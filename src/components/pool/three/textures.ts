@@ -68,3 +68,43 @@ export function createCausticsMap(size = 256): THREE.Texture {
   texture.wrapT = THREE.RepeatWrapping;
   return texture;
 }
+
+/**
+ * Seamless fine-grain mineral surface used by the coping. The map is created
+ * locally so the close-up keeps its material definition without relying on a
+ * remote texture or increasing the downloadable asset set.
+ */
+export function createStoneDetailMap(size = 256): THREE.Texture {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const image = ctx.createImageData(size, size);
+
+  const hash = (x: number, y: number) => {
+    const value = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    return value - Math.floor(value);
+  };
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const coarse = hash(Math.floor(x / 5), Math.floor(y / 5));
+      const fine = hash(x, y);
+      const vein = Math.sin((x + y * 0.73) * 0.045) * 0.5 + 0.5;
+      const value = Math.round(105 + coarse * 68 + fine * 54 + vein * 20);
+      const i = (y * size + x) * 4;
+      image.data[i] = value;
+      image.data[i + 1] = value;
+      image.data[i + 2] = value;
+      image.data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(5, 5);
+  texture.colorSpace = THREE.NoColorSpace;
+  return texture;
+}

@@ -12,7 +12,7 @@ import type {
 export const DIMENSION_LIMITS = {
   length: { min: 3, max: 25, step: 0.1, unit: "m" },
   width: { min: 2, max: 12, step: 0.1, unit: "m" },
-  depth: { min: 0.8, max: 3.5, step: 0.05, unit: "m" },
+  depth: { min: 0.8, max: 1.5, step: 0.05, unit: "m" },
   cornerRadius: { min: 0, max: 1, step: 0.01, unit: "" },
 } as const;
 

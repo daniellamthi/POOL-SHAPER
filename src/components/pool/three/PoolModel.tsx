@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { DoubleSide } from "three";
 import { createSurfaceGeometry, createWallGeometry } from "./poolGeometry";
-import { createCausticsMap, createRippleNormalMap } from "./textures";
+import { createCausticsMap, createRippleNormalMap, createStoneDetailMap } from "./textures";
 import { offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
 import { COPING_WIDTH, FREEBOARD } from "@/lib/pool/config";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
@@ -40,10 +40,15 @@ export function PoolModel({
   copingThickness,
   showWater,
 }: PoolModelProps) {
+  const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const copingOutline = useMemo(() => offsetOutline(outline, COPING_WIDTH), [outline]);
   const overflowWaterEdge = useMemo(() => offsetOutline(outline, 0.06), [outline]);
   const overflowSlotEdge = useMemo(() => offsetOutline(outline, 0.105), [outline]);
+  const overflowChannelOuter = useMemo(() => offsetOutline(outline, 0.165), [outline]);
   const copingInner = system === "overflow" ? overflowSlotEdge : outline;
+  const meniscusInner = useMemo(() => offsetOutline(outline, -0.018), [outline]);
+  const copingOuterBevel = useMemo(() => offsetOutline(copingOutline, -0.018), [copingOutline]);
+  const copingInnerBevel = useMemo(() => offsetOutline(copingInner, 0.018), [copingInner]);
   const perimeter = useMemo(() => outlinePerimeter(outline), [outline]);
   const loadedSurfaceMaps = useTexture(INTERIOR_TEXTURE_URLS);
   const sourceSurfaceMap =
@@ -57,7 +62,7 @@ export function PoolModel({
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.anisotropy = 4;
+      texture.anisotropy = Math.min(8, maxAnisotropy);
     }
     floorMap.repeat.set(1 / materials.surface.tileSize, 1 / materials.surface.tileSize);
     wallMap.repeat.set(
@@ -67,7 +72,7 @@ export function PoolModel({
     floorMap.needsUpdate = true;
     wallMap.needsUpdate = true;
     return [floorMap, wallMap];
-  }, [sourceSurfaceMap, materials.surface.tileSize, perimeter, depth]);
+  }, [sourceSurfaceMap, materials.surface.tileSize, perimeter, depth, maxAnisotropy]);
 
   useEffect(
     () => () => {
@@ -79,12 +84,14 @@ export function PoolModel({
 
   const rippleMap = useMemo(() => createRippleNormalMap(), []);
   const causticsMap = useMemo(() => createCausticsMap(), []);
+  const stoneDetailMap = useMemo(() => createStoneDetailMap(), []);
   useEffect(
     () => () => {
       rippleMap.dispose();
       causticsMap.dispose();
+      stoneDetailMap.dispose();
     },
-    [rippleMap, causticsMap],
+    [rippleMap, causticsMap, stoneDetailMap],
   );
 
   const waterMesh = useRef<THREE.Mesh>(null);
@@ -105,13 +112,19 @@ export function PoolModel({
   });
 
   useEffect(() => {
-    const repeat = Math.max(2, Math.round(Math.hypot(...bounds(outline)) / 2));
+    const [outlineWidth, outlineLength] = bounds(outline);
+    const repeat = Math.max(2, Math.round(Math.hypot(outlineWidth, outlineLength) / 2));
     rippleMap.repeat.set(repeat, repeat);
     causticsMap.repeat.set(repeat * 0.7, repeat * 0.7);
-  }, [outline, rippleMap, causticsMap]);
+    stoneDetailMap.repeat.set(Math.max(3, outlineWidth * 1.6), Math.max(3, outlineLength * 1.6));
+  }, [outline, rippleMap, causticsMap, stoneDetailMap]);
 
   const floor = useDisposable(() => createSurfaceGeometry(outline), [outline]);
   const water = useDisposable(() => createSurfaceGeometry(outline), [outline]);
+  const waterMeniscus = useDisposable(
+    () => createSurfaceGeometry(outline, meniscusInner),
+    [outline, meniscusInner],
+  );
   const walls = useDisposable(() => createWallGeometry(outline, 0, -depth), [outline, depth]);
   const coping = useDisposable(
     () => createSurfaceGeometry(copingOutline, copingInner),
@@ -133,6 +146,22 @@ export function PoolModel({
     () => createSurfaceGeometry(overflowWaterEdge, outline),
     [overflowWaterEdge, outline],
   );
+  const overflowChannelWall = useDisposable(
+    () => createWallGeometry(overflowSlotEdge, -0.018, -0.19),
+    [overflowSlotEdge],
+  );
+  const overflowShadowGap = useDisposable(
+    () => createSurfaceGeometry(overflowChannelOuter, overflowSlotEdge),
+    [overflowChannelOuter, overflowSlotEdge],
+  );
+  const copingOuterHighlight = useDisposable(
+    () => createSurfaceGeometry(copingOutline, copingOuterBevel),
+    [copingOutline, copingOuterBevel],
+  );
+  const copingInnerHighlight = useDisposable(
+    () => createSurfaceGeometry(copingInnerBevel, copingInner),
+    [copingInnerBevel, copingInner],
+  );
   const isOverflow = system === "overflow";
 
   return (
@@ -148,6 +177,9 @@ export function PoolModel({
           metalness={materials.liner.metalness}
           clearcoat={POOL_SURFACE_PRESET.linerClearcoat}
           clearcoatRoughness={POOL_SURFACE_PRESET.linerClearcoatRoughness}
+          reflectivity={0.38}
+          envMapIntensity={0.88}
+          specularIntensity={0.52}
           side={DoubleSide}
         />
       </mesh>
@@ -162,6 +194,9 @@ export function PoolModel({
           roughness={materials.floor.roughness}
           metalness={0.02}
           clearcoat={POOL_SURFACE_PRESET.floorClearcoat}
+          clearcoatRoughness={0.28}
+          reflectivity={0.34}
+          envMapIntensity={0.82}
           emissive={"#7fd8ff"}
           emissiveMap={causticsMap}
           emissiveIntensity={showWater ? POOL_SURFACE_PRESET.dayCaustics : 0}
@@ -186,6 +221,35 @@ export function PoolModel({
             attenuationColor={materials.water}
             attenuationDistance={Math.max(0.8, depth * WATER_VISUAL_PRESET.attenuationDepthFactor)}
             envMapIntensity={WATER_VISUAL_PRESET.environmentIntensity.day}
+            reflectivity={0.92}
+            specularIntensity={1}
+            specularColor="#edfaff"
+            normalMap={rippleMap}
+            normalScale={normalScale}
+            depthWrite={false}
+            side={DoubleSide}
+          />
+        </mesh>
+      ) : null}
+
+      {/* A restrained meniscus catches grazing reflections along the waterline
+          and gives the transparent surface a physically readable boundary. */}
+      {showWater ? (
+        <mesh
+          geometry={waterMeniscus}
+          position={[0, system === "overflow" ? -0.012 : -FREEBOARD + 0.003, 0]}
+          renderOrder={3}
+        >
+          <meshPhysicalMaterial
+            color="#d8f7fa"
+            transparent
+            opacity={0.24}
+            roughness={0.035}
+            transmission={0.88}
+            ior={WATER_VISUAL_PRESET.ior}
+            clearcoat={1}
+            clearcoatRoughness={0.025}
+            envMapIntensity={1.35}
             normalMap={rippleMap}
             normalScale={normalScale}
             depthWrite={false}
@@ -197,11 +261,29 @@ export function PoolModel({
       {/* Concealed perimeter gutter for a residential overflow-edge pool. */}
       {isOverflow ? (
         <group>
+          {/* Deep slot and vertical channel wall create a readable residential
+              perimeter-overflow section without relying on a rigid model. */}
+          <mesh geometry={overflowChannelWall} receiveShadow castShadow>
+            <meshStandardMaterial
+              color="#171b1b"
+              roughness={0.94}
+              metalness={0.01}
+              side={DoubleSide}
+            />
+          </mesh>
           <mesh geometry={overflowChannel} position={[0, -0.095, 0]} receiveShadow>
             <meshStandardMaterial
               color="#555653"
               roughness={0.82}
               metalness={0.03}
+              side={DoubleSide}
+            />
+          </mesh>
+          <mesh geometry={overflowShadowGap} position={[0, -0.012, 0]} receiveShadow>
+            <meshStandardMaterial
+              color="#111515"
+              roughness={0.92}
+              metalness={0.01}
               side={DoubleSide}
             />
           </mesh>
@@ -214,6 +296,9 @@ export function PoolModel({
                 roughness={0.11}
                 transmission={0.62}
                 ior={WATER_VISUAL_PRESET.ior}
+                clearcoat={0.9}
+                clearcoatRoughness={0.06}
+                envMapIntensity={1.15}
                 normalMap={rippleMap}
                 normalScale={normalScale}
                 depthWrite={false}
@@ -228,6 +313,9 @@ export function PoolModel({
       <mesh geometry={coping} position={[0, copingThickness, 0]} receiveShadow castShadow>
         <meshPhysicalMaterial
           color={materials.coping.color}
+          bumpMap={stoneDetailMap}
+          bumpScale={0.006}
+          roughnessMap={stoneDetailMap}
           roughness={materials.coping.roughness}
           metalness={0}
           clearcoat={0.1}
@@ -235,9 +323,35 @@ export function PoolModel({
           side={DoubleSide}
         />
       </mesh>
+      {/* Narrow highlight bands simulate the eased coping edges without
+          adding dense bevelled geometry around custom outlines. */}
+      <mesh geometry={copingOuterHighlight} position={[0, copingThickness + 0.004, 0]}>
+        <meshPhysicalMaterial
+          color="#dedbd4"
+          bumpMap={stoneDetailMap}
+          bumpScale={0.004}
+          roughness={0.48}
+          clearcoat={0.16}
+          clearcoatRoughness={0.38}
+          side={DoubleSide}
+        />
+      </mesh>
+      <mesh geometry={copingInnerHighlight} position={[0, copingThickness + 0.004, 0]}>
+        <meshPhysicalMaterial
+          color="#d5d1c9"
+          bumpMap={stoneDetailMap}
+          bumpScale={0.004}
+          roughness={0.5}
+          clearcoat={0.14}
+          clearcoatRoughness={0.4}
+          side={DoubleSide}
+        />
+      </mesh>
       <mesh geometry={copingSkirt} position={[0, copingThickness, 0]}>
         <meshStandardMaterial
           color={materials.coping.color}
+          bumpMap={stoneDetailMap}
+          bumpScale={0.005}
           roughness={Math.min(1, materials.coping.roughness + 0.1)}
           side={DoubleSide}
         />
@@ -245,6 +359,8 @@ export function PoolModel({
       <mesh geometry={copingInnerSkirt} position={[0, copingThickness, 0]} castShadow>
         <meshPhysicalMaterial
           color={materials.coping.color}
+          bumpMap={stoneDetailMap}
+          bumpScale={0.005}
           roughness={materials.coping.roughness}
           clearcoat={0.12}
           clearcoatRoughness={0.4}

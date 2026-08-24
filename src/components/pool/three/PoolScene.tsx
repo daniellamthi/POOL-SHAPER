@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment, Lightformer, ContactShadows } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { Vector3, ACESFilmicToneMapping, PCFShadowMap } from "three";
+import { Vector3, ACESFilmicToneMapping, PCFSoftShadowMap } from "three";
 import { PoolModel } from "./PoolModel";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
@@ -70,6 +70,10 @@ function CameraRig({
   const camera = useThree((state) => state.camera);
   const goal = useRef(new Vector3());
   const lookAt = useRef(new Vector3());
+  const startPosition = useRef(new Vector3());
+  const startTarget = useRef(new Vector3());
+  const elapsed = useRef(0);
+  const duration = useRef(1.15);
   const flying = useRef(false);
   const systemDetail = useRef({ x: 0, z: -width / 2, rotation: 0 });
 
@@ -96,22 +100,33 @@ function CameraRig({
       goal.current.set(0.92, elevation, 1.08).normalize().multiplyScalar(overviewDistance);
       lookAt.current.set(0, -0.08, 0);
     }
+    startPosition.current.copy(camera.position);
+    startTarget.current.copy(controls.current?.target ?? lookAt.current);
+    elapsed.current = 0;
+    duration.current = focus === "skimmer" || focus === "overflow" ? 1.35 : 1.15;
     flying.current = true;
-  }, [radius, frameToken, focus, shape, depth, width, skimmers]);
+  }, [camera, controls, radius, frameToken, focus, shape, depth, width, skimmers]);
 
   useFrame((_, delta) => {
     if (!flying.current) return;
-    const t = 1 - Math.pow(0.0015, delta);
-    camera.position.lerp(goal.current, t);
+    elapsed.current = Math.min(duration.current, elapsed.current + Math.min(delta, 0.05));
+    const progress = duration.current === 0 ? 1 : elapsed.current / duration.current;
+    const eased = progress * progress * progress * (progress * (progress * 6 - 15) + 10);
+    camera.position.lerpVectors(startPosition.current, goal.current, eased);
+    // A restrained vertical arc keeps the movement cinematic without changing
+    // the final framing or introducing automotive-style camera theatrics.
+    camera.position.y += Math.sin(progress * Math.PI) * Math.min(0.22, radius * 0.018);
     const control = controls.current;
     if (control) {
-      control.target.lerp(lookAt.current, t);
+      control.target.lerpVectors(startTarget.current, lookAt.current, eased);
       control.update();
     }
-    if (
-      camera.position.distanceTo(goal.current) < 0.02 &&
-      (!control || control.target.distanceTo(lookAt.current) < 0.01)
-    ) {
+    if (progress >= 1) {
+      camera.position.copy(goal.current);
+      if (control) {
+        control.target.copy(lookAt.current);
+        control.update();
+      }
       flying.current = false;
     }
   });
@@ -171,7 +186,7 @@ export default function PoolScene({
 
   return (
     <Canvas
-      shadows={{ type: PCFShadowMap }}
+      shadows={{ type: PCFSoftShadowMap }}
       dpr={[1, SCENE_VISUAL_PRESET.renderer.maxDpr]}
       gl={{
         antialias: true,
@@ -195,10 +210,11 @@ export default function PoolScene({
       <hemisphereLight intensity={dayIntensity} color="#ffffff" groundColor="#1a1b1c" />
       <directionalLight
         position={[radius * 2 + 6, radius * 2.4 + 12, radius + 6]}
-        intensity={theme === "dark" ? 1.2 : 1.72}
+        intensity={theme === "dark" ? 1.12 : 1.58}
         castShadow
         shadow-bias={-0.0005}
         shadow-mapSize={[1024, 1024]}
+        shadow-radius={3.5}
         shadow-camera-left={-Math.max(16, radius * 2.2)}
         shadow-camera-right={Math.max(16, radius * 2.2)}
         shadow-camera-top={Math.max(16, radius * 2.2)}
@@ -206,7 +222,7 @@ export default function PoolScene({
       />
       <spotLight
         position={[-radius * 1.4, radius * 1.6 + 5, -radius * 0.8]}
-        intensity={theme === "dark" ? 13 : 8}
+        intensity={theme === "dark" ? 10.5 : 7.2}
         angle={0.65}
         penumbra={0.9}
         decay={2}
@@ -231,6 +247,14 @@ export default function PoolScene({
           position={[-10, 3, 4]}
           rotation={[0, Math.PI / 2, 0]}
           scale={[8, 5, 1]}
+        />
+        <Lightformer
+          form="ring"
+          intensity={theme === "dark" ? 1.1 : 0.72}
+          color={theme === "dark" ? "#aab7b9" : "#f4eee5"}
+          position={[8, 1.5, 8]}
+          rotation={[0, -Math.PI / 4, 0]}
+          scale={[4, 4, 1]}
         />
       </Environment>
 
