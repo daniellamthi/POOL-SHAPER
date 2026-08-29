@@ -1,10 +1,13 @@
 import type {
-  AccessoryId,
   ControlPoint,
   CustomerInfo,
   Dimensions,
+  EquipmentId,
   FinishMaterial,
   LinerColor,
+  PoolFeatureId,
+  PoolStructure,
+  PoolType,
   PoolShapeId,
   StepDefinition,
 } from "./types";
@@ -61,6 +64,37 @@ export const PROJECT_TYPES = [
   },
 ];
 
+export const POOL_TYPES: ReadonlyArray<{
+  id: PoolType;
+  title: string;
+  description: string;
+}> = [
+  {
+    id: "in-ground",
+    title: "In-Ground Pool",
+    description: "A pool installed completely below ground level.",
+  },
+  {
+    id: "above-ground",
+    title: "Above-Ground Pool",
+    description: "A pool installed above the surrounding ground level.",
+  },
+];
+
+export const POOL_STRUCTURES: ReadonlyArray<{
+  id: PoolStructure;
+  poolTypes: ReadonlyArray<PoolType>;
+  title: string;
+}> = [
+  { id: "reinforced-concrete", poolTypes: ["in-ground"], title: "Reinforced Concrete" },
+  { id: "modular-steel-panels", poolTypes: ["in-ground"], title: "Modular Steel Panels" },
+  {
+    id: "modular-steel-structure",
+    poolTypes: ["above-ground"],
+    title: "Modular Steel Structure",
+  },
+];
+
 export const CUSTOMER_FIELDS: ReadonlyArray<{
   key: keyof CustomerInfo;
   label: string;
@@ -112,7 +146,7 @@ export const FINISHES: ReadonlyArray<{
   {
     id: "liner",
     title: "PVC Liner",
-    description: "Reinforced 150/100 membrane, welded on site. Six architectural colours.",
+    description: "Reinforced 150/100 membrane, welded on site. Six architectural finishes.",
     color: "#dfe9ec",
     roughness: 0.32,
     metalness: 0.02,
@@ -127,71 +161,153 @@ export const FINISHES: ReadonlyArray<{
   },
 ];
 
-export const LINER_COLORS: ReadonlyArray<{ id: LinerColor; title: string; hex: string }> = [
-  { id: "white", title: "White", hex: "#eef2f2" },
-  { id: "sand", title: "Sand", hex: "#e3d6bd" },
-  { id: "lightGrey", title: "Light Grey", hex: "#c8cccd" },
-  { id: "darkGrey", title: "Dark Grey", hex: "#6f7476" },
-  { id: "blue", title: "Blue", hex: "#7fa9c9" },
-  { id: "green", title: "Green", hex: "#8aa893" },
+export const LINER_COLORS: ReadonlyArray<{
+  id: LinerColor;
+  title: string;
+  hex: string;
+  texture: string;
+  underwater: {
+    absorption: readonly [number, number, number];
+    scatteringColor: readonly [number, number, number];
+    scatteringStrength: number;
+    causticStrength: number;
+    /** Multiplies opticalPath before the scattering-depth smoothstep only. Default 1.0 = unchanged behaviour. */
+    scatteringOpticalPathScale: number;
+    /** Multiplies opticalPath before the absorption/transmission exponent only. Default 1.0 = unchanged behaviour. */
+    absorptionOpticalPathScale: number;
+    /** Per-liner override for the scattering-energy clamp. Default = WATER_VISUAL_PRESET.maxScatteringEnergy (0.06), unchanged behaviour. */
+    maxScatteringEnergy: number;
+    /** Per-liner override for the scattering-energy multiplier. Default = WATER_VISUAL_PRESET.scatteringContribution (0.16), unchanged behaviour. */
+    scatteringContribution: number;
+  };
+}> = [
+  {
+    id: "motionDeepSea603",
+    title: "Motion Deep Sea [603]",
+    hex: "#073f9d",
+    texture: "/textures/pvc-liner/motion-deep-sea-603.png",
+    underwater: {
+      absorption: [0.7, 0.1, 0.03],
+      scatteringColor: [0.02, 0.75, 0.95],
+      scatteringStrength: 0.68,
+      causticStrength: 0.08,
+      scatteringOpticalPathScale: 1.9,
+      absorptionOpticalPathScale: 1.3,
+      maxScatteringEnergy: 0.09,
+      scatteringContribution: 0.32,
+    },
+  },
+  {
+    id: "motionBlueSky602",
+    title: "Motion Blue Sky [602]",
+    hex: "#63b8ea",
+    texture: "/textures/pvc-liner/motion-blue-sky-602.png",
+    underwater: {
+      absorption: [0.3, 0.065, 0.022],
+      scatteringColor: [0.2, 0.72, 0.86],
+      scatteringStrength: 0.42,
+      causticStrength: 0.025,
+      scatteringOpticalPathScale: 1.0,
+      absorptionOpticalPathScale: 1.0,
+      maxScatteringEnergy: 0.06,
+      scatteringContribution: 0.16,
+    },
+  },
+  {
+    id: "motionArcticWhite180",
+    title: "Motion Arctic White [180]",
+    hex: "#f4f3ef",
+    texture: "/textures/pvc-liner/motion-arctic-white-180.png",
+    underwater: {
+      absorption: [0.34, 0.055, 0.02],
+      scatteringColor: [0.2, 0.68, 0.82],
+      scatteringStrength: 0.38,
+      causticStrength: 0.028,
+      scatteringOpticalPathScale: 1.0,
+      absorptionOpticalPathScale: 1.0,
+      maxScatteringEnergy: 0.06,
+      scatteringContribution: 0.16,
+    },
+  },
+  {
+    id: "motionSandBeach179",
+    title: "Motion Sand Beach [179]",
+    hex: "#ddbd74",
+    texture: "/textures/pvc-liner/motion-sand-beach-179.png",
+    underwater: {
+      absorption: [0.45, 0.14, 0.035],
+      scatteringColor: [0.06, 0.62, 0.42],
+      scatteringStrength: 0.6,
+      causticStrength: 0.04,
+      scatteringOpticalPathScale: 2.4,
+      absorptionOpticalPathScale: 2.0,
+      maxScatteringEnergy: 0.06,
+      scatteringContribution: 0.16,
+    },
+  },
+  {
+    id: "motionGreyRock798",
+    title: "Motion Grey Rock [798]",
+    hex: "#8a8c96",
+    texture: "/textures/pvc-liner/motion-grey-rock-798.png",
+    underwater: {
+      absorption: [0.35, 0.13, 0.05],
+      scatteringColor: [0.14, 0.44, 0.6],
+      scatteringStrength: 0.34,
+      causticStrength: 0.022,
+      scatteringOpticalPathScale: 1.0,
+      absorptionOpticalPathScale: 1.0,
+      maxScatteringEnergy: 0.06,
+      scatteringContribution: 0.16,
+    },
+  },
+  {
+    id: "motionBlackStone799",
+    title: "Motion Black Stone [799]",
+    hex: "#17151a",
+    texture: "/textures/pvc-liner/motion-black-stone-799.png",
+    underwater: {
+      absorption: [0.52, 0.28, 0.13],
+      scatteringColor: [0.04, 0.13, 0.26],
+      scatteringStrength: 0.14,
+      causticStrength: 0.032,
+      scatteringOpticalPathScale: 1.0,
+      absorptionOpticalPathScale: 1.0,
+      maxScatteringEnergy: 0.06,
+      scatteringContribution: 0.16,
+    },
+  },
 ];
 
-export const ACCESSORIES: ReadonlyArray<{
-  id: AccessoryId;
+export const POOL_FEATURES: ReadonlyArray<{
+  id: PoolFeatureId;
   title: string;
   description: string;
 }> = [
+  { id: "ledLighting", title: "LED Pool Lights", description: "Underwater lighting." },
   {
-    id: "automaticCover",
-    title: "Automatic Cover",
-    description: "Automatic safety and thermal protection system.",
+    id: "hydromassage",
+    title: "Hydromassage Jets",
+    description: "Integrated hydromassage jets.",
   },
-  {
-    id: "heatPump",
-    title: "Heat Pump",
-    description: "Efficient water heating for a longer swimming season.",
-  },
+];
+
+export const EQUIPMENT: ReadonlyArray<{
+  id: EquipmentId;
+  title: string;
+  description: string;
+}> = [
+  { id: "automaticCover", title: "Automatic Cover", description: "Safety and thermal cover." },
+  { id: "heatPump", title: "Heat Pump", description: "Efficient pool water heating." },
   {
     id: "saltElectrolysis",
     title: "Salt Electrolysis",
-    description: "Comfortable, automated salt-water treatment.",
+    description: "Automated salt-water treatment.",
   },
   {
     id: "automaticDosing",
     title: "Automatic Chlorine / pH Dosing",
-    description: "Automatic control of essential water treatment.",
-  },
-  { id: "ledLighting", title: "LED Lighting", description: "Underwater lighting for evening use." },
-  {
-    id: "perimeterLed",
-    title: "Perimeter LED",
-    description: "Subtle lighting around the pool perimeter.",
-  },
-  { id: "waterfall", title: "Waterfall", description: "Architectural water feature." },
-  {
-    id: "hydromassage",
-    title: "Hydromassage",
-    description: "Integrated therapeutic water and air jets.",
-  },
-  {
-    id: "counterCurrent",
-    title: "Counter-current Swimming",
-    description: "A compact system for continuous swimming.",
-  },
-  {
-    id: "poolRobot",
-    title: "Pool Robot",
-    description: "Automatic cleaning for the pool floor and walls.",
-  },
-  {
-    id: "smartControl",
-    title: "Smart Pool Control / Automation",
-    description: "Simple remote management of pool functions.",
-  },
-  {
-    id: "solarShower",
-    title: "Solar Shower",
-    description: "An efficient outdoor shower for the pool area.",
+    description: "Automatic water treatment control.",
   },
 ];
 
@@ -204,57 +320,64 @@ export const STEPS: ReadonlyArray<StepDefinition> = [
     short: "Project",
   },
   {
-    id: "shape",
+    id: "pool-type",
     index: 1,
-    title: "Pool Shape",
-    subtitle: "The silhouette regenerates the 3D geometry instantly.",
+    title: "Pool Type",
+    subtitle: "Choose the installation type for your new pool.",
+    short: "Type",
+  },
+  {
+    id: "structure",
+    index: 2,
+    title: "Pool Structure",
+    subtitle: "Choose the construction system for your pool.",
+    short: "Structure",
+  },
+  {
+    id: "shape-dimensions",
+    index: 3,
+    title: "Shape & Dimensions",
+    subtitle: "Choose the silhouette and size the basin in real time.",
     short: "Shape",
   },
   {
-    id: "dimensions",
-    index: 2,
-    title: "Pool Dimensions",
-    subtitle: "Size the basin — every value resizes the model live.",
-    short: "Size",
-  },
-  {
     id: "system",
-    index: 3,
+    index: 4,
     title: "Pool System",
     subtitle: "Hydraulic principle and water line management.",
     short: "System",
   },
   {
     id: "finish",
-    index: 4,
+    index: 5,
     title: "Interior Finish",
     subtitle: "The material that defines the colour of the water.",
     short: "Finish",
   },
   {
-    id: "color",
-    index: 5,
-    title: "Interior Color",
-    subtitle: "Select the tone applied to the chosen finish.",
-    short: "Color",
+    id: "features",
+    index: 6,
+    title: "Pool Features",
+    subtitle: "Select the essential features built into the pool.",
+    short: "Features",
   },
   {
-    id: "accessories",
-    index: 6,
-    title: "Optional Accessories",
-    subtitle: "Quote-only equipment; it does not alter the 3D model.",
-    short: "Extras",
+    id: "equipment",
+    index: 7,
+    title: "Equipment",
+    subtitle: "Select equipment to include in the quotation.",
+    short: "Equipment",
   },
   {
     id: "contact",
-    index: 7,
+    index: 8,
     title: "Customer Details",
     subtitle: "Contact and project location information.",
     short: "Customer",
   },
   {
     id: "review",
-    index: 8,
+    index: 9,
     title: "Final Review",
     subtitle: "Review the pool configuration before requesting a quote.",
     short: "Review",
@@ -301,10 +424,24 @@ export const RENOVATION_STEPS: ReadonlyArray<StepDefinition> = [
 ];
 
 /** Deck / coping ring width in metres. */
-export const COPING_WIDTH = 0.38;
-/** Distance from the coping top down to the waterline, in metres. */
-export const FREEBOARD = 0.12;
+export const COPING_WIDTH = 0.2;
+export const OVERFLOW_GEOMETRY = {
+  waterEdgeOffset: 0.055,
+  hiddenChannelOffset: 0.105,
+  visibleChannelOuterOffset: 0.165,
+  visibleWaterFilmWidth: 0.02,
+  hiddenWaterChannelClearance: 0.015,
+  visibleGrateTopOffset: 0.006,
+  visibleWaterAboveLip: 0.001,
+  hiddenWaterTopClearance: 0.0005,
+  surfaceMovementAmplitude: 0.00025,
+  channelDepth: 0.19,
+  grateSlatPitch: 0.075,
+} as const;
+/** Distance from the coping top down to the waterline, in metres.
+ * Sized so the skimmer-pool waterline sits ~mid-mouth on the skimmer opening. */
+export const FREEBOARD = 0.143;
 /** Number of sampled points used for curved outlines. */
-export const CURVE_SAMPLES = 128;
+export const CURVE_SAMPLES = 256;
 /** Water surface served by a single skimmer (industry standard). */
 export const SQM_PER_SKIMMER = 25;

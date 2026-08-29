@@ -2,16 +2,22 @@ import { createContext, useContext } from "react";
 import type { DimensionKey } from "./config";
 import type { SkimmerPlan } from "./engineering";
 import type {
-  AccessoryId,
   ControlPoint,
   CustomMode,
   CustomerInfo,
+  EquipmentId,
   FinishMaterial,
+  PoolType,
   LinerColor,
+  MosaicFinishId,
   Outline,
+  OverflowType,
   PoolConfig,
+  PoolAccess,
+  PoolFeatureId,
   PoolMetrics,
   PoolShapeId,
+  PoolStructure,
   ProjectType,
   SystemType,
   UploadedFile,
@@ -28,6 +34,8 @@ export interface ConfiguratorContextValue {
   isStepComplete: (index: number) => boolean;
   canContinue: boolean;
   setProjectType: (value: ProjectType) => void;
+  setPoolType: (value: PoolType) => void;
+  setPoolStructure: (value: PoolStructure) => void;
   setCustomerField: (key: keyof CustomerInfo, value: string) => void;
   setShape: (value: PoolShapeId) => void;
   setCustomMode: (value: CustomMode) => void;
@@ -35,9 +43,13 @@ export interface ConfiguratorContextValue {
   resetControlPoints: () => void;
   setDimension: (key: DimensionKey, value: number) => void;
   setSystem: (value: SystemType) => void;
+  setOverflowType: (value: OverflowType) => void;
   setFinish: (value: FinishMaterial) => void;
   setLinerColor: (value: LinerColor) => void;
-  toggleAccessory: (value: AccessoryId) => void;
+  setMosaicFinish: (value: MosaicFinishId) => void;
+  togglePoolFeature: (value: PoolFeatureId) => void;
+  setPoolAccess: (value: PoolAccess) => void;
+  toggleEquipment: (value: EquipmentId) => void;
   updateRenovation: (value: Partial<RenovationConfig>) => void;
   addUploads: (files: UploadedFile[]) => void;
   removeUpload: (id: string) => void;

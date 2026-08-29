@@ -1,53 +1,123 @@
 import { FINISHES, LINER_COLORS } from "./config";
-import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
-import { getInteriorTexture } from "@/configurator/materials/interior-textures";
+import {
+  POOL_BORDER_PRESET,
+  POOL_SURFACE_PRESET,
+  WATER_VISUAL_PRESET,
+  MATERIAL_MICRO_DETAIL_PRESET,
+} from "@/configurator/materials/visual-presets";
+import {
+  getInteriorTexture,
+  getMosaicFinish,
+  INTERIOR_TEXTURE_METADATA,
+  PVC_TEXTURE_MODULE_SIZE_METERS,
+} from "@/configurator/materials/interior-textures";
 import type { PoolConfig } from "./types";
 
 export interface ResolvedMaterials {
   liner: { color: string; roughness: number; metalness: number };
   floor: { color: string; roughness: number };
-  surface: { textureUrl: string; tileSize: number; bumpScale: number };
+  surface: {
+    textureUrl: string;
+    maps: {
+      baseColorMap: string;
+      normalMap?: string;
+      roughnessMap?: string;
+      aoMap?: string;
+      bumpMap?: string;
+    };
+    textureMetadata: (typeof INTERIOR_TEXTURE_METADATA)[keyof typeof INTERIOR_TEXTURE_METADATA];
+    tileSize: number;
+    bumpScale: number;
+    microDetail: { moduleSize: number; normalStrength: number };
+    wallClearcoat: number;
+    wallClearcoatRoughness: number;
+    floorClearcoat: number;
+    floorClearcoatRoughness: number;
+    underwaterAbsorption: readonly [number, number, number];
+    underwaterScatteringColor: readonly [number, number, number];
+    underwaterScatteringStrength: number;
+    underwaterCausticStrength: number;
+    underwaterScatteringOpticalPathScale: number;
+    underwaterAbsorptionOpticalPathScale: number;
+    underwaterMaxScatteringEnergy: number;
+    underwaterScatteringContribution: number;
+  };
   water: string;
   coping: { color: string; roughness: number };
 }
 
-/** Slightly darken a hex colour (floor reads deeper than the walls). */
-function shade(hex: string, amount: number): string {
-  const value = hex.replace("#", "");
-  const num = Number.parseInt(value, 16);
-  const channels = [(num >> 16) & 255, (num >> 8) & 255, num & 255].map((c) =>
-    Math.round(Math.max(0, Math.min(255, c * amount))),
-  );
-  return `#${channels.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
-}
-
-const WATER_TINT: Record<string, string> = {
-  white: "#3fb6d6",
-  sand: "#3fbfc0",
-  lightGrey: "#1f9dbf",
-  darkGrey: "#0d5f7a",
-  blue: "#1178a8",
-  green: "#177f7a",
-};
-
 export function resolveMaterials(
-  config: Pick<PoolConfig, "finish" | "linerColor">,
+  config: Pick<PoolConfig, "finish" | "linerColor" | "mosaicFinish">,
 ): ResolvedMaterials {
   const finish = FINISHES.find((item) => item.id === config.finish) ?? FINISHES[0]!;
-  const linerColor = LINER_COLORS.find((item) => item.id === config.linerColor) ?? LINER_COLORS[0]!;
-
-  const linerHex = config.finish === "liner" ? linerColor.hex : shade(linerColor.hex, 0.88);
-  const water = WATER_TINT[config.linerColor] ?? "#1f9dbf";
-
+  const liner = LINER_COLORS.find((item) => item.id === config.linerColor) ?? LINER_COLORS[0]!;
+  const mosaic = getMosaicFinish(config.mosaicFinish);
+  const textureUrl = getInteriorTexture(config.finish, config.linerColor, config.mosaicFinish);
   return {
-    liner: { color: linerHex, roughness: finish.roughness, metalness: finish.metalness },
-    floor: { color: shade(linerHex, 0.92), roughness: finish.roughness },
-    surface: {
-      textureUrl: getInteriorTexture(config.finish, config.linerColor),
-      tileSize: config.finish === "mosaic" ? 0.42 : 1.6,
-      bumpScale: config.finish === "mosaic" ? 0.012 : 0,
+    liner: {
+      color: "#ffffff",
+      roughness: config.finish === "mosaic" ? mosaic.materialSettings.roughness : finish.roughness,
+      metalness: config.finish === "mosaic" ? mosaic.materialSettings.metalness : finish.metalness,
     },
-    water,
+    floor: {
+      color: "#ffffff",
+      roughness: config.finish === "mosaic" ? mosaic.materialSettings.roughness : finish.roughness,
+    },
+    surface: {
+      textureUrl,
+      maps: {
+        baseColorMap: textureUrl,
+      },
+      textureMetadata:
+        config.finish === "mosaic" ? mosaic.textureMetadata : INTERIOR_TEXTURE_METADATA.liner,
+      tileSize: config.finish === "mosaic" ? mosaic.tileSize : PVC_TEXTURE_MODULE_SIZE_METERS,
+      bumpScale: config.finish === "mosaic" ? 0 : 0.003,
+      microDetail:
+        config.finish === "mosaic"
+          ? MATERIAL_MICRO_DETAIL_PRESET.mosaic
+          : MATERIAL_MICRO_DETAIL_PRESET.liner,
+      wallClearcoat:
+        config.finish === "mosaic"
+          ? mosaic.materialSettings.clearcoat
+          : POOL_SURFACE_PRESET.linerClearcoat,
+      wallClearcoatRoughness:
+        config.finish === "mosaic"
+          ? mosaic.materialSettings.clearcoatRoughness
+          : POOL_SURFACE_PRESET.linerClearcoatRoughness,
+      floorClearcoat:
+        config.finish === "mosaic"
+          ? mosaic.materialSettings.clearcoat
+          : POOL_SURFACE_PRESET.floorClearcoat,
+      floorClearcoatRoughness:
+        config.finish === "mosaic" ? mosaic.materialSettings.clearcoatRoughness : 0.28,
+      underwaterAbsorption:
+        config.finish === "mosaic" ? WATER_VISUAL_PRESET.absorption : liner.underwater.absorption,
+      underwaterScatteringColor:
+        config.finish === "mosaic"
+          ? WATER_VISUAL_PRESET.scatteringColor
+          : liner.underwater.scatteringColor,
+      underwaterScatteringStrength:
+        config.finish === "mosaic"
+          ? WATER_VISUAL_PRESET.scatteringStrength
+          : liner.underwater.scatteringStrength,
+      underwaterCausticStrength:
+        config.finish === "mosaic"
+          ? WATER_VISUAL_PRESET.caustics.strength
+          : liner.underwater.causticStrength,
+      underwaterScatteringOpticalPathScale:
+        config.finish === "mosaic" ? 1.0 : liner.underwater.scatteringOpticalPathScale,
+      underwaterAbsorptionOpticalPathScale:
+        config.finish === "mosaic" ? 1.0 : liner.underwater.absorptionOpticalPathScale,
+      underwaterMaxScatteringEnergy:
+        config.finish === "mosaic"
+          ? WATER_VISUAL_PRESET.maxScatteringEnergy
+          : liner.underwater.maxScatteringEnergy,
+      underwaterScatteringContribution:
+        config.finish === "mosaic"
+          ? WATER_VISUAL_PRESET.scatteringContribution
+          : liner.underwater.scatteringContribution,
+    },
+    water: "#ffffff",
     coping: { color: POOL_BORDER_PRESET.color, roughness: POOL_BORDER_PRESET.roughness },
   };
 }

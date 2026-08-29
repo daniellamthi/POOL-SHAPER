@@ -1,6 +1,9 @@
 import {
-  ACCESSORIES,
+  EQUIPMENT,
   FINISHES,
+  POOL_FEATURES,
+  POOL_STRUCTURES,
+  POOL_TYPES,
   LINER_COLORS,
   PROJECT_TYPES,
   getShapeDefinition,
@@ -8,20 +11,34 @@ import {
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { MetricsPanel } from "./MetricsPanel";
+import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 
 /** Read-only recap of everything collected. No pricing, no quotation. */
 export function ProjectSummary() {
   const { config, metrics } = useConfigurator();
   const projectType = PROJECT_TYPES.find((type) => type.id === config.projectType);
+  const poolType = POOL_TYPES.find((type) => type.id === config.poolType);
+  const structure = POOL_STRUCTURES.find((option) => option.id === config.structure);
   const shape = getShapeDefinition(config.shape);
   const finish = FINISHES.find((option) => option.id === config.finish);
   const color = LINER_COLORS.find((option) => option.id === config.linerColor);
-  const selectedAccessories = ACCESSORIES.filter((option) =>
-    config.accessories.includes(option.id),
-  );
+  const finishColor =
+    config.finish === "mosaic"
+      ? getMosaicFinish(config.mosaicFinish).name
+      : (color?.title ?? config.linerColor);
+  const selectedFeatures = POOL_FEATURES.filter((option) => config.features.includes(option.id));
+  const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
+  const poolAccess =
+    config.poolAccess === "internalSteps"
+      ? "Internal Steps"
+      : config.poolAccess === "stainlessSteelLadder"
+        ? "Stainless Steel Ladder"
+        : null;
 
   const rows: ReadonlyArray<{ label: string; value: string }> = [
     { label: "Project Type", value: projectType?.title ?? "Not selected" },
+    { label: "Pool Type", value: poolType?.title ?? "Not selected" },
+    { label: "Pool Structure", value: structure?.title ?? "Not selected" },
     { label: "Pool Shape", value: shape.title },
     {
       label: "Dimensions",
@@ -32,11 +49,19 @@ export function ProjectSummary() {
       value: config.system === "skimmer" ? "Skimmer Pool" : "Overflow Edge Pool",
     },
     { label: "Interior Finish", value: finish?.title ?? config.finish },
-    { label: "Interior Color", value: color?.title ?? config.linerColor },
+    { label: "Interior Color / Finish Color", value: finishColor },
     {
-      label: "Selected Accessories",
-      value: selectedAccessories.length
-        ? selectedAccessories.map((option) => option.title).join(", ")
+      label: "Pool Features",
+      value:
+        [
+          ...selectedFeatures.map((option) => option.title),
+          ...(poolAccess ? [poolAccess] : []),
+        ].join(", ") || "None selected",
+    },
+    {
+      label: "Equipment",
+      value: selectedEquipment.length
+        ? selectedEquipment.map((option) => option.title).join(", ")
         : "None selected",
     },
   ];

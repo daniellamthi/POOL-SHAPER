@@ -1,147 +1,170 @@
+import { useEffect, useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
+import * as THREE from "three";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
+import { MATERIAL_MICRO_DETAIL_PRESET } from "@/configurator/materials/visual-presets";
+import {
+  createContactAOGradientMap,
+  createMaterialMicroNormalMap,
+  createMaterialMicroRoughnessMap,
+} from "./textures";
+import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 
 const FRAME_COLOR = "#f5f5f1";
-const THROAT_COLOR = "#101516";
+const CAVITY_COLOR = "#202829";
+const SKIMMER_FRONT_SCALE: readonly [number, number, number] = [0.975, 0.25 / 0.195, 1];
+const WATERLINE_PIVOT_Y = -0.004;
 
-function SkimmerAssembly() {
+const frameMaterial = (normalMap: THREE.Texture, roughnessMap: THREE.Texture) => (
+  <meshPhysicalMaterial
+    color={FRAME_COLOR}
+    roughness={0.3}
+    normalMap={normalMap}
+    normalScale={[
+      MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
+      MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
+    ]}
+    roughnessMap={roughnessMap}
+    clearcoat={0.24}
+    clearcoatRoughness={0.3}
+  />
+);
+
+function SkimmerAssembly({
+  normalMap,
+  roughnessMap,
+  contactAOMap,
+}: {
+  normalMap: THREE.Texture;
+  roughnessMap: THREE.Texture;
+  contactAOMap: THREE.Texture;
+}) {
   return (
-    <group>
-      {/* The housing sits behind the finished wall, creating a believable
-          recess instead of a flat black rectangle. */}
-      <RoundedBox
-        args={[0.61, 0.195, 0.12]}
-        radius={0.025}
-        smoothness={3}
-        position={[0, 0.012, -0.02]}
-      >
-        <meshStandardMaterial color="#202627" roughness={0.86} metalness={0.02} />
-      </RoundedBox>
-
-      {/* Water continues into the throat, as it does in a working skimmer. */}
-      <mesh position={[0, -0.038, 0.005]} renderOrder={3}>
-        <boxGeometry args={[0.535, 0.008, 0.115]} />
-        <meshPhysicalMaterial
-          color="#78c9d1"
-          transparent
-          opacity={0.58}
-          roughness={0.1}
-          transmission={0.52}
-          ior={1.33}
-          clearcoat={0.7}
-          clearcoatRoughness={0.12}
-          depthWrite={false}
-        />
+    <group
+      scale={SKIMMER_FRONT_SCALE}
+      position={[0, WATERLINE_PIVOT_Y * (1 - SKIMMER_FRONT_SCALE[1]), 0]}
+    >
+      {/* Soft contact shadow where the frame meets the wall liner: a
+          vertical wall-mounted fitting like this sits outside the pool's
+          global (ground-plane) ContactShadows helper, so without this it
+          reads as pasted onto the wall rather than seated in a cut opening. */}
+      <mesh name="contact-ao-decal" position={[0, 0.017, 0.001]} renderOrder={1}>
+        <planeGeometry args={[0.62, 0.27]} />
+        <meshBasicMaterial map={contactAOMap} transparent depthWrite={false} />
       </mesh>
 
+      {/* Recessed housing: its depth extends into the wall, behind the face frame. */}
       <RoundedBox
-        args={[0.57, 0.135, 0.018]}
+        args={[0.41, 0.145, 0.18]}
         radius={0.018}
         smoothness={3}
-        position={[0, 0.016, 0.052]}
-        receiveShadow
+        position={[0, 0.017, -0.08]}
       >
-        <meshStandardMaterial color={THROAT_COLOR} roughness={0.72} metalness={0.04} />
+        <meshStandardMaterial color={CAVITY_COLOR} roughness={0.9} metalness={0} />
       </RoundedBox>
 
-      {/* Four-piece faceplate preserves a real opening while the rounded
-          edges catch the studio light like moulded ABS. */}
-      <RoundedBox
-        args={[0.72, 0.052, 0.052]}
-        radius={0.018}
-        smoothness={3}
-        position={[0, 0.12, 0.071]}
-        castShadow
-      >
-        <meshPhysicalMaterial
-          color={FRAME_COLOR}
-          roughness={0.24}
-          clearcoat={0.38}
-          clearcoatRoughness={0.22}
-        />
-      </RoundedBox>
-      <RoundedBox
-        args={[0.72, 0.052, 0.052]}
-        radius={0.018}
-        smoothness={3}
-        position={[0, -0.088, 0.071]}
-        castShadow
-      >
-        <meshPhysicalMaterial
-          color={FRAME_COLOR}
-          roughness={0.24}
-          clearcoat={0.38}
-          clearcoatRoughness={0.22}
-        />
-      </RoundedBox>
-      <RoundedBox
-        args={[0.052, 0.16, 0.052]}
-        radius={0.017}
-        smoothness={3}
-        position={[-0.334, 0.016, 0.071]}
-        castShadow
-      >
-        <meshPhysicalMaterial
-          color={FRAME_COLOR}
-          roughness={0.24}
-          clearcoat={0.38}
-          clearcoatRoughness={0.22}
-        />
-      </RoundedBox>
-      <RoundedBox
-        args={[0.052, 0.16, 0.052]}
-        radius={0.017}
-        smoothness={3}
-        position={[0.334, 0.016, 0.071]}
-        castShadow
-      >
-        <meshPhysicalMaterial
-          color={FRAME_COLOR}
-          roughness={0.24}
-          clearcoat={0.38}
-          clearcoatRoughness={0.22}
-        />
-      </RoundedBox>
-
-      {/* A slightly inclined floating weir makes the opening readable in the
-          close-up while remaining below the water line. */}
-      <mesh position={[0, -0.022, 0.064]} rotation={[0.08, 0, 0]} castShadow>
-        <boxGeometry args={[0.51, 0.055, 0.014]} />
-        <meshPhysicalMaterial color="#e7e9e6" roughness={0.32} clearcoat={0.22} />
+      {/* White throat panels make the opening read as a real inset channel. */}
+      <mesh position={[-0.192, 0.017, -0.066]}>
+        <boxGeometry args={[0.016, 0.115, 0.15]} />
+        <meshStandardMaterial color="#e9ebe8" roughness={0.58} />
+      </mesh>
+      <mesh position={[0.192, 0.017, -0.066]}>
+        <boxGeometry args={[0.016, 0.115, 0.15]} />
+        <meshStandardMaterial color="#e9ebe8" roughness={0.58} />
+      </mesh>
+      <mesh position={[0, 0.069, -0.066]}>
+        <boxGeometry args={[0.4, 0.014, 0.15]} />
+        <meshStandardMaterial color="#e9ebe8" roughness={0.58} />
+      </mesh>
+      <mesh position={[0, -0.035, -0.066]}>
+        <boxGeometry args={[0.4, 0.014, 0.15]} />
+        <meshStandardMaterial color="#eef0ed" roughness={0.5} />
       </mesh>
 
-      {[-0.304, 0.304].map((x) =>
-        [-0.058, 0.09].map((y) => (
-          <mesh key={`${x}-${y}`} position={[x, y, 0.101]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.007, 0.007, 0.006, 12]} />
-            <meshStandardMaterial color="#aeb2b0" roughness={0.42} metalness={0.5} />
-          </mesh>
-        )),
-      )}
+      {/* The water tongue continues naturally into the lower part of the mouth. */}
+      <mesh position={[0, -0.004, -0.064]} renderOrder={3}>
+        <boxGeometry args={[0.368, 0.004, 0.155]} />
+        <WaterSurfaceMaterial />
+      </mesh>
+
+      {/* Geometric 48 × 19.5 cm face frame with a raised inner profile. */}
+      <mesh position={[0, 0.092, 0.018]} castShadow>
+        <boxGeometry args={[0.48, 0.045, 0.035]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+      <mesh position={[0, -0.058, 0.018]} castShadow>
+        <boxGeometry args={[0.48, 0.045, 0.035]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+      <mesh position={[-0.215, 0.017, 0.018]} castShadow>
+        <boxGeometry args={[0.05, 0.115, 0.035]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+      <mesh position={[0.215, 0.017, 0.018]} castShadow>
+        <boxGeometry args={[0.05, 0.115, 0.035]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+
+      <mesh position={[0, 0.066, 0.039]} castShadow>
+        <boxGeometry args={[0.378, 0.01, 0.008]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+      <mesh position={[0, -0.032, 0.039]} castShadow>
+        <boxGeometry args={[0.378, 0.01, 0.008]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+      <mesh position={[-0.184, 0.017, 0.039]} castShadow>
+        <boxGeometry args={[0.01, 0.108, 0.008]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
+      <mesh position={[0.184, 0.017, 0.039]} castShadow>
+        <boxGeometry args={[0.01, 0.108, 0.008]} />
+        {frameMaterial(normalMap, roughnessMap)}
+      </mesh>
     </group>
   );
 }
 
-/**
- * Wall-mounted skimmer faceplates, placed on the water line following the
- * computed plan (one every 25 m², never in a corner).
- */
 export function Skimmers({
   plan,
-  copingThickness,
+  wallTopY,
 }: {
   plan: SkimmerPlan;
   copingThickness: number;
+  wallTopY: number;
 }) {
+  const normalMap = useMemo(() => {
+    const texture = createMaterialMicroNormalMap();
+    texture.repeat.set(...MATERIAL_MICRO_DETAIL_PRESET.skimmer.repeat);
+    return texture;
+  }, []);
+  const roughnessMap = useMemo(() => {
+    const texture = createMaterialMicroRoughnessMap();
+    texture.repeat.set(...MATERIAL_MICRO_DETAIL_PRESET.skimmer.repeat);
+    return texture;
+  }, []);
+  const contactAOMap = useMemo(() => createContactAOGradientMap(), []);
+  useEffect(
+    () => () => {
+      normalMap.dispose();
+      roughnessMap.dispose();
+      contactAOMap.dispose();
+    },
+    [normalMap, roughnessMap, contactAOMap],
+  );
   return (
     <group>
       {plan.positions.map((spot, index) => (
         <group
           key={index}
-          position={[spot.x, -0.17 + copingThickness, spot.z]}
+          position={[spot.x, wallTopY - 0.16, spot.z]}
           rotation={[0, spot.rotation, 0]}
         >
-          <SkimmerAssembly />
+          <SkimmerAssembly
+            normalMap={normalMap}
+            roughnessMap={roughnessMap}
+            contactAOMap={contactAOMap}
+          />
         </group>
       ))}
     </group>

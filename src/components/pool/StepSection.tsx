@@ -91,11 +91,13 @@ export function OptionCard({
 export function SwatchOption({
   title,
   hex,
+  texture,
   selected,
   onSelect,
 }: {
   title: string;
   hex: string;
+  texture?: string;
   selected: boolean;
   onSelect: () => void;
 }) {
@@ -110,8 +112,8 @@ export function SwatchOption({
       )}
     >
       <span
-        className="relative block h-12 w-full rounded-lg border border-hairline"
-        style={{ backgroundColor: hex }}
+        className="relative block h-12 w-full rounded-lg border border-hairline bg-cover bg-center"
+        style={{ backgroundColor: hex, backgroundImage: texture ? `url(${texture})` : undefined }}
       >
         {selected ? (
           <Check

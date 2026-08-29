@@ -19,7 +19,9 @@ export function planSkimmers(outline: Outline, waterSurface: number, enabled = t
     return { count: 0, positions: [], spacing: 0, cornerDistance: 0 };
   }
   const count = Math.max(1, Math.ceil(waterSurface / SQM_PER_SKIMMER));
-  const { minX, maxX, minZ, spanX, spanZ } = outlineBounds(outline);
+  const { minX, minZ, spanX, spanZ } = outlineBounds(outline);
+  const centreX = outline.reduce((sum, [x]) => sum + x, 0) / outline.length;
+  const centreZ = outline.reduce((sum, [, z]) => sum + z, 0) / outline.length;
   const positions: Array<{ x: number; z: number; rotation: number }> = [];
   const runAlongX = spanX >= spanZ;
   const runLength = runAlongX ? spanX : spanZ;
@@ -28,10 +30,18 @@ export function planSkimmers(outline: Outline, waterSurface: number, enabled = t
     const targetX = runAlongX ? minX + spanX * t : minX;
     const targetZ = runAlongX ? minZ : minZ + spanZ * t;
     const boundary = closestPointOnOutline(outline, targetX, targetZ);
+    const firstNormal: readonly [number, number] = [-boundary.tangent[1], boundary.tangent[0]];
+    const secondNormal: readonly [number, number] = [boundary.tangent[1], -boundary.tangent[0]];
+    const toCentre: readonly [number, number] = [
+      centreX - boundary.point[0],
+      centreZ - boundary.point[1],
+    ];
+    const inwardNormal =
+      firstNormal[0] * toCentre[0] + firstNormal[1] * toCentre[1] >= 0 ? firstNormal : secondNormal;
     positions.push({
-      x: boundary[0],
-      z: boundary[1],
-      rotation: runAlongX ? 0 : -Math.PI / 2,
+      x: boundary.point[0],
+      z: boundary.point[1],
+      rotation: Math.atan2(inwardNormal[0], inwardNormal[1]),
     });
   }
 
@@ -43,8 +53,9 @@ function closestPointOnOutline(
   outline: Outline,
   targetX: number,
   targetZ: number,
-): readonly [number, number] {
+): { point: readonly [number, number]; tangent: readonly [number, number] } {
   let closest: readonly [number, number] = outline[0]!;
+  let closestTangent: readonly [number, number] = [1, 0];
   let closestDistance = Infinity;
   for (let index = 0; index < outline.length; index++) {
     const a = outline[index]!;
@@ -60,8 +71,10 @@ function closestPointOnOutline(
     const distance = Math.hypot(point[0] - targetX, point[1] - targetZ);
     if (distance < closestDistance) {
       closest = point;
+      const length = Math.sqrt(lengthSquared) || 1;
+      closestTangent = [dx / length, dz / length];
       closestDistance = distance;
     }
   }
-  return closest;
+  return { point: closest, tangent: closestTangent };
 }

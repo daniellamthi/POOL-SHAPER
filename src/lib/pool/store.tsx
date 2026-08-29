@@ -9,20 +9,27 @@ import {
   RENOVATION_STEPS,
   type DimensionKey,
 } from "./config";
-import { buildOutline, computeMetrics, constrainControlPoint } from "./geometry";
+import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
 import { getCustomerValidation } from "./validation";
+import { DEFAULT_MOSAIC_FINISH_ID } from "@/configurator/materials/interior-textures";
 import type {
-  AccessoryId,
   ControlPoint,
   CustomMode,
   CustomerInfo,
+  EquipmentId,
   FinishMaterial,
+  PoolType,
   LinerColor,
+  MosaicFinishId,
   Outline,
+  OverflowType,
   PoolConfig,
+  PoolAccess,
+  PoolFeatureId,
   PoolMetrics,
   PoolShapeId,
+  PoolStructure,
   ProjectType,
   SystemType,
   UploadedFile,
@@ -31,6 +38,8 @@ import type {
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
+  | { type: "setPoolType"; value: PoolType }
+  | { type: "setPoolStructure"; value: PoolStructure }
   | { type: "setCustomerField"; key: keyof CustomerInfo; value: string }
   | { type: "setShape"; value: PoolShapeId }
   | { type: "setCustomMode"; value: CustomMode }
@@ -38,9 +47,13 @@ type Action =
   | { type: "resetControlPoints" }
   | { type: "setDimension"; key: DimensionKey; value: number }
   | { type: "setSystem"; value: SystemType }
+  | { type: "setOverflowType"; value: OverflowType }
   | { type: "setFinish"; value: FinishMaterial }
   | { type: "setLinerColor"; value: LinerColor }
-  | { type: "toggleAccessory"; value: AccessoryId }
+  | { type: "setMosaicFinish"; value: MosaicFinishId }
+  | { type: "togglePoolFeature"; value: PoolFeatureId }
+  | { type: "setPoolAccess"; value: PoolAccess }
+  | { type: "toggleEquipment"; value: EquipmentId }
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
   | { type: "addUploads"; value: UploadedFile[] }
   | { type: "removeUpload"; id: string }
@@ -68,14 +81,20 @@ const initialState: State = {
   },
   config: {
     projectType: null,
+    poolType: null,
+    structure: null,
     shape: "rectangle",
     customMode: "draw",
     controlPoints: DEFAULT_CONTROL_POINTS,
     dimensions: DEFAULT_DIMENSIONS,
     system: "skimmer",
+    overflowType: "hidden",
     finish: "liner",
-    linerColor: "lightGrey",
-    accessories: [],
+    linerColor: "motionBlueSky602",
+    mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
+    features: [],
+    poolAccess: null,
+    equipment: [],
     customer: DEFAULT_CUSTOMER,
     uploads: [],
   },
@@ -88,6 +107,19 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "setProjectType":
       return { ...state, config: { ...config, projectType: action.value } };
+    case "setPoolType": {
+      const structure =
+        action.value === "in-ground"
+          ? config.structure === "modular-steel-structure"
+            ? null
+            : config.structure
+          : config.structure === "modular-steel-structure"
+            ? config.structure
+            : null;
+      return { ...state, config: { ...config, poolType: action.value, structure } };
+    }
+    case "setPoolStructure":
+      return { ...state, config: { ...config, structure: action.value } };
     case "setCustomerField":
       return {
         ...state,
@@ -98,10 +130,11 @@ function reducer(state: State, action: Action): State {
     case "setCustomMode":
       return { ...state, config: { ...config, customMode: action.value } };
     case "setControlPoint": {
-      const points = config.controlPoints.map((point, index) =>
-        index === action.index
-          ? constrainControlPoint(config.controlPoints, action.index, action.value)
-          : point,
+      const points = constrainControlPoints(
+        config.controlPoints,
+        action.index,
+        action.value,
+        config.dimensions,
       );
       return { ...state, config: { ...config, controlPoints: points } };
     }
@@ -118,16 +151,27 @@ function reducer(state: State, action: Action): State {
     }
     case "setSystem":
       return { ...state, config: { ...config, system: action.value } };
+    case "setOverflowType":
+      return { ...state, config: { ...config, overflowType: action.value } };
     case "setFinish":
       return { ...state, config: { ...config, finish: action.value } };
     case "setLinerColor":
       return { ...state, config: { ...config, linerColor: action.value } };
-    case "toggleAccessory": {
-      const has = config.accessories.includes(action.value);
-      const accessories = has
-        ? config.accessories.filter((id) => id !== action.value)
-        : [...config.accessories, action.value];
-      return { ...state, config: { ...config, accessories } };
+    case "setMosaicFinish":
+      return { ...state, config: { ...config, mosaicFinish: action.value } };
+    case "togglePoolFeature": {
+      const features = config.features.includes(action.value)
+        ? config.features.filter((id) => id !== action.value)
+        : [...config.features, action.value];
+      return { ...state, config: { ...config, features } };
+    }
+    case "setPoolAccess":
+      return { ...state, config: { ...config, poolAccess: action.value } };
+    case "toggleEquipment": {
+      const equipment = config.equipment.includes(action.value)
+        ? config.equipment.filter((id) => id !== action.value)
+        : [...config.equipment, action.value];
+      return { ...state, config: { ...config, equipment } };
     }
     case "updateRenovation":
       return { ...state, renovation: { ...state.renovation, ...action.value } };
@@ -151,8 +195,10 @@ function reducer(state: State, action: Action): State {
           config.projectType === "renovation" ? RENOVATION_STEPS.length - 1 : STEPS.length - 1,
         ),
       };
-    case "previous":
-      return { ...state, step: clamp(state.step - 1, 0, STEPS.length - 1) };
+    case "previous": {
+      const count = config.projectType === "renovation" ? RENOVATION_STEPS.length : STEPS.length;
+      return { ...state, step: clamp(state.step - 1, 0, count - 1) };
+    }
     case "reset":
       return initialState;
     default:
@@ -195,7 +241,11 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         }
         return true;
       }
-      if (index === 7) return getCustomerValidation(customer).valid;
+      const stepId = STEPS[index]?.id;
+      if (stepId === "pool-type") return config.poolType !== null;
+      if (stepId === "structure") return config.structure !== null;
+      if (stepId === "features") return config.poolAccess !== null;
+      if (stepId === "contact") return getCustomerValidation(customer).valid;
       return true;
     },
     [config, renovation],
@@ -212,6 +262,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       isStepComplete,
       canContinue: isStepComplete(step),
       setProjectType: (v) => dispatch({ type: "setProjectType", value: v }),
+      setPoolType: (v) => dispatch({ type: "setPoolType", value: v }),
+      setPoolStructure: (v) => dispatch({ type: "setPoolStructure", value: v }),
       setCustomerField: (key, v) => dispatch({ type: "setCustomerField", key, value: v }),
       setShape: (v) => dispatch({ type: "setShape", value: v }),
       setCustomMode: (v) => dispatch({ type: "setCustomMode", value: v }),
@@ -219,9 +271,13 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       resetControlPoints: () => dispatch({ type: "resetControlPoints" }),
       setDimension: (key, v) => dispatch({ type: "setDimension", key, value: v }),
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
+      setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
       setFinish: (v) => dispatch({ type: "setFinish", value: v }),
       setLinerColor: (v) => dispatch({ type: "setLinerColor", value: v }),
-      toggleAccessory: (v) => dispatch({ type: "toggleAccessory", value: v }),
+      setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
+      togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
+      setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
+      toggleEquipment: (v) => dispatch({ type: "toggleEquipment", value: v }),
       updateRenovation: (v) => dispatch({ type: "updateRenovation", value: v }),
       addUploads: (files) => dispatch({ type: "addUploads", value: files }),
       removeUpload: (id) => {

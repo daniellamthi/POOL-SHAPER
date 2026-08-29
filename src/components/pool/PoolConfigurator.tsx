@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
@@ -7,12 +8,13 @@ import { ConfiguratorProvider } from "@/lib/pool/store";
 import { resolveMaterials } from "@/lib/pool/materials";
 import { ThemeProvider, useTheme } from "@/lib/theme";
 import { ProjectTypeStep } from "@/configurator/steps/project-type";
+import { PoolTypeStep } from "@/configurator/steps/pool-type";
+import { PoolStructureStep } from "@/configurator/steps/pool-structure";
 import { PoolShapeStep } from "@/configurator/steps/pool-shape";
-import { PoolDimensionsStep } from "@/configurator/steps/pool-dimensions";
 import { PoolSystemStep } from "@/configurator/steps/pool-system";
 import { InteriorFinishStep } from "@/configurator/steps/interior-finish";
-import { InteriorColorStep } from "@/configurator/steps/interior-color";
-import { AccessoriesStep } from "@/configurator/steps/accessories";
+import { PoolFeaturesStep } from "@/configurator/steps/pool-features";
+import { EquipmentStep } from "@/configurator/steps/equipment";
 import { ContactDetailsStep } from "@/configurator/steps/contact-details";
 import { FinalReviewStep } from "@/configurator/steps/final-review";
 import {
@@ -27,16 +29,17 @@ import { PoolViewport } from "./PoolViewport";
 import { ThemeToggle } from "./ThemeToggle";
 import { StepIndicator } from "./StepIndicator";
 import { LiveSummary } from "./LiveSummary";
-import type { SceneFocus } from "./three/PoolScene";
+import type { SceneFocus, PhotoModeQuality } from "./three/PoolScene";
 
 const STEP_COMPONENTS = [
   ProjectTypeStep,
+  PoolTypeStep,
+  PoolStructureStep,
   PoolShapeStep,
-  PoolDimensionsStep,
   PoolSystemStep,
   InteriorFinishStep,
-  InteriorColorStep,
-  AccessoriesStep,
+  PoolFeaturesStep,
+  EquipmentStep,
   ContactDetailsStep,
   FinalReviewStep,
 ] as const;
@@ -65,29 +68,71 @@ function ConfiguratorLayout() {
   } = useConfigurator();
   const { theme } = useTheme();
   const materials = useMemo(
-    () => resolveMaterials({ finish: config.finish, linerColor: config.linerColor }),
-    [config.finish, config.linerColor],
+    () =>
+      resolveMaterials({
+        finish: config.finish,
+        linerColor: config.linerColor,
+        mosaicFinish: config.mosaicFinish,
+      }),
+    [config.finish, config.linerColor, config.mosaicFinish],
   );
 
   const [showMeasurements, setShowMeasurements] = useState(true);
   const [frameToken, setFrameToken] = useState(0);
+  const [photoMode, setPhotoMode] = useState(false);
+  const [photoModeQuality, setPhotoModeQuality] = useState<PhotoModeQuality>("standard");
+  // Set once the path tracer has proven it can't run on this device (no
+  // WebGL2, or WebGLPathTracer threw during setup -- see
+  // PhotoModeRenderer's onUnsupported). Sticky for the rest of the session:
+  // once known unsupported, the toggle stays disabled instead of letting
+  // the user retry into the same failure repeatedly.
+  const [photoModeUnsupported, setPhotoModeUnsupported] = useState(false);
   const toggleMeasurements = useCallback(() => setShowMeasurements((value) => !value), []);
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
+  const togglePhotoMode = useCallback(() => {
+    if (photoModeUnsupported) return;
+    setPhotoMode((value) => !value);
+  }, [photoModeUnsupported]);
+  // PhotoModeRenderer's setup effect can genuinely run more than once for a
+  // single user click (e.g. an intervening re-render changing
+  // `photoModeSceneKey` remounts it before the first attempt's failure is
+  // even reported). A `useCallback` closure can't guard against that with
+  // `photoModeUnsupported` alone -- it's created once and never sees the
+  // updated value -- so a ref-backed one-shot latch ensures the toast fires
+  // exactly once instead of a second call re-triggering (and visually
+  // cutting short) the first toast's animation.
+  const hasReportedUnsupported = useRef(false);
+  const handlePhotoModeUnsupported = useCallback(() => {
+    if (hasReportedUnsupported.current) return;
+    hasReportedUnsupported.current = true;
+    setPhotoModeUnsupported(true);
+    setPhotoMode(false);
+    toast.error("Photo Mode isn't supported on this device", {
+      description: "The live 3D view is unaffected -- keep configuring as normal.",
+    });
+  }, []);
 
   const renovationWorkflow = config.projectType === "renovation";
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
   const components = renovationWorkflow ? RENOVATION_COMPONENTS : STEP_COMPONENTS;
   const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
+  const activeStepId = activeSteps[step]?.id;
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
-    : step === 3
+    : activeStepId === "system"
       ? config.system
-      : step === 4 || step === 5
-        ? "interior"
-        : step === 8
+      : activeStepId === "finish" || activeStepId === "color"
+        ? "liner"
+        : activeStepId === "review"
           ? "review"
           : "overview";
+  const stepContent =
+    !renovationWorkflow && activeStepId === "system" ? (
+      <PoolSystemStep onSkimmerSelect={reframe} />
+    ) : (
+      <StepComponent />
+    );
 
   return (
     <div className="flex min-h-screen flex-col bg-background lg:h-screen lg:overflow-hidden">
@@ -118,7 +163,7 @@ function ConfiguratorLayout() {
           </div>
 
           <div className="scroll-slim flex-1 overflow-y-auto px-6 pt-12 pb-20 sm:px-11 lg:min-h-0">
-            <StepComponent />
+            {stepContent}
           </div>
 
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 border-t border-hairline bg-background/88 px-6 py-5 backdrop-blur-2xl sm:px-11">
@@ -154,7 +199,10 @@ function ConfiguratorLayout() {
             outline={outline}
             shape={config.shape}
             system={config.system}
+            overflowType={config.overflowType}
+            poolType={config.poolType ?? "in-ground"}
             materials={materials}
+            features={config.features}
             skimmers={skimmers}
             length={config.dimensions.length}
             width={config.dimensions.width}
@@ -164,8 +212,14 @@ function ConfiguratorLayout() {
             onReframe={reframe}
             frameToken={frameToken}
             focus={cameraFocus}
-            showWater={renovationWorkflow || step !== 4}
+            showWater={renovationWorkflow || activeStepId !== "finish"}
             theme={theme}
+            photoMode={photoMode}
+            onTogglePhotoMode={togglePhotoMode}
+            photoModeQuality={photoModeQuality}
+            onSetPhotoModeQuality={setPhotoModeQuality}
+            photoModeUnsupported={photoModeUnsupported}
+            onPhotoModeUnsupported={handlePhotoModeUnsupported}
           />
           <LiveSummary />
         </main>

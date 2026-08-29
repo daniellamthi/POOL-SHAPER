@@ -8,6 +8,8 @@ interface Props {
   length: number;
   width: number;
   depth: number;
+  floorY: number;
+  wallTopY: number;
   color: string;
 }
 
@@ -15,7 +17,15 @@ const LABEL_CLASS =
   "pointer-events-none whitespace-nowrap select-none rounded-full border border-hairline bg-panel px-3 py-1 font-mono text-[10px] font-light tracking-[0.08em] text-foreground backdrop-blur-xl";
 
 /** Dimension guides drawn around the live geometry. */
-export function PoolMeasurements({ outline, length, width, depth, color }: Props) {
+export function PoolMeasurements({
+  outline,
+  length,
+  width,
+  depth,
+  floorY,
+  wallTopY,
+  color,
+}: Props) {
   const bounds = useMemo(() => {
     let maxX = 0;
     let maxZ = 0;
@@ -27,7 +37,7 @@ export function PoolMeasurements({ outline, length, width, depth, color }: Props
   }, [outline]);
 
   const offset = 0.9;
-  const y = 0.02;
+  const y = wallTopY + 0.02;
   const zLine = bounds.maxZ + offset;
   const xLine = bounds.maxX + offset;
 
@@ -59,13 +69,13 @@ export function PoolMeasurements({ outline, length, width, depth, color }: Props
 
       <Line
         points={[
-          [-xLine, 0, zLine],
-          [-xLine, -depth, zLine],
+          [-xLine, wallTopY, zLine],
+          [-xLine, floorY, zLine],
         ]}
         color={color}
         lineWidth={1}
       />
-      <Html position={[-xLine, -depth / 2, zLine]} center zIndexRange={[10, 0]}>
+      <Html position={[-xLine, (wallTopY + floorY) / 2, zLine]} center zIndexRange={[10, 0]}>
         <span className={LABEL_CLASS}>D {formatNumber(depth, 2)} m</span>
       </Html>
     </group>

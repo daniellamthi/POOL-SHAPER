@@ -165,6 +165,7 @@ export function RenovationDetailsStep() {
                 key={item.id}
                 title={item.title}
                 hex={item.hex}
+                texture={item.texture}
                 selected={config.linerColor === item.id}
                 onSelect={() => setLinerColor(item.id)}
               />

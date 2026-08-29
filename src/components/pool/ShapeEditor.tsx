@@ -1,37 +1,51 @@
 import { useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { unitFromControlPoints } from "@/lib/pool/geometry";
 import { useConfigurator } from "@/lib/pool/context";
 
 const SIZE = 320;
 const PAD = 26;
 
-const toScreen = (v: number, span: number) => PAD + (v + 0.5) * span;
-
 /** Editable outline: drag the control points, the 3D basin follows live. */
 export function ShapeEditor() {
-  const { config, setControlPoint, resetControlPoints } = useConfigurator();
+  const { config, outline, setControlPoint, resetControlPoints } = useConfigurator();
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<number | null>(null);
 
-  const spanX = SIZE - PAD * 2;
-  const spanY = SIZE * 0.62 - PAD * 2;
-  const curve = unitFromControlPoints(config.controlPoints);
+  const editorHeight = SIZE * 0.62;
+  const availableWidth = SIZE - PAD * 2;
+  const availableHeight = editorHeight - PAD * 2;
+  const metresToScreen = Math.min(
+    availableWidth / config.dimensions.length,
+    availableHeight / config.dimensions.width,
+  );
+  const centreX = SIZE / 2;
+  const centreY = editorHeight / 2;
+  const toScreen = ([x, z]: readonly [number, number]) => [
+    centreX + x * metresToScreen,
+    centreY + z * metresToScreen,
+  ];
   const path =
-    curve
-      .map(
-        ([x, y], index) => `${index === 0 ? "M" : "L"}${toScreen(x, spanX)},${toScreen(y, spanY)}`,
-      )
+    outline
+      .map((point, index) => {
+        const [x, y] = toScreen(point);
+        return `${index === 0 ? "M" : "L"}${x},${y}`;
+      })
       .join(" ") + " Z";
 
   const move = (event: React.PointerEvent) => {
     if (dragging === null || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * SIZE;
-    const y = ((event.clientY - rect.top) / rect.height) * SIZE * 0.62;
-    const nx = Math.max(-0.5, Math.min(0.5, (x - PAD) / spanX - 0.5));
-    const ny = Math.max(-0.5, Math.min(0.5, (y - PAD) / spanY - 0.5));
+    const y = ((event.clientY - rect.top) / rect.height) * editorHeight;
+    const nx = Math.max(
+      -0.5,
+      Math.min(0.5, (x - centreX) / metresToScreen / config.dimensions.length),
+    );
+    const ny = Math.max(
+      -0.5,
+      Math.min(0.5, (y - centreY) / metresToScreen / config.dimensions.width),
+    );
     setControlPoint(dragging, [nx, ny]);
   };
 
@@ -40,7 +54,7 @@ export function ShapeEditor() {
       <div className="rounded-2xl border border-hairline bg-card/40 p-2">
         <svg
           ref={svgRef}
-          viewBox={`0 0 ${SIZE} ${SIZE * 0.62}`}
+          viewBox={`0 0 ${SIZE} ${editorHeight}`}
           className="w-full touch-none select-none"
           onPointerMove={move}
           onPointerUp={() => setDragging(null)}
@@ -56,8 +70,8 @@ export function ShapeEditor() {
           {config.controlPoints.map(([x, y], index) => (
             <circle
               key={index}
-              cx={toScreen(x, spanX)}
-              cy={toScreen(y, spanY)}
+              cx={toScreen([x * config.dimensions.length, y * config.dimensions.width])[0]}
+              cy={toScreen([x * config.dimensions.length, y * config.dimensions.width])[1]}
               r={dragging === index ? 7 : 5}
               className="cursor-grab"
               fill="var(--background)"

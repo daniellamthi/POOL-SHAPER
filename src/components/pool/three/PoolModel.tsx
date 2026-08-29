@@ -1,24 +1,238 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { DoubleSide } from "three";
-import { createSurfaceGeometry, createWallGeometry } from "./poolGeometry";
-import { createCausticsMap, createRippleNormalMap, createStoneDetailMap } from "./textures";
-import { offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
-import { COPING_WIDTH, FREEBOARD } from "@/lib/pool/config";
+import {
+  createBeveledRingGeometry,
+  createInteriorWallGeometry,
+  createRingGeometry,
+  createSurfaceGeometry,
+  createWallGeometry,
+} from "./poolGeometry";
+import {
+  createMaterialMicroNormalMap,
+  createMaterialMicroRoughnessMap,
+  createTriplanarDetailMaps,
+  getDerivedDetailMaps,
+} from "./textures";
+import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { photoModeState } from "@/lib/pool/photoModeState";
+import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
+import { COPING_WIDTH, OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
-import type { Outline, SystemType } from "@/lib/pool/types";
-import { POOL_SURFACE_PRESET, WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
-import { INTERIOR_TEXTURE_URLS } from "@/configurator/materials/interior-textures";
+import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
+import {
+  ABOVE_GROUND_STRUCTURE_THICKNESS,
+  getPoolVerticalLayout,
+} from "@/lib/pool/vertical-layout";
+import {
+  MATERIAL_MICRO_DETAIL_PRESET,
+  WATER_VISUAL_PRESET,
+} from "@/configurator/materials/visual-presets";
+import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 
 interface PoolModelProps {
   outline: Outline;
   depth: number;
   materials: ResolvedMaterials;
   system: SystemType;
+  overflowType: OverflowType;
+  poolType: PoolType;
   copingThickness: number;
   showWater: boolean;
+}
+
+interface UnderwaterShader extends THREE.WebGLProgramParametersWithUniforms {
+  uniforms: THREE.WebGLProgramParametersWithUniforms["uniforms"] & {
+    causticTime?: { value: number };
+    causticStrength?: { value: number };
+    causticScale?: { value: number };
+    waterLevel?: { value: number };
+    waterAbsorption?: { value: THREE.Vector3 };
+    waterScatteringColor?: { value: THREE.Vector3 };
+    waterScatteringStrength?: { value: number };
+    maxOpticalPath?: { value: number };
+    waterDepthDensity?: { value: number };
+    waterScatteringContribution?: { value: number };
+    maxWaterScatteringEnergy?: { value: number };
+    waterScatteringDepthStart?: { value: number };
+    waterScatteringOpticalPathScale?: { value: number };
+    waterAbsorptionOpticalPathScale?: { value: number };
+  };
+}
+
+const CAUSTICS_VERTEX_HEADER = `
+varying vec3 vCausticWorldPosition;
+`;
+
+const CAUSTICS_VERTEX_POSITION = `
+#include <worldpos_vertex>
+vCausticWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
+`;
+
+const CAUSTICS_FRAGMENT_HEADER = `
+uniform float causticTime;
+uniform float causticStrength;
+uniform float causticScale;
+uniform float waterLevel;
+uniform vec3 waterAbsorption;
+uniform vec3 waterScatteringColor;
+uniform float waterScatteringStrength;
+uniform float maxOpticalPath;
+uniform float waterDepthDensity;
+uniform float waterScatteringContribution;
+uniform float maxWaterScatteringEnergy;
+uniform float waterScatteringDepthStart;
+uniform float waterScatteringOpticalPathScale;
+uniform float waterAbsorptionOpticalPathScale;
+varying vec3 vCausticWorldPosition;
+
+float subtleCausticField(vec2 position, float time) {
+  vec2 p = position * causticScale;
+  vec2 warp = vec2(
+    sin(p.y * 0.37 + time * 0.16),
+    cos(p.x * 0.31 - time * 0.13)
+  ) * 0.72;
+  float broad = sin((p.x + warp.x) * 0.72 + sin(p.y * 0.41 + time * 0.11));
+  float crossing = sin((p.y + warp.y) * 0.83 - cos(p.x * 0.46 - time * 0.09));
+  float detail = sin((p.x * 0.57 - p.y * 0.49) + warp.x - warp.y + time * 0.07);
+  float field = broad * 0.44 + crossing * 0.38 + detail * 0.18;
+  return 0.5 + smoothstep(-0.72, 0.82, field) * 0.5 - 0.25;
+}
+`;
+
+const CAUSTICS_LIGHT_MODULATION = `
+vec3 causticNormal = normalize(cross(dFdx(vCausticWorldPosition), dFdy(vCausticWorldPosition)));
+vec3 causticWeights = pow(abs(causticNormal), vec3(6.0));
+causticWeights /= max(causticWeights.x + causticWeights.y + causticWeights.z, 0.0001);
+vec3 causticProjectedPosition = vCausticWorldPosition + vec3(
+  vCausticWorldPosition.y * 0.18,
+  0.0,
+  vCausticWorldPosition.y * 0.12
+);
+float causticValue =
+  subtleCausticField(causticProjectedPosition.yz, causticTime) * causticWeights.x +
+  subtleCausticField(causticProjectedPosition.xz, causticTime * 0.93) * causticWeights.y +
+  subtleCausticField(causticProjectedPosition.xy, causticTime * 1.07) * causticWeights.z;
+float underwaterMask = 1.0 - step(waterLevel + 0.0001, vCausticWorldPosition.y);
+float underwaterDepth = max(0.0, waterLevel - vCausticWorldPosition.y);
+vec3 viewRay = normalize(cameraPosition - vCausticWorldPosition);
+float viewThroughSurface = max(abs(viewRay.y), 0.35);
+float opticalPath = min(underwaterDepth * waterDepthDensity / viewThroughSurface, maxOpticalPath);
+float absorptionPath = opticalPath * waterAbsorptionOpticalPathScale;
+vec3 waterTransmission = exp(-waterAbsorption * absorptionPath);
+float lostLight = 1.0 - dot(waterTransmission, vec3(0.2126, 0.7152, 0.0722));
+float scatteringPath = opticalPath * waterScatteringOpticalPathScale;
+float scatteringDepthWeight = smoothstep(
+  waterScatteringDepthStart,
+  maxOpticalPath,
+  scatteringPath
+);
+float scatteringEnergy = min(
+  lostLight * waterScatteringStrength * waterScatteringContribution * scatteringDepthWeight,
+  maxWaterScatteringEnergy
+);
+vec3 inScattering = waterScatteringColor * scatteringEnergy;
+float causticLight = 1.0 + (causticValue - 0.5) * 2.0 * causticStrength;
+vec3 submergedLight = outgoingLight * waterTransmission * causticLight + inScattering;
+outgoingLight = mix(outgoingLight, submergedLight, underwaterMask);
+#include <opaque_fragment>
+`;
+
+interface TriplanarShader extends THREE.WebGLProgramParametersWithUniforms {
+  uniforms: THREE.WebGLProgramParametersWithUniforms["uniforms"] & {
+    triplanarScale?: { value: number };
+  };
+}
+
+const TRIPLANAR_VERTEX_HEADER = `
+varying vec3 vTriWorldPosition;
+varying vec3 vTriWorldNormal;
+`;
+
+const TRIPLANAR_VERTEX_POSITION = `
+#include <worldpos_vertex>
+vTriWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
+vTriWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
+`;
+
+const TRIPLANAR_FRAGMENT_HEADER = `
+uniform float triplanarScale;
+varying vec3 vTriWorldPosition;
+varying vec3 vTriWorldNormal;
+vec3 triplanarBlend;
+`;
+
+/**
+ * World-space triplanar sampling for the coping ring/skirts and the
+ * above-ground panel: their procedural detail no longer depends on the
+ * mesh's own UVs, which stretch badly wherever a face turns away from its
+ * "home" projection (the coping's rounded bevel going from horizontal top to
+ * near-vertical side is exactly that case -- its UV is a flat XZ footprint
+ * projection, degenerate once the face is nearly vertical). Blend weights
+ * are computed once here, in `<roughnessmap_fragment>`, which three.js runs
+ * before `<normal_fragment_maps>` -- reused there instead of recomputed.
+ */
+const TRIPLANAR_ROUGHNESS_FRAGMENT = `
+float roughnessFactor = roughness;
+#ifdef USE_ROUGHNESSMAP
+  vec3 triWorldNormalR = normalize(vTriWorldNormal);
+  triplanarBlend = normalize(max(abs(triWorldNormalR), vec3(0.00001)));
+  triplanarBlend = pow(triplanarBlend, vec3(4.0));
+  triplanarBlend /= (triplanarBlend.x + triplanarBlend.y + triplanarBlend.z);
+  float triRoughX = texture2D(roughnessMap, vTriWorldPosition.zy * triplanarScale).g;
+  float triRoughY = texture2D(roughnessMap, vTriWorldPosition.xz * triplanarScale).g;
+  float triRoughZ = texture2D(roughnessMap, vTriWorldPosition.xy * triplanarScale).g;
+  roughnessFactor *=
+    triRoughX * triplanarBlend.x + triRoughY * triplanarBlend.y + triRoughZ * triplanarBlend.z;
+#endif
+`;
+
+const TRIPLANAR_NORMAL_FRAGMENT = `
+vec3 triWorldNormalN = normalize(vTriWorldNormal);
+vec3 triTangentX = texture2D(normalMap, vTriWorldPosition.zy * triplanarScale).xyz * 2.0 - 1.0;
+vec3 triTangentY = texture2D(normalMap, vTriWorldPosition.xz * triplanarScale).xyz * 2.0 - 1.0;
+vec3 triTangentZ = texture2D(normalMap, vTriWorldPosition.xy * triplanarScale).xyz * 2.0 - 1.0;
+triTangentX.xy *= normalScale;
+triTangentY.xy *= normalScale;
+triTangentZ.xy *= normalScale;
+triTangentX = vec3(triTangentX.xy + triWorldNormalN.zy, abs(triTangentX.z) * triWorldNormalN.x);
+triTangentY = vec3(triTangentY.xy + triWorldNormalN.xz, abs(triTangentY.z) * triWorldNormalN.y);
+triTangentZ = vec3(triTangentZ.xy + triWorldNormalN.xy, abs(triTangentZ.z) * triWorldNormalN.z);
+vec3 triBlendedWorldNormal = normalize(
+  triTangentX.zyx * triplanarBlend.x +
+  triTangentY.xzy * triplanarBlend.y +
+  triTangentZ.xyz * triplanarBlend.z
+);
+normal = normalize(mat3(viewMatrix) * triBlendedWorldNormal);
+`;
+
+const ABOVE_GROUND_PANEL_WIDTH = 0.9;
+const COPING_EDGE_RADIUS = 0.006;
+const INTERIOR_FLOOR_COVE_RADIUS = 0.008;
+
+function createAboveGroundPanelMap(size = 256): THREE.Texture {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d")!;
+  context.fillStyle = "#f7f8f6";
+  context.fillRect(0, 0, size, size);
+
+  const joint = context.createLinearGradient(0, 0, Math.max(6, size * 0.045), 0);
+  joint.addColorStop(0, "#aeb4b1");
+  joint.addColorStop(0.18, "#d4d8d5");
+  joint.addColorStop(0.5, "#ffffff");
+  joint.addColorStop(1, "#f7f8f6");
+  context.fillStyle = joint;
+  context.fillRect(0, 0, Math.max(6, size * 0.045), size);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
 }
 
 function useDisposable<T extends THREE.BufferGeometry>(factory: () => T, deps: unknown[]): T {
@@ -26,6 +240,25 @@ function useDisposable<T extends THREE.BufferGeometry>(factory: () => T, deps: u
   const geometry = useMemo(factory, deps);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return geometry;
+}
+
+function cloneDataTexture(
+  source: THREE.Texture,
+  repeatX: number,
+  repeatY: number,
+  anisotropy: number,
+) {
+  const texture = source.clone();
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(Math.max(1, repeatX), Math.max(1, repeatY));
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.anisotropy = anisotropy;
+  texture.needsUpdate = true;
+  return texture;
 }
 
 /**
@@ -37,40 +270,77 @@ export function PoolModel({
   depth,
   materials,
   system,
+  overflowType,
+  poolType,
   copingThickness,
   showWater,
 }: PoolModelProps) {
+  const verticalLayout = getPoolVerticalLayout({
+    poolType,
+    system,
+    overflowType,
+    depth,
+    copingThickness,
+  });
+  const waterLevel = verticalLayout.waterY;
+  const isOverflow = system === "overflow";
+  const isVisibleOverflow = isOverflow && overflowType === "visible";
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const copingOutline = useMemo(() => offsetOutline(outline, COPING_WIDTH), [outline]);
-  const overflowWaterEdge = useMemo(() => offsetOutline(outline, 0.06), [outline]);
-  const overflowSlotEdge = useMemo(() => offsetOutline(outline, 0.105), [outline]);
-  const overflowChannelOuter = useMemo(() => offsetOutline(outline, 0.165), [outline]);
-  const copingInner = system === "overflow" ? overflowSlotEdge : outline;
-  const meniscusInner = useMemo(() => offsetOutline(outline, -0.018), [outline]);
-  const copingOuterBevel = useMemo(() => offsetOutline(copingOutline, -0.018), [copingOutline]);
-  const copingInnerBevel = useMemo(() => offsetOutline(copingInner, 0.018), [copingInner]);
+  const structuralOutline = useMemo(
+    () => offsetOutline(outline, ABOVE_GROUND_STRUCTURE_THICKNESS),
+    [outline],
+  );
+  const overflowWaterEdge = useMemo(
+    () => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset),
+    [outline],
+  );
+  const overflowSlotEdge = useMemo(
+    () => offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset),
+    [outline],
+  );
+  const overflowChannelOuter = useMemo(
+    () => offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset),
+    [outline],
+  );
+  const waterOutline = useMemo(
+    () => buildWaterOutline(outline, system, overflowType),
+    [outline, system, overflowType],
+  );
+  const copingInner = isOverflow
+    ? isVisibleOverflow
+      ? overflowChannelOuter
+      : overflowWaterEdge
+    : outline;
+  const copingSurfaceY = isVisibleOverflow
+    ? verticalLayout.wallTopY + 0.004
+    : verticalLayout.copingY;
   const perimeter = useMemo(() => outlinePerimeter(outline), [outline]);
-  const loadedSurfaceMaps = useTexture(INTERIOR_TEXTURE_URLS);
-  const sourceSurfaceMap =
-    loadedSurfaceMaps[INTERIOR_TEXTURE_URLS.indexOf(materials.surface.textureUrl)] ??
-    loadedSurfaceMaps[0]!;
+  const structuralPerimeter = useMemo(
+    () => outlinePerimeter(structuralOutline),
+    [structuralOutline],
+  );
+  const sourceSurfaceMap = useTexture(materials.surface.maps.baseColorMap);
 
   const [floorSurfaceMap, wallSurfaceMap] = useMemo(() => {
     const floorMap = sourceSurfaceMap.clone();
     const wallMap = sourceSurfaceMap.clone();
     for (const texture of [floorMap, wallMap]) {
-      texture.colorSpace = THREE.SRGBColorSpace;
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.anisotropy = Math.min(8, maxAnisotropy);
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = true;
+      texture.anisotropy = Math.min(ACTIVE_RENDERING_QUALITY.textureAnisotropy, maxAnisotropy);
     }
+    floorMap.colorSpace = THREE.SRGBColorSpace;
+    wallMap.colorSpace = THREE.SRGBColorSpace;
     floorMap.repeat.set(1 / materials.surface.tileSize, 1 / materials.surface.tileSize);
     wallMap.repeat.set(
       Math.max(1, perimeter / materials.surface.tileSize),
       Math.max(1, depth / materials.surface.tileSize),
     );
-    floorMap.needsUpdate = true;
-    wallMap.needsUpdate = true;
+    for (const texture of [floorMap, wallMap]) texture.needsUpdate = true;
     return [floorMap, wallMap];
   }, [sourceSurfaceMap, materials.surface.tileSize, perimeter, depth, maxAnisotropy]);
 
@@ -82,305 +352,472 @@ export function PoolModel({
     [floorSurfaceMap, wallSurfaceMap],
   );
 
-  const rippleMap = useMemo(() => createRippleNormalMap(), []);
-  const causticsMap = useMemo(() => createCausticsMap(), []);
-  const stoneDetailMap = useMemo(() => createStoneDetailMap(), []);
+  const materialMicroNormal = useMemo(() => createMaterialMicroNormalMap(), []);
+  const materialMicroRoughness = useMemo(() => createMaterialMicroRoughnessMap(), []);
+  const dataAnisotropy = Math.min(ACTIVE_RENDERING_QUALITY.textureAnisotropy, maxAnisotropy);
+  // Real bump/roughness derived from the liner's or mosaic's own photographed
+  // pattern when available; the generic sine-noise field is only a fallback
+  // (e.g. before the image has produced readable pixel data).
+  const derivedSurfaceDetail = useMemo(
+    () => getDerivedDetailMaps(sourceSurfaceMap),
+    [sourceSurfaceMap],
+  );
+  const surfaceMicroNormal = derivedSurfaceDetail?.normalMap ?? materialMicroNormal;
+  const surfaceMicroRoughness = derivedSurfaceDetail?.roughnessMap ?? materialMicroRoughness;
+  const interiorMicroMaps = useMemo(() => {
+    const moduleSize = materials.surface.microDetail.moduleSize;
+    const floorRepeat = 1 / moduleSize;
+    const wallRepeatX = perimeter / moduleSize;
+    const wallRepeatY = depth / moduleSize;
+    return {
+      floorNormal: cloneDataTexture(surfaceMicroNormal, floorRepeat, floorRepeat, dataAnisotropy),
+      floorRoughness: cloneDataTexture(
+        surfaceMicroRoughness,
+        floorRepeat,
+        floorRepeat,
+        dataAnisotropy,
+      ),
+      wallNormal: cloneDataTexture(surfaceMicroNormal, wallRepeatX, wallRepeatY, dataAnisotropy),
+      wallRoughness: cloneDataTexture(
+        surfaceMicroRoughness,
+        wallRepeatX,
+        wallRepeatY,
+        dataAnisotropy,
+      ),
+    };
+  }, [
+    surfaceMicroNormal,
+    surfaceMicroRoughness,
+    materials.surface.microDetail.moduleSize,
+    perimeter,
+    depth,
+    dataAnisotropy,
+  ]);
+
+  const aboveGroundPanelMap = useMemo(() => createAboveGroundPanelMap(), []);
+  const aboveGroundPanelBumpMap = useMemo(() => {
+    const texture = aboveGroundPanelMap.clone();
+    texture.colorSpace = THREE.NoColorSpace;
+    texture.needsUpdate = true;
+    return texture;
+  }, [aboveGroundPanelMap]);
+  // Cast-stone and manufactured-panel detail, sampled triplanar in-shader
+  // (see configureCopingTriplanar/configurePanelTriplanar below) rather than
+  // through the mesh's own UV -- these come from a module-level cache keyed
+  // by material kind, so they are shared and must not be disposed here.
+  const copingDetail = useMemo(() => createTriplanarDetailMaps("stone"), []);
+  const panelDetail = useMemo(() => createTriplanarDetailMaps("panel"), []);
   useEffect(
     () => () => {
-      rippleMap.dispose();
-      causticsMap.dispose();
-      stoneDetailMap.dispose();
+      aboveGroundPanelMap.dispose();
+      aboveGroundPanelBumpMap.dispose();
+      materialMicroNormal.dispose();
+      materialMicroRoughness.dispose();
     },
-    [rippleMap, causticsMap, stoneDetailMap],
+    [aboveGroundPanelMap, aboveGroundPanelBumpMap, materialMicroNormal, materialMicroRoughness],
+  );
+  useEffect(
+    () => () => Object.values(interiorMicroMaps).forEach((texture) => texture.dispose()),
+    [interiorMicroMaps],
   );
 
-  const waterMesh = useRef<THREE.Mesh>(null);
-  const normalScale = useMemo(
-    () => new THREE.Vector2(WATER_VISUAL_PRESET.normalStrength, WATER_VISUAL_PRESET.normalStrength),
-    [],
+  const causticsShaders = useRef<UnderwaterShader[]>([]);
+  const configureCaustics = useCallback(
+    (shader: UnderwaterShader) => {
+      shader.uniforms.causticTime = { value: 0 };
+      shader.uniforms.causticStrength = { value: 0 };
+      shader.uniforms.causticScale = { value: WATER_VISUAL_PRESET.caustics.scale };
+      shader.uniforms.waterLevel = { value: waterLevel };
+      shader.uniforms.waterAbsorption = {
+        value: new THREE.Vector3(...materials.surface.underwaterAbsorption),
+      };
+      shader.uniforms.waterScatteringColor = {
+        value: new THREE.Vector3(...materials.surface.underwaterScatteringColor),
+      };
+      shader.uniforms.waterScatteringStrength = {
+        value: materials.surface.underwaterScatteringStrength,
+      };
+      shader.uniforms.maxOpticalPath = { value: WATER_VISUAL_PRESET.maxOpticalPath };
+      shader.uniforms.waterDepthDensity = { value: WATER_VISUAL_PRESET.depthDensity };
+      shader.uniforms.waterScatteringContribution = {
+        value: materials.surface.underwaterScatteringContribution,
+      };
+      shader.uniforms.maxWaterScatteringEnergy = {
+        value: materials.surface.underwaterMaxScatteringEnergy,
+      };
+      shader.uniforms.waterScatteringDepthStart = {
+        value: WATER_VISUAL_PRESET.scatteringDepthStart,
+      };
+      shader.uniforms.waterScatteringOpticalPathScale = {
+        value: materials.surface.underwaterScatteringOpticalPathScale,
+      };
+      shader.uniforms.waterAbsorptionOpticalPathScale = {
+        value: materials.surface.underwaterAbsorptionOpticalPathScale,
+      };
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          "varying vec3 vViewPosition;",
+          `varying vec3 vViewPosition;${CAUSTICS_VERTEX_HEADER}`,
+        )
+        .replace("#include <worldpos_vertex>", CAUSTICS_VERTEX_POSITION);
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", `#include <common>${CAUSTICS_FRAGMENT_HEADER}`)
+        .replace("#include <opaque_fragment>", CAUSTICS_LIGHT_MODULATION);
+      if (!causticsShaders.current.includes(shader)) causticsShaders.current.push(shader);
+    },
+    [materials.surface, waterLevel],
   );
-
-  useFrame((_, delta) => {
-    rippleMap.offset.x += delta * 0.012;
-    rippleMap.offset.y += delta * 0.008;
-    causticsMap.offset.x -= delta * 0.01;
-    causticsMap.offset.y += delta * 0.014;
-    if (waterMesh.current) {
-      const waterline = system === "overflow" ? -0.018 : -FREEBOARD;
-      waterMesh.current.position.y = waterline + Math.sin(performance.now() * 0.0008) * 0.004;
+  useFrame(({ clock }) => {
+    // The path tracer never executes this onBeforeCompile-patched shader --
+    // it reads the material's plain JS properties and builds its own
+    // rendering path entirely, ignoring runtime GLSL patches. Real light
+    // transport through the water also makes the manual caustics
+    // approximation moot. Updating these uniforms would still be harmless
+    // (the patched program simply isn't used for the traced image), but
+    // skipping it avoids doing pointless work every frame.
+    if (photoModeState.active) return;
+    const time = clock.getElapsedTime();
+    for (const shader of causticsShaders.current) {
+      if (shader.uniforms.causticTime) {
+        shader.uniforms.causticTime.value = time * WATER_VISUAL_PRESET.caustics.speed;
+      }
+      if (shader.uniforms.causticStrength) {
+        shader.uniforms.causticStrength.value = showWater
+          ? materials.surface.underwaterCausticStrength * WATER_VISUAL_PRESET.causticVisibility
+          : 0;
+      }
+      if (shader.uniforms.waterLevel) shader.uniforms.waterLevel.value = waterLevel;
+      if (shader.uniforms.waterAbsorption) {
+        const absorption = showWater
+          ? materials.surface.underwaterAbsorption
+          : ([0, 0, 0] as const);
+        shader.uniforms.waterAbsorption.value.set(absorption[0], absorption[1], absorption[2]);
+      }
+      if (shader.uniforms.waterScatteringColor) {
+        const scatteringColor = materials.surface.underwaterScatteringColor;
+        shader.uniforms.waterScatteringColor.value.set(
+          scatteringColor[0],
+          scatteringColor[1],
+          scatteringColor[2],
+        );
+      }
+      if (shader.uniforms.waterScatteringStrength) {
+        shader.uniforms.waterScatteringStrength.value = showWater
+          ? materials.surface.underwaterScatteringStrength
+          : 0;
+      }
+      if (shader.uniforms.waterScatteringOpticalPathScale) {
+        shader.uniforms.waterScatteringOpticalPathScale.value =
+          materials.surface.underwaterScatteringOpticalPathScale;
+      }
+      if (shader.uniforms.waterAbsorptionOpticalPathScale) {
+        shader.uniforms.waterAbsorptionOpticalPathScale.value =
+          materials.surface.underwaterAbsorptionOpticalPathScale;
+      }
+      if (shader.uniforms.maxWaterScatteringEnergy) {
+        shader.uniforms.maxWaterScatteringEnergy.value =
+          materials.surface.underwaterMaxScatteringEnergy;
+      }
+      if (shader.uniforms.waterScatteringContribution) {
+        shader.uniforms.waterScatteringContribution.value =
+          materials.surface.underwaterScatteringContribution;
+      }
     }
   });
 
+  const configureCopingTriplanar = useCallback((shader: TriplanarShader) => {
+    shader.uniforms.triplanarScale = {
+      value: 1 / MATERIAL_MICRO_DETAIL_PRESET.coping.moduleSize,
+    };
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
+      .replace("#include <worldpos_vertex>", TRIPLANAR_VERTEX_POSITION);
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", `#include <common>${TRIPLANAR_FRAGMENT_HEADER}`)
+      .replace("#include <roughnessmap_fragment>", TRIPLANAR_ROUGHNESS_FRAGMENT)
+      .replace("#include <normal_fragment_maps>", TRIPLANAR_NORMAL_FRAGMENT);
+  }, []);
+
+  const configurePanelTriplanar = useCallback((shader: TriplanarShader) => {
+    shader.uniforms.triplanarScale = {
+      value: 1 / MATERIAL_MICRO_DETAIL_PRESET.aboveGroundPanel.moduleSize,
+    };
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
+      .replace("#include <worldpos_vertex>", TRIPLANAR_VERTEX_POSITION);
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", `#include <common>${TRIPLANAR_FRAGMENT_HEADER}`)
+      .replace("#include <roughnessmap_fragment>", TRIPLANAR_ROUGHNESS_FRAGMENT)
+      .replace("#include <normal_fragment_maps>", TRIPLANAR_NORMAL_FRAGMENT);
+  }, []);
+
   useEffect(() => {
-    const [outlineWidth, outlineLength] = bounds(outline);
-    const repeat = Math.max(2, Math.round(Math.hypot(outlineWidth, outlineLength) / 2));
-    rippleMap.repeat.set(repeat, repeat);
-    causticsMap.repeat.set(repeat * 0.7, repeat * 0.7);
-    stoneDetailMap.repeat.set(Math.max(3, outlineWidth * 1.6), Math.max(3, outlineLength * 1.6));
-  }, [outline, rippleMap, causticsMap, stoneDetailMap]);
+    aboveGroundPanelMap.repeat.set(
+      Math.max(1, Math.round(structuralPerimeter / ABOVE_GROUND_PANEL_WIDTH)),
+      1,
+    );
+    aboveGroundPanelBumpMap.repeat.copy(aboveGroundPanelMap.repeat);
+  }, [structuralPerimeter, aboveGroundPanelMap, aboveGroundPanelBumpMap]);
 
   const floor = useDisposable(() => createSurfaceGeometry(outline), [outline]);
-  const water = useDisposable(() => createSurfaceGeometry(outline), [outline]);
-  const waterMeniscus = useDisposable(
-    () => createSurfaceGeometry(outline, meniscusInner),
-    [outline, meniscusInner],
+  const water = useDisposable(() => createSurfaceGeometry(waterOutline), [waterOutline]);
+  const walls = useDisposable(
+    () =>
+      createInteriorWallGeometry(
+        outline,
+        verticalLayout.wallTopY,
+        verticalLayout.floorY,
+        INTERIOR_FLOOR_COVE_RADIUS,
+        2,
+      ),
+    [outline, verticalLayout.wallTopY, verticalLayout.floorY],
   );
-  const walls = useDisposable(() => createWallGeometry(outline, 0, -depth), [outline, depth]);
+  const exteriorWalls = useDisposable(
+    () => createWallGeometry(structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY),
+    [structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY],
+  );
   const coping = useDisposable(
-    () => createSurfaceGeometry(copingOutline, copingInner),
+    () => createBeveledRingGeometry(copingInner, copingOutline, COPING_EDGE_RADIUS, 3),
     [copingOutline, copingInner],
   );
   const copingSkirt = useDisposable(
-    () => createWallGeometry(copingOutline, 0, -copingThickness),
-    [copingOutline, copingThickness],
+    () =>
+      createWallGeometry(
+        copingOutline,
+        copingSurfaceY - COPING_EDGE_RADIUS,
+        verticalLayout.wallTopY,
+      ),
+    [copingOutline, copingSurfaceY, verticalLayout.wallTopY],
   );
   const copingInnerSkirt = useDisposable(
-    () => createWallGeometry(copingInner, 0, -copingThickness),
-    [copingInner, copingThickness],
+    () =>
+      createWallGeometry(copingInner, copingSurfaceY - COPING_EDGE_RADIUS, verticalLayout.wallTopY),
+    [copingInner, copingSurfaceY, verticalLayout.wallTopY],
   );
-  const overflowChannel = useDisposable(
-    () => createSurfaceGeometry(overflowSlotEdge, outline),
-    [overflowSlotEdge, outline],
+  const hiddenOverflowIntake = useDisposable(
+    () => createRingGeometry(overflowWaterEdge, overflowSlotEdge),
+    [overflowSlotEdge, overflowWaterEdge],
   );
-  const overflowWater = useDisposable(
-    () => createSurfaceGeometry(overflowWaterEdge, outline),
-    [overflowWaterEdge, outline],
+  const visibleOverflowGrate = useDisposable(
+    () => createRingGeometry(overflowWaterEdge, overflowChannelOuter, true),
+    [overflowChannelOuter, overflowWaterEdge],
   );
   const overflowChannelWall = useDisposable(
-    () => createWallGeometry(overflowSlotEdge, -0.018, -0.19),
-    [overflowSlotEdge],
+    () =>
+      createWallGeometry(
+        overflowSlotEdge,
+        verticalLayout.wallTopY - 0.018,
+        verticalLayout.wallTopY - OVERFLOW_GEOMETRY.channelDepth,
+      ),
+    [overflowSlotEdge, verticalLayout.wallTopY],
   );
-  const overflowShadowGap = useDisposable(
-    () => createSurfaceGeometry(overflowChannelOuter, overflowSlotEdge),
-    [overflowChannelOuter, overflowSlotEdge],
+  const visibleOverflowChannelWall = useDisposable(
+    () =>
+      createWallGeometry(
+        overflowChannelOuter,
+        verticalLayout.wallTopY - 0.012,
+        verticalLayout.wallTopY - OVERFLOW_GEOMETRY.channelDepth,
+      ),
+    [overflowChannelOuter, verticalLayout.wallTopY],
   );
-  const copingOuterHighlight = useDisposable(
-    () => createSurfaceGeometry(copingOutline, copingOuterBevel),
-    [copingOutline, copingOuterBevel],
-  );
-  const copingInnerHighlight = useDisposable(
-    () => createSurfaceGeometry(copingInnerBevel, copingInner),
-    [copingInnerBevel, copingInner],
-  );
-  const isOverflow = system === "overflow";
 
   return (
     <group>
-      {/* Interior walls */}
-      <mesh geometry={walls} receiveShadow castShadow>
-        <meshPhysicalMaterial
-          color={materials.liner.color}
-          map={wallSurfaceMap}
-          bumpMap={wallSurfaceMap}
-          bumpScale={materials.surface.bumpScale}
-          roughness={materials.liner.roughness}
-          metalness={materials.liner.metalness}
-          clearcoat={POOL_SURFACE_PRESET.linerClearcoat}
-          clearcoatRoughness={POOL_SURFACE_PRESET.linerClearcoatRoughness}
-          reflectivity={0.38}
-          envMapIntensity={0.88}
-          specularIntensity={0.52}
-          side={DoubleSide}
-        />
-      </mesh>
-
-      {/* Floor with animated caustics */}
-      <mesh geometry={floor} position={[0, -depth, 0]} receiveShadow>
-        <meshPhysicalMaterial
-          color={materials.floor.color}
-          map={floorSurfaceMap}
-          bumpMap={floorSurfaceMap}
-          bumpScale={materials.surface.bumpScale}
-          roughness={materials.floor.roughness}
-          metalness={0.02}
-          clearcoat={POOL_SURFACE_PRESET.floorClearcoat}
-          clearcoatRoughness={0.28}
-          reflectivity={0.34}
-          envMapIntensity={0.82}
-          emissive={"#7fd8ff"}
-          emissiveMap={causticsMap}
-          emissiveIntensity={showWater ? POOL_SURFACE_PRESET.dayCaustics : 0}
-          side={DoubleSide}
-        />
-      </mesh>
-
-      {/* Water body — animated ripples, refraction, real reflections */}
-      {showWater ? (
-        <mesh ref={waterMesh} geometry={water} position={[0, -FREEBOARD, 0]} renderOrder={2}>
+      {/* Interior walls, floor, water and overflow channel: everything that
+          physically sits inside the basin. Named so the planar water
+          reflector can hide it for its mirror-camera pass — from below the
+          waterline these surfaces would otherwise render nonsensical
+          close-up backfaces instead of a clean sky/coping reflection. */}
+      <group name="pool-basin">
+        {/* Interior walls */}
+        <mesh geometry={walls} renderOrder={0} receiveShadow castShadow>
           <meshPhysicalMaterial
-            color={materials.water}
-            transparent
-            opacity={WATER_VISUAL_PRESET.opacity}
-            roughness={WATER_VISUAL_PRESET.roughness}
-            metalness={WATER_VISUAL_PRESET.metalness}
-            transmission={WATER_VISUAL_PRESET.transmission}
-            thickness={Math.min(depth, 2.4)}
-            ior={WATER_VISUAL_PRESET.ior}
-            clearcoat={WATER_VISUAL_PRESET.clearcoat}
-            clearcoatRoughness={WATER_VISUAL_PRESET.clearcoatRoughness}
-            attenuationColor={materials.water}
-            attenuationDistance={Math.max(0.8, depth * WATER_VISUAL_PRESET.attenuationDepthFactor)}
-            envMapIntensity={WATER_VISUAL_PRESET.environmentIntensity.day}
-            reflectivity={0.92}
-            specularIntensity={1}
-            specularColor="#edfaff"
-            normalMap={rippleMap}
-            normalScale={normalScale}
-            depthWrite={false}
+            color={materials.liner.color}
+            map={wallSurfaceMap}
+            normalMap={interiorMicroMaps.wallNormal}
+            normalScale={[
+              materials.surface.microDetail.normalStrength,
+              materials.surface.microDetail.normalStrength,
+            ]}
+            roughnessMap={interiorMicroMaps.wallRoughness}
+            roughness={materials.liner.roughness}
+            metalness={materials.liner.metalness}
+            clearcoat={materials.surface.wallClearcoat}
+            clearcoatRoughness={materials.surface.wallClearcoatRoughness}
+            reflectivity={0.42}
+            envMapIntensity={1.0}
+            specularIntensity={0.58}
+            onBeforeCompile={configureCaustics}
+            customProgramCacheKey={() => "depth-aware-underwater-optics-v2"}
+            side={DoubleSide}
+          />
+        </mesh>
+
+        {/* Floor with animated caustics */}
+        <mesh geometry={floor} position={[0, verticalLayout.floorY, 0]} receiveShadow>
+          <meshPhysicalMaterial
+            color={materials.floor.color}
+            map={floorSurfaceMap}
+            normalMap={interiorMicroMaps.floorNormal}
+            normalScale={[
+              materials.surface.microDetail.normalStrength,
+              materials.surface.microDetail.normalStrength,
+            ]}
+            roughnessMap={interiorMicroMaps.floorRoughness}
+            roughness={materials.floor.roughness}
+            metalness={0.02}
+            clearcoat={materials.surface.floorClearcoat}
+            clearcoatRoughness={materials.surface.floorClearcoatRoughness}
+            reflectivity={0.38}
+            envMapIntensity={0.95}
+            onBeforeCompile={configureCaustics}
+            customProgramCacheKey={() => "depth-aware-underwater-optics-v2"}
+            side={DoubleSide}
+          />
+        </mesh>
+
+        {/* Water body — animated ripples, refraction, real planar reflection */}
+        {showWater ? (
+          <mesh geometry={water} position={[0, waterLevel, 0]} renderOrder={2}>
+            <WaterSurfaceMaterial waterLevel={waterLevel} />
+          </mesh>
+        ) : null}
+
+        {/* Overflow variants share the pool outline but expose different sections. */}
+        {isOverflow ? (
+          <group>
+            {isVisibleOverflow ? (
+              <>
+                <mesh geometry={visibleOverflowChannelWall} receiveShadow castShadow>
+                  <meshStandardMaterial
+                    color="#242929"
+                    roughness={0.9}
+                    metalness={0.08}
+                    side={DoubleSide}
+                  />
+                </mesh>
+                <mesh
+                  geometry={visibleOverflowGrate}
+                  position={[
+                    0,
+                    verticalLayout.wallTopY + OVERFLOW_GEOMETRY.visibleGrateTopOffset,
+                    0,
+                  ]}
+                  receiveShadow
+                  castShadow
+                >
+                  <meshStandardMaterial
+                    color="#ffffff"
+                    roughness={0.82}
+                    metalness={0}
+                    side={DoubleSide}
+                  />
+                </mesh>
+              </>
+            ) : (
+              <>
+                <mesh geometry={overflowChannelWall} receiveShadow castShadow>
+                  <meshStandardMaterial
+                    color="#171b1b"
+                    roughness={0.94}
+                    metalness={0.01}
+                    side={DoubleSide}
+                  />
+                </mesh>
+                <mesh
+                  geometry={hiddenOverflowIntake}
+                  position={[0, verticalLayout.wallTopY - 0.055, 0]}
+                  receiveShadow
+                >
+                  <meshStandardMaterial
+                    color="#151919"
+                    roughness={0.94}
+                    metalness={0.01}
+                    side={DoubleSide}
+                  />
+                </mesh>
+              </>
+            )}
+          </group>
+        ) : null}
+      </group>
+
+      {poolType === "above-ground" ? (
+        <mesh geometry={exteriorWalls} receiveShadow castShadow>
+          <meshStandardMaterial
+            color="#ffffff"
+            map={aboveGroundPanelMap}
+            bumpMap={aboveGroundPanelBumpMap}
+            bumpScale={0.004}
+            normalMap={panelDetail.normalMap}
+            normalScale={[
+              MATERIAL_MICRO_DETAIL_PRESET.aboveGroundPanel.normalStrength,
+              MATERIAL_MICRO_DETAIL_PRESET.aboveGroundPanel.normalStrength,
+            ]}
+            roughnessMap={panelDetail.roughnessMap}
+            roughness={0.74}
+            metalness={0}
+            onBeforeCompile={configurePanelTriplanar}
+            customProgramCacheKey={() => "triplanar-panel-detail-v1"}
             side={DoubleSide}
           />
         </mesh>
       ) : null}
 
-      {/* A restrained meniscus catches grazing reflections along the waterline
-          and gives the transparent surface a physically readable boundary. */}
-      {showWater ? (
-        <mesh
-          geometry={waterMeniscus}
-          position={[0, system === "overflow" ? -0.012 : -FREEBOARD + 0.003, 0]}
-          renderOrder={3}
-        >
-          <meshPhysicalMaterial
-            color="#d8f7fa"
-            transparent
-            opacity={0.24}
-            roughness={0.035}
-            transmission={0.88}
-            ior={WATER_VISUAL_PRESET.ior}
-            clearcoat={1}
-            clearcoatRoughness={0.025}
-            envMapIntensity={1.35}
-            normalMap={rippleMap}
-            normalScale={normalScale}
-            depthWrite={false}
-            side={DoubleSide}
-          />
-        </mesh>
-      ) : null}
-
-      {/* Concealed perimeter gutter for a residential overflow-edge pool. */}
-      {isOverflow ? (
-        <group>
-          {/* Deep slot and vertical channel wall create a readable residential
-              perimeter-overflow section without relying on a rigid model. */}
-          <mesh geometry={overflowChannelWall} receiveShadow castShadow>
-            <meshStandardMaterial
-              color="#171b1b"
-              roughness={0.94}
-              metalness={0.01}
-              side={DoubleSide}
-            />
-          </mesh>
-          <mesh geometry={overflowChannel} position={[0, -0.095, 0]} receiveShadow>
-            <meshStandardMaterial
-              color="#555653"
-              roughness={0.82}
-              metalness={0.03}
-              side={DoubleSide}
-            />
-          </mesh>
-          <mesh geometry={overflowShadowGap} position={[0, -0.012, 0]} receiveShadow>
-            <meshStandardMaterial
-              color="#111515"
-              roughness={0.92}
-              metalness={0.01}
-              side={DoubleSide}
-            />
-          </mesh>
-          {showWater ? (
-            <mesh geometry={overflowWater} position={[0, -0.026, 0]} renderOrder={2}>
-              <meshPhysicalMaterial
-                color={materials.water}
-                transparent
-                opacity={0.72}
-                roughness={0.11}
-                transmission={0.62}
-                ior={WATER_VISUAL_PRESET.ior}
-                clearcoat={0.9}
-                clearcoatRoughness={0.06}
-                envMapIntensity={1.15}
-                normalMap={rippleMap}
-                normalScale={normalScale}
-                depthWrite={false}
-                side={DoubleSide}
-              />
-            </mesh>
-          ) : null}
-        </group>
-      ) : null}
-
-      {/* Coping / deck ring */}
-      <mesh geometry={coping} position={[0, copingThickness, 0]} receiveShadow castShadow>
+      {/* Coping / deck ring -- normal/roughness sampled triplanar in world
+          space (see configureCopingTriplanar) so the rounded bevel, which
+          turns from horizontal to near-vertical, never stretches the way a
+          UV projected flat from the ring's XZ footprint would. */}
+      <mesh geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
         <meshPhysicalMaterial
           color={materials.coping.color}
-          bumpMap={stoneDetailMap}
-          bumpScale={0.006}
-          roughnessMap={stoneDetailMap}
+          normalMap={copingDetail.normalMap}
+          normalScale={[
+            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+          ]}
+          roughnessMap={copingDetail.roughnessMap}
           roughness={materials.coping.roughness}
           metalness={0}
           clearcoat={0.1}
           clearcoatRoughness={0.45}
+          onBeforeCompile={configureCopingTriplanar}
+          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
           side={DoubleSide}
         />
       </mesh>
-      {/* Narrow highlight bands simulate the eased coping edges without
-          adding dense bevelled geometry around custom outlines. */}
-      <mesh geometry={copingOuterHighlight} position={[0, copingThickness + 0.004, 0]}>
-        <meshPhysicalMaterial
-          color="#dedbd4"
-          bumpMap={stoneDetailMap}
-          bumpScale={0.004}
-          roughness={0.48}
-          clearcoat={0.16}
-          clearcoatRoughness={0.38}
-          side={DoubleSide}
-        />
-      </mesh>
-      <mesh geometry={copingInnerHighlight} position={[0, copingThickness + 0.004, 0]}>
-        <meshPhysicalMaterial
-          color="#d5d1c9"
-          bumpMap={stoneDetailMap}
-          bumpScale={0.004}
-          roughness={0.5}
-          clearcoat={0.14}
-          clearcoatRoughness={0.4}
-          side={DoubleSide}
-        />
-      </mesh>
-      <mesh geometry={copingSkirt} position={[0, copingThickness, 0]}>
+      <mesh geometry={copingSkirt}>
         <meshStandardMaterial
           color={materials.coping.color}
-          bumpMap={stoneDetailMap}
-          bumpScale={0.005}
+          normalMap={copingDetail.normalMap}
+          normalScale={[
+            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+          ]}
+          roughnessMap={copingDetail.roughnessMap}
           roughness={Math.min(1, materials.coping.roughness + 0.1)}
+          onBeforeCompile={configureCopingTriplanar}
+          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
           side={DoubleSide}
         />
       </mesh>
-      <mesh geometry={copingInnerSkirt} position={[0, copingThickness, 0]} castShadow>
+      <mesh geometry={copingInnerSkirt} castShadow>
         <meshPhysicalMaterial
           color={materials.coping.color}
-          bumpMap={stoneDetailMap}
-          bumpScale={0.005}
+          normalMap={copingDetail.normalMap}
+          normalScale={[
+            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+          ]}
+          roughnessMap={copingDetail.roughnessMap}
           roughness={materials.coping.roughness}
           clearcoat={0.12}
           clearcoatRoughness={0.4}
+          onBeforeCompile={configureCopingTriplanar}
+          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
           side={DoubleSide}
         />
       </mesh>
     </group>
   );
-}
-
-function bounds(outline: Outline): [number, number] {
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minZ = Infinity;
-  let maxZ = -Infinity;
-  for (const [x, z] of outline) {
-    minX = Math.min(minX, x);
-    maxX = Math.max(maxX, x);
-    minZ = Math.min(minZ, z);
-    maxZ = Math.max(maxZ, z);
-  }
-  return [maxX - minX, maxZ - minZ];
 }

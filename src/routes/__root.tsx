@@ -7,11 +7,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { THEME_BOOT_SCRIPT } from "../lib/theme";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { installChunkReloadGuard } from "../lib/chunk-reload-guard";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -35,7 +37,75 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+/**
+ * Full error text, always visible on the page itself -- not just in
+ * console.error -- so a report can be copied straight off the error screen
+ * with no DevTools involved: message, stack, and the React component stack
+ * when the router's error boundary captured one.
+ */
+function formatErrorDiagnostics(error: Error, info?: { componentStack: string }): string {
+  const parts = [
+    `Message: ${error.message || "(no message)"}`,
+    error.stack ? `Stack:\n${error.stack}` : "Stack: (not available)",
+  ];
+  if (info?.componentStack) {
+    parts.push(`Component stack:${info.componentStack}`);
+  }
+  return parts.join("\n\n");
+}
+
+function ErrorDiagnostics({
+  error,
+  info,
+}: {
+  error: Error;
+  info: { componentStack: string } | undefined;
+}) {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const diagnostics = formatErrorDiagnostics(error, info);
+
+  return (
+    <div className="mt-6 w-full text-left">
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Error details
+        </h2>
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(diagnostics);
+              setCopyState("copied");
+            } catch {
+              setCopyState("failed");
+            }
+            setTimeout(() => setCopyState("idle"), 2000);
+          }}
+          className="inline-flex items-center justify-center rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+        >
+          {copyState === "copied"
+            ? "Copied"
+            : copyState === "failed"
+              ? "Select text to copy"
+              : "Copy"}
+        </button>
+      </div>
+      <pre className="max-h-64 select-text overflow-auto whitespace-pre-wrap break-words rounded-md border border-input bg-muted/40 p-3 text-left text-[11px] leading-snug text-foreground">
+        {diagnostics}
+      </pre>
+    </div>
+  );
+}
+
+function ErrorComponent({
+  error,
+  info,
+  reset,
+}: {
+  error: Error;
+  info?: { componentStack: string };
+  reset: () => void;
+}) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -43,8 +113,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-2xl text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
@@ -68,6 +138,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Go home
           </a>
         </div>
+        <ErrorDiagnostics error={error} info={info} />
       </div>
     </div>
   );
@@ -119,10 +190,18 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    installChunkReloadGuard();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      {/* Global toast host -- currently only used to surface Photo Mode's
+          "this device can't run the path tracer" message without a full
+          error page (see PoolConfigurator's handlePhotoModeUnsupported). */}
+      <Toaster />
     </QueryClientProvider>
   );
 }

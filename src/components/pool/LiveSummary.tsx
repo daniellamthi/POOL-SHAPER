@@ -1,23 +1,44 @@
 import {
-  ACCESSORIES,
+  EQUIPMENT,
   FINISHES,
+  POOL_FEATURES,
+  POOL_STRUCTURES,
+  POOL_TYPES,
   LINER_COLORS,
   PROJECT_TYPES,
   getShapeDefinition,
 } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
+import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 
 export function LiveSummary() {
   const { config, metrics } = useConfigurator();
   const project =
     PROJECT_TYPES.find((item) => item.id === config.projectType)?.title ?? "Not selected";
   const finish = FINISHES.find((item) => item.id === config.finish)?.title ?? config.finish;
+  const poolType = POOL_TYPES.find((item) => item.id === config.poolType)?.title ?? "Not selected";
+  const structure =
+    POOL_STRUCTURES.find((item) => item.id === config.structure)?.title ?? "Not selected";
   const color =
-    LINER_COLORS.find((item) => item.id === config.linerColor)?.title ?? config.linerColor;
-  const accessories = ACCESSORIES.filter((item) => config.accessories.includes(item.id));
+    config.finish === "mosaic"
+      ? getMosaicFinish(config.mosaicFinish).name
+      : (LINER_COLORS.find((item) => item.id === config.linerColor)?.title ?? config.linerColor);
+  const features = POOL_FEATURES.filter((item) => config.features.includes(item.id));
+  const equipment = EQUIPMENT.filter((item) => config.equipment.includes(item.id));
+  const featureLabels = [
+    ...features.map((item) => item.title),
+    ...(config.poolAccess === "internalSteps"
+      ? ["Internal Steps"]
+      : config.poolAccess === "stainlessSteelLadder"
+        ? ["Stainless Steel Ladder"]
+        : []),
+    ...equipment.map((item) => item.title),
+  ];
   const rows = [
     ["Project", project],
+    ["Pool Type", poolType],
+    ["Structure", structure],
     ["Shape", getShapeDefinition(config.shape).title],
     [
       "Dimensions",
@@ -27,7 +48,7 @@ export function LiveSummary() {
     ["System", config.system === "skimmer" ? "Skimmer Pool" : "Overflow Edge Pool"],
     ["Finish", finish],
     ["Color", color],
-    ["Accessories", accessories.length ? accessories.map((item) => item.title).join(", ") : "None"],
+    ["Features / Accessories", featureLabels.length ? featureLabels.join(", ") : "None"],
   ] as const;
 
   return (

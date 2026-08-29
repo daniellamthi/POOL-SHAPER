@@ -1,27 +1,32 @@
 export type ProjectType = "new" | "renovation";
 
+export type PoolType = "in-ground" | "above-ground";
+
+export type PoolStructure =
+  "reinforced-concrete" | "modular-steel-panels" | "modular-steel-structure";
+
 export type PoolShapeId = "rectangle" | "custom";
 
 export type CustomMode = "draw" | "upload";
 
 export type SystemType = "skimmer" | "overflow";
+export type OverflowType = "hidden" | "visible";
 
 export type FinishMaterial = "liner" | "mosaic";
-export type LinerColor = "white" | "sand" | "lightGrey" | "darkGrey" | "blue" | "green";
+export type LinerColor =
+  | "motionDeepSea603"
+  | "motionBlueSky602"
+  | "motionArcticWhite180"
+  | "motionSandBeach179"
+  | "motionGreyRock798"
+  | "motionBlackStone799";
+export type MosaicFinishId = `mosaic-${string}`;
 
-export type AccessoryId =
-  | "automaticCover"
-  | "heatPump"
-  | "saltElectrolysis"
-  | "automaticDosing"
-  | "ledLighting"
-  | "perimeterLed"
-  | "waterfall"
-  | "hydromassage"
-  | "counterCurrent"
-  | "poolRobot"
-  | "smartControl"
-  | "solarShower";
+export type PoolFeatureId = "ledLighting" | "hydromassage" | "externalStaircase";
+
+export type PoolAccess = "internalSteps" | "stainlessSteelLadder";
+
+export type EquipmentId = "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing";
 
 export interface CustomerInfo {
   name: string;
@@ -80,14 +85,20 @@ export interface UploadedFile {
 
 export interface PoolConfig {
   projectType: ProjectType | null;
+  poolType: PoolType | null;
+  structure: PoolStructure | null;
   shape: PoolShapeId;
   customMode: CustomMode;
   controlPoints: ReadonlyArray<ControlPoint>;
   dimensions: Dimensions;
   system: SystemType;
+  overflowType: OverflowType;
   finish: FinishMaterial;
   linerColor: LinerColor;
-  accessories: ReadonlyArray<AccessoryId>;
+  mosaicFinish: MosaicFinishId;
+  features: ReadonlyArray<PoolFeatureId>;
+  poolAccess: PoolAccess | null;
+  equipment: ReadonlyArray<EquipmentId>;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;
 }
