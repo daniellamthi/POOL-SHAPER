@@ -1,12 +1,18 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
 import { resolveMaterials } from "@/lib/pool/materials";
 import { ThemeProvider, useTheme } from "@/lib/theme";
+import {
+  downloadPhotorealisticRenderJob,
+  preparePhotorealisticRenderJob,
+  serializePoolRenderConfig,
+} from "@/lib/render-pipeline";
 import { ProjectTypeStep } from "@/configurator/steps/project-type";
 import { PoolTypeStep } from "@/configurator/steps/pool-type";
 import { PoolStructureStep } from "@/configurator/steps/pool-structure";
@@ -43,6 +49,44 @@ const STEP_COMPONENTS = [
   ContactDetailsStep,
   FinalReviewStep,
 ] as const;
+
+/**
+ * Brief automotive/architectural-style entrance -- logo + wordmark settle in,
+ * then the whole veil dissolves into the already-mounted wizard underneath.
+ * Purely presentational (no store/wizard state involved) and fully honours
+ * prefers-reduced-motion: the global reduced-motion rule in styles.css
+ * collapses every animation/transition duration to ~0, so the timers below
+ * still fire but the veil never visibly holds the screen.
+ */
+function IntroVeil() {
+  const [stage, setStage] = useState<"in" | "out" | "done">("in");
+
+  useEffect(() => {
+    const leave = window.setTimeout(() => setStage("out"), 950);
+    const remove = window.setTimeout(() => setStage("done"), 1250);
+    return () => {
+      window.clearTimeout(leave);
+      window.clearTimeout(remove);
+    };
+  }, []);
+
+  if (stage === "done") return null;
+
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background transition-opacity duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        stage === "out" ? "pointer-events-none opacity-0" : "opacity-100",
+      )}
+    >
+      <BrandLogo className="h-10 w-auto animate-intro-mark" />
+      <p className="label-xs animate-veil [animation-delay:200ms]">
+        Configuratore Piscine Wellness
+      </p>
+    </div>
+  );
+}
 
 const RENOVATION_COMPONENTS = [
   ProjectTypeStep,
@@ -112,6 +156,29 @@ function ConfiguratorLayout() {
     });
   }, []);
 
+  // "Generate Photorealistic Render" -- hands the current configuration to
+  // the separate Blender/Cycles pipeline (see src/lib/render-pipeline/ and
+  // rendering/blender/). This app deploys to Cloudflare Workers, which
+  // cannot run Blender itself, so this exports a validated JSON snapshot and
+  // shows the exact CLI command to render it wherever Blender is installed
+  // -- it never touches the live Three.js scene or blocks the configurator.
+  const handleGeneratePhotorealisticRender = useCallback(() => {
+    try {
+      const renderConfig = serializePoolRenderConfig({ config, outline, skimmers, theme });
+      const job = preparePhotorealisticRenderJob(renderConfig);
+      downloadPhotorealisticRenderJob(job);
+      toast.success("Render config exported", {
+        description: `Run this once Blender is installed: ${job.cyclesCommand}`,
+        duration: 15000,
+      });
+    } catch (error) {
+      console.error("[PhotorealisticRender] failed to export render config", error);
+      toast.error("Couldn't export the render config", {
+        description: error instanceof Error ? error.message : "Unknown error.",
+      });
+    }
+  }, [config, outline, skimmers, theme]);
+
   const renovationWorkflow = config.projectType === "renovation";
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
   const components = renovationWorkflow ? RENOVATION_COMPONENTS : STEP_COMPONENTS;
@@ -136,24 +203,23 @@ function ConfiguratorLayout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background lg:h-screen lg:overflow-hidden">
-      {/* Masthead */}
-      <header className="z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/90 px-6 py-4 backdrop-blur-2xl sm:px-9">
+      <IntroVeil />
+      <header className="z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/90 px-6 py-4 backdrop-blur-sm sm:px-9">
         <div className="flex min-w-0 items-center">
-          <BrandLogo className="h-8 max-w-[104px] opacity-90" />
+          <BrandLogo className="h-8 max-w-[112px]" />
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Button type="button" variant="ghost" size="sm" onClick={reset}>
+          <Button type="button" variant="ghost" size="sm" onClick={reset} className="rounded-full px-3">
             <RotateCcw />
             <span className="hidden sm:inline">Reset</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col-reverse lg:min-h-0 lg:flex-row">
-        {/* Command column */}
-        <aside className="relative z-10 flex w-full flex-col border-hairline bg-background shadow-[18px_0_60px_-48px_rgba(0,0,0,0.75)] lg:w-[452px] lg:border-r xl:w-[512px]">
-          <div className="border-b border-hairline px-6 pt-8 pb-8 sm:px-11">
+      <div className="flex flex-1 flex-col-reverse gap-3 p-3 lg:min-h-0 lg:flex-row lg:p-4">
+        <aside className="relative z-10 flex w-full flex-col rounded-[1.75rem] border border-hairline bg-background/95 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.85)] lg:w-[452px] xl:w-[512px]">
+          <div className="border-b border-hairline/80 px-5 pb-6 pt-6 sm:px-8">
             <StepIndicator
               current={step}
               steps={activeSteps}
@@ -162,39 +228,35 @@ function ConfiguratorLayout() {
             />
           </div>
 
-          <div className="scroll-slim flex-1 overflow-y-auto px-6 pt-12 pb-20 sm:px-11 lg:min-h-0">
+          <div className="scroll-slim flex-1 overflow-y-auto px-5 pb-18 pt-8 sm:px-8 lg:min-h-0">
             {stepContent}
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 border-t border-hairline bg-background/88 px-6 py-5 backdrop-blur-2xl sm:px-11">
+          <div className="flex items-center justify-between gap-6 border-t border-hairline bg-background/60 px-5 py-5 sm:px-8">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={previous}
               disabled={step === 0}
-              className="px-5"
+              className="px-0 hover:bg-transparent"
             >
               <ArrowLeft />
               <span className="hidden sm:inline">Back</span>
             </Button>
-            <span className="text-center text-[10px] uppercase tracking-[0.24em] text-muted-foreground/70">
-              {String(step + 1).padStart(2, "0")} / {String(activeSteps.length).padStart(2, "0")}
-            </span>
             <Button
               type="button"
               onClick={next}
               disabled={isLast || !canContinue}
               title={canContinue ? undefined : "Complete this step to continue"}
-              className="px-7"
+              className="px-6"
             >
               Continue
-              <ArrowRight />
+              <ArrowRight className="size-3.5" strokeWidth={1.5} />
             </Button>
           </div>
         </aside>
 
-        {/* Centrepiece */}
-        <main className="relative h-[46vh] w-full min-h-[320px] bg-viewport sm:h-[54vh] lg:h-auto lg:flex-1">
+        <main className="relative h-[46vh] w-full min-h-[320px] overflow-hidden rounded-[1.75rem] border border-hairline bg-viewport sm:h-[54vh] lg:h-auto lg:flex-1">
           <PoolViewport
             outline={outline}
             shape={config.shape}
@@ -220,6 +282,7 @@ function ConfiguratorLayout() {
             onSetPhotoModeQuality={setPhotoModeQuality}
             photoModeUnsupported={photoModeUnsupported}
             onPhotoModeUnsupported={handlePhotoModeUnsupported}
+            onGeneratePhotorealisticRender={handleGeneratePhotorealisticRender}
           />
           <LiveSummary />
         </main>

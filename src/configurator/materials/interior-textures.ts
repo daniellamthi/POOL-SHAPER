@@ -57,10 +57,10 @@ export const MOSAIC_FINISHES: ReadonlyArray<MosaicFinishDefinition> = MOSAIC_ASS
     },
     maps: { baseColorMap: mosaicTextureUrl(filename) },
     materialSettings: {
-      roughness: 0.18,
+      roughness: 0.12,
       metalness: 0,
-      clearcoat: 0.32,
-      clearcoatRoughness: 0.16,
+      clearcoat: 0.55,
+      clearcoatRoughness: 0.07,
     },
   }),
 );

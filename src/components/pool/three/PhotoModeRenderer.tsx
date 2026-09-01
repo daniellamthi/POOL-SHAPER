@@ -26,8 +26,12 @@ const GRADIENT_PALETTE = {
  * with no ground/horizon objects baked in, chosen specifically so they
  * don't introduce foreign geometry into the pool's reflections. One per
  * theme, matching the same light/dark split as the gradient fallback.
+ *
+ * Exported so the Blender/Cycles render pipeline (see
+ * src/lib/render-pipeline/serialize.ts) points at this exact same file
+ * instead of hard-coding a second copy of this mapping that could drift.
  */
-const HDRI_BY_THEME: Record<Theme, string> = {
+export const HDRI_BY_THEME: Record<Theme, string> = {
   light: "/hdri/qwantani-noon-puresky-2k.hdr",
   dark: "/hdri/qwantani-dusk-puresky-2k.hdr",
 };

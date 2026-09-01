@@ -219,14 +219,19 @@ export const LINER_COLORS: ReadonlyArray<{
     hex: "#f4f3ef",
     texture: "/textures/pvc-liner/motion-arctic-white-180.png",
     underwater: {
-      absorption: [0.34, 0.055, 0.02],
-      scatteringColor: [0.2, 0.68, 0.82],
-      scatteringStrength: 0.38,
+      // Reference photo: a near-white dry liner reads as a saturated
+      // cyan/turquoise once submerged (the most dramatic shift of the
+      // range, since there is no base tint to begin with). The previous
+      // values left it almost unchanged underwater (pale off-white) --
+      // raised absorption + scattering push it to a visible turquoise.
+      absorption: [0.85, 0.12, 0.04],
+      scatteringColor: [0.05, 0.75, 0.72],
+      scatteringStrength: 0.65,
       causticStrength: 0.028,
-      scatteringOpticalPathScale: 1.0,
-      absorptionOpticalPathScale: 1.0,
-      maxScatteringEnergy: 0.06,
-      scatteringContribution: 0.16,
+      scatteringOpticalPathScale: 1.8,
+      absorptionOpticalPathScale: 1.6,
+      maxScatteringEnergy: 0.09,
+      scatteringContribution: 0.28,
     },
   },
   {

@@ -56,8 +56,8 @@ const WATER_CONFIGURATION_PRESET = {
   opacity: 0.12,
   transmission: 0.92,
   roughness: 0.105,
-  clearcoat: 0.06,
-  clearcoatRoughness: 0.2,
+  clearcoat: 0.16,
+  clearcoatRoughness: 0.12,
   reflectivity: 0.5,
   specularIntensity: 1,
   normalStrength: 0.016,
@@ -65,11 +65,11 @@ const WATER_CONFIGURATION_PRESET = {
   scatteringContribution: 0.16,
   maxScatteringEnergy: 0.06,
   scatteringDepthStart: 0.18,
-  causticVisibility: 1.55,
-  caustics: { strength: 0.02, scale: 20, speed: 0.28 },
+  causticVisibility: 2.3,
+  caustics: { strength: 0.027, scale: 20, speed: 0.28 },
   normals: {
-    large: { scale: 0.82, strength: 0.23, rotation: 0.24 },
-    micro: { scale: 3.8, strength: 0.15, rotation: -0.68 },
+    large: { scale: 0.82, strength: 0.3, rotation: 0.24 },
+    micro: { scale: 3.8, strength: 0.21, rotation: -0.68 },
   },
   waves: {
     speed: [0.0013, 0.00086] as const,
@@ -104,17 +104,17 @@ const selectWaterPreset = (mode: "legacy" | "premium") =>
 export const WATER_VISUAL_PRESET = selectWaterPreset(ACTIVE_WATER_RENDERING);
 
 export const POOL_SURFACE_PRESET = {
-  linerClearcoat: 0.42,
-  linerClearcoatRoughness: 0.18,
-  floorClearcoat: 0.36,
-  dayCaustics: 0.1,
-  nightCaustics: 0.08,
+  linerClearcoat: 0.58,
+  linerClearcoatRoughness: 0.1,
+  floorClearcoat: 0.5,
+  dayCaustics: 0.16,
+  nightCaustics: 0.13,
 } as const;
 
 export const MATERIAL_MICRO_DETAIL_PRESET = {
-  liner: { moduleSize: 0.08, normalStrength: 0.045 },
+  liner: { moduleSize: 0.08, normalStrength: 0.05 },
   mosaic: { moduleSize: 0.04, normalStrength: 0.025 },
-  coping: { moduleSize: 0.12, normalStrength: 0.04 },
+  coping: { moduleSize: 0.12, normalStrength: 0.055 },
   aboveGroundPanel: { moduleSize: 0.12, normalStrength: 0.025 },
   studioFloor: { moduleSize: 0.22, normalStrength: 0.018 },
   skimmer: { repeat: [7, 4] as const, normalStrength: 0.032 },

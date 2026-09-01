@@ -14,7 +14,7 @@ interface Props {
 }
 
 const LABEL_CLASS =
-  "pointer-events-none whitespace-nowrap select-none rounded-full border border-hairline bg-panel px-3 py-1 font-mono text-[10px] font-light tracking-[0.08em] text-foreground backdrop-blur-xl";
+  "pointer-events-none whitespace-nowrap select-none rounded-full border border-hairline bg-panel px-3 py-1 font-mono text-[10px] font-light tracking-[0.08em] text-foreground";
 
 /** Dimension guides drawn around the live geometry. */
 export function PoolMeasurements({

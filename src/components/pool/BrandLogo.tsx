@@ -3,7 +3,10 @@ import { cn } from "@/lib/utils";
 
 /**
  * Piscine Wellness brand mark. Aspect ratio is preserved by fixing the height
- * and letting the width follow; inverted in dark mode so the mark stays legible.
+ * and letting the width follow. The source asset is dark ink for a light
+ * background: Day now runs an off-white masthead (mark reads correctly
+ * as-is), Night runs graphite/black (mark needs inverting to read light),
+ * so the invert is theme-scoped rather than permanent.
  */
 export function BrandLogo({ className }: { className?: string }) {
   if (!PRODUCT_BRAND.logoUrl) {

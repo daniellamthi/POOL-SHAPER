@@ -46,20 +46,20 @@ export function OptionCard({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        "group relative flex w-full flex-col gap-3.5 overflow-hidden rounded-[1.125rem] border p-7 text-left outline-none transition-[border-color,background-color,box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992]",
+        "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-7 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992]",
         selected
-          ? "border-foreground/28 bg-card lift"
-          : "border-hairline bg-card/35 hover:-translate-y-0.5 hover:border-foreground/16 hover:bg-card/75 hover:shadow-[0_22px_54px_-38px_rgba(0,0,0,0.75)]",
+          ? "border-brand bg-transparent pl-3"
+          : "border-hairline bg-transparent hover:border-foreground/30 hover:pl-3",
       )}
     >
       <span className="flex items-start justify-between gap-4">
         <span className="text-[15px] font-light tracking-[-0.012em] text-foreground">{title}</span>
         <span
           className={cn(
-            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
             selected
-              ? "scale-100 border-brand bg-brand text-background shadow-[0_0_0_4px_var(--brand-soft)]"
-              : "scale-90 border-border bg-transparent text-transparent group-hover:scale-100 group-hover:border-foreground/30",
+              ? "scale-100 bg-brand text-background shadow-[0_0_0_4px_var(--brand-soft)]"
+              : "scale-75 border border-foreground/25 text-transparent opacity-0 group-hover:scale-100 group-hover:opacity-100",
           )}
         >
           <Check
@@ -79,7 +79,7 @@ export function OptionCard({
       {meta}
       <span
         className={cn(
-          "absolute inset-x-7 bottom-0 h-px origin-center bg-brand transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "absolute inset-x-0 bottom-0 h-px origin-left bg-brand transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
           selected ? "scale-x-100" : "scale-x-0",
         )}
       />

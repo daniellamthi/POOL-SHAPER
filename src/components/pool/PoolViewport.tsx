@@ -1,6 +1,6 @@
 import { lazy, memo, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
-import { Camera, Download, Expand, Ruler } from "lucide-react";
+import { Aperture, Camera, Download, Expand, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { photoModeState, PHOTO_MODE_EXPORT_READY_SAMPLES } from "@/lib/pool/photoModeState";
 import type { SceneProps, PhotoModeQuality } from "./three/PoolScene";
@@ -13,6 +13,8 @@ type ViewportProps = SceneProps & {
   onTogglePhotoMode: () => void;
   onSetPhotoModeQuality: (quality: PhotoModeQuality) => void;
   photoModeUnsupported: boolean;
+  /** Exports the current configuration for the separate Blender/Cycles render pipeline -- see src/lib/render-pipeline/. */
+  onGeneratePhotorealisticRender: () => void;
 };
 
 function ViewportFallback() {
@@ -96,6 +98,7 @@ export const PoolViewport = memo(function PoolViewport({
   onTogglePhotoMode,
   onSetPhotoModeQuality,
   photoModeUnsupported,
+  onGeneratePhotorealisticRender,
   ...scene
 }: ViewportProps) {
   const samples = usePhotoModeSamples();
@@ -112,7 +115,7 @@ export const PoolViewport = memo(function PoolViewport({
       {/* Vignette for depth — purely decorative */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 [background:radial-gradient(125%_95%_at_50%_38%,transparent_62%,color-mix(in_oklab,var(--viewport)_58%,transparent)_100%)]"
+        className="pointer-events-none absolute inset-0 [background:radial-gradient(120%_92%_at_50%_40%,transparent_52%,color-mix(in_oklab,var(--viewport)_74%,transparent)_100%)]"
       />
 
       {scene.photoMode ? <PhotoModeStatus samples={samples} /> : null}
@@ -160,6 +163,18 @@ export const PoolViewport = memo(function PoolViewport({
             <Expand />
             Reframe
           </Button>
+          {scene.photoMode ? null : (
+            <Button
+              type="button"
+              variant="viewport"
+              size="sm"
+              onClick={onGeneratePhotorealisticRender}
+              title="Exports this configuration for the Blender/Cycles render pipeline -- see rendering/blender/"
+            >
+              <Aperture />
+              Generate Photorealistic Render
+            </Button>
+          )}
           <Button
             type="button"
             variant={scene.photoMode ? "viewportActive" : "viewport"}

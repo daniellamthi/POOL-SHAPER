@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-29T12:00:00.000Z",
+  "sourceProject": "pool-shape-shaper-main",
+  "shape": {
+    "kind": "rectangle",
+    "outline": [
+      [-4.0, -2.0],
+      [4.0, -2.0],
+      [4.0, 2.0],
+      [-4.0, 2.0]
+    ]
+  },
+  "dimensions": {
+    "length": 8.0,
+    "width": 4.0,
+    "depth": 1.5,
+    "cornerRadius": 0.0
+  },
+  "structure": {
+    "installation": "in-ground",
+    "system": "skimmer",
+    "overflowType": null
+  },
+  "verticalLayout": {
+    "groundY": 0.0,
+    "floorY": -1.5,
+    "wallTopY": 0.0,
+    "waterY": -0.143,
+    "copingY": 0.055,
+    "copingThickness": 0.055,
+    "copingWidth": 0.2
+  },
+  "finish": {
+    "material": "liner",
+    "colorId": "motionSandBeach179",
+    "title": "Motion Sand Beach [179]",
+    "baseColorHex": "#ddbd74",
+    "textureUrl": "/textures/pvc-liner/motion-sand-beach-179.png",
+    "roughness": 0.32,
+    "metalness": 0.02
+  },
+  "coping": {
+    "colorHex": "#cbc7bf",
+    "roughness": 0.62,
+    "thickness": 0.055,
+    "width": 0.2
+  },
+  "water": {
+    "waterY": -0.143,
+    "ior": 1.333,
+    "roughness": 0.105,
+    "transmission": 0.92,
+    "scatteringColor": [0.2, 0.72, 0.82],
+    "absorption": [0.36, 0.065, 0.025],
+    "attenuationColorHex": "#e8fffb",
+    "attenuationDistance": 2.4
+  },
+  "staircase": {
+    "present": false,
+    "kind": null
+  },
+  "accessories": [],
+  "camera": {
+    "preset": "hero",
+    "position": [5.3939, 4.4941, 6.8922],
+    "target": [0.0, -0.75, 0.0],
+    "verticalFovDeg": 35
+  },
+  "environment": {
+    "theme": "light",
+    "label": "Sunny Day",
+    "hdriUrl": "/hdri/qwantani-noon-puresky-2k.hdr"
+  },
+  "outputPreset": {
+    "id": "hd",
+    "width": 1920,
+    "height": 1080,
+    "samples": 256,
+    "denoise": true
+  }
+}
