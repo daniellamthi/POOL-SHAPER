@@ -60,7 +60,10 @@ export const SCENE_VISUAL_PRESET = {
     night: "#08090b",
   },
   guides: { dark: "#8a8e96", light: "#7a746d" },
-  contactShadow: { dark: 0.34, light: 0.27, blur: 3.3 },
+  // Deeper, tighter contact shadow: the single biggest lever for reading as
+  // grounded architectural photography instead of a CG model floating over
+  // its own studio floor. Water/liner calibration untouched.
+  contactShadow: { dark: 0.42, light: 0.35, blur: 2.5 },
   exposure: { dark: 1.12, light: 1.18, night: 0.9 },
   environment: { dark: 0.95, light: 1.18, night: 0.22 },
   lighting: {

@@ -1,4 +1,4 @@
-import { FINISHES, LINER_COLORS } from "./config";
+import { FINISHES, LINER_COLORS, SKIMMER_FINISHES } from "./config";
 import {
   POOL_BORDER_PRESET,
   POOL_SURFACE_PRESET,
@@ -44,13 +44,16 @@ export interface ResolvedMaterials {
   };
   water: string;
   coping: { color: string; roughness: number };
+  skimmer: { color: string; roughness: number };
 }
 
 export function resolveMaterials(
-  config: Pick<PoolConfig, "finish" | "linerColor" | "mosaicFinish">,
+  config: Pick<PoolConfig, "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish">,
 ): ResolvedMaterials {
   const finish = FINISHES.find((item) => item.id === config.finish) ?? FINISHES[0]!;
   const liner = LINER_COLORS.find((item) => item.id === config.linerColor) ?? LINER_COLORS[0]!;
+  const skimmerFinish =
+    SKIMMER_FINISHES.find((item) => item.id === config.skimmerFinish) ?? SKIMMER_FINISHES[0]!;
   const mosaic = getMosaicFinish(config.mosaicFinish);
   const textureUrl = getInteriorTexture(config.finish, config.linerColor, config.mosaicFinish);
   return {
@@ -119,5 +122,6 @@ export function resolveMaterials(
     },
     water: "#ffffff",
     coping: { color: POOL_BORDER_PRESET.color, roughness: POOL_BORDER_PRESET.roughness },
+    skimmer: { color: skimmerFinish.hex, roughness: skimmerFinish.roughness },
   };
 }

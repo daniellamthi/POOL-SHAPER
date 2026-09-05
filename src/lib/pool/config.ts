@@ -9,6 +9,7 @@ import type {
   PoolStructure,
   PoolType,
   PoolShapeId,
+  SkimmerFinishId,
   StepDefinition,
 } from "./types";
 
@@ -159,6 +160,19 @@ export const FINISHES: ReadonlyArray<{
     roughness: 0.12,
     metalness: 0.06,
   },
+];
+
+/** Skimmer face-frame finish. A short, self-contained list -- extend it here
+ * when more finishes are needed, nothing else has to change. */
+export const SKIMMER_FINISHES: ReadonlyArray<{
+  id: SkimmerFinishId;
+  title: string;
+  hex: string;
+  roughness: number;
+}> = [
+  { id: "white", title: "Bianco", hex: "#f5f5f1", roughness: 0.24 },
+  { id: "graphite", title: "Antracite", hex: "#3a3d3f", roughness: 0.32 },
+  { id: "sand", title: "Sabbia", hex: "#d8cdb8", roughness: 0.3 },
 ];
 
 export const LINER_COLORS: ReadonlyArray<{

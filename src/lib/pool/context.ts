@@ -19,6 +19,7 @@ import type {
   PoolShapeId,
   PoolStructure,
   ProjectType,
+  SkimmerFinishId,
   SystemType,
   UploadedFile,
   RenovationConfig,
@@ -44,6 +45,7 @@ export interface ConfiguratorContextValue {
   setDimension: (key: DimensionKey, value: number) => void;
   setSystem: (value: SystemType) => void;
   setOverflowType: (value: OverflowType) => void;
+  setSkimmerFinish: (value: SkimmerFinishId) => void;
   setFinish: (value: FinishMaterial) => void;
   setLinerColor: (value: LinerColor) => void;
   setMosaicFinish: (value: MosaicFinishId) => void;

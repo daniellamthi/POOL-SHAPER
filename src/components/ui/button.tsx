@@ -5,12 +5,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full border border-transparent text-[11px] font-normal uppercase tracking-[0.14em] cursor-pointer transition-[background-color,color,border-color,box-shadow,transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/45 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.98] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-25 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.15]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent text-[10px] font-medium uppercase tracking-[0.12em] cursor-pointer transition-[background-color,color,border-color,box-shadow,transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/45 focus-visible:ring-offset-3 focus-visible:ring-offset-background active:scale-[0.99] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-25 [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:stroke-[1]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_10px_22px_-14px_rgba(15,15,20,0.4)] hover:-translate-y-px hover:opacity-92 hover:shadow-[0_14px_28px_-16px_rgba(15,15,20,0.45)]",
+          "bg-primary text-primary-foreground shadow-[0_8px_18px_-14px_rgba(15,15,20,0.35)] hover:-translate-y-px hover:opacity-92",
         destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
         outline:
           "border-border bg-transparent text-foreground hover:-translate-y-px hover:border-foreground/28 hover:bg-accent/55",
@@ -22,9 +22,9 @@ const buttonVariants = cva(
         viewportActive: "bg-foreground/92 text-background hover:bg-foreground",
       },
       size: {
-        default: "h-12 px-7",
-        sm: "h-10 px-4.5 text-[11px]",
-        lg: "h-14 px-10 text-[13px]",
+        default: "h-11 px-6",
+        sm: "h-10 px-4 text-[10px]",
+        lg: "h-13 px-8 text-[11px]",
         icon: "size-11",
       },
     },

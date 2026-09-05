@@ -1,12 +1,14 @@
-import { OptionCard, StepSection } from "@/components/pool/StepSection";
+import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
+import { SKIMMER_FINISHES } from "@/lib/pool/config";
+import { cn } from "@/lib/utils";
 
 /**
  * Step 4 — selects the hydraulic system.
  * Engineering values remain derived from the existing configurator store.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const { config, setSystem, setOverflowType } = useConfigurator();
+  const { config, setSystem, setOverflowType, setSkimmerFinish } = useConfigurator();
 
   const selectSkimmer = () => {
     setSystem("skimmer");
@@ -22,6 +24,34 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
           selected={config.system === "skimmer"}
           onSelect={selectSkimmer}
         />
+
+        {/* Inline, not a modal/route -- grid-template-rows 0fr/1fr is what
+            makes this smoothly animate to its natural height without a
+            measured-pixel-height hack. */}
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            config.system === "skimmer" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-4 rounded-2xl border border-hairline p-5">
+              <p className="label-xs">Finitura skimmer</p>
+              <div className="grid grid-cols-3 gap-3">
+                {SKIMMER_FINISHES.map((option) => (
+                  <SwatchOption
+                    key={option.id}
+                    title={option.title}
+                    hex={option.hex}
+                    selected={config.skimmerFinish === option.id}
+                    onSelect={() => setSkimmerFinish(option.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <OptionCard
           title="Overflow Edge Pool"
           description="A flush water line with selectable perimeter overflow collection."

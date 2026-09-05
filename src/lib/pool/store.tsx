@@ -31,6 +31,7 @@ import type {
   PoolShapeId,
   PoolStructure,
   ProjectType,
+  SkimmerFinishId,
   SystemType,
   UploadedFile,
   RenovationConfig,
@@ -48,6 +49,7 @@ type Action =
   | { type: "setDimension"; key: DimensionKey; value: number }
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
+  | { type: "setSkimmerFinish"; value: SkimmerFinishId }
   | { type: "setFinish"; value: FinishMaterial }
   | { type: "setLinerColor"; value: LinerColor }
   | { type: "setMosaicFinish"; value: MosaicFinishId }
@@ -89,6 +91,7 @@ const initialState: State = {
     dimensions: DEFAULT_DIMENSIONS,
     system: "skimmer",
     overflowType: "hidden",
+    skimmerFinish: "white",
     finish: "liner",
     linerColor: "motionBlueSky602",
     mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
@@ -153,6 +156,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, config: { ...config, system: action.value } };
     case "setOverflowType":
       return { ...state, config: { ...config, overflowType: action.value } };
+    case "setSkimmerFinish":
+      return { ...state, config: { ...config, skimmerFinish: action.value } };
     case "setFinish":
       return { ...state, config: { ...config, finish: action.value } };
     case "setLinerColor":
@@ -272,6 +277,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setDimension: (key, v) => dispatch({ type: "setDimension", key, value: v }),
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
+      setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),
       setFinish: (v) => dispatch({ type: "setFinish", value: v }),
       setLinerColor: (v) => dispatch({ type: "setLinerColor", value: v }),
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),

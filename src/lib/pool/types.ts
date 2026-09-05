@@ -22,6 +22,10 @@ export type LinerColor =
   | "motionBlackStone799";
 export type MosaicFinishId = `mosaic-${string}`;
 
+/** Skimmer face-frame finish. Kept separate from the interior liner/mosaic
+ * finish list -- extensible for more finishes later without touching those. */
+export type SkimmerFinishId = "white" | "graphite" | "sand";
+
 export type PoolFeatureId = "ledLighting" | "hydromassage" | "externalStaircase";
 
 export type PoolAccess = "internalSteps" | "stainlessSteelLadder";
@@ -93,6 +97,7 @@ export interface PoolConfig {
   dimensions: Dimensions;
   system: SystemType;
   overflowType: OverflowType;
+  skimmerFinish: SkimmerFinishId;
   finish: FinishMaterial;
   linerColor: LinerColor;
   mosaicFinish: MosaicFinishId;

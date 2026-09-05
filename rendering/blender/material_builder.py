@@ -155,10 +155,57 @@ def build_coping_material(config: dict) -> "bpy.types.Material":
     return material
 
 
+def build_ground_material() -> "bpy.types.Material":
+    """Neutral deck/terrace stone for `geometry_builder.build_ground` -- a
+    light warm dielectric with the same noise-driven roughness variation
+    `build_coping_material` uses, so the ring the pool actually sits on
+    reads as real cut stone catching the sun, not a flat grey backdrop."""
+    material = bpy.data.materials.new(name="pool-ground-stone")
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    nodes.clear()
+
+    output = nodes.new("ShaderNodeOutputMaterial")
+    output.location = (400, 0)
+    bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+    bsdf.location = (100, 0)
+    bsdf.inputs["Base Color"].default_value = _hex_to_linear_rgb("#d9d4c8")
+    if "Coat Weight" in bsdf.inputs:
+        bsdf.inputs["Coat Weight"].default_value = 0.05
+    elif "Clearcoat" in bsdf.inputs:
+        bsdf.inputs["Clearcoat"].default_value = 0.05
+
+    grain_coord = nodes.new("ShaderNodeTexCoord")
+    grain_coord.location = (-400, -200)
+    grain_noise = nodes.new("ShaderNodeTexNoise")
+    grain_noise.location = (-200, -200)
+    grain_noise.inputs["Scale"].default_value = 12.0
+    grain_noise.inputs["Detail"].default_value = 6.0
+    links.new(grain_coord.outputs["Object"], grain_noise.inputs["Vector"])
+
+    roughness_range = nodes.new("ShaderNodeMapRange")
+    roughness_range.location = (0, -200)
+    roughness_range.inputs["To Min"].default_value = 0.45
+    roughness_range.inputs["To Max"].default_value = 0.75
+    links.new(grain_noise.outputs["Fac"], roughness_range.inputs["Value"])
+    links.new(roughness_range.outputs["Result"], bsdf.inputs["Roughness"])
+
+    grain_bump = nodes.new("ShaderNodeBump")
+    grain_bump.location = (0, -350)
+    grain_bump.inputs["Strength"].default_value = 0.04
+    links.new(grain_noise.outputs["Fac"], grain_bump.inputs["Height"])
+    links.new(grain_bump.outputs["Normal"], bsdf.inputs["Normal"])
+
+    links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
+    return material
+
+
 def assign_materials(objects: dict, config: dict, assets_root: str) -> None:
-    """Assigns finish/coping materials to the geometry objects returned by
-    `geometry_builder.build_pool_geometry`. Water is handled separately by
-    `water_builder.py` since it needs a different BSDF setup entirely."""
+    """Assigns finish/coping/ground materials to the geometry objects
+    returned by `geometry_builder.build_pool_geometry`. Water is handled
+    separately by `water_builder.py` since it needs a different BSDF setup
+    entirely."""
     finish_material = build_finish_material(config, assets_root)
     coping_material = build_coping_material(config)
 
@@ -170,3 +217,7 @@ def assign_materials(objects: dict, config: dict, assets_root: str) -> None:
     coping_obj = objects.get("coping")
     if coping_obj is not None:
         coping_obj.data.materials.append(coping_material)
+
+    ground_obj = objects.get("ground")
+    if ground_obj is not None:
+        ground_obj.data.materials.append(build_ground_material())

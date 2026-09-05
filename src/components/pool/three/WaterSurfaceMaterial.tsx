@@ -117,6 +117,19 @@ const scratchTargetPoint = new THREE.Vector3();
 const scratchMirroredTarget = new THREE.Vector3();
 
 /**
+ * Identifies meshes using this file's own water material (via the marker
+ * baked into its `customProgramCacheKey`, below) so the mirror pass can hide
+ * them -- see the note in the render loop for why that's required, not just
+ * an optimization.
+ */
+function isWaterSurfaceMesh(object: THREE.Object3D): object is THREE.Mesh {
+  if (!(object instanceof THREE.Mesh) || Array.isArray(object.material)) return false;
+  const key = (object.material as THREE.Material & { customProgramCacheKey?: () => string })
+    .customProgramCacheKey;
+  return typeof key === "function" && key.call(object.material).includes("dual-normal-physical-water");
+}
+
+/**
  * Renders the scene from a camera mirrored across the horizontal water
  * plane into a small render target, and derives the projective texture
  * matrix a fragment needs to sample it correctly per-pixel (the same
@@ -197,12 +210,30 @@ function useWaterReflection(waterLevel: number) {
     const basin = scene.getObjectByName("pool-basin");
     const wasVisible = basin?.visible ?? true;
     if (basin) basin.visible = false;
+
+    // Every water mesh (main basin + skimmer tongue) samples this very
+    // render target as `waterReflectionTexture`. Left visible, the mirror
+    // pass would render a water mesh into `target` while that mesh's own
+    // shader samples `target.texture` in the same draw call -- a
+    // framebuffer/texture feedback loop (WebGL flags it as
+    // GL_INVALID_OPERATION and the sampled result is undefined per spec).
+    // Hidden here for the one pass that would otherwise create the loop;
+    // restored immediately after.
+    const hiddenWater: THREE.Object3D[] = [];
+    scene.traverse((object) => {
+      if (object.visible && isWaterSurfaceMesh(object)) {
+        object.visible = false;
+        hiddenWater.push(object);
+      }
+    });
+
     const previousTarget = gl.getRenderTarget();
     gl.setRenderTarget(target);
     gl.clear();
     gl.render(scene, mirrorCamera);
     gl.setRenderTarget(previousTarget);
     if (basin) basin.visible = wasVisible;
+    for (const object of hiddenWater) object.visible = true;
   });
 
   return { texture: target?.texture ?? null, textureMatrix, aboveWaterline };

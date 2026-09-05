@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { Outline } from "@/lib/pool/types";
+import { COPING_WIDTH } from "@/lib/pool/config";
 import { createContactAOGradientMap } from "./textures";
 
 interface ExternalStaircaseProps {
@@ -52,6 +53,7 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
     const endOffset = longest.length / 2;
     return {
       ...longest,
+      centre,
       midpoint: [
         longest.midpoint[0] + longest.tangent[0] * endOffset,
         longest.midpoint[1] + longest.tangent[1] * endOffset,
@@ -65,6 +67,42 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
     };
   }, [groundY, outline, topY]);
 
+  // `outline` is the pool's wall outline; the coping band extends
+  // COPING_WIDTH beyond it (see PoolModel's `offsetOutline(outline,
+  // COPING_WIDTH)`). The staircase sits right at the wall's end, where the
+  // coping's mitred corner bulges slightly past that straight-edge offset --
+  // a small extra clearance keeps the staircase clear of that corner too,
+  // without reading as a gap at real scale.
+  const CORNER_MITRE_CLEARANCE = 0.05;
+  const copingClearance = COPING_WIDTH + CORNER_MITRE_CLEARANCE;
+  const groupPosition: readonly [number, number, number] = [
+    layout.midpoint[0] + layout.outward[0] * (layout.width / 2 + copingClearance),
+    0,
+    layout.midpoint[1] + layout.outward[1] * (layout.width / 2 + copingClearance),
+  ];
+  // The staircase sits at the end of its wall (see `endOffset` above), so
+  // one of its two rails can land past the corner, next to (or over) the
+  // adjacent wall -- an "inner" rail that reads as entering the pool. Keep
+  // only whichever rail is actually farther from the pool's own centre,
+  // i.e. genuinely external, for any wall/corner this ends up on.
+  const cosRotation = Math.cos(layout.rotation);
+  const sinRotation = Math.sin(layout.rotation);
+  const railSides = [-1, 1] as const;
+  const externalSide = railSides.reduce((farthest, side) => {
+    const localX = side * layout.width * 0.49;
+    const worldX = groupPosition[0] + localX * cosRotation;
+    const worldZ = groupPosition[2] - localX * sinRotation;
+    const distance = Math.hypot(worldX - layout.centre[0], worldZ - layout.centre[1]);
+    const farthestLocalX = farthest * layout.width * 0.49;
+    const farthestWorldX = groupPosition[0] + farthestLocalX * cosRotation;
+    const farthestWorldZ = groupPosition[2] - farthestLocalX * sinRotation;
+    const farthestDistance = Math.hypot(
+      farthestWorldX - layout.centre[0],
+      farthestWorldZ - layout.centre[1],
+    );
+    return distance > farthestDistance ? side : farthest;
+  }, railSides[0]);
+
   const railHeight = 0.88;
   const lowestZ = (layout.stepCount - 0.5) * layout.treadDepth;
   const highestZ = 0.5 * layout.treadDepth;
@@ -77,14 +115,7 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
   useEffect(() => () => contactAOMap.dispose(), [contactAOMap]);
 
   return (
-    <group
-      position={[
-        layout.midpoint[0] + layout.outward[0] * (layout.width / 2 + 0.03),
-        0,
-        layout.midpoint[1] + layout.outward[1] * (layout.width / 2 + 0.03),
-      ]}
-      rotation={[0, layout.rotation, 0]}
-    >
+    <group position={groupPosition} rotation={[0, layout.rotation, 0]}>
       {/* Soft ground contact shadow under the whole footprint: the global,
           heavily-blurred pool ContactShadows bake is sized for the pool
           itself and reads too faint at this small a footprint to anchor it
@@ -103,21 +134,29 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
         const level = index + 1;
         const blockHeight = layout.rise * level;
         const z = (layout.stepCount - index - 0.5) * layout.treadDepth;
+        // The top step's own riser top already sits exactly at `topY` (its
+        // block height is defined as the full `height`), so it's already
+        // flush with the pool's top edge -- the proud nosing cap every other
+        // tread gets would push *this* one above that edge instead of
+        // landing flush with it, so the top step skips it.
+        const isTopStep = level === layout.stepCount;
         return (
           <group key={level}>
             <mesh position={[0, groundY + blockHeight / 2, z]} castShadow receiveShadow>
               <boxGeometry args={[layout.width, blockHeight, layout.treadDepth]} />
               <meshStandardMaterial color="#f1f2f2" roughness={0.48} metalness={0.02} />
             </mesh>
-            <mesh position={[0, groundY + blockHeight + 0.018, z]} castShadow receiveShadow>
-              <boxGeometry args={[layout.width + 0.04, 0.036, layout.treadDepth + 0.025]} />
-              <meshStandardMaterial color="#34383c" roughness={0.34} metalness={0.08} />
-            </mesh>
+            {!isTopStep ? (
+              <mesh position={[0, groundY + blockHeight + 0.018, z]} castShadow receiveShadow>
+                <boxGeometry args={[layout.width + 0.04, 0.036, layout.treadDepth + 0.025]} />
+                <meshStandardMaterial color="#34383c" roughness={0.34} metalness={0.08} />
+              </mesh>
+            ) : null}
           </group>
         );
       })}
 
-      {[-1, 1].map((side) => (
+      {[externalSide].map((side) => (
         <group key={side} position={[side * layout.width * 0.49, 0, 0]}>
           {[0, Math.floor((layout.stepCount - 1) / 2), layout.stepCount - 1].map((index) => {
             const stepY = groundY + layout.rise * (index + 1);

@@ -146,6 +146,7 @@ function getInteriorFinishCamera({
   depth,
   verticalFov,
   viewportAspect,
+  isLiner,
 }: {
   reference: BoundaryFocus;
   bounds: ReturnType<typeof outlineBounds>;
@@ -153,6 +154,10 @@ function getInteriorFinishCamera({
   depth: number;
   verticalFov: number;
   viewportAspect: number;
+  /** Liner gets a slightly pulled-back, more architectural composition than
+   * the tight material-swatch framing Mosaic keeps -- more of the pool
+   * interior in frame while the liner texture itself stays clearly legible. */
+  isLiner: boolean;
 }): CameraPose {
   const inwardSpan =
     Math.abs(reference.inward[0]) * bounds.spanX + Math.abs(reference.inward[1]) * bounds.spanZ;
@@ -167,14 +172,15 @@ function getInteriorFinishCamera({
     reference.point[0] + reference.tangent[0] * centreOffset,
     reference.point[1] + reference.tangent[1] * centreOffset,
   ];
-  const maximumInteriorDistance = Math.max(1.7, inwardSpan * 0.82);
-  const distance = clamp(
+  const maximumInteriorDistance = Math.max(1.7, inwardSpan * 0.82) * (isLiner ? 1.65 : 1);
+  const baseDistance = clamp(
     Math.max(1.6, inwardSpan * 0.64, depth * 1.35),
     1.6,
     maximumInteriorDistance,
   );
+  const distance = isLiner ? baseDistance * 1.65 : baseDistance;
   const targetY = layout.wallTopY - depth * 0.3;
-  const cameraY = layout.waterY + clamp(depth * 0.18, 0.22, 0.38);
+  const cameraY = layout.waterY + clamp(depth * (isLiner ? 0.3 : 0.18), 0.22, isLiner ? 0.56 : 0.38);
   return {
     target: [wallCentre[0], targetY, wallCentre[1]],
     position: [
@@ -229,6 +235,7 @@ export function getCameraPose({
         depth: safeDepth,
         verticalFov,
         viewportAspect,
+        isLiner: intent === "liner",
       });
     }
     return master;

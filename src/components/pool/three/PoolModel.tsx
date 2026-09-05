@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { DoubleSide } from "three";
 import {
@@ -41,6 +40,52 @@ interface PoolModelProps {
   poolType: PoolType;
   copingThickness: number;
   showWater: boolean;
+}
+
+function createNeutralSurfaceTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 1;
+  canvas.getContext("2d")!.fillStyle = "#ffffff";
+  canvas.getContext("2d")!.fillRect(0, 0, 1, 1);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/** Keeps the current material usable when an optional finish image cannot load. */
+function useSafeSurfaceTexture(url: string) {
+  const [texture, setTexture] = useState<THREE.Texture>(() => createNeutralSurfaceTexture());
+
+  useEffect(() => {
+    let active = true;
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      url,
+      (loadedTexture) => {
+        if (!active) {
+          loadedTexture.dispose();
+          return;
+        }
+        loadedTexture.colorSpace = THREE.SRGBColorSpace;
+        setTexture((previous) => {
+          previous.dispose();
+          return loadedTexture;
+        });
+      },
+      undefined,
+      (error) => {
+        if (active) console.warn(`[Pool3D] Could not load surface texture ${url}; using fallback.`, error);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [url]);
+
+  useEffect(() => () => texture.dispose(), [texture]);
+  return texture;
 }
 
 interface UnderwaterShader extends THREE.WebGLProgramParametersWithUniforms {
@@ -320,7 +365,7 @@ export function PoolModel({
     () => outlinePerimeter(structuralOutline),
     [structuralOutline],
   );
-  const sourceSurfaceMap = useTexture(materials.surface.maps.baseColorMap);
+  const sourceSurfaceMap = useSafeSurfaceTexture(materials.surface.maps.baseColorMap);
 
   const [floorSurfaceMap, wallSurfaceMap] = useMemo(() => {
     const floorMap = sourceSurfaceMap.clone();
@@ -688,13 +733,12 @@ export function PoolModel({
           <group>
             {isVisibleOverflow ? (
               <>
+                {/* Front-face only (not DoubleSide): this wall sits at the
+                    pool's true outer edge, so its backface is what the
+                    exterior camera sees -- DoubleSide was leaking this dark
+                    channel colour through as a black exterior band. */}
                 <mesh geometry={visibleOverflowChannelWall} receiveShadow castShadow>
-                  <meshStandardMaterial
-                    color="#242929"
-                    roughness={0.9}
-                    metalness={0.08}
-                    side={DoubleSide}
-                  />
+                  <meshStandardMaterial color="#242929" roughness={0.9} metalness={0.08} />
                 </mesh>
                 <mesh
                   geometry={visibleOverflowGrate}
@@ -801,23 +845,30 @@ export function PoolModel({
           side={DoubleSide}
         />
       </mesh>
-      <mesh geometry={copingInnerSkirt} castShadow>
-        <meshPhysicalMaterial
-          color={materials.coping.color}
-          normalMap={copingDetail.normalMap}
-          normalScale={[
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-          ]}
-          roughnessMap={copingDetail.roughnessMap}
-          roughness={materials.coping.roughness}
-          clearcoat={0.12}
-          clearcoatRoughness={0.4}
-          onBeforeCompile={configureCopingTriplanar}
-          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
-          side={DoubleSide}
-        />
-      </mesh>
+      {/* Dry coping bezel between the coping surface and the wall top --
+          correct for Skimmer (water sits below it, so it's genuinely a dry
+          rim) but not for Overflow, where water reaches the top edge: left
+          on, it showed as an out-of-place dry/"skimmer-like" band right
+          where the submerged liner colour should continue uninterrupted. */}
+      {!isOverflow ? (
+        <mesh geometry={copingInnerSkirt} castShadow>
+          <meshPhysicalMaterial
+            color={materials.coping.color}
+            normalMap={copingDetail.normalMap}
+            normalScale={[
+              MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+              MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+            ]}
+            roughnessMap={copingDetail.roughnessMap}
+            roughness={materials.coping.roughness}
+            clearcoat={0.12}
+            clearcoatRoughness={0.4}
+            onBeforeCompile={configureCopingTriplanar}
+            customProgramCacheKey={() => "triplanar-stone-detail-v1"}
+            side={DoubleSide}
+          />
+        </mesh>
+      ) : null}
     </group>
   );
 }

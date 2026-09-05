@@ -12,6 +12,7 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "test:geometry": "node scripts/run-geometry-audit.mjs",
+    "render-bridge": "node scripts/render-bridge.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

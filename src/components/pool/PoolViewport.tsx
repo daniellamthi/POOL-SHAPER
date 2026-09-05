@@ -1,8 +1,9 @@
 import { lazy, memo, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
-import { Aperture, Camera, Download, Expand, Ruler } from "lucide-react";
+import { Aperture, Camera, Download, Expand, Loader2, Ruler, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { photoModeState, PHOTO_MODE_EXPORT_READY_SAMPLES } from "@/lib/pool/photoModeState";
+import type { RenderJobStatus } from "@/lib/render-pipeline";
 import type { SceneProps, PhotoModeQuality } from "./three/PoolScene";
 
 const PoolScene = lazy(() => import("./three/PoolScene"));
@@ -13,8 +14,10 @@ type ViewportProps = SceneProps & {
   onTogglePhotoMode: () => void;
   onSetPhotoModeQuality: (quality: PhotoModeQuality) => void;
   photoModeUnsupported: boolean;
-  /** Exports the current configuration for the separate Blender/Cycles render pipeline -- see src/lib/render-pipeline/. */
+  /** Starts/cancels/downloads the Blender/Cycles render -- see src/lib/render-pipeline/. */
   onGeneratePhotorealisticRender: () => void;
+  renderPhase: "idle" | "rendering" | "complete" | "error";
+  renderProgress: RenderJobStatus["progress"];
 };
 
 function ViewportFallback() {
@@ -99,6 +102,8 @@ export const PoolViewport = memo(function PoolViewport({
   onSetPhotoModeQuality,
   photoModeUnsupported,
   onGeneratePhotorealisticRender,
+  renderPhase,
+  renderProgress,
   ...scene
 }: ViewportProps) {
   const samples = usePhotoModeSamples();
@@ -166,13 +171,36 @@ export const PoolViewport = memo(function PoolViewport({
           {scene.photoMode ? null : (
             <Button
               type="button"
-              variant="viewport"
+              variant={renderPhase === "complete" ? "viewportActive" : "viewport"}
               size="sm"
               onClick={onGeneratePhotorealisticRender}
-              title="Exports this configuration for the Blender/Cycles render pipeline -- see rendering/blender/"
+              title={
+                renderPhase === "rendering"
+                  ? "Cancel the render"
+                  : renderPhase === "complete"
+                    ? "Download the finished PNG"
+                    : "Renders this configuration through the Blender/Cycles pipeline -- see rendering/blender/"
+              }
             >
-              <Aperture />
-              Generate Photorealistic Render
+              {renderPhase === "rendering" ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  {renderProgress
+                    ? `Rendering… ${Math.round((renderProgress.current / renderProgress.total) * 100)}%`
+                    : "Rendering…"}
+                  <X className="size-3.5" strokeWidth={1.5} />
+                </>
+              ) : renderPhase === "complete" ? (
+                <>
+                  <Download />
+                  Download Render
+                </>
+              ) : (
+                <>
+                  <Aperture />
+                  {renderPhase === "error" ? "Retry Photorealistic Render" : "Generate Photorealistic Render"}
+                </>
+              )}
             </Button>
           )}
           <Button

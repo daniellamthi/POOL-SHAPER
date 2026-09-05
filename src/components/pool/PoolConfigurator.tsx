@@ -9,9 +9,14 @@ import { ConfiguratorProvider } from "@/lib/pool/store";
 import { resolveMaterials } from "@/lib/pool/materials";
 import { ThemeProvider, useTheme } from "@/lib/theme";
 import {
+  cancelRenderJob,
   downloadPhotorealisticRenderJob,
+  getRenderOutputUrl,
+  isRenderBridgeAvailable,
   preparePhotorealisticRenderJob,
+  runPhotorealisticRender,
   serializePoolRenderConfig,
+  type RenderJobStatus,
 } from "@/lib/render-pipeline";
 import { ProjectTypeStep } from "@/configurator/steps/project-type";
 import { PoolTypeStep } from "@/configurator/steps/pool-type";
@@ -117,8 +122,9 @@ function ConfiguratorLayout() {
         finish: config.finish,
         linerColor: config.linerColor,
         mosaicFinish: config.mosaicFinish,
+        skimmerFinish: config.skimmerFinish,
       }),
-    [config.finish, config.linerColor, config.mosaicFinish],
+    [config.finish, config.linerColor, config.mosaicFinish, config.skimmerFinish],
   );
 
   const [showMeasurements, setShowMeasurements] = useState(true);
@@ -159,25 +165,89 @@ function ConfiguratorLayout() {
   // "Generate Photorealistic Render" -- hands the current configuration to
   // the separate Blender/Cycles pipeline (see src/lib/render-pipeline/ and
   // rendering/blender/). This app deploys to Cloudflare Workers, which
-  // cannot run Blender itself, so this exports a validated JSON snapshot and
-  // shows the exact CLI command to render it wherever Blender is installed
-  // -- it never touches the live Three.js scene or blocks the configurator.
-  const handleGeneratePhotorealisticRender = useCallback(() => {
+  // cannot run Blender itself, so the real render runs through the local
+  // dev bridge (scripts/render-bridge.mjs, `npm run render-bridge`) when
+  // it's reachable; without it, this falls back to exporting the validated
+  // JSON + the exact CLI command, exactly as before. Either way it never
+  // touches the live Three.js scene or blocks the configurator.
+  type RenderPhase = "idle" | "rendering" | "complete" | "error";
+  const [renderPhase, setRenderPhase] = useState<RenderPhase>("idle");
+  const [renderProgress, setRenderProgress] = useState<RenderJobStatus["progress"]>(null);
+  const [renderJobId, setRenderJobId] = useState<string | null>(null);
+  const renderAbortRef = useRef<AbortController | null>(null);
+
+  const downloadRenderedPng = useCallback((jobId: string) => {
+    const link = document.createElement("a");
+    link.href = getRenderOutputUrl(jobId);
+    link.download = `pool-render-${jobId}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, []);
+
+  const handleGeneratePhotorealisticRender = useCallback(async () => {
+    if (renderPhase === "rendering") {
+      renderAbortRef.current?.abort();
+      if (renderJobId) void cancelRenderJob(renderJobId);
+      setRenderPhase("idle");
+      setRenderProgress(null);
+      toast.info("Render cancelled");
+      return;
+    }
+    if (renderPhase === "complete" && renderJobId) {
+      downloadRenderedPng(renderJobId);
+      return;
+    }
+
+    let job;
     try {
       const renderConfig = serializePoolRenderConfig({ config, outline, skimmers, theme });
-      const job = preparePhotorealisticRenderJob(renderConfig);
+      job = preparePhotorealisticRenderJob(renderConfig);
+    } catch (error) {
+      console.error("[PhotorealisticRender] invalid render config", error);
+      toast.error("Couldn't prepare the render config", {
+        description: error instanceof Error ? error.message : "Unknown error.",
+      });
+      return;
+    }
+
+    const bridgeUp = await isRenderBridgeAvailable();
+    if (!bridgeUp) {
       downloadPhotorealisticRenderJob(job);
-      toast.success("Render config exported", {
-        description: `Run this once Blender is installed: ${job.cyclesCommand}`,
+      toast.info("Local render bridge isn't running", {
+        description: `Start it with "npm run render-bridge", or run manually: ${job.cyclesCommand}`,
         duration: 15000,
       });
+      return;
+    }
+
+    setRenderPhase("rendering");
+    setRenderProgress(null);
+    setRenderJobId(null);
+    const controller = new AbortController();
+    renderAbortRef.current = controller;
+
+    try {
+      const jobId = await runPhotorealisticRender(job.config, {
+        signal: controller.signal,
+        onProgress: (status) => setRenderProgress(status.progress),
+      });
+      // The user's own Cancel click already reset the UI and told them --
+      // this response is racing in after that, so it must not resurrect a
+      // finished-looking state (or a stray "complete" toast) over it.
+      if (controller.signal.aborted) return;
+      setRenderJobId(jobId);
+      setRenderPhase("complete");
+      toast.success("Render complete", { description: "Your photorealistic render is ready." });
     } catch (error) {
-      console.error("[PhotorealisticRender] failed to export render config", error);
-      toast.error("Couldn't export the render config", {
+      if (controller.signal.aborted) return;
+      setRenderPhase("error");
+      console.error("[PhotorealisticRender] render failed", error);
+      toast.error("Render failed", {
         description: error instanceof Error ? error.message : "Unknown error.",
       });
     }
-  }, [config, outline, skimmers, theme]);
+  }, [config, outline, skimmers, theme, renderPhase, renderJobId, downloadRenderedPng]);
 
   const renovationWorkflow = config.projectType === "renovation";
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
@@ -283,6 +353,8 @@ function ConfiguratorLayout() {
             photoModeUnsupported={photoModeUnsupported}
             onPhotoModeUnsupported={handlePhotoModeUnsupported}
             onGeneratePhotorealisticRender={handleGeneratePhotorealisticRender}
+            renderPhase={renderPhase}
+            renderProgress={renderProgress}
           />
           <LiveSummary />
         </main>

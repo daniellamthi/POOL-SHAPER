@@ -53,15 +53,20 @@ export function LiveSummary() {
 
   return (
     <aside
-      className="pointer-events-none absolute right-6 top-6 z-10 hidden w-60 rounded-[1.375rem] border border-hairline/70 bg-card/93 p-5 text-foreground shadow-[0_30px_70px_-44px_rgba(0,0,0,0.6)] xl:block"
+      className="pointer-events-none absolute right-6 top-6 z-10 hidden w-56 border-l border-hairline/80 bg-card/88 px-4 py-3.5 text-foreground backdrop-blur-sm xl:block"
       aria-label="Live configuration summary"
     >
-      <p className="label-xs mb-4">Live specification</p>
+      <p className="label-xs mb-2.5">Live specification</p>
       <dl>
         {rows.map(([label, value]) => (
-          <div key={label} className="border-b border-hairline/55 py-2.5 last:border-0 last:pb-0">
-            <dt className="label-xs">{label}</dt>
-            <dd className="mt-1 text-[11px] font-light leading-relaxed text-foreground/92">
+          <div
+            key={label}
+            className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2 border-b border-hairline/45 py-1.5 last:border-0 last:pb-0"
+          >
+            <dt className="text-[8px] font-medium uppercase leading-4 tracking-[0.12em] text-muted-foreground">
+              {label}
+            </dt>
+            <dd className="text-[10px] font-normal leading-4 text-foreground/88">
               {value}
             </dd>
           </div>

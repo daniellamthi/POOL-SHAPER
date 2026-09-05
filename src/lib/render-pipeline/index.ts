@@ -34,3 +34,11 @@ export {
   downloadPhotorealisticRenderJob,
   type PhotorealisticRenderJob,
 } from "./renderJob";
+export {
+  isRenderBridgeAvailable,
+  runPhotorealisticRender,
+  getRenderOutputUrl,
+  cancelRenderJob,
+  type RenderJobPhase,
+  type RenderJobStatus,
+} from "./renderBackend";

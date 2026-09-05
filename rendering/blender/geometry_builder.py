@@ -125,10 +125,46 @@ def build_water(config: dict, collection) -> "bpy.types.Object":
     return _new_mesh_object("pool-water", verts, faces, collection)
 
 
+# How far past the coping's outer edge the deck plane extends. Generous and
+# fixed rather than derived from the pool's own footprint -- like the live
+# app's `deckSize = Math.max(40, radius * 14)` studio floor, this only needs
+# to reach past whatever the camera preset frames, not match any real size.
+_GROUND_MARGIN_M = 20.0
+
+
+def build_ground(config: dict, collection) -> "bpy.types.Object":
+    """A flat deck plane flush with the coping's own outer edge, extending
+    well past the camera frame. Without it the pool has no surface to sit on
+    or cast a shadow onto -- it reads as a CG asset floating in front of the
+    HDRI rather than an installed pool on a terrace (the single biggest
+    "this is a 3D model, not a photo" tell in the first real renders).
+
+    Built as a ring between two offsets of the same outline -- the coping's
+    own outer edge (`_offset_outline_2d(outline, coping_width)`, identical to
+    what `build_coping` already uses, so the two meshes meet with no seam or
+    z-fighting) and a much larger offset of that same outline. Both offsets
+    share the source outline's vertex order/count, so this ring-of-quads
+    works for any simple polygon (rectangle or custom), not just rectangles.
+    """
+    outline = config["shape"]["outline"]
+    coping_width = config["coping"]["width"]
+    ground_y = config["verticalLayout"]["copingY"]
+    inner = _offset_outline_2d(outline, coping_width)
+    outer = _offset_outline_2d(outline, coping_width + _GROUND_MARGIN_M)
+    n = len(outline)
+    verts = _outline_to_vectors(inner, ground_y) + _outline_to_vectors(outer, ground_y)
+    faces = []
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((i, j, n + j, n + i))
+    return _new_mesh_object("pool-ground", verts, faces, collection)
+
+
 def build_pool_geometry(config: dict, collection) -> dict:
-    """Builds floor/walls/coping/water for the given config and returns the
-    created objects keyed by role, so material_builder.py / water_builder.py
-    can assign materials without re-deriving which object is which."""
+    """Builds floor/walls/coping/water/ground for the given config and
+    returns the created objects keyed by role, so material_builder.py /
+    water_builder.py can assign materials without re-deriving which object
+    is which."""
     if config["shape"]["kind"] not in ("rectangle", "custom"):
         raise ValueError(f"Unsupported shape kind: {config['shape']['kind']!r}")
 
@@ -137,6 +173,7 @@ def build_pool_geometry(config: dict, collection) -> dict:
         "walls": build_walls(config, collection),
         "coping": build_coping(config, collection),
         "water": build_water(config, collection),
+        "ground": build_ground(config, collection),
     }
 
     for obj in objects.values():

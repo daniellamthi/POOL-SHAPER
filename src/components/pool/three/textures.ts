@@ -1,5 +1,37 @@
 import * as THREE from "three";
 
+/** Separable, wrap-around box blur (sliding-window sum, O(size²) total) --
+ * used to extract the low-frequency component of a photographed texture so
+ * it can be subtracted back out before deriving bump/roughness detail. */
+function boxBlurWrapped(src: Float32Array, size: number, radius: number): Float32Array {
+  const windowSize = radius * 2 + 1;
+  const horizontal = new Float32Array(size * size);
+  const out = new Float32Array(size * size);
+
+  for (let y = 0; y < size; y++) {
+    const row = y * size;
+    let sum = 0;
+    for (let k = -radius; k <= radius; k++) sum += src[row + ((k + size) % size)]!;
+    for (let x = 0; x < size; x++) {
+      horizontal[row + x] = sum / windowSize;
+      sum += src[row + ((x + radius + 1) % size)]! - src[row + ((x - radius + size) % size)]!;
+    }
+  }
+
+  for (let x = 0; x < size; x++) {
+    let sum = 0;
+    for (let k = -radius; k <= radius; k++) sum += horizontal[((k + size) % size) * size + x]!;
+    for (let y = 0; y < size; y++) {
+      out[y * size + x] = sum / windowSize;
+      sum +=
+        horizontal[((y + radius + 1) % size) * size + x]! -
+        horizontal[((y - radius + size) % size) * size + x]!;
+    }
+  }
+
+  return out;
+}
+
 /** Neutral, seamless micro-normal used only to break perfectly flat highlights. */
 export function createMaterialMicroNormalMap(size = 256): THREE.Texture {
   const canvas = document.createElement("canvas");
@@ -217,7 +249,15 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
     const o = i * 4;
     luminance[i] = (data[o]! * 0.2126 + data[o + 1]! * 0.7152 + data[o + 2]! * 0.0722) / 255;
   }
-  const at = (x: number, y: number) => luminance[((y + size) % size) * size + ((x + size) % size)]!;
+  // The source photo's own soft studio lighting/vignette is a broad,
+  // slow luminance gradient -- turned directly into surface relief it reads
+  // as cloudy/blotchy patches once tiled. Subtracting a blurred (low-
+  // frequency) estimate leaves only genuine high-frequency detail (grout
+  // joints, print grain) for the Sobel pass below to pick up.
+  const lowFrequency = boxBlurWrapped(luminance, size, 24);
+  const detail = new Float32Array(size * size);
+  for (let i = 0; i < size * size; i++) detail[i] = luminance[i]! - lowFrequency[i]! + 0.5;
+  const at = (x: number, y: number) => detail[((y + size) % size) * size + ((x + size) % size)]!;
 
   const normalImage = new Uint8ClampedArray(size * size * 4);
   const roughnessImage = new Uint8ClampedArray(size * size * 4);

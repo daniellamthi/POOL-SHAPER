@@ -135,6 +135,7 @@ export function serializePoolRenderConfig(
     finish: config.finish,
     linerColor: config.linerColor,
     mosaicFinish: config.mosaicFinish,
+    skimmerFinish: config.skimmerFinish,
   });
 
   const cameraPose = getCameraPose({

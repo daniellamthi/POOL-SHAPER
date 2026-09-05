@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&family=Manrope:wght@200..800&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -8,13 +7,13 @@
 /*
  * POOL WELLNESS — design system
  * Premium dark: deep navy / warm ivory, gold CTA accent, teal water accent.
- * Titles in Fraunces (display serif), UI/body in Manrope.
+ * Titles, UI and body in Futura PT.
  */
 
 @theme inline {
-  --font-sans: "Manrope", "Inter", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", "SF Pro Display", ui-serif, serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Futura PT", Futura, "Century Gothic", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Futura PT", Futura, "Century Gothic", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Futura PT", Futura, "Century Gothic", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);
@@ -203,8 +202,9 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-weight: 300;
-    letter-spacing: -0.005em;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: 0;
     min-width: 320px;
   }
 
@@ -223,9 +223,9 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 300;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    line-height: 1.12;
   }
 
   ::selection {
@@ -233,24 +233,23 @@
   }
 }
 
-/* Small refined uppercase label -- stays on the UI font (Manrope) even when
-   rendered on an h1-h3 (see base layer above): a display serif at 10px
-   uppercase reads worse, not more premium. */
+/* Small refined uppercase label -- stays on the UI font even when
+   rendered on an h1-h3 (see base layer above). */
 @utility label-xs {
   font-family: var(--font-sans);
   font-size: 0.625rem;
-  line-height: 1;
-  font-weight: 400;
+  line-height: 1.2;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   color: var(--muted-foreground);
 }
 
 @utility numeric {
   font-family: var(--font-mono);
-  font-weight: 300;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
 }
 
 /* Solid architectural panel (no backdrop blur/glassmorphism by design) */

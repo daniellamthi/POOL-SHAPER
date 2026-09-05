@@ -18,11 +18,11 @@ interface Props {
 export function StepIndicator({ current, isStepComplete, onSelect, steps }: Props) {
   const visibleSteps = steps ?? [];
   return (
-    <nav aria-label="Configuration steps" className="flex flex-col gap-4">
+    <nav aria-label="Configuration steps" className="flex flex-col gap-3.5">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="label-xs">Step {String(current + 1).padStart(2, "0")}</p>
-          <p className="mt-2 font-display text-[1.45rem] tracking-[-0.04em] text-foreground/95">
+          <p className="mt-1.5 font-display text-[1.25rem] tracking-[-0.025em] text-foreground/95">
             {visibleSteps[current]?.short}
           </p>
         </div>
@@ -31,7 +31,7 @@ export function StepIndicator({ current, isStepComplete, onSelect, steps }: Prop
         </span>
       </div>
 
-      <ol className="relative flex items-center justify-between gap-2 rounded-full border border-hairline/80 bg-card/30 px-3 py-3 backdrop-blur-sm">
+      <ol className="relative flex items-center justify-between gap-1 border-t border-hairline/70 pt-3">
         {visibleSteps.map((step) => {
           const active = step.index === current;
           const done = isStepComplete(step.index) && step.index < current;
@@ -46,18 +46,18 @@ export function StepIndicator({ current, isStepComplete, onSelect, steps }: Prop
                 aria-label={step.title}
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "group relative flex w-full items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/40 disabled:cursor-default",
+                  "group relative flex h-9 w-full items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/40 disabled:cursor-default",
                   active && "pointer-events-none",
                 )}
               >
                 <span
                   className={cn(
-                    "flex size-7 items-center justify-center rounded-full border text-[9px] font-medium tracking-[0.18em] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                    "flex size-5.5 items-center justify-center rounded-full border text-[8px] font-medium tracking-[0.08em] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
                     active
-                      ? "border-primary bg-primary text-primary-foreground shadow-[0_14px_28px_-18px_rgba(120,118,215,0.95)]"
+                      ? "border-primary bg-primary text-primary-foreground"
                       : done
-                        ? "border-foreground/30 bg-foreground/8 text-foreground/80"
-                        : "border-border bg-background text-muted-foreground/65 group-hover:border-foreground/25 group-hover:text-foreground/75",
+                        ? "border-foreground/25 bg-transparent text-foreground/75"
+                        : "border-border/80 bg-transparent text-muted-foreground/60 group-hover:border-foreground/25 group-hover:text-foreground/75",
                   )}
                 >
                   {String(step.index + 1).padStart(2, "0")}

@@ -502,6 +502,9 @@ export default function PoolScene({
           plan={skimmers}
           copingThickness={copingThickness}
           wallTopY={verticalLayout.wallTopY}
+          color={materials.skimmer.color}
+          roughness={materials.skimmer.roughness}
+          poolType={poolType}
         />
       ) : null}
 
@@ -575,11 +578,10 @@ export default function PoolScene({
         layout={verticalLayout}
         skimmers={skimmers}
         photoMode={photoMode}
-        includeExternalStaircase={
-          poolType === "above-ground" &&
-          system === "skimmer" &&
-          features.includes("externalStaircase")
-        }
+        // The exterior/staircase framing must never hijack the Step 05
+        // Pool System camera -- that step's premium front view (both
+        // skimmers, centred, from inside looking out) always wins.
+        includeExternalStaircase={false}
       />
 
       {/* Premium post pass -- only ever mounts (and only ever fetches its
