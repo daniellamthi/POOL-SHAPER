@@ -50,8 +50,32 @@ export const RENDERING_QUALITY_PRESETS: Readonly<
   },
 };
 
-/** Temporarily set to Experience for live visual verification in the browser. */
-export const ACTIVE_RENDERING_QUALITY = RENDERING_QUALITY_PRESETS.experience;
+/**
+ * One-time device heuristic, evaluated when this (browser-only, lazily
+ * loaded) module is first imported: Experience's 4K shadow maps, 2x DPR,
+ * planar reflection and postprocessing are desktop-class GPU cost, so
+ * touch/small-viewport/low-core devices get the lighter Configuration tier
+ * instead. This used to be hardcoded to Experience for every visitor
+ * (left over from browser verification) -- correctness on real content is
+ * unaffected either way, but that meant no device ever actually got the
+ * lighter tier the preset system already defines. Conservative on purpose:
+ * any single low-power signal downgrades, since shipping poor mobile FPS
+ * costs more than a desktop losing a reflection it wouldn't render slowly
+ * anyway.
+ */
+function detectRenderingQualityMode(): RenderingQualityMode {
+  if (typeof navigator === "undefined" || typeof window === "undefined") return "experience";
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const smallViewport = window.matchMedia?.("(max-width: 767px)").matches ?? false;
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  const limitedMemory = typeof deviceMemory === "number" && deviceMemory <= 4;
+  const limitedCores =
+    typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 4;
+  const isLowPower = coarsePointer || smallViewport || limitedMemory || limitedCores;
+  return isLowPower ? "configuration" : "experience";
+}
+
+export const ACTIVE_RENDERING_QUALITY = RENDERING_QUALITY_PRESETS[detectRenderingQualityMode()];
 
 export const SCENE_VISUAL_PRESET = {
   backgrounds: {

@@ -9,7 +9,8 @@ its own recommendations were already implemented — treat both as partially
 stale; re-verify claims against code before trusting them).
 
 ## CURRENT TASK
-None in progress. Last session closed out cleanly after the fix below.
+None in progress. Last session closed out cleanly after the fixes below
+(AUTO-001, AUTO-004).
 
 ## NEXT TASK (READY)
 Re-run a fresh audit against `docs/IMPROVEMENT_ROADMAP.md` item list — several
@@ -41,6 +42,18 @@ See `git log -1` on `claude/zen-cannon-0akmda`. This session's commit fixes
 a broken geometry-audit invariant (see KNOWN REGRESSIONS below, now FIXED).
 
 ## KNOWN REGRESSIONS
+- FIXED this session: `ACTIVE_RENDERING_QUALITY` in `src/configurator/3d/
+  scene/visual-preset.ts` was hardcoded to the highest ("experience")
+  rendering tier for every visitor (a debug leftover comment admitted as
+  much), making the lighter "configuration" tier the preset system already
+  defines dead code and leaving mobile/low-power devices with no real
+  quality scaling. Replaced with a conservative device heuristic (coarse
+  pointer OR narrow viewport OR <=4 cores OR <=4GB `deviceMemory` ->
+  configuration; otherwise experience), evaluated once at module import in
+  the same browser-only lazy chunk — no consumer files changed. Verified
+  with a Playwright smoke test at 1440x900 and 390x844 (touch) viewports:
+  pool renders correctly, no console errors, no black canvas at either
+  size. See `docs/AUTONOMOUS_BACKLOG.md` AUTO-004.
 - FIXED this session: `scripts/geometry-audit.ts` asserted that the
   Interior-Finish (liner/mosaic) camera target exactly equalled the
   Skimmer-master camera target on both horizontal axes. That invariant is

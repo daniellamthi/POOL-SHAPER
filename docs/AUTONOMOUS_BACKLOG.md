@@ -59,3 +59,31 @@ Statuses: READY, IN_PROGRESS, BLOCKED, COMPLETE.
   close-up, skimmer variants, overflow close-up, water close-up); committed
   as baseline images or compared against a stored baseline.
 - Status: READY.
+
+## AUTO-004
+- Problem: `ACTIVE_RENDERING_QUALITY` (`src/configurator/3d/scene/
+  visual-preset.ts`) — the single source of truth for DPR, shadow-map size,
+  postprocessing, planar reflections and anisotropy across `PoolScene.tsx`,
+  `PoolModel.tsx` and `WaterSurfaceMaterial.tsx` — was hardcoded to the
+  `experience` (highest, desktop-class) tier for every visitor, with a
+  comment admitting it was "Temporarily set to Experience for live visual
+  verification in the browser." The lighter `configuration` tier the preset
+  system already defines was dead code: nothing ever selected it. This
+  directly contradicts product-brief Section 24 (mobile is first-class,
+  "quality automatically scales") and Section 28 (automatic quality tier).
+- Evidence: `grep -rn ACTIVE_RENDERING_QUALITY src` showed only the
+  hardcoded module export; no `isMobile`/`matchMedia`/GPU-tier signal fed
+  into it anywhere in the 3D scene path.
+- Expected gain: real mobile/low-power-device FPS improvement (lighter
+  shadow maps, no forced 2x DPR, no planar reflection/postprocessing) with
+  zero desktop visual change, since desktop still resolves to `experience`.
+- Risk: low — single-file change, no consumer files touched, preset
+  *values* untouched (only which preset gets selected).
+- Files: `src/configurator/3d/scene/visual-preset.ts`.
+- Acceptance criteria: `npx tsc --noEmit`, `npm run lint` (no new errors),
+  `npm run build`, `npm run test:geometry` all pass; manual smoke test
+  (Playwright + the pre-installed Chromium, since `chromium-cli` isn't
+  available in this environment) confirms the 3D pool renders correctly at
+  both a 1440x900 desktop viewport and a 390x844 touch/mobile viewport with
+  no console errors and no black canvas.
+- Status: COMPLETE.
