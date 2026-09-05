@@ -24,7 +24,7 @@ BLOCKED TASKS
   geometry-focused task is next picked up.
 
 LAST GOOD COMMIT
-eca3e91 -- perf: memoize procedural micro-detail canvas textures
+d9535f6 -- perf: share skimmer frame material instead of per-mesh instances
 
 KNOWN REGRESSIONS
 - `npm run test:geometry` fails on a clean checkout (baseline commit
