@@ -24,7 +24,7 @@ BLOCKED TASKS
   geometry-focused task is next picked up.
 
 LAST GOOD COMMIT
-(update after each commit in this file)
+eca3e91 -- perf: memoize procedural micro-detail canvas textures
 
 KNOWN REGRESSIONS
 - `npm run test:geometry` fails on a clean checkout (baseline commit
