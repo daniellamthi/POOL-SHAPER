@@ -509,6 +509,8 @@ export default function PoolScene({
           wallTopY={verticalLayout.wallTopY}
           color={materials.skimmer.color}
           roughness={materials.skimmer.roughness}
+          metalness={materials.skimmer.metalness}
+          variant={materials.skimmer.type}
           poolType={poolType}
         />
       ) : null}

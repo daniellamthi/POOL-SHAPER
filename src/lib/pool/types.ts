@@ -24,7 +24,12 @@ export type MosaicFinishId = `mosaic-${string}`;
 
 /** Skimmer face-frame finish. Kept separate from the interior liner/mosaic
  * finish list -- extensible for more finishes later without touching those. */
-export type SkimmerFinishId = "white" | "graphite" | "sand";
+export type SkimmerFinishId = "white" | "graphite" | "sand" | "steel";
+
+/** Skimmer housing family -- real geometry differences (throat/frame
+ * proportions, recess depth, waterline relationship), not a colour swap.
+ * See `SKIMMER_TYPES` (src/lib/pool/config.ts) and `Skimmers.tsx`. */
+export type SkimmerTypeId = "standard" | "slim" | "highWaterline" | "flush";
 
 export type PoolFeatureId = "ledLighting" | "hydromassage" | "externalStaircase";
 
@@ -98,6 +103,7 @@ export interface PoolConfig {
   system: SystemType;
   overflowType: OverflowType;
   skimmerFinish: SkimmerFinishId;
+  skimmerType: SkimmerTypeId;
   finish: FinishMaterial;
   linerColor: LinerColor;
   mosaicFinish: MosaicFinishId;

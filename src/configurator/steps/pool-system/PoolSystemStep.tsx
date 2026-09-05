@@ -1,6 +1,6 @@
 import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
-import { SKIMMER_FINISHES } from "@/lib/pool/config";
+import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
 
 /**
@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
  * Engineering values remain derived from the existing configurator store.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const { config, setSystem, setOverflowType, setSkimmerFinish } = useConfigurator();
+  const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType } =
+    useConfigurator();
 
   const selectSkimmer = () => {
     setSystem("skimmer");
@@ -36,8 +37,20 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
         >
           <div className="overflow-hidden">
             <div className="flex flex-col gap-4 rounded-2xl border border-hairline p-5">
+              <p className="label-xs">Tipo skimmer</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {SKIMMER_TYPES.map((option) => (
+                  <OptionCard
+                    key={option.id}
+                    title={option.title}
+                    description={option.description}
+                    selected={config.skimmerType === option.id}
+                    onSelect={() => setSkimmerType(option.id)}
+                  />
+                ))}
+              </div>
               <p className="label-xs">Finitura skimmer</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {SKIMMER_FINISHES.map((option) => (
                   <SwatchOption
                     key={option.id}

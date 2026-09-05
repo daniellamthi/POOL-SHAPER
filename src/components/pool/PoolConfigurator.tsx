@@ -123,8 +123,15 @@ function ConfiguratorLayout() {
         linerColor: config.linerColor,
         mosaicFinish: config.mosaicFinish,
         skimmerFinish: config.skimmerFinish,
+        skimmerType: config.skimmerType,
       }),
-    [config.finish, config.linerColor, config.mosaicFinish, config.skimmerFinish],
+    [
+      config.finish,
+      config.linerColor,
+      config.mosaicFinish,
+      config.skimmerFinish,
+      config.skimmerType,
+    ],
   );
 
   const [showMeasurements, setShowMeasurements] = useState(true);

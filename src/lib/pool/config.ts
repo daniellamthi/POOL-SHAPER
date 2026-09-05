@@ -10,6 +10,7 @@ import type {
   PoolType,
   PoolShapeId,
   SkimmerFinishId,
+  SkimmerTypeId,
   StepDefinition,
 } from "./types";
 
@@ -163,16 +164,52 @@ export const FINISHES: ReadonlyArray<{
 ];
 
 /** Skimmer face-frame finish. A short, self-contained list -- extend it here
- * when more finishes are needed, nothing else has to change. */
+ * when more finishes are needed, nothing else has to change. `metalness`
+ * defaults to 0 (moulded ABS) except the satin AISI-316-style steel finish. */
 export const SKIMMER_FINISHES: ReadonlyArray<{
   id: SkimmerFinishId;
   title: string;
   hex: string;
   roughness: number;
+  metalness: number;
 }> = [
-  { id: "white", title: "Bianco", hex: "#f5f5f1", roughness: 0.24 },
-  { id: "graphite", title: "Antracite", hex: "#3a3d3f", roughness: 0.32 },
-  { id: "sand", title: "Sabbia", hex: "#d8cdb8", roughness: 0.3 },
+  { id: "white", title: "Bianco ABS", hex: "#f5f5f1", roughness: 0.24, metalness: 0 },
+  { id: "graphite", title: "Antracite ABS", hex: "#3a3d3f", roughness: 0.32, metalness: 0 },
+  { id: "sand", title: "Sabbia ABS", hex: "#d8cdb8", roughness: 0.3, metalness: 0 },
+  // Satin AISI-316-style stainless steel -- brushed, not mirror-polished, so
+  // no fake chrome: roughness is high enough to keep specular highlights soft.
+  { id: "steel", title: "Acciaio satinato", hex: "#c7cbca", roughness: 0.4, metalness: 0.9 },
+];
+
+/** Skimmer housing family. Each id maps to a real geometry variant in
+ * `Skimmers.tsx` (`SKIMMER_GEOMETRY`) -- differences are dimensional
+ * (throat/frame proportions, recess depth, waterline offset), never a
+ * colour-only reskin. */
+export const SKIMMER_TYPES: ReadonlyArray<{
+  id: SkimmerTypeId;
+  title: string;
+  description: string;
+}> = [
+  {
+    id: "standard",
+    title: "Standard Refined",
+    description: "Moulded face frame with a visible raised profile and classic proportions.",
+  },
+  {
+    id: "slim",
+    title: "Slim / Modern",
+    description: "Thin low-profile frame, minimal reveal, wider glass-like opening.",
+  },
+  {
+    id: "highWaterline",
+    title: "High-Waterline",
+    description: "Short housing set high against the coping for a near-brimming water line.",
+  },
+  {
+    id: "flush",
+    title: "Architectural Flush",
+    description: "Frameless, near-flush plate with a fine shadow-gap reveal in the wall.",
+  },
 ];
 
 export const LINER_COLORS: ReadonlyArray<{
