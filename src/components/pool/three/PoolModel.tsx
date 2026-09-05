@@ -10,6 +10,7 @@ import {
   createWallGeometry,
 } from "./poolGeometry";
 import {
+  createMaterialMicroAoMap,
   createMaterialMicroNormalMap,
   createMaterialMicroRoughnessMap,
   createTriplanarDetailMaps,
@@ -399,16 +400,18 @@ export function PoolModel({
 
   const materialMicroNormal = useMemo(() => createMaterialMicroNormalMap(), []);
   const materialMicroRoughness = useMemo(() => createMaterialMicroRoughnessMap(), []);
+  const materialMicroAo = useMemo(() => createMaterialMicroAoMap(), []);
   const dataAnisotropy = Math.min(ACTIVE_RENDERING_QUALITY.textureAnisotropy, maxAnisotropy);
-  // Real bump/roughness derived from the liner's or mosaic's own photographed
-  // pattern when available; the generic sine-noise field is only a fallback
-  // (e.g. before the image has produced readable pixel data).
+  // Real bump/roughness/AO derived from the liner's or mosaic's own
+  // photographed pattern when available; the generic sine-noise fields are
+  // only a fallback (e.g. before the image has produced readable pixel data).
   const derivedSurfaceDetail = useMemo(
     () => getDerivedDetailMaps(sourceSurfaceMap),
     [sourceSurfaceMap],
   );
   const surfaceMicroNormal = derivedSurfaceDetail?.normalMap ?? materialMicroNormal;
   const surfaceMicroRoughness = derivedSurfaceDetail?.roughnessMap ?? materialMicroRoughness;
+  const surfaceMicroAo = derivedSurfaceDetail?.aoMap ?? materialMicroAo;
   const interiorMicroMaps = useMemo(() => {
     const moduleSize = materials.surface.microDetail.moduleSize;
     const floorRepeat = 1 / moduleSize;
@@ -422,6 +425,7 @@ export function PoolModel({
         floorRepeat,
         dataAnisotropy,
       ),
+      floorAo: cloneDataTexture(surfaceMicroAo, floorRepeat, floorRepeat, dataAnisotropy),
       wallNormal: cloneDataTexture(surfaceMicroNormal, wallRepeatX, wallRepeatY, dataAnisotropy),
       wallRoughness: cloneDataTexture(
         surfaceMicroRoughness,
@@ -429,10 +433,12 @@ export function PoolModel({
         wallRepeatY,
         dataAnisotropy,
       ),
+      wallAo: cloneDataTexture(surfaceMicroAo, wallRepeatX, wallRepeatY, dataAnisotropy),
     };
   }, [
     surfaceMicroNormal,
     surfaceMicroRoughness,
+    surfaceMicroAo,
     materials.surface.microDetail.moduleSize,
     perimeter,
     depth,
@@ -458,8 +464,15 @@ export function PoolModel({
       aboveGroundPanelBumpMap.dispose();
       materialMicroNormal.dispose();
       materialMicroRoughness.dispose();
+      materialMicroAo.dispose();
     },
-    [aboveGroundPanelMap, aboveGroundPanelBumpMap, materialMicroNormal, materialMicroRoughness],
+    [
+      aboveGroundPanelMap,
+      aboveGroundPanelBumpMap,
+      materialMicroNormal,
+      materialMicroRoughness,
+      materialMicroAo,
+    ],
   );
   useEffect(
     () => () => Object.values(interiorMicroMaps).forEach((texture) => texture.dispose()),
@@ -685,6 +698,8 @@ export function PoolModel({
               materials.surface.microDetail.normalStrength,
             ]}
             roughnessMap={interiorMicroMaps.wallRoughness}
+            aoMap={interiorMicroMaps.wallAo}
+            aoMapIntensity={0.6}
             roughness={materials.liner.roughness}
             metalness={materials.liner.metalness}
             clearcoat={materials.surface.wallClearcoat}
@@ -709,6 +724,8 @@ export function PoolModel({
               materials.surface.microDetail.normalStrength,
             ]}
             roughnessMap={interiorMicroMaps.floorRoughness}
+            aoMap={interiorMicroMaps.floorAo}
+            aoMapIntensity={0.6}
             roughness={materials.floor.roughness}
             metalness={0.02}
             clearcoat={materials.surface.floorClearcoat}

@@ -106,6 +106,47 @@ export function createMaterialMicroRoughnessMap(size = 256): THREE.Texture {
   return texture;
 }
 
+/**
+ * Near-white occlusion fallback for finishes with no photographed source to
+ * derive real joint/grout shadowing from (see `getDerivedDetailMaps`'s own
+ * `aoMap`, which is preferred whenever one is available). Kept extremely
+ * subtle and only ever modulates indirect light -- direct lighting and base
+ * colour are untouched -- so it reads as gentle micro-occlusion rather than
+ * baked shading.
+ */
+export function createMaterialMicroAoMap(size = 256): THREE.Texture {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d")!;
+  const image = context.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const u = (x / size) * Math.PI * 2;
+      const v = (y / size) * Math.PI * 2;
+      const variation =
+        Math.sin(u * 5 + v * 3) * 0.45 +
+        Math.sin(v * 7 - u * 2) * 0.32 +
+        Math.sin((u + v) * 11) * 0.23;
+      const value = Math.round(246 + variation * 8);
+      const offset = (y * size + x) * 4;
+      image.data[offset] = value;
+      image.data[offset + 1] = value;
+      image.data[offset + 2] = value;
+      image.data[offset + 3] = 255;
+    }
+  }
+  context.putImageData(image, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  return texture;
+}
+
 /** Height field shared by both ripple layers -- broad, slow swells vs. tight, fast chop. */
 function rippleHeight(layer: "broad" | "micro", x: number, y: number, size: number): number {
   const u = (x / size) * Math.PI * 2;
@@ -210,6 +251,9 @@ export function createDualRippleNormalMap(
 export interface DerivedDetailMaps {
   normalMap: THREE.Texture;
   roughnessMap: THREE.Texture;
+  /** Only produced from a real photographed source (see `getDerivedDetailMaps`); the
+   * procedural triplanar generator below has no comparable joint/seam data to derive it from. */
+  aoMap?: THREE.Texture;
 }
 
 const derivedDetailCache = new Map<string, DerivedDetailMaps>();
@@ -261,6 +305,7 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
 
   const normalImage = new Uint8ClampedArray(size * size * 4);
   const roughnessImage = new Uint8ClampedArray(size * size * 4);
+  const aoImage = new Uint8ClampedArray(size * size * 4);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       // Sobel gradient of the real photographed pattern: grout joints and
@@ -294,6 +339,14 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
         roughnessImage[o + 2] =
           Math.round(230 + edge * 25);
       roughnessImage[o + 3] = 255;
+
+      // Same edge signal read as recessed joints/seams instead: real grout
+      // and print-seam grooves receive slightly less indirect light than the
+      // flat tile/panel face around them. Kept close to white (three.js only
+      // applies aoMap to indirect diffuse/specular, never direct light or
+      // base colour) so this stays a gentle cue, not baked shading.
+      aoImage[o] = aoImage[o + 1] = aoImage[o + 2] = Math.round(255 - edge * 70);
+      aoImage[o + 3] = 255;
     }
   }
 
@@ -323,7 +376,20 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
   roughnessMap.generateMipmaps = true;
   roughnessMap.needsUpdate = true;
 
-  const result: DerivedDetailMaps = { normalMap, roughnessMap };
+  const aoCanvas = document.createElement("canvas");
+  aoCanvas.width = size;
+  aoCanvas.height = size;
+  aoCanvas.getContext("2d")!.putImageData(new ImageData(aoImage, size, size), 0, 0);
+  const aoMap = new THREE.CanvasTexture(aoCanvas);
+  aoMap.wrapS = THREE.RepeatWrapping;
+  aoMap.wrapT = THREE.RepeatWrapping;
+  aoMap.colorSpace = THREE.NoColorSpace;
+  aoMap.minFilter = THREE.LinearMipmapLinearFilter;
+  aoMap.magFilter = THREE.LinearFilter;
+  aoMap.generateMipmaps = true;
+  aoMap.needsUpdate = true;
+
+  const result: DerivedDetailMaps = { normalMap, roughnessMap, aoMap };
   derivedDetailCache.set(cacheKey, result);
   return result;
 }
