@@ -16,9 +16,10 @@ Format: ID / problem / evidence / expected gain / risk / files / acceptance crit
 - Evidence: this session's dev-server smoke test required manually wiring a globally-installed Playwright (not a project dependency) and a one-off script; no reusable reference-configuration set exists.
 - Expected gain: objective before/after comparison for all future visual work; directly unblocks confident material/lighting iteration.
 - Risk: Low (additive tooling only).
-- Files (suspects): new `scripts/visual-audit.mjs` or similar, `package.json`.
+- Files: `scripts/visual-audit.mjs` (new), `test-baselines/visual/*.png` (new, committed baselines), `package.json` (`test:visual` / `test:visual:update` scripts), `playwright`/`pixelmatch`/`pngjs` added as devDependencies.
 - Acceptance: deterministic camera/config/viewport/quality reference set per §63; runnable via an `npm run` script.
-- Status: READY — recommended next P1 task once P0 is stable.
+- Status: IN_PROGRESS — harness built and proven deterministic (`npm run test:visual` reports `0/1296000 px differ` re-running against its own just-established baseline), but only 1 of the ~15+ reference configurations from directive §63 exists so far (`landing-desktop`: default rectangle/skimmer/PVC-Liner pool, no interaction, 1440×900). Remaining reference configs (liner/mosaic/coping/skimmer/overflow close-ups, custom shape, mobile viewport, etc.) require driving the actual step-by-step wizard UI (no deep-link/URL state exists — see below) and are follow-up work, not blocking further use of the harness for newly-changed files (add a reference alongside the change that touches it).
+- Follow-up: consider a dev-only test hook (e.g. a window-exposed state-dispatch function, gated out of production builds) to reach deep wizard states without brittle UI click sequences — evaluate cost/benefit before implementing, per LC-18 (don't build speculative infrastructure).
 
 ## AUTO-010 — Interior AO close-up visual verification
 - Problem: `70f0d0c`'s interior AO (ported this session) was verified by code review + typecheck/lint/build/geometry-audit + one default-step Playwright smoke shot, but not by a dedicated Liner/Mosaic close-up screenshot comparing indirect-light darkening at grout/seam lines.

@@ -67,3 +67,14 @@ AFFECTED FILES: `src/components/pool/three/textures.ts`, `src/components/pool/th
 RISK: Low — indirect-light-only, reuses an already-shipped derivation technique and the existing `cloneDataTexture` repeat/anisotropy path.
 STATUS: IN_PROGRESS (code ported verbatim, applied cleanly on top of AUTO-006's `textures.ts` changes; not FIXED/VERIFIED — the §103 material-change close-up validation below is outstanding).
 VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build`, Playwright smoke (default step, no console errors/black canvas). NOT YET DONE: a dedicated Liner/Mosaic close-up screenshot isolating the AO effect — tracked as `AUTO-010` in `docs/AUTONOMOUS_BACKLOG.md` (deterministic visual-regression infra doesn't exist yet to do this cheaply).
+
+## AUTO-011
+CATEGORY: BUILD
+SEVERITY: LOW
+PROBLEM: `npm run preview` (`vite preview`) fails with a 500 error — "Cannot find module `dist/server/server.js`" — instead of serving the production build.
+EVIDENCE: reproduced running `npx vite preview --host 127.0.0.1 --port <n>` after a clean `npm run build`; the app's actual build output goes to `.output/` via Nitro's `cloudflare-module` preset, but TanStack Start's `vite preview` plugin expects a `dist/server/server.js` layout instead. Found while building `scripts/visual-audit.mjs` (AUTO-009), which uses `vite dev` as a workaround.
+REPRODUCTION: `npm run build && npm run preview`, then request the URL it prints.
+EXPECTED BEHAVIOR: `npm run preview` serves the actual production build (or the script should be pointed at a working equivalent, e.g. `wrangler dev`/`nitro preview` for the `cloudflare-module` preset).
+AFFECTED FILES: `vite.config.ts` / TanStack Start preview-plugin configuration (not yet root-caused further); `package.json` `preview` script.
+RISK: Low — does not affect `dev` or `build`, only local preview of the production bundle.
+STATUS: READY (not fixed this session — out of scope for AUTO-009; `scripts/visual-audit.mjs` uses `vite dev` instead, documented in its header comment).

@@ -30,3 +30,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Visual-regression harness scratch output (baselines are committed; the
+# per-run "current" capture and any failure diff images are not).
+test-baselines/visual/*.current.png
+test-baselines/visual/*.diff.png
