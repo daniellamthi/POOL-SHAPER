@@ -539,6 +539,7 @@ for (const testCase of verticalGeometryCases) {
 
     let frontMasterPose: CameraPose | undefined;
     let interiorWidePose: CameraPose | undefined;
+    let linerHorizontalDistance: number | undefined;
     for (const intent of cameraIntents) {
       const intentSystem = intent === "overflow" ? "overflow" : "skimmer";
       const intentLayout = getPoolVerticalLayout({
@@ -586,39 +587,56 @@ for (const testCase of verticalGeometryCases) {
           `${testCase.name}/${poolType}: Overflow changed the existing master camera`,
         );
       }
-      if (intent === "liner") {
+      if (intent === "liner" || intent === "mosaic") {
+        // Liner intentionally sits pulled back from the wall (a more
+        // architectural composition) while Mosaic keeps a tight
+        // material-swatch framing -- see getInteriorFinishCamera's `isLiner`
+        // branch. Both still belong to the same reference wall as the
+        // Skimmer master: on its plane, centred along it, and frontal.
         assert(frontMasterPose, `${testCase.name}/${poolType}: missing Skimmer master`);
-        interiorWidePose = pose;
-        assert(
-          Math.abs(pose.target[0] - frontMasterPose.target[0]) < 1e-10 &&
-            Math.abs(pose.target[2] - frontMasterPose.target[2]) < 1e-10,
-          `${testCase.name}/${poolType}: Interior Finish changed the reference wall target`,
-        );
         const referenceSkimmer =
           cameraSkimmers.positions[Math.floor(cameraSkimmers.positions.length / 2)];
         assert(referenceSkimmer, `${testCase.name}/${poolType}: missing reference skimmer`);
+        const inwardX = Math.sin(referenceSkimmer.rotation);
+        const inwardZ = Math.cos(referenceSkimmer.rotation);
+        const tangentX = inwardZ;
+        const tangentZ = -inwardX;
+        const wallX = referenceSkimmer.x;
+        const wallZ = referenceSkimmer.z;
+        const targetInwardOffset =
+          (pose.target[0] - wallX) * inwardX + (pose.target[2] - wallZ) * inwardZ;
+        assert(
+          Math.abs(targetInwardOffset) < 1e-9,
+          `${testCase.name}/${poolType}/${intent}: Interior Finish target left the reference wall plane`,
+        );
+        const targetTangentOffset =
+          (pose.target[0] - wallX) * tangentX + (pose.target[2] - wallZ) * tangentZ;
+        const masterTangentOffset =
+          (frontMasterPose.target[0] - wallX) * tangentX +
+          (frontMasterPose.target[2] - wallZ) * tangentZ;
+        assert(
+          Math.abs(targetTangentOffset - masterTangentOffset) < 1e-9,
+          `${testCase.name}/${poolType}/${intent}: Interior Finish target is not centred on the reference wall`,
+        );
         const viewX = pose.position[0] - pose.target[0];
         const viewZ = pose.position[2] - pose.target[2];
         const horizontalLength = Math.hypot(viewX, viewZ);
-        const expectedInwardX = Math.sin(referenceSkimmer.rotation);
-        const expectedInwardZ = Math.cos(referenceSkimmer.rotation);
         assert(
-          Math.abs(viewX / horizontalLength - expectedInwardX) < 1e-10 &&
-            Math.abs(viewZ / horizontalLength - expectedInwardZ) < 1e-10,
-          `${testCase.name}/${poolType}: Interior Finish camera is not frontal`,
+          Math.abs(viewX / horizontalLength - inwardX) < 1e-10 &&
+            Math.abs(viewZ / horizontalLength - inwardZ) < 1e-10,
+          `${testCase.name}/${poolType}/${intent}: Interior Finish camera is not frontal`,
         );
-      }
-      if (intent === "mosaic") {
-        assert(interiorWidePose, `${testCase.name}/${poolType}: missing Liner wide pose`);
-        assert(
-          pose.position.every(
-            (value, index) => Math.abs(value - interiorWidePose.position[index]!) < 1e-10,
-          ) &&
-            pose.target.every(
-              (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
-            ),
-          `${testCase.name}/${poolType}: Mosaic camera differs from PVC/Liner`,
-        );
+        if (intent === "liner") {
+          interiorWidePose = pose;
+          linerHorizontalDistance = horizontalLength;
+        } else {
+          assert(interiorWidePose, `${testCase.name}/${poolType}: missing Liner wide pose`);
+          assert(
+            linerHorizontalDistance !== undefined &&
+              horizontalLength < linerHorizontalDistance - 1e-9,
+            `${testCase.name}/${poolType}: Mosaic framing is not tighter than the Liner's pulled-back composition`,
+          );
+        }
       }
       assert(
         pose.target[1] >= intentLayout.floorY - 1e-9 &&
