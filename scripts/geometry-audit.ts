@@ -589,14 +589,24 @@ for (const testCase of verticalGeometryCases) {
       if (intent === "liner") {
         assert(frontMasterPose, `${testCase.name}/${poolType}: missing Skimmer master`);
         interiorWidePose = pose;
-        assert(
-          Math.abs(pose.target[0] - frontMasterPose.target[0]) < 1e-10 &&
-            Math.abs(pose.target[2] - frontMasterPose.target[2]) < 1e-10,
-          `${testCase.name}/${poolType}: Interior Finish changed the reference wall target`,
-        );
         const referenceSkimmer =
           cameraSkimmers.positions[Math.floor(cameraSkimmers.positions.length / 2)];
         assert(referenceSkimmer, `${testCase.name}/${poolType}: missing reference skimmer`);
+        // Interior Finish deliberately targets the wall itself for a close
+        // material read, while the master shot frames the whole pool from
+        // outside -- so the two targets differ along the wall's inward axis
+        // by design (see getInteriorFinishCamera). What must not drift is
+        // the sideways (tangent) position: Interior Finish is only valid on
+        // the very same wall segment the master shot already committed to.
+        const tangentX = Math.cos(referenceSkimmer.rotation);
+        const tangentZ = -Math.sin(referenceSkimmer.rotation);
+        const tangentDrift =
+          (pose.target[0] - frontMasterPose.target[0]) * tangentX +
+          (pose.target[2] - frontMasterPose.target[2]) * tangentZ;
+        assert(
+          Math.abs(tangentDrift) < 1e-9,
+          `${testCase.name}/${poolType}: Interior Finish drifted to a different wall segment`,
+        );
         const viewX = pose.position[0] - pose.target[0];
         const viewZ = pose.position[2] - pose.target[2];
         const horizontalLength = Math.hypot(viewX, viewZ);
@@ -610,14 +620,32 @@ for (const testCase of verticalGeometryCases) {
       }
       if (intent === "mosaic") {
         assert(interiorWidePose, `${testCase.name}/${poolType}: missing Liner wide pose`);
+        // Mosaic keeps a tighter material-swatch framing than Liner's more
+        // pulled-back architectural read (the isLiner branch in
+        // getInteriorFinishCamera), so distance and height differ by
+        // design. The invariant that must hold is that both shots point at
+        // the exact same wall point along the exact same viewing axis.
         assert(
-          pose.position.every(
-            (value, index) => Math.abs(value - interiorWidePose.position[index]!) < 1e-10,
-          ) &&
-            pose.target.every(
-              (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
-            ),
-          `${testCase.name}/${poolType}: Mosaic camera differs from PVC/Liner`,
+          pose.target.every(
+            (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
+          ),
+          `${testCase.name}/${poolType}: Mosaic camera targets a different wall than PVC/Liner`,
+        );
+        const mosaicView = [pose.position[0] - pose.target[0], pose.position[2] - pose.target[2]];
+        const linerView = [
+          interiorWidePose.position[0] - interiorWidePose.target[0],
+          interiorWidePose.position[2] - interiorWidePose.target[2],
+        ];
+        const mosaicLength = Math.hypot(mosaicView[0], mosaicView[1]);
+        const linerLength = Math.hypot(linerView[0], linerView[1]);
+        assert(
+          mosaicLength > 1e-9 && linerLength > 1e-9,
+          `${testCase.name}/${poolType}: Mosaic/Liner camera collapsed onto its target`,
+        );
+        assert(
+          Math.abs(mosaicView[0] / mosaicLength - linerView[0] / linerLength) < 1e-9 &&
+            Math.abs(mosaicView[1] / mosaicLength - linerView[1] / linerLength) < 1e-9,
+          `${testCase.name}/${poolType}: Mosaic camera left the PVC/Liner viewing axis`,
         );
       }
       assert(
