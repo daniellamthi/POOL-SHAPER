@@ -50,8 +50,38 @@ export const RENDERING_QUALITY_PRESETS: Readonly<
   },
 };
 
-/** Temporarily set to Experience for live visual verification in the browser. */
-export const ACTIVE_RENDERING_QUALITY = RENDERING_QUALITY_PRESETS.experience;
+/**
+ * One-time device capability check, resolved at module load. Safe to read
+ * `window`/`navigator` unconditionally: this module is only ever reached
+ * through the lazy-loaded, client-only 3D chunk (see `PoolViewport.tsx`),
+ * never SSR -- the `typeof` guards below exist only for non-browser tooling
+ * (e.g. a future node-based test) importing this module directly.
+ *
+ * Experience assumes a discrete or capable integrated GPU: 4K shadow maps,
+ * postprocessing and a real planar water reflection. Handing that to every
+ * phone/tablet risks exactly the "mobile must be first-class" and
+ * ">=30 FPS on mobile" budgets this project tracks, so low-power devices
+ * fall back to Configuration instead.
+ */
+function selectAutomaticRenderingQuality(): RenderingQualityMode {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return "experience";
+  }
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const smallViewport = window.innerWidth > 0 && window.innerWidth < 820;
+  const lowConcurrency = (navigator.hardwareConcurrency || 8) <= 4;
+  const isLowPower = coarsePointer || smallViewport || lowConcurrency;
+  return isLowPower ? "configuration" : "experience";
+}
+
+/**
+ * Resolved once per session load. Every existing consumer just reads this
+ * constant, so choosing it automatically (instead of the previous hardcoded
+ * "experience") upgrades mobile/low-power behaviour without touching any
+ * downstream file.
+ */
+export const ACTIVE_RENDERING_QUALITY =
+  RENDERING_QUALITY_PRESETS[selectAutomaticRenderingQuality()];
 
 export const SCENE_VISUAL_PRESET = {
   backgrounds: {
