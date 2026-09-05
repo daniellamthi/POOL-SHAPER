@@ -16,26 +16,37 @@ const CAVITY_COLOR = "#202829";
 const SKIMMER_FRONT_SCALE: readonly [number, number, number] = [0.975, 0.25 / 0.195, 1];
 const WATERLINE_PIVOT_Y = -0.004;
 
-const frameMaterial = (
+/**
+ * Every skimmer in the plan shares the same color/roughness/maps (both are
+ * plain props on `Skimmers`, not per-position), and each assembly reuses
+ * the frame material across 8 separate meshes. Building one
+ * `THREE.MeshPhysicalMaterial` in `Skimmers` and attaching it via
+ * `<primitive>` everywhere -- instead of a JSX-per-usage helper that made
+ * React/R3F construct a fresh material object at each of those 8 spots for
+ * every skimmer instance -- turns `positions.length * 8` material
+ * allocations into 1, with identical visual output.
+ */
+function createFrameMaterial(
   color: string,
   roughness: number,
   normalMap: THREE.Texture,
   roughnessMap: THREE.Texture,
-) => (
-  <meshPhysicalMaterial
-    color={color}
-    roughness={roughness}
-    normalMap={normalMap}
-    normalScale={[
-      MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
-      MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
-    ]}
-    roughnessMap={roughnessMap}
-    clearcoat={0.55}
-    clearcoatRoughness={0.1}
-    ior={1.45}
-  />
-);
+): THREE.MeshPhysicalMaterial {
+  const material = new THREE.MeshPhysicalMaterial({
+    color,
+    roughness,
+    normalMap,
+    roughnessMap,
+    clearcoat: 0.55,
+    clearcoatRoughness: 0.1,
+    ior: 1.45,
+  });
+  material.normalScale.set(
+    MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
+    MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
+  );
+  return material;
+}
 
 // Recessed housing geometry (unclamped): its depth runs behind the face
 // frame, into the wall. Fine for a thick in-ground wall, but an
@@ -48,17 +59,11 @@ const CAVITY_FULL_BACK_Z = -0.17;
 const CAVITY_EXTERIOR_CLEARANCE = 0.01;
 
 function SkimmerAssembly({
-  color,
-  roughness,
-  normalMap,
-  roughnessMap,
+  frameMaterial,
   contactAOMap,
   wallThickness,
 }: {
-  color: string;
-  roughness: number;
-  normalMap: THREE.Texture;
-  roughnessMap: THREE.Texture;
+  frameMaterial: THREE.MeshPhysicalMaterial;
   contactAOMap: THREE.Texture;
   /** Real wall thickness at the skimmer's opening, so the hidden cavity
    * housing can be kept from poking through a thin (above-ground) panel
@@ -122,34 +127,58 @@ function SkimmerAssembly({
           A slight bevel (RoundedBox, low smoothness -- cheap geometry)
           replaces the flat box edges so the frame catches highlights like
           real moulded plastic instead of reading as a toy block. */}
-      <RoundedBox args={[0.48, 0.045, 0.035]} radius={0.006} smoothness={2} position={[0, 0.092, 0.018]} castShadow>
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+      <RoundedBox
+        args={[0.48, 0.045, 0.035]}
+        radius={0.006}
+        smoothness={2}
+        position={[0, 0.092, 0.018]}
+        castShadow
+      >
+        <primitive object={frameMaterial} attach="material" />
       </RoundedBox>
-      <RoundedBox args={[0.48, 0.045, 0.035]} radius={0.006} smoothness={2} position={[0, -0.058, 0.018]} castShadow>
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+      <RoundedBox
+        args={[0.48, 0.045, 0.035]}
+        radius={0.006}
+        smoothness={2}
+        position={[0, -0.058, 0.018]}
+        castShadow
+      >
+        <primitive object={frameMaterial} attach="material" />
       </RoundedBox>
-      <RoundedBox args={[0.05, 0.115, 0.035]} radius={0.006} smoothness={2} position={[-0.215, 0.017, 0.018]} castShadow>
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+      <RoundedBox
+        args={[0.05, 0.115, 0.035]}
+        radius={0.006}
+        smoothness={2}
+        position={[-0.215, 0.017, 0.018]}
+        castShadow
+      >
+        <primitive object={frameMaterial} attach="material" />
       </RoundedBox>
-      <RoundedBox args={[0.05, 0.115, 0.035]} radius={0.006} smoothness={2} position={[0.215, 0.017, 0.018]} castShadow>
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+      <RoundedBox
+        args={[0.05, 0.115, 0.035]}
+        radius={0.006}
+        smoothness={2}
+        position={[0.215, 0.017, 0.018]}
+        castShadow
+      >
+        <primitive object={frameMaterial} attach="material" />
       </RoundedBox>
 
       <mesh position={[0, 0.066, 0.039]} castShadow>
         <boxGeometry args={[0.378, 0.01, 0.008]} />
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, -0.032, 0.039]} castShadow>
         <boxGeometry args={[0.378, 0.01, 0.008]} />
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[-0.184, 0.017, 0.039]} castShadow>
         <boxGeometry args={[0.01, 0.108, 0.008]} />
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0.184, 0.017, 0.039]} castShadow>
         <boxGeometry args={[0.01, 0.108, 0.008]} />
-        {frameMaterial(color, roughness, normalMap, roughnessMap)}
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
     </group>
   );
@@ -186,6 +215,12 @@ export function Skimmers({
     return texture;
   }, []);
   const contactAOMap = useMemo(() => createContactAOGradientMap(), []);
+  // Shared across every skimmer position and all 8 frame surfaces within
+  // each one -- see `createFrameMaterial`'s doc comment.
+  const frameMaterial = useMemo(
+    () => createFrameMaterial(color, roughness, normalMap, roughnessMap),
+    [color, roughness, normalMap, roughnessMap],
+  );
   useEffect(
     () => () => {
       normalMap.dispose();
@@ -194,6 +229,7 @@ export function Skimmers({
     },
     [normalMap, roughnessMap, contactAOMap],
   );
+  useEffect(() => () => frameMaterial.dispose(), [frameMaterial]);
   return (
     <group>
       {plan.positions.map((spot, index) => (
@@ -203,10 +239,7 @@ export function Skimmers({
           rotation={[0, spot.rotation, 0]}
         >
           <SkimmerAssembly
-            color={color}
-            roughness={roughness}
-            normalMap={normalMap}
-            roughnessMap={roughnessMap}
+            frameMaterial={frameMaterial}
             contactAOMap={contactAOMap}
             wallThickness={wallThickness}
           />
