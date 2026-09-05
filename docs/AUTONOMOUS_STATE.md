@@ -40,9 +40,14 @@ BLOCKED TASKS
 None currently.
 
 LAST VERIFIED CANONICAL COMMIT
-`claude/pool-photorealism-autonomous` and this session's harness-assigned
-`claude/vibrant-cannon-grk2xt`, HEAD after this session's commit (on top of
-`ac2a458`). Base was `4cddd3f` (= `origin/main`, unchanged).
+`ba26c42` on `claude/pool-photorealism-autonomous`. Reconciled from two
+concurrent sessions working the repo at once (`claude/vibrant-cannon-grk2xt`
+authoring AUTO-010/AUTO-012 above, `claude/vibrant-cannon-2v6g91`
+independently attempting the same AUTO-010 close-ups with an inferior
+implementation, non-force-merged twice keeping the grk2xt version -- see
+`git log --oneline -8` for the merge commits). Both harness branches and
+canonical now point at the same `ba26c42`. Base was `4cddd3f` (=
+`origin/main`, unchanged).
 
 LAST VALIDATED BUILD
 `npm ci` clean, `npx tsc --noEmit` clean, `npm run lint` (86 problems,
