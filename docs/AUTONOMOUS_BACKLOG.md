@@ -27,17 +27,29 @@ underwater color-per-liner are already substantially built).
   unchanged (same generation code, only deduplicated).
 - Status: COMPLETE.
 
-## PERF-2: Share skimmer geometry/materials
+## PERF-2: Share skimmer frame material
 
-- Problem: `Skimmers.tsx` likely re-declares geometry/material JSX per
-  skimmer instance rather than sharing/instancing.
+- Problem: `Skimmers.tsx` textures (normal/roughness/AO) were already
+  shared per `Skimmers` instance, but the frame `<meshPhysicalMaterial>`
+  was declared via a JSX-returning helper called at 8 spots inside
+  `SkimmerAssembly`, so React/R3F constructed a fresh material object at
+  each of those 8 spots for *every* skimmer position (`positions.length * 8`
+  material allocations) even though `color`/`roughness`/maps are identical
+  across the whole plan.
 - Evidence: `docs/PERFORMANCE_REPORT.md` "Safe optimization order" item 2 and
   "Skimmers" cost row ("no shared instancing").
-- Expected gain: fewer geometry/material allocations and draw calls at
-  higher skimmer counts.
-- Risk: medium -- must preserve per-skimmer color/finish/position/rotation.
+- Expected gain: fewer material allocations/GC churn; no visual change
+  (same material properties everywhere).
+- Risk: low -- verified single call site (`PoolScene.tsx`) unchanged props;
+  R3F supports one material object attached to many meshes.
 - Files: `src/components/pool/three/Skimmers.tsx`.
-- Status: READY (next task).
+- Acceptance criteria: typecheck clean, lint clean (prettier auto-fix
+  applied for the resulting JSX reflow), `npm run build` succeeds, no
+  `Skimmers` prop-API change.
+- Status: COMPLETE. (Geometry sharing across skimmer instances -- e.g. the
+  ~14 meshes per assembly repeated per position -- is a separate, higher-
+  effort follow-up not done here; residential skimmer counts are low enough
+  that the report rates it "Low" severity.)
 
 ## GEO-1: Root-cause geometry audit failure
 

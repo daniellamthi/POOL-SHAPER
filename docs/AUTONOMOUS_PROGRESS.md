@@ -29,3 +29,12 @@
   docs/AUTONOMOUS_STATE.md and docs/AUTONOMOUS_BACKLOG.md rather than
   fixing speculatively in the same commit.
 - Committed PERF-1 alone (atomic, verified change only).
+- Implemented PERF-2: `Skimmers.tsx`'s frame material was being constructed
+  fresh (JSX-per-usage helper) at 8 spots inside `SkimmerAssembly` for
+  every skimmer position, despite identical color/roughness/maps across
+  the whole plan. Replaced with one memoized `THREE.MeshPhysicalMaterial`
+  in `Skimmers`, attached via `<primitive attach="material">` at each spot.
+  `eslint --fix` reflowed the affected `RoundedBox` JSX (prettier's line-
+  break choice depends on the whole element, including children).
+  Verified: tsc clean, eslint clean, `npm run build` succeeds, single
+  `<Skimmers>` call site (`PoolScene.tsx`) untouched/prop-compatible.

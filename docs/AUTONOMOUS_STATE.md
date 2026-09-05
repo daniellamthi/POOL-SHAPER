@@ -6,17 +6,17 @@ while preserving the existing configurator flow (see docs/IMPROVEMENT_ROADMAP.md
 and docs/VISUAL_REALISM_MAP.md for the standing priority order).
 
 CURRENT TASK
-Complete: shared/cached procedural CanvasTexture templates (micro-normal,
-micro-roughness, contact-AO gradient) instead of regenerating identical
-per-pixel canvases at every mount site. See "Safe optimization order" item 4
-in docs/PERFORMANCE_REPORT.md.
+Complete: PERF-1 (shared/cached procedural CanvasTexture templates) and
+PERF-2 (shared skimmer frame `THREE.MeshPhysicalMaterial` instead of one
+per mesh per skimmer). See docs/AUTONOMOUS_BACKLOG.md for both.
 
 NEXT TASK
-Pick up docs/PERFORMANCE_REPORT.md "Safe optimization order" item 2: share
-skimmer geometries/materials across `Skimmers.tsx` instances (currently
-re-declared JSX/geometry per skimmer instead of instanced/shared). After
-that, item 3 (adaptive DPR/quality tier) and item 5 (Context selectors, only
-with regression tests first).
+docs/PERFORMANCE_REPORT.md "Safe optimization order" item 3: adaptive
+DPR/quality tier. Then item 5 (Context selectors, only with regression
+tests first -- currently blocked on GEO-1's audit failure being fixed so
+there's a working regression gate). Geometry sharing across skimmer
+*instances* (not just materials) remains a lower-priority follow-up --
+see PERF-2's note in docs/AUTONOMOUS_BACKLOG.md.
 
 BLOCKED TASKS
 - None currently blocking unrelated work. See KNOWN REGRESSIONS below for an
