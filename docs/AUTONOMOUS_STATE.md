@@ -18,13 +18,16 @@ Mosaic strictly tighter than Liner) instead of exact-equality checks that
 could never pass under the current design.
 
 NEXT TASK
-Run a scoped audit of `src/configurator/materials/interior-textures.ts` /
-`src/components/pool/three/textures.ts` against `docs/VISUAL_REALISM_MAP.md`
-gap #1 ("Real per-color PBR texture sets") — confirm which liner/mosaic
-colors still rely on the shared procedural normal/roughness derivation vs.
-authored maps, and whether AO is present. This is priority 2 in the default
-order and the geometry audit script is now available again as a regression
-gate for any material/UV work that follows.
+AUTO-002 (liner/mosaic PBR map audit) is complete — see
+`docs/AUTONOMOUS_BACKLOG.md`; the procedural per-photo normal/roughness
+derivation already satisfies mission section 8, no source change needed.
+Move to default-priority item 5: audit UV/tangent/material-scale correctness
+in `src/components/pool/three/poolGeometry.ts` (winding, seam continuity
+between wall/floor at corners, whether tangents are provided for
+`meshPhysicalMaterial`'s normal maps) using `docs/IMPROVEMENT_ROADMAP.md`
+item 4 ("Refine PoolModel edge profiles/UV/tangents") as the starting
+reference. `npm run test:geometry` is the regression gate for any change
+here.
 
 BLOCKED TASKS
 None currently recorded.

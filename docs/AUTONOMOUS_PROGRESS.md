@@ -19,3 +19,10 @@
 - Created the autonomous state/backlog docs required by the operating
   directive (`AUTONOMOUS_STATE.md`, `AUTONOMOUS_BACKLOG.md`,
   `AUTONOMOUS_PROGRESS.md`, `AUTONOMOUS_DECISIONS.md`) since none existed yet.
+- Audited liner/mosaic PBR maps (AUTO-002, roadmap default-priority item 2).
+  `getDerivedDetailMaps` (`src/components/pool/three/textures.ts`) already
+  derives a photo-correlated normal + roughness map per finish (Sobel
+  gradient of the base-color photo's own high-frequency detail) and it's
+  wired into liner wall/floor, above-ground panel, and coping materials in
+  `PoolModel.tsx`. Conclusion: this already satisfies mission section 8;
+  no source change made. Recorded in `docs/AUTONOMOUS_BACKLOG.md`.

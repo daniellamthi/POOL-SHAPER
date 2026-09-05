@@ -40,4 +40,20 @@ criteria, status.
 - Acceptance criteria: A clear recommendation recorded in
   `docs/AUTONOMOUS_STATE.md`/`docs/AUTONOMOUS_DECISIONS.md` on whether
   authored maps are worth sourcing vs. keeping the procedural approach.
-- Status: READY.
+- Status: COMPLETE (audit only — no source change).
+  `getDerivedDetailMaps` in `src/components/pool/three/textures.ts` already
+  derives a real normal map + roughness-variation map per finish from the
+  loaded base-color photo itself (Sobel gradient of the high-frequency detail
+  after removing the photo's own soft studio-lighting gradient), not generic
+  synthetic noise. It's wired into liner wall/floor, above-ground panel, and
+  coping materials in `PoolModel.tsx` (`interiorMicroMaps`, `copingDetail`,
+  `panelDetail`). This already satisfies mission section 8's "roughness
+  variation" + "micro normal" requirements per finish, photo-correlated
+  rather than shared/generic. No standalone AO map exists, but liners are a
+  near-flat membrane where normal-mapped shading already carries the
+  occlusion cue — a separate baked AO map would add little for this specific
+  material. Recommendation: keep the procedural approach; only revisit if a
+  licensed manufacturer texture catalogue (real photographed normal/
+  roughness/AO sets) becomes available, which is an external asset
+  dependency, not an engineering gap — record as a future BLOCKED item only
+  if that catalogue is actually pursued.
