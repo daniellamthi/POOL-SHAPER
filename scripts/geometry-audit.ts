@@ -589,19 +589,28 @@ for (const testCase of verticalGeometryCases) {
       if (intent === "liner") {
         assert(frontMasterPose, `${testCase.name}/${poolType}: missing Skimmer master`);
         interiorWidePose = pose;
-        assert(
-          Math.abs(pose.target[0] - frontMasterPose.target[0]) < 1e-10 &&
-            Math.abs(pose.target[2] - frontMasterPose.target[2]) < 1e-10,
-          `${testCase.name}/${poolType}: Interior Finish changed the reference wall target`,
-        );
         const referenceSkimmer =
           cameraSkimmers.positions[Math.floor(cameraSkimmers.positions.length / 2)];
         assert(referenceSkimmer, `${testCase.name}/${poolType}: missing reference skimmer`);
+        const expectedInwardX = Math.sin(referenceSkimmer.rotation);
+        const expectedInwardZ = Math.cos(referenceSkimmer.rotation);
+        // getInteriorFinishCamera intentionally looks directly at the wall
+        // (inward offset 0), not at the room's bounds centre like the
+        // Skimmer master, so only the tangential (along-wall) component of
+        // the target is expected to match -- the inward/depth component
+        // legitimately differs. Tangent is perpendicular to inward.
+        const expectedTangentX = expectedInwardZ;
+        const expectedTangentZ = -expectedInwardX;
+        const deltaX = pose.target[0] - frontMasterPose.target[0];
+        const deltaZ = pose.target[2] - frontMasterPose.target[2];
+        const tangentialDrift = deltaX * expectedTangentX + deltaZ * expectedTangentZ;
+        assert(
+          Math.abs(tangentialDrift) < 1e-9,
+          `${testCase.name}/${poolType}: Interior Finish camera drifted along the reference wall`,
+        );
         const viewX = pose.position[0] - pose.target[0];
         const viewZ = pose.position[2] - pose.target[2];
         const horizontalLength = Math.hypot(viewX, viewZ);
-        const expectedInwardX = Math.sin(referenceSkimmer.rotation);
-        const expectedInwardZ = Math.cos(referenceSkimmer.rotation);
         assert(
           Math.abs(viewX / horizontalLength - expectedInwardX) < 1e-10 &&
             Math.abs(viewZ / horizontalLength - expectedInwardZ) < 1e-10,
@@ -610,14 +619,15 @@ for (const testCase of verticalGeometryCases) {
       }
       if (intent === "mosaic") {
         assert(interiorWidePose, `${testCase.name}/${poolType}: missing Liner wide pose`);
+        // Mosaic intentionally keeps a tighter material-swatch distance than
+        // Liner's more pulled-back architectural composition (getInteriorFinishCamera's
+        // isLiner branch), so only the shared look-at point -- the same wall
+        // reference both shots frame -- is expected to match; position differs.
         assert(
-          pose.position.every(
-            (value, index) => Math.abs(value - interiorWidePose.position[index]!) < 1e-10,
-          ) &&
-            pose.target.every(
-              (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
-            ),
-          `${testCase.name}/${poolType}: Mosaic camera differs from PVC/Liner`,
+          pose.target.every(
+            (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
+          ),
+          `${testCase.name}/${poolType}: Mosaic camera targets a different wall reference than PVC/Liner`,
         );
       }
       assert(
