@@ -24,7 +24,7 @@ commits total, all accounted for below).
 | zen-cannon-w0go78 | `a86d4a5` | Same feature, independent (earlier, less-evidenced) implementation | DUPLICATE | SUPERSEDED by `cbe2b2b` | n/a |
 | zen-cannon-6rp4js | `eca3e91` | Memoize procedural micro-detail canvas textures (normal/roughness/AO gradient) shared across mount sites | UNIQUE VERIFIED PRODUCTION CHANGE (perf) | RECOVERED (ported verbatim) | `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build` on canonical HEAD |
 | zen-cannon-6rp4js | `d9535f6` | Share one memoized skimmer frame material instead of building it per mesh (8×/skimmer allocations removed) | UNIQUE VERIFIED PRODUCTION CHANGE (perf) | RECOVERED (ported verbatim) | same as above; lint problem count dropped 90→86 (patch's own `--fix` reflow, not a regression) |
-| zen-cannon-voutw6 | `70f0d0c` | Derive interior AO from photographed liner/mosaic detail (extends existing derived normal/roughness pipeline); adds `createMaterialMicroAoMap` procedural fallback | UNIQUE VERIFIED PRODUCTION CHANGE (material) | RECOVERED (ported verbatim, applies cleanly on top of `eca3e91`) | `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build`, Playwright smoke (default step renders correctly, no console errors beyond one pre-existing unrelated 404) on canonical HEAD. NOTE: no dedicated Liner/Mosaic close-up screenshot taken yet — deterministic visual-regression infra (P1) does not exist yet; flagged as a residual verification gap, not blocking, per this being an indirect-light-only (`aoMap`) addition to an already-shipped derivation technique. |
+| zen-cannon-voutw6 | `70f0d0c` | Derive interior AO from photographed liner/mosaic detail (extends existing derived normal/roughness pipeline); adds `createMaterialMicroAoMap` procedural fallback | UNIQUE VERIFIED PRODUCTION CHANGE (material) | **IN_PROGRESS** (code ported verbatim, applies cleanly on top of `eca3e91`; NOT counted as RECOVERED/done — a material change's definition-of-done (§103) requires close-up, and underwater-if-relevant, visual validation, which has not been performed) | `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build`, Playwright smoke (default step renders correctly, no console errors beyond one pre-existing unrelated 404) on canonical HEAD. Only a wide default-step shot has been taken — no dedicated Liner/Mosaic close-up, and no underwater framing, has been checked. Blocking gap until `AUTO-010` (`docs/AUTONOMOUS_BACKLOG.md`) passes. |
 | zen-cannon-voutw6 | `e23f76f` | `chore: sync package-lock.json` — same `npm ci` / missing `lru-cache` root cause independently found | DUPLICATE (same defect as AUTO-001) | SUPERSEDED by this session's minimal fix (added only the missing entry, excluded npm-version `libc` metadata noise that a full `npm install` regenerates) | `npm ci` clean on canonical HEAD |
 | zen-cannon-6rp4js, w0go78, xkrtvq, voutw6, 0akmda | `83a40bb`, `4c6708b`, `a0b0829` (+ docs hunks inside the above commits) | `docs/AUTONOMOUS_*` state/backlog/progress/decisions/scorecard updates from each session | DOC-ONLY | NO UNIQUE USEFUL CHANGE (each branch's own session-local narrative; superseded by this session's `docs/AUTONOMOUS_STATE.md` / `AUTONOMOUS_ISSUES.md` / this ledger, which describe current canonical reality) | n/a |
 
@@ -39,11 +39,20 @@ check, uses `matchMedia` instead of a raw width comparison) and it carries
 recorded Playwright smoke-test evidence at two viewports that the earlier
 commit lacks.
 
-CONSOLIDATION_STATUS: COMPLETE
+CONSOLIDATION_STATUS: COMPLETE (branch enumeration/review) — 1 item VALIDATION-PENDING
 
-All 12 unique commits across all 7 discovered `zen-cannon-*` branches are
-accounted for (5 RECOVERED, 5 SUPERSEDED/DUPLICATE, 2 DOC-ONLY groups NO
-UNIQUE USEFUL CHANGE). No zen-cannon branch was deleted.
+All 12 unique commits across all 7 discovered `zen-cannon-*` branches have
+been reviewed and are accounted for (4 RECOVERED, 1 IN_PROGRESS, 5
+SUPERSEDED/DUPLICATE, 2 DOC-ONLY groups NO UNIQUE USEFUL CHANGE). No
+zen-cannon branch was deleted, and no branch/commit remains un-reviewed.
+
+The one IN_PROGRESS item (`70f0d0c`, interior AO) is integrated into
+canonical code but does not yet satisfy the material-change definition of
+done (§103: close-up + underwater-if-relevant visual validation) — tracked
+as `AUTO-010`. Per LC-13A this is intentionally NOT one of the terminal
+consolidation dispositions (RECOVERED/DUPLICATE/SUPERSEDED/FAILED-
+REJECTED/DOC-ONLY/NO-UNIQUE-CHANGE): re-classify to RECOVERED only once
+`AUTO-010` passes, or to FAILED/REJECTED-and-revert if it does not.
 
 ## SUBSYSTEM AUDIT NOTES
 

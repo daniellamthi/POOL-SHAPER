@@ -65,5 +65,5 @@ EVIDENCE: `zen-cannon-voutw6` commit `70f0d0c`, extending the existing `getDeriv
 EXPECTED BEHAVIOR: an `aoMap` derived from the same Sobel signal (plus a `createMaterialMicroAoMap` procedural fallback for finishes without usable photo data), wired onto the interior wall/floor `MeshPhysicalMaterial`s' `aoMap`/`aoMapIntensity`. Three.js applies `aoMap` only to indirect diffuse/specular — direct lighting and base colour untouched.
 AFFECTED FILES: `src/components/pool/three/textures.ts`, `src/components/pool/three/PoolModel.tsx`.
 RISK: Low — indirect-light-only, reuses an already-shipped derivation technique and the existing `cloneDataTexture` repeat/anisotropy path.
-STATUS: FIXED (ported `70f0d0c` verbatim; applied cleanly on top of AUTO-006's `textures.ts` changes).
+STATUS: IN_PROGRESS (code ported verbatim, applied cleanly on top of AUTO-006's `textures.ts` changes; not FIXED/VERIFIED — the §103 material-change close-up validation below is outstanding).
 VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build`, Playwright smoke (default step, no console errors/black canvas). NOT YET DONE: a dedicated Liner/Mosaic close-up screenshot isolating the AO effect — tracked as `AUTO-010` in `docs/AUTONOMOUS_BACKLOG.md` (deterministic visual-regression infra doesn't exist yet to do this cheaply).

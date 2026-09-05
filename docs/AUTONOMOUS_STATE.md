@@ -7,7 +7,7 @@ CURRENT TASK
 P0 repository trust + historical consolidation, this session:
 1. Fixed `npm ci` failure — `package-lock.json` was missing the `node_modules/nitro/node_modules/lru-cache` entry (real drift, not npm-version noise).
 2. Fixed two stale `scripts/geometry-audit.ts` Liner/Mosaic camera-pose assertions that no longer matched the intentional wall-anchored `getInteriorFinishCamera` framing (`src/lib/pool/camera.ts`) — no product code changed, only the test invariants.
-3. Reviewed all 12 unique commits across all 7 discovered `origin/claude/zen-cannon-*` branches (full consolidation ledger in `docs/POOL_ARCHITECT_MASTER_AUDIT.md`) and ported the 5 unique, verified changes onto canonical: the camera-audit fix (above), the auto rendering-quality tier (`cbe2b2b`), memoized micro-detail canvas textures (`eca3e91`), shared skimmer frame material (`d9535f6`), and interior AO derived from photographed liner/mosaic detail (`70f0d0c`). CONSOLIDATION_STATUS: COMPLETE.
+3. Reviewed all 12 unique commits across all 7 discovered `origin/claude/zen-cannon-*` branches (full consolidation ledger in `docs/POOL_ARCHITECT_MASTER_AUDIT.md`) and ported the 5 unique, verified changes onto canonical: the camera-audit fix (above), the auto rendering-quality tier (`cbe2b2b`), memoized micro-detail canvas textures (`eca3e91`), shared skimmer frame material (`d9535f6`) — all 4 RECOVERED — and interior AO derived from photographed liner/mosaic detail (`70f0d0c`), which is code-integrated but IN_PROGRESS, not RECOVERED: it has not yet passed the §103 material-change close-up/underwater validation (tracked as `AUTO-010`). Branch review itself is COMPLETE; the AO item's validation is not.
 4. Created `claude/pool-photorealism-autonomous` from verified `origin/main` and fast-forwarded it to the verified work (owner-authorized in-session; see `docs/OWNER_INPUT_REQUIRED.md`). Both it and `claude/vibrant-cannon-2v6g91` (this session's harness-assigned branch) are kept in sync.
 COMPLETE this iteration.
 
@@ -33,7 +33,7 @@ CURRENT PERFORMANCE STATUS
 Not measured numerically this session; two perf-positive changes ported (memoized micro-detail textures, shared skimmer material) reduce redundant CPU/allocation work per the ported commits' own descriptions — not independently re-measured here.
 
 CONSOLIDATION STATUS
-COMPLETE. See `docs/POOL_ARCHITECT_MASTER_AUDIT.md` for the full ledger (all 7 `zen-cannon-*` branches, all 12 unique commits accounted for: 5 RECOVERED, 5 SUPERSEDED/DUPLICATE, 2 DOC-ONLY groups NO UNIQUE USEFUL CHANGE). No zen-cannon branch was deleted. Re-open only if new evidence suggests a branch was missed or a recovered change needs revision.
+Branch enumeration/review COMPLETE (all 7 `zen-cannon-*` branches, all 12 unique commits accounted for: 4 RECOVERED, 1 IN_PROGRESS, 5 SUPERSEDED/DUPLICATE, 2 DOC-ONLY groups NO UNIQUE USEFUL CHANGE — see `docs/POOL_ARCHITECT_MASTER_AUDIT.md`). No zen-cannon branch was deleted. NOT fully COMPLETE per LC-13A until the 1 IN_PROGRESS item (interior AO, `AUTO-010`) reaches a terminal disposition. Re-open branch review only if new evidence suggests a branch was missed.
 
 LAST_SYNCED_MAIN_COMMIT
 4cddd3f (origin/main == both branches' merge-base; no drift).
