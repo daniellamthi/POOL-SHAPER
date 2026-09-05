@@ -260,7 +260,9 @@ function ConfiguratorLayout() {
     : activeStepId === "system"
       ? config.system
       : activeStepId === "finish" || activeStepId === "color"
-        ? "liner"
+        ? config.finish === "mosaic"
+          ? "mosaic"
+          : "liner"
         : activeStepId === "review"
           ? "review"
           : "overview";
