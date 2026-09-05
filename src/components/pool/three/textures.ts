@@ -32,8 +32,38 @@ function boxBlurWrapped(src: Float32Array, size: number, radius: number): Float3
   return out;
 }
 
+/**
+ * Generic once-per-size memoization for the parameterless procedural maps
+ * below: several unrelated components (studio floor, skimmers, PoolModel's
+ * fallback micro-detail, staircase contact shadow) each call these factories
+ * independently on mount, and every call re-runs the same per-pixel trig/
+ * gradient loop over identical output. The expensive canvas is built once
+ * per `size` and kept as a template; each call site still gets its own
+ * `Texture` instance (via `.clone()`) so it can freely set `repeat`/
+ * `anisotropy` and `dispose()` without affecting any other consumer -- only
+ * the redundant CPU generation is removed.
+ */
+function memoizedTemplate(
+  cache: Map<number, THREE.Texture>,
+  size: number,
+  build: () => THREE.Texture,
+): THREE.Texture {
+  let template = cache.get(size);
+  if (!template) {
+    template = build();
+    cache.set(size, template);
+  }
+  return template.clone();
+}
+
+const microNormalTemplateCache = new Map<number, THREE.Texture>();
+
 /** Neutral, seamless micro-normal used only to break perfectly flat highlights. */
 export function createMaterialMicroNormalMap(size = 256): THREE.Texture {
+  return memoizedTemplate(microNormalTemplateCache, size, () => buildMaterialMicroNormalMap(size));
+}
+
+function buildMaterialMicroNormalMap(size: number): THREE.Texture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -72,8 +102,16 @@ export function createMaterialMicroNormalMap(size = 256): THREE.Texture {
   return texture;
 }
 
+const microRoughnessTemplateCache = new Map<number, THREE.Texture>();
+
 /** High-valued roughness modulation: subtle variation without darkening base colour. */
 export function createMaterialMicroRoughnessMap(size = 256): THREE.Texture {
+  return memoizedTemplate(microRoughnessTemplateCache, size, () =>
+    buildMaterialMicroRoughnessMap(size),
+  );
+}
+
+function buildMaterialMicroRoughnessMap(size: number): THREE.Texture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -485,7 +523,13 @@ export function createTriplanarDetailMaps(kind: "stone" | "panel", size = 512): 
  * post-processing dependency, so it reads identically in Configuration and
  * Experience. Deliberately gentle -- a soft gradient, not a hard dark ring.
  */
+const contactAOTemplateCache = new Map<number, THREE.Texture>();
+
 export function createContactAOGradientMap(size = 128): THREE.Texture {
+  return memoizedTemplate(contactAOTemplateCache, size, () => buildContactAOGradientMap(size));
+}
+
+function buildContactAOGradientMap(size: number): THREE.Texture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
