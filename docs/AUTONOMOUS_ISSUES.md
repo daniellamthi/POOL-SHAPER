@@ -88,7 +88,8 @@ REPRODUCTION: enable OS/browser "reduce motion", change any wizard step that cha
 EXPECTED BEHAVIOR: when `prefers-reduced-motion: reduce` is active, `CameraRig` should set the camera to the goal pose immediately (duration ~0), consistent with `IntroVeil`'s intent for the rest of the app.
 AFFECTED FILES: `src/components/pool/three/PoolScene.tsx` (`CameraRig`).
 RISK: Low — additive accessibility check only, default (no-preference) behavior unchanged.
-STATUS: READY.
+STATUS: FIXED — `CameraRig`'s pose effect now reads `window.matchMedia("(prefers-reduced-motion: reduce)")` and sets `duration.current = 0` when active, snapping to the goal pose on the next rendered frame instead of flying.
+VERIFICATION: `tsc --noEmit` clean, `npm run test:geometry` 108/108 (camera pose math unchanged, only transition duration), `npm run lint` (86 problems, baseline unchanged). Visual: with `page.emulateMedia({ reducedMotion: "reduce" })`, the Interior Finish step's Liner close-up framing was reached in a 3s wait (vs. requiring ~45s without it in this sandbox's slow renderer, per `AUTO-009`/`AUTO-010`'s `settleCameraFlight`) — confirms the snap takes effect within a frame or two rather than the full eased flight.
 
 ## AUTO-013
 CATEGORY: VISUAL

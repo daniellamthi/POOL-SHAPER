@@ -164,7 +164,12 @@ function CameraRig({
     startPosition.current.copy(camera.position);
     startTarget.current.copy(controls.current?.target ?? lookAt.current);
     elapsed.current = 0;
-    duration.current = focus === "overview" || focus === "review" ? 0.88 : 0.78;
+    // AUTO-012 / directive §53: honour prefers-reduced-motion by snapping to
+    // the goal pose on the next frame instead of flying the camera there.
+    // (styles.css's global reduced-motion rule only collapses CSS
+    // animations/transitions -- it doesn't reach this Three.js-driven lerp.)
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    duration.current = reducedMotion ? 0 : focus === "overview" || focus === "review" ? 0.88 : 0.78;
     flying.current =
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;

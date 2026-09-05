@@ -21,13 +21,19 @@ against a different sandbox instance — edge/AA-only, not a content
 regression; documented so it isn't mistaken for one later).
 COMPLETE this iteration.
 
+Also fixed `AUTO-012` this session: `CameraRig` (`PoolScene.tsx`) now checks
+`prefers-reduced-motion` and snaps to the goal camera pose instead of
+flying when active (directive §53). Verified visually (emulated reduced
+motion reached the Liner close-up framing in 3s vs. ~45s without it in
+this sandbox) plus `tsc`/`test:geometry`/`lint` clean.
+
 NEXT READY TASK
-Consolidation is now LC-13A-complete (all 12 unique zen-cannon commits at a
-terminal disposition). Pick up next: expand `AUTO-009` reference coverage
-opportunistically (coping/skimmer/overflow close-ups, custom shape, mobile
-viewport) as related changes touch those areas, or start `AUTO-008` (liner
-PBR completeness, P2/§116 fresh material-truth audit). `AUTO-012` (reduced-
-motion) and `AUTO-011` (`vite preview`) are READY, low-severity, pick up
+Consolidation is LC-13A-complete and both this session's P0/P5 items
+(`AUTO-010`, `AUTO-012`) are FIXED. Pick up next: expand `AUTO-009`
+reference coverage opportunistically (coping/skimmer/overflow close-ups,
+custom shape, mobile viewport) as related changes touch those areas, or
+start `AUTO-008` (liner PBR completeness, P2/§116 fresh material-truth
+audit). `AUTO-011` (`vite preview`) is READY, low-severity, pick up
 opportunistically. See `docs/AUTONOMOUS_BACKLOG.md` / `AUTONOMOUS_ISSUES.md`.
 
 BLOCKED TASKS
@@ -40,13 +46,14 @@ LAST VERIFIED CANONICAL COMMIT
 
 LAST VALIDATED BUILD
 `npm ci` clean, `npx tsc --noEmit` clean, `npm run lint` (86 problems,
-baseline unchanged), `npm run test:geometry` (108/108), `npm run test:visual`
-— `landing-desktop` diffs ~1.07% against the checked-in baseline (see
-`AUTO-013`, cross-sandbox rendering noise, not a regression: edge-only diff,
-reproduced identically across 2 re-runs in this sandbox); `liner-closeup`/
-`mosaic-closeup` newly baselined this session (no prior baseline to diff
-against). `npm run build` not re-run this session (no product code
-changed, only test tooling + docs).
+baseline unchanged), `npm run test:geometry` (108/108, both commits this
+session), `npm run test:visual` — `landing-desktop` diffs ~1.07% against
+the checked-in baseline (see `AUTO-013`, cross-sandbox rendering noise, not
+a regression: edge-only diff, reproduced identically across 2 re-runs in
+this sandbox); `liner-closeup`/`mosaic-closeup` newly baselined this
+session (no prior baseline to diff against). `npm run build` clean
+(re-run for the `AUTO-012` camera change per LC-10A's "camera subsystem
+changed" milestone trigger).
 
 KNOWN REGRESSIONS
 None. (`AUTO-013` is an environment/harness characteristic, not a regression.)
