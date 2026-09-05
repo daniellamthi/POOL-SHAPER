@@ -43,6 +43,69 @@ const PREVIEW_URL = `http://127.0.0.1:${PREVIEW_PORT}/`;
 const DIFF_THRESHOLD_RATIO = 0.005; // 0.5% of pixels may differ before failing
 const UPDATE = process.argv.includes("--update");
 
+// Click a locator via raw mouse coordinates instead of Playwright's own
+// `locator.click()` -- the latter hangs indefinitely on this app ("waiting
+// for scheduled navigations to finish"), not yet root-caused, suspected to
+// be this TanStack Start SPA's client-side routing confusing Playwright's
+// post-click navigation heuristic. `boundingBox()` does NOT auto-scroll
+// like `.click()` does, though, so an off-screen target (e.g. the Mosaic
+// option, which sits below the fold at the default viewport height)
+// silently mis-clicks whatever raw coordinate it resolves to instead of
+// throwing -- always scroll into view first.
+async function clickAt(page, loc, label) {
+  await loc.scrollIntoViewIfNeeded();
+  const box = await loc.boundingBox();
+  if (!box) throw new Error(`no bounding box for ${label}`);
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+// Drives the wizard from a fresh load to Step 06 "Interior Finish" using
+// every-default selections (New Pool / In-Ground / Reinforced Concrete /
+// Rectangle 10x4.5 / Skimmer Pool). Each step is intentionally slow (the
+// headless/SwiftShader-rendered 3D scene can take 15-30s to settle per
+// step in this sandbox) -- do not shorten these waits without
+// re-verifying against a real run; this whole reference takes several
+// minutes end to end.
+async function navigateToInteriorFinish(page) {
+  await page.goto(PREVIEW_URL, { waitUntil: "load", timeout: 30000 });
+  await page.waitForTimeout(6000); // cold shader compile + first texture load
+
+  await clickAt(page, page.getByRole("button", { name: /New Pool/i }), "New Pool");
+  await page.waitForTimeout(600);
+  await clickAt(page, page.getByRole("button", { name: /^continue$/i }), "Continue#1");
+  await page.waitForTimeout(2500);
+
+  await clickAt(page, page.getByRole("button", { name: /In-Ground Pool/i }), "In-Ground Pool");
+  await page.waitForTimeout(600);
+  await clickAt(page, page.getByRole("button", { name: /^continue$/i }), "Continue#2");
+  await page.waitForTimeout(2500);
+
+  await clickAt(
+    page,
+    page.getByRole("button", { name: /Reinforced Concrete/i }),
+    "Reinforced Concrete",
+  );
+  await page.waitForTimeout(600);
+  await clickAt(page, page.getByRole("button", { name: /^continue$/i }), "Continue#3");
+  await page.waitForTimeout(2500);
+
+  await clickAt(
+    page,
+    page.getByRole("button", { name: /^continue$/i }),
+    "Continue#4 (shape default)",
+  );
+  await page.waitForTimeout(2500);
+
+  await clickAt(page, page.getByRole("button", { name: /Skimmer Pool/i }), "Skimmer Pool");
+  await page.waitForTimeout(600);
+  await clickAt(page, page.getByRole("button", { name: /^continue$/i }), "Continue#5 (system)");
+  await page.waitForTimeout(6000); // Interior Finish step: new camera framing + liner texture settle
+
+  const onFinishStep = await page.getByText("Interior Finish", { exact: true }).first().isVisible();
+  if (!onFinishStep)
+    throw new Error("navigateToInteriorFinish: did not land on Interior Finish step");
+}
+
 /** @type {{ name: string, viewport: { width: number, height: number }, run: (page: import('playwright').Page) => Promise<void> }[]} */
 const REFERENCES = [
   {
@@ -53,8 +116,38 @@ const REFERENCES = [
     // currently exercised by CI/local smoke checks (see AUTO-007's
     // Playwright smoke test) -- kept here as the first, always-reachable
     // baseline so the harness itself has continuous coverage.
-    async run() {
-      // no-op: default state after load is the reference.
+    async run(page) {
+      await page.goto(PREVIEW_URL, { waitUntil: "networkidle", timeout: 30000 });
+      await page.waitForTimeout(3000); // let the 3D scene settle (async texture/material load)
+    },
+  },
+  {
+    name: "interior-finish-liner-closeup",
+    viewport: { width: 1440, height: 900 },
+    // AUTO-010: Step 06 "Interior Finish", default PVC Liner (Motion Blue
+    // Sky) selected -- the wall-anchored close-up camera (getCameraPose
+    // intent "liner", camera.ts) framing the reference skimmer wall,
+    // validating the interior AO ported in AUTO-007 close-up rather than
+    // only at the wide default landing view.
+    async run(page) {
+      await navigateToInteriorFinish(page);
+    },
+  },
+  {
+    name: "interior-finish-mosaic-closeup",
+    viewport: { width: 1440, height: 900 },
+    // AUTO-010: same step, Mosaic finish selected instead -- exercises the
+    // tighter "mosaic" camera intent (only reachable in the live UI since
+    // the PoolConfigurator.tsx cameraFocus fix in this same session) and
+    // the mosaic-specific AO/derived-detail path.
+    async run(page) {
+      await navigateToInteriorFinish(page);
+      await clickAt(
+        page,
+        page.getByRole("button", { name: /Mosaic/i }).first(),
+        "Mosaic finish option",
+      );
+      await page.waitForTimeout(6000); // new camera intent + mosaic texture/material settle
     },
   },
 ];
@@ -106,8 +199,6 @@ async function main() {
       });
       page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-      await page.goto(PREVIEW_URL, { waitUntil: "networkidle", timeout: 30000 });
-      await page.waitForTimeout(3000); // let the 3D scene settle (async texture/material load)
       await ref.run(page);
       await page.waitForTimeout(500);
 
