@@ -65,8 +65,8 @@ EVIDENCE: `zen-cannon-voutw6` commit `70f0d0c`, extending the existing `getDeriv
 EXPECTED BEHAVIOR: an `aoMap` derived from the same Sobel signal (plus a `createMaterialMicroAoMap` procedural fallback for finishes without usable photo data), wired onto the interior wall/floor `MeshPhysicalMaterial`s' `aoMap`/`aoMapIntensity`. Three.js applies `aoMap` only to indirect diffuse/specular — direct lighting and base colour untouched.
 AFFECTED FILES: `src/components/pool/three/textures.ts`, `src/components/pool/three/PoolModel.tsx`.
 RISK: Low — indirect-light-only, reuses an already-shipped derivation technique and the existing `cloneDataTexture` repeat/anisotropy path.
-STATUS: IN_PROGRESS (code ported verbatim, applied cleanly on top of AUTO-006's `textures.ts` changes; not FIXED/VERIFIED — the §103 material-change close-up validation below is outstanding).
-VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build`, Playwright smoke (default step, no console errors/black canvas). NOT YET DONE: a dedicated Liner/Mosaic close-up screenshot isolating the AO effect — tracked as `AUTO-010` in `docs/AUTONOMOUS_BACKLOG.md` (deterministic visual-regression infra doesn't exist yet to do this cheaply).
+STATUS: FIXED (AUTO-010 close-up validation passed this session).
+VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint`, `build`, Playwright smoke (default step, no console errors/black canvas), plus dedicated Liner/Mosaic close-up screenshots (`test-baselines/visual/liner-closeup.png`, `mosaic-closeup.png`) isolating the AO effect: subtle indirect darkening at Mosaic grout lines, subtle embossing-level variation on the grout-free Liner, no direct-light darkening, no artifacts.
 
 ## AUTO-011
 CATEGORY: BUILD
@@ -78,3 +78,25 @@ EXPECTED BEHAVIOR: `npm run preview` serves the actual production build (or the 
 AFFECTED FILES: `vite.config.ts` / TanStack Start preview-plugin configuration (not yet root-caused further); `package.json` `preview` script.
 RISK: Low — does not affect `dev` or `build`, only local preview of the production bundle.
 STATUS: READY (not fixed this session — out of scope for AUTO-009; `scripts/visual-audit.mjs` uses `vite dev` instead, documented in its header comment).
+
+## AUTO-012
+CATEGORY: ACCESSIBILITY
+SEVERITY: LOW
+PROBLEM: `CameraRig` (`src/components/pool/three/PoolScene.tsx`) always animates camera-pose transitions over ~0.78-0.88s; it does not check `prefers-reduced-motion` at all (directive §53 requires it). `IntroVeil`'s own comment (`PoolConfigurator.tsx`) claims "the global reduced-motion rule in styles.css collapses every animation/transition duration to ~0", but that CSS rule only affects CSS transitions/animations (the veil itself), not this JS-driven Three.js camera lerp — a genuinely different mechanism the comment doesn't distinguish.
+EVIDENCE: read `CameraRig`'s transition effect/`useFrame` (no `matchMedia`/`prefers-reduced-motion` reference anywhere in the file or in `src/lib/pool/camera.ts`); confirmed by observing every wizard-step camera move animate in this session's screenshots regardless of any reduced-motion emulation.
+REPRODUCTION: enable OS/browser "reduce motion", change any wizard step that changes `cameraFocus` — the camera still flies instead of snapping instantly.
+EXPECTED BEHAVIOR: when `prefers-reduced-motion: reduce` is active, `CameraRig` should set the camera to the goal pose immediately (duration ~0), consistent with `IntroVeil`'s intent for the rest of the app.
+AFFECTED FILES: `src/components/pool/three/PoolScene.tsx` (`CameraRig`).
+RISK: Low — additive accessibility check only, default (no-preference) behavior unchanged.
+STATUS: READY.
+
+## AUTO-013
+CATEGORY: VISUAL
+SEVERITY: LOW
+PROBLEM: The `AUTO-009` harness's `landing-desktop` baseline (captured in a prior session's sandbox) shows a consistent ~1.07% pixel diff (`13,860`/1,296,000 px) against a fresh capture in this session's sandbox, reproduced identically across two independent re-runs here (1.070%, 1.069%) — i.e. deterministic *within* a given sandbox instance, but not stable *across* different sandbox instances/Chromium builds.
+EVIDENCE: `landing-desktop.diff.png` shows the diff concentrated entirely along thin edges — coping/wall outlines, dimension-guide lines, the skimmer icon outline — with zero diff across filled regions (floor/wall/water colour matches exactly); consistent with a sub-pixel anti-aliasing/edge-rasterization difference between Chromium/SwiftShader builds across sandbox instances, not a content or colour regression. No product or test code affecting `landing-desktop`'s scene was touched this session.
+REPRODUCTION: run `npm run test:visual` in a different sandbox instance than the one that last wrote `test-baselines/visual/landing-desktop.png`.
+EXPECTED BEHAVIOR: none changed — this is a limitation of pixel-exact screenshot comparison across heterogeneous CI/sandbox environments, not a product defect. Documented so a future session doesn't mistake this specific, edge-only diff pattern for a real regression.
+AFFECTED FILES: none (harness/environment characteristic, not a code path).
+RISK: None to product code. Low risk to the harness's usefulness: a future *real* regression that also only touches edge pixels could be masked by this same pattern — if `landing-desktop` diff ratio or pattern changes noticeably from this session's recorded baseline (edge-only, ~1.07%), treat it as suspect and re-diff by content region rather than assuming environment noise again.
+STATUS: READY (no fix planned — documented limitation; consider a higher `DIFF_THRESHOLD_RATIO` or a perceptual/edge-tolerant diff mode in a future `AUTO-009` iteration if this keeps causing false failures across sandboxes).

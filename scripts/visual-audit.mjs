@@ -43,6 +43,95 @@ const PREVIEW_URL = `http://127.0.0.1:${PREVIEW_PORT}/`;
 const DIFF_THRESHOLD_RATIO = 0.005; // 0.5% of pixels may differ before failing
 const UPDATE = process.argv.includes("--update");
 
+// This sandbox's headless Chromium falls back to a software GL rasterizer
+// for the Pool3D WebGL canvas ("GPU stall due to ReadPixels" console
+// warnings, observed frame times of 1-6s+ per frame). Real mouse-simulated
+// Playwright clicks (`locator.click()`) time out waiting for the main
+// thread to go idle between such stalls, even though the click itself is
+// perfectly deliverable -- so wizard navigation below dispatches clicks
+// directly via `Element.click()` in-page (`page.evaluate`), which doesn't
+// depend on the compositor keeping up. Per directive §68, this sandbox's
+// software rendering is a comparative/CI proxy, not a real-GPU proof.
+
+/** Clicks the first `<button>` inside `[role="group"][aria-label=label]`. */
+async function clickFirstOption(page, groupLabel) {
+  await page.evaluate((label) => {
+    const group = document.querySelector(`[role="group"][aria-label="${label}"]`);
+    const button = group?.querySelector("button");
+    if (!button) throw new Error(`clickFirstOption: no button in group "${label}"`);
+    button.click();
+  }, groupLabel);
+}
+
+/** Clicks the `OptionCard` inside a group whose title span matches exactly. */
+async function clickOptionByTitle(page, groupLabel, title) {
+  await page.evaluate(
+    ({ label, title }) => {
+      const group = document.querySelector(`[role="group"][aria-label="${label}"]`);
+      const button = Array.from(group?.querySelectorAll("button") ?? []).find(
+        (b) =>
+          b.querySelector(":scope > span:first-child > span:first-child")?.textContent?.trim() ===
+          title,
+      );
+      if (!button) throw new Error(`clickOptionByTitle: no "${title}" option in group "${label}"`);
+      button.click();
+    },
+    { label: groupLabel, title },
+  );
+}
+
+/** Clicks the wizard's "Continue" button. */
+async function clickContinue(page) {
+  await page.evaluate(() => {
+    const button = Array.from(document.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Continue",
+    );
+    if (!button) throw new Error("clickContinue: no Continue button found");
+    button.click();
+  });
+}
+
+/**
+ * Drives the wizard from its fresh-load Step 01 state to Step 06 "Interior
+ * Finish" using only the default option in each of the three steps that
+ * require an explicit selection to unlock Continue (project type, pool
+ * type, structure) -- shape/dimensions and system already validate with
+ * their defaults. Ends with the Interior Finish step's default "PVC Liner"
+ * finish selected and expanded (matches `InteriorFinishStep`'s
+ * `useState(config.finish)` initial expansion), which is also what puts the
+ * live camera in the "liner" `CameraIntent` (see `PoolConfigurator.tsx`'s
+ * `activeStepId === "finish"` branch and `getCameraPose`/
+ * `getInteriorFinishCamera` in `src/lib/pool/camera.ts`).
+ */
+async function navigateToInteriorFinish(page) {
+  for (const groupLabel of ["Project type", "Pool type", "Pool structure"]) {
+    await clickFirstOption(page, groupLabel);
+    await page.waitForTimeout(400);
+    await clickContinue(page);
+    await page.waitForTimeout(400);
+  }
+  // Shape & Dimensions, then Pool System: both already valid with defaults.
+  await clickContinue(page);
+  await page.waitForTimeout(400);
+  await clickContinue(page);
+  await settleCameraFlight(page);
+}
+
+/**
+ * `CameraRig` (`src/components/pool/three/PoolScene.tsx`) advances its
+ * eased camera-pose transition by at most 0.05s of *simulated* time per
+ * rendered frame, regardless of real elapsed time -- so completing a
+ * 0.78-0.88s transition always takes >=16 rendered frames. This sandbox's
+ * software-rasterized WebGL (see the module comment above) has been
+ * observed as slow as ~0.2-0.9 fps, so 16 frames can take over a minute of
+ * real time here (nowhere near the case on real GPU hardware -- directive
+ * §68 notes SwiftShader timing isn't representative). A short fixed wait
+ * would screenshot mid-flight; wait generously instead.
+ */
+async function settleCameraFlight(page) {
+  await page.waitForTimeout(45000);
+}
+
 /** @type {{ name: string, viewport: { width: number, height: number }, run: (page: import('playwright').Page) => Promise<void> }[]} */
 const REFERENCES = [
   {
@@ -55,6 +144,32 @@ const REFERENCES = [
     // baseline so the harness itself has continuous coverage.
     async run() {
       // no-op: default state after load is the reference.
+    },
+  },
+  {
+    name: "liner-closeup",
+    viewport: { width: 1440, height: 900 },
+    // AUTO-010: Interior Finish step, default "PVC Liner" finish -- the
+    // wall-anchored `getInteriorFinishCamera` "liner" framing. Validates the
+    // ported interior AO (AUTO-007/70f0d0c) against the pulled-back,
+    // architectural Liner composition: grout/seam AO should be subtle and
+    // only affect indirect light, never direct-light darkening or the
+    // liner's base colour.
+    async run(page) {
+      await navigateToInteriorFinish(page);
+    },
+  },
+  {
+    name: "mosaic-closeup",
+    viewport: { width: 1440, height: 900 },
+    // AUTO-010: same step, "Mosaic" finish selected -- the tighter
+    // material-swatch "mosaic" framing (reachable in the live UI since
+    // ac2a458). Validates the same AO derivation against Mosaic's distinct
+    // photographed base texture/grout pattern.
+    async run(page) {
+      await navigateToInteriorFinish(page);
+      await clickOptionByTitle(page, "Interior finish", "Mosaic");
+      await settleCameraFlight(page);
     },
   },
 ];
