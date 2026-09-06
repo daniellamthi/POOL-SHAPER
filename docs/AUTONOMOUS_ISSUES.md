@@ -103,7 +103,7 @@ UPDATE (2026-09-06): hypothesis confirmed with a clean control case. In the same
 RISK: None to product code. Low risk to the harness's usefulness: a future *real* regression that also only touches edge pixels could be masked by this same pattern — if `landing-desktop` diff ratio or pattern changes noticeably from this session's recorded baseline (edge-only, ~1.07%), treat it as suspect and re-diff by content region rather than assuming environment noise again.
 STATUS: READY (no fix planned — documented limitation; consider a higher `DIFF_THRESHOLD_RATIO` or a perceptual/edge-tolerant diff mode in a future `AUTO-009` iteration if this keeps causing false failures across sandboxes).
 
-## AUTO-014
+## AUTO-015
 CATEGORY: RUNTIME
 SEVERITY: LOW
 PROBLEM: Every page load emitted a console 404. Root cause: `src/routes/__root.tsx` declared `{ rel: "icon", href: "/favicon.ico", type: "image/x-icon" }`, but `public/` ships `favicon.png` only — there is no `.ico` file. Result: a broken/generic browser-tab icon plus a failed request on every visit.
@@ -112,9 +112,9 @@ EXPECTED BEHAVIOR: the declared icon resolves; no failed request; the real brand
 AFFECTED FILES: `src/routes/__root.tsx`.
 RISK: Low — one link tag; PNG favicons are supported by every current browser.
 STATUS: FIXED (pointed at `/favicon.png` with `type: "image/png"`).
-VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint` (baseline unchanged), `build` all clean; `npm run test:visual` no longer reports the console error (see AUTO-015 note).
+VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint` (baseline unchanged), `build` all clean; `npm run test:visual` no longer reports the console error (see AUTO-016 note).
 
-## AUTO-015
+## AUTO-016
 CATEGORY: PERFORMANCE
 SEVERITY: LOW
 PROBLEM: `public/textures/pvc-liner/` shipped 7 superseded legacy liner textures (`antracite`, `azzurro-blu`, `azzurro-celeste`, `bianco`, `grigio`, `nero`, `verde-caraibi` — 12 MB total) alongside the 6 `motion-*` files the catalogue actually uses. Everything under `public/` is served/deployed verbatim, so this was 12 MB of dead payload.
@@ -125,7 +125,7 @@ RISK: Low and fully reversible — files remain in git history (`git revert` or 
 STATUS: FIXED.
 VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint` (baseline unchanged), `build` clean; visual audit confirms the liner still renders (assets removed were never referenced).
 
-## AUTO-016
+## AUTO-017
 CATEGORY: MATERIAL
 SEVERITY: N/A — INVESTIGATED, NO ACTION REQUIRED
 PROBLEM (hypothesis under test): directive §28 / P2 item 13 anticipated that mosaic finishes would expose "obvious repeated modules" on large walls, requiring an anti-tiling implementation. On a 10 x 4.5 m pool the mosaic module (0.2 m) repeats ~145x along the wall perimeter and 50x across the floor, so the concern was well founded a priori.

@@ -11,7 +11,7 @@ import {
   INTERIOR_TEXTURE_METADATA,
   PVC_TEXTURE_MODULE_SIZE_METERS,
 } from "@/configurator/materials/interior-textures";
-import type { PoolConfig } from "./types";
+import type { PoolConfig, SkimmerTypeId } from "./types";
 
 export interface ResolvedMaterials {
   liner: { color: string; roughness: number; metalness: number };
@@ -44,11 +44,14 @@ export interface ResolvedMaterials {
   };
   water: string;
   coping: { color: string; roughness: number };
-  skimmer: { color: string; roughness: number };
+  skimmer: { color: string; roughness: number; metalness: number; type: SkimmerTypeId };
 }
 
 export function resolveMaterials(
-  config: Pick<PoolConfig, "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish">,
+  config: Pick<
+    PoolConfig,
+    "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish" | "skimmerType"
+  >,
 ): ResolvedMaterials {
   const finish = FINISHES.find((item) => item.id === config.finish) ?? FINISHES[0]!;
   const liner = LINER_COLORS.find((item) => item.id === config.linerColor) ?? LINER_COLORS[0]!;
@@ -122,6 +125,11 @@ export function resolveMaterials(
     },
     water: "#ffffff",
     coping: { color: POOL_BORDER_PRESET.color, roughness: POOL_BORDER_PRESET.roughness },
-    skimmer: { color: skimmerFinish.hex, roughness: skimmerFinish.roughness },
+    skimmer: {
+      color: skimmerFinish.hex,
+      roughness: skimmerFinish.roughness,
+      metalness: skimmerFinish.metalness,
+      type: config.skimmerType,
+    },
   };
 }

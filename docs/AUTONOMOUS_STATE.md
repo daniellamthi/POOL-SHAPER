@@ -4,16 +4,29 @@ CURRENT OBJECTIVE
 Elevate Pool Architect 3D toward ultra-premium realism/commercial quality while preserving the existing configurator flow (see `docs/IMPROVEMENT_ROADMAP.md`).
 
 CURRENT TASK
-Session of 2026-09-06 (P2 material-truth pass). Outcome was mostly
-*verification*, which closed more than it opened:
-- `AUTO-014` FIXED — every page load 404'd on `/favicon.ico` while `public/`
+This session: Visible Premium Realism Phase A -- SKIMMER PREMIUM PASS
+(`AUTO-014`, `docs/AUTONOMOUS_BACKLOG.md`). Added a `SkimmerTypeId` ("Tipo
+skimmer" selector, `PoolSystemStep.tsx`) driving 4 dimensionally distinct
+housing assemblies in `Skimmers.tsx` -- Standard Refined (unchanged),
+Slim/Modern, High-Waterline, Architectural Flush (frameless + shadow-gap
+groove) -- plus a `steel` (satin AISI-316-style) skimmer finish alongside
+the existing white/graphite/sand moulded ABS. Verified with an ad hoc,
+uncommitted Playwright close-up smoke test (real macOS Chromium, zoomed
+OrbitControls view of the Pool System step) confirming all 4 variants are
+visually distinct, no floating parts/z-fighting, no console errors, and the
+steel finish renders correctly (no missing-envmap black-hole artifact).
+COMPLETE this iteration -- see `AUTO-014` for full detail.
+
+Concurrently, a second session ran a P2 material-truth pass on the same
+canonical branch (merged here, no source-file overlap):
+- `AUTO-015` FIXED — every page load 404'd on `/favicon.ico` while `public/`
   ships `favicon.png` only (broken tab icon on a premium-positioned product).
   Root-caused by diffing assets referenced in `__root.tsx` against `public/`,
   no browser run needed. Now resolves; the console error is gone.
-- `AUTO-015` FIXED — removed 7 superseded legacy liner textures (12 MB) that
+- `AUTO-016` FIXED — removed 7 superseded legacy liner textures (12 MB) that
   shipped in `public/` with zero code references (`public/textures/`
   61 MB -> 49 MB). Recoverable from git history.
-- `AUTO-016` / D-001 CLOSED, no defect — mosaic anti-tiling (§28, P2 item 13)
+- `AUTO-017` / D-001 CLOSED, no defect — mosaic anti-tiling (§28, P2 item 13)
   investigated and deliberately NOT implemented: both shipped assets tile
   seamlessly with no detectable repeating constellation. Evidence and
   re-open criteria in `docs/AUTONOMOUS_DECISIONS.md`.
@@ -48,46 +61,37 @@ motion reached the Liner close-up framing in 3s vs. ~45s without it in
 this sandbox) plus `tsc`/`test:geometry`/`lint` clean.
 
 NEXT READY TASK
-P2 material truth is now closed out as far as it can go without owner input:
-anti-tiling is settled (D-001), UV scaling verified (D-002), and `AUTO-008`
-is owner-gated. Do NOT re-open those without new evidence.
-Best remaining candidates, in rough value order:
-1. P4 pool-construction detail (§45/§46) — first *audit* what is actually
-   live in 3D vs metadata-only (internal steps, ladder, LED, returns, main
-   drain, cover), since §45 warns the docs may overstate it. Verify before
-   building anything.
-2. `AUTO-011` (`vite preview` broken against the Nitro `cloudflare-module`
-   output) — READY, low severity, unblocks auditing the real production
-   bundle instead of `vite dev`.
-3. Expand `AUTO-009` reference coverage opportunistically alongside whatever
-   change touches those areas (coping/skimmer/overflow close-ups, custom
-   shape, mobile viewport).
-Superseded note from the previous session, kept for context: `AUTO-011` is
-opportunistically. See `docs/AUTONOMOUS_BACKLOG.md` / `AUTONOMOUS_ISSUES.md`.
+Two independent tracks are live; both are safe to pick up.
+A. Phase B of the Visible Premium Realism sequence: coping / pool-edge
+   realism (thickness, bevel, premium stone material) — the skimmer
+   session's stated next step.
+B. P2 material truth is closed as far as it can go without owner input:
+   anti-tiling settled (D-001), UV scaling verified (D-002), `AUTO-008`
+   owner-gated. Do NOT re-open those without new evidence.
+Opportunistic, either track: add a skimmer close-up reference to
+`scripts/visual-audit.mjs` (none exists yet, and the new variants are
+exactly the kind of geometry a reference should lock in), expand
+`AUTO-009` coverage generally (coping/overflow close-ups, custom shape,
+mobile viewport), or fix `AUTO-011` (`vite preview`, low severity).
+See `docs/AUTONOMOUS_BACKLOG.md` / `AUTONOMOUS_ISSUES.md`.
 
 BLOCKED TASKS
 None currently.
 
 LAST VERIFIED CANONICAL COMMIT
-`ba26c42` on `claude/pool-photorealism-autonomous`. Reconciled from two
-concurrent sessions working the repo at once (`claude/vibrant-cannon-grk2xt`
-authoring AUTO-010/AUTO-012 above, `claude/vibrant-cannon-2v6g91`
-independently attempting the same AUTO-010 close-ups with an inferior
-implementation, non-force-merged twice keeping the grk2xt version -- see
-`git log --oneline -8` for the merge commits). Both harness branches and
-canonical now point at the same `ba26c42`. Base was `4cddd3f` (=
-`origin/main`, unchanged).
+`9b1504d` on `claude/pool-photorealism-autonomous` (this session's starting
+point, `git fetch origin` confirmed no drift). This session's `AUTO-014`
+work is uncommitted as of this state-doc update -- see COMMIT step pending
+in the session's own workflow.
 
 LAST VALIDATED BUILD
-`npm ci` clean, `npx tsc --noEmit` clean, `npm run lint` (86 problems,
-baseline unchanged), `npm run test:geometry` (108/108, both commits this
-session), `npm run test:visual` — `landing-desktop` diffs ~1.07% against
-the checked-in baseline (see `AUTO-013`, cross-sandbox rendering noise, not
-a regression: edge-only diff, reproduced identically across 2 re-runs in
-this sandbox); `liner-closeup`/`mosaic-closeup` newly baselined this
-session (no prior baseline to diff against). `npm run build` clean
-(re-run for the `AUTO-012` camera change per LC-10A's "camera subsystem
-changed" milestone trigger).
+`npx tsc --noEmit` clean, `npm run test:geometry` (108/108, unaffected --
+this file isn't exercised by the geometry audit), `npm run lint` (86
+problems, baseline unchanged -- `Skimmers.tsx`/`PoolSystemStep.tsx` both
+`--fix`-clean), `npm run build` clean. `npm run test:visual` not run this
+session (no committed reference exercises the skimmer; see `AUTO-014`'s
+follow-up). Visual verification instead done via an ad hoc, uncommitted
+Playwright script (see `AUTO-014`).
 
 KNOWN REGRESSIONS
 None. (`AUTO-013` is an environment/harness characteristic, not a regression.)

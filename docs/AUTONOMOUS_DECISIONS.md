@@ -10,7 +10,7 @@ because the roadmap still lists the item.
 
 ## D-001 — Mosaic anti-tiling: NOT implemented (no demonstrable gap)
 
-**Date:** 2026-09-06 · **Roadmap item:** directive §28, P2 item 13 · **Issue:** `AUTO-016`
+**Date:** 2026-09-06 · **Roadmap item:** directive §28, P2 item 13 · **Issue:** `AUTO-017`
 
 **Question.** The roadmap treats mosaic anti-tiling as a likely gap: a 0.2 m
 mosaic module repeats ~145x along the wall perimeter of a 10 x 4.5 m pool and
