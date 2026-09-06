@@ -99,5 +99,37 @@ EVIDENCE: `landing-desktop.diff.png` shows the diff concentrated entirely along 
 REPRODUCTION: run `npm run test:visual` in a different sandbox instance than the one that last wrote `test-baselines/visual/landing-desktop.png`.
 EXPECTED BEHAVIOR: none changed — this is a limitation of pixel-exact screenshot comparison across heterogeneous CI/sandbox environments, not a product defect. Documented so a future session doesn't mistake this specific, edge-only diff pattern for a real regression.
 AFFECTED FILES: none (harness/environment characteristic, not a code path).
+UPDATE (2026-09-06): hypothesis confirmed with a clean control case. In the same cross-sandbox run that showed `landing-desktop` at 13,861/1,296,000 px (1.070%, matching the 13,860 recorded above), `liner-closeup` compared **0/1,296,000 px (0.000%)** — pixel-exact against a baseline captured in a *different* sandbox. The distinguishing factor is edge density, not sandbox identity: `landing-desktop` is full of thin high-contrast geometry (dimension guides, coping outlines, text glyphs) while `liner-closeup` is a near-flat material surface. So the harness IS reliable cross-sandbox for exactly the close-up material references used for §103 material validation, and only edge-dense wide shots carry this noise floor. Practical rule: treat a non-zero diff on a close-up reference as a real regression; on `landing-desktop`, check the diff *pattern* is edge-only before dismissing it.
 RISK: None to product code. Low risk to the harness's usefulness: a future *real* regression that also only touches edge pixels could be masked by this same pattern — if `landing-desktop` diff ratio or pattern changes noticeably from this session's recorded baseline (edge-only, ~1.07%), treat it as suspect and re-diff by content region rather than assuming environment noise again.
 STATUS: READY (no fix planned — documented limitation; consider a higher `DIFF_THRESHOLD_RATIO` or a perceptual/edge-tolerant diff mode in a future `AUTO-009` iteration if this keeps causing false failures across sandboxes).
+
+## AUTO-014
+CATEGORY: RUNTIME
+SEVERITY: LOW
+PROBLEM: Every page load emitted a console 404. Root cause: `src/routes/__root.tsx` declared `{ rel: "icon", href: "/favicon.ico", type: "image/x-icon" }`, but `public/` ships `favicon.png` only — there is no `.ico` file. Result: a broken/generic browser-tab icon plus a failed request on every visit.
+EVIDENCE: the 404 appeared in this session's Playwright smoke test and in every `npm run test:visual` run ("[warn] landing-desktop: 1 console error(s): Failed to load resource: the server responded with a status of 404"). Root-caused by diffing the assets referenced from `__root.tsx` against the contents of `public/` — no browser run needed.
+EXPECTED BEHAVIOR: the declared icon resolves; no failed request; the real brand mark shows in the tab.
+AFFECTED FILES: `src/routes/__root.tsx`.
+RISK: Low — one link tag; PNG favicons are supported by every current browser.
+STATUS: FIXED (pointed at `/favicon.png` with `type: "image/png"`).
+VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint` (baseline unchanged), `build` all clean; `npm run test:visual` no longer reports the console error (see AUTO-015 note).
+
+## AUTO-015
+CATEGORY: PERFORMANCE
+SEVERITY: LOW
+PROBLEM: `public/textures/pvc-liner/` shipped 7 superseded legacy liner textures (`antracite`, `azzurro-blu`, `azzurro-celeste`, `bianco`, `grigio`, `nero`, `verde-caraibi` — 12 MB total) alongside the 6 `motion-*` files the catalogue actually uses. Everything under `public/` is served/deployed verbatim, so this was 12 MB of dead payload.
+EVIDENCE: each filename grepped across `src/` and `scripts/` returned 0 references (the single apparent `nero` hit was the substring inside "generously" in a code comment). `INTERIOR_TEXTURES.liner` references only the six `motion-*.png` assets.
+EXPECTED BEHAVIOR: only catalogue assets ship.
+AFFECTED FILES: `public/textures/pvc-liner/*` (7 files removed; `public/textures/` 61 MB -> 49 MB).
+RISK: Low and fully reversible — files remain in git history (`git revert` or `git checkout <sha>^ -- <path>` restores them). No code path referenced them.
+STATUS: FIXED.
+VERIFICATION: `tsc --noEmit`, `test:geometry` 108/108, `lint` (baseline unchanged), `build` clean; visual audit confirms the liner still renders (assets removed were never referenced).
+
+## AUTO-016
+CATEGORY: MATERIAL
+SEVERITY: N/A — INVESTIGATED, NO ACTION REQUIRED
+PROBLEM (hypothesis under test): directive §28 / P2 item 13 anticipated that mosaic finishes would expose "obvious repeated modules" on large walls, requiring an anti-tiling implementation. On a 10 x 4.5 m pool the mosaic module (0.2 m) repeats ~145x along the wall perimeter and 50x across the floor, so the concern was well founded a priori.
+EVIDENCE (measured, not assumed): both shipped mosaic artworks were tiled 4x4 offline from the real assets and inspected — `23DD3311...` (pale grey/white blend) and `3470EA07...` (teal). Both tile **seamlessly**: no seam, no discontinuity, no luminance step at module boundaries. Neither shows a detectable repeating tessera "constellation": the teal artwork's tesserae are near-uniform in colour (nothing distinctive to repeat), and the pale artwork's variation is too low-contrast to read as a pattern. Reproduce with the 4x4 tiling check described in `docs/AUTONOMOUS_DECISIONS.md`.
+CONCLUSION: implementing stochastic/hex-grid anti-tiling would add real shader and GPU cost, and would put §28's own constraints at risk (pattern identity, grout-line continuity, wall/floor continuity), in exchange for no demonstrable visual gain on any currently shipped asset. Per §111 ("if unclear, do not implement") and §108 (no useless churn), NOT implemented.
+RE-OPEN IF: a future mosaic asset ships with high-contrast or strongly non-uniform tesserae (a distinctive constellation, a blend/gradient artwork, or a directional pattern), or if the mosaic module size is reduced enough to raise the repeat count sharply. Re-run the 4x4 tiling check on the new asset before assuming a gap exists.
+STATUS: CLOSED (verified, no defect).

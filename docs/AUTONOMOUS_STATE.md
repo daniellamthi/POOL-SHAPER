@@ -4,7 +4,27 @@ CURRENT OBJECTIVE
 Elevate Pool Architect 3D toward ultra-premium realism/commercial quality while preserving the existing configurator flow (see `docs/IMPROVEMENT_ROADMAP.md`).
 
 CURRENT TASK
-This session: closed `AUTO-010` (last open consolidation item). Added two
+Session of 2026-09-06 (P2 material-truth pass). Outcome was mostly
+*verification*, which closed more than it opened:
+- `AUTO-014` FIXED — every page load 404'd on `/favicon.ico` while `public/`
+  ships `favicon.png` only (broken tab icon on a premium-positioned product).
+  Root-caused by diffing assets referenced in `__root.tsx` against `public/`,
+  no browser run needed. Now resolves; the console error is gone.
+- `AUTO-015` FIXED — removed 7 superseded legacy liner textures (12 MB) that
+  shipped in `public/` with zero code references (`public/textures/`
+  61 MB -> 49 MB). Recoverable from git history.
+- `AUTO-016` / D-001 CLOSED, no defect — mosaic anti-tiling (§28, P2 item 13)
+  investigated and deliberately NOT implemented: both shipped assets tile
+  seamlessly with no detectable repeating constellation. Evidence and
+  re-open criteria in `docs/AUTONOMOUS_DECISIONS.md`.
+- D-002 recorded — the floor (`1/tileSize`) vs wall (`perimeter/tileSize`)
+  repeat asymmetry reads as a bug but is correct: floor UVs are world-metre
+  (`uvs.push(x, z)`), wall UVs are normalised. Do not "fix" it.
+- `AUTO-008` re-scoped to BLOCKED/owner-input: its engineering half already
+  ships (derived normal+roughness+AO); only manufacturer asset sourcing and
+  PVC print-repeat calibration remain. See `docs/OWNER_INPUT_REQUIRED.md`.
+
+Previous session: closed `AUTO-010` (last open consolidation item). Added two
 `AUTO-009` harness reference configs (`liner-closeup`, `mosaic-closeup`,
 `scripts/visual-audit.mjs`) reached by driving the wizard from Step 01 to
 Step 06 "Interior Finish" via in-page `Element.click()` dispatch (see script
@@ -28,12 +48,21 @@ motion reached the Liner close-up framing in 3s vs. ~45s without it in
 this sandbox) plus `tsc`/`test:geometry`/`lint` clean.
 
 NEXT READY TASK
-Consolidation is LC-13A-complete and both this session's P0/P5 items
-(`AUTO-010`, `AUTO-012`) are FIXED. Pick up next: expand `AUTO-009`
-reference coverage opportunistically (coping/skimmer/overflow close-ups,
-custom shape, mobile viewport) as related changes touch those areas, or
-start `AUTO-008` (liner PBR completeness, P2/§116 fresh material-truth
-audit). `AUTO-011` (`vite preview`) is READY, low-severity, pick up
+P2 material truth is now closed out as far as it can go without owner input:
+anti-tiling is settled (D-001), UV scaling verified (D-002), and `AUTO-008`
+is owner-gated. Do NOT re-open those without new evidence.
+Best remaining candidates, in rough value order:
+1. P4 pool-construction detail (§45/§46) — first *audit* what is actually
+   live in 3D vs metadata-only (internal steps, ladder, LED, returns, main
+   drain, cover), since §45 warns the docs may overstate it. Verify before
+   building anything.
+2. `AUTO-011` (`vite preview` broken against the Nitro `cloudflare-module`
+   output) — READY, low severity, unblocks auditing the real production
+   bundle instead of `vite dev`.
+3. Expand `AUTO-009` reference coverage opportunistically alongside whatever
+   change touches those areas (coping/skimmer/overflow close-ups, custom
+   shape, mobile viewport).
+Superseded note from the previous session, kept for context: `AUTO-011` is
 opportunistically. See `docs/AUTONOMOUS_BACKLOG.md` / `AUTONOMOUS_ISSUES.md`.
 
 BLOCKED TASKS
