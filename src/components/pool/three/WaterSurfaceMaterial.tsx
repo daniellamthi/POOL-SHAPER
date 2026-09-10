@@ -40,9 +40,15 @@ vec3 microRipple = texture2D(
   waterMicroNormalMap,
   microRotation * centeredNormalUv * waterMicroScale + 0.5 + waterMicroOffset
 ).xyz * 2.0 - 1.0;
-vec2 combinedSlope =
-  largeRipple.xy * waterLargeStrength +
-  microRipple.xy * waterMicroStrength;
+// Incommensurate capillary waves in physical surface coordinates. Analytic
+// slopes avoid 8-bit normal-map banding and repeated highlight grids at grazing angles.
+float waveTime = waterLargeOffset.x * 150.0;
+vec2 p = centeredNormalUv;
+vec2 calmSlope = vec2(1.7, 0.8) * 0.004 * cos(dot(p, vec2(1.7, 0.8)) - waveTime * 0.73)
+  + vec2(-0.7, 2.1) * 0.0028 * cos(dot(p, vec2(-0.7, 2.1)) + waveTime * 0.57)
+  + vec2(3.6, -1.2) * 0.0012 * cos(dot(p, vec2(3.6, -1.2)) - waveTime * 1.13)
+  + vec2(5.2, 3.7) * 0.00045 * cos(dot(p, vec2(5.2, 3.7)) + waveTime * 0.91);
+vec2 combinedSlope = calmSlope + largeRipple.xy * waterLargeStrength + microRipple.xy * waterMicroStrength;
 vec3 waterNormal = normalize(vec3(combinedSlope, 1.0));
 normal = normalize(tbn * waterNormal);
 `;
@@ -77,7 +83,10 @@ if (waterDebugMode == 1) {
   // material's own IBL response, which is already sitting in outgoingLight,
   // instead of a visibly wrong image.
   mirrorFresnel *= waterAboveWaterline;
-  vec3 mirrorColor = texture2DProj(waterReflectionTexture, vWaterMirrorCoord).rgb;
+  vec2 mirrorUv = vWaterMirrorCoord.xy / vWaterMirrorCoord.w;
+  // The reflected scene bends with the same wave normal as the refraction.
+  mirrorUv += combinedSlope * 0.045;
+  vec3 mirrorColor = texture2D(waterReflectionTexture, clamp(mirrorUv, 0.001, 0.999)).rgb;
   outgoingLight = mix(outgoingLight, mirrorColor, mirrorFresnel);
 }
 #include <opaque_fragment>
@@ -126,7 +135,9 @@ function isWaterSurfaceMesh(object: THREE.Object3D): object is THREE.Mesh {
   if (!(object instanceof THREE.Mesh) || Array.isArray(object.material)) return false;
   const key = (object.material as THREE.Material & { customProgramCacheKey?: () => string })
     .customProgramCacheKey;
-  return typeof key === "function" && key.call(object.material).includes("dual-normal-physical-water");
+  return (
+    typeof key === "function" && key.call(object.material).includes("dual-normal-physical-water")
+  );
 }
 
 /**
@@ -138,27 +149,32 @@ function isWaterSurfaceMesh(object: THREE.Object3D): object is THREE.Mesh {
  * scene draw calls for the parts visible above the waterline, so
  * Configuration keeps today's exact cost and output.
  */
-function useWaterReflection(waterLevel: number) {
+function useWaterReflection(waterLevel: number, enabled: boolean) {
   const { gl, scene, camera } = useThree();
 
   const target = useMemo(() => {
-    if (!REFLECTION_ENABLED) return null;
+    if (!REFLECTION_ENABLED || !enabled) return null;
     const renderTarget = new THREE.WebGLRenderTarget(REFLECTION_RESOLUTION, REFLECTION_RESOLUTION, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       generateMipmaps: false,
+      type: THREE.HalfFloatType,
     });
     return renderTarget;
-  }, []);
+  }, [enabled]);
   useEffect(() => () => target?.dispose(), [target]);
 
   const mirrorCamera = useMemo(
-    () => (REFLECTION_ENABLED ? new THREE.PerspectiveCamera() : null),
-    [],
+    () => (REFLECTION_ENABLED && enabled ? new THREE.PerspectiveCamera() : null),
+    [enabled],
   );
   const textureMatrix = useRef(new THREE.Matrix4());
   const aboveWaterline = useRef({ value: 1 }).current;
   const frame = useRef(0);
+  const clipping = useMemo(
+    () => ({ plane: new THREE.Plane(), vector: new THREE.Vector4(), q: new THREE.Vector4() }),
+    [],
+  );
 
   useFrame(() => {
     if (!target || !mirrorCamera || !(camera instanceof THREE.PerspectiveCamera)) return;
@@ -179,7 +195,8 @@ function useWaterReflection(waterLevel: number) {
     // Every other frame: calm water reflections change slowly enough that
     // one frame of staleness is invisible, and it halves the extra cost.
     frame.current += 1;
-    if (frame.current % 2 !== 0) return;
+    if (frame.current > 1 && frame.current % 2 !== 0) return;
+    if (aboveWaterline.value === 0) return;
 
     mirrorCamera.position.set(
       camera.position.x,
@@ -207,6 +224,30 @@ function useWaterReflection(waterLevel: number) {
       .multiply(mirrorCamera.projectionMatrix)
       .multiply(mirrorCamera.matrixWorldInverse);
 
+    // Oblique near plane clips submerged geometry out of the reflected image.
+    // This is the horizontal-water specialization of Three's Reflector camera.
+    clipping.plane.normal.set(0, 1, 0);
+    clipping.plane.constant = -waterLevel;
+    clipping.plane.applyMatrix4(mirrorCamera.matrixWorldInverse);
+    clipping.vector.set(
+      clipping.plane.normal.x,
+      clipping.plane.normal.y,
+      clipping.plane.normal.z,
+      clipping.plane.constant,
+    );
+    const projection = mirrorCamera.projectionMatrix.elements;
+    clipping.q.set(
+      (Math.sign(clipping.vector.x) + projection[8]!) / projection[0]!,
+      (Math.sign(clipping.vector.y) + projection[9]!) / projection[5]!,
+      -1,
+      (1 + projection[10]!) / projection[14]!,
+    );
+    clipping.vector.multiplyScalar(2 / clipping.vector.dot(clipping.q));
+    projection[2] = clipping.vector.x;
+    projection[6] = clipping.vector.y;
+    projection[10] = clipping.vector.z + 1 - 0.001;
+    projection[14] = clipping.vector.w;
+
     const basin = scene.getObjectByName("pool-basin");
     const wasVisible = basin?.visible ?? true;
     if (basin) basin.visible = false;
@@ -228,24 +269,39 @@ function useWaterReflection(waterLevel: number) {
     });
 
     const previousTarget = gl.getRenderTarget();
-    gl.setRenderTarget(target);
-    gl.clear();
-    gl.render(scene, mirrorCamera);
-    gl.setRenderTarget(previousTarget);
-    if (basin) basin.visible = wasVisible;
-    for (const object of hiddenWater) object.visible = true;
+    const shadowAutoUpdate = gl.shadowMap.autoUpdate;
+    const xrEnabled = gl.xr.enabled;
+    try {
+      gl.shadowMap.autoUpdate = false;
+      gl.xr.enabled = false;
+      gl.setRenderTarget(target);
+      gl.clear();
+      gl.render(scene, mirrorCamera);
+    } finally {
+      gl.setRenderTarget(previousTarget);
+      gl.shadowMap.autoUpdate = shadowAutoUpdate;
+      gl.xr.enabled = xrEnabled;
+      if (basin) basin.visible = wasVisible;
+      for (const object of hiddenWater) object.visible = true;
+    }
   });
 
   return { texture: target?.texture ?? null, textureMatrix, aboveWaterline };
 }
 
 /** Shared physical water surface used by the pool and skimmer tongue. */
-export function WaterSurfaceMaterial({ waterLevel = 0 }: { waterLevel?: number }) {
+export function WaterSurfaceMaterial({
+  waterLevel = 0,
+  reflections = true,
+}: {
+  waterLevel?: number;
+  reflections?: boolean;
+}) {
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const largeNormal = useMemo(() => createRippleNormalMap("broad"), []);
   const microNormal = useMemo(() => createRippleNormalMap("micro"), []);
   const shaders = useRef<WaterShader[]>([]);
-  const reflection = useWaterReflection(waterLevel);
+  const reflection = useWaterReflection(waterLevel, reflections);
 
   useEffect(() => {
     for (const texture of [largeNormal, microNormal]) {
@@ -348,7 +404,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       side={THREE.DoubleSide}
       onBeforeCompile={configureWaterSurface}
       customProgramCacheKey={() =>
-        `p1c-dual-normal-physical-water-v3-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED ? 1 : 0}`
+        `p1c-dual-normal-physical-water-v4-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}`
       }
     />
   );

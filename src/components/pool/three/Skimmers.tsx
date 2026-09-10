@@ -11,6 +11,8 @@ import {
   createMaterialMicroRoughnessMap,
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { FREEBOARD } from "@/lib/pool/config";
+import { SKIMMER_PROFILES } from "./poolConstruction";
 
 const CAVITY_COLOR = "#202829";
 const THROAT_LIGHT = "#e9ebe8";
@@ -49,8 +51,8 @@ function createFrameMaterial(
     metalness,
     normalMap,
     roughnessMap,
-    clearcoat: isMetal ? 0 : 0.55,
-    clearcoatRoughness: 0.1,
+    clearcoat: isMetal ? 0 : 0.18,
+    clearcoatRoughness: 0.24,
     ior: isMetal ? 2.5 : 1.45,
   });
   material.normalScale.set(
@@ -81,7 +83,6 @@ function clampedCavityBackZ(fullBackZ: number, wallThickness: number, exteriorCl
 // numerically unchanged from the previously shipped/validated geometry.
 // ---------------------------------------------------------------------------
 
-const STD_CAVITY_FRONT_Z = 0.01;
 const STD_CAVITY_FULL_BACK_Z = -0.17;
 const STD_CAVITY_EXTERIOR_CLEARANCE = 0.01;
 
@@ -91,8 +92,6 @@ function StandardSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }:
     wallThickness,
     STD_CAVITY_EXTERIOR_CLEARANCE,
   );
-  const cavityDepth = STD_CAVITY_FRONT_Z - cavityBackZ;
-  const cavityCenterZ = (STD_CAVITY_FRONT_Z + cavityBackZ) / 2;
   return (
     <group
       scale={SKIMMER_FRONT_SCALE}
@@ -111,10 +110,10 @@ function StandardSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }:
           frame, clamped to `wallThickness` so it can't poke through a thin
           (above-ground) panel and appear outside the pool. */}
       <RoundedBox
-        args={[0.41, 0.145, cavityDepth]}
-        radius={0.018}
+        args={[0.41, 0.145, 0.006]}
+        radius={0.002}
         smoothness={3}
-        position={[0, 0.017, cavityCenterZ]}
+        position={[0, 0.017, cavityBackZ + 0.003]}
       >
         <meshStandardMaterial color={CAVITY_COLOR} roughness={0.9} metalness={0} />
       </RoundedBox>
@@ -135,12 +134,6 @@ function StandardSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }:
       <mesh position={[0, -0.035, -0.066]}>
         <boxGeometry args={[0.4, 0.014, 0.15]} />
         <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.5} />
-      </mesh>
-
-      {/* The water tongue continues naturally into the lower part of the mouth. */}
-      <mesh position={[0, -0.004, -0.064]} renderOrder={3}>
-        <boxGeometry args={[0.368, 0.004, 0.155]} />
-        <WaterSurfaceMaterial />
       </mesh>
 
       {/* Geometric 48 x 19.5 cm face frame with a raised inner profile.
@@ -229,9 +222,6 @@ function SlimSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: Ass
   const frameDepth = 0.018; // roughly half of Standard's 0.035 -- low-profile
   const frameZ = 0.011;
   const cavityBackZ = clampedCavityBackZ(-0.15, wallThickness, 0.01);
-  const cavityFrontZ = 0.006;
-  const cavityDepth = cavityFrontZ - cavityBackZ;
-  const cavityCenterZ = (cavityFrontZ + cavityBackZ) / 2;
 
   return (
     <group>
@@ -241,10 +231,10 @@ function SlimSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: Ass
       </mesh>
 
       <RoundedBox
-        args={[throatWidth + 0.024, throatHeight + 0.03, cavityDepth]}
-        radius={0.014}
+        args={[throatWidth + 0.024, throatHeight + 0.03, 0.006]}
+        radius={0.002}
         smoothness={3}
-        position={[0, vc, cavityCenterZ]}
+        position={[0, vc, cavityBackZ + 0.003]}
       >
         <meshStandardMaterial color={CAVITY_COLOR} roughness={0.9} metalness={0} />
       </RoundedBox>
@@ -266,11 +256,6 @@ function SlimSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: Ass
       <mesh position={[0, bottomBarY + barThickness / 2 + 0.005, -0.06]}>
         <boxGeometry args={[throatWidth, 0.01, 0.14]} />
         <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.42} />
-      </mesh>
-
-      <mesh position={[0, vc - 0.004, -0.058]} renderOrder={3}>
-        <boxGeometry args={[throatWidth - 0.01, 0.004, 0.145]} />
-        <WaterSurfaceMaterial />
       </mesh>
 
       {/* Thin, crisp-edged bars (small bevel radius) -- the "modern" reveal
@@ -341,12 +326,6 @@ function HighWaterlineSkimmerAssembly({
   const frameDepth = 0.03;
   const frameZ = 0.017;
   const cavityBackZ = clampedCavityBackZ(-0.14, wallThickness, 0.01);
-  const cavityFrontZ = 0.008;
-  const cavityDepth = cavityFrontZ - cavityBackZ;
-  const cavityCenterZ = (cavityFrontZ + cavityBackZ) / 2;
-  // Waterline sits just under the top bar -- most of the short throat is
-  // submerged, unlike Standard/Slim where the tongue sits near mid-throat.
-  const waterlineY = topBarY - barThickness / 2 - 0.012;
 
   return (
     <group>
@@ -356,10 +335,10 @@ function HighWaterlineSkimmerAssembly({
       </mesh>
 
       <RoundedBox
-        args={[throatWidth + 0.02, throatHeight + 0.025, cavityDepth]}
-        radius={0.014}
+        args={[throatWidth + 0.02, throatHeight + 0.025, 0.006]}
+        radius={0.002}
         smoothness={3}
-        position={[0, vc, cavityCenterZ]}
+        position={[0, vc, cavityBackZ + 0.003]}
       >
         <meshStandardMaterial color={CAVITY_COLOR} roughness={0.9} metalness={0} />
       </RoundedBox>
@@ -381,11 +360,6 @@ function HighWaterlineSkimmerAssembly({
       <mesh position={[0, bottomBarY + barThickness / 2 + 0.005, -0.055]}>
         <boxGeometry args={[throatWidth, 0.01, 0.13]} />
         <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.5} />
-      </mesh>
-
-      <mesh position={[0, waterlineY, -0.052]} renderOrder={3}>
-        <boxGeometry args={[throatWidth - 0.008, throatHeight * 0.7, 0.135]} />
-        <WaterSurfaceMaterial />
       </mesh>
 
       <RoundedBox
@@ -452,9 +426,6 @@ function FlushSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: As
   const frameDepth = 0.008; // near-flush -- a fraction of Standard's 0.035
   const frameZ = 0.005;
   const cavityBackZ = clampedCavityBackZ(-0.09, wallThickness, 0.01);
-  const cavityFrontZ = 0.004;
-  const cavityDepth = cavityFrontZ - cavityBackZ;
-  const cavityCenterZ = (cavityFrontZ + cavityBackZ) / 2;
   // Shadow-gap groove: a thin dark reveal line just outside the flush bars,
   // recessed slightly behind their front face -- the detail that reads as
   // "cut into the wall" rather than "clipping through it".
@@ -470,10 +441,10 @@ function FlushSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: As
       </mesh>
 
       <RoundedBox
-        args={[throatWidth + 0.016, throatHeight + 0.02, cavityDepth]}
-        radius={0.01}
+        args={[throatWidth + 0.016, throatHeight + 0.02, 0.006]}
+        radius={0.002}
         smoothness={3}
-        position={[0, vc, cavityCenterZ]}
+        position={[0, vc, cavityBackZ + 0.003]}
       >
         <meshStandardMaterial color={CAVITY_COLOR} roughness={0.9} metalness={0} />
       </RoundedBox>
@@ -493,11 +464,6 @@ function FlushSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: As
       <mesh position={[0, bottomBarY + barThickness / 2 + 0.004, -0.05]}>
         <boxGeometry args={[throatWidth, 0.008, 0.12]} />
         <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.42} />
-      </mesh>
-
-      <mesh position={[0, vc - 0.003, -0.048]} renderOrder={3}>
-        <boxGeometry args={[throatWidth - 0.008, 0.004, 0.125]} />
-        <WaterSurfaceMaterial />
       </mesh>
 
       {/* Near-flush bars -- almost no protrusion, sharp edge (minimal bevel). */}
@@ -585,6 +551,8 @@ export function Skimmers({
   metalness,
   variant,
   poolType,
+  showWater,
+  copingThickness,
 }: {
   plan: SkimmerPlan;
   copingThickness: number;
@@ -598,6 +566,7 @@ export function Skimmers({
    * skimmer" selector. Real geometry differences, not a colour reskin. */
   variant: SkimmerTypeId;
   poolType: PoolType;
+  showWater: boolean;
 }) {
   // In-ground walls are structural concrete, thick enough that the cavity
   // housing was already fully hidden -- only the thinner above-ground
@@ -623,6 +592,8 @@ export function Skimmers({
   // Each variant places its own waterline differently against the coping --
   // High-Waterline sits much closer to it than Standard/Slim/Flush.
   const verticalDrop = variant === "highWaterline" ? 0.09 : variant === "flush" ? 0.15 : 0.16;
+  const profile = SKIMMER_PROFILES[variant];
+  const mouthWidth = profile.width - profile.bar * 2;
   useEffect(
     () => () => {
       normalMap.dispose();
@@ -646,6 +617,52 @@ export function Skimmers({
             contactAOMap={contactAOMap}
             wallThickness={wallThickness}
           />
+          {/* Hinged weir sits inside the open throat, behind the faceplate. */}
+          <RoundedBox
+            args={[mouthWidth - 0.022, 0.05, 0.008]}
+            radius={0.002}
+            smoothness={2}
+            position={[0, profile.center - profile.height / 2 + profile.bar + 0.026, -0.045]}
+            rotation={[-0.22, 0, 0]}
+            receiveShadow
+          >
+            <primitive object={frameMaterial} attach="material" />
+          </RoundedBox>
+          {showWater &&
+          verticalDrop - FREEBOARD > profile.center - profile.height / 2 + profile.bar ? (
+            <mesh
+              position={[0, verticalDrop - FREEBOARD, -0.067]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              renderOrder={3}
+            >
+              <planeGeometry args={[mouthWidth - 0.01, 0.13]} />
+              <WaterSurfaceMaterial waterLevel={wallTopY - FREEBOARD} reflections={false} />
+            </mesh>
+          ) : null}
+          {/* Removable service lid, a recessed pull slot and perimeter seal. */}
+          <RoundedBox
+            args={[0.235, 0.004, 0.16]}
+            radius={0.0015}
+            smoothness={2}
+            position={[0, verticalDrop + copingThickness + 0.001, -0.105]}
+          >
+            <meshStandardMaterial color="#595954" roughness={0.8} />
+          </RoundedBox>
+          <RoundedBox
+            args={[0.228, 0.004, 0.153]}
+            radius={0.0015}
+            smoothness={2}
+            position={[0, verticalDrop + copingThickness + 0.003, -0.105]}
+          >
+            <primitive object={frameMaterial} attach="material" />
+          </RoundedBox>
+          <mesh
+            position={[0, verticalDrop + copingThickness + 0.0051, -0.115]}
+            rotation={[-Math.PI / 2, 0, 0]}
+          >
+            <planeGeometry args={[0.035, 0.003]} />
+            <meshStandardMaterial color="#444844" roughness={0.8} />
+          </mesh>
         </group>
       ))}
     </group>

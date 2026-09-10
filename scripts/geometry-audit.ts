@@ -41,11 +41,18 @@ import {
 } from "../src/configurator/materials/interior-textures";
 import { getCustomerValidation } from "../src/lib/pool/validation";
 import {
+  createBeveledRingGeometry,
   createInteriorWallGeometry,
   createRingGeometry,
   createSurfaceGeometry,
   createWallGeometry,
 } from "../src/components/pool/three/poolGeometry";
+import {
+  createGrateGeometry,
+  createCopingJointGeometry,
+  SKIMMER_PROFILES,
+} from "../src/components/pool/three/poolConstruction";
+import * as THREE from "three";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -901,6 +908,77 @@ assert(
   "a complete customer form must unlock Final Review",
 );
 
+// Construction regressions: real wall apertures, finite bevel normals and
+// bounded grille geometry across small, large and concave configurations.
+for (const shape of shapes) {
+  for (const dimensions of [dimensionCases[0]!, dimensionCases[dimensionCases.length - 1]!]) {
+    const outline = buildOutline(shape, dimensions, DEFAULT_CONTROL_POINTS);
+    const outer = offsetOutline(outline, COPING_WIDTH);
+    const meshes = [
+      createBeveledRingGeometry(outline, outer, 0.008, 5),
+      createGrateGeometry(offsetOutline(outline, 0.055), offsetOutline(outline, 0.165)),
+      createCopingJointGeometry(outline, outer, 0.055),
+    ];
+    for (const geometry of meshes) {
+      for (const attribute of ["position", "normal", "uv"]) {
+        assert(
+          Array.from(geometry.getAttribute(attribute).array).every(Number.isFinite),
+          `${shape}: finite construction ${attribute}`,
+        );
+      }
+      assert(
+        geometry.getAttribute("position").count < 500000,
+        "construction geometry stays bounded",
+      );
+      geometry.dispose();
+    }
+    const plan = planSkimmers(outline, dimensions.length * dimensions.width);
+    for (const profile of Object.values(SKIMMER_PROFILES)) {
+      const openings = plan.positions.map((p) => ({
+        ...p,
+        width: profile.width - 2 * profile.bar + 0.008,
+        top: -profile.drop + profile.center + profile.height / 2 - profile.bar + 0.004,
+        bottom: -profile.drop + profile.center - profile.height / 2 + profile.bar - 0.004,
+      }));
+      const geometry = createInteriorWallGeometry(
+        outline,
+        0,
+        -dimensions.depth,
+        0.008,
+        2,
+        openings,
+      );
+      const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.updateMatrixWorld();
+      for (const opening of openings) {
+        const inward = new THREE.Vector3(Math.sin(opening.rotation), 0, Math.cos(opening.rotation));
+        const center = new THREE.Vector3(opening.x, (opening.top + opening.bottom) / 2, opening.z);
+        const ray = new THREE.Raycaster(
+          center.clone().addScaledVector(inward, 0.1),
+          inward.clone().negate(),
+          0,
+          0.2,
+        );
+        assert(
+          ray.intersectObject(mesh).length === 0,
+          `${shape}: skimmer throat must be physically open`,
+        );
+        ray.ray.origin.y = opening.bottom - 0.035;
+        assert(
+          ray.intersectObject(mesh).length > 0,
+          `${shape}: liner below skimmer must remain intact`,
+        );
+      }
+      geometry.dispose();
+      material.dispose();
+    }
+  }
+}
+
+console.log(
+  "Construction audit passed: open skimmer throats for all four profiles; bounded grille, joints and bevels.",
+);
 console.log(
   `Geometry audit passed: ${shapes.length * dimensionCases.length * 2} shape/dimension/system cases, ${customCases.length} custom-shape offset cases, ${validRegressionCases.length + invalidRegressionCases.length} guardrail regressions, ${cameraRegressionCount} camera poses and 24 clamped drag steps.`,
 );

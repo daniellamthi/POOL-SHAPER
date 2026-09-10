@@ -484,6 +484,7 @@ export default function PoolScene({
       <StudioFloor outline={outline} size={deckSize} theme={theme} poolType={poolType} />
 
       <PoolModel
+        skimmers={skimmers}
         outline={outline}
         depth={depth}
         materials={materials}
@@ -504,6 +505,7 @@ export default function PoolScene({
 
       {system === "skimmer" ? (
         <Skimmers
+          showWater={showWater}
           plan={skimmers}
           copingThickness={copingThickness}
           wallTopY={verticalLayout.wallTopY}

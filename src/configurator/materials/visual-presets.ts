@@ -53,10 +53,11 @@ export const WATER_P1C_BASELINE_PRESET = {
 /** P1-C correction: stronger water cues without changing surface colour or opacity. */
 const WATER_CONFIGURATION_PRESET = {
   ...WATER_P1C_BASELINE_PRESET,
-  opacity: 0.12,
-  transmission: 0.92,
-  roughness: 0.105,
-  clearcoat: 0.16,
+  opacity: 1,
+  transmission: 1,
+  thickness: 0.32,
+  roughness: 0.055,
+  clearcoat: 0,
   clearcoatRoughness: 0.12,
   reflectivity: 0.5,
   specularIntensity: 1,
@@ -68,8 +69,8 @@ const WATER_CONFIGURATION_PRESET = {
   causticVisibility: 2.3,
   caustics: { strength: 0.027, scale: 20, speed: 0.28 },
   normals: {
-    large: { scale: 0.82, strength: 0.3, rotation: 0.24 },
-    micro: { scale: 3.8, strength: 0.21, rotation: -0.68 },
+    large: { scale: 0.62, strength: 0.035, rotation: 0.24 },
+    micro: { scale: 2.4, strength: 0.025, rotation: -0.68 },
   },
   waves: {
     speed: [0.0013, 0.00086] as const,

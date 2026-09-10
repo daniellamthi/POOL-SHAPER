@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+import type { WallOpening } from "./poolConstruction";
 import { offsetOutline } from "../../../lib/pool/geometry";
 import type { Outline } from "../../../lib/pool/types";
 
@@ -118,8 +120,8 @@ export function createBeveledRingGeometry(
   let previousOuterY = 0;
   for (let step = 1; step <= safeSegments; step++) {
     const angle = (step / safeSegments) * (Math.PI / 2);
-    const currentOuter = offsetOutline(outer, -safeRadius * Math.cos(angle));
-    const currentY = -safeRadius * Math.sin(angle);
+    const currentOuter = offsetOutline(outer, -safeRadius * (1 - Math.sin(angle)));
+    const currentY = -safeRadius * (1 - Math.cos(angle));
     appendBand(previousOuter, previousOuterY, currentOuter, currentY);
     previousOuter = currentOuter;
     previousOuterY = currentY;
@@ -130,7 +132,7 @@ export function createBeveledRingGeometry(
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
   geometry.computeVertexNormals();
 
-  return geometry;
+  return toCreasedNormals(geometry, Math.PI / 3);
 }
 
 /** Vertical wall band between y = top and y = bottom following the outline. */
@@ -192,6 +194,7 @@ export function createInteriorWallGeometry(
   bottom: number,
   radius = 0.005,
   segments = 2,
+  openings: readonly WallOpening[] = [],
 ): THREE.BufferGeometry {
   const height = top - bottom;
   const safeRadius = Math.min(Math.max(radius, 0), 0.008, height * 0.05);
@@ -244,6 +247,60 @@ export function createInteriorWallGeometry(
       const u2 = perimeterDistances[index + 1]! / perimeter;
       const upperV = (upper.y - bottom) / height;
       const lowerV = (lower.y - bottom) / height;
+      // Only the straight vertical band intersects the skimmers. Split it
+      // at the aperture boundaries; retain physical holes in raster and shadows.
+      if (layer === 0 && openings.length) {
+        const dx = upperB[0] - upperA[0];
+        const dz = upperB[1] - upperA[1];
+        const holes = openings.flatMap((opening) => {
+          const c = Math.cos(opening.rotation);
+          const s = Math.sin(opening.rotation);
+          const ax = upperA[0] - opening.x;
+          const az = upperA[1] - opening.z;
+          const bx = upperB[0] - opening.x;
+          const bz = upperB[1] - opening.z;
+          const localA = ax * c - az * s;
+          const localB = bx * c - bz * s;
+          // Reject other walls; permit the small chord error of curved outlines.
+          if (
+            Math.min(Math.abs(ax * s + az * c), Math.abs(bx * s + bz * c)) > 0.035 ||
+            Math.abs(localB - localA) < 1e-8
+          )
+            return [];
+          const t0 = (-opening.width / 2 - localA) / (localB - localA);
+          const t1 = (opening.width / 2 - localA) / (localB - localA);
+          const a = Math.max(0, Math.min(t0, t1));
+          const b = Math.min(1, Math.max(t0, t1));
+          return b > a ? [{ a, b, top: opening.top, bottom: opening.bottom }] : [];
+        });
+        const cuts = [...new Set([0, 1, ...holes.flatMap((h) => [h.a, h.b])])].sort(
+          (a, b) => a - b,
+        );
+        const append = (a: number, b: number, y0: number, y1: number) => {
+          if (y0 - y1 < 1e-8) return;
+          for (const [t, y] of [
+            [a, y0],
+            [a, y1],
+            [b, y1],
+            [a, y0],
+            [b, y1],
+            [b, y0],
+          ]) {
+            positions.push(upperA[0] + dx * t!, y!, upperA[1] + dz * t!);
+            uvs.push(THREE.MathUtils.lerp(u1, u2, t!), (y! - bottom) / height);
+          }
+        };
+        for (let i = 0; i < cuts.length - 1; i++) {
+          const a = cuts[i]!;
+          const b = cuts[i + 1]!;
+          const hole = holes.find((h) => (a + b) / 2 >= h.a && (a + b) / 2 <= h.b);
+          if (hole) {
+            append(a, b, upper.y, Math.min(upper.y, hole.top));
+            append(a, b, Math.max(lower.y, hole.bottom), lower.y);
+          } else append(a, b, upper.y, lower.y);
+        }
+        continue;
+      }
       const triangles = [
         [upperA, upper.y, u1, upperV],
         [lowerA, lower.y, u1, lowerV],
@@ -263,6 +320,10 @@ export function createInteriorWallGeometry(
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
   geometry.computeVertexNormals();
+
+  // Aperture tessellation is variable; geometric normals with crease-aware
+  // smoothing preserve the cove and sharp architectural corners.
+  if (openings.length) return toCreasedNormals(geometry, Math.PI / 3);
 
   // Smooth only across the tiny vertical-to-horizontal radius. Each outline
   // segment keeps its own normal set, so true wall corners remain planar/hard.
