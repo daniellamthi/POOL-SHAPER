@@ -247,7 +247,7 @@ const causticTemplateCache = new Map<number, THREE.Texture>();
 export function createCausticsMap(size = 512): THREE.Texture {
   return memoizedTemplate(causticTemplateCache, size, () => {
     const data = new Uint8Array(size * size * 4);
-    const cells = 13;
+    const cells = 6;
     const hash = (x: number, y: number) => {
       const n = Math.sin(((x + cells) % cells) * 127.1 + ((y + cells) % cells) * 311.7) * 43758.5453;
       return n - Math.floor(n);
@@ -265,10 +265,27 @@ export function createCausticsMap(size = 512): THREE.Texture {
         if (distance < first) { second = first; first = distance; }
         else if (distance < second) second = distance;
       }
-      const edge = Math.exp(-(second - first) * 10);
+      const edge = Math.exp(-(second - first) * 10)
+        * THREE.MathUtils.smoothstep(hash(ix, iy + 29), 0.72, 0.94);
       const value = Math.round(edge * 255), o = (y * size + x) * 4;
       data[o] = data[o + 1] = data[o + 2] = value;
       data[o + 3] = 255;
+    }
+    // Sparse, broad, low-contrast light traces rather than a sharp cellular
+    // net. Periodic separable Gaussian blur is baked once, not per frame.
+    const kernel = Array.from({ length: 13 }, (_, i) => Math.exp(-((i - 6) ** 2) / 18));
+    const weight = kernel.reduce((sum, value) => sum + value, 0);
+    const horizontal = new Float32Array(size * size);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      let value = 0;
+      for (let k = -6; k <= 6; k++) value += data[(y * size + (x + k + size) % size) * 4]! * kernel[k + 6]!;
+      horizontal[y * size + x] = value / weight;
+    }
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      let value = 0;
+      for (let k = -6; k <= 6; k++) value += horizontal[((y + k + size) % size) * size + x]! * kernel[k + 6]!;
+      const o = (y * size + x) * 4;
+      data[o] = data[o + 1] = data[o + 2] = Math.round(value / weight);
     }
     const texture = new THREE.DataTexture(data, size, size);
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;

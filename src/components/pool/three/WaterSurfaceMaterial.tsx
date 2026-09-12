@@ -267,7 +267,10 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
     // restored immediately after.
     const hiddenWater: THREE.Object3D[] = [];
     scene.traverse((object) => {
-      if (object.visible && isWaterSurfaceMesh(object)) {
+      // Keep sky/environment reflection, but omit the presentation deck and
+      // coping from this pass: their mirrored strips double the pool outline.
+      // The main scene and all interaction remain unchanged.
+      if (object.visible && (isWaterSurfaceMesh(object) || object.name === "pool-perimeter-finish" || object.name === "pool-studio-deck")) {
         object.visible = false;
         hiddenWater.push(object);
       }
@@ -428,8 +431,8 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
     for (const shader of shaders.current) {
-      shader.uniforms.waterLargeOffset?.value.set(time * 0.004, time * 0.0022);
-      shader.uniforms.waterMicroOffset?.value.set(-time * 0.011, time * 0.008);
+      shader.uniforms.waterLargeOffset?.value.set(time * 0.002, time * 0.0011);
+      shader.uniforms.waterMicroOffset?.value.set(-time * 0.0055, time * 0.004);
     }
   });
 

@@ -57,12 +57,33 @@ import {
 } from "../src/components/pool/three/poolConstruction";
 import * as THREE from "three";
 import { createShorelineField } from "../src/components/pool/three/waterDepth";
+import { createCausticsMap } from "../src/components/pool/three/textures";
+import { WATER_VISUAL_PRESET } from "../src/configurator/materials/visual-presets";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
 };
 
 const shapes: ReadonlyArray<PoolShapeId> = ["rectangle", "custom"];
+assert(copingOuterOffset("overflow", "visible") === OVERFLOW_GEOMETRY.visibleChannelOuterOffset,
+  "grille overflow must meet the deck directly, without a masonry border");
+assert(copingOuterOffset("overflow", "hidden") > OVERFLOW_GEOMETRY.hiddenChannelOffset,
+  "grille-free overflow must retain its concealed channel and stone edge");
+assert(copingOuterOffset("skimmer", "visible") === 0.32, "skimmer coping must remain unchanged");
+{
+  const texture = createCausticsMap(512);
+  const pixels = texture.image.data as Uint8Array;
+  let sum = 0, maxGradient = 0;
+  for (let i = 0; i < 512 * 512; i++) {
+    sum += pixels[i * 4]!;
+    const next = Math.floor(i / 512) * 512 + (i + 1) % 512;
+    maxGradient = Math.max(maxGradient, Math.abs(pixels[i * 4]! - pixels[next * 4]!));
+  }
+  assert(sum / (512 * 512 * 255) < 0.08, "caustic field must remain sparse and low-energy");
+  assert(maxGradient < 30, "caustic field must be softened rather than sharp lines");
+  assert(WATER_VISUAL_PRESET.causticVisibility <= 0.1, "calm-water caustics must remain barely visible");
+  texture.dispose();
+}
 // Refraction must remain inside rectangular and concave water footprints.
 for (const outline of [
   [[-4, -2], [4, -2], [4, 2], [-4, 2]],
@@ -944,11 +965,10 @@ for (const shape of shapes) {
     const outer = offsetOutline(outline, COPING_WIDTH);
     const meshes = [
       createBeveledRingGeometry(outline, outer, 0.008, 5),
-      createGrateGeometry(offsetOutline(outline, 0.055), offsetOutline(outline, 0.165)),
+      createGrateGeometry(outline, offsetOutline(outline, 0.165)),
       createCopingJointGeometry(outline, outer, 0.055),
       createCopingSlabGeometry(outline, offsetOutline(outline, copingOuterOffset("skimmer", "hidden")), 0.055),
       createCopingSlabGeometry(offsetOutline(outline, 0.07), offsetOutline(outline, copingOuterOffset("overflow", "hidden")), 0.055),
-      createCopingSlabGeometry(offsetOutline(outline, 0.165), offsetOutline(outline, copingOuterOffset("overflow", "visible")), 0.055),
     ];
     for (const geometry of meshes) {
       for (const attribute of ["position", "normal", "uv"]) {
@@ -1015,7 +1035,7 @@ for (const shape of shapes) {
 // open squares where perpendicular straight-run ribs stop at the inner edge.
 {
   const outline: Outline = [[-3, -2], [3, -2], [3, 2], [-3, 2]];
-  const geometry = createGrateGeometry(offsetOutline(outline, 0.055), offsetOutline(outline, 0.165));
+  const geometry = createGrateGeometry(outline, offsetOutline(outline, 0.165));
   const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.updateMatrixWorld();

@@ -147,11 +147,11 @@ uniform float waterAbsorptionOpticalPathScale;
 varying vec3 vCausticWorldPosition;
 
 float subtleCausticField(vec2 position, float time) {
-  vec2 p = position * 0.46;
+  vec2 p = position * 0.22;
   vec2 warp = vec2(sin(p.y * 7.0 + time * 0.51), sin(p.x * 8.0 - time * 0.39)) * 0.012;
   float a = texture2D(causticMap, p + warp + vec2(time * 0.013, -time * 0.008)).r;
   float b = texture2D(causticMap, mat2(0.8, -0.6, 0.6, 0.8) * p * 1.23 - warp + vec2(-time * 0.011, time * 0.015)).r;
-  return max(a, b * 0.75);
+  return (a + b) * 0.5;
 }
 `;
 
@@ -189,7 +189,7 @@ float scatteringEnergy = min(
   maxWaterScatteringEnergy
 );
 vec3 inScattering = waterScatteringColor * scatteringEnergy;
-float causticLight = (causticValue - 0.3) * 26.0 * min(causticStrength, 0.07) * exp(-underwaterDepth * 0.18);
+float causticLight = causticValue * 8.0 * min(causticStrength, 0.007) * exp(-underwaterDepth * 0.35);
 // Sun-caustics cannot illuminate a face hidden from the sun. Modulate only
 // direct diffuse light, leaving sky bounce and specular energy untouched.
 vec3 submergedLight = (outgoingLight + reflectedLight.directDiffuse * causticLight) * waterTransmission + inScattering;
@@ -357,6 +357,7 @@ export function PoolModel({
     () => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset),
     [outline],
   );
+  const channelInnerEdge = isVisibleOverflow ? outline : overflowWaterEdge;
   const overflowSlotEdge = useMemo(
     () => offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset),
     [outline],
@@ -374,8 +375,8 @@ export function PoolModel({
       ? overflowChannelOuter
       : concealedCopingEdge
     : outline;
-  const copingSurfaceY = isVisibleOverflow
-    ? verticalLayout.wallTopY + 0.004
+  const copingSurfaceY = isOverflow
+    ? verticalLayout.wallTopY + 0.008
     : verticalLayout.copingY;
   const perimeter = useMemo(() => outlinePerimeter(outline), [outline]);
   const structuralPerimeter = useMemo(
@@ -692,49 +693,51 @@ export function PoolModel({
     [structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY],
   );
   const coping = useDisposable(
-    () => createCopingSlabGeometry(copingInner, copingOutline, copingThickness),
-    [copingInner, copingOutline, copingThickness],
+    () => isVisibleOverflow ? new THREE.BufferGeometry() : createCopingSlabGeometry(copingInner, copingOutline, copingThickness),
+    [copingInner, copingOutline, copingThickness, isVisibleOverflow],
   );
   const overflowLip = useDisposable(
     () =>
-      isOverflow
+      isOverflow && !isVisibleOverflow
         ? createBeveledRingGeometry(outline, overflowWaterEdge, 0.003, 3)
         : new THREE.BufferGeometry(),
-    [outline, overflowWaterEdge, isOverflow],
+    [outline, overflowWaterEdge, isOverflow, isVisibleOverflow],
   );
   const copingBed = useDisposable(
-    () => createRingGeometry(copingInner, copingOutline),
-    [copingInner, copingOutline],
+    () => isVisibleOverflow ? new THREE.BufferGeometry() : createRingGeometry(copingInner, copingOutline),
+    [copingInner, copingOutline, isVisibleOverflow],
   );
-  const grilleInnerSeat = useDisposable(() => createRingGeometry(overflowWaterEdge, offsetOutline(overflowWaterEdge, 0.012)), [overflowWaterEdge]);
+  const grilleInnerSeat = useDisposable(() => createRingGeometry(outline, offsetOutline(outline, 0.012)), [outline]);
   const grilleOuterSeat = useDisposable(() => createRingGeometry(offsetOutline(overflowChannelOuter, -0.012), overflowChannelOuter), [overflowChannelOuter]);
   const visibleOverflowGrate = useDisposable(
     () =>
       isVisibleOverflow
-        ? createGrateGeometry(overflowWaterEdge, overflowChannelOuter)
+        ? createGrateGeometry(outline, overflowChannelOuter)
         : new THREE.BufferGeometry(),
-    [overflowChannelOuter, overflowWaterEdge, isVisibleOverflow],
+    [overflowChannelOuter, outline, isVisibleOverflow],
   );
   const channelFloor = useDisposable(
     () =>
       isOverflow
         ? createRingGeometry(
-            overflowWaterEdge,
+            channelInnerEdge,
             isVisibleOverflow ? overflowChannelOuter : overflowSlotEdge,
           )
         : new THREE.BufferGeometry(),
-    [isOverflow, isVisibleOverflow, overflowWaterEdge, overflowChannelOuter, overflowSlotEdge],
+    [isOverflow, isVisibleOverflow, channelInnerEdge, overflowChannelOuter, overflowSlotEdge],
   );
   const channelInnerWall = useDisposable(
     () =>
       isOverflow
         ? createWallGeometry(
-            overflowWaterEdge,
-            waterLevel - 0.003,
+            // Recess the grille's channel wall beneath its seat; it must
+            // not overlap the basin liner at the same XZ plane.
+            isVisibleOverflow ? offsetOutline(channelInnerEdge, 0.012) : channelInnerEdge,
+            isVisibleOverflow ? verticalLayout.wallTopY - 0.013 : waterLevel - 0.003,
             verticalLayout.wallTopY - OVERFLOW_GEOMETRY.channelDepth,
           )
         : new THREE.BufferGeometry(),
-    [isOverflow, overflowWaterEdge, waterLevel, verticalLayout.wallTopY],
+    [isOverflow, isVisibleOverflow, channelInnerEdge, waterLevel, verticalLayout.wallTopY],
   );
   const overflowChannelWall = useDisposable(
     () =>
@@ -836,7 +839,7 @@ export function PoolModel({
             <mesh geometry={channelInnerWall} receiveShadow>
               <meshStandardMaterial color="#4b5350" roughness={0.45} side={DoubleSide} />
             </mesh>
-            <mesh geometry={overflowLip} position={[0, waterLevel - 0.001, 0]} receiveShadow>
+            {!isVisibleOverflow && <mesh name="overflow-edge-without-grille" geometry={overflowLip} position={[0, waterLevel - 0.001, 0]} receiveShadow>
               <meshPhysicalMaterial
                 color={materials.liner.color}
                 roughness={0.21}
@@ -844,7 +847,7 @@ export function PoolModel({
                 clearcoatRoughness={0.12}
                 side={DoubleSide}
               />
-            </mesh>
+            </mesh>}
             {isVisibleOverflow ? (
               <>
                 {/* Front-face only (not DoubleSide): this wall sits at the
@@ -861,6 +864,7 @@ export function PoolModel({
                   <meshStandardMaterial color="#77796f" roughness={0.68} side={DoubleSide} />
                 </mesh>
                 <mesh
+                  name="overflow-grille"
                   geometry={visibleOverflowGrate}
                   position={[
                     0,
@@ -920,6 +924,7 @@ export function PoolModel({
           space (see configureCopingTriplanar) so the rounded bevel, which
           turns from horizontal to near-vertical, never stretches the way a
           UV projected flat from the ring's XZ footprint would. */}
+      {!isVisibleOverflow && <group name="pool-perimeter-finish">
       <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.006, 0]} receiveShadow>
         <meshStandardMaterial color="#938b7b" roughness={0.96} side={DoubleSide} />
       </mesh>
@@ -942,6 +947,7 @@ export function PoolModel({
           side={DoubleSide}
         />
       </mesh>
+      </group>}
     </group>
   );
 }

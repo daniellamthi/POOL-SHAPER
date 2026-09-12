@@ -6,9 +6,9 @@ import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 
 /** Architectural presentation only; never changes basin dimensions or quotation logic. */
 export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
-  return 0.32 + (system === "overflow"
-    ? overflow === "visible" ? OVERFLOW_GEOMETRY.visibleChannelOuterOffset : OVERFLOW_GEOMETRY.hiddenChannelOffset
-    : 0);
+  // The deck meets the grille directly: no separate masonry border.
+  if (system === "overflow" && overflow === "visible") return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;
+  return 0.32 + (system === "overflow" ? OVERFLOW_GEOMETRY.hiddenChannelOffset : 0);
 }
 
 /** Metres; shared by the wall apertures and the manufactured face assemblies. */

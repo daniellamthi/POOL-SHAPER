@@ -262,7 +262,7 @@ function StudioFloor({
   }, [stone, maxAnisotropy]);
 
   return (
-    <mesh geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
+    <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
       <meshStandardMaterial
         color={theme === "dark" ? "#151617" : "#d8d6d1"}
         map={stone.colorMap}
