@@ -241,8 +241,10 @@ export function getCameraPose({
     return master;
   }
 
-  const distance = radius * (intent === "review" ? 2.25 : 2.45);
-  const direction: CameraPoint = intent === "review" ? [0.72, 0.7, 0.92] : [0.86, 0.76, 1.04];
+  // Photographic overview only: clear the full coping and view along the
+  // basin at a lower elevation. Interaction and all detail poses are unchanged.
+  const distance = radius * 3.4;
+  const direction: CameraPoint = [1.7, 0.9, 0.7];
   const directionLength = Math.hypot(...direction);
   return {
     target: [centre[0], verticalCentre, centre[1]],

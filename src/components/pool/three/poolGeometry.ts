@@ -6,9 +6,9 @@ import type { Outline } from "../../../lib/pool/types";
 
 /** Flat, horizontal (XZ) surface filling the outline. */
 export function createSurfaceGeometry(outline: Outline, hole?: Outline): THREE.BufferGeometry {
-  const shape = new THREE.Shape(outline.map(([x, y]) => new THREE.Vector2(x, y)));
+  const shape = new THREE.Shape(outline.map(([x, z]) => new THREE.Vector2(x, -z)));
   if (hole) {
-    shape.holes.push(new THREE.Path(hole.map(([x, y]) => new THREE.Vector2(x, y))));
+    shape.holes.push(new THREE.Path(hole.map(([x, z]) => new THREE.Vector2(x, -z))));
   }
   const geometry = new THREE.ShapeGeometry(shape);
   geometry.rotateX(-Math.PI / 2);

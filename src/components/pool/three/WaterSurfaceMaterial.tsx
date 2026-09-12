@@ -5,6 +5,8 @@ import { WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
 import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import { photoModeState } from "@/lib/pool/photoModeState";
 import { createRippleNormalMap } from "./textures";
+import { createShorelineField } from "./waterDepth";
+import type { Outline } from "@/lib/pool/types";
 
 interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
   uniforms: THREE.WebGLProgramParametersWithUniforms["uniforms"] & {
@@ -82,12 +84,13 @@ if (waterDebugMode == 1) {
   // (it starts showing the basin instead of sky/coping) -- fade back to the
   // material's own IBL response, which is already sitting in outgoingLight,
   // instead of a visibly wrong image.
-  mirrorFresnel *= waterAboveWaterline;
   vec2 mirrorUv = vWaterMirrorCoord.xy / vWaterMirrorCoord.w;
   // The reflected scene bends with the same wave normal as the refraction.
   mirrorUv += combinedSlope * 0.045;
   vec3 mirrorColor = texture2D(waterReflectionTexture, clamp(mirrorUv, 0.001, 0.999)).rgb;
-  outgoingLight = mix(outgoingLight, mirrorColor, mirrorFresnel);
+  // Transmission already contains (1-F). Replace only the indirect specular
+  // lobe, retaining transmitted radiance and the sun's direct highlight.
+  outgoingLight += (mirrorColor * mirrorFresnel - reflectedLight.indirectSpecular) * waterAboveWaterline;
 }
 #include <opaque_fragment>
 `;
@@ -178,6 +181,8 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
 
   useFrame(() => {
     if (!target || !mirrorCamera || !(camera instanceof THREE.PerspectiveCamera)) return;
+    mirrorCamera.name = "pool-water-reflection";
+    mirrorCamera.layers.enable(1);
     // Photo Mode ignores this material's onBeforeCompile entirely (the path
     // tracer reads plain material properties, never the patched WebGL
     // program), so the mirror-camera render this hook drives would just be
@@ -293,15 +298,35 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
 export function WaterSurfaceMaterial({
   waterLevel = 0,
   reflections = true,
+  depth = 0.13,
+  outline,
 }: {
   waterLevel?: number;
   reflections?: boolean;
+  depth?: number;
+  outline?: Outline;
 }) {
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const largeNormal = useMemo(() => createRippleNormalMap("broad"), []);
   const microNormal = useMemo(() => createRippleNormalMap("micro"), []);
   const shaders = useRef<WaterShader[]>([]);
   const reflection = useWaterReflection(waterLevel, reflections);
+  const shoreline = useMemo(() => outline ? createShorelineField(outline) : null, [outline]);
+  useEffect(() => () => shoreline?.texture.dispose(), [shoreline]);
+  useEffect(() => {
+    if (!shoreline) return;
+    // Shape edits reuse the compiled program: update its live uniforms before
+    // the next frame instead of retaining a disposed previous distance field.
+    for (const shader of shaders.current) {
+      const textureUniform = shader.uniforms["waterShoreline"];
+      const boundsUniform = shader.uniforms["waterShoreBounds"];
+      const scaleUniform = shader.uniforms["waterShoreScale"];
+      if (!textureUniform || !boundsUniform || !scaleUniform) continue;
+      textureUniform.value = shoreline.texture;
+      boundsUniform.value = shoreline.bounds;
+      scaleUniform.value = shoreline.scale;
+    }
+  }, [shoreline]);
 
   useEffect(() => {
     for (const texture of [largeNormal, microNormal]) {
@@ -326,6 +351,11 @@ export function WaterSurfaceMaterial({
       shader.uniforms.waterMicroRotation = { value: WATER_VISUAL_PRESET.normals.micro.rotation };
       shader.uniforms.waterMicroNormalMap = { value: microNormal };
       shader.uniforms.waterDebugMode = { value: WATER_DEBUG_MODE };
+      if (shoreline) {
+        shader.uniforms["waterShoreline"] = { value: shoreline.texture };
+        shader.uniforms["waterShoreBounds"] = { value: shoreline.bounds };
+        shader.uniforms["waterShoreScale"] = { value: shoreline.scale };
+      }
       let fragmentHeader = `#include <common>
 uniform vec2 waterLargeOffset;
 uniform vec2 waterMicroOffset;
@@ -337,6 +367,10 @@ uniform float waterLargeRotation;
 uniform float waterMicroRotation;
 uniform int waterDebugMode;
 uniform sampler2D waterMicroNormalMap;`;
+      if (shoreline) fragmentHeader += `
+uniform sampler2D waterShoreline;
+uniform vec4 waterShoreBounds;
+uniform float waterShoreScale;`;
       let vertexHeader = "#include <common>";
       let vertexBody = "#include <worldpos_vertex>";
       let finalFragment = DEBUG_FRAGMENT;
@@ -364,9 +398,31 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
         .replace("#include <common>", fragmentHeader)
         .replace("#include <normal_fragment_maps>", DUAL_NORMAL_FRAGMENT)
         .replace("#include <opaque_fragment>", finalFragment);
+      if (shoreline) {
+        const boundedTransmission = THREE.ShaderChunk.transmission_fragment.replace(
+          "vec4 transmitted = getIBLVolumeRefraction(", `
+          vec2 shoreUv = (pos.xz - waterShoreBounds.xy) / waterShoreBounds.zw;
+          float shoreDistance = texture2D(waterShoreline, shoreUv).r * waterShoreScale;
+          vec3 submergedRay = refract(-v, n, 1.0 / material.ior);
+          float floorPath = thickness / max(abs(submergedRay.y), 0.1);
+          float wallPath = shoreDistance / max(length(submergedRay.xz), 0.05);
+          // A floor hit can project behind dry foreground coping in the
+          // opaque framebuffer. Bound the projected sample as well as the
+          // world ray, analytically, without a second scene render/raymarch.
+          float cameraHeight = max(cameraPosition.y - pos.y, 0.01);
+          vec2 projectedDirection = cameraHeight * submergedRay.xz + submergedRay.y * (pos.xz - cameraPosition.xz);
+          float screenPath = shoreDistance * cameraHeight / max(length(projectedDirection) + shoreDistance * submergedRay.y, 0.0001);
+          // Screen-space refraction cannot recover foreground-occluded basin
+          // pixels. Limit displacement; full-depth absorption still comes
+          // from the actual submerged surfaces, not this optical proxy.
+          material.thickness = min(0.28, min(floorPath, min(wallPath, screenPath)));
+          vec4 transmitted = getIBLVolumeRefraction(`,
+        );
+        shader.fragmentShader = shader.fragmentShader.replace("#include <transmission_fragment>", boundedTransmission);
+      }
       if (!shaders.current.includes(shader)) shaders.current.push(shader);
     },
-    [microNormal, reflection.texture, reflection.textureMatrix, reflection.aboveWaterline],
+    [microNormal, reflection.texture, reflection.textureMatrix, reflection.aboveWaterline, shoreline],
   );
 
   useFrame(({ clock }) => {
@@ -385,11 +441,13 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       roughness={debugModeName === "specular" ? 0.035 : WATER_VISUAL_PRESET.roughness}
       metalness={WATER_VISUAL_PRESET.metalness}
       transmission={WATER_VISUAL_PRESET.transmission}
-      thickness={WATER_VISUAL_PRESET.thickness}
+      // Metric floor depth, conservatively bounded by the actual perimeter
+      // in the shader so dry coping cannot leak into the refracted basin.
+      thickness={outline ? depth : Math.min(depth, 0.22)}
       ior={WATER_VISUAL_PRESET.ior}
       clearcoat={WATER_VISUAL_PRESET.clearcoat}
       clearcoatRoughness={WATER_VISUAL_PRESET.clearcoatRoughness}
-      attenuationColor={WATER_VISUAL_PRESET.attenuationColor}
+      attenuationColor="#ffffff"
       attenuationDistance={WATER_VISUAL_PRESET.attenuationDistance}
       envMapIntensity={
         debugModeName === "specular" ? 0 : WATER_VISUAL_PRESET.environmentIntensity.day
@@ -404,7 +462,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       side={THREE.DoubleSide}
       onBeforeCompile={configureWaterSurface}
       customProgramCacheKey={() =>
-        `p1c-dual-normal-physical-water-v4-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}`
+        `p1c-dual-normal-physical-water-v6-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}-${outline ? 1 : 0}`
       }
     />
   );

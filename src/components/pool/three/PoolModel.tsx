@@ -11,15 +11,17 @@ import {
 } from "./poolGeometry";
 import {
   createMaterialMicroAoMap,
+  createCausticsMap,
   createMaterialMicroNormalMap,
   createMaterialMicroRoughnessMap,
   createTriplanarDetailMaps,
   getDerivedDetailMaps,
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { createTravertineMaps } from "./stoneTextures";
 import { photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
-import { COPING_WIDTH, OVERFLOW_GEOMETRY } from "@/lib/pool/config";
+import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
 import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
 import {
@@ -33,7 +35,8 @@ import {
 import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import {
-  createCopingJointGeometry,
+  copingOuterOffset,
+  createCopingSlabGeometry,
   createGrateGeometry,
   SKIMMER_PROFILES,
 } from "./poolConstruction";
@@ -127,6 +130,7 @@ vCausticWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
 
 const CAUSTICS_FRAGMENT_HEADER = `
 uniform float causticTime;
+uniform sampler2D causticMap;
 uniform float causticStrength;
 uniform float causticScale;
 uniform float waterLevel;
@@ -143,18 +147,11 @@ uniform float waterAbsorptionOpticalPathScale;
 varying vec3 vCausticWorldPosition;
 
 float subtleCausticField(vec2 position, float time) {
-  vec2 p = position * causticScale;
-  vec2 warp = vec2(
-    sin(p.y * 0.37 + time * 0.16),
-    cos(p.x * 0.31 - time * 0.13)
-  ) * 0.72;
-  float broad = sin((p.x + warp.x) * 0.72 + sin(p.y * 0.41 + time * 0.11));
-  float crossing = sin((p.y + warp.y) * 0.83 - cos(p.x * 0.46 - time * 0.09));
-  float detail = sin((p.x * 0.57 - p.y * 0.49) + warp.x - warp.y + time * 0.07);
-  float field = broad * 0.44 + crossing * 0.38 + detail * 0.18;
-  // Narrow, branching light concentrations with a quiet surrounding field.
-  float ridge = pow(max(0.0, 1.0 - abs(broad + crossing * 0.8 + detail * 0.22)), 9.0);
-  return 0.44 + ridge * 1.6;
+  vec2 p = position * 0.46;
+  vec2 warp = vec2(sin(p.y * 7.0 + time * 0.51), sin(p.x * 8.0 - time * 0.39)) * 0.012;
+  float a = texture2D(causticMap, p + warp + vec2(time * 0.013, -time * 0.008)).r;
+  float b = texture2D(causticMap, mat2(0.8, -0.6, 0.6, 0.8) * p * 1.23 - warp + vec2(-time * 0.011, time * 0.015)).r;
+  return max(a, b * 0.75);
 }
 `;
 
@@ -175,7 +172,8 @@ float underwaterMask = 1.0 - step(waterLevel + 0.0001, vCausticWorldPosition.y);
 float underwaterDepth = max(0.0, waterLevel - vCausticWorldPosition.y);
 float wetContact = exp(-abs(waterLevel - vCausticWorldPosition.y) * 190.0);
 vec3 viewRay = normalize(cameraPosition - vCausticWorldPosition);
-float viewThroughSurface = max(abs(viewRay.y), 0.35);
+// Snell's law: even a grazing air ray travels at a finite angle in water.
+float viewThroughSurface = sqrt(1.0 - (1.0 - viewRay.y * viewRay.y) / (1.333 * 1.333));
 float opticalPath = min(underwaterDepth * waterDepthDensity / viewThroughSurface, maxOpticalPath);
 float absorptionPath = opticalPath * waterAbsorptionOpticalPathScale;
 vec3 waterTransmission = exp(-waterAbsorption * absorptionPath);
@@ -191,8 +189,10 @@ float scatteringEnergy = min(
   maxWaterScatteringEnergy
 );
 vec3 inScattering = waterScatteringColor * scatteringEnergy;
-float causticLight = 1.0 + (causticValue - 0.5) * 2.0 * causticStrength * exp(-underwaterDepth * 0.22);
-vec3 submergedLight = outgoingLight * waterTransmission * causticLight + inScattering;
+float causticLight = (causticValue - 0.3) * 26.0 * min(causticStrength, 0.07) * exp(-underwaterDepth * 0.18);
+// Sun-caustics cannot illuminate a face hidden from the sun. Modulate only
+// direct diffuse light, leaving sky bounce and specular energy untouched.
+vec3 submergedLight = (outgoingLight + reflectedLight.directDiffuse * causticLight) * waterTransmission + inScattering;
 outgoingLight = mix(outgoingLight, submergedLight, underwaterMask);
 outgoingLight *= 1.0 - wetContact * min(causticStrength * 2.0, 0.12);
 #include <opaque_fragment>
@@ -267,7 +267,6 @@ normal = normalize(mat3(viewMatrix) * triBlendedWorldNormal);
 `;
 
 const ABOVE_GROUND_PANEL_WIDTH = 0.9;
-const COPING_EDGE_RADIUS = 0.008;
 const INTERIOR_FLOOR_COVE_RADIUS = 0.008;
 
 function createAboveGroundPanelMap(size = 256): THREE.Texture {
@@ -345,7 +344,11 @@ export function PoolModel({
   const isOverflow = system === "overflow";
   const isVisibleOverflow = isOverflow && overflowType === "visible";
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
-  const copingOutline = useMemo(() => offsetOutline(outline, COPING_WIDTH), [outline]);
+  const copingOutline = useMemo(
+    () => offsetOutline(outline, copingOuterOffset(system, overflowType)),
+    [outline, system, overflowType],
+  );
+  const concealedCopingEdge = useMemo(() => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset + 0.015), [outline]);
   const structuralOutline = useMemo(
     () => offsetOutline(outline, ABOVE_GROUND_STRUCTURE_THICKNESS),
     [outline],
@@ -369,7 +372,7 @@ export function PoolModel({
   const copingInner = isOverflow
     ? isVisibleOverflow
       ? overflowChannelOuter
-      : overflowSlotEdge
+      : concealedCopingEdge
     : outline;
   const copingSurfaceY = isVisibleOverflow
     ? verticalLayout.wallTopY + 0.004
@@ -480,7 +483,11 @@ export function PoolModel({
   // (see configureCopingTriplanar/configurePanelTriplanar below) rather than
   // through the mesh's own UV -- these come from a module-level cache keyed
   // by material kind, so they are shared and must not be disposed here.
-  const copingDetail = useMemo(() => createTriplanarDetailMaps("stone"), []);
+  const copingDetail = useMemo(() => createTravertineMaps(), []);
+  useEffect(() => {
+    Object.values(copingDetail).forEach(map => { map.anisotropy = dataAnisotropy; map.needsUpdate = true; });
+    return () => Object.values(copingDetail).forEach(map => map.dispose());
+  }, [copingDetail, dataAnisotropy]);
   const panelDetail = useMemo(() => createTriplanarDetailMaps("panel"), []);
   useEffect(
     () => () => {
@@ -504,10 +511,14 @@ export function PoolModel({
   );
 
   const causticsShaders = useRef<UnderwaterShader[]>([]);
+  const causticMap = useMemo(() => createCausticsMap(), []);
+  useEffect(() => () => causticMap.dispose(), [causticMap]);
   const configureCaustics = useCallback(
     (shader: UnderwaterShader) => {
       shader.uniforms.causticTime = { value: 0 };
-      shader.uniforms.causticStrength = { value: 0 };
+      shader.uniforms["causticMap"] = { value: causticMap };
+      shader.uniforms.causticStrength = { value: showWater
+        ? materials.surface.underwaterCausticStrength * WATER_VISUAL_PRESET.causticVisibility : 0 };
       shader.uniforms.causticScale = { value: WATER_VISUAL_PRESET.caustics.scale };
       shader.uniforms.waterLevel = { value: waterLevel };
       shader.uniforms.waterAbsorption = {
@@ -544,10 +555,19 @@ export function PoolModel({
         .replace("#include <worldpos_vertex>", CAUSTICS_VERTEX_POSITION);
       shader.fragmentShader = shader.fragmentShader
         .replace("#include <common>", `#include <common>${CAUSTICS_FRAGMENT_HEADER}`)
-        .replace("#include <opaque_fragment>", CAUSTICS_LIGHT_MODULATION);
+        .replace("#include <opaque_fragment>", CAUSTICS_LIGHT_MODULATION.replace(
+          "#include <opaque_fragment>",
+          import.meta.env.DEV && import.meta.env["VITE_WATER_DEBUG"] === "directLight"
+            ? "outgoingLight = reflectedLight.directDiffuse;\n#include <opaque_fragment>"
+            : import.meta.env.DEV && import.meta.env["VITE_WATER_DEBUG"] === "strength"
+            ? "outgoingLight = vec3(causticStrength * 10.0);\n#include <opaque_fragment>"
+            : import.meta.env.DEV && import.meta.env["VITE_WATER_DEBUG"] === "caustics"
+            ? "outgoingLight = vec3(causticValue);\n#include <opaque_fragment>"
+            : "#include <opaque_fragment>",
+        ));
       if (!causticsShaders.current.includes(shader)) causticsShaders.current.push(shader);
     },
-    [materials.surface, waterLevel],
+    [materials.surface, waterLevel, causticMap, showWater],
   );
   useFrame(({ clock }) => {
     // The path tracer never executes this onBeforeCompile-patched shader --
@@ -614,22 +634,23 @@ export function PoolModel({
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
       .replace("#include <worldpos_vertex>", TRIPLANAR_VERTEX_POSITION);
+    shader.uniforms["stoneColorMap"] = { value: copingDetail.colorMap };
     shader.fragmentShader = shader.fragmentShader
-      .replace("#include <common>", `#include <common>${TRIPLANAR_FRAGMENT_HEADER}`)
+      .replace("#include <common>", `#include <common>${TRIPLANAR_FRAGMENT_HEADER}\nuniform sampler2D stoneColorMap;`)
       .replace(
         "#include <color_fragment>",
         `#include <color_fragment>
-        // Low-contrast mineral variation in metres, consistent across bevels.
-        float stoneCloud = sin(vTriWorldPosition.x * 31.0 + sin(vTriWorldPosition.z * 19.0))
-          * sin(vTriWorldPosition.z * 27.0 + vTriWorldPosition.y * 23.0);
-        float stoneGrain = sin(vTriWorldPosition.x * 419.0 + vTriWorldPosition.z * 313.0)
-          * sin(vTriWorldPosition.z * 367.0 - vTriWorldPosition.y * 281.0);
-        diffuseColor.rgb *= 0.98 + stoneCloud * 0.026 + stoneGrain * 0.012;
+        vec3 stoneWeights = pow(abs(normalize(vTriWorldNormal)), vec3(4.0));
+        stoneWeights /= max(dot(stoneWeights, vec3(1.0)), 0.0001);
+        vec3 stoneColor = texture2D(stoneColorMap, vTriWorldPosition.zy * triplanarScale).rgb * stoneWeights.x
+          + texture2D(stoneColorMap, vTriWorldPosition.xz * triplanarScale).rgb * stoneWeights.y
+          + texture2D(stoneColorMap, vTriWorldPosition.xy * triplanarScale).rgb * stoneWeights.z;
+        diffuseColor.rgb *= stoneColor;
       `,
       )
       .replace("#include <roughnessmap_fragment>", TRIPLANAR_ROUGHNESS_FRAGMENT)
       .replace("#include <normal_fragment_maps>", TRIPLANAR_NORMAL_FRAGMENT);
-  }, []);
+  }, [copingDetail]);
 
   const configurePanelTriplanar = useCallback((shader: TriplanarShader) => {
     shader.uniforms.triplanarScale = {
@@ -671,11 +692,7 @@ export function PoolModel({
     [structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY],
   );
   const coping = useDisposable(
-    () => createBeveledRingGeometry(copingInner, copingOutline, COPING_EDGE_RADIUS, 5),
-    [copingOutline, copingInner],
-  );
-  const copingJoints = useDisposable(
-    () => createCopingJointGeometry(copingInner, copingOutline, copingThickness),
+    () => createCopingSlabGeometry(copingInner, copingOutline, copingThickness),
     [copingInner, copingOutline, copingThickness],
   );
   const overflowLip = useDisposable(
@@ -685,28 +702,12 @@ export function PoolModel({
         : new THREE.BufferGeometry(),
     [outline, overflowWaterEdge, isOverflow],
   );
-  const copingSkirt = useDisposable(
-    () =>
-      createWallGeometry(
-        copingOutline,
-        copingSurfaceY - COPING_EDGE_RADIUS,
-        copingSurfaceY - copingThickness,
-      ),
-    [copingOutline, copingSurfaceY, copingThickness],
+  const copingBed = useDisposable(
+    () => createRingGeometry(copingInner, copingOutline),
+    [copingInner, copingOutline],
   );
-  const copingInnerSkirt = useDisposable(
-    () =>
-      createWallGeometry(
-        copingInner,
-        copingSurfaceY - COPING_EDGE_RADIUS,
-        copingSurfaceY - copingThickness,
-      ),
-    [copingInner, copingSurfaceY, copingThickness],
-  );
-  const hiddenOverflowIntake = useDisposable(
-    () => createRingGeometry(overflowWaterEdge, overflowSlotEdge),
-    [overflowSlotEdge, overflowWaterEdge],
-  );
+  const grilleInnerSeat = useDisposable(() => createRingGeometry(overflowWaterEdge, offsetOutline(overflowWaterEdge, 0.012)), [overflowWaterEdge]);
+  const grilleOuterSeat = useDisposable(() => createRingGeometry(offsetOutline(overflowChannelOuter, -0.012), overflowChannelOuter), [overflowChannelOuter]);
   const visibleOverflowGrate = useDisposable(
     () =>
       isVisibleOverflow
@@ -777,13 +778,14 @@ export function PoolModel({
             aoMapIntensity={0.6}
             roughness={materials.liner.roughness}
             metalness={materials.liner.metalness}
-            clearcoat={materials.surface.wallClearcoat}
+            clearcoat={showWater ? 0.04 : materials.surface.wallClearcoat}
+            ior={showWater ? 1.2 : 1.5}
             clearcoatRoughness={materials.surface.wallClearcoatRoughness}
             reflectivity={0.42}
             envMapIntensity={1.0}
             specularIntensity={0.58}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => "depth-aware-underwater-optics-v2"}
+            customProgramCacheKey={() => "depth-aware-underwater-optics-v3"}
             side={DoubleSide}
           />
         </mesh>
@@ -803,12 +805,13 @@ export function PoolModel({
             aoMapIntensity={0.6}
             roughness={materials.floor.roughness}
             metalness={0}
-            clearcoat={materials.surface.floorClearcoat}
+            clearcoat={showWater ? 0 : materials.surface.floorClearcoat}
+            ior={showWater ? 1.13 : 1.5}
             clearcoatRoughness={materials.surface.floorClearcoatRoughness}
             reflectivity={0.38}
             envMapIntensity={0.95}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => "depth-aware-underwater-optics-v2"}
+            customProgramCacheKey={() => "depth-aware-underwater-optics-v3"}
             side={DoubleSide}
           />
         </mesh>
@@ -816,7 +819,7 @@ export function PoolModel({
         {/* Water body — animated ripples, refraction, real planar reflection */}
         {showWater ? (
           <mesh geometry={water} position={[0, waterLevel, 0]} renderOrder={2}>
-            <WaterSurfaceMaterial waterLevel={waterLevel} />
+            <WaterSurfaceMaterial waterLevel={waterLevel} depth={waterLevel - verticalLayout.floorY} outline={waterOutline} />
           </mesh>
         ) : null}
 
@@ -851,6 +854,12 @@ export function PoolModel({
                 <mesh geometry={visibleOverflowChannelWall} receiveShadow castShadow>
                   <meshStandardMaterial color="#242929" roughness={0.9} metalness={0.08} />
                 </mesh>
+                <mesh geometry={grilleInnerSeat} position={[0, verticalLayout.wallTopY - 0.013, 0]} receiveShadow>
+                  <meshStandardMaterial color="#77796f" roughness={0.68} side={DoubleSide} />
+                </mesh>
+                <mesh geometry={grilleOuterSeat} position={[0, verticalLayout.wallTopY - 0.013, 0]} receiveShadow>
+                  <meshStandardMaterial color="#77796f" roughness={0.68} side={DoubleSide} />
+                </mesh>
                 <mesh
                   geometry={visibleOverflowGrate}
                   position={[
@@ -874,18 +883,6 @@ export function PoolModel({
                 <mesh geometry={overflowChannelWall} receiveShadow castShadow>
                   <meshStandardMaterial
                     color="#171b1b"
-                    roughness={0.94}
-                    metalness={0.01}
-                    side={DoubleSide}
-                  />
-                </mesh>
-                <mesh
-                  geometry={hiddenOverflowIntake}
-                  position={[0, verticalLayout.wallTopY - 0.055, 0]}
-                  receiveShadow
-                >
-                  <meshStandardMaterial
-                    color="#151919"
                     roughness={0.94}
                     metalness={0.01}
                     side={DoubleSide}
@@ -923,12 +920,13 @@ export function PoolModel({
           space (see configureCopingTriplanar) so the rounded bevel, which
           turns from horizontal to near-vertical, never stretches the way a
           UV projected flat from the ring's XZ footprint would. */}
-      <mesh geometry={copingJoints} position={[0, copingSurfaceY, 0]} receiveShadow>
-        <meshStandardMaterial color="#8d8980" roughness={0.94} />
+      <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.006, 0]} receiveShadow>
+        <meshStandardMaterial color="#938b7b" roughness={0.96} side={DoubleSide} />
       </mesh>
       <mesh geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
         <meshPhysicalMaterial
           color={materials.coping.color}
+          vertexColors
           normalMap={copingDetail.normalMap}
           normalScale={[
             MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
@@ -937,44 +935,10 @@ export function PoolModel({
           roughnessMap={copingDetail.roughnessMap}
           roughness={materials.coping.roughness}
           metalness={0}
-          clearcoat={0.1}
+          clearcoat={0}
           clearcoatRoughness={0.45}
           onBeforeCompile={configureCopingTriplanar}
-          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
-          side={DoubleSide}
-        />
-      </mesh>
-      <mesh geometry={copingSkirt}>
-        <meshStandardMaterial
-          color={materials.coping.color}
-          normalMap={copingDetail.normalMap}
-          normalScale={[
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-          ]}
-          roughnessMap={copingDetail.roughnessMap}
-          roughness={Math.min(1, materials.coping.roughness + 0.1)}
-          onBeforeCompile={configureCopingTriplanar}
-          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
-          side={DoubleSide}
-        />
-      </mesh>
-      {/* Real slab fascia: for overflow it faces the collection channel,
-          outside the wet lip, rather than covering the pool's liner. */}
-      <mesh geometry={copingInnerSkirt} castShadow>
-        <meshPhysicalMaterial
-          color={materials.coping.color}
-          normalMap={copingDetail.normalMap}
-          normalScale={[
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-          ]}
-          roughnessMap={copingDetail.roughnessMap}
-          roughness={materials.coping.roughness}
-          clearcoat={0.12}
-          clearcoatRoughness={0.4}
-          onBeforeCompile={configureCopingTriplanar}
-          customProgramCacheKey={() => "triplanar-stone-detail-v1"}
+          customProgramCacheKey={() => "metric-travertine-slabs-v2"}
           side={DoubleSide}
         />
       </mesh>

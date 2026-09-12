@@ -21,6 +21,8 @@ uniform vec3 horizonColor;
 uniform vec3 sunDirection;
 uniform vec3 sunColor;
 uniform float sunVisibility;
+uniform sampler2D environmentMap;
+uniform bool hasEnvironmentMap;
 varying vec3 vDirection;
 void main() {
   vec3 direction = normalize(vDirection);
@@ -35,8 +37,14 @@ void main() {
   float sunDisc = pow(alignment, 900.0) * 1.4;
   float sunGlow = pow(alignment, 8.0) * 0.16;
   vec3 outgoing = sky + sunColor * (sunDisc + sunGlow) * sunVisibility;
+  if (hasEnvironmentMap) {
+    vec2 uv = vec2(atan(direction.z, direction.x) * 0.159154943 + 0.5, asin(clamp(direction.y, -1.0, 1.0)) * 0.318309886 + 0.5);
+    outgoing = texture2D(environmentMap, uv).rgb;
+  }
 
   gl_FragColor = vec4(outgoing, 1.0);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
 }
 `;
 
@@ -48,14 +56,16 @@ export interface SkyDomeProps {
   /** 0..1 -- fades the visible sun disc out for the dim night preset without touching the gradient. */
   sunVisibility: number;
   radius?: number;
+  environmentMap?: THREE.Texture | null;
+  reflectionOnly?: boolean;
 }
 
 /**
  * A real piece of scene geometry (not a Lightformer-only offscreen capture)
  * so the planar water reflector actually has a photographic sky -- gradient
  * plus a soft sun glow matched to the scene's own key light -- to mirror,
- * instead of a flat fill colour. Fully procedural and local: no HDRI asset,
- * no remote request.
+ * instead of a flat fill colour. A local photographic environment can be
+ * restricted to the mirror camera, leaving the visible studio uncluttered.
  */
 export function SkyDome({
   theme,
@@ -63,6 +73,8 @@ export function SkyDome({
   sunColor,
   sunVisibility,
   radius = 260,
+  environmentMap = null,
+  reflectionOnly = false,
 }: SkyDomeProps) {
   const palette = SKY_PALETTE[theme];
   const uniforms = useMemo(
@@ -72,6 +84,8 @@ export function SkyDome({
       sunDirection: { value: new THREE.Vector3(...sunDirection).normalize() },
       sunColor: { value: new THREE.Color(sunColor) },
       sunVisibility: { value: sunVisibility },
+      environmentMap: { value: environmentMap },
+      hasEnvironmentMap: { value: !!environmentMap },
     }),
     // Rebuilt only when the palette identity (theme) changes; per-frame
     // colour/direction values are pushed via the effect below instead of
@@ -83,9 +97,11 @@ export function SkyDome({
   uniforms.sunDirection.value.set(...sunDirection).normalize();
   uniforms.sunColor.value.set(sunColor);
   uniforms.sunVisibility.value = sunVisibility;
+  uniforms.environmentMap.value = environmentMap;
+  uniforms.hasEnvironmentMap.value = !!environmentMap;
 
   return (
-    <mesh renderOrder={-1000} frustumCulled={false}>
+    <mesh renderOrder={reflectionOnly ? -999 : -1000} layers-mask={reflectionOnly ? 2 : 1} frustumCulled={false}>
       <sphereGeometry args={[radius, 32, 16]} />
       <shaderMaterial
         uniforms={uniforms}

@@ -10,6 +10,7 @@ import {
   POOL_TYPES,
   PROJECT_TYPES,
   COPING_WIDTH,
+  FREEBOARD,
   OVERFLOW_GEOMETRY,
   SQM_PER_SKIMMER,
   STEPS,
@@ -50,15 +51,42 @@ import {
 import {
   createGrateGeometry,
   createCopingJointGeometry,
+  createCopingSlabGeometry,
+  copingOuterOffset,
   SKIMMER_PROFILES,
 } from "../src/components/pool/three/poolConstruction";
 import * as THREE from "three";
+import { createShorelineField } from "../src/components/pool/three/waterDepth";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
 };
 
 const shapes: ReadonlyArray<PoolShapeId> = ["rectangle", "custom"];
+// Refraction must remain inside rectangular and concave water footprints.
+for (const outline of [
+  [[-4, -2], [4, -2], [4, 2], [-4, 2]],
+  [[0, 0], [6, 0], [6, 2], [2, 2], [2, 5], [0, 5]],
+] as const) {
+  const field = createShorelineField(outline, 64);
+  const data = field.texture.image.data;
+  assert(Array.from(data).every(value => Number.isFinite(value) && value >= 0), "finite shoreline field");
+  assert(Array.from(data).some(value => value > 0), "shoreline has usable interior refraction depth");
+  assert(data[0] === 0 && data[63] === 0, "refraction vanishes at perimeter corners");
+  if (outline.length === 6) {
+    assert(data[50 * 64 + 50] === 0, "concave notch cannot refract dry paving");
+    const geometry = createSurfaceGeometry(outline);
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+    mesh.updateMatrixWorld();
+    const ray = new THREE.Raycaster(new THREE.Vector3(1, 2, 4), new THREE.Vector3(0, -1, 0));
+    assert(ray.intersectObject(mesh).length > 0, "asymmetric floor/water aligns with walls");
+    ray.ray.origin.set(5, 2, 4);
+    assert(ray.intersectObject(mesh).length === 0, "asymmetric surface preserves the dry notch");
+    geometry.dispose();
+    mesh.material.dispose();
+  }
+  field.texture.dispose();
+}
 const dimensionCases: ReadonlyArray<Dimensions> = [
   DIMENSION_LIMITS.length.min,
   10,
@@ -918,6 +946,9 @@ for (const shape of shapes) {
       createBeveledRingGeometry(outline, outer, 0.008, 5),
       createGrateGeometry(offsetOutline(outline, 0.055), offsetOutline(outline, 0.165)),
       createCopingJointGeometry(outline, outer, 0.055),
+      createCopingSlabGeometry(outline, offsetOutline(outline, copingOuterOffset("skimmer", "hidden")), 0.055),
+      createCopingSlabGeometry(offsetOutline(outline, 0.07), offsetOutline(outline, copingOuterOffset("overflow", "hidden")), 0.055),
+      createCopingSlabGeometry(offsetOutline(outline, 0.165), offsetOutline(outline, copingOuterOffset("overflow", "visible")), 0.055),
     ];
     for (const geometry of meshes) {
       for (const attribute of ["position", "normal", "uv"]) {
@@ -948,6 +979,10 @@ for (const shape of shapes) {
         2,
         openings,
       );
+      for (const opening of openings) {
+        assert(opening.bottom < -FREEBOARD && opening.top > -FREEBOARD,
+          `${shape}: every installed skimmer mouth must intersect the configured waterline`);
+      }
       const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.updateMatrixWorld();
@@ -974,6 +1009,29 @@ for (const shape of shapes) {
       material.dispose();
     }
   }
+}
+
+// Mitred grating must also span the outside corner patches, not leave four
+// open squares where perpendicular straight-run ribs stop at the inner edge.
+{
+  const outline: Outline = [[-3, -2], [3, -2], [3, 2], [-3, 2]];
+  const geometry = createGrateGeometry(offsetOutline(outline, 0.055), offsetOutline(outline, 0.165));
+  const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.updateMatrixWorld();
+  for (const xSign of [-1, 1]) for (const zSign of [-1, 1]) {
+    let covered = 0;
+    for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++) {
+      const ray = new THREE.Raycaster(
+        new THREE.Vector3(xSign * (3.075 + x * 0.016), 0.1, zSign * (2.075 + z * 0.016)),
+        new THREE.Vector3(0, -1, 0), 0, 0.15,
+      );
+      if (ray.intersectObject(mesh).length) covered++;
+    }
+    assert(covered >= 5, "grating ribs must cover every mitred outer corner");
+  }
+  geometry.dispose();
+  material.dispose();
 }
 
 console.log(

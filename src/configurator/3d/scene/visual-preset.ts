@@ -45,7 +45,7 @@ export const RENDERING_QUALITY_PRESETS: Readonly<
     ambientOcclusion: { enabled: false },
     waterQuality: "experience",
     textureAnisotropy: 16,
-    postProcessing: { enabled: true },
+    postProcessing: { enabled: false },
     planarReflection: { enabled: true, resolution: 512 },
   },
 };
@@ -88,8 +88,8 @@ export const SCENE_VISUAL_PRESET = {
   // grounded architectural photography instead of a CG model floating over
   // its own studio floor. Water/liner calibration untouched.
   contactShadow: { dark: 0.42, light: 0.35, blur: 2.5 },
-  exposure: { dark: 1.12, light: 1.18, night: 0.9 },
-  environment: { dark: 0.95, light: 1.18, night: 0.22 },
+  exposure: { dark: 0.95, light: 0.95, night: 0.9 },
+  environment: { dark: 0.24, light: 0.24, night: 0.22 },
   lighting: {
     sky: {
       intensity: { dark: 0.15, light: 0.24 },
@@ -97,7 +97,7 @@ export const SCENE_VISUAL_PRESET = {
       groundColor: { dark: "#171a1e", light: "#dcd4cb" },
     },
     sun: {
-      intensity: { dark: 1.32, light: 1.95 },
+      intensity: { dark: 3.2, light: 3.2 },
       color: "#f9f6f1",
       bias: -0.0002,
       normalBias: 0.005,

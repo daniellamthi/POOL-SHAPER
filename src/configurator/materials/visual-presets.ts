@@ -56,7 +56,7 @@ const WATER_CONFIGURATION_PRESET = {
   opacity: 1,
   transmission: 1,
   thickness: 0.32,
-  roughness: 0.055,
+  roughness: 0.035,
   clearcoat: 0,
   clearcoatRoughness: 0.12,
   reflectivity: 0.5,
@@ -66,11 +66,11 @@ const WATER_CONFIGURATION_PRESET = {
   scatteringContribution: 0.16,
   maxScatteringEnergy: 0.06,
   scatteringDepthStart: 0.18,
-  causticVisibility: 2.3,
+  causticVisibility: 1.5,
   caustics: { strength: 0.027, scale: 20, speed: 0.28 },
   normals: {
-    large: { scale: 0.62, strength: 0.035, rotation: 0.24 },
-    micro: { scale: 2.4, strength: 0.025, rotation: -0.68 },
+    large: { scale: 1.65, strength: 0.34, rotation: 0.24 },
+    micro: { scale: 1.15, strength: 0.14, rotation: -0.68 },
   },
   waves: {
     speed: [0.0013, 0.00086] as const,
@@ -115,7 +115,7 @@ export const POOL_SURFACE_PRESET = {
 export const MATERIAL_MICRO_DETAIL_PRESET = {
   liner: { moduleSize: 0.08, normalStrength: 0.05 },
   mosaic: { moduleSize: 0.04, normalStrength: 0.025 },
-  coping: { moduleSize: 0.12, normalStrength: 0.055 },
+  coping: { moduleSize: 0.4, normalStrength: 0.75 },
   aboveGroundPanel: { moduleSize: 0.12, normalStrength: 0.025 },
   studioFloor: { moduleSize: 0.22, normalStrength: 0.018 },
   skimmer: { repeat: [7, 4] as const, normalStrength: 0.032 },

@@ -591,8 +591,8 @@ export function Skimmers({
   );
   // Each variant places its own waterline differently against the coping --
   // High-Waterline sits much closer to it than Standard/Slim/Flush.
-  const verticalDrop = variant === "highWaterline" ? 0.09 : variant === "flush" ? 0.15 : 0.16;
   const profile = SKIMMER_PROFILES[variant];
+  const verticalDrop = profile.drop;
   const mouthWidth = profile.width - profile.bar * 2;
   useEffect(
     () => () => {

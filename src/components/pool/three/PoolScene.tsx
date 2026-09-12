@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Lightformer, ContactShadows } from "@react-three/drei";
+import { OrbitControls, ContactShadows } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { Vector3, ACESFilmicToneMapping, NoToneMapping, PCFShadowMap, SRGBColorSpace } from "three";
+import { Vector3, AgXToneMapping, NoToneMapping, PCFShadowMap, SRGBColorSpace } from "three";
 import { PoolModel } from "./PoolModel";
-import { SkyDome } from "./SkyDome";
-import { createMaterialMicroNormalMap, createMaterialMicroRoughnessMap } from "./textures";
+import { DaylightEnvironment } from "./DaylightEnvironment";
+import { copingOuterOffset } from "./poolConstruction";
+import { createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
 import { ExternalStaircase } from "./ExternalStaircase";
@@ -26,10 +27,8 @@ import {
   SCENE_VISUAL_PRESET,
 } from "@/configurator/3d/scene/visual-preset";
 import {
-  MATERIAL_MICRO_DETAIL_PRESET,
   POOL_BORDER_PRESET,
 } from "@/configurator/materials/visual-presets";
-import { COPING_WIDTH } from "@/lib/pool/config";
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { getCameraPose } from "@/lib/pool/camera";
 import type { CameraIntent } from "@/lib/pool/camera";
@@ -95,7 +94,7 @@ function DevelopmentRendererMetrics() {
     frames.current += 1;
     if (elapsed.current < 2) return;
     const frameTime = (elapsed.current / frames.current) * 1000;
-    console.debug("[Pool3D performance]", {
+    console.debug("[Pool3D performance]", JSON.stringify({
       fps: Number((1000 / frameTime).toFixed(1)),
       frameTimeMs: Number(frameTime.toFixed(2)),
       calls: gl.info.render.calls,
@@ -105,7 +104,7 @@ function DevelopmentRendererMetrics() {
       dpr: gl.getPixelRatio(),
       shadowMapSize: ACTIVE_RENDERING_QUALITY.shadowMapSize,
       qualityPreset: ACTIVE_RENDERING_QUALITY.id,
-    });
+    }));
     elapsed.current = 0;
     frames.current = 0;
   });
@@ -226,11 +225,15 @@ function StudioFloor({
   size,
   theme,
   poolType,
+  system,
+  overflowType,
 }: {
   outline: Outline;
   size: number;
   theme: Theme;
   poolType: PoolType;
+  system: SystemType;
+  overflowType: OverflowType;
 }) {
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const geometry = useMemo(() => {
@@ -243,42 +246,43 @@ function StudioFloor({
     ];
     return createSurfaceGeometry(
       outer,
-      poolType === "in-ground" ? offsetOutline(outline, COPING_WIDTH) : undefined,
+      poolType === "in-ground" ? offsetOutline(outline, copingOuterOffset(system, overflowType)) : undefined,
     );
-  }, [outline, size, poolType]);
+  }, [outline, size, poolType, system, overflowType]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
-  const [normalMap, roughnessMap] = useMemo(() => {
-    const normal = createMaterialMicroNormalMap();
-    const roughness = createMaterialMicroRoughnessMap();
-    const repeat = 1 / MATERIAL_MICRO_DETAIL_PRESET.studioFloor.moduleSize;
-    for (const texture of [normal, roughness]) {
-      texture.repeat.set(repeat, repeat);
-      texture.anisotropy = Math.min(ACTIVE_RENDERING_QUALITY.textureAnisotropy, maxAnisotropy);
+  const stone = useMemo(() => createTravertineMaps(), []);
+  useEffect(() => {
+    for (const texture of Object.values(stone)) {
+      texture.repeat.set(2.5, 2.5);
+      texture.anisotropy = Math.min(8, maxAnisotropy);
       texture.needsUpdate = true;
     }
-    return [normal, roughness];
-  }, [maxAnisotropy]);
-  useEffect(
-    () => () => {
-      normalMap.dispose();
-      roughnessMap.dispose();
-    },
-    [normalMap, roughnessMap],
-  );
+    return () => Object.values(stone).forEach(texture => texture.dispose());
+  }, [stone, maxAnisotropy]);
 
   return (
     <mesh geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
       <meshStandardMaterial
         color={theme === "dark" ? "#151617" : "#d8d6d1"}
-        roughness={0.94}
-        normalMap={normalMap}
-        normalScale={[
-          MATERIAL_MICRO_DETAIL_PRESET.studioFloor.normalStrength,
-          MATERIAL_MICRO_DETAIL_PRESET.studioFloor.normalStrength,
-        ]}
-        roughnessMap={roughnessMap}
+        map={stone.colorMap}
+        roughness={0.86}
+        normalMap={stone.normalMap}
+        normalScale={[0.28, 0.28]}
+        roughnessMap={stone.roughnessMap}
         metalness={0}
+        onBeforeCompile={shader => {
+          shader.fragmentShader = shader.fragmentShader.replace("#include <map_fragment>", `
+            #include <map_fragment>
+            vec2 slabCoord = vMapUv / 3.0;
+            vec2 toJoint = min(fract(slabCoord), 1.0 - fract(slabCoord));
+            vec2 aa = fwidth(slabCoord);
+            vec2 grout = smoothstep(vec2(0.001), vec2(0.001) + aa, toJoint);
+            float slabSeed = fract(sin(dot(floor(slabCoord), vec2(127.1, 311.7))) * 43758.5453);
+            diffuseColor.rgb *= mix(0.73, 0.97 + slabSeed * 0.045, min(grout.x, grout.y));
+          `);
+        }}
+        customProgramCacheKey={() => "architectural-stone-paving-v1"}
       />
     </mesh>
   );
@@ -357,16 +361,11 @@ export default function PoolScene({
         // in WebKit. Screenshots are not part of the current workflow, so the
         // renderer can safely release each frame after presentation.
         preserveDrawingBuffer: false,
-        // Single ACES source of truth: three.js bakes toneMapping into every
-        // material's own fragment shader, so it already runs once per pixel
-        // inside the EffectComposer's own scene render pass. When the post
-        // pass supplies its own <ToneMapping> effect (Experience tier) the
-        // renderer must render linear/HDR instead, or ACES gets applied
-        // twice. Configuration (no post pass) keeps the renderer doing ACES
-        // directly, exactly as before.
+        // Apply AgX exactly once, with no bloom/contrast pass. If a quality
+        // preset opts into a composer again, its output owns tone mapping.
         toneMapping: ACTIVE_RENDERING_QUALITY.postProcessing.enabled
           ? NoToneMapping
-          : ACESFilmicToneMapping,
+          : AgXToneMapping,
         toneMappingExposure: SCENE_VISUAL_PRESET.exposure[theme],
       }}
       onCreated={({ gl }) => {
@@ -389,12 +388,7 @@ export default function PoolScene({
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
       {!photoMode ? (
-        <SkyDome
-          theme={theme}
-          sunDirection={sunPosition}
-          sunColor={SCENE_VISUAL_PRESET.lighting.sun.color}
-          sunVisibility={theme === "dark" ? 0.35 : 1}
-        />
+        <DaylightEnvironment theme={theme} sunDirection={sunPosition} />
       ) : null}
 
       <hemisphereLight
@@ -430,58 +424,7 @@ export default function PoolScene({
         distance={radius * 8}
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[theme]}
       />
-      {/* Local procedural reflections: no remote HDR request can reject and
-          escape through the application-level React error boundary. */}
-      <Environment
-        resolution={ACTIVE_RENDERING_QUALITY.environmentResolution}
-        environmentIntensity={SCENE_VISUAL_PRESET.environment[theme]}
-      >
-        <Lightformer
-          form="rect"
-          intensity={theme === "dark" ? 2.1 : 1.45}
-          color={theme === "dark" ? "#dfe8ed" : "#eef6fb"}
-          position={[0, 11, -5]}
-          rotation={[Math.PI / 2, 0, 0]}
-          scale={[24, 18, 1]}
-        />
-        <Lightformer
-          form="rect"
-          intensity={theme === "dark" ? 1.05 : 0.78}
-          color="#e5d8c7"
-          position={[-14, 4, 5]}
-          rotation={[0, Math.PI / 2, 0]}
-          scale={[12, 7, 1]}
-        />
-        <Lightformer
-          form="rect"
-          intensity={theme === "dark" ? 0.72 : 0.52}
-          color="#dce8ec"
-          position={[12, 3, -7]}
-          rotation={[0, -Math.PI / 3, 0]}
-          scale={[10, 5, 1]}
-        />
-        {/* Extra angular coverage so PBR/water reflections read as more than a
-            couple of flat rectangles: a low soft rim from the opposite side
-            and a faint warm ground bounce underneath. */}
-        <Lightformer
-          form="rect"
-          intensity={theme === "dark" ? 0.58 : 0.4}
-          color={theme === "dark" ? "#c9d6e0" : "#fdf8ee"}
-          position={[-10, 2.4, -9]}
-          rotation={[0, Math.PI / 4, 0]}
-          scale={[9, 5, 1]}
-        />
-        <Lightformer
-          form="ring"
-          intensity={theme === "dark" ? 0.3 : 0.22}
-          color="#e8ddc9"
-          position={[0, -1.5, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-          scale={[16, 16, 1]}
-        />
-      </Environment>
-
-      <StudioFloor outline={outline} size={deckSize} theme={theme} poolType={poolType} />
+      <StudioFloor outline={outline} size={deckSize} theme={theme} poolType={poolType} system={system} overflowType={overflowType} />
 
       <PoolModel
         skimmers={skimmers}

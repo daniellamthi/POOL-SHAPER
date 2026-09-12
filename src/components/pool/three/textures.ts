@@ -191,13 +191,19 @@ function rippleHeight(layer: "broad" | "micro", x: number, y: number, size: numb
   const v = (y / size) * Math.PI * 2;
   if (layer === "broad") {
     return (
-      Math.sin(u * 2 + Math.sin(v * 2) * 0.42) * 0.5 +
-      Math.sin(v * 3 - Math.cos(u * 2) * 0.35) * 0.32
+      Math.sin(u * 2 + v * 3 + Math.sin(v * 2) * 0.65) * 0.26 +
+      Math.sin(u * 4 - v * 3 + Math.cos(u + v) * 0.72) * 0.19 +
+      Math.sin(u * 3 + v * 7 + 1.7) * 0.12 +
+      Math.sin(u * 8 - v * 5 + 2.4) * 0.07 +
+      Math.sin(u * 9 + v * 4 + 0.9) * 0.05 +
+      Math.sin(u - v * 6 + Math.cos(u * 2) * 0.6) * 0.1
     );
   }
   return (
-    Math.sin(u * 7 + v * 5 + Math.sin(v * 3) * 0.28) * 0.2 +
-    Math.sin(u * 11 - v * 9 - Math.cos(u * 4) * 0.22) * 0.14
+    Math.sin(u * 7 + v * 5 + Math.sin(v * 3) * 0.8) * 0.12 +
+    Math.sin(u * 11 - v * 9 - Math.cos(u * 4) * 0.6) * 0.08 +
+    Math.sin(u * 13 + v * 3 + 3.1) * 0.06 +
+    Math.sin(u * 4 - v * 15 + 0.6) * 0.04
   );
 }
 
@@ -232,6 +238,46 @@ export function createRippleNormalMap(
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   return texture;
+}
+
+const causticTemplateCache = new Map<number, THREE.Texture>();
+
+/** Periodic, warped cellular light concentrations. Generated once on CPU;
+ * the basin shader needs just two bilinear samples, not a per-pixel noise loop. */
+export function createCausticsMap(size = 512): THREE.Texture {
+  return memoizedTemplate(causticTemplateCache, size, () => {
+    const data = new Uint8Array(size * size * 4);
+    const cells = 13;
+    const hash = (x: number, y: number) => {
+      const n = Math.sin(((x + cells) % cells) * 127.1 + ((y + cells) % cells) * 311.7) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const u = x / size, v = y / size;
+      const px = u * cells + Math.sin(v * Math.PI * 4) * 0.35;
+      const py = v * cells + Math.sin(u * Math.PI * 6) * 0.3;
+      const ix = Math.floor(px), iy = Math.floor(py);
+      let first = 10, second = 10;
+      for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+        const dx = ix + i + 0.15 + hash(ix + i, iy + j) * 0.7 - px;
+        const dy = iy + j + 0.15 + hash(iy + j, ix + i + 7) * 0.7 - py;
+        const distance = Math.hypot(dx, dy);
+        if (distance < first) { second = first; first = distance; }
+        else if (distance < second) second = distance;
+      }
+      const edge = Math.exp(-(second - first) * 10);
+      const value = Math.round(edge * 255), o = (y * size + x) * 4;
+      data[o] = data[o + 1] = data[o + 2] = value;
+      data[o + 3] = 255;
+    }
+    const texture = new THREE.DataTexture(data, size, size);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+    return texture;
+  });
 }
 
 /**
