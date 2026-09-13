@@ -680,11 +680,11 @@ for (const testCase of verticalGeometryCases) {
       }
       if (intent === "mosaic") {
         assert(interiorWidePose, `${testCase.name}/${poolType}: missing Liner wide pose`);
-        // Mosaic intentionally keeps a tighter material-swatch distance than
-        // Liner's pulled-back architectural composition (see the `isLiner`
-        // branch in `getInteriorFinishCamera`), so only the shared target --
-        // the same point on the same reference wall -- must still match.
+        // Finish comparisons must preserve both position and target.
         assert(
+          pose.position.every(
+            (value, index) => Math.abs(value - interiorWidePose.position[index]!) < 1e-10,
+          ) &&
           pose.target.every(
             (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
           ),

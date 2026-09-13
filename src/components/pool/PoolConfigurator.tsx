@@ -262,14 +262,16 @@ function ConfiguratorLayout() {
   const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
+  const dimensionsStep = activeSteps.findIndex(({ id }) =>
+    id === (renovationWorkflow ? "renovation-pool" : "shape-dimensions"),
+  );
+  const cameraLocked = dimensionsStep >= 0 && step > dimensionsStep;
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
     : activeStepId === "system"
       ? config.system
       : activeStepId === "finish" || activeStepId === "color"
-        ? config.finish === "mosaic"
-          ? "mosaic"
-          : "liner"
+        ? "liner"
         : activeStepId === "review"
           ? "review"
           : "overview";
@@ -353,6 +355,7 @@ function ConfiguratorLayout() {
             onReframe={reframe}
             frameToken={frameToken}
             focus={cameraFocus}
+            cameraLocked={cameraLocked}
             showWater={renovationWorkflow || activeStepId !== "finish"}
             theme={theme}
             photoMode={photoMode}

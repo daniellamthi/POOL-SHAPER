@@ -64,6 +64,7 @@ export interface SceneProps {
   showMeasurements: boolean;
   frameToken: number;
   focus: SceneFocus;
+  cameraLocked: boolean;
   showWater: boolean;
   theme: Theme;
   photoMode: boolean;
@@ -113,6 +114,7 @@ function DevelopmentRendererMetrics() {
 
 /** Smoothly restores a stable product view when dimensions or framing change. */
 function CameraRig({
+  cameraLocked,
   radius,
   controls,
   frameToken,
@@ -125,6 +127,7 @@ function CameraRig({
   includeExternalStaircase,
   photoMode,
 }: {
+  cameraLocked: boolean;
   radius: number;
   controls: React.RefObject<OrbitControlsImpl | null>;
   frameToken: number;
@@ -162,6 +165,17 @@ function CameraRig({
     lookAt.current.set(...pose.target);
     startPosition.current.copy(camera.position);
     startTarget.current.copy(controls.current?.target ?? lookAt.current);
+    // Drain any orbit inertia without changing the visible starting pose.
+    const control = controls.current;
+    if (control && cameraLocked) {
+      const damping = control.enableDamping;
+      control.enableDamping = false;
+      control.update();
+      camera.position.copy(startPosition.current);
+      control.target.copy(startTarget.current);
+      control.update();
+      control.enableDamping = damping;
+    }
     elapsed.current = 0;
     // AUTO-012 / directive §53: honour prefers-reduced-motion by snapping to
     // the goal pose on the next frame instead of flying the camera there.
@@ -173,6 +187,7 @@ function CameraRig({
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;
   }, [
+    cameraLocked,
     camera,
     controls,
     frameToken,
@@ -303,6 +318,7 @@ export default function PoolScene({
   showMeasurements,
   frameToken,
   focus,
+  cameraLocked,
   showWater,
   theme,
   photoMode,
@@ -506,7 +522,7 @@ export default function PoolScene({
         // while `enabled` is true, so disabling it here doesn't just ignore
         // new drag input, it stops the camera from drifting at all while
         // Photo Mode is active.
-        enabled={!photoMode}
+        enabled={!photoMode && !cameraLocked}
         enablePan
         enableZoom
         enableRotate
@@ -520,6 +536,7 @@ export default function PoolScene({
         maxPolarAngle={Math.PI / 2.05}
       />
       <CameraRig
+        cameraLocked={cameraLocked}
         radius={radius}
         controls={controls}
         frameToken={frameToken}

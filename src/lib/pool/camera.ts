@@ -235,7 +235,8 @@ export function getCameraPose({
         depth: safeDepth,
         verticalFov,
         viewportAspect,
-        isLiner: intent === "liner",
+        // Compare all finishes from the same existing architectural pose.
+        isLiner: true,
       });
     }
     return master;

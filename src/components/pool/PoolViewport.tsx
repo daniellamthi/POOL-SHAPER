@@ -129,7 +129,9 @@ export const PoolViewport = memo(function PoolViewport({
         <p className="hidden text-[10px] uppercase tracking-[0.24em] text-muted-foreground/70 sm:block">
           {scene.photoMode
             ? "Path-traced preview — camera locked while refining"
-            : "Drag to orbit · Scroll to zoom · Right-drag to pan"}
+            : scene.cameraLocked
+              ? "Camera locked · Live 3D"
+              : "Drag to orbit · Scroll to zoom · Right-drag to pan"}
         </p>
         <div className="pointer-events-auto ml-auto flex flex-wrap items-center justify-end gap-2">
           {scene.photoMode ? (
