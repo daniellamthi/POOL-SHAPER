@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
 import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import { photoModeState } from "@/lib/pool/photoModeState";
+import { renderQualityState } from "@/lib/pool/renderQualityState";
 import { createRippleNormalMap } from "./textures";
 import { createShorelineField } from "./waterDepth";
 import type { Outline } from "@/lib/pool/types";
@@ -44,12 +45,12 @@ vec3 microRipple = texture2D(
 ).xyz * 2.0 - 1.0;
 // Incommensurate capillary waves in physical surface coordinates. Analytic
 // slopes avoid 8-bit normal-map banding and repeated highlight grids at grazing angles.
-float waveTime = waterLargeOffset.x * 150.0;
+float waveTime = waterLargeOffset.x * 110.0;
 vec2 p = centeredNormalUv;
-vec2 calmSlope = vec2(1.7, 0.8) * 0.004 * cos(dot(p, vec2(1.7, 0.8)) - waveTime * 0.73)
-  + vec2(-0.7, 2.1) * 0.0028 * cos(dot(p, vec2(-0.7, 2.1)) + waveTime * 0.57)
-  + vec2(3.6, -1.2) * 0.0012 * cos(dot(p, vec2(3.6, -1.2)) - waveTime * 1.13)
-  + vec2(5.2, 3.7) * 0.00045 * cos(dot(p, vec2(5.2, 3.7)) + waveTime * 0.91);
+vec2 calmSlope = vec2(1.7, 0.8) * 0.0026 * cos(dot(p, vec2(1.7, 0.8)) - waveTime * 0.73)
+  + vec2(-0.7, 2.1) * 0.0018 * cos(dot(p, vec2(-0.7, 2.1)) + waveTime * 0.57)
+  + vec2(3.6, -1.2) * 0.0008 * cos(dot(p, vec2(3.6, -1.2)) - waveTime * 1.13)
+  + vec2(5.2, 3.7) * 0.0003 * cos(dot(p, vec2(5.2, 3.7)) + waveTime * 0.91);
 vec2 combinedSlope = calmSlope + largeRipple.xy * waterLargeStrength + microRipple.xy * waterMicroStrength;
 vec3 waterNormal = normalize(vec3(combinedSlope, 1.0));
 normal = normalize(tbn * waterNormal);
@@ -197,10 +198,15 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
       waterLevel + REFLECTION_FALLBACK_MARGIN,
     );
 
-    // Every other frame: calm water reflections change slowly enough that
-    // one frame of staleness is invisible, and it halves the extra cost.
+    // Every other frame while the camera is moving: calm water reflections
+    // change slowly enough that one frame of staleness is invisible there,
+    // and it halves the extra cost exactly when responsiveness matters most.
+    // Once the camera has settled (see renderQualityState/CameraRig), render
+    // every frame instead -- the mirror capture itself doesn't accumulate,
+    // so this only removes up-to-one-frame staleness from the reflection,
+    // for a steadier, less swimmy image with no extra GPU cost while moving.
     frame.current += 1;
-    if (frame.current > 1 && frame.current % 2 !== 0) return;
+    if (!renderQualityState.idle && frame.current > 1 && frame.current % 2 !== 0) return;
     if (aboveWaterline.value === 0) return;
 
     mirrorCamera.position.set(
@@ -268,9 +274,23 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
     const hiddenWater: THREE.Object3D[] = [];
     scene.traverse((object) => {
       // Keep sky/environment reflection, but omit the presentation deck and
-      // coping from this pass: their mirrored strips double the pool outline.
-      // The main scene and all interaction remain unchanged.
-      if (object.visible && (isWaterSurfaceMesh(object) || object.name === "pool-perimeter-finish" || object.name === "pool-studio-deck")) {
+      // every dry edge/border finish from this pass: mirrored right next to
+      // the real thing, their reflected strips double the pool outline and
+      // make the actual border harder to read. Covers the skimmer coping
+      // (pool-perimeter-finish), the studio deck, the physical skimmer
+      // housings (pool-skimmers), the hidden-overflow stone lip
+      // (overflow-edge-without-grille) and the visible-overflow grille
+      // (overflow-grille) -- whichever of these is this system's actual
+      // border. The main scene and all interaction remain unchanged.
+      if (
+        object.visible &&
+        (isWaterSurfaceMesh(object) ||
+          object.name === "pool-perimeter-finish" ||
+          object.name === "pool-studio-deck" ||
+          object.name === "pool-skimmers" ||
+          object.name === "overflow-edge-without-grille" ||
+          object.name === "overflow-grille")
+      ) {
         object.visible = false;
         hiddenWater.push(object);
       }
@@ -431,8 +451,10 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
     for (const shader of shaders.current) {
-      shader.uniforms.waterLargeOffset?.value.set(time * 0.002, time * 0.0011);
-      shader.uniforms.waterMicroOffset?.value.set(-time * 0.0055, time * 0.004);
+      // Slowed vs. the original bake: a calmer, more architectural drift --
+      // still alive, not the "game water" scroll speed the raw values read as.
+      shader.uniforms.waterLargeOffset?.value.set(time * 0.0013, time * 0.0007);
+      shader.uniforms.waterMicroOffset?.value.set(-time * 0.0035, time * 0.0026);
     }
   });
 

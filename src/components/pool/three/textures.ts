@@ -273,17 +273,22 @@ export function createCausticsMap(size = 512): THREE.Texture {
     }
     // Sparse, broad, low-contrast light traces rather than a sharp cellular
     // net. Periodic separable Gaussian blur is baked once, not per frame.
-    const kernel = Array.from({ length: 13 }, (_, i) => Math.exp(-((i - 6) ** 2) / 18));
+    // Widened (radius 6 -> 14) so the underlying Worley cells diffuse into
+    // barely-there light suggestions instead of a recognisable repeated
+    // pattern -- the single biggest lever for "almost invisible" caustics,
+    // independent of the intensity uniform applied at render time.
+    const radius = 14;
+    const kernel = Array.from({ length: radius * 2 + 1 }, (_, i) => Math.exp(-((i - radius) ** 2) / 98));
     const weight = kernel.reduce((sum, value) => sum + value, 0);
     const horizontal = new Float32Array(size * size);
     for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
       let value = 0;
-      for (let k = -6; k <= 6; k++) value += data[(y * size + (x + k + size) % size) * 4]! * kernel[k + 6]!;
+      for (let k = -radius; k <= radius; k++) value += data[(y * size + (x + k + size) % size) * 4]! * kernel[k + radius]!;
       horizontal[y * size + x] = value / weight;
     }
     for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
       let value = 0;
-      for (let k = -6; k <= 6; k++) value += horizontal[((y + k + size) % size) * size + x]! * kernel[k + 6]!;
+      for (let k = -radius; k <= radius; k++) value += horizontal[((y + k + size) % size) * size + x]! * kernel[k + radius]!;
       const o = (y * size + x) * 4;
       data[o] = data[o + 1] = data[o + 2] = Math.round(value / weight);
     }

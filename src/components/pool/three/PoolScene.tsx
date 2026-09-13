@@ -35,6 +35,7 @@ import type { CameraIntent } from "@/lib/pool/camera";
 import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
+import { renderQualityState, RENDER_QUALITY_IDLE_DELAY } from "@/lib/pool/renderQualityState";
 
 export type { PhotoModeQuality };
 
@@ -112,6 +113,34 @@ function DevelopmentRendererMetrics() {
   return null;
 }
 
+/**
+ * The stationary-quality half of the moving/idle split: once `CameraRig`
+ * marks the camera settled (`renderQualityState.idle`), raise the
+ * renderer's pixel ratio to the active quality tier's ceiling for real
+ * supersampling -- sharper edges, less shimmer on thin geometry (grille
+ * bars, coping joints) -- and drop it back to the tier's responsive floor
+ * the instant movement resumes. `setDpr` is react-three-fiber's own API for
+ * this (the same one its `dpr` array prop uses internally), so this never
+ * fights the initial dpr clamp; it only ever runs on the moving/idle
+ * transition edge, not every frame, so it costs nothing while settled.
+ */
+function AdaptiveQuality() {
+  const setDpr = useThree((state) => state.setDpr);
+  const wasIdle = useRef(false);
+
+  useFrame(() => {
+    if (renderQualityState.idle === wasIdle.current) return;
+    wasIdle.current = renderQualityState.idle;
+    setDpr(
+      wasIdle.current
+        ? ACTIVE_RENDERING_QUALITY.dpr[1]
+        : ACTIVE_RENDERING_QUALITY.dpr[0],
+    );
+  });
+
+  return null;
+}
+
 /** Smoothly restores a stable product view when dimensions or framing change. */
 function CameraRig({
   cameraLocked,
@@ -149,6 +178,48 @@ function CameraRig({
   const elapsed = useRef(0);
   const duration = useRef(1.15);
   const flying = useRef(false);
+  // Tracks live OrbitControls dragging (pan/rotate/zoom), separately from
+  // `flying` above which tracks this component's own scripted camera
+  // transitions -- the stationary-quality mode (see AdaptiveQuality and
+  // useWaterReflection) needs to stay in "moving" mode for either.
+  const interacting = useRef(false);
+  const idleElapsed = useRef(0);
+
+  useEffect(() => {
+    const control = controls.current;
+    if (!control) return;
+    const handleStart = () => {
+      interacting.current = true;
+    };
+    const handleEnd = () => {
+      interacting.current = false;
+    };
+    control.addEventListener("start", handleStart);
+    control.addEventListener("end", handleEnd);
+    return () => {
+      control.removeEventListener("start", handleStart);
+      control.removeEventListener("end", handleEnd);
+    };
+  }, [controls]);
+
+  // Stationary-quality bookkeeping, independent of the flight-animation
+  // useFrame below: runs every frame (not just mid-flight) so it can notice
+  // once the camera has been still -- no scripted flight, no user drag, and
+  // not Photo Mode's own separate progressive accumulation -- for
+  // RENDER_QUALITY_IDLE_DELAY seconds, and flips back to "moving" the
+  // instant either resumes.
+  useFrame((_, delta) => {
+    const moving = flying.current || interacting.current || photoMode;
+    if (moving) {
+      idleElapsed.current = 0;
+      if (renderQualityState.idle) renderQualityState.idle = false;
+      return;
+    }
+    idleElapsed.current += delta;
+    if (!renderQualityState.idle && idleElapsed.current >= RENDER_QUALITY_IDLE_DELAY) {
+      renderQualityState.idle = true;
+    }
+  });
 
   useEffect(() => {
     const pose = getCameraPose({
@@ -512,6 +583,7 @@ export default function PoolScene({
       ) : null}
 
       {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
+      {!photoMode ? <AdaptiveQuality /> : null}
 
       <OrbitControls
         ref={controls}

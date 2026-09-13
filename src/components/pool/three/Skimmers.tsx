@@ -604,7 +604,7 @@ export function Skimmers({
   );
   useEffect(() => () => frameMaterial.dispose(), [frameMaterial]);
   return (
-    <group>
+    <group name="pool-skimmers">
       {plan.positions.map((spot, index) => (
         <group
           key={index}
