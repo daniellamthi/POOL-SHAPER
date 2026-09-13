@@ -275,7 +275,7 @@ function ConfiguratorLayout() {
         ? config.overflowType === "visible"
           ? "overflow-visible"
           : "overflow-hidden"
-        : config.system
+        : "skimmer-detail"
       : activeStepId === "finish" || activeStepId === "color"
         ? "liner"
         : activeStepId === "review"

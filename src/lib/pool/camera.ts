@@ -7,6 +7,7 @@ import type { PoolVerticalLayout } from "./vertical-layout";
 export type CameraIntent =
   | "overview"
   | "skimmer"
+  | "skimmer-detail"
   | "overflow"
   | "overflow-hidden"
   | "overflow-visible"
@@ -148,9 +149,11 @@ function getFrontWallMasterCamera({
 
 /** Medium-close frontal view of the same reference wall, framing roughly
  * half the long wall at waterline height instead of the whole basin --
- * close enough that the overflow edge or grille clearly reads, short of
- * the tight material-swatch framing the Liner/Mosaic camera uses. */
-function getOverflowDetailCamera({
+ * close enough that the skimmer openings, overflow edge or grille clearly
+ * read, short of the tight material-swatch framing the Liner/Mosaic camera
+ * uses. Shared by all three Step 5 System detail poses so they stay
+ * consistent in distance and framing philosophy. */
+function getSystemDetailCamera({
   reference,
   bounds,
   layout,
@@ -268,6 +271,7 @@ export function getCameraPose({
   const verticalCentre = (layout.floorY + layout.wallTopY) / 2;
   if (
     intent === "skimmer" ||
+    intent === "skimmer-detail" ||
     intent === "overflow" ||
     intent === "overflow-hidden" ||
     intent === "overflow-visible" ||
@@ -275,8 +279,8 @@ export function getCameraPose({
     intent === "mosaic"
   ) {
     const reference = getFrontWallReference(outline, skimmers);
-    if (intent === "overflow-hidden" || intent === "overflow-visible") {
-      return getOverflowDetailCamera({ reference, bounds, layout, verticalFov, viewportAspect });
+    if (intent === "skimmer-detail" || intent === "overflow-hidden" || intent === "overflow-visible") {
+      return getSystemDetailCamera({ reference, bounds, layout, verticalFov, viewportAspect });
     }
     const master = getFrontWallMasterCamera({
       reference,
