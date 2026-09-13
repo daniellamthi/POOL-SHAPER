@@ -86,7 +86,7 @@ if (waterDebugMode == 1) {
   // instead of a visibly wrong image.
   vec2 mirrorUv = vWaterMirrorCoord.xy / vWaterMirrorCoord.w;
   // The reflected scene bends with the same wave normal as the refraction.
-  mirrorUv += combinedSlope * 0.045;
+  mirrorUv += combinedSlope * 0.015;
   vec3 mirrorColor = texture2D(waterReflectionTexture, clamp(mirrorUv, 0.001, 0.999)).rgb;
   // Transmission already contains (1-F). Replace only the indirect specular
   // lobe, retaining transmitted radiance and the sun's direct highlight.

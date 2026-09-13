@@ -66,11 +66,11 @@ const WATER_CONFIGURATION_PRESET = {
   scatteringContribution: 0.16,
   maxScatteringEnergy: 0.06,
   scatteringDepthStart: 0.18,
-  causticVisibility: 0.1,
+  causticVisibility: 0.025,
   caustics: { strength: 0.027, scale: 20, speed: 0.28 },
   normals: {
-    large: { scale: 1.65, strength: 0.12, rotation: 0.24 },
-    micro: { scale: 1.15, strength: 0.045, rotation: -0.68 },
+    large: { scale: 1.65, strength: 0.07, rotation: 0.24 },
+    micro: { scale: 1.15, strength: 0.022, rotation: -0.68 },
   },
   waves: {
     speed: [0.0013, 0.00086] as const,

@@ -44,6 +44,7 @@ type Action =
   | { type: "setPoolStructure"; value: PoolStructure }
   | { type: "setCustomerField"; key: keyof CustomerInfo; value: string }
   | { type: "setShape"; value: PoolShapeId }
+  | { type: "setCopingMaterial"; value: NonNullable<PoolConfig["copingMaterial"]> }
   | { type: "setCustomMode"; value: CustomMode }
   | { type: "setControlPoint"; index: number; value: ControlPoint }
   | { type: "resetControlPoints" }
@@ -88,6 +89,8 @@ const initialState: State = {
     poolType: null,
     structure: null,
     shape: "rectangle",
+    shapeSelected: false,
+    copingMaterial: "travertine",
     customMode: "draw",
     controlPoints: DEFAULT_CONTROL_POINTS,
     dimensions: DEFAULT_DIMENSIONS,
@@ -132,7 +135,9 @@ function reducer(state: State, action: Action): State {
         config: { ...config, customer: { ...config.customer, [action.key]: action.value } },
       };
     case "setShape":
-      return { ...state, config: { ...config, shape: action.value } };
+      return { ...state, config: { ...config, shape: action.value, shapeSelected: true } };
+    case "setCopingMaterial":
+      return { ...state, config: { ...config, copingMaterial: action.value } };
     case "setCustomMode":
       return { ...state, config: { ...config, customMode: action.value } };
     case "setControlPoint": {
@@ -253,6 +258,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       }
       const stepId = STEPS[index]?.id;
       if (stepId === "pool-type") return config.poolType !== null;
+      if (stepId === "shape-dimensions") return config.shapeSelected === true;
       if (stepId === "structure") return config.structure !== null;
       if (stepId === "features") return config.poolAccess !== null;
       if (stepId === "contact") return getCustomerValidation(customer).valid;
@@ -276,6 +282,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setPoolStructure: (v) => dispatch({ type: "setPoolStructure", value: v }),
       setCustomerField: (key, v) => dispatch({ type: "setCustomerField", key, value: v }),
       setShape: (v) => dispatch({ type: "setShape", value: v }),
+      setCopingMaterial: (v) => dispatch({ type: "setCopingMaterial", value: v }),
       setCustomMode: (v) => dispatch({ type: "setCustomMode", value: v }),
       setControlPoint: (index, v) => dispatch({ type: "setControlPoint", index, value: v }),
       resetControlPoints: () => dispatch({ type: "resetControlPoints" }),

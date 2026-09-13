@@ -53,7 +53,7 @@ export function PoolShapeStep() {
     >
       <div className="grid gap-4" role="group" aria-label="Pool shape">
         {POOL_SHAPES.map((shape) => {
-          const selected = config.shape === shape.id;
+          const selected = config.shapeSelected === true && config.shape === shape.id;
           return (
             <div key={shape.id} className="flex flex-col">
               <OptionCard

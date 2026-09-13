@@ -16,6 +16,7 @@ import {
   STEPS,
 } from "../src/lib/pool/config";
 import { planSkimmers } from "../src/lib/pool/engineering";
+import { COPING_MATERIALS } from "../src/lib/pool/coping-materials";
 import { getCameraPose } from "../src/lib/pool/camera";
 import type { CameraIntent, CameraPose } from "../src/lib/pool/camera";
 import {
@@ -1054,8 +1055,14 @@ for (const shape of shapes) {
   material.dispose();
 }
 
+assert(COPING_MATERIALS.length === 4, "four coping finishes required");
+assert(new Set(COPING_MATERIALS.map(material => material.color)).size === 4, "coping tones must differ");
+for (const material of COPING_MATERIALS) {
+  assert(material.roughness > 0 && material.roughness <= 1, "bounded stone roughness");
+  assert(material.moduleSize >= 0.4 && material.moduleSize <= 0.6, "metric coping texture scale");
+}
 console.log(
-  "Construction audit passed: open skimmer throats for all four profiles; bounded grille, joints and bevels.",
+  "Construction audit passed: open skimmer throats for all four profiles; bounded grille, joints and bevels; four coping finishes.",
 );
 console.log(
   `Geometry audit passed: ${shapes.length * dimensionCases.length * 2} shape/dimension/system cases, ${customCases.length} custom-shape offset cases, ${validRegressionCases.length + invalidRegressionCases.length} guardrail regressions, ${cameraRegressionCount} camera poses and 24 clamped drag steps.`,

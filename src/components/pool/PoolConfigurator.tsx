@@ -124,6 +124,7 @@ function ConfiguratorLayout() {
         mosaicFinish: config.mosaicFinish,
         skimmerFinish: config.skimmerFinish,
         skimmerType: config.skimmerType,
+        copingMaterial: config.copingMaterial ?? "travertine",
       }),
     [
       config.finish,
@@ -131,6 +132,7 @@ function ConfiguratorLayout() {
       config.mosaicFinish,
       config.skimmerFinish,
       config.skimmerType,
+      config.copingMaterial,
     ],
   );
 

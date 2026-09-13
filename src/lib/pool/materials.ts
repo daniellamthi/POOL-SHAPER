@@ -1,6 +1,6 @@
 import { FINISHES, LINER_COLORS, SKIMMER_FINISHES } from "./config";
+import { COPING_MATERIALS } from "./coping-materials";
 import {
-  POOL_BORDER_PRESET,
   POOL_SURFACE_PRESET,
   WATER_VISUAL_PRESET,
   MATERIAL_MICRO_DETAIL_PRESET,
@@ -43,14 +43,14 @@ export interface ResolvedMaterials {
     underwaterScatteringContribution: number;
   };
   water: string;
-  coping: { color: string; roughness: number };
+  coping: { color: string; roughness: number; normalStrength: number; moduleSize: number };
   skimmer: { color: string; roughness: number; metalness: number; type: SkimmerTypeId };
 }
 
 export function resolveMaterials(
   config: Pick<
     PoolConfig,
-    "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish" | "skimmerType"
+    "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish" | "skimmerType" | "copingMaterial"
   >,
 ): ResolvedMaterials {
   const finish = FINISHES.find((item) => item.id === config.finish) ?? FINISHES[0]!;
@@ -124,7 +124,7 @@ export function resolveMaterials(
           : liner.underwater.scatteringContribution,
     },
     water: "#ffffff",
-    coping: { color: POOL_BORDER_PRESET.color, roughness: POOL_BORDER_PRESET.roughness },
+    coping: COPING_MATERIALS.find(item => item.id === config.copingMaterial) ?? COPING_MATERIALS[2],
     skimmer: {
       color: skimmerFinish.hex,
       roughness: skimmerFinish.roughness,

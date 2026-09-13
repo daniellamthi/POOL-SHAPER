@@ -40,6 +40,7 @@ export interface ConfiguratorContextValue {
   setPoolStructure: (value: PoolStructure) => void;
   setCustomerField: (key: keyof CustomerInfo, value: string) => void;
   setShape: (value: PoolShapeId) => void;
+  setCopingMaterial: (value: NonNullable<PoolConfig["copingMaterial"]>) => void;
   setCustomMode: (value: CustomMode) => void;
   setControlPoint: (index: number, value: ControlPoint) => void;
   resetControlPoints: () => void;

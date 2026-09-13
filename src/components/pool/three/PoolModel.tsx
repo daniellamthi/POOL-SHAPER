@@ -376,7 +376,7 @@ export function PoolModel({
       : concealedCopingEdge
     : outline;
   const copingSurfaceY = isOverflow
-    ? verticalLayout.wallTopY + 0.008
+    ? waterLevel - 0.001
     : verticalLayout.copingY;
   const perimeter = useMemo(() => outlinePerimeter(outline), [outline]);
   const structuralPerimeter = useMemo(
@@ -630,7 +630,7 @@ export function PoolModel({
 
   const configureCopingTriplanar = useCallback((shader: TriplanarShader) => {
     shader.uniforms.triplanarScale = {
-      value: 1 / MATERIAL_MICRO_DETAIL_PRESET.coping.moduleSize,
+      value: 1 / materials.coping.moduleSize,
     };
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
@@ -651,7 +651,7 @@ export function PoolModel({
       )
       .replace("#include <roughnessmap_fragment>", TRIPLANAR_ROUGHNESS_FRAGMENT)
       .replace("#include <normal_fragment_maps>", TRIPLANAR_NORMAL_FRAGMENT);
-  }, [copingDetail]);
+  }, [copingDetail, materials.coping.moduleSize]);
 
   const configurePanelTriplanar = useCallback((shader: TriplanarShader) => {
     shader.uniforms.triplanarScale = {
@@ -841,9 +841,15 @@ export function PoolModel({
             </mesh>
             {!isVisibleOverflow && <mesh name="overflow-edge-without-grille" geometry={overflowLip} position={[0, waterLevel - 0.001, 0]} receiveShadow>
               <meshPhysicalMaterial
-                color={materials.liner.color}
-                roughness={0.21}
-                clearcoat={0.45}
+                key={materials.coping.moduleSize}
+                color={materials.coping.color}
+                normalMap={copingDetail.normalMap}
+                normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
+                roughnessMap={copingDetail.roughnessMap}
+                roughness={materials.coping.roughness * 0.8}
+                onBeforeCompile={configureCopingTriplanar}
+                customProgramCacheKey={() => "overflow-stone-continuity-v1"}
+                clearcoat={0}
                 clearcoatRoughness={0.12}
                 side={DoubleSide}
               />
@@ -930,12 +936,13 @@ export function PoolModel({
       </mesh>
       <mesh geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
         <meshPhysicalMaterial
+          key={materials.coping.moduleSize}
           color={materials.coping.color}
           vertexColors
           normalMap={copingDetail.normalMap}
           normalScale={[
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
-            MATERIAL_MICRO_DETAIL_PRESET.coping.normalStrength,
+            materials.coping.normalStrength,
+            materials.coping.normalStrength,
           ]}
           roughnessMap={copingDetail.roughnessMap}
           roughness={materials.coping.roughness}

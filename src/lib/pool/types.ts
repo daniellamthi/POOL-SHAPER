@@ -97,6 +97,8 @@ export interface PoolConfig {
   poolType: PoolType | null;
   structure: PoolStructure | null;
   shape: PoolShapeId;
+  shapeSelected?: boolean;
+  copingMaterial?: import("./coping-materials").CopingMaterialId;
   customMode: CustomMode;
   controlPoints: ReadonlyArray<ControlPoint>;
   dimensions: Dimensions;

@@ -2,13 +2,14 @@ import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSec
 import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
+import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 
 /**
  * Step 4 — selects the hydraulic system.
  * Engineering values remain derived from the existing configurator store.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType } =
+  const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType, setCopingMaterial } =
     useConfigurator();
 
   const selectSkimmer = () => {
@@ -89,6 +90,15 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
           </div>
         ) : null}
       </div>
+      {!(config.system === "overflow" && config.overflowType === "visible") && (
+        <div role="group" aria-label="Materiale bordo" className="grid gap-3 sm:grid-cols-2">
+          {COPING_MATERIALS.map(option => (
+            <SwatchOption key={option.id} title={option.title} hex={option.color}
+              selected={(config.copingMaterial ?? "travertine") === option.id}
+              onSelect={() => setCopingMaterial(option.id)} />
+          ))}
+        </div>
+      )}
     </StepSection>
   );
 }
