@@ -271,7 +271,11 @@ function ConfiguratorLayout() {
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
     : activeStepId === "system"
-      ? config.system
+      ? config.system === "overflow"
+        ? config.overflowType === "visible"
+          ? "overflow-visible"
+          : "overflow-hidden"
+        : config.system
       : activeStepId === "finish" || activeStepId === "color"
         ? "liner"
         : activeStepId === "review"

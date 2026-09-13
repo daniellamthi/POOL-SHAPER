@@ -348,7 +348,10 @@ export function PoolModel({
     () => offsetOutline(outline, copingOuterOffset(system, overflowType)),
     [outline, system, overflowType],
   );
-  const concealedCopingEdge = useMemo(() => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset + 0.015), [outline]);
+  // Must match the channel's outer edge exactly (hiddenChannelOffset), not a
+  // point partway across it -- otherwise the deck coping caps most of the
+  // receiving slot and the hidden channel never reads as open.
+  const concealedCopingEdge = useMemo(() => offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset), [outline]);
   const structuralOutline = useMemo(
     () => offsetOutline(outline, ABOVE_GROUND_STRUCTURE_THICKNESS),
     [outline],

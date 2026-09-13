@@ -4,7 +4,15 @@ import { outlineArea, outlineBounds } from "./geometry";
 import type { Outline } from "./types";
 import type { PoolVerticalLayout } from "./vertical-layout";
 
-export type CameraIntent = "overview" | "skimmer" | "overflow" | "liner" | "mosaic" | "review";
+export type CameraIntent =
+  | "overview"
+  | "skimmer"
+  | "overflow"
+  | "overflow-hidden"
+  | "overflow-visible"
+  | "liner"
+  | "mosaic"
+  | "review";
 export type CameraPoint = readonly [number, number, number];
 
 export interface CameraPose {
@@ -138,6 +146,48 @@ function getFrontWallMasterCamera({
   };
 }
 
+/** Medium-close frontal view of the same reference wall, framing roughly
+ * half the long wall at waterline height instead of the whole basin --
+ * close enough that the overflow edge or grille clearly reads, short of
+ * the tight material-swatch framing the Liner/Mosaic camera uses. */
+function getOverflowDetailCamera({
+  reference,
+  bounds,
+  layout,
+  verticalFov,
+  viewportAspect,
+}: {
+  reference: BoundaryFocus;
+  bounds: ReturnType<typeof outlineBounds>;
+  layout: PoolVerticalLayout;
+  verticalFov: number;
+  viewportAspect: number;
+}): CameraPose {
+  const centre: readonly [number, number] = [
+    (bounds.minX + bounds.maxX) / 2,
+    (bounds.minZ + bounds.maxZ) / 2,
+  ];
+  const tangentSpan =
+    Math.abs(reference.tangent[0]) * bounds.spanX + Math.abs(reference.tangent[1]) * bounds.spanZ;
+  const inwardSpan =
+    Math.abs(reference.inward[0]) * bounds.spanX + Math.abs(reference.inward[1]) * bounds.spanZ;
+  const safeAspect = clamp(viewportAspect, 0.6, 3);
+  const verticalFovRadians = (clamp(verticalFov, 20, 75) * Math.PI) / 180;
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFovRadians / 2) * safeAspect);
+  const framedSpan = Math.max(2.4, tangentSpan * 0.55);
+  const distance =
+    Math.max(framedSpan / 2 / Math.tan(horizontalFov / 2), inwardSpan * 0.6) * 1.05;
+  const targetY = layout.waterY;
+  return {
+    target: [centre[0], targetY, centre[1]],
+    position: [
+      centre[0] + reference.inward[0] * distance,
+      targetY + distance * 0.16,
+      centre[1] + reference.inward[1] * distance,
+    ],
+  };
+}
+
 /** Close, perpendicular material view of the same Skimmer reference wall. */
 function getInteriorFinishCamera({
   reference,
@@ -216,8 +266,18 @@ export function getCameraPose({
   const safeDepth = Math.max(0.01, depth);
   const radius = Math.max(1, Math.hypot(bounds.spanX, bounds.spanZ, safeDepth) / 2);
   const verticalCentre = (layout.floorY + layout.wallTopY) / 2;
-  if (intent === "skimmer" || intent === "overflow" || intent === "liner" || intent === "mosaic") {
+  if (
+    intent === "skimmer" ||
+    intent === "overflow" ||
+    intent === "overflow-hidden" ||
+    intent === "overflow-visible" ||
+    intent === "liner" ||
+    intent === "mosaic"
+  ) {
     const reference = getFrontWallReference(outline, skimmers);
+    if (intent === "overflow-hidden" || intent === "overflow-visible") {
+      return getOverflowDetailCamera({ reference, bounds, layout, verticalFov, viewportAspect });
+    }
     const master = getFrontWallMasterCamera({
       reference,
       bounds,
