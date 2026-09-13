@@ -18,7 +18,24 @@ import {
   getDerivedDetailMaps,
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
-import { createTravertineMaps } from "./stoneTextures";
+import {
+  createAnthraciteMaps,
+  createLimestoneMaps,
+  createPrunMaps,
+  createTravertineMaps,
+  type StoneMaps,
+} from "./stoneTextures";
+import type { CopingMaterialId } from "@/lib/pool/coping-materials";
+
+/** Each premium coping finish gets its own procedural stone bake (distinct
+ * structural DNA -- vein/grain/pore character), never a shared texture with
+ * only color/roughness retinted -- see stoneTextures.ts. */
+const COPING_STONE_BUILDERS: Record<CopingMaterialId, (size?: number) => StoneMaps> = {
+  travertine: createTravertineMaps,
+  limestone: createLimestoneMaps,
+  prun: createPrunMaps,
+  "anthracite-gres": createAnthraciteMaps,
+};
 import { photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
 import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
@@ -487,7 +504,10 @@ export function PoolModel({
   // (see configureCopingTriplanar/configurePanelTriplanar below) rather than
   // through the mesh's own UV -- these come from a module-level cache keyed
   // by material kind, so they are shared and must not be disposed here.
-  const copingDetail = useMemo(() => createTravertineMaps(), []);
+  const copingDetail = useMemo(
+    () => COPING_STONE_BUILDERS[materials.coping.id](),
+    [materials.coping.id],
+  );
   useEffect(() => {
     Object.values(copingDetail).forEach(map => { map.anisotropy = dataAnisotropy; map.needsUpdate = true; });
     return () => Object.values(copingDetail).forEach(map => map.dispose());

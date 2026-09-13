@@ -43,7 +43,7 @@ export interface ResolvedMaterials {
     underwaterScatteringContribution: number;
   };
   water: string;
-  coping: { color: string; roughness: number; normalStrength: number; moduleSize: number };
+  coping: (typeof COPING_MATERIALS)[number];
   skimmer: { color: string; roughness: number; metalness: number; type: SkimmerTypeId };
 }
 
