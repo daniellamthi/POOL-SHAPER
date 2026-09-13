@@ -1,8 +1,17 @@
-import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSection";
+import { useState } from "react";
+import { OptionCard, MaterialSwatch, StepSection, SwatchOption } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
-import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
+import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
+import { getCopingSwatchDataUrl } from "@/components/pool/copingSwatchPreview";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 /**
  * Step 4 — selects the hydraulic system.
@@ -11,6 +20,8 @@ import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
   const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType, setCopingMaterial } =
     useConfigurator();
+  const [detailMaterial, setDetailMaterial] = useState<CopingMaterialId | null>(null);
+  const detail = COPING_MATERIALS.find((item) => item.id === detailMaterial) ?? null;
 
   const selectSkimmer = () => {
     setSystem("skimmer");
@@ -91,14 +102,45 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
         ) : null}
       </div>
       {!(config.system === "overflow" && config.overflowType === "visible") && (
-        <div role="group" aria-label="Materiale bordo" className="grid gap-3 sm:grid-cols-2">
-          {COPING_MATERIALS.map(option => (
-            <SwatchOption key={option.id} title={option.title} hex={option.color}
-              selected={(config.copingMaterial ?? "travertine") === option.id}
-              onSelect={() => setCopingMaterial(option.id)} />
-          ))}
+        <div className="flex flex-col gap-3">
+          <p className="label-xs">Coping Material</p>
+          <div role="group" aria-label="Coping material" className="grid grid-cols-2 gap-3">
+            {COPING_MATERIALS.map((option) => (
+              <MaterialSwatch
+                key={option.id}
+                title={option.title}
+                subtitle={option.subtitle}
+                previewUrl={getCopingSwatchDataUrl(option.id)}
+                selected={(config.copingMaterial ?? "travertine") === option.id}
+                onSelect={() => setCopingMaterial(option.id)}
+                onViewDetail={() => setDetailMaterial(option.id)}
+              />
+            ))}
+          </div>
         </div>
       )}
+
+      <Dialog open={detail !== null} onOpenChange={(open) => !open && setDetailMaterial(null)}>
+        <DialogContent className="max-w-sm gap-5 rounded-2xl border-hairline p-6">
+          {detail ? (
+            <>
+              <div
+                className="aspect-[4/3] w-full rounded-xl border border-hairline bg-cover bg-center"
+                style={{ backgroundImage: `url(${getCopingSwatchDataUrl(detail.id)})` }}
+              />
+              <DialogHeader className="gap-1.5">
+                <p className="label-xs text-muted-foreground">{detail.category}</p>
+                <DialogTitle className="text-[19px] font-extralight tracking-[-0.02em] text-foreground">
+                  {detail.title}
+                </DialogTitle>
+                <DialogDescription className="text-[12.5px] leading-[1.7] font-light text-muted-foreground">
+                  {detail.description}
+                </DialogDescription>
+              </DialogHeader>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </StepSection>
   );
 }

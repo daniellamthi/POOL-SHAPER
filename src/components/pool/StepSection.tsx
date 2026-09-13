@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check } from "lucide-react";
+import { Check, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StepSection({
@@ -126,6 +126,73 @@ export function SwatchOption({
         {title}
       </span>
     </button>
+  );
+}
+
+/**
+ * Premium architectural material sample -- a realistic textured swatch (not
+ * a flat colour chip), name, short elegant subtitle, and a restrained
+ * selected state. Used for the coping-material collection; `SwatchOption`
+ * above remains the shared flat colour/liner swatch used elsewhere. */
+export function MaterialSwatch({
+  title,
+  subtitle,
+  previewUrl,
+  selected,
+  onSelect,
+  onViewDetail,
+}: {
+  title: string;
+  subtitle: string;
+  previewUrl: string;
+  selected: boolean;
+  onSelect: () => void;
+  onViewDetail?: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col gap-2.5 rounded-2xl border p-2.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        selected ? "border-foreground/30 bg-card lift" : "border-hairline hover:border-border",
+      )}
+    >
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={selected}
+        className="relative block aspect-[4/3] w-full overflow-hidden rounded-xl border border-hairline bg-cover bg-center outline-none focus-visible:ring-1 focus-visible:ring-foreground/35"
+        style={{ backgroundImage: `url(${previewUrl})` }}
+      >
+        {/* State-driven, not hover-revealed: `group-hover` compiles to a
+            plain `:hover` selector with no touch-device guard, so on phones
+            a scroll/tap can leave it visually "stuck" active on whichever
+            card was last touched -- looking like two materials selected at
+            once. An always-visible outline that fills in in on select
+            works identically (and unambiguously) on mouse and touch. */}
+        <span
+          className={cn(
+            "absolute right-2 top-2 flex size-5 items-center justify-center rounded-full shadow-[0_0_0_1px_var(--border)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            selected ? "bg-background text-foreground" : "bg-background/50 text-transparent",
+          )}
+        >
+          <Check className="size-3" strokeWidth={1.75} />
+        </span>
+      </button>
+      {onViewDetail ? (
+        <button
+          type="button"
+          onClick={onViewDetail}
+          aria-label={`View ${title} detail`}
+          className="absolute left-3 top-3 flex size-5 items-center justify-center rounded-full bg-background/60 text-muted-foreground shadow-[0_0_0_1px_var(--border)] transition-colors duration-300 hover:bg-background/85 hover:text-foreground focus-visible:bg-background/85 focus-visible:text-foreground"
+        >
+          <Info className="size-3" strokeWidth={1.75} />
+        </button>
+      ) : null}
+      <button type="button" onClick={onSelect} className="flex flex-col items-start gap-0.5 text-left outline-none">
+        <span className="text-[12.5px] font-normal tracking-tight text-foreground">{title}</span>
+        <span className="text-[10.5px] leading-snug font-light text-muted-foreground">{subtitle}</span>
+      </button>
+    </div>
   );
 }
 
