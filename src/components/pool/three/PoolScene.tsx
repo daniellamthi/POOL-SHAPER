@@ -10,12 +10,15 @@ import { createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
 import { ExternalStaircase } from "./ExternalStaircase";
+import { InternalStairs } from "./InternalStairs";
+import { PoolLadder } from "./PoolLadder";
 import { createSurfaceGeometry } from "./poolGeometry";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
 import type {
   Outline,
   OverflowType,
+  PoolAccess,
   PoolFeatureId,
   PoolShapeId,
   PoolType,
@@ -58,6 +61,7 @@ export interface SceneProps {
   poolType: PoolType;
   materials: ResolvedMaterials;
   features: ReadonlyArray<PoolFeatureId>;
+  poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
   length: number;
   width: number;
@@ -382,6 +386,7 @@ export default function PoolScene({
   poolType,
   materials,
   features,
+  poolAccess,
   skimmers,
   length,
   width,
@@ -530,6 +535,24 @@ export default function PoolScene({
           outline={outline}
           groundY={verticalLayout.groundY}
           topY={verticalLayout.copingY}
+        />
+      ) : null}
+
+      {/* Pool Access is a single choice -- only one of the two ever mounts. */}
+      {poolAccess === "internalSteps" ? (
+        <InternalStairs
+          outline={outline}
+          wallTopY={verticalLayout.wallTopY}
+          floorY={verticalLayout.floorY}
+          color={materials.liner.color}
+          roughness={materials.liner.roughness}
+        />
+      ) : poolAccess === "stainlessSteelLadder" ? (
+        <PoolLadder
+          outline={outline}
+          wallTopY={verticalLayout.wallTopY}
+          copingY={verticalLayout.copingY}
+          floorY={verticalLayout.floorY}
         />
       ) : null}
 

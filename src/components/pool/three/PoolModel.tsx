@@ -19,7 +19,7 @@ import {
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import {
-  createAnthraciteMaps,
+  createBeigeGresMaps,
   createLimestoneMaps,
   createPrunMaps,
   createTravertineMaps,
@@ -34,7 +34,7 @@ const COPING_STONE_BUILDERS: Record<CopingMaterialId, (size?: number) => StoneMa
   travertine: createTravertineMaps,
   limestone: createLimestoneMaps,
   prun: createPrunMaps,
-  "anthracite-gres": createAnthraciteMaps,
+  "beige-gres": createBeigeGresMaps,
 };
 import { photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";

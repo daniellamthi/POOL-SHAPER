@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
 import {
-  createAnthraciteMaps,
+  createBeigeGresMaps,
   createLimestoneMaps,
   createPrunMaps,
   createTravertineMaps,
@@ -11,7 +11,7 @@ const BUILDERS: Record<CopingMaterialId, (size?: number) => { colorMap: THREE.Da
   travertine: createTravertineMaps,
   limestone: createLimestoneMaps,
   prun: createPrunMaps,
-  "anthracite-gres": createAnthraciteMaps,
+  "beige-gres": createBeigeGresMaps,
 };
 
 const PREVIEW_SIZE = 96;

@@ -352,6 +352,7 @@ function ConfiguratorLayout() {
             poolType={config.poolType ?? "in-ground"}
             materials={materials}
             features={config.features}
+            poolAccess={config.poolAccess}
             skimmers={skimmers}
             length={config.dimensions.length}
             width={config.dimensions.width}

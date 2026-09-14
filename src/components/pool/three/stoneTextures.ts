@@ -182,14 +182,14 @@ export function createPrunMaps(size = 512): StoneMaps {
   });
 }
 
-const anthraciteCache = new Map<number, StoneMaps>();
+const beigeGresCache = new Map<number, StoneMaps>();
 
-/** Gres Antracite Premium -- dark matte porcelain stone-effect: broad, very
+/** Gres Porcellanato Beige -- warm matte porcelain stone-effect: broad, very
  * low-contrast clouding and near-imperceptible grain, deliberately with no
- * pores and no directional structure so it reads as refined porcelain
- * rather than a darkened natural stone. */
-export function createAnthraciteMaps(size = 512): StoneMaps {
-  return memoizedTemplate(anthraciteCache, size, () => {
+ * pores and no directional structure so it reads as refined engineered
+ * porcelain rather than a natural stone. */
+export function createBeigeGresMaps(size = 512): StoneMaps {
+  return memoizedTemplate(beigeGresCache, size, () => {
     const height = new Float32Array(size * size);
     const color = new Uint8Array(size * size * 4);
     const rough = new Uint8Array(size * size * 4);
@@ -198,13 +198,13 @@ export function createAnthraciteMaps(size = 512): StoneMaps {
       const cloud = valueNoise(u, v, 3) * 0.6 + valueNoise(u, v, 8) * 0.4;
       const fineGrain = hash(x, y) - 0.5;
       height[y * size + x] = cloud * 0.01 + fineGrain * 0.003;
-      const value = 0.86 + (cloud - 0.5) * 0.06 + fineGrain * 0.01;
+      const value = 0.9 + (cloud - 0.5) * 0.06 + fineGrain * 0.01;
       const o = (y * size + x) * 4;
       color[o] = value * 255;
-      color[o + 1] = value * 255;
-      color[o + 2] = (value + 0.004) * 255; // whisper-cool neutral undertone
+      color[o + 1] = (value - 0.015) * 255;
+      color[o + 2] = (value - 0.04) * 255; // warm beige undertone
       color[o + 3] = 255;
-      const r = (0.78 + cloud * 0.05) * 255;
+      const r = (0.7 + cloud * 0.05) * 255;
       rough[o] = rough[o + 1] = rough[o + 2] = r;
       rough[o + 3] = 255;
     }
