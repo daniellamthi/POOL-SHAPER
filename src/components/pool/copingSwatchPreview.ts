@@ -34,7 +34,9 @@ export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
   const build = BUILDERS[id];
   if (!material || !build) return "";
 
-  const { colorMap } = build(PREVIEW_SIZE);
+  const maps = build(PREVIEW_SIZE);
+  const { colorMap } = maps;
+  const dispose = () => Object.values(maps).forEach(map => map.dispose());
   const source = colorMap.image.data as Uint8ClampedArray;
   const tint = new THREE.Color(material.color);
 
@@ -43,16 +45,19 @@ export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
   canvas.height = PREVIEW_SIZE;
   const ctx = canvas.getContext("2d");
   if (!ctx) {
-    colorMap.dispose();
+    dispose();
     return "";
   }
 
   const image = ctx.createImageData(PREVIEW_SIZE, PREVIEW_SIZE);
+  const sample = new THREE.Color();
   for (let i = 0; i < PREVIEW_SIZE * PREVIEW_SIZE; i++) {
     const o = i * 4;
-    image.data[o] = Math.min(255, Math.round(source[o]! * tint.r));
-    image.data[o + 1] = Math.min(255, Math.round(source[o + 1]! * tint.g));
-    image.data[o + 2] = Math.min(255, Math.round(source[o + 2]! * tint.b));
+    sample.setRGB(source[o]! / 255, source[o + 1]! / 255, source[o + 2]! / 255, THREE.SRGBColorSpace);
+    sample.multiply(tint).convertLinearToSRGB();
+    image.data[o] = Math.round(sample.r * 255);
+    image.data[o + 1] = Math.round(sample.g * 255);
+    image.data[o + 2] = Math.round(sample.b * 255);
     image.data[o + 3] = 255;
   }
   ctx.putImageData(image, 0, 0);
@@ -64,7 +69,7 @@ export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
 
-  colorMap.dispose();
+  dispose();
 
   const dataUrl = canvas.toDataURL("image/png");
   cache.set(id, dataUrl);

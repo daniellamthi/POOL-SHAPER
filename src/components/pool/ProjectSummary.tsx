@@ -30,9 +30,9 @@ export function ProjectSummary() {
   const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
   const poolAccess =
     config.poolAccess === "internalSteps"
-      ? "Internal Steps"
+      ? "Internal stairs"
       : config.poolAccess === "stainlessSteelLadder"
-        ? "Stainless Steel Ladder"
+        ? "External ladder (stainless steel)"
         : null;
 
   const rows: ReadonlyArray<{ label: string; value: string }> = [

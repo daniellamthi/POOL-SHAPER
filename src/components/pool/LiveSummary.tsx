@@ -29,9 +29,9 @@ export function LiveSummary() {
   const featureLabels = [
     ...features.map((item) => item.title),
     ...(config.poolAccess === "internalSteps"
-      ? ["Internal Steps"]
+      ? ["Internal stairs"]
       : config.poolAccess === "stainlessSteelLadder"
-        ? ["Stainless Steel Ladder"]
+        ? ["External ladder (stainless steel)"]
         : []),
     ...equipment.map((item) => item.title),
   ];

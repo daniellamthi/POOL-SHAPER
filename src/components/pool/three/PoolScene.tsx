@@ -17,6 +17,7 @@ import type {
   Outline,
   OverflowType,
   PoolFeatureId,
+  PoolAccess,
   PoolShapeId,
   PoolType,
   SystemType,
@@ -58,6 +59,7 @@ export interface SceneProps {
   poolType: PoolType;
   materials: ResolvedMaterials;
   features: ReadonlyArray<PoolFeatureId>;
+  poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
   length: number;
   width: number;
@@ -382,6 +384,7 @@ export default function PoolScene({
   poolType,
   materials,
   features,
+  poolAccess,
   skimmers,
   length,
   width,
@@ -430,6 +433,7 @@ export default function PoolScene({
     materials.surface.textureUrl,
     materials.coping.color,
     features.join(","),
+    poolAccess,
     photoModeQuality,
   ].join("|");
 
@@ -514,6 +518,7 @@ export default function PoolScene({
       <StudioFloor outline={outline} size={deckSize} theme={theme} poolType={poolType} system={system} overflowType={overflowType} />
 
       <PoolModel
+        poolAccess={poolAccess}
         skimmers={skimmers}
         outline={outline}
         depth={depth}

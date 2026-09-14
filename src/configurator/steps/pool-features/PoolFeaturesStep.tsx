@@ -30,16 +30,22 @@ export function PoolFeaturesStep() {
         <h3 className="label-xs">Pool access</h3>
         <div className="grid gap-4" role="group" aria-label="Pool access">
           <OptionCard
-            title="Internal Steps"
+            title="Internal stairs"
+            description="Integrated concrete stairs, matching the selected interior finish."
             selected={config.poolAccess === "internalSteps"}
             onSelect={() => setPoolAccess("internalSteps")}
           />
           <OptionCard
-            title="Stainless Steel Ladder"
+            title="External ladder"
+            description="Classic stainless-steel pool ladder with three non-slip treads."
             selected={config.poolAccess === "stainlessSteelLadder"}
             onSelect={() => setPoolAccess("stainlessSteelLadder")}
           />
-          {config.poolType === "above-ground" ? (
+        </div>
+      </div>
+      {config.poolType === "above-ground" ? (
+        <div className="flex flex-col gap-5 border-t border-hairline pt-8">
+          <h3 className="label-xs">Above-ground approach</h3>
             <OptionCard
               title="Scala esterna"
               description="Accesso esterno alla piscina"
@@ -47,9 +53,8 @@ export function PoolFeaturesStep() {
               onSelect={() => togglePoolFeature("externalStaircase")}
               meta={<Footprints className="size-5 text-muted-foreground" strokeWidth={1.25} />}
             />
-          ) : null}
         </div>
-      </div>
+      ) : null}
     </StepSection>
   );
 }

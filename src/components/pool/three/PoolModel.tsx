@@ -18,6 +18,7 @@ import {
   getDerivedDetailMaps,
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { PoolAccessModel } from "./PoolAccessModel";
 import {
   createAnthraciteMaps,
   createLimestoneMaps,
@@ -59,6 +60,7 @@ import {
 } from "./poolConstruction";
 
 interface PoolModelProps {
+  poolAccess: import("@/lib/pool/types").PoolAccess | null;
   outline: Outline;
   depth: number;
   materials: ResolvedMaterials;
@@ -349,6 +351,7 @@ export function PoolModel({
   copingThickness,
   showWater,
   skimmers,
+  poolAccess,
 }: PoolModelProps) {
   const verticalLayout = getPoolVerticalLayout({
     poolType,
@@ -789,6 +792,18 @@ export function PoolModel({
           waterline these surfaces would otherwise render nonsensical
           close-up backfaces instead of a clean sky/coping reflection. */}
       <group name="pool-basin">
+        <PoolAccessModel outline={outline} access={poolAccess} floorY={verticalLayout.floorY} topY={verticalLayout.copingY}>
+          <meshPhysicalMaterial
+            color={materials.liner.color}
+            map={floorSurfaceMap}
+            normalMap={interiorMicroMaps.floorNormal}
+            normalScale={[materials.surface.microDetail.normalStrength, materials.surface.microDetail.normalStrength]}
+            roughness={materials.liner.roughness}
+            metalness={materials.liner.metalness}
+            onBeforeCompile={configureCaustics}
+            customProgramCacheKey={() => "depth-aware-underwater-optics-v3"}
+          />
+        </PoolAccessModel>
         {/* Interior walls */}
         <mesh geometry={walls} renderOrder={0} receiveShadow castShadow>
           <meshPhysicalMaterial

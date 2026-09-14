@@ -159,17 +159,15 @@ function getSystemDetailCamera({
   layout,
   verticalFov,
   viewportAspect,
+  overflow,
 }: {
   reference: BoundaryFocus;
   bounds: ReturnType<typeof outlineBounds>;
   layout: PoolVerticalLayout;
   verticalFov: number;
   viewportAspect: number;
+  overflow: boolean;
 }): CameraPose {
-  const centre: readonly [number, number] = [
-    (bounds.minX + bounds.maxX) / 2,
-    (bounds.minZ + bounds.maxZ) / 2,
-  ];
   const tangentSpan =
     Math.abs(reference.tangent[0]) * bounds.spanX + Math.abs(reference.tangent[1]) * bounds.spanZ;
   const inwardSpan =
@@ -177,18 +175,20 @@ function getSystemDetailCamera({
   const safeAspect = clamp(viewportAspect, 0.6, 3);
   const verticalFovRadians = (clamp(verticalFov, 20, 75) * Math.PI) / 180;
   const horizontalFov = 2 * Math.atan(Math.tan(verticalFovRadians / 2) * safeAspect);
-  const framedSpan = Math.max(2.4, tangentSpan * 0.55);
-  const distance =
-    Math.max(framedSpan / 2 / Math.tan(horizontalFov / 2), inwardSpan * 0.6) * 1.05;
-  const targetY = layout.waterY;
-  return {
-    target: [centre[0], targetY, centre[1]],
-    position: [
-      centre[0] + reference.inward[0] * distance,
-      targetY + distance * 0.16,
-      centre[1] + reference.inward[1] * distance,
-    ],
-  };
+  // Frame the actual fitting/edge, not the basin centre behind it.
+  // A bounded physical span keeps large pools from turning this into an overview.
+  const framedSpan = clamp(tangentSpan * 0.42, 2.2, 3.4);
+  const distance = Math.min(
+    framedSpan / 2 / Math.tan(horizontalFov / 2),
+    Math.max(1.2, inwardSpan * 0.78),
+  );
+  return detailPose({
+    focus: reference,
+    targetY: layout.waterY + 0.03,
+    cameraY: layout.waterY + Math.max(0.48, distance * (overflow ? 0.58 : 0.3)),
+    distance,
+    tangentAmount: 0,
+  });
 }
 
 /** Close, perpendicular material view of the same Skimmer reference wall. */
@@ -280,7 +280,7 @@ export function getCameraPose({
   ) {
     const reference = getFrontWallReference(outline, skimmers);
     if (intent === "skimmer-detail" || intent === "overflow-hidden" || intent === "overflow-visible") {
-      return getSystemDetailCamera({ reference, bounds, layout, verticalFov, viewportAspect });
+      return getSystemDetailCamera({ reference, bounds, layout, verticalFov, viewportAspect, overflow: intent !== "skimmer-detail" });
     }
     const master = getFrontWallMasterCamera({
       reference,

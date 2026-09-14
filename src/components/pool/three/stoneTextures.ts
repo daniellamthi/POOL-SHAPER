@@ -142,9 +142,7 @@ export function createLimestoneMaps(size = 512): StoneMaps {
 
 const prunCache = new Map<number, StoneMaps>();
 
-/** Pietra di Prun / Lessinia -- compact, denser natural limestone than
- * Limestone Ivory: fine stratification lines, tighter grain, and rare dusty
- * warm nuances (never enough to read as pink or orange). */
+/** Reference-selected grey Prun finish: compact grain and pale mineral inclusions. */
 export function createPrunMaps(size = 512): StoneMaps {
   return memoizedTemplate(prunCache, size, () => {
     const height = new Float32Array(size * size);
@@ -157,7 +155,7 @@ export function createPrunMaps(size = 512): StoneMaps {
       // rather than Travertino's broad flowing bands.
       const strata = Math.sin(v * 74 + valueNoise(u, v, 6) * 1.5) * 0.02;
       const fineGrain = hash(x, y) - 0.5;
-      const px = u * 110, py = v * 110;
+      const px = u * 48, py = v * 48;
       const ix = Math.floor(px), iy = Math.floor(py);
       const seed = hash(ix + 5, iy + 13);
       const dx = px - ix - 0.5 - (hash(ix + 2, iy) - 0.5) * 0.45;
@@ -167,7 +165,8 @@ export function createPrunMaps(size = 512): StoneMaps {
       // undertone hint, never a pink cast.
       const warmSpot = valueNoise(u * 0.7, v * 0.7, 13) > 0.72 ? valueNoise(u, v, 31) : 0;
       height[y * size + x] = (sediment + strata) * 0.03 + fineGrain * 0.008 - pore * 0.16;
-      const value = 0.86 + (sediment - 0.5) * 0.12 + strata * 0.6 + fineGrain * 0.02 - pore * 0.14;
+      const inclusion = seed > 0.64 ? 1 - THREE.MathUtils.smoothstep(Math.hypot(dx * 0.8, dy), 0.1, 0.29) : 0;
+      const value = 0.78 + (sediment - 0.5) * 0.22 + strata * 0.6 + fineGrain * 0.055 - pore * 0.1 + inclusion * 0.2;
       const o = (y * size + x) * 4;
       color[o] = (value + warmSpot * 0.03) * 255;
       color[o + 1] = (value - pore * 0.012 + warmSpot * 0.006) * 255;
@@ -184,10 +183,10 @@ export function createPrunMaps(size = 512): StoneMaps {
 
 const anthraciteCache = new Map<number, StoneMaps>();
 
-/** Gres Antracite Premium -- dark matte porcelain stone-effect: broad, very
+/** Beige porcelain (legacy factory name retained for compatibility): broad, very
  * low-contrast clouding and near-imperceptible grain, deliberately with no
  * pores and no directional structure so it reads as refined porcelain
- * rather than a darkened natural stone. */
+ * rather than a porous natural stone. */
 export function createAnthraciteMaps(size = 512): StoneMaps {
   return memoizedTemplate(anthraciteCache, size, () => {
     const height = new Float32Array(size * size);
