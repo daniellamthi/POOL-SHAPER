@@ -124,7 +124,8 @@ export function resolveMaterials(
           : liner.underwater.scatteringContribution,
     },
     water: "#ffffff",
-    coping: COPING_MATERIALS.find(item => item.id === config.copingMaterial) ?? COPING_MATERIALS[2],
+    coping:
+      COPING_MATERIALS.find((item) => item.id === config.copingMaterial) ?? COPING_MATERIALS[2],
     skimmer: {
       color: skimmerFinish.hex,
       roughness: skimmerFinish.roughness,

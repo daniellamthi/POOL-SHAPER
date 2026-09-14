@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { OptionCard, MaterialSwatch, StepSection, SwatchOption } from "@/components/pool/StepSection";
+import {
+  OptionCard,
+  MaterialSwatch,
+  StepSection,
+  SwatchOption,
+} from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
@@ -18,8 +23,14 @@ import {
  * Engineering values remain derived from the existing configurator store.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType, setCopingMaterial } =
-    useConfigurator();
+  const {
+    config,
+    setSystem,
+    setOverflowType,
+    setSkimmerFinish,
+    setSkimmerType,
+    setCopingMaterial,
+  } = useConfigurator();
   const [detailMaterial, setDetailMaterial] = useState<CopingMaterialId | null>(null);
   const detail = COPING_MATERIALS.find((item) => item.id === detailMaterial) ?? null;
 

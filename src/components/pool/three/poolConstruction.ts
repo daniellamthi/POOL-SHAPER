@@ -7,7 +7,8 @@ import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 /** Architectural presentation only; never changes basin dimensions or quotation logic. */
 export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
   // The deck meets the grille directly: no separate masonry border.
-  if (system === "overflow" && overflow === "visible") return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;
+  if (system === "overflow" && overflow === "visible")
+    return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;
   return 0.32 + (system === "overflow" ? OVERFLOW_GEOMETRY.hiddenChannelOffset : 0);
 }
 
@@ -54,7 +55,8 @@ export const SKIMMER_PROFILES = {
 /** Individually eased, full-thickness slabs, including real mitres at hard corners.
  * All slabs share one geometry/material draw; colour variation is per slab. */
 export function createCopingSlabGeometry(inner: Outline, outer: Outline, thickness: number) {
-  if (inner.length !== outer.length || inner.length < 3) throw new Error("Mismatched coping outlines");
+  if (inner.length !== outer.length || inner.length < 3)
+    throw new Error("Mismatched coping outlines");
   const distances = [0];
   for (let i = 0; i < inner.length; i++) {
     const a = inner[i]!;
@@ -64,7 +66,9 @@ export function createCopingSlabGeometry(inner: Outline, outer: Outline, thickne
   const total = distances[inner.length]!;
   const corners = [0];
   for (let i = 1; i < inner.length; i++) {
-    const a = inner[i - 1]!, b = inner[i]!, c = inner[(i + 1) % inner.length]!;
+    const a = inner[i - 1]!,
+      b = inner[i]!,
+      c = inner[(i + 1) % inner.length]!;
     const u = new THREE.Vector2(b[0] - a[0], b[1] - a[1]).normalize();
     const v = new THREE.Vector2(c[0] - b[0], c[1] - b[1]).normalize();
     if (u.dot(v) < 0.94) corners.push(distances[i]!);
@@ -73,25 +77,40 @@ export function createCopingSlabGeometry(inner: Outline, outer: Outline, thickne
   const pointAt = (ring: Outline, d: number): [number, number] => {
     let i = 0;
     while (i < inner.length - 1 && distances[i + 1]! < d - 1e-8) i++;
-    const t = THREE.MathUtils.clamp((d - distances[i]!) / Math.max(1e-8, distances[i + 1]! - distances[i]!), 0, 1);
-    const a = ring[i]!, b = ring[(i + 1) % ring.length]!;
+    const t = THREE.MathUtils.clamp(
+      (d - distances[i]!) / Math.max(1e-8, distances[i + 1]! - distances[i]!),
+      0,
+      1,
+    );
+    const a = ring[i]!,
+      b = ring[(i + 1) % ring.length]!;
     return [THREE.MathUtils.lerp(a[0], b[0], t), THREE.MathUtils.lerp(a[1], b[1], t)];
   };
   const parts: THREE.BufferGeometry[] = [];
   for (let section = 0; section < corners.length - 1; section++) {
-    const start = corners[section]!, length = corners[section + 1]! - start;
+    const start = corners[section]!,
+      length = corners[section + 1]! - start;
     const count = Math.max(1, Math.round(length / 0.62));
     for (let slab = 0; slab < count; slab++) {
-      const from = start + length * slab / count, to = start + length * (slab + 1) / count;
-      const stations = [from, ...distances.filter(d => d > from + 1e-5 && d < to - 1e-5), to];
-      const polygon: Outline = [...stations.map(d => pointAt(inner, d)), ...[...stations].reverse().map(d => pointAt(outer, d))];
+      const from = start + (length * slab) / count,
+        to = start + (length * (slab + 1)) / count;
+      const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5), to];
+      const polygon: Outline = [
+        ...stations.map((d) => pointAt(inner, d)),
+        ...[...stations].reverse().map((d) => pointAt(outer, d)),
+      ];
       // 3mm recessed grout + 3mm eased arris. Insetting before extrusion
       // keeps the final stone inside its surveyed perimeter.
       const inset = offsetOutline(polygon, -0.0045);
       const shape = new THREE.Shape(inset.map(([x, z]) => new THREE.Vector2(x, -z)));
       const raw = new THREE.ExtrudeGeometry(shape, {
-        depth: thickness - 0.006, bevelEnabled: true, bevelSize: 0.003,
-        bevelThickness: 0.003, bevelSegments: 3, steps: 1, curveSegments: 1,
+        depth: thickness - 0.006,
+        bevelEnabled: true,
+        bevelSize: 0.003,
+        bevelThickness: 0.003,
+        bevelSegments: 3,
+        steps: 1,
+        curveSegments: 1,
       });
       raw.rotateX(-Math.PI / 2);
       raw.translate(0, -thickness + 0.003, 0);
@@ -104,14 +123,14 @@ export function createCopingSlabGeometry(inner: Outline, outer: Outline, thickne
       for (let i = 0; i < positions.count; i++) {
         if (Math.abs(positions.getY(i)) < 1e-6) normals.setXYZ(i, 0, 1, 0);
       }
-      const shade = 0.94 + (Math.sin(parts.length * 127.1 + 19.7) * 43758.5453 % 1 + 1) * 0.045;
+      const shade = 0.94 + (((Math.sin(parts.length * 127.1 + 19.7) * 43758.5453) % 1) + 1) * 0.045;
       const colors = new Float32Array(geometry.getAttribute("position").count * 3).fill(shade);
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       parts.push(geometry);
     }
   }
   const merged = mergeGeometries(parts)!;
-  parts.forEach(p => p.dispose());
+  parts.forEach((p) => p.dispose());
   return merged;
 }
 
@@ -185,18 +204,19 @@ export function createGrateGeometry(inner: Outline, outer: Outline) {
     // Slice each mitred channel bay perpendicular to its inner edge. Extending
     // stations to the outer corners covers the corner patches without fanning
     // straight-run ribs or overlapping the adjacent mitred bay.
-    const bay = [inner[i]!, inner[next]!, outer[next]!, outer[i]!].map(point => {
+    const bay = [inner[i]!, inner[next]!, outer[next]!, outer[i]!].map((point) => {
       const relative = new THREE.Vector2(...point).sub(a);
       return new THREE.Vector2(relative.dot(tangent), relative.dot(normal));
     });
-    const start = Math.min(...bay.map(point => point.x));
-    const end = Math.max(...bay.map(point => point.x));
+    const start = Math.min(...bay.map((point) => point.x));
+    const end = Math.max(...bay.map((point) => point.x));
     const count = Math.max(1, Math.ceil((end - start) / 0.022));
     for (let rib = 0; rib < count; rib++) {
-      const station = start + (rib + 0.5) * (end - start) / count;
+      const station = start + ((rib + 0.5) * (end - start)) / count;
       const intersections: number[] = [];
       for (let edge = 0; edge < bay.length; edge++) {
-        const p = bay[edge]!, q = bay[(edge + 1) % bay.length]!;
+        const p = bay[edge]!,
+          q = bay[(edge + 1) % bay.length]!;
         if (Math.abs(q.x - p.x) < 1e-8) continue;
         const t = (station - p.x) / (q.x - p.x);
         if (t >= 0 && t <= 1) intersections.push(THREE.MathUtils.lerp(p.y, q.y, t));
@@ -206,7 +226,9 @@ export function createGrateGeometry(inner: Outline, outer: Outline) {
       const to = Math.max(...intersections) - 0.001;
       if (to - from < 0.002) continue;
       const geometry = new THREE.ExtrudeGeometry(profile, {
-        depth: to - from, bevelEnabled: false, steps: 1,
+        depth: to - from,
+        bevelEnabled: false,
+        steps: 1,
       });
       geometry.rotateY(Math.atan2(normal.x, normal.y));
       const origin = a.clone().addScaledVector(tangent, station).addScaledVector(normal, from);

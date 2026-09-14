@@ -46,13 +46,13 @@ export function PoolFeaturesStep() {
       {config.poolType === "above-ground" ? (
         <div className="flex flex-col gap-5 border-t border-hairline pt-8">
           <h3 className="label-xs">Above-ground approach</h3>
-            <OptionCard
-              title="Scala esterna"
-              description="Accesso esterno alla piscina"
-              selected={config.features.includes("externalStaircase")}
-              onSelect={() => togglePoolFeature("externalStaircase")}
-              meta={<Footprints className="size-5 text-muted-foreground" strokeWidth={1.25} />}
-            />
+          <OptionCard
+            title="Scala esterna"
+            description="Accesso esterno alla piscina"
+            selected={config.features.includes("externalStaircase")}
+            onSelect={() => togglePoolFeature("externalStaircase")}
+            meta={<Footprints className="size-5 text-muted-foreground" strokeWidth={1.25} />}
+          />
         </div>
       ) : null}
     </StepSection>

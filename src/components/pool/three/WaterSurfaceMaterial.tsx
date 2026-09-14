@@ -334,7 +334,7 @@ export function WaterSurfaceMaterial({
   const microNormal = useMemo(() => createRippleNormalMap("micro"), []);
   const shaders = useRef<WaterShader[]>([]);
   const reflection = useWaterReflection(waterLevel, reflections);
-  const shoreline = useMemo(() => outline ? createShorelineField(outline) : null, [outline]);
+  const shoreline = useMemo(() => (outline ? createShorelineField(outline) : null), [outline]);
   useEffect(() => () => shoreline?.texture.dispose(), [shoreline]);
   useEffect(() => {
     if (!shoreline) return;
@@ -390,7 +390,8 @@ uniform float waterLargeRotation;
 uniform float waterMicroRotation;
 uniform int waterDebugMode;
 uniform sampler2D waterMicroNormalMap;`;
-      if (shoreline) fragmentHeader += `
+      if (shoreline)
+        fragmentHeader += `
 uniform sampler2D waterShoreline;
 uniform vec4 waterShoreBounds;
 uniform float waterShoreScale;`;
@@ -423,7 +424,8 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
         .replace("#include <opaque_fragment>", finalFragment);
       if (shoreline) {
         const boundedTransmission = THREE.ShaderChunk.transmission_fragment.replace(
-          "vec4 transmitted = getIBLVolumeRefraction(", `
+          "vec4 transmitted = getIBLVolumeRefraction(",
+          `
           vec2 shoreUv = (pos.xz - waterShoreBounds.xy) / waterShoreBounds.zw;
           float shoreDistance = texture2D(waterShoreline, shoreUv).r * waterShoreScale;
           vec3 submergedRay = refract(-v, n, 1.0 / material.ior);
@@ -441,11 +443,20 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
           material.thickness = min(0.28, min(floorPath, min(wallPath, screenPath)));
           vec4 transmitted = getIBLVolumeRefraction(`,
         );
-        shader.fragmentShader = shader.fragmentShader.replace("#include <transmission_fragment>", boundedTransmission);
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <transmission_fragment>",
+          boundedTransmission,
+        );
       }
       if (!shaders.current.includes(shader)) shaders.current.push(shader);
     },
-    [microNormal, reflection.texture, reflection.textureMatrix, reflection.aboveWaterline, shoreline],
+    [
+      microNormal,
+      reflection.texture,
+      reflection.textureMatrix,
+      reflection.aboveWaterline,
+      shoreline,
+    ],
   );
 
   useFrame(({ clock }) => {

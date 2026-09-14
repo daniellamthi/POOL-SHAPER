@@ -31,7 +31,10 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
       const dz = end[1] - start[1];
       const length = Math.hypot(dx, dz);
       if (length <= longest.length) continue;
-      const midpoint: readonly [number, number] = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+      const midpoint: readonly [number, number] = [
+        (start[0] + end[0]) / 2,
+        (start[1] + end[1]) / 2,
+      ];
       const firstNormal: readonly [number, number] = [-dz / length, dx / length];
       const pointsOutward =
         firstNormal[0] * (midpoint[0] - centre[0]) + firstNormal[1] * (midpoint[1] - centre[1]) > 0;

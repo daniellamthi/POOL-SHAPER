@@ -233,7 +233,8 @@ function getInteriorFinishCamera({
   );
   const distance = isLiner ? baseDistance * 1.65 : baseDistance;
   const targetY = layout.wallTopY - depth * 0.3;
-  const cameraY = layout.waterY + clamp(depth * (isLiner ? 0.3 : 0.18), 0.22, isLiner ? 0.56 : 0.38);
+  const cameraY =
+    layout.waterY + clamp(depth * (isLiner ? 0.3 : 0.18), 0.22, isLiner ? 0.56 : 0.38);
   return {
     target: [wallCentre[0], targetY, wallCentre[1]],
     position: [
@@ -279,8 +280,19 @@ export function getCameraPose({
     intent === "mosaic"
   ) {
     const reference = getFrontWallReference(outline, skimmers);
-    if (intent === "skimmer-detail" || intent === "overflow-hidden" || intent === "overflow-visible") {
-      return getSystemDetailCamera({ reference, bounds, layout, verticalFov, viewportAspect, overflow: intent !== "skimmer-detail" });
+    if (
+      intent === "skimmer-detail" ||
+      intent === "overflow-hidden" ||
+      intent === "overflow-visible"
+    ) {
+      return getSystemDetailCamera({
+        reference,
+        bounds,
+        layout,
+        verticalFov,
+        viewportAspect,
+        overflow: intent !== "skimmer-detail",
+      });
     }
     const master = getFrontWallMasterCamera({
       reference,

@@ -101,7 +101,11 @@ export function SkyDome({
   uniforms.hasEnvironmentMap.value = !!environmentMap;
 
   return (
-    <mesh renderOrder={reflectionOnly ? -999 : -1000} layers-mask={reflectionOnly ? 2 : 1} frustumCulled={false}>
+    <mesh
+      renderOrder={reflectionOnly ? -999 : -1000}
+      layers-mask={reflectionOnly ? 2 : 1}
+      frustumCulled={false}
+    >
       <sphereGeometry args={[radius, 32, 16]} />
       <shaderMaterial
         uniforms={uniforms}

@@ -36,7 +36,7 @@ export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
 
   const maps = build(PREVIEW_SIZE);
   const { colorMap } = maps;
-  const dispose = () => Object.values(maps).forEach(map => map.dispose());
+  const dispose = () => Object.values(maps).forEach((map) => map.dispose());
   const source = colorMap.image.data as Uint8ClampedArray;
   const tint = new THREE.Color(material.color);
 
@@ -53,7 +53,12 @@ export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
   const sample = new THREE.Color();
   for (let i = 0; i < PREVIEW_SIZE * PREVIEW_SIZE; i++) {
     const o = i * 4;
-    sample.setRGB(source[o]! / 255, source[o + 1]! / 255, source[o + 2]! / 255, THREE.SRGBColorSpace);
+    sample.setRGB(
+      source[o]! / 255,
+      source[o + 1]! / 255,
+      source[o + 2]! / 255,
+      THREE.SRGBColorSpace,
+    );
     sample.multiply(tint).convertLinearToSRGB();
     image.data[o] = Math.round(sample.r * 255);
     image.data[o + 1] = Math.round(sample.g * 255);

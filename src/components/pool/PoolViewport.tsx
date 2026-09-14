@@ -200,7 +200,9 @@ export const PoolViewport = memo(function PoolViewport({
               ) : (
                 <>
                   <Aperture />
-                  {renderPhase === "error" ? "Retry Photorealistic Render" : "Generate Photorealistic Render"}
+                  {renderPhase === "error"
+                    ? "Retry Photorealistic Render"
+                    : "Generate Photorealistic Render"}
                 </>
               )}
             </Button>

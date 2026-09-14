@@ -66,9 +66,7 @@ export function LiveSummary() {
             <dt className="text-[8px] font-medium uppercase leading-4 tracking-[0.12em] text-muted-foreground">
               {label}
             </dt>
-            <dd className="text-[10px] font-normal leading-4 text-foreground/88">
-              {value}
-            </dd>
+            <dd className="text-[10px] font-normal leading-4 text-foreground/88">{value}</dd>
           </div>
         ))}
       </dl>
