@@ -281,7 +281,11 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
       // housings (pool-skimmers), the hidden-overflow stone lip
       // (overflow-edge-without-grille) and the visible-overflow grille
       // (overflow-grille) -- whichever of these is this system's actual
-      // border. The main scene and all interaction remain unchanged.
+      // border. Also excludes the baked ContactShadows plane
+      // (pool-contact-shadows): its blurred shadow blob sits right at deck
+      // level and, uncaught, mirrors into the water as a smeared dark streak
+      // exactly where the coping/waterline read needed to be cleanest. The
+      // main scene and all interaction remain unchanged.
       if (
         object.visible &&
         (isWaterSurfaceMesh(object) ||
@@ -289,7 +293,8 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
           object.name === "pool-studio-deck" ||
           object.name === "pool-skimmers" ||
           object.name === "overflow-edge-without-grille" ||
-          object.name === "overflow-grille")
+          object.name === "overflow-grille" ||
+          object.name === "pool-contact-shadows")
       ) {
         object.visible = false;
         hiddenWater.push(object);

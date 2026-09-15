@@ -6,8 +6,14 @@ import { SkyDome } from "./SkyDome";
 import { ACTIVE_RENDERING_QUALITY, SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import type { Theme } from "@/lib/theme";
 
-/** The same local HDR sky drives diffuse light, glossy IBL and the planar
- * mirror. Only one PMREM bake, no additional per-frame environment capture. */
+/** The local HDR sky drives diffuse light and glossy IBL (material specular
+ * response) via its PMREM bake. The water's planar mirror instead reflects
+ * the same clean procedural `SkyDome` the main camera sees -- the raw HDR
+ * was shot poolside and its sharp, undiffused equirect carries real
+ * ground-level surroundings (trees/landscaping) that, mirrored directly at
+ * the coping, read as stray foliage smeared across the border. Blurred into
+ * ambient IBL it's a believable light source; painted as sharp mirror
+ * geometry it isn't. */
 export function DaylightEnvironment({ theme, sunDirection }: {
   theme: Theme;
   sunDirection: [number, number, number];
@@ -31,6 +37,5 @@ export function DaylightEnvironment({ theme, sunDirection }: {
         <SkyDome {...skyProps} radius={50} />
       </Environment>}
     <SkyDome {...skyProps} />
-    {sky ? <SkyDome {...skyProps} environmentMap={sky} reflectionOnly /> : null}
   </>;
 }

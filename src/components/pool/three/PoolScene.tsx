@@ -570,6 +570,7 @@ export default function PoolScene({
 
       {ACTIVE_RENDERING_QUALITY.contactShadows.enabled ? (
         <ContactShadows
+          name="pool-contact-shadows"
           key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}`}
           position={[
             0,
