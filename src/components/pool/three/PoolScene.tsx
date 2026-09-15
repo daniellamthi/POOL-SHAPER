@@ -707,7 +707,16 @@ export default function PoolScene({
         outline={outline}
         layout={verticalLayout}
         skimmers={skimmers}
-        photoMode={effectivePhotoMode}
+        // Deliberately the raw manual toggle, not `effectivePhotoMode`:
+        // CameraRig's own `moving` check (below) OR's this in to freeze the
+        // idle-tracking clock while Photo Mode is active. Feeding it the
+        // auto-engaged flag instead created a feedback loop -- Still Render
+        // engaging drives idle false, which disengages Still Render, which
+        // lets idle go true again, re-engaging it, forever -- since by the
+        // time Still Render can engage at all the camera is already static
+        // (no flight in progress, OrbitControls disabled), it never needed
+        // this freeze in the first place.
+        photoMode={photoMode}
         // The exterior/staircase framing must never hijack the Step 05
         // Pool System camera -- that step's premium front view (both
         // skimmers, centred, from inside looking out) always wins.
