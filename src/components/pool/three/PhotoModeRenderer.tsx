@@ -339,7 +339,6 @@ export function PhotoModeRenderer({
       lastCameraMatrix.current.copy(camera.matrixWorld);
       tracer.updateCamera();
       tracer.reset();
-      console.log("[photomode-debug] reset fired at sample", tracer.samples, Date.now());
     }
 
     tracer.renderSample();
