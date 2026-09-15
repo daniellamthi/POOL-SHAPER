@@ -264,8 +264,8 @@ function ConfiguratorLayout() {
   const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
-  const dimensionsStep = activeSteps.findIndex(({ id }) =>
-    id === (renovationWorkflow ? "renovation-pool" : "shape-dimensions"),
+  const dimensionsStep = activeSteps.findIndex(
+    ({ id }) => id === (renovationWorkflow ? "renovation-pool" : "shape-dimensions"),
   );
   const cameraLocked = dimensionsStep >= 0 && step > dimensionsStep;
   const cameraFocus: SceneFocus = renovationWorkflow
@@ -297,7 +297,13 @@ function ConfiguratorLayout() {
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Button type="button" variant="ghost" size="sm" onClick={reset} className="rounded-full px-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={reset}
+            className="rounded-full px-3"
+          >
             <RotateCcw />
             <span className="hidden sm:inline">Reset</span>
           </Button>

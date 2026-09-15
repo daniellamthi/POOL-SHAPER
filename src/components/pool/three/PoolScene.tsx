@@ -27,9 +27,7 @@ import {
   ACTIVE_RENDERING_QUALITY,
   SCENE_VISUAL_PRESET,
 } from "@/configurator/3d/scene/visual-preset";
-import {
-  POOL_BORDER_PRESET,
-} from "@/configurator/materials/visual-presets";
+import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { getCameraPose } from "@/lib/pool/camera";
 import type { CameraIntent } from "@/lib/pool/camera";
@@ -98,17 +96,20 @@ function DevelopmentRendererMetrics() {
     frames.current += 1;
     if (elapsed.current < 2) return;
     const frameTime = (elapsed.current / frames.current) * 1000;
-    console.debug("[Pool3D performance]", JSON.stringify({
-      fps: Number((1000 / frameTime).toFixed(1)),
-      frameTimeMs: Number(frameTime.toFixed(2)),
-      calls: gl.info.render.calls,
-      triangles: gl.info.render.triangles,
-      geometries: gl.info.memory.geometries,
-      textures: gl.info.memory.textures,
-      dpr: gl.getPixelRatio(),
-      shadowMapSize: ACTIVE_RENDERING_QUALITY.shadowMapSize,
-      qualityPreset: ACTIVE_RENDERING_QUALITY.id,
-    }));
+    console.debug(
+      "[Pool3D performance]",
+      JSON.stringify({
+        fps: Number((1000 / frameTime).toFixed(1)),
+        frameTimeMs: Number(frameTime.toFixed(2)),
+        calls: gl.info.render.calls,
+        triangles: gl.info.render.triangles,
+        geometries: gl.info.memory.geometries,
+        textures: gl.info.memory.textures,
+        dpr: gl.getPixelRatio(),
+        shadowMapSize: ACTIVE_RENDERING_QUALITY.shadowMapSize,
+        qualityPreset: ACTIVE_RENDERING_QUALITY.id,
+      }),
+    );
     elapsed.current = 0;
     frames.current = 0;
   });
@@ -133,11 +134,7 @@ function AdaptiveQuality() {
   useFrame(() => {
     if (renderQualityState.idle === wasIdle.current) return;
     wasIdle.current = renderQualityState.idle;
-    setDpr(
-      wasIdle.current
-        ? ACTIVE_RENDERING_QUALITY.dpr[1]
-        : ACTIVE_RENDERING_QUALITY.dpr[0],
-    );
+    setDpr(wasIdle.current ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr[0]);
   });
 
   return null;
@@ -334,7 +331,9 @@ function StudioFloor({
     ];
     return createSurfaceGeometry(
       outer,
-      poolType === "in-ground" ? offsetOutline(outline, copingOuterOffset(system, overflowType)) : undefined,
+      poolType === "in-ground"
+        ? offsetOutline(outline, copingOuterOffset(system, overflowType))
+        : undefined,
     );
   }, [outline, size, poolType, system, overflowType]);
 
@@ -346,7 +345,7 @@ function StudioFloor({
       texture.anisotropy = Math.min(8, maxAnisotropy);
       texture.needsUpdate = true;
     }
-    return () => Object.values(stone).forEach(texture => texture.dispose());
+    return () => Object.values(stone).forEach((texture) => texture.dispose());
   }, [stone, maxAnisotropy]);
 
   return (
@@ -359,8 +358,10 @@ function StudioFloor({
         normalScale={[0.28, 0.28]}
         roughnessMap={stone.roughnessMap}
         metalness={0}
-        onBeforeCompile={shader => {
-          shader.fragmentShader = shader.fragmentShader.replace("#include <map_fragment>", `
+        onBeforeCompile={(shader) => {
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "#include <map_fragment>",
+            `
             #include <map_fragment>
             vec2 slabCoord = vMapUv / 3.0;
             vec2 toJoint = min(fract(slabCoord), 1.0 - fract(slabCoord));
@@ -368,7 +369,8 @@ function StudioFloor({
             vec2 grout = smoothstep(vec2(0.001), vec2(0.001) + aa, toJoint);
             float slabSeed = fract(sin(dot(floor(slabCoord), vec2(127.1, 311.7))) * 43758.5453);
             diffuseColor.rgb *= mix(0.73, 0.97 + slabSeed * 0.045, min(grout.x, grout.y));
-          `);
+          `,
+          );
         }}
         customProgramCacheKey={() => "architectural-stone-paving-v1"}
       />
@@ -478,9 +480,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? (
-        <DaylightEnvironment theme={theme} sunDirection={sunPosition} />
-      ) : null}
+      {!photoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} /> : null}
 
       <hemisphereLight
         intensity={SCENE_VISUAL_PRESET.lighting.sky.intensity[theme]}
@@ -515,7 +515,14 @@ export default function PoolScene({
         distance={radius * 8}
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[theme]}
       />
-      <StudioFloor outline={outline} size={deckSize} theme={theme} poolType={poolType} system={system} overflowType={overflowType} />
+      <StudioFloor
+        outline={outline}
+        size={deckSize}
+        theme={theme}
+        poolType={poolType}
+        system={system}
+        overflowType={overflowType}
+      />
 
       <PoolModel
         poolAccess={poolAccess}

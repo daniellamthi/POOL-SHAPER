@@ -66,34 +66,60 @@ const assert = (condition: unknown, message: string): asserts condition => {
 };
 
 const shapes: ReadonlyArray<PoolShapeId> = ["rectangle", "custom"];
-assert(copingOuterOffset("overflow", "visible") === OVERFLOW_GEOMETRY.visibleChannelOuterOffset,
-  "grille overflow must meet the deck directly, without a masonry border");
-assert(copingOuterOffset("overflow", "hidden") > OVERFLOW_GEOMETRY.hiddenChannelOffset,
-  "grille-free overflow must retain its concealed channel and stone edge");
+assert(
+  copingOuterOffset("overflow", "visible") === OVERFLOW_GEOMETRY.visibleChannelOuterOffset,
+  "grille overflow must meet the deck directly, without a masonry border",
+);
+assert(
+  copingOuterOffset("overflow", "hidden") > OVERFLOW_GEOMETRY.hiddenChannelOffset,
+  "grille-free overflow must retain its concealed channel and stone edge",
+);
 assert(copingOuterOffset("skimmer", "visible") === 0.32, "skimmer coping must remain unchanged");
 {
   const texture = createCausticsMap(512);
   const pixels = texture.image.data as Uint8Array;
-  let sum = 0, maxGradient = 0;
+  let sum = 0,
+    maxGradient = 0;
   for (let i = 0; i < 512 * 512; i++) {
     sum += pixels[i * 4]!;
-    const next = Math.floor(i / 512) * 512 + (i + 1) % 512;
+    const next = Math.floor(i / 512) * 512 + ((i + 1) % 512);
     maxGradient = Math.max(maxGradient, Math.abs(pixels[i * 4]! - pixels[next * 4]!));
   }
   assert(sum / (512 * 512 * 255) < 0.08, "caustic field must remain sparse and low-energy");
   assert(maxGradient < 30, "caustic field must be softened rather than sharp lines");
-  assert(WATER_VISUAL_PRESET.causticVisibility <= 0.1, "calm-water caustics must remain barely visible");
+  assert(
+    WATER_VISUAL_PRESET.causticVisibility <= 0.1,
+    "calm-water caustics must remain barely visible",
+  );
   texture.dispose();
 }
 // Refraction must remain inside rectangular and concave water footprints.
 for (const outline of [
-  [[-4, -2], [4, -2], [4, 2], [-4, 2]],
-  [[0, 0], [6, 0], [6, 2], [2, 2], [2, 5], [0, 5]],
+  [
+    [-4, -2],
+    [4, -2],
+    [4, 2],
+    [-4, 2],
+  ],
+  [
+    [0, 0],
+    [6, 0],
+    [6, 2],
+    [2, 2],
+    [2, 5],
+    [0, 5],
+  ],
 ] as const) {
   const field = createShorelineField(outline, 64);
   const data = field.texture.image.data;
-  assert(Array.from(data).every(value => Number.isFinite(value) && value >= 0), "finite shoreline field");
-  assert(Array.from(data).some(value => value > 0), "shoreline has usable interior refraction depth");
+  assert(
+    Array.from(data).every((value) => Number.isFinite(value) && value >= 0),
+    "finite shoreline field",
+  );
+  assert(
+    Array.from(data).some((value) => value > 0),
+    "shoreline has usable interior refraction depth",
+  );
   assert(data[0] === 0 && data[63] === 0, "refraction vanishes at perimeter corners");
   if (outline.length === 6) {
     assert(data[50 * 64 + 50] === 0, "concave notch cannot refract dry paving");
@@ -686,9 +712,9 @@ for (const testCase of verticalGeometryCases) {
           pose.position.every(
             (value, index) => Math.abs(value - interiorWidePose.position[index]!) < 1e-10,
           ) &&
-          pose.target.every(
-            (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
-          ),
+            pose.target.every(
+              (value, index) => Math.abs(value - interiorWidePose.target[index]!) < 1e-10,
+            ),
           `${testCase.name}/${poolType}: Mosaic camera differs from PVC/Liner`,
         );
       }
@@ -968,8 +994,16 @@ for (const shape of shapes) {
       createBeveledRingGeometry(outline, outer, 0.008, 5),
       createGrateGeometry(outline, offsetOutline(outline, 0.165)),
       createCopingJointGeometry(outline, outer, 0.055),
-      createCopingSlabGeometry(outline, offsetOutline(outline, copingOuterOffset("skimmer", "hidden")), 0.055),
-      createCopingSlabGeometry(offsetOutline(outline, 0.07), offsetOutline(outline, copingOuterOffset("overflow", "hidden")), 0.055),
+      createCopingSlabGeometry(
+        outline,
+        offsetOutline(outline, copingOuterOffset("skimmer", "hidden")),
+        0.055,
+      ),
+      createCopingSlabGeometry(
+        offsetOutline(outline, 0.07),
+        offsetOutline(outline, copingOuterOffset("overflow", "hidden")),
+        0.055,
+      ),
     ];
     for (const geometry of meshes) {
       for (const attribute of ["position", "normal", "uv"]) {
@@ -1001,8 +1035,10 @@ for (const shape of shapes) {
         openings,
       );
       for (const opening of openings) {
-        assert(opening.bottom < -FREEBOARD && opening.top > -FREEBOARD,
-          `${shape}: every installed skimmer mouth must intersect the configured waterline`);
+        assert(
+          opening.bottom < -FREEBOARD && opening.top > -FREEBOARD,
+          `${shape}: every installed skimmer mouth must intersect the configured waterline`,
+        );
       }
       const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
       const mesh = new THREE.Mesh(geometry, material);
@@ -1035,28 +1071,40 @@ for (const shape of shapes) {
 // Mitred grating must also span the outside corner patches, not leave four
 // open squares where perpendicular straight-run ribs stop at the inner edge.
 {
-  const outline: Outline = [[-3, -2], [3, -2], [3, 2], [-3, 2]];
+  const outline: Outline = [
+    [-3, -2],
+    [3, -2],
+    [3, 2],
+    [-3, 2],
+  ];
   const geometry = createGrateGeometry(outline, offsetOutline(outline, 0.165));
   const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.updateMatrixWorld();
-  for (const xSign of [-1, 1]) for (const zSign of [-1, 1]) {
-    let covered = 0;
-    for (let x = 0; x < 5; x++) for (let z = 0; z < 5; z++) {
-      const ray = new THREE.Raycaster(
-        new THREE.Vector3(xSign * (3.075 + x * 0.016), 0.1, zSign * (2.075 + z * 0.016)),
-        new THREE.Vector3(0, -1, 0), 0, 0.15,
-      );
-      if (ray.intersectObject(mesh).length) covered++;
+  for (const xSign of [-1, 1])
+    for (const zSign of [-1, 1]) {
+      let covered = 0;
+      for (let x = 0; x < 5; x++)
+        for (let z = 0; z < 5; z++) {
+          const ray = new THREE.Raycaster(
+            new THREE.Vector3(xSign * (3.075 + x * 0.016), 0.1, zSign * (2.075 + z * 0.016)),
+            new THREE.Vector3(0, -1, 0),
+            0,
+            0.15,
+          );
+          if (ray.intersectObject(mesh).length) covered++;
+        }
+      assert(covered >= 5, "grating ribs must cover every mitred outer corner");
     }
-    assert(covered >= 5, "grating ribs must cover every mitred outer corner");
-  }
   geometry.dispose();
   material.dispose();
 }
 
 assert(COPING_MATERIALS.length === 4, "four coping finishes required");
-assert(new Set(COPING_MATERIALS.map(material => material.color)).size === 4, "coping tones must differ");
+assert(
+  new Set(COPING_MATERIALS.map((material) => material.color)).size === 4,
+  "coping tones must differ",
+);
 for (const material of COPING_MATERIALS) {
   assert(material.roughness > 0 && material.roughness <= 1, "bounded stone roughness");
   assert(material.moduleSize >= 0.4 && material.moduleSize <= 0.6, "metric coping texture scale");

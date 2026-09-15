@@ -188,9 +188,15 @@ export function MaterialSwatch({
           <Info className="size-3" strokeWidth={1.75} />
         </button>
       ) : null}
-      <button type="button" onClick={onSelect} className="flex flex-col items-start gap-0.5 text-left outline-none">
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex flex-col items-start gap-0.5 text-left outline-none"
+      >
         <span className="text-[12.5px] font-normal tracking-tight text-foreground">{title}</span>
-        <span className="text-[10.5px] leading-snug font-light text-muted-foreground">{subtitle}</span>
+        <span className="text-[10.5px] leading-snug font-light text-muted-foreground">
+          {subtitle}
+        </span>
       </button>
     </div>
   );
