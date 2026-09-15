@@ -111,8 +111,12 @@ const selectWaterPreset = (mode: "legacy" | "premium") =>
 export const WATER_VISUAL_PRESET = selectWaterPreset(ACTIVE_WATER_RENDERING);
 
 export const POOL_SURFACE_PRESET = {
-  linerClearcoat: 0.58,
-  linerClearcoatRoughness: 0.1,
+  // Softened from a sharp 0.58/0.1 lacquer response: at that intensity/
+  // sharpness the clearcoat read as a laminated, shrink-wrapped plastic
+  // sheet rather than a vinyl membrane's soft, water-wet sheen -- keeps a
+  // believable highlight without the glassy "CG plastic" tell.
+  linerClearcoat: 0.38,
+  linerClearcoatRoughness: 0.22,
   floorClearcoat: 0.5,
   dayCaustics: 0.16,
   nightCaustics: 0.13,

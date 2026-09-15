@@ -17,6 +17,7 @@ interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
     waterMicroScale?: { value: number };
     waterLargeStrength?: { value: number };
     waterMicroStrength?: { value: number };
+    waterCalm?: { value: number };
     waterLargeRotation?: { value: number };
     waterMicroRotation?: { value: number };
     waterMicroNormalMap?: { value: THREE.Texture };
@@ -47,10 +48,10 @@ vec3 microRipple = texture2D(
 // slopes avoid 8-bit normal-map banding and repeated highlight grids at grazing angles.
 float waveTime = waterLargeOffset.x * 110.0;
 vec2 p = centeredNormalUv;
-vec2 calmSlope = vec2(1.7, 0.8) * 0.0026 * cos(dot(p, vec2(1.7, 0.8)) - waveTime * 0.73)
+vec2 calmSlope = (vec2(1.7, 0.8) * 0.0026 * cos(dot(p, vec2(1.7, 0.8)) - waveTime * 0.73)
   + vec2(-0.7, 2.1) * 0.0018 * cos(dot(p, vec2(-0.7, 2.1)) + waveTime * 0.57)
   + vec2(3.6, -1.2) * 0.0008 * cos(dot(p, vec2(3.6, -1.2)) - waveTime * 1.13)
-  + vec2(5.2, 3.7) * 0.0003 * cos(dot(p, vec2(5.2, 3.7)) + waveTime * 0.91);
+  + vec2(5.2, 3.7) * 0.0003 * cos(dot(p, vec2(5.2, 3.7)) + waveTime * 0.91)) * waterCalm;
 vec2 combinedSlope = calmSlope + largeRipple.xy * waterLargeStrength + microRipple.xy * waterMicroStrength;
 vec3 waterNormal = normalize(vec3(combinedSlope, 1.0));
 normal = normalize(tbn * waterNormal);
@@ -120,6 +121,16 @@ const WATER_DEBUG_MODE =
         : 0;
 const REFLECTION_ENABLED = ACTIVE_RENDERING_QUALITY.planarReflection.enabled;
 const REFLECTION_RESOLUTION = ACTIVE_RENDERING_QUALITY.planarReflection.resolution;
+// Once the camera settles (see renderQualityState/CameraRig) the mirror
+// capture only has to look good in a single still frame instead of keeping
+// up with 60fps motion, so it's worth the one-off cost of a sharper render
+// target -- the same "spend the stationary budget on image quality" idea
+// AdaptiveQuality already applies to the main framebuffer's DPR. Reusing the
+// live WebGLRenderTarget's own `setSize` (not allocating a new one) keeps
+// its `.texture` reference stable, so the already-compiled water shader's
+// `waterReflectionTexture` uniform keeps sampling it correctly across the
+// resize with no shader recompile.
+const REFLECTION_IDLE_RESOLUTION = REFLECTION_RESOLUTION * 2;
 // Structural safety margin, not a look/tuning knob: below this height above
 // the water plane the mirror camera has crossed to the wrong side of it
 // (see the fade below), roughly matching the coping's own thickness.
@@ -175,6 +186,7 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
   const textureMatrix = useRef(new THREE.Matrix4());
   const aboveWaterline = useRef({ value: 1 }).current;
   const frame = useRef(0);
+  const wasIdleForReflection = useRef(false);
   const clipping = useMemo(
     () => ({ plane: new THREE.Plane(), vector: new THREE.Vector4(), q: new THREE.Vector4() }),
     [],
@@ -189,6 +201,20 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
     // program), so the mirror-camera render this hook drives would just be
     // extra GPU work feeding a uniform nothing reads.
     if (photoModeState.active) return;
+
+    // Spend the stationary budget on reflection sharpness: bump the render
+    // target up once the camera has actually settled, drop it back the
+    // instant movement resumes so interaction never pays for the larger
+    // capture. `setSize` reallocates the target's GPU storage in place, so
+    // the compiled water shader's texture uniform (bound to this same
+    // WebGLRenderTarget's `.texture`) keeps working across the resize.
+    if (renderQualityState.idle !== wasIdleForReflection.current) {
+      wasIdleForReflection.current = renderQualityState.idle;
+      const resolution = renderQualityState.idle
+        ? REFLECTION_IDLE_RESOLUTION
+        : REFLECTION_RESOLUTION;
+      if (target.width !== resolution) target.setSize(resolution, resolution);
+    }
 
     // Tracks camera height every frame regardless of the render throttle
     // below, so the fallback fade stays smooth even on skipped frames.
@@ -377,6 +403,7 @@ export function WaterSurfaceMaterial({
       shader.uniforms.waterMicroStrength = { value: WATER_VISUAL_PRESET.normals.micro.strength };
       shader.uniforms.waterLargeRotation = { value: WATER_VISUAL_PRESET.normals.large.rotation };
       shader.uniforms.waterMicroRotation = { value: WATER_VISUAL_PRESET.normals.micro.rotation };
+      shader.uniforms.waterCalm = { value: 1 };
       shader.uniforms.waterMicroNormalMap = { value: microNormal };
       shader.uniforms.waterDebugMode = { value: WATER_DEBUG_MODE };
       if (shoreline) {
@@ -393,6 +420,7 @@ uniform float waterLargeStrength;
 uniform float waterMicroStrength;
 uniform float waterLargeRotation;
 uniform float waterMicroRotation;
+uniform float waterCalm;
 uniform int waterDebugMode;
 uniform sampler2D waterMicroNormalMap;`;
       if (shoreline)
@@ -464,13 +492,31 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
     ],
   );
 
-  useFrame(({ clock }) => {
+  const stillness = useRef(0);
+  useFrame(({ clock }, delta) => {
     const time = clock.getElapsedTime();
+    // Eases toward "held still" while the camera is settled (see
+    // renderQualityState/CameraRig) and snaps back the instant it moves
+    // again -- the surface keeps drifting either way (a perfectly static
+    // normal map is its own tell), just far less while the fixed
+    // presentation cameras are actually being looked at, for the glassy
+    // stillness a real calm pool has in a photograph rather than a
+    // real-time viewport's constant shimmer.
+    const stillTarget = renderQualityState.idle ? 1 : 0;
+    stillness.current = THREE.MathUtils.damp(stillness.current, stillTarget, 2.2, delta);
+    const calm = THREE.MathUtils.lerp(1, 0.32, stillness.current);
     for (const shader of shaders.current) {
       // Slowed vs. the original bake: a calmer, more architectural drift --
       // still alive, not the "game water" scroll speed the raw values read as.
       shader.uniforms.waterLargeOffset?.value.set(time * 0.0013, time * 0.0007);
       shader.uniforms.waterMicroOffset?.value.set(-time * 0.0035, time * 0.0026);
+      if (shader.uniforms.waterLargeStrength) {
+        shader.uniforms.waterLargeStrength.value = WATER_VISUAL_PRESET.normals.large.strength * calm;
+      }
+      if (shader.uniforms.waterMicroStrength) {
+        shader.uniforms.waterMicroStrength.value = WATER_VISUAL_PRESET.normals.micro.strength * calm;
+      }
+      if (shader.uniforms.waterCalm) shader.uniforms.waterCalm.value = calm;
     }
   });
 

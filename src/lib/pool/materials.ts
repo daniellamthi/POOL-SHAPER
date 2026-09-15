@@ -77,7 +77,10 @@ export function resolveMaterials(
       textureMetadata:
         config.finish === "mosaic" ? mosaic.textureMetadata : INTERIOR_TEXTURE_METADATA.liner,
       tileSize: config.finish === "mosaic" ? mosaic.tileSize : PVC_TEXTURE_MODULE_SIZE_METERS,
-      bumpScale: config.finish === "mosaic" ? 0 : 0.003,
+      // Nudged up from 0.003: at that strength the liner read as a
+      // perfectly flat plastic sheet under close, stationary cameras --
+      // still a subtle membrane relief, not a heavily textured surface.
+      bumpScale: config.finish === "mosaic" ? 0 : 0.0055,
       microDetail:
         config.finish === "mosaic"
           ? MATERIAL_MICRO_DETAIL_PRESET.mosaic
