@@ -13,6 +13,7 @@ export type CameraIntent =
   | "overflow-visible"
   | "liner"
   | "mosaic"
+  | "features"
   | "review";
 export type CameraPoint = readonly [number, number, number];
 
@@ -245,6 +246,33 @@ function getInteriorFinishCamera({
   };
 }
 
+/** Locked, closer "hero" 3/4 view for the Features / Pool Access step: same
+ * elevated architectural angle the overview uses, but pulled in roughly
+ * twice as close so a selected feature (internal stairs, ladder, lighting)
+ * reads clearly while the whole pool and its border stay in frame -- a
+ * curated presentation shot rather than the wide establishing overview. */
+function getFeaturesCamera({
+  verticalCentre,
+  centre,
+  radius,
+}: {
+  verticalCentre: number;
+  centre: readonly [number, number];
+  radius: number;
+}): CameraPose {
+  const distance = radius * 1.9;
+  const direction: CameraPoint = [1.55, 1.05, 0.62];
+  const directionLength = Math.hypot(...direction);
+  return {
+    target: [centre[0], verticalCentre, centre[1]],
+    position: [
+      centre[0] + (direction[0] / directionLength) * distance,
+      verticalCentre + (direction[1] / directionLength) * distance,
+      centre[1] + (direction[2] / directionLength) * distance,
+    ],
+  };
+}
+
 /** Bounds-driven pose shared by in-ground and above-ground installations. */
 export function getCameraPose({
   intent,
@@ -316,6 +344,10 @@ export function getCameraPose({
       });
     }
     return master;
+  }
+
+  if (intent === "features") {
+    return getFeaturesCamera({ verticalCentre, centre, radius });
   }
 
   // Photographic overview only: clear the full coping and view along the

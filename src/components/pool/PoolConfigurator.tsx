@@ -278,9 +278,11 @@ function ConfiguratorLayout() {
         : "skimmer-detail"
       : activeStepId === "finish" || activeStepId === "color"
         ? "liner"
-        : activeStepId === "review"
-          ? "review"
-          : "overview";
+        : activeStepId === "features"
+          ? "features"
+          : activeStepId === "review"
+            ? "review"
+            : "overview";
   const stepContent =
     !renovationWorkflow && activeStepId === "system" ? (
       <PoolSystemStep onSkimmerSelect={reframe} />
