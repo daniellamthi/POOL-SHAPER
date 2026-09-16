@@ -1,9 +1,10 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, ContactShadows } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Vector3, AgXToneMapping, NoToneMapping, PCFShadowMap, SRGBColorSpace } from "three";
 import { PoolModel } from "./PoolModel";
+import { PoolLights } from "./PoolLights";
 import { DaylightEnvironment } from "./DaylightEnvironment";
 import { copingOuterOffset } from "./poolConstruction";
 import { createTravertineMaps } from "./stoneTextures";
@@ -57,6 +58,7 @@ export interface SceneProps {
   poolType: PoolType;
   materials: ResolvedMaterials;
   features: ReadonlyArray<PoolFeatureId>;
+  ledColor?: string;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
   length: number;
@@ -140,59 +142,6 @@ function AdaptiveQuality() {
   return null;
 }
 
-/** Seconds the camera must already read as `renderQualityState.idle` (itself
- * debounced by RENDER_QUALITY_IDLE_DELAY, 0.3s) before Still Render Mode
- * engages -- on top of that, lands the combined dwell in the requested
- * 500-800ms band without a second independent movement tracker. */
-const STILL_RENDER_ADDITIONAL_DWELL = 0.35;
-
-/**
- * Auto-engages the exact same path-traced renderer Photo Mode uses (see
- * PhotoModeRenderer), but only for the curated, locked-camera presentation
- * steps (post-dimensions) and only once the camera has genuinely stopped --
- * no free orbit is even possible there (OrbitControls is disabled whenever
- * `cameraLocked`), so "stationary" here only ever means "the scripted
- * camera flight between steps has finished". Reverts to the live raster
- * the instant that assumption breaks: a new flight starts, the step
- * changes, or the manual Photo Mode toggle takes over. A regular
- * component (not a hook) because it must run its `useFrame` inside the
- * Canvas tree, while the `engaged` flag it drives lives one level up in
- * PoolScene's own state (`setEngaged`, `setUnsupported` are just plain
- * React state setters -- always safe to call from a child).
- */
-function StillRenderTrigger({
-  cameraLocked,
-  manualPhotoMode,
-  unsupported,
-  setEngaged,
-}: {
-  cameraLocked: boolean;
-  manualPhotoMode: boolean;
-  unsupported: boolean;
-  setEngaged: (value: boolean) => void;
-}) {
-  const engagedRef = useRef(false);
-  const dwell = useRef(0);
-
-  useFrame((_, delta) => {
-    if (unsupported || manualPhotoMode || !cameraLocked || !renderQualityState.idle) {
-      dwell.current = 0;
-      if (engagedRef.current) {
-        engagedRef.current = false;
-        setEngaged(false);
-      }
-      return;
-    }
-    dwell.current += delta;
-    if (!engagedRef.current && dwell.current >= STILL_RENDER_ADDITIONAL_DWELL) {
-      engagedRef.current = true;
-      setEngaged(true);
-    }
-  });
-
-  return null;
-}
-
 /** Smoothly restores a stable product view when dimensions or framing change. */
 function CameraRig({
   cameraLocked,
@@ -261,6 +210,10 @@ function CameraRig({
   // RENDER_QUALITY_IDLE_DELAY seconds, and flips back to "moving" the
   // instant either resumes.
   useFrame((_, delta) => {
+    if (cameraLocked) {
+      renderQualityState.idle = true;
+      return;
+    }
     const moving = flying.current || interacting.current || photoMode;
     if (moving) {
       idleElapsed.current = 0;
@@ -273,7 +226,7 @@ function CameraRig({
     }
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const pose = getCameraPose({
       intent: focus,
       outline,
@@ -290,6 +243,20 @@ function CameraRig({
     startTarget.current.copy(controls.current?.target ?? lookAt.current);
     // Drain any orbit inertia without changing the visible starting pose.
     const control = controls.current;
+    renderQualityState.locked = cameraLocked;
+    if (cameraLocked) {
+      if (control) {
+        control.enableDamping = false;
+        control.update();
+        control.target.copy(lookAt.current);
+      }
+      camera.position.copy(goal.current);
+      camera.lookAt(lookAt.current);
+      camera.updateMatrixWorld(true);
+      flying.current = false;
+      renderQualityState.idle = true;
+      return;
+    }
     if (control && cameraLocked) {
       const damping = control.enableDamping;
       control.enableDamping = false;
@@ -439,6 +406,7 @@ export default function PoolScene({
   poolType,
   materials,
   features,
+  ledColor = "#ffffff",
   poolAccess,
   skimmers,
   length,
@@ -460,22 +428,6 @@ export default function PoolScene({
   const background = palette.background;
   const copingThickness = POOL_BORDER_PRESET.thickness;
 
-  // Still Render Mode: silently swaps in the path-traced renderer once the
-  // locked presentation camera has actually settled (see StillRenderTrigger
-  // above) -- entirely internal to the Canvas, never touches the manual
-  // Photo Mode toggle's own state/UI in PoolConfigurator/PoolViewport, so a
-  // viewer sees the image itself improve with no extra chrome appearing.
-  const [stillRenderEngaged, setStillRenderEngaged] = useState(false);
-  const [stillRenderUnsupported, setStillRenderUnsupported] = useState(false);
-  const effectivePhotoMode = photoMode || stillRenderEngaged;
-  const handleStillRenderUnsupported = useCallback(() => {
-    setStillRenderUnsupported(true);
-    setStillRenderEngaged(false);
-    // A device that can't run the path tracer at all can't run it for the
-    // manual toggle either -- report it exactly like a failed manual
-    // attempt would, so that button also disables itself.
-    onPhotoModeUnsupported();
-  }, [onPhotoModeUnsupported]);
   const verticalLayout = useMemo(
     () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
     [poolType, system, overflowType, depth, copingThickness],
@@ -504,9 +456,13 @@ export default function PoolScene({
     showWater,
     materials.surface.textureUrl,
     materials.coping.color,
+    materials.skimmer.color,
+    materials.skimmer.type,
+    theme,
     features.join(","),
+    ledColor,
     poolAccess,
-    photoMode ? photoModeQuality : "high",
+    photoModeQuality,
   ].join("|");
 
   return (
@@ -517,7 +473,7 @@ export default function PoolScene({
       // here is a zero-behaviour-change fix for the console warning, not a
       // visual change.
       shadows={{ type: PCFShadowMap }}
-      dpr={ACTIVE_RENDERING_QUALITY.dpr}
+      dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr}
       gl={{
         antialias: ACTIVE_RENDERING_QUALITY.antialias,
         // Retaining every WebGL back buffer causes sustained GPU-memory growth
@@ -550,7 +506,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!effectivePhotoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} /> : null}
 
       <hemisphereLight
         intensity={SCENE_VISUAL_PRESET.lighting.sky.intensity[theme]}
@@ -607,6 +563,10 @@ export default function PoolScene({
         showWater={showWater}
       />
 
+      {features.includes("ledLighting") ? (
+        <PoolLights outline={outline} layout={verticalLayout} skimmers={system === "skimmer" ? skimmers : { ...skimmers, positions: [] }} access={poolAccess} showWater={showWater} ledColor={ledColor} />
+      ) : null}
+
       {poolType === "above-ground" && features.includes("externalStaircase") ? (
         <ExternalStaircase
           outline={outline}
@@ -633,7 +593,7 @@ export default function PoolScene({
           which uses an instanced/interleaved buffer under the hood -- one of
           the two geometry kinds the path tracer explicitly does not support.
           They are an editing overlay anyway, not part of a "photo". */}
-      {showMeasurements && !effectivePhotoMode ? (
+      {showMeasurements && !photoMode ? (
         <PoolMeasurements
           outline={outline}
           length={length}
@@ -666,13 +626,7 @@ export default function PoolScene({
       ) : null}
 
       {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
-      {!effectivePhotoMode ? <AdaptiveQuality /> : null}
-      <StillRenderTrigger
-        cameraLocked={cameraLocked}
-        manualPhotoMode={photoMode}
-        unsupported={stillRenderUnsupported}
-        setEngaged={setStillRenderEngaged}
-      />
+      {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
 
       <OrbitControls
         ref={controls}
@@ -682,12 +636,12 @@ export default function PoolScene({
         // .update() -- the call that applies damping's residual rotation --
         // while `enabled` is true, so disabling it here doesn't just ignore
         // new drag input, it stops the camera from drifting at all while
-        // Photo Mode (manual or auto Still Render) is active.
-        enabled={!effectivePhotoMode && !cameraLocked}
+        // explicit Photo Mode or a locked presentation view is active.
+        enabled={!photoMode && !cameraLocked}
         enablePan
         enableZoom
         enableRotate
-        enableDamping
+        enableDamping={!cameraLocked && !photoMode}
         dampingFactor={0.06}
         rotateSpeed={0.55}
         zoomSpeed={0.7}
@@ -707,15 +661,6 @@ export default function PoolScene({
         outline={outline}
         layout={verticalLayout}
         skimmers={skimmers}
-        // Deliberately the raw manual toggle, not `effectivePhotoMode`:
-        // CameraRig's own `moving` check (below) OR's this in to freeze the
-        // idle-tracking clock while Photo Mode is active. Feeding it the
-        // auto-engaged flag instead created a feedback loop -- Still Render
-        // engaging drives idle false, which disengages Still Render, which
-        // lets idle go true again, re-engaging it, forever -- since by the
-        // time Still Render can engage at all the camera is already static
-        // (no flight in progress, OrbitControls disabled), it never needed
-        // this freeze in the first place.
         photoMode={photoMode}
         // The exterior/staircase framing must never hijack the Step 05
         // Pool System camera -- that step's premium front view (both
@@ -729,31 +674,21 @@ export default function PoolScene({
           Skipped in Photo Mode: EffectComposer takes over the render loop
           with its own render-priority mechanism, which would fight with
           PhotoModeRenderer's for who owns the final canvas draw. */}
-      {ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !effectivePhotoMode ? (
+      {ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !photoMode ? (
         <Suspense fallback={null}>
           <PremiumPostFX />
         </Suspense>
       ) : null}
 
-      {/* Photo Mode / Still Render Mode: takes over the render loop entirely
-          (see PhotoModeRenderer's positive useFrame priority) to
-          progressively accumulate a path-traced frame instead of the usual
-          raster pass -- engaged either by the manual toggle or by
-          StillRenderTrigger once a locked presentation camera settles.
-          Keyed so a structural change to the pool remounts it with a fresh
-          WebGLPathTracer rather than trying to patch one in place. */}
-      {effectivePhotoMode ? (
+      {/* Normal configuration is raster-only. Tracing is loaded and mounted
+          exclusively in response to the user's explicit Photo Mode toggle. */}
+      {photoMode ? (
         <Suspense fallback={null}>
           <PhotoModeRenderer
             key={photoModeSceneKey}
             theme={theme}
-            // The manual toggle respects the user's own quality picker
-            // (they may want faster convergence while composing a shot);
-            // an auto-engaged Still Render always spends the full budget --
-            // nothing is asking it to converge quickly, and the whole point
-            // of the locked camera is that this cost is free to take.
-            quality={photoMode ? photoModeQuality : "high"}
-            onUnsupported={handleStillRenderUnsupported}
+            quality={photoModeQuality}
+            onUnsupported={onPhotoModeUnsupported}
           />
         </Suspense>
       ) : null}

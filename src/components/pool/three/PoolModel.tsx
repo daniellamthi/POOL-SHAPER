@@ -19,6 +19,7 @@ import {
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { PoolAccessModel } from "./PoolAccessModel";
+import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
 import {
   createAnthraciteMaps,
   createLimestoneMaps,
@@ -602,6 +603,7 @@ export function PoolModel({
                   : "#include <opaque_fragment>",
           ),
         );
+      applyLedTransmission(shader);
       if (!causticsShaders.current.includes(shader)) causticsShaders.current.push(shader);
     },
     [materials.surface, waterLevel, causticMap, showWater],
@@ -837,7 +839,7 @@ export function PoolModel({
             roughness={materials.liner.roughness}
             metalness={materials.liner.metalness}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => "depth-aware-underwater-optics-v3"}
+            customProgramCacheKey={() => `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`}
           />
         </PoolAccessModel>
         {/* Interior walls */}
@@ -862,7 +864,7 @@ export function PoolModel({
             envMapIntensity={1.0}
             specularIntensity={0.58}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => "depth-aware-underwater-optics-v3"}
+            customProgramCacheKey={() => `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`}
             side={DoubleSide}
           />
         </mesh>
@@ -888,7 +890,7 @@ export function PoolModel({
             reflectivity={0.38}
             envMapIntensity={0.95}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => "depth-aware-underwater-optics-v3"}
+            customProgramCacheKey={() => `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`}
             side={DoubleSide}
           />
         </mesh>

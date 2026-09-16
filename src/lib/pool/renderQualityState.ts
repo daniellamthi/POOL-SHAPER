@@ -20,6 +20,7 @@
  */
 export const renderQualityState = {
   idle: false,
+  locked: false,
 };
 
 /** Seconds the camera must be stationary (no scripted flight, no user drag)

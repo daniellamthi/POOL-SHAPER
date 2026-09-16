@@ -110,6 +110,7 @@ export interface PoolConfig {
   linerColor: LinerColor;
   mosaicFinish: MosaicFinishId;
   features: ReadonlyArray<PoolFeatureId>;
+  ledColor?: string;
   poolAccess: PoolAccess | null;
   equipment: ReadonlyArray<EquipmentId>;
   customer: CustomerInfo;

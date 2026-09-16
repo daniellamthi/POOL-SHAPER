@@ -11,6 +11,7 @@ import {
 } from "./config";
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
+import { isLedColor } from "./led-optics";
 import { getCustomerValidation } from "./validation";
 import { DEFAULT_MOSAIC_FINISH_ID } from "@/configurator/materials/interior-textures";
 import type {
@@ -57,6 +58,7 @@ type Action =
   | { type: "setLinerColor"; value: LinerColor }
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
+  | { type: "setLedColor"; value: string }
   | { type: "setPoolAccess"; value: PoolAccess }
   | { type: "toggleEquipment"; value: EquipmentId }
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
@@ -102,6 +104,7 @@ const initialState: State = {
     linerColor: "motionBlueSky602",
     mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
     features: [],
+    ledColor: "#ffffff",
     poolAccess: null,
     equipment: [],
     customer: DEFAULT_CUSTOMER,
@@ -114,6 +117,8 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 function reducer(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
+    case "setLedColor":
+      return isLedColor(action.value) ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } } : state;
     case "setProjectType":
       return { ...state, config: { ...config, projectType: action.value } };
     case "setPoolType": {
@@ -295,6 +300,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLinerColor: (v) => dispatch({ type: "setLinerColor", value: v }),
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
+      setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
       toggleEquipment: (v) => dispatch({ type: "toggleEquipment", value: v }),
       updateRenovation: (v) => dispatch({ type: "updateRenovation", value: v }),

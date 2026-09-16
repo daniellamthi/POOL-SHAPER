@@ -360,6 +360,7 @@ function ConfiguratorLayout() {
             poolType={config.poolType ?? "in-ground"}
             materials={materials}
             features={config.features}
+            ledColor={config.ledColor ?? "#ffffff"}
             poolAccess={config.poolAccess}
             skimmers={skimmers}
             length={config.dimensions.length}

@@ -2,9 +2,10 @@ import { Footprints } from "lucide-react";
 import { OptionCard, StepSection } from "@/components/pool/StepSection";
 import { POOL_FEATURES } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
+import { LedColorWheel } from "./LedColorWheel";
 
 export function PoolFeaturesStep() {
-  const { config, togglePoolFeature, setPoolAccess } = useConfigurator();
+  const { config, togglePoolFeature, setPoolAccess, setLedColor } = useConfigurator();
 
   return (
     <StepSection
@@ -15,13 +16,15 @@ export function PoolFeaturesStep() {
         <h3 className="label-xs">Pool features</h3>
         <div className="grid gap-3" role="group" aria-label="Pool features">
           {POOL_FEATURES.map((feature) => (
-            <OptionCard
-              key={feature.id}
-              title={feature.title}
-              description={feature.description}
-              selected={config.features.includes(feature.id)}
-              onSelect={() => togglePoolFeature(feature.id)}
-            />
+            <div key={feature.id} className="grid gap-3">
+              <OptionCard
+                title={feature.title}
+                description={feature.description}
+                selected={config.features.includes(feature.id)}
+                onSelect={() => togglePoolFeature(feature.id)}
+              />
+              {feature.id === "ledLighting" && config.features.includes(feature.id) ? <LedColorWheel value={config.ledColor ?? "#ffffff"} onChange={setLedColor} /> : null}
+            </div>
           ))}
         </div>
       </div>

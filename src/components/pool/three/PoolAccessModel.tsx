@@ -3,7 +3,7 @@ import * as THREE from "three";
 import type { Outline, PoolAccess } from "@/lib/pool/types";
 
 /** Select a wall with enough clear interior space for the entire access footprint. */
-function accessPlacement(outline: Outline, run: number, width: number) {
+export function accessPlacement(outline: Outline, run: number, width: number) {
   const inside = (x: number, z: number) => {
     let hit = false;
     for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {

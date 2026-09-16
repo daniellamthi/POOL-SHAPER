@@ -53,6 +53,7 @@ export interface ConfiguratorContextValue {
   setLinerColor: (value: LinerColor) => void;
   setMosaicFinish: (value: MosaicFinishId) => void;
   togglePoolFeature: (value: PoolFeatureId) => void;
+  setLedColor: (value: string) => void;
   setPoolAccess: (value: PoolAccess) => void;
   toggleEquipment: (value: EquipmentId) => void;
   updateRenovation: (value: Partial<RenovationConfig>) => void;
