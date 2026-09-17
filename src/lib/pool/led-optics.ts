@@ -8,7 +8,16 @@ export const LED_OPTICS = {
   rangeMultiplier: 2.8,
   targetFloorFraction: 0.22,
   targetThrowFraction: 0.9,
-  sourceOffset: 0.055,
+  // Coincident with the lens glass (see the 0.017 circleGeometry in
+  // PoolLights) rather than floating ahead of it -- the beam must visibly
+  // originate at the fixture, not a point suspended in the water in front
+  // of it.
+  sourceOffset: 0.019,
+  // Soft core glow rendered on top of the lens glass itself, at the same
+  // origin as the spotlight above -- not a detached halo. Slightly smaller
+  // than the lens radius (0.1) so it reads as the glass lighting up, not a
+  // floating sprite.
+  glowRadius: 0.082,
   // Diffuser near-field regularisation prevents point-source singularities.
   nearField: 1.4,
   absorption: [0.18, 0.045, 0.023] as const,
@@ -20,9 +29,9 @@ export const LED_OPTICS = {
   upperCutoff: 0.5,
   upperFeather: 0.025,
   presentations: {
-    day: { output: 0.24, emission: 0.045 },
-    evening: { output: 0.5, emission: 0.12 },
-    night: { output: 0.8, emission: 0.22 },
+    day: { output: 0.24, emission: 0.045, glow: 0.32 },
+    evening: { output: 0.5, emission: 0.12, glow: 0.5 },
+    night: { output: 0.8, emission: 0.22, glow: 0.68 },
   },
 } as const;
 

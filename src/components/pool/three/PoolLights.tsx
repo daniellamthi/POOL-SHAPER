@@ -10,11 +10,12 @@ import { calibratedLedColor, ledCandela, LED_OPTICS } from "@/lib/pool/led-optic
 // Presentation dimming is independent of the design lumen budget and layout.
 export const POOL_LED_PRESENTATIONS = LED_OPTICS.presentations;
 
-function RecessedPoolLight({ position, floorY, powered, presentation, revision, colour, intensity, diffuser, occlusion }: {
+function RecessedPoolLight({ position, floorY, powered, presentation, revision, colour, intensity, diffuser, glow, occlusion }: {
   position: PoolLightPosition; floorY: number; powered: boolean;
   presentation: keyof typeof POOL_LED_PRESENTATIONS; revision: string;
   colour: THREE.Color; intensity: number;
   diffuser: THREE.DataTexture;
+  glow: THREE.DataTexture;
   occlusion: boolean;
 }) {
   const light = useRef<THREE.SpotLight>(null);
@@ -52,6 +53,22 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
         </mesh>
       ))}
       <primitive object={target} />
+      {powered ? (
+        // Soft core glow, coincident with the spotlight origin below -- the
+        // glass itself visibly lighting up, not a halo floating in front of
+        // the fixture. Additive so it only ever brightens, never occludes.
+        <mesh position={[0, 0, LED_OPTICS.sourceOffset + 0.0005]}>
+          <circleGeometry args={[LED_OPTICS.glowRadius, 24]} />
+          <meshBasicMaterial
+            map={glow}
+            color={colour}
+            opacity={level.glow}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ) : null}
       {powered ? <spotLight
         ref={light}
         position={[0, 0, LED_OPTICS.sourceOffset]}
@@ -100,6 +117,27 @@ export function PoolLights({ outline, layout, skimmers, access, showWater, prese
     return texture;
   }, []);
   useEffect(() => () => diffuser.dispose(), [diffuser]);
+  // Soft radial falloff (no hard edge) for the lens core glow -- generated
+  // once, tinted per-fixture via the mesh's own colour at render time.
+  const glow = useMemo(() => {
+    const size = 32;
+    const data = new Uint8Array(size * size * 4);
+    const centre = (size - 1) / 2;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const d = Math.hypot(x - centre, y - centre) / centre;
+        const alpha = Math.pow(Math.max(0, 1 - d), 2.2);
+        const i = (y * size + x) * 4;
+        data[i] = data[i + 1] = data[i + 2] = 255;
+        data[i + 3] = Math.round(alpha * 255);
+      }
+    }
+    const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+    texture.minFilter = texture.magFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
+  useEffect(() => () => glow.dispose(), [glow]);
   const { plan, shadowIndex, convexQuad } = useMemo(() => {
     const exclusions: LightingExclusion[] = skimmers.positions.map(p => ({ kind: "skimmer", x: p.x, z: p.z, radius: 0.65 }));
     let accessPoint: { x: number; z: number } | null = null;
@@ -136,7 +174,7 @@ export function PoolLights({ outline, layout, skimmers, access, showWater, prese
   const intensity = ledCandela(plan.surfaceArea, plan.count, POOL_LUMINAIRE.lumens, presentation);
   return (
     <group name="pool-automatic-lighting" userData={{ lightingPlan: plan, luminaire: POOL_LUMINAIRE }}>
-      {plan.positions.map((position, i) => <RecessedPoolLight key={i} position={position} floorY={layout.floorY} powered={showWater} presentation={presentation} revision={revision} colour={colour} intensity={intensity} diffuser={diffuser} occlusion={!convexQuad || i === shadowIndex} />)}
+      {plan.positions.map((position, i) => <RecessedPoolLight key={i} position={position} floorY={layout.floorY} powered={showWater} presentation={presentation} revision={revision} colour={colour} intensity={intensity} diffuser={diffuser} glow={glow} occlusion={!convexQuad || i === shadowIndex} />)}
     </group>
   );
 }
