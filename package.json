@@ -14,6 +14,7 @@
     "test:geometry": "node scripts/run-geometry-audit.mjs",
     "test:project-config": "node scripts/run-project-config-audit.mjs",
     "test:lead-pipeline": "node scripts/run-lead-pipeline-audit.mjs",
+    "test:persistence": "node scripts/run-persistence-audit.mjs",
     "test:visual": "node scripts/visual-audit.mjs",
     "test:visual:update": "node scripts/visual-audit.mjs --update",
     "render-bridge": "node scripts/render-bridge.mjs",

@@ -1,4 +1,12 @@
-import { useCallback, useMemo, useReducer, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
 import {
   DEFAULT_CONTROL_POINTS,
@@ -13,7 +21,8 @@ import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry
 import { planSkimmers } from "./engineering";
 import { isLedColor } from "./led-optics";
 import { getCustomerValidation } from "./validation";
-import { createProjectId, toProjectConfiguration } from "./project";
+import { createProjectId, toProjectConfiguration, type ProjectConfiguration } from "./project";
+import { clearProjectDraft, loadProjectDraft, saveProjectDraft } from "./persistence";
 import { DEFAULT_MOSAIC_FINISH_ID } from "@/configurator/materials/interior-textures";
 import type {
   ControlPoint,
@@ -68,7 +77,8 @@ type Action =
   | { type: "goToStep"; value: number }
   | { type: "next" }
   | { type: "previous" }
-  | { type: "reset" };
+  | { type: "reset" }
+  | { type: "restoreProject"; value: ProjectConfiguration };
 
 interface State {
   config: PoolConfig;
@@ -230,9 +240,46 @@ function reducer(state: State, action: Action): State {
     }
     case "reset":
       return createInitialState();
+    case "restoreProject":
+      // Keeps `step` at its current value -- which step to land on after a
+      // restore is view/navigation UX, decided by the provider effect
+      // below, not project data.
+      return {
+        ...state,
+        projectId: action.value.projectId,
+        config: action.value.config,
+        renovation: action.value.renovation,
+      };
     default:
       return state;
   }
+}
+
+/** First step (in the appropriate wizard for this project type) that isn't
+ * complete yet for a freshly-restored config -- mirrors `isStepComplete`'s
+ * per-step rules below, but as a pure function over a specific config
+ * instead of the provider's own closed-over state, since it needs to run
+ * against the just-loaded draft before that state is committed. */
+function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConfig): number {
+  if (config.projectType === "renovation") {
+    if (renovation.areas.length === 0) return 1;
+    const customer = config.customer;
+    const contactComplete =
+      ["name", "surname", "email", "phone", "city", "country"].every(
+        (key) => customer[key as keyof CustomerInfo].trim().length > 0,
+      ) && getCustomerValidation(customer).emailValid;
+    if (!contactComplete) return 4;
+    return RENOVATION_STEPS.length - 1;
+  }
+  for (let index = 0; index < STEPS.length; index++) {
+    const stepId = STEPS[index]?.id;
+    if (stepId === "pool-type" && config.poolType === null) return index;
+    if (stepId === "shape-dimensions" && config.shapeSelected !== true) return index;
+    if (stepId === "structure" && config.structure === null) return index;
+    if (stepId === "features" && config.poolAccess === null) return index;
+    if (stepId === "contact" && !getCustomerValidation(config.customer).valid) return index;
+  }
+  return STEPS.length - 1;
 }
 
 export function ConfiguratorProvider({ children }: { children: ReactNode }) {
@@ -243,6 +290,31 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     () => toProjectConfiguration(projectId, config, renovation),
     [projectId, config, renovation],
   );
+
+  // Autosave/resume (P4). Restore runs once on mount, client-side only --
+  // SSR always renders the plain default state, so there is no
+  // server/client hydration mismatch to worry about; this effect only ever
+  // runs in the browser, after hydration.
+  const [justRestoredProject, setJustRestoredProject] = useState(false);
+  useEffect(() => {
+    const draft = loadProjectDraft();
+    if (!draft) return;
+    dispatch({ type: "restoreProject", value: draft });
+    dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
+    setJustRestoredProject(true);
+    // Runs once per mount by design -- a later `reset()` starts a fresh
+    // project and clears the draft rather than re-triggering this restore.
+  }, []);
+
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
+    // Debounced so a drag/typing burst writes once, not on every change.
+    saveTimeoutRef.current = setTimeout(() => saveProjectDraft(projectConfiguration), 800);
+    return () => {
+      if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [projectConfiguration]);
 
   const outline = useMemo(
     () => buildOutline(config.shape, config.dimensions, config.controlPoints),
@@ -333,8 +405,15 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         for (const upload of config.uploads) {
           if (upload.url) URL.revokeObjectURL(upload.url);
         }
+        // Starting over must not leave the old draft to be restored on the
+        // next visit -- clear it immediately rather than waiting for the
+        // debounced autosave to overwrite it with the fresh (blank) state.
+        clearProjectDraft();
+        setJustRestoredProject(false);
         dispatch({ type: "reset" });
       },
+      justRestoredProject,
+      dismissRestoredProjectNotice: () => setJustRestoredProject(false),
     }),
     [
       config,
@@ -346,6 +425,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       metrics,
       skimmers,
       isStepComplete,
+      justRestoredProject,
     ],
   );
 

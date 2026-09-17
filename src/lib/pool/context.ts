@@ -69,7 +69,14 @@ export interface ConfiguratorContextValue {
   goToStep: (index: number) => void;
   next: () => void;
   previous: () => void;
+  /** Starts a fresh project: new `projectId`, blank config, and clears any
+   * locally saved draft (P4 autosave). */
   reset: () => void;
+  /** True for the rest of this session once a saved draft has been
+   * restored on load, until dismissed. Drives the "Abbiamo ripristinato il
+   * tuo progetto" notice. */
+  justRestoredProject: boolean;
+  dismissRestoredProjectNotice: () => void;
 }
 
 export const ConfiguratorContext = createContext<ConfiguratorContextValue | null>(null);

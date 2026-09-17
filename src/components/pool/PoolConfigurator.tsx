@@ -114,8 +114,24 @@ function ConfiguratorLayout() {
     reset,
     canContinue,
     isStepComplete,
+    justRestoredProject,
+    dismissRestoredProjectNotice,
   } = useConfigurator();
   const { theme } = useTheme();
+
+  // P4 autosave: a small, non-blocking notice -- never a modal -- offering
+  // to continue the restored draft or start over. Marked handled right
+  // away so it can't reopen from an unrelated re-render.
+  useEffect(() => {
+    if (!justRestoredProject) return;
+    toast.message("Abbiamo ripristinato il tuo progetto.", {
+      description: "Puoi continuare da dove avevi lasciato oppure iniziare un nuovo progetto.",
+      action: { label: "Nuovo progetto", onClick: () => reset() },
+      duration: 8000,
+    });
+    dismissRestoredProjectNotice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [justRestoredProject]);
   const materials = useMemo(
     () =>
       resolveMaterials({
