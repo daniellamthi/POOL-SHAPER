@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
 import { StepSection } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
+import { LeadRequestDialog } from "./LeadRequestDialog";
 
 /** Final Review: a premium, Italian presentation of the customer's own
  * canonical ProjectConfiguration (see `ProjectSummary`), then -- only once
  * they've had a chance to appreciate the project -- the contact recap and
- * the commercial CTA. Lead submission itself is a later pass; the button
- * here is intentionally inert. */
+ * the commercial CTA, which opens `LeadRequestDialog` to actually submit
+ * the qualified lead. */
 export function FinalReviewStep() {
-  const { config } = useConfigurator();
+  const { config, projectConfiguration } = useConfigurator();
   const customerRows = [
     ["Nome", `${config.customer.name} ${config.customer.surname}`.trim() || "—"],
     ["Azienda", config.customer.company || "—"],
@@ -52,18 +52,14 @@ export function FinalReviewStep() {
         <p className="max-w-[46ch] text-[13px] leading-[1.8] font-light text-muted-foreground">
           Un nostro consulente può verificare configurazione, fattibilità e investimento.
         </p>
-        <Button
-          type="button"
-          size="lg"
-          disabled
-          title="La richiesta di valutazione sarà disponibile a breve"
-          className="mt-1"
-        >
-          Valuta il progetto con un consulente
-        </Button>
-        <p className="text-xs font-light text-muted-foreground">
-          L&apos;invio della richiesta sarà attivato nella prossima fase.
-        </p>
+        <LeadRequestDialog
+          projectConfiguration={projectConfiguration}
+          defaultCustomer={{
+            name: `${config.customer.name} ${config.customer.surname}`.trim(),
+            email: config.customer.email,
+            phone: config.customer.phone,
+          }}
+        />
       </section>
     </StepSection>
   );
