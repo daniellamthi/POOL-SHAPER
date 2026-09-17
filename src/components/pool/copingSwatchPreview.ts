@@ -4,14 +4,20 @@ import {
   createAnthraciteMaps,
   createLimestoneMaps,
   createPrunMaps,
+  createSlateMaps,
   createTravertineMaps,
+  createWoodDeckMaps,
+  createWPCMaps,
 } from "./three/stoneTextures";
 
-const BUILDERS: Record<CopingMaterialId, (size?: number) => { colorMap: THREE.DataTexture }> = {
+const BUILDERS: Record<CopingMaterialId, (size?: number) => { colorMap: THREE.Texture }> = {
   travertine: createTravertineMaps,
   limestone: createLimestoneMaps,
   prun: createPrunMaps,
   "anthracite-gres": createAnthraciteMaps,
+  ardesia: createSlateMaps,
+  "deck-marrone": createWoodDeckMaps,
+  wpc: createWPCMaps,
 };
 
 const PREVIEW_SIZE = 96;
@@ -31,13 +37,24 @@ export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
   if (cached) return cached;
 
   const material = COPING_MATERIALS.find((item) => item.id === id);
+  if (!material) return "";
+  // A scanned finish shows its own BaseColor, so the swatch and the 3D coping
+  // are literally the same asset -- never a procedural stand-in beside a real
+  // material.
+  if ("asset" in material) {
+    const url = `${material.asset.dir}/basecolor.png`;
+    cache.set(id, url);
+    return url;
+  }
+
   const build = BUILDERS[id];
-  if (!material || !build) return "";
+  if (!build) return "";
 
   const maps = build(PREVIEW_SIZE);
   const { colorMap } = maps;
   const dispose = () => Object.values(maps).forEach((map) => map.dispose());
-  const source = colorMap.image.data as Uint8ClampedArray;
+  // Procedural fallbacks are always DataTextures, so the raw buffer is present.
+  const source = (colorMap as THREE.DataTexture).image.data as Uint8ClampedArray;
   const tint = new THREE.Color(material.color);
 
   const canvas = document.createElement("canvas");

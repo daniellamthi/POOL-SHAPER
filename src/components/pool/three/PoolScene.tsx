@@ -360,12 +360,13 @@ function StudioFloor({
   useEffect(() => () => geometry.dispose(), [geometry]);
   const stone = useMemo(() => createTravertineMaps(), []);
   useEffect(() => {
-    for (const texture of Object.values(stone)) {
+    const textures = Object.values(stone).filter((texture) => texture !== null);
+    for (const texture of textures) {
       texture.repeat.set(2.5, 2.5);
       texture.anisotropy = Math.min(8, maxAnisotropy);
       texture.needsUpdate = true;
     }
-    return () => Object.values(stone).forEach((texture) => texture.dispose());
+    return () => textures.forEach((texture) => texture.dispose());
   }, [stone, maxAnisotropy]);
 
   return (
@@ -564,7 +565,14 @@ export default function PoolScene({
       />
 
       {features.includes("ledLighting") ? (
-        <PoolLights outline={outline} layout={verticalLayout} skimmers={system === "skimmer" ? skimmers : { ...skimmers, positions: [] }} access={poolAccess} showWater={showWater} ledColor={ledColor} />
+        <PoolLights
+          outline={outline}
+          layout={verticalLayout}
+          skimmers={system === "skimmer" ? skimmers : { ...skimmers, positions: [] }}
+          access={poolAccess}
+          showWater={showWater}
+          ledColor={ledColor}
+        />
       ) : null}
 
       {poolType === "above-ground" && features.includes("externalStaircase") ? (

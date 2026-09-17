@@ -1,10 +1,44 @@
 import * as THREE from "three";
 
 export type StoneMaps = {
-  colorMap: THREE.DataTexture;
-  normalMap: THREE.DataTexture;
-  roughnessMap: THREE.DataTexture;
+  colorMap: THREE.Texture;
+  normalMap: THREE.Texture;
+  /** Null when the scanned set ships no roughness map. The material then
+   * falls back to its scalar `roughness`, which three.js applies directly
+   * (USE_ROUGHNESSMAP stays undefined). Deriving a roughness map from an
+   * unrelated channel -- e.g. a specular map -- would fabricate PBR data,
+   * so it is deliberately not done. */
+  roughnessMap: THREE.Texture | null;
 };
+
+/**
+ * Real scanned PBR maps for a coping finish, loaded from `public/textures/coping/<id>/`.
+ *
+ * Preferred over the procedural bakes below: those synthesise plausible noise
+ * but carry no authentic pore/sediment/grain morphology, so they read as CG at
+ * close range. A finish only falls back to a procedural bake when no scanned
+ * asset has been sourced for it yet (see `asset` in coping-materials.ts).
+ *
+ * Colour space matters: BaseColor is authored in sRGB, while Normal/Roughness
+ * are linear data and must NOT be gamma-decoded.
+ */
+export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true): StoneMaps {
+  const loader = new THREE.TextureLoader();
+  const load = (name: string, srgb: boolean) => {
+    const texture = loader.load(`${dir}/${name}.png`);
+    texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    return texture;
+  };
+  return {
+    colorMap: load("basecolor", true),
+    normalMap: load("normal", false),
+    roughnessMap: hasRoughnessMap ? load("roughness", false) : null,
+  };
+}
 
 function hash(x: number, y: number) {
   const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
@@ -76,7 +110,8 @@ function memoizedTemplate(
   return {
     colorMap: maps.colorMap.clone(),
     normalMap: maps.normalMap.clone(),
-    roughnessMap: maps.roughnessMap.clone(),
+    // Procedural bakes always produce all three channels.
+    roughnessMap: maps.roughnessMap!.clone(),
   };
 }
 
@@ -273,6 +308,157 @@ export function createAnthraciteMaps(size = 512): StoneMaps {
         rough[o + 3] = 255;
       }
     const normal = heightToNormal(height, size, 4.2);
+    return {
+      colorMap: makeTexture(color, size, true),
+      normalMap: makeTexture(normal, size, false),
+      roughnessMap: makeTexture(rough, size, false),
+    };
+  });
+}
+
+const slateCache = new Map<number, StoneMaps>();
+
+/** Ardesia -- dark stratified slate: thin, regular cleavage-plane banding
+ * (not travertine's flowing sediment) plus sparse hairline fractures where
+ * two plates meet. Low value range and a cool blue-grey undertone keep it
+ * unmistakably darker than every other finish; low pore count and a compact
+ * grain keep it "refined stone", not craggy rubble. */
+export function createSlateMaps(size = 512): StoneMaps {
+  return memoizedTemplate(slateCache, size, () => {
+    const height = new Float32Array(size * size);
+    const color = new Uint8Array(size * size * 4);
+    const rough = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        const u = x / size,
+          v = y / size;
+        const cloud =
+          valueNoise(u, v, 6) * 0.5 + valueNoise(u, v, 17) * 0.3 + valueNoise(u, v, 41) * 0.2;
+        // Thin, regular cleavage strata -- much tighter and more even than
+        // Prun's sedimentary layering, the defining slate structure.
+        const strata =
+          Math.sin(v * 130 + valueNoise(u, v, 5) * 0.8) * 0.018 +
+          Math.sin(v * 331 - valueNoise(u, v, 9) * 0.5) * 0.008;
+        const fineGrain = hash(x, y) - 0.5;
+        // Sparse hairline fractures along a cleavage plane, not round pores.
+        const px = u * 30,
+          py = v * 30;
+        const ix = Math.floor(px),
+          iy = Math.floor(py);
+        const seed = hash(ix + 21, iy + 4);
+        const fracture =
+          seed > 0.88 ? 1 - THREE.MathUtils.smoothstep(Math.abs(py - iy - 0.5), 0, 0.05) : 0;
+        height[y * size + x] = (cloud * 0.02 + strata) * 1.4 + fineGrain * 0.006 - fracture * 0.035;
+        const value =
+          0.34 + (cloud - 0.5) * 0.1 + strata * 1.6 + fineGrain * 0.02 - fracture * 0.05;
+        const o = (y * size + x) * 4;
+        color[o] = (value - 0.01) * 255;
+        color[o + 1] = value * 255;
+        color[o + 2] = (value + 0.015) * 255; // cool blue-grey undertone
+        color[o + 3] = 255;
+        const r = (0.76 + cloud * 0.06 + fracture * 0.06) * 255;
+        rough[o] = rough[o + 1] = rough[o + 2] = r;
+        rough[o + 3] = 255;
+      }
+    const normal = heightToNormal(height, size, 3.0);
+    return {
+      colorMap: makeTexture(color, size, true),
+      normalMap: makeTexture(normal, size, false),
+      roughnessMap: makeTexture(rough, size, false),
+    };
+  });
+}
+
+const deckWoodCache = new Map<number, StoneMaps>();
+
+/** Deck Marrone -- warm brown outdoor plank decking. `moduleSize` is tuned
+ * to one board's real width, so the baked board-edge seam and directional
+ * grain both tile at true scale rather than an arbitrary repeat. Grain runs
+ * along v (the board's length) with sparse growth-ring arcs and knots; two
+ * faint seams near the top/bottom of the tile read as the gap between
+ * boards when triplanar-tiled. */
+export function createWoodDeckMaps(size = 512): StoneMaps {
+  return memoizedTemplate(deckWoodCache, size, () => {
+    const height = new Float32Array(size * size);
+    const color = new Uint8Array(size * size * 4);
+    const rough = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        const u = x / size,
+          v = y / size;
+        // Fine parallel grain lines running along the board's length (v).
+        const grain =
+          Math.sin(v * 90 + valueNoise(u * 0.3, v, 4) * 6) * 0.045 +
+          Math.sin(v * 210 - valueNoise(u * 0.3, v, 9) * 4) * 0.02;
+        const tone = valueNoise(u, v * 0.35, 5) * 0.6 + valueNoise(u, v * 0.35, 13) * 0.4;
+        const fineGrain = hash(x, y) - 0.5;
+        // Sparse growth-ring arcs (knots), never covering more than a speck.
+        const px = u * 26,
+          py = v * 9;
+        const ix = Math.floor(px),
+          iy = Math.floor(py);
+        const seed = hash(ix + 41, iy + 6);
+        const dx = px - ix - 0.5 - (hash(ix + 2, iy) - 0.5) * 0.4;
+        const dy = py - iy - 0.5 - (hash(ix, iy + 6) - 0.5) * 0.4;
+        const knot =
+          seed > 0.93 ? 1 - THREE.MathUtils.smoothstep(Math.hypot(dx * 2.2, dy), 0.03, 0.12) : 0;
+        // Board-edge seam: a shallow, dark channel at the very top/bottom of
+        // the tile -- the gap between adjacent boards once tiled.
+        const seam = Math.max(0, 1 - Math.min(v, 1 - v) * size * 0.05);
+        height[y * size + x] =
+          grain * 0.5 + tone * 0.015 + fineGrain * 0.01 - knot * 0.05 - seam * 0.05;
+        const value =
+          0.5 + (tone - 0.5) * 0.24 + grain * 1.1 + fineGrain * 0.03 - knot * 0.16 - seam * 0.22;
+        const o = (y * size + x) * 4;
+        color[o] = (value + 0.22) * 255;
+        color[o + 1] = (value + 0.09) * 255;
+        color[o + 2] = (value - 0.02) * 255;
+        color[o + 3] = 255;
+        const r = (0.58 + tone * 0.1 + Math.abs(grain) * 0.5 + seam * 0.1) * 255;
+        rough[o] = rough[o + 1] = rough[o + 2] = r;
+        rough[o + 3] = 255;
+      }
+    const normal = heightToNormal(height, size, 2.4);
+    return {
+      colorMap: makeTexture(color, size, true),
+      normalMap: makeTexture(normal, size, false),
+      roughnessMap: makeTexture(rough, size, false),
+    };
+  });
+}
+
+const wpcCache = new Map<number, StoneMaps>();
+
+/** WPC -- wood-plastic composite decking. Reuses the deck's directional
+ * board grammar (grain direction + board-edge seam) but with tighter, far
+ * more regular ridges and no knots/tone drift -- the manufactured
+ * uniformity that visually distinguishes a composite board from real wood. */
+export function createWPCMaps(size = 512): StoneMaps {
+  return memoizedTemplate(wpcCache, size, () => {
+    const height = new Float32Array(size * size);
+    const color = new Uint8Array(size * size * 4);
+    const rough = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        const u = x / size,
+          v = y / size;
+        // Regular, low-amplitude embossed ridges -- a manufactured grain,
+        // not a natural one: fixed frequency, minimal randomised offset.
+        const ridge = Math.sin(v * 150) * 0.03 + Math.sin(v * 340 + 0.6) * 0.012;
+        const speckle = hash(x, y) - 0.5;
+        const seam = Math.max(0, 1 - Math.min(v, 1 - v) * size * 0.045);
+        height[y * size + x] = ridge * 0.5 + speckle * 0.005 - seam * 0.04;
+        const value = 0.42 + ridge * 0.9 + speckle * 0.015 - seam * 0.18;
+        const o = (y * size + x) * 4;
+        color[o] = (value + 0.06) * 255;
+        color[o + 1] = (value + 0.02) * 255;
+        color[o + 2] = value * 255;
+        color[o + 3] = 255;
+        const r = (0.52 + Math.abs(ridge) * 0.4 + seam * 0.08) * 255;
+        rough[o] = rough[o + 1] = rough[o + 2] = r;
+        rough[o + 3] = 255;
+      }
+    const normal = heightToNormal(height, size, 2.2);
     return {
       colorMap: makeTexture(color, size, true),
       normalMap: makeTexture(normal, size, false),

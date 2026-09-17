@@ -24,7 +24,11 @@ import {
   createAnthraciteMaps,
   createLimestoneMaps,
   createPrunMaps,
+  createSlateMaps,
   createTravertineMaps,
+  createWoodDeckMaps,
+  createWPCMaps,
+  loadCopingTextureMaps,
   type StoneMaps,
 } from "./stoneTextures";
 import type { CopingMaterialId } from "@/lib/pool/coping-materials";
@@ -37,6 +41,9 @@ const COPING_STONE_BUILDERS: Record<CopingMaterialId, (size?: number) => StoneMa
   limestone: createLimestoneMaps,
   prun: createPrunMaps,
   "anthracite-gres": createAnthraciteMaps,
+  ardesia: createSlateMaps,
+  "deck-marrone": createWoodDeckMaps,
+  wpc: createWPCMaps,
 };
 import { photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
@@ -237,9 +244,15 @@ vTriWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
 
 const TRIPLANAR_FRAGMENT_HEADER = `
 uniform float triplanarScale;
+// Width/height of the source map. A scanned set is not always square (the
+// slate is 512x249); scaling V by the aspect keeps its real proportions
+// without duplicating the image to force it square, which would halve the
+// repeat distance. 1.0 for every square map.
+uniform float triplanarAspect;
 varying vec3 vTriWorldPosition;
 varying vec3 vTriWorldNormal;
 vec3 triplanarBlend;
+#define TRI_UV_SCALE vec2(triplanarScale, triplanarScale * triplanarAspect)
 `;
 
 /**
@@ -254,14 +267,18 @@ vec3 triplanarBlend;
  */
 const TRIPLANAR_ROUGHNESS_FRAGMENT = `
 float roughnessFactor = roughness;
+// Blend weights must be computed unconditionally: <normal_fragment_maps>
+// consumes them, and a scanned set without a roughness map (USE_ROUGHNESSMAP
+// undefined) would otherwise leave them uninitialised -- degenerate normals
+// that render the coping black and glossy.
+vec3 triWorldNormalR = normalize(vTriWorldNormal);
+triplanarBlend = normalize(max(abs(triWorldNormalR), vec3(0.00001)));
+triplanarBlend = pow(triplanarBlend, vec3(4.0));
+triplanarBlend /= (triplanarBlend.x + triplanarBlend.y + triplanarBlend.z);
 #ifdef USE_ROUGHNESSMAP
-  vec3 triWorldNormalR = normalize(vTriWorldNormal);
-  triplanarBlend = normalize(max(abs(triWorldNormalR), vec3(0.00001)));
-  triplanarBlend = pow(triplanarBlend, vec3(4.0));
-  triplanarBlend /= (triplanarBlend.x + triplanarBlend.y + triplanarBlend.z);
-  float triRoughX = texture2D(roughnessMap, vTriWorldPosition.zy * triplanarScale).g;
-  float triRoughY = texture2D(roughnessMap, vTriWorldPosition.xz * triplanarScale).g;
-  float triRoughZ = texture2D(roughnessMap, vTriWorldPosition.xy * triplanarScale).g;
+  float triRoughX = texture2D(roughnessMap, vTriWorldPosition.zy * TRI_UV_SCALE).g;
+  float triRoughY = texture2D(roughnessMap, vTriWorldPosition.xz * TRI_UV_SCALE).g;
+  float triRoughZ = texture2D(roughnessMap, vTriWorldPosition.xy * TRI_UV_SCALE).g;
   roughnessFactor *=
     triRoughX * triplanarBlend.x + triRoughY * triplanarBlend.y + triRoughZ * triplanarBlend.z;
 #endif
@@ -269,9 +286,9 @@ float roughnessFactor = roughness;
 
 const TRIPLANAR_NORMAL_FRAGMENT = `
 vec3 triWorldNormalN = normalize(vTriWorldNormal);
-vec3 triTangentX = texture2D(normalMap, vTriWorldPosition.zy * triplanarScale).xyz * 2.0 - 1.0;
-vec3 triTangentY = texture2D(normalMap, vTriWorldPosition.xz * triplanarScale).xyz * 2.0 - 1.0;
-vec3 triTangentZ = texture2D(normalMap, vTriWorldPosition.xy * triplanarScale).xyz * 2.0 - 1.0;
+vec3 triTangentX = texture2D(normalMap, vTriWorldPosition.zy * TRI_UV_SCALE).xyz * 2.0 - 1.0;
+vec3 triTangentY = texture2D(normalMap, vTriWorldPosition.xz * TRI_UV_SCALE).xyz * 2.0 - 1.0;
+vec3 triTangentZ = texture2D(normalMap, vTriWorldPosition.xy * TRI_UV_SCALE).xyz * 2.0 - 1.0;
 triTangentX.xy *= normalScale;
 triTangentY.xy *= normalScale;
 triTangentZ.xy *= normalScale;
@@ -509,16 +526,34 @@ export function PoolModel({
   // (see configureCopingTriplanar/configurePanelTriplanar below) rather than
   // through the mesh's own UV -- these come from a module-level cache keyed
   // by material kind, so they are shared and must not be disposed here.
+  // Scanned asset when the finish has one; procedural bake only as the
+  // documented fallback for finishes whose real maps aren't sourced yet.
+  const copingAssetDir = "asset" in materials.coping ? materials.coping.asset.dir : null;
+  const copingAssetHasRoughness =
+    "asset" in materials.coping && "roughnessMap" in materials.coping.asset
+      ? materials.coping.asset.roughnessMap !== false
+      : true;
+  // Non-square scanned maps keep their real proportions via the shader's V
+  // scale rather than being duplicated to a square, which would halve the
+  // repeat distance along the coping run.
+  const copingAssetAspect =
+    "asset" in materials.coping && "aspect" in materials.coping.asset
+      ? materials.coping.asset.aspect
+      : 1;
   const copingDetail = useMemo(
-    () => COPING_STONE_BUILDERS[materials.coping.id](),
-    [materials.coping.id],
+    () =>
+      copingAssetDir
+        ? loadCopingTextureMaps(copingAssetDir, copingAssetHasRoughness)
+        : COPING_STONE_BUILDERS[materials.coping.id](),
+    [materials.coping.id, copingAssetDir, copingAssetHasRoughness],
   );
   useEffect(() => {
-    Object.values(copingDetail).forEach((map) => {
+    const maps = Object.values(copingDetail).filter((map) => map !== null);
+    maps.forEach((map) => {
       map.anisotropy = dataAnisotropy;
       map.needsUpdate = true;
     });
-    return () => Object.values(copingDetail).forEach((map) => map.dispose());
+    return () => maps.forEach((map) => map.dispose());
   }, [copingDetail, dataAnisotropy]);
   const panelDetail = useMemo(() => createTriplanarDetailMaps("panel"), []);
   useEffect(
@@ -671,6 +706,7 @@ export function PoolModel({
       shader.uniforms.triplanarScale = {
         value: 1 / materials.coping.moduleSize,
       };
+      shader.uniforms["triplanarAspect"] = { value: copingAssetAspect };
       shader.vertexShader = shader.vertexShader
         .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
         .replace("#include <worldpos_vertex>", TRIPLANAR_VERTEX_POSITION);
@@ -685,22 +721,24 @@ export function PoolModel({
           `#include <color_fragment>
         vec3 stoneWeights = pow(abs(normalize(vTriWorldNormal)), vec3(4.0));
         stoneWeights /= max(dot(stoneWeights, vec3(1.0)), 0.0001);
-        vec3 stoneColor = texture2D(stoneColorMap, vTriWorldPosition.zy * triplanarScale).rgb * stoneWeights.x
-          + texture2D(stoneColorMap, vTriWorldPosition.xz * triplanarScale).rgb * stoneWeights.y
-          + texture2D(stoneColorMap, vTriWorldPosition.xy * triplanarScale).rgb * stoneWeights.z;
+        vec3 stoneColor = texture2D(stoneColorMap, vTriWorldPosition.zy * TRI_UV_SCALE).rgb * stoneWeights.x
+          + texture2D(stoneColorMap, vTriWorldPosition.xz * TRI_UV_SCALE).rgb * stoneWeights.y
+          + texture2D(stoneColorMap, vTriWorldPosition.xy * TRI_UV_SCALE).rgb * stoneWeights.z;
         diffuseColor.rgb *= stoneColor;
       `,
         )
         .replace("#include <roughnessmap_fragment>", TRIPLANAR_ROUGHNESS_FRAGMENT)
         .replace("#include <normal_fragment_maps>", TRIPLANAR_NORMAL_FRAGMENT);
     },
-    [copingDetail, materials.coping.moduleSize],
+    [copingDetail, materials.coping.moduleSize, copingAssetAspect],
   );
 
   const configurePanelTriplanar = useCallback((shader: TriplanarShader) => {
     shader.uniforms.triplanarScale = {
       value: 1 / MATERIAL_MICRO_DETAIL_PRESET.aboveGroundPanel.moduleSize,
     };
+    // Square source map.
+    shader.uniforms["triplanarAspect"] = { value: 1 };
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
       .replace("#include <worldpos_vertex>", TRIPLANAR_VERTEX_POSITION);
@@ -839,7 +877,9 @@ export function PoolModel({
             roughness={materials.liner.roughness}
             metalness={materials.liner.metalness}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`}
+            customProgramCacheKey={() =>
+              `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`
+            }
           />
         </PoolAccessModel>
         {/* Interior walls */}
@@ -864,7 +904,9 @@ export function PoolModel({
             envMapIntensity={1.0}
             specularIntensity={0.58}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`}
+            customProgramCacheKey={() =>
+              `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`
+            }
             side={DoubleSide}
           />
         </mesh>
@@ -890,7 +932,9 @@ export function PoolModel({
             reflectivity={0.38}
             envMapIntensity={0.95}
             onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() => `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`}
+            customProgramCacheKey={() =>
+              `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`
+            }
             side={DoubleSide}
           />
         </mesh>
@@ -934,7 +978,7 @@ export function PoolModel({
                   roughnessMap={copingDetail.roughnessMap}
                   roughness={materials.coping.roughness * 0.8}
                   onBeforeCompile={configureCopingTriplanar}
-                  customProgramCacheKey={() => "overflow-stone-continuity-v1"}
+                  customProgramCacheKey={() => "overflow-stone-continuity-v3"}
                   clearcoat={0}
                   clearcoatRoughness={0.12}
                   side={DoubleSide}
@@ -1015,7 +1059,7 @@ export function PoolModel({
             roughness={0.74}
             metalness={0}
             onBeforeCompile={configurePanelTriplanar}
-            customProgramCacheKey={() => "triplanar-panel-detail-v1"}
+            customProgramCacheKey={() => "triplanar-panel-detail-v2"}
             side={DoubleSide}
           />
         </mesh>
@@ -1043,7 +1087,7 @@ export function PoolModel({
               clearcoat={0}
               clearcoatRoughness={0.45}
               onBeforeCompile={configureCopingTriplanar}
-              customProgramCacheKey={() => "metric-travertine-slabs-v2"}
+              customProgramCacheKey={() => "coping-triplanar-v4"}
               side={DoubleSide}
             />
           </mesh>

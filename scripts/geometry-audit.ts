@@ -1100,17 +1100,28 @@ for (const shape of shapes) {
   material.dispose();
 }
 
-assert(COPING_MATERIALS.length === 4, "four coping finishes required");
+assert(COPING_MATERIALS.length === 7, "seven coping finishes required");
+// Finishes backed by a scanned asset are deliberately untinted (#ffffff), so
+// their identity comes from the asset, not the base colour. Only the
+// procedural fallbacks still distinguish themselves by tone.
+const scannedCoping = COPING_MATERIALS.filter((material) => "asset" in material);
+const proceduralCoping = COPING_MATERIALS.filter((material) => !("asset" in material));
 assert(
-  new Set(COPING_MATERIALS.map((material) => material.color)).size === 4,
-  "coping tones must differ",
+  new Set(scannedCoping.map((material) => material.asset.dir)).size === scannedCoping.length,
+  "each scanned coping finish needs its own asset directory",
+);
+assert(
+  new Set(proceduralCoping.map((material) => material.color)).size === proceduralCoping.length,
+  "procedural coping tones must differ",
 );
 for (const material of COPING_MATERIALS) {
   assert(material.roughness > 0 && material.roughness <= 1, "bounded stone roughness");
-  assert(material.moduleSize >= 0.4 && material.moduleSize <= 0.6, "metric coping texture scale");
+  // Real-world repeat, in metres: from a single decking board width up to a
+  // large-format stone slab.
+  assert(material.moduleSize >= 0.15 && material.moduleSize <= 1.5, "metric coping texture scale");
 }
 console.log(
-  "Construction audit passed: open skimmer throats for all four profiles; bounded grille, joints and bevels; four coping finishes.",
+  `Construction audit passed: open skimmer throats for all four profiles; bounded grille, joints and bevels; ${COPING_MATERIALS.length} coping finishes (${scannedCoping.length} scanned, ${proceduralCoping.length} procedural fallback).`,
 );
 console.log(
   `Geometry audit passed: ${shapes.length * dimensionCases.length * 2} shape/dimension/system cases, ${customCases.length} custom-shape offset cases, ${validRegressionCases.length + invalidRegressionCases.length} guardrail regressions, ${cameraRegressionCount} camera poses and 24 clamped drag steps.`,
