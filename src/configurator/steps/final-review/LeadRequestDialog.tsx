@@ -256,8 +256,17 @@ export function LeadRequestDialog({
                       onCheckedChange={(v) => set("privacyAccepted", v === true)}
                       className="mt-0.5"
                     />
-                    Ho letto e accetto l&apos;informativa sulla privacy.{" "}
-                    <span className="text-brand">*</span>
+                    Ho letto e accetto l&apos;
+                    <a
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(event) => event.stopPropagation()}
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      informativa sulla privacy
+                    </a>
+                    . <span className="text-brand">*</span>
                   </label>
                   {errors.privacyAccepted ? (
                     <span className="text-[11px] font-light text-destructive">

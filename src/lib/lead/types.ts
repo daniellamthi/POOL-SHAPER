@@ -54,14 +54,26 @@ export interface LeadSubmissionResult {
   success: true;
   requestId: string;
   projectId: string;
+  /** True once the lead has a durable copy (Supabase-backed store). False
+   * when this deployment has no durable store configured and the record
+   * only ever existed in the process-local memory fallback. */
+  stored: boolean;
+  /** True once the commercial email actually sent. A lead can be a
+   * (truthful) success with this false -- see submitLead.server.ts's
+   * transaction order -- but only when `stored` is true, so the lead
+   * itself is never silently lost. */
+  emailDelivered: boolean;
 }
 
 /** Thrown by the server function; codes the client maps to Italian copy.
  * `EMAIL_NOT_CONFIGURED` is the honest, expected outcome wherever
- * RESEND_API_KEY / LEAD_NOTIFY_EMAIL aren't set for this deployment. */
+ * RESEND_API_KEY / LEAD_NOTIFY_EMAIL aren't set for this deployment.
+ * `STORAGE_UNAVAILABLE` is the durable-store equivalent -- both are
+ * "code complete, external credentials missing", not bugs. */
 export type LeadSubmissionErrorCode =
   | "VALIDATION_FAILED"
   | "PAYLOAD_TOO_LARGE"
   | "RATE_LIMITED"
+  | "STORAGE_UNAVAILABLE"
   | "EMAIL_NOT_CONFIGURED"
   | "EMAIL_SEND_FAILED";

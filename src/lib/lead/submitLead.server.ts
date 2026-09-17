@@ -1,19 +1,23 @@
 /**
  * Server-only lead submission endpoint (TanStack Start `createServerFn`).
  * Validates the full payload -- including the canonical
- * `ProjectConfiguration` from P1 -- server-side, then hands a human-readable
- * summary to Resend for delivery to Piscine Wellness.
+ * `ProjectConfiguration` from P1 -- server-side, durably persists it
+ * (see storage.ts), then hands a human-readable summary to Resend for
+ * delivery to Piscine Wellness.
  *
- * KNOWN LIMITATION (see P3 report): there is no database/KV/Durable Object
- * bound to this deployment (no `wrangler.toml` in the repo), so the
- * best-effort rate-limit/idempotency caches below are process-local -- they
- * reset whenever the Workers isolate recycles. That is an honest, disclosed
- * limitation, not a substitute for real persistence.
+ * Transaction order (P6A): validate -> persist -> attempt email -> update
+ * delivery status -> return a truthful result. A lead that is durably
+ * stored is never lost just because email delivery fails -- that comes
+ * back as success with `emailDelivered: false`, not an error. Only when
+ * there is no durable store at all (this environment's current state --
+ * see the P6A report) does an email failure become a hard error, because
+ * in that case nothing else exists to remember the lead by.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestIP } from "@tanstack/react-start/server";
 import { leadSubmissionInputSchema } from "./schema";
 import { formatLeadEmail } from "./formatLeadEmail";
+import { getLeadStore } from "./storage";
 import type { LeadSubmission, LeadSubmissionErrorCode, LeadSubmissionResult } from "./types";
 
 export class LeadSubmissionError extends Error {
@@ -27,19 +31,16 @@ export class LeadSubmissionError extends Error {
 
 const MAX_PAYLOAD_BYTES = 200_000;
 const RATE_LIMIT_WINDOW_MS = 20_000;
-const IDEMPOTENCY_TTL_MS = 5 * 60_000;
 
-// Process-local best-effort caches -- see the module comment above.
+// Process-local best-effort rate limit -- see the module comment; this is
+// a throttle, not the idempotency guarantee (that now lives in
+// storage.ts's upsertLead, durable whenever a real store is configured).
 const recentSubmissionsByIp = new Map<string, number>();
-const resultByIdempotencyKey = new Map<string, { at: number; result: LeadSubmissionResult }>();
 
-function pruneExpired() {
+function pruneExpiredRateLimits() {
   const now = Date.now();
   for (const [ip, at] of recentSubmissionsByIp) {
     if (now - at > RATE_LIMIT_WINDOW_MS) recentSubmissionsByIp.delete(ip);
-  }
-  for (const [key, entry] of resultByIdempotencyKey) {
-    if (now - entry.at > IDEMPOTENCY_TTL_MS) resultByIdempotencyKey.delete(key);
   }
 }
 
@@ -93,15 +94,18 @@ async function sendLeadEmail(submission: LeadSubmission): Promise<void> {
 export const submitLead = createServerFn({ method: "POST" })
   .validator(leadSubmissionInputSchema)
   .handler(async ({ data }): Promise<LeadSubmissionResult> => {
-    pruneExpired();
+    pruneExpiredRateLimits();
 
     if (data.website) {
       // Honeypot tripped -- pretend success without doing any work.
-      return { success: true, requestId: crypto.randomUUID(), projectId: data.project.projectId };
+      return {
+        success: true,
+        requestId: crypto.randomUUID(),
+        projectId: data.project.projectId,
+        stored: false,
+        emailDelivered: false,
+      };
     }
-
-    const cached = resultByIdempotencyKey.get(data.idempotencyKey);
-    if (cached) return cached.result;
 
     if (JSON.stringify(data).length > MAX_PAYLOAD_BYTES) {
       throw new LeadSubmissionError("PAYLOAD_TOO_LARGE", "La richiesta è troppo grande.");
@@ -133,21 +137,54 @@ export const submitLead = createServerFn({ method: "POST" })
       attachments: [],
     };
 
-    // Best-effort operational trail even when email delivery is
-    // unavailable -- NOT durable storage (see module comment).
-    console.log("[lead] submission received", {
+    const store = getLeadStore();
+    const { stored, existing } = await store.upsertLead(submission, data.idempotencyKey);
+
+    if (existing) {
+      // Same idempotency key as a previous attempt -- return its outcome
+      // instead of creating (or re-emailing) a second lead.
+      return {
+        success: true,
+        requestId: existing.requestId,
+        projectId: submission.projectId,
+        stored,
+        emailDelivered: existing.status === "email_sent",
+      };
+    }
+
+    console.log("[lead] submission persisted", {
       requestId: submission.requestId,
       projectId: submission.projectId,
       customerEmail: submission.customer.email,
+      stored,
     });
 
-    await sendLeadEmail(submission);
-
-    const result: LeadSubmissionResult = {
-      success: true,
-      requestId,
-      projectId: submission.projectId,
-    };
-    resultByIdempotencyKey.set(data.idempotencyKey, { at: Date.now(), result });
-    return result;
+    try {
+      await sendLeadEmail(submission);
+      await store.updateEmailStatus(requestId, "email_sent");
+      return {
+        success: true,
+        requestId,
+        projectId: submission.projectId,
+        stored,
+        emailDelivered: true,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await store.updateEmailStatus(requestId, "email_failed", message);
+      if (stored) {
+        // The lead survives durably even though the email didn't go out
+        // -- honest partial success, not a lost lead.
+        return {
+          success: true,
+          requestId,
+          projectId: submission.projectId,
+          stored: true,
+          emailDelivered: false,
+        };
+      }
+      // No durable copy and the email failed: nothing preserved this
+      // lead, so this genuinely is an error the customer should retry.
+      throw error;
+    }
   });
