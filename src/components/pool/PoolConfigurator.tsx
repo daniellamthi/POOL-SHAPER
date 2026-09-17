@@ -351,7 +351,10 @@ function ConfiguratorLayout() {
           </div>
         </aside>
 
-        <main className="relative h-[46vh] w-full min-h-[320px] overflow-hidden rounded-[1.75rem] border border-hairline bg-viewport sm:h-[54vh] lg:h-auto lg:flex-1">
+        <main
+          id="pool-viewport"
+          className="relative h-[46vh] w-full min-h-[320px] scroll-mt-20 overflow-hidden rounded-[1.75rem] border border-hairline bg-viewport sm:h-[54vh] lg:h-auto lg:flex-1"
+        >
           <PoolViewport
             outline={outline}
             shape={config.shape}

@@ -3,25 +3,31 @@ import { ProjectSummary } from "@/components/pool/ProjectSummary";
 import { StepSection } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 
+/** Final Review: a premium, Italian presentation of the customer's own
+ * canonical ProjectConfiguration (see `ProjectSummary`), then -- only once
+ * they've had a chance to appreciate the project -- the contact recap and
+ * the commercial CTA. Lead submission itself is a later pass; the button
+ * here is intentionally inert. */
 export function FinalReviewStep() {
   const { config } = useConfigurator();
   const customerRows = [
-    ["Name", config.customer.name],
-    ["Company", config.customer.company || "—"],
-    ["Email", config.customer.email],
-    ["Phone", config.customer.phone],
-    ["Location", [config.customer.city, config.customer.country].filter(Boolean).join(", ")],
-    ["Notes", config.customer.notes || "—"],
+    ["Nome", `${config.customer.name} ${config.customer.surname}`.trim() || "—"],
+    ["Azienda", config.customer.company || "—"],
+    ["Email", config.customer.email || "—"],
+    ["Telefono", config.customer.phone || "—"],
+    ["Località", [config.customer.city, config.customer.country].filter(Boolean).join(", ") || "—"],
+    ["Note", config.customer.notes || "—"],
   ] as const;
 
   return (
     <StepSection
-      title="Final Review"
-      subtitle="Review the 3D pool, configuration and customer details."
+      title="Il tuo progetto"
+      subtitle="Ecco la sintesi della piscina che hai progettato, pronta per essere valutata con un consulente."
     >
       <ProjectSummary />
+
       <section className="rounded-2xl border border-hairline bg-card/40 p-7">
-        <h3 className="label-xs mb-5">Customer information</h3>
+        <h3 className="label-xs mb-5">I tuoi dati</h3>
         <dl>
           {customerRows.map(([label, value]) => (
             <div
@@ -38,12 +44,27 @@ export function FinalReviewStep() {
           ))}
         </dl>
       </section>
-      <Button type="button" size="lg" disabled title="Quote submission will be implemented later">
-        Request Quote
-      </Button>
-      <p className="text-center text-xs font-light text-muted-foreground">
-        Quote submission is intentionally reserved for the next implementation phase.
-      </p>
+
+      <section className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-card/40 p-8 text-center">
+        <h3 className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">
+          Vuoi trasformare questo progetto in una proposta reale?
+        </h3>
+        <p className="max-w-[46ch] text-[13px] leading-[1.8] font-light text-muted-foreground">
+          Un nostro consulente può verificare configurazione, fattibilità e investimento.
+        </p>
+        <Button
+          type="button"
+          size="lg"
+          disabled
+          title="La richiesta di valutazione sarà disponibile a breve"
+          className="mt-1"
+        >
+          Valuta il progetto con un consulente
+        </Button>
+        <p className="text-xs font-light text-muted-foreground">
+          L&apos;invio della richiesta sarà attivato nella prossima fase.
+        </p>
+      </section>
     </StepSection>
   );
 }
