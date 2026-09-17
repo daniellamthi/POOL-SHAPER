@@ -25,6 +25,7 @@ import type {
   UploadedFile,
   RenovationConfig,
 } from "./types";
+import type { ProjectConfiguration } from "./project";
 
 export interface ConfiguratorContextValue {
   config: PoolConfig;
@@ -33,6 +34,12 @@ export interface ConfiguratorContextValue {
   metrics: PoolMetrics;
   skimmers: SkimmerPlan;
   renovation: RenovationConfig;
+  /** Stable identity for the project being configured. */
+  projectId: string;
+  /** The single canonical, serializable representation of everything the
+   * customer has selected so far -- the source of truth for the summary,
+   * autosave, exports and any future CRM/lead handoff. */
+  projectConfiguration: ProjectConfiguration;
   isStepComplete: (index: number) => boolean;
   canContinue: boolean;
   setProjectType: (value: ProjectType) => void;

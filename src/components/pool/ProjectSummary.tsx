@@ -6,8 +6,11 @@ import {
   POOL_TYPES,
   LINER_COLORS,
   PROJECT_TYPES,
+  SKIMMER_FINISHES,
+  SKIMMER_TYPES,
   getShapeDefinition,
 } from "@/lib/pool/config";
+import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { MetricsPanel } from "./MetricsPanel";
@@ -26,6 +29,9 @@ export function ProjectSummary() {
     config.finish === "mosaic"
       ? getMosaicFinish(config.mosaicFinish).name
       : (color?.title ?? config.linerColor);
+  const copingMaterial = COPING_MATERIALS.find((option) => option.id === config.copingMaterial);
+  const skimmerFinish = SKIMMER_FINISHES.find((option) => option.id === config.skimmerFinish);
+  const skimmerType = SKIMMER_TYPES.find((option) => option.id === config.skimmerType);
   const selectedFeatures = POOL_FEATURES.filter((option) => config.features.includes(option.id));
   const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
   const poolAccess =
@@ -34,6 +40,13 @@ export function ProjectSummary() {
       : config.poolAccess === "stainlessSteelLadder"
         ? "External ladder (stainless steel)"
         : null;
+  const poolSystemDetail =
+    config.system === "skimmer"
+      ? [skimmerType?.title, skimmerFinish?.title].filter(Boolean).join(" · ")
+      : config.overflowType === "visible"
+        ? "Visible overflow"
+        : "Hidden overflow";
+  const hasLed = config.features.includes("ledLighting");
 
   const rows: ReadonlyArray<{ label: string; value: string }> = [
     { label: "Project Type", value: projectType?.title ?? "Not selected" },
@@ -46,8 +59,9 @@ export function ProjectSummary() {
     },
     {
       label: "Pool System",
-      value: config.system === "skimmer" ? "Skimmer Pool" : "Overflow Edge Pool",
+      value: `${config.system === "skimmer" ? "Skimmer Pool" : "Overflow Edge Pool"} — ${poolSystemDetail}`,
     },
+    { label: "Coping Material", value: copingMaterial?.title ?? "Not selected" },
     { label: "Interior Finish", value: finish?.title ?? config.finish },
     { label: "Interior Color / Finish Color", value: finishColor },
     {
@@ -58,12 +72,18 @@ export function ProjectSummary() {
           ...(poolAccess ? [poolAccess] : []),
         ].join(", ") || "None selected",
     },
+    ...(hasLed
+      ? [{ label: "LED RGB Colour", value: (config.ledColor ?? "#ffffff").toUpperCase() }]
+      : []),
     {
       label: "Equipment",
       value: selectedEquipment.length
         ? selectedEquipment.map((option) => option.title).join(", ")
         : "None selected",
     },
+    ...(config.uploads.length
+      ? [{ label: "Attachments", value: `${config.uploads.length} file(s)` }]
+      : []),
   ];
 
   return (

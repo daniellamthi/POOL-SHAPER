@@ -13,6 +13,7 @@ import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry
 import { planSkimmers } from "./engineering";
 import { isLedColor } from "./led-optics";
 import { getCustomerValidation } from "./validation";
+import { createProjectId, toProjectConfiguration } from "./project";
 import { DEFAULT_MOSAIC_FINISH_ID } from "@/configurator/materials/interior-textures";
 import type {
   ControlPoint,
@@ -73,44 +74,50 @@ interface State {
   config: PoolConfig;
   renovation: RenovationConfig;
   step: number;
+  /** Stable identity for this project; regenerated only on `reset`, when a
+   * genuinely new project begins. */
+  projectId: string;
 }
 
-const initialState: State = {
-  step: 0,
-  renovation: {
-    areas: [],
-    currentFinish: "liner",
-    filtrationWorks: [],
-    replaceCoping: null,
-    copingMaterial: "",
-    structureIssues: [],
-    equipmentUpgrades: [],
-  },
-  config: {
-    projectType: null,
-    poolType: null,
-    structure: null,
-    shape: "rectangle",
-    shapeSelected: false,
-    copingMaterial: "travertine",
-    customMode: "draw",
-    controlPoints: DEFAULT_CONTROL_POINTS,
-    dimensions: DEFAULT_DIMENSIONS,
-    system: "skimmer",
-    overflowType: "hidden",
-    skimmerFinish: "white",
-    skimmerType: "standard",
-    finish: "liner",
-    linerColor: "motionBlueSky602",
-    mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
-    features: [],
-    ledColor: "#ffffff",
-    poolAccess: null,
-    equipment: [],
-    customer: DEFAULT_CUSTOMER,
-    uploads: [],
-  },
-};
+function createInitialState(): State {
+  return {
+    step: 0,
+    projectId: createProjectId(),
+    renovation: {
+      areas: [],
+      currentFinish: "liner",
+      filtrationWorks: [],
+      replaceCoping: null,
+      copingMaterial: "",
+      structureIssues: [],
+      equipmentUpgrades: [],
+    },
+    config: {
+      projectType: null,
+      poolType: null,
+      structure: null,
+      shape: "rectangle",
+      shapeSelected: false,
+      copingMaterial: "travertine",
+      customMode: "draw",
+      controlPoints: DEFAULT_CONTROL_POINTS,
+      dimensions: DEFAULT_DIMENSIONS,
+      system: "skimmer",
+      overflowType: "hidden",
+      skimmerFinish: "white",
+      skimmerType: "standard",
+      finish: "liner",
+      linerColor: "motionBlueSky602",
+      mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
+      features: [],
+      ledColor: "#ffffff",
+      poolAccess: null,
+      equipment: [],
+      customer: DEFAULT_CUSTOMER,
+      uploads: [],
+    },
+  };
+}
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -118,7 +125,9 @@ function reducer(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
     case "setLedColor":
-      return isLedColor(action.value) ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } } : state;
+      return isLedColor(action.value)
+        ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
+        : state;
     case "setProjectType":
       return { ...state, config: { ...config, projectType: action.value } };
     case "setPoolType": {
@@ -220,15 +229,20 @@ function reducer(state: State, action: Action): State {
       return { ...state, step: clamp(state.step - 1, 0, count - 1) };
     }
     case "reset":
-      return initialState;
+      return createInitialState();
     default:
       return state;
   }
 }
 
 export function ConfiguratorProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { config, renovation, step } = state;
+  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const { config, renovation, step, projectId } = state;
+
+  const projectConfiguration = useMemo(
+    () => toProjectConfiguration(projectId, config, renovation),
+    [projectId, config, renovation],
+  );
 
   const outline = useMemo(
     () => buildOutline(config.shape, config.dimensions, config.controlPoints),
@@ -280,6 +294,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       metrics,
       skimmers,
       renovation,
+      projectId,
+      projectConfiguration,
       isStepComplete,
       canContinue: isStepComplete(step),
       setProjectType: (v) => dispatch({ type: "setProjectType", value: v }),
@@ -320,7 +336,17 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "reset" });
       },
     }),
-    [config, renovation, step, outline, metrics, skimmers, isStepComplete],
+    [
+      config,
+      renovation,
+      step,
+      projectId,
+      projectConfiguration,
+      outline,
+      metrics,
+      skimmers,
+      isStepComplete,
+    ],
   );
 
   return <ConfiguratorContext.Provider value={value}>{children}</ConfiguratorContext.Provider>;
