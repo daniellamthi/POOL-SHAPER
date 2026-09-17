@@ -74,6 +74,13 @@ type Action =
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
   | { type: "addUploads"; value: UploadedFile[] }
   | { type: "removeUpload"; id: string }
+  | {
+      type: "setUploadStatus";
+      id: string;
+      status: NonNullable<UploadedFile["uploadStatus"]>;
+      storagePath?: string | null;
+      uploadError?: string;
+    }
   | { type: "goToStep"; value: number }
   | { type: "next" }
   | { type: "previous" }
@@ -214,12 +221,33 @@ function reducer(state: State, action: Action): State {
     }
     case "updateRenovation":
       return { ...state, renovation: { ...state.renovation, ...action.value } };
-    case "addUploads":
-      return { ...state, config: { ...config, uploads: [...config.uploads, ...action.value] } };
+    case "addUploads": {
+      const withDefaults: UploadedFile[] = action.value.map((file) => {
+        const next: UploadedFile = { ...file };
+        next.uploadStatus = file.uploadStatus ?? "pending";
+        next.storagePath = file.storagePath ?? null;
+        return next;
+      });
+      return { ...state, config: { ...config, uploads: [...config.uploads, ...withDefaults] } };
+    }
     case "removeUpload":
       return {
         ...state,
         config: { ...config, uploads: config.uploads.filter((file) => file.id !== action.id) },
+      };
+    case "setUploadStatus":
+      return {
+        ...state,
+        config: {
+          ...config,
+          uploads: config.uploads.map((file) => {
+            if (file.id !== action.id) return file;
+            const next: UploadedFile = { ...file, uploadStatus: action.status };
+            if (action.storagePath !== undefined) next.storagePath = action.storagePath;
+            if (action.uploadError !== undefined) next.uploadError = action.uploadError;
+            return next;
+          }),
+        },
       };
     case "goToStep": {
       const count = config.projectType === "renovation" ? RENOVATION_STEPS.length : STEPS.length;
@@ -398,6 +426,14 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         if (upload?.url) URL.revokeObjectURL(upload.url);
         dispatch({ type: "removeUpload", id });
       },
+      setUploadStatus: (id, status, storagePath, uploadError) =>
+        dispatch({
+          type: "setUploadStatus",
+          id,
+          status,
+          ...(storagePath !== undefined ? { storagePath } : {}),
+          ...(uploadError !== undefined ? { uploadError } : {}),
+        }),
       goToStep: (i) => dispatch({ type: "goToStep", value: i }),
       next: () => dispatch({ type: "next" }),
       previous: () => dispatch({ type: "previous" }),

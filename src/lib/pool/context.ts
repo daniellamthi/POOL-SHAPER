@@ -66,6 +66,14 @@ export interface ConfiguratorContextValue {
   updateRenovation: (value: Partial<RenovationConfig>) => void;
   addUploads: (files: UploadedFile[]) => void;
   removeUpload: (id: string) => void;
+  /** P6B: records the outcome of a real upload attempt for a previously
+   * added file -- never called with a fake "uploaded" result. */
+  setUploadStatus: (
+    id: string,
+    status: NonNullable<UploadedFile["uploadStatus"]>,
+    storagePath?: string | null,
+    uploadError?: string,
+  ) => void;
   goToStep: (index: number) => void;
   next: () => void;
   previous: () => void;

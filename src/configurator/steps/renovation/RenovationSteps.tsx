@@ -12,6 +12,7 @@ import type {
   StructureIssue,
 } from "@/lib/pool/types";
 import { formatNumber } from "@/lib/pool/format";
+import { LeadRequestDialog } from "@/configurator/steps/final-review/LeadRequestDialog";
 
 const AREAS: ReadonlyArray<{ id: RenovationArea; title: string; description: string }> = [
   { id: "interiorFinish", title: "Interior Finish", description: "Replace liner or mosaic." },
@@ -335,7 +336,7 @@ export function RenovationCustomerStep() {
 }
 
 export function RenovationReviewStep() {
-  const { config, renovation } = useConfigurator();
+  const { config, renovation, projectConfiguration } = useConfigurator();
   const areaNames = AREAS.filter((item) => renovation.areas.includes(item.id)).map(
     (item) => item.title,
   );
@@ -398,6 +399,24 @@ export function RenovationReviewStep() {
           </div>
         ))}
       </dl>
+
+      <section className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-card/40 p-8 text-center">
+        <h3 className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">
+          Vuoi valutare questo intervento con un nostro consulente?
+        </h3>
+        <p className="max-w-[46ch] text-[13px] leading-[1.8] font-light text-muted-foreground">
+          Un nostro consulente può verificare fattibilità, soluzioni tecniche e investimento per la
+          tua ristrutturazione.
+        </p>
+        <LeadRequestDialog
+          projectConfiguration={projectConfiguration}
+          defaultCustomer={{
+            name: `${config.customer.name} ${config.customer.surname}`.trim(),
+            email: config.customer.email,
+            phone: config.customer.phone,
+          }}
+        />
+      </section>
     </StepSection>
   );
 }

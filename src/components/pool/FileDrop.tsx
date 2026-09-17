@@ -1,8 +1,15 @@
-import { useRef } from "react";
-import { Upload, X } from "lucide-react";
+import { useCallback, useRef } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { AlertCircle, Loader2, RotateCw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConfigurator } from "@/lib/pool/context";
 import type { UploadedFile } from "@/lib/pool/types";
+import {
+  ATTACHMENT_ACCEPT_ATTR,
+  checkAttachment,
+  MAX_ATTACHMENTS_PER_PROJECT,
+} from "@/lib/lead/attachmentPolicy";
+import { uploadAttachment } from "@/lib/lead/uploadAttachment.server";
 
 interface Props {
   category: UploadedFile["category"];
@@ -10,23 +17,70 @@ interface Props {
   hint: string;
 }
 
-/** Reference uploads: plans, PDFs, drawings and site photos. */
+/** Reference uploads: plans, drawings and site photos (JPG/PNG/WEBP/PDF).
+ * Each file gets a real, server-validated upload attempt to the private
+ * `pool-shaper-attachments` bucket (P6B) -- the local thumbnail is only
+ * ever a transient preview; `uploadStatus`/`storagePath` on the same
+ * `UploadedFile` record are the durable, honest signal of whether it
+ * actually made it to storage. */
 export function FileDrop({ category, label, hint }: Props) {
-  const { config, addUploads, removeUpload } = useConfigurator();
+  const { config, projectId, addUploads, removeUpload, setUploadStatus } = useConfigurator();
   const input = useRef<HTMLInputElement>(null);
+  // Runtime-only: the actual File objects, kept just long enough to retry a
+  // failed upload. Never part of canonical state (File/Blob can't be
+  // serialized or persisted) -- see the module comment above.
+  const fileRefs = useRef<Map<string, File>>(new Map());
   const files = config.uploads.filter((file) => file.category === category);
+  const uploadFn = useServerFn(uploadAttachment);
+
+  const attemptUpload = useCallback(
+    async (id: string, file: File) => {
+      setUploadStatus(id, "uploading");
+      try {
+        const form = new FormData();
+        form.set("file", file);
+        form.set("projectId", projectId);
+        const result = await uploadFn({ data: form });
+        setUploadStatus(id, "uploaded", result.storagePath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Caricamento non riuscito.";
+        setUploadStatus(id, "failed", null, message);
+      }
+    },
+    [projectId, setUploadStatus, uploadFn],
+  );
 
   const onFiles = (list: FileList | null) => {
     if (!list) return;
-    const next: UploadedFile[] = Array.from(list).map((file) => ({
-      id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 8)}`,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
-      category,
-    }));
-    addUploads(next);
+    const incoming = Array.from(list);
+    const remainingSlots = Math.max(0, MAX_ATTACHMENTS_PER_PROJECT - files.length);
+    const accepted: { entry: UploadedFile; file: File }[] = [];
+    incoming.forEach((file, index) => {
+      const overLimit = index >= remainingSlots;
+      const check = overLimit
+        ? { ok: false, reason: `Massimo ${MAX_ATTACHMENTS_PER_PROJECT} allegati per progetto.` }
+        : checkAttachment({ name: file.name, type: file.type, size: file.size });
+      const id = `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 8)}`;
+      accepted.push({
+        entry: {
+          id,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+          category,
+          uploadStatus: check.ok ? "pending" : "failed",
+          storagePath: null,
+          ...(check.ok ? {} : { uploadError: check.reason }),
+        },
+        file,
+      });
+    });
+    addUploads(accepted.map((item) => item.entry));
+    for (const { entry, file } of accepted) {
+      fileRefs.current.set(entry.id, file);
+      if (entry.uploadStatus === "pending") void attemptUpload(entry.id, file);
+    }
   };
 
   return (
@@ -48,16 +102,19 @@ export function FileDrop({ category, label, hint }: Props) {
       >
         <Upload className="size-4 text-muted-foreground" strokeWidth={1.25} />
         <span className="text-[12px] font-light text-muted-foreground">
-          Drop files here or click to browse — PDF, DWG, JPG, PNG
+          Drop files here or click to browse — JPG, PNG, WEBP, PDF
         </span>
       </button>
       <input
         ref={input}
         type="file"
         multiple
-        accept=".pdf,.dwg,.dxf,image/*"
+        accept={ATTACHMENT_ACCEPT_ATTR}
         className="hidden"
-        onChange={(event) => onFiles(event.target.files)}
+        onChange={(event) => {
+          onFiles(event.target.files);
+          event.target.value = "";
+        }}
       />
 
       {files.length ? (
@@ -74,10 +131,46 @@ export function FileDrop({ category, label, hint }: Props) {
                   {file.name.split(".").pop()}
                 </span>
               )}
-              <span className="min-w-0 flex-1 truncate text-[12px] font-light text-foreground">
-                {file.name}
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate text-[12px] font-light text-foreground">{file.name}</span>
+                {file.uploadStatus === "uploading" ? (
+                  <span className="flex items-center gap-1.5 text-[10.5px] font-light text-muted-foreground">
+                    <Loader2 className="size-3 animate-spin" strokeWidth={1.5} />
+                    Caricamento…
+                  </span>
+                ) : file.uploadStatus === "uploaded" ? (
+                  <span className="text-[10.5px] font-light text-muted-foreground">Caricato</span>
+                ) : file.uploadStatus === "failed" ? (
+                  <span className="flex items-center gap-1.5 text-[10.5px] font-light text-destructive">
+                    <AlertCircle className="size-3" strokeWidth={1.5} />
+                    {file.uploadError ?? "Caricamento non riuscito"}
+                  </span>
+                ) : null}
               </span>
-              <Button type="button" variant="ghost" size="sm" onClick={() => removeUpload(file.id)}>
+              {file.uploadStatus === "failed" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Riprova a caricare ${file.name}`}
+                  onClick={() => {
+                    const original = fileRefs.current.get(file.id);
+                    if (original) void attemptUpload(file.id, original);
+                  }}
+                >
+                  <RotateCw />
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label={`Rimuovi ${file.name}`}
+                onClick={() => {
+                  fileRefs.current.delete(file.id);
+                  removeUpload(file.id);
+                }}
+              >
                 <X />
               </Button>
             </li>

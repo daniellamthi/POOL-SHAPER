@@ -82,6 +82,13 @@ export type Outline = ReadonlyArray<readonly [number, number]>;
 /** Editable control point in normalised [-0.5, 0.5] unit space. */
 export type ControlPoint = readonly [number, number];
 
+/** P6B: whether a real (server-validated, durably stored) upload attempt
+ * has completed for this file. `url` is only ever a transient local
+ * preview (`blob:`) -- it never survives a reload and is never a durable
+ * reference; `storagePath` is the durable one, set only after a
+ * successful upload. Optional so existing literals (tests, older saved
+ * drafts) that predate P6B still satisfy the type -- runtime code always
+ * populates them (see store.tsx's addUploads). */
 export interface UploadedFile {
   id: string;
   name: string;
@@ -90,6 +97,9 @@ export interface UploadedFile {
   /** object URL, image previews only */
   url: string | null;
   category: "reference" | "site";
+  uploadStatus?: "pending" | "uploading" | "uploaded" | "failed";
+  storagePath?: string | null;
+  uploadError?: string;
 }
 
 export interface PoolConfig {

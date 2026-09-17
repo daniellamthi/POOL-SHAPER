@@ -36,6 +36,17 @@ export interface LeadFormInput {
   project: ProjectConfiguration;
 }
 
+/** A real, durably-stored attachment (P6B) -- only ever populated from
+ * `UploadedFile` entries whose `uploadStatus === "uploaded"` and that
+ * carry a real `storagePath`. Never a blob: URL or any other
+ * client-only reference. */
+export interface LeadAttachment {
+  name: string;
+  storagePath: string;
+  mimeType: string;
+  size: number;
+}
+
 /** The complete, human-reviewable commercial record -- this is what gets
  * emailed/logged to Piscine Wellness, never raw JSON as the primary body. */
 export interface LeadSubmission {
@@ -47,7 +58,7 @@ export interface LeadSubmission {
   commercial: LeadFormInput["commercial"];
   project: ProjectConfiguration;
   privacy: LeadFormInput["privacy"];
-  attachments: ReadonlyArray<never>;
+  attachments: ReadonlyArray<LeadAttachment>;
 }
 
 export interface LeadSubmissionResult {

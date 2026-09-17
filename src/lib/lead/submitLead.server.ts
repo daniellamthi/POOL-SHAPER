@@ -18,6 +18,7 @@ import { getRequestIP } from "@tanstack/react-start/server";
 import { leadSubmissionInputSchema } from "./schema";
 import { formatLeadEmail } from "./formatLeadEmail";
 import { getLeadStore } from "./storage";
+import { deriveAttachments } from "./deriveAttachments";
 import type { LeadSubmission, LeadSubmissionErrorCode, LeadSubmissionResult } from "./types";
 
 export class LeadSubmissionError extends Error {
@@ -134,7 +135,7 @@ export const submitLead = createServerFn({ method: "POST" })
       // ProjectConfiguration (see schema.ts's module comment).
       project: data.project as unknown as LeadSubmission["project"],
       privacy: data.privacy,
-      attachments: [],
+      attachments: deriveAttachments(data.project),
     };
 
     const store = getLeadStore();

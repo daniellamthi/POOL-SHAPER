@@ -15,6 +15,7 @@
     "test:project-config": "node scripts/run-project-config-audit.mjs",
     "test:lead-pipeline": "node scripts/run-lead-pipeline-audit.mjs",
     "test:lead-storage": "node scripts/run-lead-storage-audit.mjs",
+    "test:attachments": "node scripts/run-attachment-renovation-audit.mjs",
     "test:persistence": "node scripts/run-persistence-audit.mjs",
     "test:visual": "node scripts/visual-audit.mjs",
     "test:visual:update": "node scripts/visual-audit.mjs --update",

@@ -86,6 +86,7 @@ class SupabaseLeadStore implements LeadStore {
       privacy_accepted: submission.privacy.accepted,
       marketing_consent: submission.privacy.marketingConsent,
       project_configuration: submission.project,
+      attachments: submission.attachments,
       status: "pending",
     };
 

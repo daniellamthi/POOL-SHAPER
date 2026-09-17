@@ -6,6 +6,11 @@
  * and the on-screen summary can never quietly disagree about what a value
  * means. This file does NOT re-derive pricing/engineering data -- it only
  * formats fields already present on the canonical `ProjectConfiguration`.
+ *
+ * P6B: branches on `config.projectType` -- a renovation lead shows its
+ * own relevant fields (current situation, requested interventions,
+ * problems/needs) instead of the new-pool-specific ones (skimmer detail,
+ * LED, etc.) that may not even be meaningfully set for a renovation.
  */
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
@@ -19,6 +24,12 @@ import {
   SKIMMER_TYPE_LABEL,
   systemHeadline,
 } from "@/configurator/steps/final-review/summary-labels";
+import {
+  EQUIPMENT_UPGRADE_LABEL,
+  FILTRATION_WORK_LABEL,
+  RENOVATION_AREA_LABEL,
+  STRUCTURE_ISSUE_LABEL,
+} from "./renovationLabels";
 import { LEAD_TIMING_OPTIONS, type LeadSubmission } from "./types";
 
 function deferredItems(config: LeadSubmission["project"]["config"]): string[] {
@@ -31,17 +42,8 @@ function deferredItems(config: LeadSubmission["project"]["config"]): string[] {
   return items;
 }
 
-export function formatLeadEmail(submission: LeadSubmission): {
-  subject: string;
-  text: string;
-  html: string;
-} {
-  const { customer, commercial, project, privacy } = submission;
-  const config = project.config;
-  const timing =
-    LEAD_TIMING_OPTIONS.find((option) => option.id === commercial.timing)?.label ??
-    commercial.timing;
-
+function newPoolLines(submission: LeadSubmission): string[] {
+  const config = submission.project.config;
   const isMosaic = config.finish === "mosaic";
   const finishTitle = isMosaic
     ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
@@ -63,25 +65,8 @@ export function formatLeadEmail(submission: LeadSubmission): {
     (option) => EQUIPMENT_LABEL[option.id],
   );
   const deferred = deferredItems(config);
-  const uploadsCount = Array.isArray(config.uploads) ? config.uploads.length : 0;
 
-  const subject = `Nuovo progetto piscina — ${customer.name} — Rif. ${submission.projectId.slice(0, 8).toUpperCase()}`;
-
-  const lines = [
-    `RICHIESTA VALUTAZIONE PROGETTO — Piscine Wellness`,
-    ``,
-    `Richiesta: ${submission.requestId}`,
-    `Progetto: ${submission.projectId}`,
-    `Ricevuta: ${submission.createdAt}`,
-    ``,
-    `--- CLIENTE ---`,
-    `Nome: ${customer.name}`,
-    `Email: ${customer.email}`,
-    `Telefono: ${customer.phone}`,
-    `Località progetto: ${customer.projectLocation}`,
-    `Tempistica desiderata: ${timing}`,
-    ...(commercial.notes ? [`Note del cliente: ${commercial.notes}`] : []),
-    ``,
+  return [
     `--- PISCINA ---`,
     `Tipologia: ${poolTypeLabel(config.poolType)}`,
     `Dimensioni: ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${formatNumber(config.dimensions.depth, 2)} m`,
@@ -97,10 +82,124 @@ export function formatLeadEmail(submission: LeadSubmission): {
     ...(deferred.length
       ? [``, `--- DA DEFINIRE CON IL CONSULENTE ---`, ...deferred.map((i) => `• ${i}`)]
       : []),
-    ...(uploadsCount > 0
+  ];
+}
+
+function renovationLines(submission: LeadSubmission): string[] {
+  const config = submission.project.config;
+  const renovation = submission.project.renovation;
+  const areaLabels = renovation.areas.map((id) => RENOVATION_AREA_LABEL[id]);
+  const lines = [
+    `--- RISTRUTTURAZIONE PISCINA ---`,
+    `Interventi richiesti: ${areaLabels.length ? areaLabels.join(", ") : "Da definire"}`,
+  ];
+
+  if (config.shape || config.dimensions) {
+    lines.push(
+      `Piscina attuale: forma ${config.shape}, dimensioni indicative ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${formatNumber(config.dimensions.depth, 2)} m`,
+    );
+  }
+
+  const wantsInterior =
+    renovation.areas.includes("interiorFinish") || renovation.areas.includes("complete");
+  if (wantsInterior) {
+    const newFinishTitle =
+      config.finish === "mosaic"
+        ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
+        : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
+    lines.push(
+      `Rivestimento: attuale ${renovation.currentFinish} → richiesto ${config.finish} (${newFinishTitle})`,
+    );
+  }
+
+  const wantsFiltration =
+    renovation.areas.includes("filtration") || renovation.areas.includes("complete");
+  if (wantsFiltration) {
+    const filtrationLabels = renovation.filtrationWorks.map((id) => FILTRATION_WORK_LABEL[id]);
+    lines.push(
+      `Impianto filtrazione: ${filtrationLabels.length ? filtrationLabels.join(", ") : "Valutazione richiesta"}`,
+    );
+  }
+
+  const wantsCoping = renovation.areas.includes("coping") || renovation.areas.includes("complete");
+  if (wantsCoping) {
+    lines.push(
+      `Bordo/coping: ${
+        renovation.replaceCoping
+          ? `sostituzione richiesta${renovation.copingMaterial ? ` (${renovation.copingMaterial})` : ""}`
+          : "nessuna sostituzione richiesta"
+      }`,
+    );
+  }
+
+  const wantsStructure =
+    renovation.areas.includes("structure") || renovation.areas.includes("complete");
+  if (wantsStructure) {
+    const structureLabels = renovation.structureIssues.map((id) => STRUCTURE_ISSUE_LABEL[id]);
+    lines.push(
+      `Problemi struttura: ${structureLabels.length ? structureLabels.join(", ") : "Valutazione generale richiesta"}`,
+    );
+  }
+
+  const wantsEquipment =
+    renovation.areas.includes("equipment") || renovation.areas.includes("complete");
+  if (wantsEquipment) {
+    const equipmentLabels = renovation.equipmentUpgrades.map((id) => EQUIPMENT_UPGRADE_LABEL[id]);
+    lines.push(
+      `Aggiornamento dotazioni: ${equipmentLabels.length ? equipmentLabels.join(", ") : "Valutazione richiesta"}`,
+    );
+  }
+
+  return lines;
+}
+
+export function formatLeadEmail(submission: LeadSubmission): {
+  subject: string;
+  text: string;
+  html: string;
+} {
+  const { customer, commercial, project, privacy, attachments } = submission;
+  const config = project.config;
+  const isRenovation = config.projectType === "renovation";
+  const timing =
+    LEAD_TIMING_OPTIONS.find((option) => option.id === commercial.timing)?.label ??
+    commercial.timing;
+
+  const subject = `${isRenovation ? "Ristrutturazione piscina" : "Nuovo progetto piscina"} — ${customer.name} — Rif. ${submission.projectId.slice(0, 8).toUpperCase()}`;
+
+  const localOnlyUploads = Array.isArray(config.uploads)
+    ? config.uploads.filter((upload) => upload.uploadStatus !== "uploaded").length
+    : 0;
+
+  const lines = [
+    `RICHIESTA VALUTAZIONE ${isRenovation ? "RISTRUTTURAZIONE" : "PROGETTO"} — Piscine Wellness`,
+    ``,
+    `Richiesta: ${submission.requestId}`,
+    `Progetto: ${submission.projectId}`,
+    `Ricevuta: ${submission.createdAt}`,
+    ``,
+    `--- CLIENTE ---`,
+    `Nome: ${customer.name}`,
+    `Email: ${customer.email}`,
+    `Telefono: ${customer.phone}`,
+    `Località progetto: ${customer.projectLocation}`,
+    `Tempistica desiderata: ${timing}`,
+    ...(commercial.notes ? [`Note del cliente: ${commercial.notes}`] : []),
+    ``,
+    ...(isRenovation ? renovationLines(submission) : newPoolLines(submission)),
+    ...(attachments.length > 0
       ? [
           ``,
-          `Nota: il cliente ha indicato ${uploadsCount} allegato/i in configurazione. Non sono stati caricati su alcun sistema di storage -- nessuna integrazione attiva in questa versione.`,
+          `--- ALLEGATI (${attachments.length}) ---`,
+          ...attachments.map(
+            (a) => `• ${a.name} (${a.mimeType}, ${(a.size / 1024).toFixed(0)} KB)`,
+          ),
+        ]
+      : []),
+    ...(localOnlyUploads > 0
+      ? [
+          ``,
+          `Nota: ${localOnlyUploads} file selezionato/i dal cliente non risulta/no caricato/i correttamente e non è/sono incluso/i sopra.`,
         ]
       : []),
     ``,
