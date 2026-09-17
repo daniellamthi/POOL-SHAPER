@@ -46,7 +46,7 @@ export function StepIndicator({ current, isStepComplete, onSelect, steps }: Prop
                 aria-label={step.title}
                 aria-current={active ? "step" : undefined}
                 className={cn(
-                  "group relative flex h-9 w-full items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/40 disabled:cursor-default",
+                  "group relative flex h-11 w-full items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground/40 disabled:cursor-default",
                   active && "pointer-events-none",
                 )}
               >

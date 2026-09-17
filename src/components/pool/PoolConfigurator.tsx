@@ -154,6 +154,11 @@ function ConfiguratorLayout() {
 
   const [showMeasurements, setShowMeasurements] = useState(true);
   const [frameToken, setFrameToken] = useState(0);
+  // P5: mobile-only fullscreen presentation of the SAME live viewport --
+  // never a second Canvas/renderer, just a CSS repositioning of the
+  // existing <main>, so camera/orbit state carries over untouched.
+  const [mobileExpanded, setMobileExpanded] = useState(false);
+  const toggleMobileExpanded = useCallback(() => setMobileExpanded((value) => !value), []);
   const [photoMode, setPhotoMode] = useState(false);
   const [photoModeQuality, setPhotoModeQuality] = useState<PhotoModeQuality>("standard");
   // Set once the path tracer has proven it can't run on this device (no
@@ -320,6 +325,7 @@ function ConfiguratorLayout() {
             variant="ghost"
             size="sm"
             onClick={reset}
+            aria-label="Reset"
             className="rounded-full px-3"
           >
             <RotateCcw />
@@ -349,6 +355,7 @@ function ConfiguratorLayout() {
               variant="ghost"
               onClick={previous}
               disabled={step === 0}
+              aria-label="Back"
               className="px-0 hover:bg-transparent"
             >
               <ArrowLeft />
@@ -369,7 +376,12 @@ function ConfiguratorLayout() {
 
         <main
           id="pool-viewport"
-          className="relative h-[46vh] w-full min-h-[320px] scroll-mt-20 overflow-hidden rounded-[1.75rem] border border-hairline bg-viewport sm:h-[54vh] lg:h-auto lg:flex-1"
+          className={cn(
+            "relative w-full overflow-hidden bg-viewport",
+            mobileExpanded
+              ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
+              : "h-[46vh] min-h-[320px] scroll-mt-20 rounded-[1.75rem] border border-hairline sm:h-[54vh] lg:h-auto lg:flex-1",
+          )}
         >
           <PoolViewport
             outline={outline}
@@ -402,6 +414,8 @@ function ConfiguratorLayout() {
             onGeneratePhotorealisticRender={handleGeneratePhotorealisticRender}
             renderPhase={renderPhase}
             renderProgress={renderProgress}
+            mobileExpanded={mobileExpanded}
+            onToggleMobileExpanded={toggleMobileExpanded}
           />
           <LiveSummary />
         </main>

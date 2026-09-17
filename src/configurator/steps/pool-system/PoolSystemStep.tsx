@@ -73,7 +73,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
                 ))}
               </div>
               <p className="label-xs">Finitura skimmer</p>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {SKIMMER_FINISHES.map((option) => (
                   <SwatchOption
                     key={option.id}

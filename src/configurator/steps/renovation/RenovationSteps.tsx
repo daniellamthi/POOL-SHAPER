@@ -159,7 +159,7 @@ export function RenovationDetailsStep() {
             ))}
           </div>
           <p className="label-xs">Finish colour</p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {LINER_COLORS.map((item) => (
               <SwatchOption
                 key={item.id}

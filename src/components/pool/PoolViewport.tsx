@@ -1,7 +1,23 @@
 import { lazy, memo, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
-import { Aperture, Camera, Download, Expand, Loader2, Ruler, X } from "lucide-react";
+import {
+  Aperture,
+  Camera,
+  Download,
+  Expand,
+  Loader2,
+  MoreHorizontal,
+  Ruler,
+  Shrink,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { photoModeState, PHOTO_MODE_EXPORT_READY_SAMPLES } from "@/lib/pool/photoModeState";
 import type { RenderJobStatus } from "@/lib/render-pipeline";
 import type { SceneProps, PhotoModeQuality } from "./three/PoolScene";
@@ -18,6 +34,13 @@ type ViewportProps = SceneProps & {
   onGeneratePhotorealisticRender: () => void;
   renderPhase: "idle" | "rendering" | "complete" | "error";
   renderProgress: RenderJobStatus["progress"];
+  /** P5: on narrow viewports the live pool can otherwise read as cropped
+   * once the wizard controls take their share of the screen -- this lets
+   * the customer blow the same live view up to fill the screen without
+   * losing camera/orbit state (it's the same mounted scene, just
+   * repositioned by the parent layout, never remounted). */
+  mobileExpanded: boolean;
+  onToggleMobileExpanded: () => void;
 };
 
 function ViewportFallback() {
@@ -104,10 +127,22 @@ export const PoolViewport = memo(function PoolViewport({
   onGeneratePhotorealisticRender,
   renderPhase,
   renderProgress,
+  mobileExpanded,
+  onToggleMobileExpanded,
   ...scene
 }: ViewportProps) {
   const samples = usePhotoModeSamples();
   const exportReady = scene.photoMode && samples >= PHOTO_MODE_EXPORT_READY_SAMPLES;
+  const renderButtonLabel =
+    renderPhase === "rendering"
+      ? renderProgress
+        ? `Rendering… ${Math.round((renderProgress.current / renderProgress.total) * 100)}%`
+        : "Rendering…"
+      : renderPhase === "complete"
+        ? "Download Render"
+        : renderPhase === "error"
+          ? "Retry Photorealistic Render"
+          : "Generate Photorealistic Render";
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-viewport">
@@ -133,7 +168,74 @@ export const PoolViewport = memo(function PoolViewport({
               ? "Camera locked · Live 3D"
               : "Drag to orbit · Scroll to zoom · Right-drag to pan"}
         </p>
-        <div className="pointer-events-auto ml-auto flex flex-wrap items-center justify-end gap-2">
+        {/* Compact mobile row: only the actions a customer needs on every
+            visit stay directly on screen (reframe, expand); Guides, Photo
+            Mode and the Blender render are advanced/rare here, so they move
+            into the "More" menu instead of eating the small viewport. */}
+        <div className="pointer-events-auto ml-auto flex items-center justify-end gap-2 sm:hidden">
+          <Button type="button" variant="viewport" size="sm" onClick={onReframe}>
+            <Expand />
+            Reframe
+          </Button>
+          <Button
+            type="button"
+            variant={mobileExpanded ? "viewportActive" : "viewport"}
+            size="icon"
+            onClick={onToggleMobileExpanded}
+            aria-label={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
+            title={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
+          >
+            {mobileExpanded ? <Shrink /> : <Expand />}
+          </Button>
+          {scene.photoMode ? (
+            <Button type="button" variant="viewportActive" size="sm" onClick={onTogglePhotoMode}>
+              <Camera />
+              Live
+            </Button>
+          ) : null}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="viewport" size="icon" aria-label="Altri strumenti">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {scene.photoMode ? (
+                <>
+                  <DropdownMenuItem onSelect={() => onSetPhotoModeQuality("standard")}>
+                    Qualità standard{scene.photoModeQuality === "standard" ? " ✓" : ""}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => onSetPhotoModeQuality("high")}>
+                    Qualità alta{scene.photoModeQuality === "high" ? " ✓" : ""}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={!exportReady}
+                    onSelect={() => {
+                      photoModeState.exportRequestId += 1;
+                    }}
+                  >
+                    Genera foto
+                    {!exportReady ? ` (ancora ${PHOTO_MODE_EXPORT_READY_SAMPLES}+ campioni)` : ""}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem onSelect={onToggleMeasurements}>
+                    {scene.showMeasurements ? "Nascondi guide" : "Mostra guide"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled={photoModeUnsupported} onSelect={onTogglePhotoMode}>
+                    Modalità foto {photoModeUnsupported ? "(non supportata)" : ""}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={onGeneratePhotorealisticRender}>
+                    {renderButtonLabel}
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="pointer-events-auto ml-auto hidden flex-wrap items-center justify-end gap-2 sm:flex">
           {scene.photoMode ? (
             <>
               <QualityPicker quality={scene.photoModeQuality} onChange={onSetPhotoModeQuality} />
