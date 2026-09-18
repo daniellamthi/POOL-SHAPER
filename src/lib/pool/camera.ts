@@ -1,6 +1,8 @@
 import { planSkimmers } from "./engineering";
 import type { SkimmerPlan } from "./engineering";
 import { outlineArea, outlineBounds } from "./geometry";
+import { POOL_LIGHTING_DESIGN } from "./lighting";
+import type { PoolLightPosition } from "./lighting";
 import type { Outline } from "./types";
 import type { PoolVerticalLayout } from "./vertical-layout";
 
@@ -251,24 +253,91 @@ function getInteriorFinishCamera({
  * twice as close so a selected feature (internal stairs, ladder, lighting)
  * reads clearly while the whole pool and its border stay in frame -- a
  * curated presentation shot rather than the wide establishing overview. */
+/**
+ * The lighting pose: a swimmer's-eye view of the luminaire wall.
+ *
+ * The previous pose was a high, distant three-quarter overview, on which a
+ * 260 mm luminaire is a handful of pixels: the only thing large enough to
+ * read was the patch its beam threw on the liner, so the light appeared to
+ * start at the floor. This frames the wall the fixtures are actually mounted
+ * on -- `planPoolLighting` always puts its row on the longest straight edge,
+ * which is what this looks up -- from inside the basin, low and close, and
+ * off to one side so the beam is seen broadside rather than end-on. The lens,
+ * the water it lights and the surface it lands on are then all in frame at
+ * once, which is the only way the eye connects them.
+ */
 function getFeaturesCamera({
-  verticalCentre,
+  outline,
+  layout,
   centre,
   radius,
+  ledRow,
 }: {
-  verticalCentre: number;
+  outline: Outline;
+  layout: PoolVerticalLayout;
   centre: readonly [number, number];
   radius: number;
+  ledRow: readonly PoolLightPosition[];
 }): CameraPose {
-  const distance = radius * 1.9;
-  const direction: CameraPoint = [1.55, 1.05, 0.62];
-  const directionLength = Math.hypot(...direction);
+  const verticalCentre = (layout.floorY + layout.wallTopY) / 2;
+  const anchor = ledRow[Math.floor(ledRow.length / 2)];
+  if (!anchor) {
+    const distance = radius * 1.9;
+    const direction: CameraPoint = [1.55, 1.05, 0.62];
+    const directionLength = Math.hypot(...direction);
+    return {
+      target: [centre[0], verticalCentre, centre[1]],
+      position: [
+        centre[0] + (direction[0] / directionLength) * distance,
+        verticalCentre + (direction[1] / directionLength) * distance,
+        centre[1] + (direction[2] / directionLength) * distance,
+      ],
+    };
+  }
+  // The fixture's own transform: `rotation` is the yaw of its lens normal,
+  // which points into the water.
+  const normalX = Math.sin(anchor.rotation);
+  const normalZ = Math.cos(anchor.rotation);
+  const tangentX = normalZ;
+  const tangentZ = -normalX;
+  const midX = anchor.x;
+  const midZ = anchor.z;
+  const lensY = anchor.y;
+  const wallLength =
+    ledRow.length > 1
+      ? Math.hypot(
+          ledRow[ledRow.length - 1]!.x - ledRow[0]!.x,
+          ledRow[ledRow.length - 1]!.z - ledRow[0]!.z,
+        )
+      : POOL_LIGHTING_DESIGN.maxSpacing;
+  // How far the basin actually extends away from this wall. Deriving the
+  // stand-off from the outline's own span, rather than from the bounding
+  // radius, keeps the camera inside the water: on a long narrow pool the
+  // radius is dominated by the length and would put the viewpoint straight
+  // through the opposite wall, looking back at the wrong side of the basin.
+  const span = outline.reduce(
+    (furthest, [x, z]) => Math.max(furthest, (x - midX) * normalX + (z - midZ) * normalZ),
+    0,
+  );
+  // Stand on the far deck rather than in the water: a 34 degree lens needs
+  // roughly six metres of stand-off to hold the deck, the waterline, the
+  // luminaire wall and the floor in one frame, and a narrow basin cannot
+  // give that from the inside. From here the beam is seen broadside, across
+  // the full section it actually travels through.
+  const back = span + clamp(span * 0.72, 1.8, 3.8);
+  const along = clamp(wallLength * 0.45, 1.6, 4.4);
+  const eyeY = layout.waterY + 2.75;
+  const targetY = lensY - (lensY - layout.floorY) * 0.3;
   return {
-    target: [centre[0], verticalCentre, centre[1]],
+    target: [
+      midX + normalX * span * 0.45 + tangentX * along * 0.25,
+      targetY,
+      midZ + normalZ * span * 0.45 + tangentZ * along * 0.25,
+    ],
     position: [
-      centre[0] + (direction[0] / directionLength) * distance,
-      verticalCentre + (direction[1] / directionLength) * distance,
-      centre[1] + (direction[2] / directionLength) * distance,
+      midX + normalX * back + tangentX * along,
+      eyeY,
+      midZ + normalZ * back + tangentZ * along,
     ],
   };
 }
@@ -280,6 +349,7 @@ export function getCameraPose({
   layout,
   depth,
   skimmers,
+  ledRow = [],
   verticalFov = 35,
   viewportAspect = 1.5,
   includeExternalStaircase = false,
@@ -289,6 +359,8 @@ export function getCameraPose({
   layout: PoolVerticalLayout;
   depth: number;
   skimmers: SkimmerPlan;
+  /** The luminaire row as actually built, so the lighting pose frames it. */
+  ledRow?: readonly PoolLightPosition[];
   verticalFov?: number;
   viewportAspect?: number;
   includeExternalStaircase?: boolean;
@@ -347,7 +419,7 @@ export function getCameraPose({
   }
 
   if (intent === "features") {
-    return getFeaturesCamera({ verticalCentre, centre, radius });
+    return getFeaturesCamera({ outline, layout, centre, radius, ledRow });
   }
 
   // Photographic overview only: clear the full coping and view along the

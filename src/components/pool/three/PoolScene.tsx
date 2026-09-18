@@ -2,9 +2,18 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "rea
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, ContactShadows } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { Vector3, AgXToneMapping, NoToneMapping, PCFShadowMap, SRGBColorSpace } from "three";
+import {
+  Vector3,
+  AgXToneMapping,
+  Color,
+  MathUtils,
+  NoToneMapping,
+  PCFShadowMap,
+  SRGBColorSpace,
+} from "three";
+import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
-import { PoolLights } from "./PoolLights";
+import { PoolLights, planSceneLighting } from "./PoolLights";
 import { DaylightEnvironment } from "./DaylightEnvironment";
 import { copingOuterOffset } from "./poolConstruction";
 import { createTravertineMaps } from "./stoneTextures";
@@ -32,6 +41,7 @@ import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { getCameraPose } from "@/lib/pool/camera";
 import type { CameraIntent } from "@/lib/pool/camera";
+import type { PoolLightPosition } from "@/lib/pool/lighting";
 import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
@@ -87,6 +97,73 @@ const PALETTE = {
     contact: SCENE_VISUAL_PRESET.contactShadow.light,
   },
 } as const;
+
+/**
+ * Crossfades the whole scene between daylight and blue hour.
+ *
+ * Underwater LEDs are invisible under a midday sun -- in a real pool exactly
+ * as in this scene -- so the configurator drops to dusk while the customer is
+ * on the lighting step and restores daylight on the way out. Driven off the
+ * existing `focus` value, so no new state has to be plumbed through.
+ *
+ * Exposure, background, fog and the three scene lights are interpolated per
+ * frame rather than switched, so the change reads as the sun going down and
+ * not as a mode toggle.
+ */
+function SceneMood({
+  dusk,
+  baseBackground,
+  baseExposure,
+  baseEnvironment,
+  sky,
+  sun,
+  auxiliary,
+}: {
+  dusk: boolean;
+  baseBackground: string;
+  baseExposure: number;
+  baseEnvironment: number;
+  sky: React.RefObject<HemisphereLight | null>;
+  sun: React.RefObject<DirectionalLight | null>;
+  auxiliary: React.RefObject<SpotLight | null>;
+}) {
+  const blend = useRef(dusk ? 1 : 0);
+  const dayColor = useMemo(() => new Color(baseBackground), [baseBackground]);
+  const duskColor = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.background), []);
+  const scratch = useMemo(() => new Color(), []);
+  const baseSky = useRef(0);
+  const baseSun = useRef(0);
+  const baseAux = useRef(0);
+
+  useFrame(({ gl, scene }, delta) => {
+    if (baseSky.current === 0 && sky.current) baseSky.current = sky.current.intensity;
+    if (baseSun.current === 0 && sun.current) baseSun.current = sun.current.intensity;
+    if (baseAux.current === 0 && auxiliary.current) baseAux.current = auxiliary.current.intensity;
+
+    const target = dusk ? 1 : 0;
+    const step = delta / SCENE_VISUAL_PRESET.dusk.transitionSeconds;
+    blend.current =
+      blend.current < target
+        ? Math.min(target, blend.current + step)
+        : Math.max(target, blend.current - step);
+    const t = blend.current;
+    const preset = SCENE_VISUAL_PRESET.dusk;
+
+    gl.toneMappingExposure = MathUtils.lerp(baseExposure, preset.exposure, t);
+    scene.environmentIntensity = MathUtils.lerp(baseEnvironment, preset.environment, t);
+    scratch.copy(dayColor).lerp(duskColor, t);
+    if (scene.background instanceof Color) scene.background.copy(scratch);
+    if (scene.fog) scene.fog.color.copy(scratch);
+    if (sky.current)
+      sky.current.intensity = MathUtils.lerp(baseSky.current, preset.skyIntensity, t);
+    if (sun.current)
+      sun.current.intensity = MathUtils.lerp(baseSun.current, preset.sunIntensity, t);
+    if (auxiliary.current) {
+      auxiliary.current.intensity = MathUtils.lerp(baseAux.current, preset.auxiliaryIntensity, t);
+    }
+  });
+  return null;
+}
 
 function DevelopmentRendererMetrics() {
   const gl = useThree((state) => state.gl);
@@ -154,6 +231,7 @@ function CameraRig({
   outline,
   layout,
   skimmers,
+  ledRow,
   includeExternalStaircase,
   photoMode,
 }: {
@@ -167,6 +245,7 @@ function CameraRig({
   outline: Outline;
   layout: PoolVerticalLayout;
   skimmers: SkimmerPlan;
+  ledRow: readonly PoolLightPosition[];
   includeExternalStaircase: boolean;
   photoMode: boolean;
 }) {
@@ -233,6 +312,7 @@ function CameraRig({
       layout,
       depth,
       skimmers,
+      ledRow,
       verticalFov: SCENE_VISUAL_PRESET.camera.fov,
       viewportAspect: viewportSize.width / Math.max(1, viewportSize.height),
       includeExternalStaircase,
@@ -279,6 +359,7 @@ function CameraRig({
   }, [
     cameraLocked,
     camera,
+    ledRow,
     controls,
     frameToken,
     focus,
@@ -428,10 +509,28 @@ export default function PoolScene({
   const palette = PALETTE[theme];
   const background = palette.background;
   const copingThickness = POOL_BORDER_PRESET.thickness;
+  // The lighting step drops the scene to blue hour so the LEDs are visible.
+  const dusk = focus === "features";
+  const skyLight = useRef<HemisphereLight | null>(null);
+  const sunLight = useRef<DirectionalLight | null>(null);
+  const auxiliaryLight = useRef<SpotLight | null>(null);
 
   const verticalLayout = useMemo(
     () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
     [poolType, system, overflowType, depth, copingThickness],
+  );
+
+  // Computed once here so the luminaires and the camera that frames them are
+  // driven by the same row.
+  const lighting = useMemo(
+    () =>
+      planSceneLighting({
+        outline,
+        layout: verticalLayout,
+        skimmers: system === "skimmer" ? skimmers : { ...skimmers, positions: [] },
+        access: poolAccess,
+      }),
+    [outline, verticalLayout, skimmers, system, poolAccess],
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
@@ -509,12 +608,24 @@ export default function PoolScene({
           equirectangular gradient environment instead. */}
       {!photoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} /> : null}
 
+      <SceneMood
+        dusk={dusk}
+        baseBackground={background}
+        baseExposure={SCENE_VISUAL_PRESET.exposure[theme]}
+        baseEnvironment={SCENE_VISUAL_PRESET.environment[theme]}
+        sky={skyLight}
+        sun={sunLight}
+        auxiliary={auxiliaryLight}
+      />
+
       <hemisphereLight
+        ref={skyLight}
         intensity={SCENE_VISUAL_PRESET.lighting.sky.intensity[theme]}
         color={SCENE_VISUAL_PRESET.lighting.sky.color}
         groundColor={SCENE_VISUAL_PRESET.lighting.sky.groundColor[theme]}
       />
       <directionalLight
+        ref={sunLight}
         position={sunPosition}
         intensity={SCENE_VISUAL_PRESET.lighting.sun.intensity[theme]}
         color={SCENE_VISUAL_PRESET.lighting.sun.color}
@@ -534,6 +645,7 @@ export default function PoolScene({
         shadow-camera-far={Math.max(36, radius * 7)}
       />
       <spotLight
+        ref={auxiliaryLight}
         position={[-radius * 1.4, radius * 1.6 + 5, -radius * 0.8]}
         intensity={SCENE_VISUAL_PRESET.lighting.auxiliary.intensity[theme]}
         angle={0.65}
@@ -566,12 +678,11 @@ export default function PoolScene({
 
       {features.includes("ledLighting") ? (
         <PoolLights
-          outline={outline}
+          lighting={lighting}
           layout={verticalLayout}
-          skimmers={system === "skimmer" ? skimmers : { ...skimmers, positions: [] }}
-          access={poolAccess}
           showWater={showWater}
           ledColor={ledColor}
+          presentation={dusk ? "night" : "day"}
         />
       ) : null}
 
@@ -669,6 +780,7 @@ export default function PoolScene({
         outline={outline}
         layout={verticalLayout}
         skimmers={skimmers}
+        ledRow={lighting.plan.positions}
         photoMode={photoMode}
         // The exterior/staircase framing must never hijack the Step 05
         // Pool System camera -- that step's premium front view (both

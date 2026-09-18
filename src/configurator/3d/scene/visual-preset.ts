@@ -111,4 +111,24 @@ export const SCENE_VISUAL_PRESET = {
   },
   camera: { fov: 34, near: 0.1, far: 500, defaultDistanceFactor: 3.25 },
   renderer: { maxDpr: ACTIVE_RENDERING_QUALITY.dpr[1] },
+  /**
+   * Blue hour, used while the customer is choosing lighting. Underwater LEDs
+   * are invisible under a midday sun -- in a real pool as much as in this
+   * scene -- so the step that sells them shows them at the hour they are
+   * actually seen. Deliberately dusk and not night: the deck, coping and
+   * surroundings stay readable, so the pool is still being configured rather
+   * than staged as a black backdrop with glowing water.
+   */
+  dusk: {
+    background: "#101b28",
+    exposure: 1.05,
+    environment: 0.06,
+    skyIntensity: 0.05,
+    skyGroundColor: "#0c1119",
+    sunIntensity: 0.22,
+    sunColor: "#9fb6d8",
+    auxiliaryIntensity: 0.04,
+    /** Seconds for the daylight <-> dusk crossfade. */
+    transitionSeconds: 0.9,
+  },
 } as const;
