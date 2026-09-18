@@ -12,6 +12,7 @@
  * problems/needs) instead of the new-pool-specific ones (skimmer detail,
  * LED, etc.) that may not even be meaningfully set for a renovation.
  */
+import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
@@ -20,6 +21,7 @@ import {
   EQUIPMENT_LABEL,
   poolTypeLabel,
   POOL_ACCESS_LABEL,
+  INTERNAL_STAIR_LABEL,
   POOL_FEATURE_LABEL,
   SKIMMER_TYPE_LABEL,
   systemHeadline,
@@ -55,7 +57,10 @@ function newPoolLines(submission: LeadSubmission): string[] {
       ? `${SKIMMER_TYPE_LABEL[config.skimmerType as keyof typeof SKIMMER_TYPE_LABEL] ?? config.skimmerType} · ${SKIMMER_FINISHES.find((s) => s.id === config.skimmerFinish)?.title ?? config.skimmerFinish}`
       : null;
   const accessLabel = config.poolAccess
-    ? (POOL_ACCESS_LABEL[config.poolAccess as keyof typeof POOL_ACCESS_LABEL] ?? config.poolAccess)
+    ? config.poolAccess === "internalSteps"
+      ? `${POOL_ACCESS_LABEL.internalSteps} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}`
+      : (POOL_ACCESS_LABEL[config.poolAccess as keyof typeof POOL_ACCESS_LABEL] ??
+        config.poolAccess)
     : "Non selezionato";
   const featureLabels = config.features
     .filter((id) => id === "hydromassage" || id === "externalStaircase")
@@ -76,7 +81,9 @@ function newPoolLines(submission: LeadSubmission): string[] {
     `Accesso: ${accessLabel}`,
     ...(featureLabels.length ? [`Comfort: ${featureLabels.join(", ")}`] : []),
     ...(hasLed
-      ? [`Illuminazione LED: sì — colore ${(config.ledColor ?? "#ffffff").toUpperCase()}`]
+      ? [
+          `Illuminazione LED: sì — colore ${(config.ledColor ?? "#ffffff").toUpperCase()}, intensità ${Math.round(normalisedLedIntensity(config.ledIntensity) * 100)}%`,
+        ]
       : []),
     ...(equipmentLabels.length ? [`Gestione piscina: ${equipmentLabels.join(", ")}`] : []),
     ...(deferred.length

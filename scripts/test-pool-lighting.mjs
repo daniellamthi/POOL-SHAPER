@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import * as THREE from 'three';
 import { planPoolLighting, clearsLightingExclusions, POOL_LIGHTING_DESIGN } from '../src/lib/pool/lighting.ts';
+import { skimmerWall } from '../src/lib/pool/walls.ts';
 
 // Exercise the existing access placement without mounting React/WebGL.
 const accessSource = readFileSync(new URL('../src/components/pool/three/PoolAccessModel.tsx', import.meta.url), 'utf8');
@@ -10,7 +11,7 @@ const ast = ts.createSourceFile('PoolAccessModel.tsx', accessSource, ts.ScriptTa
 const declaration = ast.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === 'accessPlacement');
 assert.ok(declaration, 'Shared access placement must remain available');
 const compiled = ts.transpileModule(declaration.getText(ast), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
-const accessPlacement = new Function('THREE', 'exports', `${compiled}; return exports.accessPlacement;`)(THREE, {});
+const accessPlacement = new Function('THREE', 'skimmerWall', 'exports', `${compiled}; return exports.accessPlacement;`)(THREE, skimmerWall, {});
 const rectangle = (length, width) => [[-length / 2, -width / 2], [length / 2, -width / 2], [length / 2, width / 2], [-length / 2, width / 2]];
 
 let cases = 0;
@@ -26,7 +27,7 @@ for (const [length, width, expected] of [[6, 3, 2], [8, 4, 2], [10, 5, 3], [12, 
       if (access) {
         const run = access === 'internalSteps' ? (Math.ceil(1.555 / 0.25) - 1) * 0.3 : 0.55;
         const accessWidth = access === 'internalSteps' ? 1.15 : 0.62;
-        const p = accessPlacement(outline, run, accessWidth);
+        const p = accessPlacement(outline, run, accessWidth, access === 'internalSteps' ? 'internalSteps' : 'stainlessSteelLadder');
         assert.ok(p);
         const nx = Math.sin(p.rotation), nz = Math.cos(p.rotation);
         const polygon = [[-accessWidth / 2, -0.05], [accessWidth / 2, -0.05], [accessWidth / 2, run + 0.1], [-accessWidth / 2, run + 0.1]].map(([x, z]) => [p.x + nz * x + nx * z, p.z - nx * x + nz * z]);
@@ -41,6 +42,9 @@ for (const [length, width, expected] of [[6, 3, 2], [8, 4, 2], [10, 5, 3], [12, 
       for (let i = 2; i < xs.length; i++) assert.ok(Math.abs((xs[i] - xs[i - 1]) - (xs[1] - xs[0])) < 1e-8, 'Even spacing');
       for (const p of plan.positions) {
         assert.equal(p.z, rowZ, 'One long wall');
+        // Skimmers are laid along the minZ wall above, so the luminaires must
+        // sit on the far side of the basin and shine back across it at them.
+        assert.ok(p.z > 0, 'Luminaires must face the skimmers from the opposite wall');
         assert.ok(Math.abs(waterY - p.y - 0.6) < 1e-8);
         assert.ok(p.y + 0.13 < waterY && p.y - 0.13 > -1.5, 'Entire fitting submerged and above floor');
         assert.ok(length / 2 - Math.abs(p.x) >= 0.6, 'Corner clearance');

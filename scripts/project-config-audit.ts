@@ -8,6 +8,7 @@ import {
 } from "../src/lib/pool/project";
 import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
 import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
+import { LED_OPTICS } from "../src/lib/pool/led-optics";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -37,7 +38,9 @@ const fullConfig: PoolConfig = {
   mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
   features: ["ledLighting", "hydromassage", "externalStaircase"],
   ledColor: "#3fa8ff",
+  ledIntensity: 0.75,
   poolAccess: "stainlessSteelLadder",
+  internalStairType: "corner",
   equipment: ["heatPump", "saltElectrolysis"],
   customer: {
     name: "Ada",
@@ -135,9 +138,47 @@ assert(linerRoundTrip.config.linerColor === "motionBlackStone799", "liner colour
 
 // 7. Pool Access survives.
 assert(roundTripped.config.poolAccess === "stainlessSteelLadder", "pool access must survive");
+assert(roundTripped.config.internalStairType === "corner", "internal stair variant must survive");
+{
+  const { internalStairType: _omitted, ...legacyStairs } = fullConfig;
+  const legacy = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(createProjectId(), legacyStairs as PoolConfig, fullRenovation),
+    ),
+  );
+  assert(
+    legacy.config.internalStairType === "linear",
+    "a project without internalStairType must restore as the straight flight it was drawn with",
+  );
+}
 
 // 8. RGB LED colour survives.
 assert(roundTripped.config.ledColor === "#3fa8ff", "LED RGB colour must survive");
+assert(roundTripped.config.ledIntensity === 0.75, "LED intensity must survive");
+// A project saved before the dimmer existed must come back with the real
+// default rather than undefined, so nothing downstream has to invent one.
+{
+  const { ledIntensity: _omitted, ...legacyConfig } = fullConfig;
+  const legacy = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(createProjectId(), legacyConfig as PoolConfig, fullRenovation),
+    ),
+  );
+  assert(
+    legacy.config.ledIntensity === LED_OPTICS.defaultIntensity,
+    "a project without ledIntensity must restore at the default, not undefined",
+  );
+  const clamped = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(
+        createProjectId(),
+        { ...fullConfig, ledIntensity: 4.2 } as PoolConfig,
+        fullRenovation,
+      ),
+    ),
+  );
+  assert(clamped.config.ledIntensity === 1, "an out-of-range ledIntensity must be clamped to 0..1");
+}
 assert(roundTripped.config.features.includes("ledLighting"), "LED feature flag must survive");
 
 // 9. Renovation-specific data survives where applicable.

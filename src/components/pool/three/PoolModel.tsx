@@ -69,6 +69,7 @@ import {
 
 interface PoolModelProps {
   poolAccess: import("@/lib/pool/types").PoolAccess | null;
+  internalStairType: import("@/lib/pool/types").InternalStairType;
   outline: Outline;
   depth: number;
   materials: ResolvedMaterials;
@@ -370,6 +371,7 @@ export function PoolModel({
   showWater,
   skimmers,
   poolAccess,
+  internalStairType,
 }: PoolModelProps) {
   const verticalLayout = getPoolVerticalLayout({
     poolType,
@@ -401,7 +403,15 @@ export function PoolModel({
     () => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset),
     [outline],
   );
-  const channelInnerEdge = isVisibleOverflow ? outline : overflowWaterEdge;
+  // Visible overflow edge, from the water outwards: basin -> raised kerb ->
+  // grated channel. The kerb is carved out of the near side of the channel
+  // band, so the grating simply starts further out and nothing beyond the
+  // channel's outer edge moves.
+  const overflowKerbOuter = useMemo(
+    () => offsetOutline(outline, OVERFLOW_GEOMETRY.visibleKerbWidth),
+    [outline],
+  );
+  const channelInnerEdge = isVisibleOverflow ? overflowKerbOuter : overflowWaterEdge;
   const overflowSlotEdge = useMemo(
     () => offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset),
     [outline],
@@ -796,8 +806,8 @@ export function PoolModel({
     [copingInner, copingOutline, isVisibleOverflow],
   );
   const grilleInnerSeat = useDisposable(
-    () => createRingGeometry(outline, offsetOutline(outline, 0.012)),
-    [outline],
+    () => createRingGeometry(overflowKerbOuter, offsetOutline(overflowKerbOuter, 0.012)),
+    [overflowKerbOuter],
   );
   const grilleOuterSeat = useDisposable(
     () => createRingGeometry(offsetOutline(overflowChannelOuter, -0.012), overflowChannelOuter),
@@ -806,9 +816,9 @@ export function PoolModel({
   const visibleOverflowGrate = useDisposable(
     () =>
       isVisibleOverflow
-        ? createGrateGeometry(outline, overflowChannelOuter)
+        ? createGrateGeometry(overflowKerbOuter, overflowChannelOuter)
         : new THREE.BufferGeometry(),
-    [overflowChannelOuter, outline, isVisibleOverflow],
+    [overflowChannelOuter, overflowKerbOuter, isVisibleOverflow],
   );
   const channelFloor = useDisposable(
     () =>
@@ -842,6 +852,28 @@ export function PoolModel({
       ),
     [overflowSlotEdge, verticalLayout.wallTopY],
   );
+  const overflowKerbTopY = verticalLayout.wallTopY + OVERFLOW_GEOMETRY.visibleKerbRise;
+  const overflowKerbTop = useDisposable(
+    () =>
+      isVisibleOverflow
+        ? createRingGeometry(outline, overflowKerbOuter)
+        : new THREE.BufferGeometry(),
+    [outline, overflowKerbOuter, isVisibleOverflow],
+  );
+  const overflowKerbInnerFace = useDisposable(
+    () =>
+      isVisibleOverflow
+        ? createWallGeometry(outline, overflowKerbTopY, verticalLayout.wallTopY - 0.05)
+        : new THREE.BufferGeometry(),
+    [outline, overflowKerbTopY, verticalLayout.wallTopY, isVisibleOverflow],
+  );
+  const overflowKerbOuterFace = useDisposable(
+    () =>
+      isVisibleOverflow
+        ? createWallGeometry(overflowKerbOuter, overflowKerbTopY, verticalLayout.wallTopY - 0.014)
+        : new THREE.BufferGeometry(),
+    [overflowKerbOuter, overflowKerbTopY, verticalLayout.wallTopY, isVisibleOverflow],
+  );
   const visibleOverflowChannelWall = useDisposable(
     () =>
       createWallGeometry(
@@ -863,6 +895,7 @@ export function PoolModel({
         <PoolAccessModel
           outline={outline}
           access={poolAccess}
+          stairType={internalStairType}
           floorY={verticalLayout.floorY}
           topY={verticalLayout.copingY}
         >
@@ -1007,6 +1040,25 @@ export function PoolModel({
                   receiveShadow
                 >
                   <meshStandardMaterial color="#77796f" roughness={0.68} side={DoubleSide} />
+                </mesh>
+                {/* The kerb: the raised band the basin is contained by, and
+                    the first thing outboard of the water. Mitred ring on top,
+                    a face down into the basin and a face down onto the grille
+                    seat, so it reads as one solid edge from every angle. */}
+                <mesh
+                  name="overflow-kerb"
+                  geometry={overflowKerbTop}
+                  position={[0, overflowKerbTopY, 0]}
+                  receiveShadow
+                  castShadow
+                >
+                  <meshStandardMaterial color="#eceae3" roughness={0.62} side={DoubleSide} />
+                </mesh>
+                <mesh geometry={overflowKerbInnerFace} receiveShadow castShadow>
+                  <meshStandardMaterial color="#e6e4dd" roughness={0.66} side={DoubleSide} />
+                </mesh>
+                <mesh geometry={overflowKerbOuterFace} receiveShadow castShadow>
+                  <meshStandardMaterial color="#e6e4dd" roughness={0.66} side={DoubleSide} />
                 </mesh>
                 <mesh
                   name="overflow-grille"

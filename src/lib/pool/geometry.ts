@@ -358,11 +358,15 @@ export function buildWaterOutline(
   overflowType: OverflowType,
 ): Outline {
   if (system === "skimmer") return outline;
-  const offset =
-    overflowType === "visible"
-      ? OVERFLOW_GEOMETRY.waterEdgeOffset + OVERFLOW_GEOMETRY.visibleWaterFilmWidth
-      : OVERFLOW_GEOMETRY.hiddenChannelOffset - OVERFLOW_GEOMETRY.hiddenWaterChannelClearance;
-  return offsetOutline(outline, offset);
+  // A visible overflow edge is contained by its kerb: the water stops at the
+  // basin wall and the raised kerb stands proud of it, with the grated channel
+  // outboard again. A film spreading past the wall would float over the kerb
+  // band instead of meeting its inner face.
+  if (overflowType === "visible") return outline;
+  return offsetOutline(
+    outline,
+    OVERFLOW_GEOMETRY.hiddenChannelOffset - OVERFLOW_GEOMETRY.hiddenWaterChannelClearance,
+  );
 }
 
 function rawOffsetOutline(outline: Outline, distance: number): Outline {

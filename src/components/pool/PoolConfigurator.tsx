@@ -1,3 +1,4 @@
+import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -392,6 +393,8 @@ function ConfiguratorLayout() {
             materials={materials}
             features={config.features}
             ledColor={config.ledColor ?? "#ffffff"}
+            ledIntensity={normalisedLedIntensity(config.ledIntensity)}
+            internalStairType={config.internalStairType ?? "linear"}
             poolAccess={config.poolAccess}
             skimmers={skimmers}
             length={config.dimensions.length}

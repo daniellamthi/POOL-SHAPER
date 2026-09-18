@@ -60,10 +60,38 @@ export const LED_OPTICS = {
   nearField: 1.4,
   absorption: [0.18, 0.045, 0.023] as const,
   maxLumensPerSquareMetre: 90,
-  neutralMix: 0.055,
-  maxChromaGain: 1.45,
+  /**
+   * A real underwater LED is never spectrally pure: its phosphor and its
+   * diffuser both wash the primary. Mixing 12% neutral is what lets a deep
+   * blue or red reach the same luminance as green without a grotesque gain,
+   * and it is why the lens core reads as a bright lamp rather than as a
+   * saturated gel.
+   */
+  neutralMix: 0.12,
+  /**
+   * Every hue is normalised to one luminance, so the colour wheel changes the
+   * colour of the pool and not its brightness. Without it green landed twice
+   * as bright as red, because the eye weights green 10x more -- the same
+   * reason a naive RGB lamp looks like a nightclub.
+   */
+  targetLuminance: 0.62,
+  maxChromaGain: 3.5,
+  /**
+   * Perceptual curve on the intensity control. Straight linear scaling makes
+   * the bottom half of the slider do almost nothing visible, because both the
+   * tone mapping and the eye are already compressive; this restores an even
+   * feel across 25 / 50 / 75 / 100.
+   */
+  intensityGamma: 1.75,
+  /** Even at the bottom of the slider the lens is a lamp that is switched on. */
+  minEmissionFraction: 0.2,
+  /** Default output: an evening setting, not the maximum. */
+  defaultIntensity: 0.6,
   shadowSize: 512,
-  diffuserSize: 64,
+  diffuserSize: 128,
+  /** Amplitude of the caustic banding baked into the projector map. Subtle on
+   * purpose: a pool lit by one LED ripples, it does not strobe. */
+  causticDepth: 0.16,
   // Shielding of the lamp's upper lobe. A submerged luminaire should not
   // throw light onto the dry deck, but the old values (0.5 / 0.025) sliced the
   // cone in half with a hard edge at exactly the fixture's own height: the
@@ -90,20 +118,56 @@ export const LED_OPTICS = {
 
 export const isLedColor = (value: string) => /^#[0-9a-f]{6}$/i.test(value);
 
+/**
+ * One calibrated colour, shared by every part of the luminaire.
+ *
+ * The lens glass, its core, the spotlight and the scattering volume are all
+ * driven by this single value, so the hue the customer picks is the hue of the
+ * lens, of the beam, of the lit water and of the pattern thrown on the liner.
+ * Nothing downstream is allowed to re-tint: that is how a blue lens ends up
+ * with a cyan beam.
+ */
 export function calibratedLedColor(value = "#ffffff") {
   // CSS colours enter as sRGB; Color converts once to the linear lighting space.
   const color = new Color(isLedColor(value) ? value : "#ffffff");
   const neutral = new Color().setRGB(0.96, 0.98, 1);
   color.lerp(neutral, LED_OPTICS.neutralMix);
   const luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
-  return color.multiplyScalar(Math.min(LED_OPTICS.maxChromaGain, 0.8 / Math.max(luminance, 0.01)));
+  return color.multiplyScalar(
+    Math.min(LED_OPTICS.maxChromaGain, LED_OPTICS.targetLuminance / Math.max(luminance, 0.01)),
+  );
 }
 
-export function ledCandela(area: number, count: number, lumens: number, presentation: keyof typeof LED_OPTICS.presentations = "day") {
+/** Clamp whatever a stored project hands us to a usable 0..1 dimmer setting. */
+export function normalisedLedIntensity(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(1, Math.max(0, value))
+    : LED_OPTICS.defaultIntensity;
+}
+
+/**
+ * The dimmer, as one factor applied to every emissive term at once -- lamp
+ * output, lens emission, core glow and the scattering volume -- so the beam
+ * cannot brighten without the lens that is supposed to be producing it.
+ */
+export function ledIntensityScale(value: unknown) {
+  const setting = normalisedLedIntensity(value);
+  const scale = Math.pow(setting, LED_OPTICS.intensityGamma);
+  return {
+    setting,
+    /** Lamp output, beam and lit water scale straight off the curve. */
+    output: scale,
+    /** The lens keeps a floor: a dimmed lamp is dim, not off. */
+    emission: LED_OPTICS.minEmissionFraction + (1 - LED_OPTICS.minEmissionFraction) * scale,
+  };
+}
+
+export function ledCandela(area: number, count: number, lumens: number, presentation: keyof typeof LED_OPTICS.presentations = "day", intensity = 1) {
   if (count <= 0 || area <= 0 || lumens <= 0) return 0;
   const perFixtureLumens = Math.min(lumens, area * LED_OPTICS.maxLumensPerSquareMetre / count);
   const solidAngle = 2 * Math.PI * (1 - Math.cos(LED_OPTICS.angle));
-  return perFixtureLumens * LED_OPTICS.presentations[presentation].output / solidAngle;
+  const lampOutput = LED_OPTICS.presentations[presentation].output * intensity;
+  return perFixtureLumens * lampOutput / solidAngle;
 }
 
 export function hueToLedHex(hue: number) {

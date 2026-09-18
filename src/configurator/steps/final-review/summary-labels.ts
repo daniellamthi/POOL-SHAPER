@@ -6,6 +6,7 @@
  * final summary is presented in.
  */
 import type {
+  InternalStairType,
   EquipmentId,
   LinerColor,
   PoolAccess,
@@ -51,6 +52,11 @@ export const MOSAIC_WATER_CHARACTER =
 export const POOL_ACCESS_LABEL: Record<PoolAccess, string> = {
   internalSteps: "Scala interna integrata",
   stainlessSteelLadder: "Scaletta in acciaio inox",
+};
+
+export const INTERNAL_STAIR_LABEL: Record<InternalStairType, string> = {
+  linear: "Scala lineare",
+  corner: "Scala ad angolo",
 };
 
 export const POOL_FEATURE_LABEL: Record<PoolFeatureId, string> = {

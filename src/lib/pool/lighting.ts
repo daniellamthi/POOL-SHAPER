@@ -1,4 +1,5 @@
 import type { Outline } from "./types";
+import { skimmerWall } from "./walls.ts";
 
 /** Lighting DESIGN defaults, not a statutory light count or a compliance check. */
 export const POOL_LIGHTING_DESIGN = {
@@ -86,21 +87,36 @@ export function planPoolLighting({ outline, waterY, floorY, lumenOutput = POOL_L
   if (maxSubmergence < minSubmergence) return empty("Insufficient submerged installation clearance");
   const submergence = Math.min(design.submergence, maxSubmergence);
   let signedArea = 0;
+  // Luminaires face the skimmers across the basin: they go on the wall
+  // parallel to the skimmer run and on the far side of it, never on the
+  // skimmer wall itself. The wall is derived from the same canonical rule the
+  // skimmers are placed by, so the two can never drift apart, and the row's
+  // spacing still comes from the wall's own length.
+  const skimmers = skimmerWall(outline);
+  const axis = skimmers.axis === "x" ? 0 : 1;
+  // 0 = the wall opposite the skimmers, 1 = any other wall, 2 = theirs.
+  const wallRank = (a: readonly number[], b: readonly number[]) => {
+    if (Math.abs(a[axis]! - b[axis]!) > 1e-6) return 1;
+    if (Math.abs(a[axis]! - skimmers.coordinate) < 1e-6) return 2;
+    return a[axis]! > skimmers.coordinate ? 0 : 1;
+  };
   const edges = outline.map((a, i) => {
     const b = outline[(i + 1) % outline.length]!;
     signedArea += a[0] * b[1] - b[0] * a[1];
-    return { a, b, length: Math.hypot(b[0] - a[0], b[1] - a[1]) };
-  }).filter(edge => edge.length > 2 * design.cornerClearance).sort((a, b) => b.length - a.length);
+    return { a, b, length: Math.hypot(b[0] - a[0], b[1] - a[1]), rank: wallRank(a, b) };
+  }).filter(edge => edge.length > 2 * design.cornerClearance).sort((a, b) => a.rank - b.rank || b.length - a.length);
   const area = Math.abs(signedArea) / 2;
   if (!edges.length || area <= 0) return empty("No straight wall suitable for a symmetric lighting row");
-  const length = edges[0]!.length;
+  // Photometrics follow the longest wall in the basin; candidate selection
+  // below follows the ranking above.
+  const length = Math.max(...edges.map(edge => edge.length));
   const depthFactor = 1 + design.depthAllowance * Math.max(0, depth - design.referenceDepth);
   const requestedCount = Math.max(design.minCount, Math.ceil(length / design.maxSpacing), Math.ceil(area * design.targetIlluminance * depthFactor / (lumenOutput * design.utilization * design.maintenance)));
   const count = Math.min(requestedCount, design.maxRenderedCount);
   const warnings = requestedCount > count ? ["Design exceeds preview light budget; photometric review required"] : [];
   if (submergence < 0.5) warnings.push("Shallow pool: confirm product minimum immersion before installation");
   const result: PoolLightingPlan = { count: 0, requestedCount, surfaceArea: area, submergence, positions: [], warnings };
-  for (const edge of edges.filter(candidate => candidate.length >= length * 0.9)) {
+  for (const edge of edges.filter(candidate => candidate.length >= length * 0.9 && candidate.rank < 2)) {
     const tx = (edge.b[0] - edge.a[0]) / edge.length, tz = (edge.b[1] - edge.a[1]) / edge.length;
     const mx = (edge.a[0] + edge.b[0]) / 2, mz = (edge.a[1] + edge.b[1]) / 2;
     const sign = insideLightingOutline(mx - tz * 0.05, mz + tx * 0.05, outline) ? 1 : -1;

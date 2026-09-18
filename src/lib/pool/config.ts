@@ -484,14 +484,40 @@ export const COPING_WIDTH = 0.2;
 export const OVERFLOW_GEOMETRY = {
   waterEdgeOffset: 0.055,
   hiddenChannelOffset: 0.105,
-  visibleChannelOuterOffset: 0.165,
+  /**
+   * Outer edge of the VISIBLE overflow perimeter. Built, not styled: it is the
+   * kerb plus the grille, and the audit enforces that identity rather than
+   * letting the three numbers drift apart.
+   */
+  visibleChannelOuterOffset: 0.355,
+  /**
+   * The constructed kerb (muretto) between the basin and the grille. 110 mm is
+   * a real finished kerb -- a block or cast upstand with its cladding -- not
+   * the 62 mm decorative strip this started as, which read as a trim bead
+   * rather than as structure.
+   */
+  visibleKerbWidth: 0.11,
+  /**
+   * How far the kerb's top stands above the pool wall top. 75 mm leaves ~68 mm
+   * of kerb face above the waterline: enough to read as a built containment
+   * edge at every camera distance, and in the range a real coping course
+   * stands proud of the water.
+   */
+  visibleKerbRise: 0.075,
+  /**
+   * Overflow grille width. 245 mm is a stock section (the common residential
+   * size between 195 and 295), so the grille is proportioned like a product
+   * that exists rather than to whatever was left over from the channel band.
+   */
+  visibleGrateWidth: 0.245,
   visibleWaterFilmWidth: 0.02,
   hiddenWaterChannelClearance: 0.015,
   visibleGrateTopOffset: 0.006,
   visibleWaterAboveLip: 0.001,
   hiddenWaterTopClearance: 0.0005,
   surfaceMovementAmplitude: 0.00025,
-  channelDepth: 0.19,
+  /** Channel below the grille -- a real perimeter gutter, not a slot. */
+  channelDepth: 0.22,
   grateSlatPitch: 0.075,
 } as const;
 /** Distance from the coping top down to the waterline, in metres.

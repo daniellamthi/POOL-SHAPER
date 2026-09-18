@@ -34,6 +34,9 @@ export type SkimmerTypeId = "standard" | "slim" | "highWaterline" | "flush";
 export type PoolFeatureId = "ledLighting" | "hydromassage" | "externalStaircase";
 
 export type PoolAccess = "internalSteps" | "stainlessSteelLadder";
+/** Which internal staircase is built: a straight flight down an end wall, or
+ *  a radial flight wrapped around a corner. */
+export type InternalStairType = "linear" | "corner";
 
 export type EquipmentId = "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing";
 
@@ -121,7 +124,13 @@ export interface PoolConfig {
   mosaicFinish: MosaicFinishId;
   features: ReadonlyArray<PoolFeatureId>;
   ledColor?: string;
+  /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before
+   * the control existed; readers substitute LED_OPTICS.defaultIntensity. */
+  ledIntensity?: number;
   poolAccess: PoolAccess | null;
+  /** Only meaningful while `poolAccess` is "internalSteps". Absent on projects
+   *  saved before the corner staircase existed; readers substitute "linear". */
+  internalStairType?: InternalStairType;
   equipment: ReadonlyArray<EquipmentId>;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;

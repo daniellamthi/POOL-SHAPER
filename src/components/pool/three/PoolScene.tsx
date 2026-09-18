@@ -42,6 +42,7 @@ import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { getCameraPose } from "@/lib/pool/camera";
 import type { CameraIntent } from "@/lib/pool/camera";
 import type { PoolLightPosition } from "@/lib/pool/lighting";
+import type { InternalStairType } from "@/lib/pool/types";
 import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
@@ -69,6 +70,10 @@ export interface SceneProps {
   materials: ResolvedMaterials;
   features: ReadonlyArray<PoolFeatureId>;
   ledColor?: string;
+  /** 0..1 dimmer, already resolved: the scene never guesses a default. */
+  ledIntensity: number;
+  /** Which internal staircase is built; resolved upstream. */
+  internalStairType: InternalStairType;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
   length: number;
@@ -489,6 +494,8 @@ export default function PoolScene({
   materials,
   features,
   ledColor = "#ffffff",
+  ledIntensity,
+  internalStairType,
   poolAccess,
   skimmers,
   length,
@@ -529,8 +536,9 @@ export default function PoolScene({
         layout: verticalLayout,
         skimmers: system === "skimmer" ? skimmers : { ...skimmers, positions: [] },
         access: poolAccess,
+        stairType: internalStairType,
       }),
-    [outline, verticalLayout, skimmers, system, poolAccess],
+    [outline, verticalLayout, skimmers, system, poolAccess, internalStairType],
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
@@ -561,6 +569,7 @@ export default function PoolScene({
     theme,
     features.join(","),
     ledColor,
+    ledIntensity,
     poolAccess,
     photoModeQuality,
   ].join("|");
@@ -665,6 +674,7 @@ export default function PoolScene({
 
       <PoolModel
         poolAccess={poolAccess}
+        internalStairType={internalStairType}
         skimmers={skimmers}
         outline={outline}
         depth={depth}
@@ -682,6 +692,7 @@ export default function PoolScene({
           layout={verticalLayout}
           showWater={showWater}
           ledColor={ledColor}
+          ledIntensity={ledIntensity}
           presentation={dusk ? "night" : "day"}
         />
       ) : null}

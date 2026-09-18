@@ -14,6 +14,7 @@
  * belong in component/store state, not here.
  */
 import type { PoolConfig, RenovationConfig } from "./types";
+import { normalisedLedIntensity } from "./led-optics";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -84,10 +85,21 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   if (typeof renovation !== "object" || renovation === null) {
     throw new Error("ProjectConfiguration: missing renovation");
   }
+  // A project saved before the LED dimmer existed has no `ledIntensity`.
+  // Filling it here, once, means every reader downstream -- scene, summary,
+  // commercial email, quotation -- sees a real number instead of each having
+  // to guess a fallback of its own.
+  const restored = config as PoolConfig;
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
-    config: config as PoolConfig,
+    config: {
+      ...restored,
+      ledIntensity: normalisedLedIntensity(restored.ledIntensity),
+      // Same reasoning for the staircase variant: a project saved before the
+      // corner flight existed comes back as the straight one it was drawn with.
+      internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
+    },
     renovation: renovation as RenovationConfig,
   };
 }

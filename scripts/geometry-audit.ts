@@ -59,6 +59,11 @@ import {
 import * as THREE from "three";
 import { createShorelineField } from "../src/components/pool/three/waterDepth";
 import { createCausticsMap } from "../src/components/pool/three/textures";
+import {
+  accessPlacement,
+  cornerStairPlan,
+  linearStairDimensions,
+} from "../src/components/pool/three/PoolAccessModel";
 import { WATER_VISUAL_PRESET } from "../src/configurator/materials/visual-presets";
 
 const assert = (condition: unknown, message: string): asserts condition => {
@@ -386,7 +391,11 @@ for (const testCase of customCases) {
   const hiddenOverflowEdge = offsetOutline(inner, OVERFLOW_GEOMETRY.hiddenChannelOffset);
   const visibleOverflowEdge = offsetOutline(inner, OVERFLOW_GEOMETRY.visibleChannelOuterOffset);
   const hiddenIntake = createRingGeometry(overflowWaterEdge, hiddenOverflowEdge);
-  const visibleGrate = createRingGeometry(overflowWaterEdge, visibleOverflowEdge, true);
+  const visibleGrate = createRingGeometry(
+    offsetOutline(inner, OVERFLOW_GEOMETRY.visibleKerbWidth),
+    visibleOverflowEdge,
+    true,
+  );
   const skimmerWater = buildWaterOutline(inner, "skimmer", "hidden");
   const hiddenWater = buildWaterOutline(inner, "overflow", "hidden");
   const visibleWater = buildWaterOutline(inner, "overflow", "visible");
@@ -400,12 +409,24 @@ for (const testCase of customCases) {
     `${testCase.name}: Visible Overflow is not geometrically wider than Hidden Overflow`,
   );
   assert(skimmerWater === inner, `${testCase.name}: Skimmer water footprint changed`);
+  // Hidden Overflow's water still reaches into its concealed slot. Visible
+  // Overflow's is contained by the kerb instead: the water stops at the basin
+  // wall, the raised kerb stands proud of it and the grated channel is
+  // outboard again -- basin, kerb, grating, in that order.
   assert(
     hiddenWaterBounds.spanX > visibleWaterBounds.spanX &&
       hiddenWaterBounds.spanZ > visibleWaterBounds.spanZ &&
-      visibleWaterBounds.spanX > innerBounds.spanX &&
-      visibleWaterBounds.spanZ > innerBounds.spanZ,
+      Math.abs(visibleWaterBounds.spanX - innerBounds.spanX) < 1e-9 &&
+      Math.abs(visibleWaterBounds.spanZ - innerBounds.spanZ) < 1e-9,
     `${testCase.name}: overflow water footprints do not reach their thresholds`,
+  );
+  const kerbBounds = outlineBounds(offsetOutline(inner, OVERFLOW_GEOMETRY.visibleKerbWidth));
+  assert(
+    innerBounds.spanX < kerbBounds.spanX &&
+      kerbBounds.spanX < visibleBounds.spanX &&
+      innerBounds.spanZ < kerbBounds.spanZ &&
+      kerbBounds.spanZ < visibleBounds.spanZ,
+    `${testCase.name}: visible overflow kerb does not sit between basin and grating`,
   );
   assert(
     hiddenIntake.getAttribute("position").count > 0 &&
@@ -924,13 +945,132 @@ assert(
     .join(",") === "modular-steel-structure",
   "invalid above-ground structures",
 );
+
+// --- Internal staircases -------------------------------------------------
+// Both variants are built from the basin's own dimensions, so they are checked
+// across the size range rather than at the one pool they were drawn against.
+for (const [length, width, depth] of [
+  [6, 3, 1.2],
+  [8, 4, 1.5],
+  [10, 4.5, 1.5],
+  [12, 6, 2],
+] as const) {
+  const outline: Outline = [
+    [-length / 2, -width / 2],
+    [length / 2, -width / 2],
+    [length / 2, width / 2],
+    [-length / 2, width / 2],
+  ];
+  const floorY = -depth;
+  const topY = 0.06;
+  const flight = linearStairDimensions(floorY, topY);
+  const label = `${length}x${width}x${depth}`;
+  assert(
+    flight.rise > 0.12 && flight.rise <= 0.25,
+    `${label}: stair risers outside a climbable range`,
+  );
+
+  const straight = accessPlacement(outline, flight.run, flight.width, "internalSteps");
+  assert(straight, `${label}: straight flight found no wall`);
+  // On the short wall...
+  assert(
+    Math.abs(Math.abs(straight.x) - length / 2) < 1e-6,
+    `${label}: straight flight is not on a short wall`,
+  );
+  // ...and pushed into a corner, one flank against the long wall.
+  const flank = width / 2 - (Math.abs(straight.z) + flight.width / 2);
+  assert(
+    flank >= -1e-6 && flank < 0.05,
+    `${label}: straight flight is not seated against the long wall (gap ${flank.toFixed(3)} m)`,
+  );
+  assert(flight.run < length - 0.6, `${label}: straight flight runs too far down the basin`);
+
+  const corner = cornerStairPlan(outline, floorY, topY);
+  assert(corner, `${label}: corner flight found no corner`);
+  assert(
+    corner.radii.length === flight.steps,
+    `${label}: the two staircases must descend in the same number of treads`,
+  );
+  const treads = corner.radii.slice(1).map((radius, i) => radius - corner.radii[i]!);
+  assert(
+    treads.every((tread) => tread >= 0.219 && tread <= 0.351),
+    `${label}: corner treads are not a walkable depth`,
+  );
+  assert(
+    treads.every((tread) => Math.abs(tread - treads[0]!) < 1e-9),
+    `${label}: corner treads are not concentric at a constant pitch`,
+  );
+  // The 28 cm target is only guaranteed once the basin is wide enough that a
+  // FULL 28 cm pitch would itself have stayed in proportion -- checking the
+  // plan's own (possibly already backed-off) reach here would be circular,
+  // since that reach fits *by construction* however far the pitch had to
+  // back off. Recompute the same hypothetical cornerStairPlan works from.
+  const shortSpan = Math.min(length, width);
+  const outerTarget = Math.min(1.85, Math.max(1.1, shortSpan * 0.4));
+  const safeOuterReach = shortSpan * 0.45;
+  const hypotheticalOuterReach =
+    Math.max(0.42, outerTarget - 0.28 * (flight.steps - 1)) + 0.28 * (flight.steps - 1);
+  if (hypotheticalOuterReach <= safeOuterReach + 1e-6) {
+    assert(
+      treads.every((tread) => tread >= 0.279),
+      `${label}: corner treads should reach the ~28 cm target on a basin this size`,
+    );
+  }
+  const outerRadius = corner.radii[corner.radii.length - 1]!;
+  assert(
+    corner.radii[0]! >= 0.42 && outerRadius <= Math.min(width, length) * 0.45,
+    `${label}: corner flight is out of proportion with the basin`,
+  );
+  // Anchored on an actual corner of the outline, with the whole quarter inside.
+  assert(
+    outline.some(([x, z]) => Math.hypot(x - corner.x, z - corner.z) < 0.05),
+    `${label}: corner flight is not anchored on a corner`,
+  );
+  assert(
+    corner.footprint.every(
+      ([x, z]) => Math.abs(x) <= length / 2 + 1e-6 && Math.abs(z) <= width / 2 + 1e-6,
+    ),
+    `${label}: corner flight footprint leaves the basin`,
+  );
+  // Top tread submerged, bottom tread standing on the floor: no floating steps.
+  const topTread = floorY + corner.radii.length * corner.rise;
+  assert(
+    topTread < topY - 1e-6 && topTread > topY - 0.3,
+    `${label}: corner flight does not finish just below the coping`,
+  );
+}
+
 assert(POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,custom", "invalid pool shapes");
 assert(FINISHES.map(({ id }) => id).join(",") === "liner,mosaic", "invalid finishes");
 assert(
   OVERFLOW_GEOMETRY.waterEdgeOffset < OVERFLOW_GEOMETRY.hiddenChannelOffset &&
-    OVERFLOW_GEOMETRY.hiddenChannelOffset < OVERFLOW_GEOMETRY.visibleChannelOuterOffset &&
-    OVERFLOW_GEOMETRY.visibleChannelOuterOffset < COPING_WIDTH,
+    OVERFLOW_GEOMETRY.hiddenChannelOffset < OVERFLOW_GEOMETRY.visibleChannelOuterOffset,
   "invalid overflow geometry hierarchy",
+);
+// The visible overflow perimeter is built out of two real components, so its
+// outer edge is their sum and nothing else. Without this the kerb, the grille
+// and the band they sit in can each be tuned on their own until the edge stops
+// adding up -- which is exactly how it ended up reading as a trim strip.
+assert(
+  Math.abs(
+    OVERFLOW_GEOMETRY.visibleKerbWidth +
+      OVERFLOW_GEOMETRY.visibleGrateWidth -
+      OVERFLOW_GEOMETRY.visibleChannelOuterOffset,
+  ) < 1e-9,
+  "visible overflow band must equal kerb width + grille width",
+);
+assert(
+  OVERFLOW_GEOMETRY.visibleKerbWidth >= 0.09 &&
+    OVERFLOW_GEOMETRY.visibleKerbWidth <= 0.16 &&
+    OVERFLOW_GEOMETRY.visibleKerbRise >= 0.05 &&
+    OVERFLOW_GEOMETRY.visibleKerbRise <= 0.12,
+  "visible overflow kerb is outside buildable proportions",
+);
+assert(
+  OVERFLOW_GEOMETRY.visibleGrateWidth >= 0.195 &&
+    OVERFLOW_GEOMETRY.visibleGrateWidth <= 0.295 &&
+    OVERFLOW_GEOMETRY.channelDepth > OVERFLOW_GEOMETRY.visibleKerbRise,
+  "overflow grille width or channel depth is not a real section",
 );
 assert(
   POOL_FEATURES.map(({ id }) => id).join(",") === "ledLighting,hydromassage",

@@ -1,3 +1,4 @@
+import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import type { ReactNode } from "react";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, STEPS } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
@@ -9,6 +10,7 @@ import {
   linerWaterCharacter,
   MOSAIC_WATER_CHARACTER,
   POOL_ACCESS_LABEL,
+  INTERNAL_STAIR_LABEL,
   POOL_FEATURE_LABEL,
   poolTypeLabel,
   shapeLabel,
@@ -119,7 +121,13 @@ export function ProjectSummary() {
   const finishHint = isMosaic ? MOSAIC_WATER_CHARACTER : linerWaterCharacter(config.linerColor);
 
   const comfortItems = [
-    ...(config.poolAccess ? [POOL_ACCESS_LABEL[config.poolAccess]] : []),
+    ...(config.poolAccess
+      ? [
+          config.poolAccess === "internalSteps"
+            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}`
+            : POOL_ACCESS_LABEL[config.poolAccess],
+        ]
+      : []),
     ...config.features
       .filter((id) => id === "hydromassage" || id === "externalStaircase")
       .map((id) => POOL_FEATURE_LABEL[id]),
@@ -127,6 +135,7 @@ export function ProjectSummary() {
 
   const hasLed = config.features.includes("ledLighting");
   const ledColor = config.ledColor ?? "#ffffff";
+  const ledIntensity = Math.round(normalisedLedIntensity(config.ledIntensity) * 100);
 
   const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
 
@@ -206,6 +215,7 @@ export function ProjectSummary() {
             value={ledColor.toUpperCase()}
             swatch={<Swatch hex={ledColor} />}
           />
+          <Row label="Intensità luce" value={`${ledIntensity}%`} />
         </Section>
       ) : null}
 

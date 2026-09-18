@@ -1,5 +1,6 @@
 import { SQM_PER_SKIMMER } from "./config";
 import { outlineBounds } from "./geometry";
+import { skimmerWall } from "./walls.ts";
 import type { Outline } from "./types";
 
 export interface SkimmerPlan {
@@ -23,7 +24,7 @@ export function planSkimmers(outline: Outline, waterSurface: number, enabled = t
   const centreX = outline.reduce((sum, [x]) => sum + x, 0) / outline.length;
   const centreZ = outline.reduce((sum, [, z]) => sum + z, 0) / outline.length;
   const positions: Array<{ x: number; z: number; rotation: number }> = [];
-  const runAlongX = spanX >= spanZ;
+  const runAlongX = skimmerWall(outline).runsAlongX;
   const runLength = runAlongX ? spanX : spanZ;
   for (let index = 0; index < count; index++) {
     const t = (index + 0.5) / count;

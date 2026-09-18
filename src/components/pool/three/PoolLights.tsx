@@ -1,11 +1,22 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { accessPlacement } from "./PoolAccessModel";
-import { planPoolLighting, POOL_LUMINAIRE, type LightingExclusion, type PoolLightPosition, type PoolLightingPlan } from "@/lib/pool/lighting";
-import type { Outline, PoolAccess } from "@/lib/pool/types";
+import { accessPlacement, cornerStairPlan, linearStairDimensions } from "./PoolAccessModel";
+import {
+  planPoolLighting,
+  POOL_LUMINAIRE,
+  type LightingExclusion,
+  type PoolLightPosition,
+  type PoolLightingPlan,
+} from "@/lib/pool/lighting";
+import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
-import { calibratedLedColor, ledCandela, LED_OPTICS } from "@/lib/pool/led-optics";
+import {
+  calibratedLedColor,
+  ledCandela,
+  ledIntensityScale,
+  LED_OPTICS,
+} from "@/lib/pool/led-optics";
 
 // Presentation dimming is independent of the design lumen budget and layout.
 export const POOL_LED_PRESENTATIONS = LED_OPTICS.presentations;
@@ -127,10 +138,11 @@ void main() {
 }
 `;
 
-function RecessedPoolLight({ position, floorY, powered, presentation, revision, colour, intensity, diffuser, glow, scatterGeometry, scatterMaterial, occlusion }: {
+function RecessedPoolLight({ position, floorY, powered, presentation, revision, colour, intensity, dimmer, diffuser, glow, scatterGeometry, scatterMaterial, occlusion }: {
   position: PoolLightPosition; floorY: number; powered: boolean;
   presentation: keyof typeof POOL_LED_PRESENTATIONS; revision: string;
   colour: THREE.Color; intensity: number;
+  dimmer: { output: number; emission: number };
   diffuser: THREE.DataTexture;
   glow: THREE.DataTexture;
   scatterGeometry: THREE.CylinderGeometry;
@@ -163,7 +175,7 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
       </mesh>
       <mesh position={[0, 0, 0.017]}>
         <circleGeometry args={[0.1, 40]} />
-        <meshPhysicalMaterial color="#aabfc3" roughness={0.18} clearcoat={0.8} clearcoatRoughness={0.12} emissive={colour} emissiveIntensity={powered ? level.emission : 0} />
+        <meshPhysicalMaterial color="#aabfc3" roughness={0.18} clearcoat={0.8} clearcoatRoughness={0.12} emissive={colour} emissiveIntensity={powered ? level.emission * dimmer.emission : 0} />
       </mesh>
       {[-1, 1].map(sign => (
         <mesh key={sign} position={[sign * 0.116, 0, 0.032]} rotation={[Math.PI / 2, 0, 0]}>
@@ -185,7 +197,7 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
           <meshBasicMaterial
             map={glow}
             color={colour}
-            opacity={level.glow}
+            opacity={level.glow * dimmer.emission}
             // Opaque-list for the same reason as the beam volume: a
             // `transparent` glow is invisible through the water surface.
             transparent={false}
@@ -250,19 +262,31 @@ export function planSceneLighting({
   layout,
   skimmers,
   access,
+  stairType = "linear",
 }: {
   outline: Outline;
   layout: PoolVerticalLayout;
   skimmers: SkimmerPlan;
   access: PoolAccess | null;
+  stairType?: InternalStairType;
 }): SceneLightingPlan {
   const exclusions: LightingExclusion[] = skimmers.positions.map(p => ({ kind: "skimmer", x: p.x, z: p.z, radius: 0.65 }));
   let accessPoint: { x: number; z: number } | null = null;
-  if (access) {
-    const riseCount = Math.max(3, Math.ceil((layout.copingY - layout.floorY) / 0.25));
-    const run = access === "internalSteps" ? (riseCount - 1) * 0.3 : 0.55;
-    const width = access === "internalSteps" ? 1.15 : 0.62;
-    const placement = accessPlacement(outline, run, width);
+  // The footprint fittings must avoid comes from the same plan the staircase
+  // is built from, so a corner flight excludes the quarter it actually fills
+  // rather than the straight flight's rectangle.
+  const corner =
+    access === "internalSteps" && stairType === "corner"
+      ? cornerStairPlan(outline, layout.floorY, layout.copingY)
+      : null;
+  if (corner) {
+    accessPoint = { x: corner.x, z: corner.z };
+    exclusions.push({ kind: "access", polygon: corner.footprint, clearance: 0.2 });
+  } else if (access) {
+    const flight = linearStairDimensions(layout.floorY, layout.copingY);
+    const run = access === "internalSteps" ? flight.run : 0.55;
+    const width = access === "internalSteps" ? flight.width : 0.62;
+    const placement = accessPlacement(outline, run, width, access);
     if (placement) {
       accessPoint = placement;
       const nx = Math.sin(placement.rotation), nz = Math.cos(placement.rotation);
@@ -287,11 +311,13 @@ export function planSceneLighting({
   return { plan, shadowIndex, convexQuad };
 }
 
-export function PoolLights({ lighting, layout, showWater, presentation = "day", ledColor = "#ffffff" }: {
+export function PoolLights({ lighting, layout, showWater, presentation = "day", ledColor = "#ffffff", ledIntensity }: {
   lighting: SceneLightingPlan; layout: PoolVerticalLayout;
   showWater: boolean;
   presentation?: keyof typeof POOL_LED_PRESENTATIONS;
   ledColor?: string;
+  /** 0..1 dimmer, resolved upstream. */
+  ledIntensity: number;
 }) {
   // A shared optical distribution, not a visible beam mesh. The upper lobe is
   // shielded so submerged LEDs do not light the dry deck or produce point
@@ -302,8 +328,20 @@ export function PoolLights({ lighting, layout, showWater, presentation = "day", 
     for (let y = 0; y < size; y++) {
       const transmission = THREE.MathUtils.smoothstep(LED_OPTICS.upperCutoff - y / (size - 1), 0, LED_OPTICS.upperFeather);
       for (let x = 0; x < size; x++) {
+        // Caustics, baked into the projector rather than added as a second
+        // pass: the beam crosses a rippled surface on its way out, so the
+        // pattern it lays on the liner is faintly banded. Because it modulates
+        // the spotlight's own map it is tinted by the lamp's colour for free,
+        // costs no extra light, no extra draw and no per-frame work.
+        const u = (x / (size - 1) - 0.5) * Math.PI * 4;
+        const v = (y / (size - 1) - 0.5) * Math.PI * 4;
+        const ripple =
+          1 +
+          LED_OPTICS.causticDepth *
+            (Math.sin(u * 1.7 + Math.cos(v * 1.1)) * Math.sin(v * 1.3 + Math.cos(u * 0.9)));
         const i = (y * size + x) * 4;
-        data[i] = data[i + 1] = data[i + 2] = Math.round(transmission * 255);
+        const level = Math.round(THREE.MathUtils.clamp(transmission * ripple, 0, 1) * 255);
+        data[i] = data[i + 1] = data[i + 2] = level;
         data[i + 3] = 255;
       }
     }
@@ -401,18 +439,28 @@ export function PoolLights({ lighting, layout, showWater, presentation = "day", 
   const { plan, shadowIndex, convexQuad } = lighting;
   const revision = `${plan.positions.map(p => `${p.x},${p.y},${p.z}`).join(";")}|${showWater}`;
   const colour = useMemo(() => calibratedLedColor(ledColor), [ledColor]);
-  const intensity = ledCandela(plan.surfaceArea, plan.count, POOL_LUMINAIRE.lumens, presentation);
+  // One dimmer factor for the whole luminaire. Changing it only rewrites
+  // uniforms and light parameters on the existing objects -- no geometry, no
+  // material, no light is rebuilt, so dragging the slider costs nothing.
+  const dimmer = ledIntensityScale(ledIntensity);
+  const intensity = ledCandela(
+    plan.surfaceArea,
+    plan.count,
+    POOL_LUMINAIRE.lumens,
+    presentation,
+    dimmer.output,
+  );
   // The scattering volume is driven by the same calibrated colour as the
   // beam, so lens, water and lit surfaces always agree.
   scatterMaterial.uniforms["beamColor"]!.value.copy(colour);
   scatterMaterial.uniforms["density"]!.value = showWater
-    ? POOL_LED_PRESENTATIONS[presentation].scatter
+    ? POOL_LED_PRESENTATIONS[presentation].scatter * dimmer.output
     : 0;
   scatterMaterial.uniforms["waterLevel"]!.value = layout.waterY;
   scatterMaterial.uniforms["floorLevel"]!.value = layout.floorY;
   return (
     <group name="pool-automatic-lighting" userData={{ lightingPlan: plan, luminaire: POOL_LUMINAIRE }}>
-      {plan.positions.map((position, i) => <RecessedPoolLight key={i} position={position} floorY={layout.floorY} powered={showWater} presentation={presentation} revision={revision} colour={colour} intensity={intensity} diffuser={diffuser} glow={glow} scatterGeometry={scatterGeometry} scatterMaterial={scatterMaterial} occlusion={!convexQuad || i === shadowIndex} />)}
+      {plan.positions.map((position, i) => <RecessedPoolLight key={i} position={position} floorY={layout.floorY} powered={showWater} presentation={presentation} revision={revision} colour={colour} intensity={intensity} dimmer={dimmer} diffuser={diffuser} glow={glow} scatterGeometry={scatterGeometry} scatterMaterial={scatterMaterial} occlusion={!convexQuad || i === shadowIndex} />)}
     </group>
   );
 }

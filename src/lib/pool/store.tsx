@@ -19,7 +19,7 @@ import {
 } from "./config";
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
-import { isLedColor } from "./led-optics";
+import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
 import { getCustomerValidation } from "./validation";
 import { createProjectId, toProjectConfiguration, type ProjectConfiguration } from "./project";
 import { clearProjectDraft, loadProjectDraft, saveProjectDraft } from "./persistence";
@@ -30,6 +30,7 @@ import type {
   CustomerInfo,
   EquipmentId,
   FinishMaterial,
+  InternalStairType,
   PoolType,
   LinerColor,
   MosaicFinishId,
@@ -69,6 +70,8 @@ type Action =
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
   | { type: "setLedColor"; value: string }
+  | { type: "setLedIntensity"; value: number }
+  | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setPoolAccess"; value: PoolAccess }
   | { type: "toggleEquipment"; value: EquipmentId }
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
@@ -128,7 +131,9 @@ function createInitialState(): State {
       mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
       features: [],
       ledColor: "#ffffff",
+      ledIntensity: LED_OPTICS.defaultIntensity,
       poolAccess: null,
+      internalStairType: "linear",
       equipment: [],
       customer: DEFAULT_CUSTOMER,
       uploads: [],
@@ -145,6 +150,13 @@ function reducer(state: State, action: Action): State {
       return isLedColor(action.value)
         ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
         : state;
+    case "setInternalStairType":
+      return { ...state, config: { ...config, internalStairType: action.value } };
+    case "setLedIntensity":
+      return {
+        ...state,
+        config: { ...config, ledIntensity: normalisedLedIntensity(action.value) },
+      };
     case "setProjectType":
       return { ...state, config: { ...config, projectType: action.value } };
     case "setPoolType": {
@@ -417,6 +429,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
+      setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
+      setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
       toggleEquipment: (v) => dispatch({ type: "toggleEquipment", value: v }),
       updateRenovation: (v) => dispatch({ type: "updateRenovation", value: v }),
