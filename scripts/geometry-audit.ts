@@ -1616,6 +1616,191 @@ for (const testCase of slopeCases) {
   );
 }
 
+// --- Geometry Pass A follow-up: shallow-end stair placement preference ---
+{
+  const stairDimensions: Dimensions = {
+    length: 10,
+    width: 4.5,
+    depth: 1.5,
+    cornerRadius: 0,
+    floorProfile: "slope",
+    shallowDepth: 1.2,
+  };
+  const outline = buildOutline("rectangle", stairDimensions, DEFAULT_CONTROL_POINTS);
+  const verticalLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: stairDimensions.depth,
+    copingThickness: 0.03,
+  });
+  const normalProfile = buildFloorProfile({
+    outline,
+    shape: "rectangle",
+    poolType: "in-ground",
+    dimensions: stairDimensions,
+    verticalLayout,
+  });
+  const reversedProfile = buildFloorProfile({
+    outline,
+    shape: "rectangle",
+    poolType: "in-ground",
+    dimensions: { ...stairDimensions, slopeReversed: true },
+    verticalLayout,
+  });
+  assert(
+    normalProfile.sloped && reversedProfile.sloped,
+    "shallow-end stair test requires sloped profiles",
+  );
+  assert(
+    normalProfile.shallowAtMin === true && reversedProfile.shallowAtMin === false,
+    "reversal must flip shallowAtMin",
+  );
+  const axisIndex = normalProfile.axis === "x" ? 0 : 1;
+  const axisValue = (point: { x: number; z: number }) => (axisIndex === 0 ? point.x : point.z);
+  const flight = linearStairDimensions(normalProfile.deepFloorY, verticalLayout.copingY);
+
+  // Linear stairs follow the shallow end, and swap it when reversed.
+  const linearNormal = accessPlacement(
+    outline,
+    flight.run,
+    flight.width,
+    "internalSteps",
+    normalProfile,
+  );
+  assert(linearNormal, "linear stair placement must succeed on a sloped rectangle");
+  assert(
+    Math.abs(axisValue(linearNormal!) - normalProfile.axisMin) < 1e-6,
+    "linear stairs must land on the shallow-end wall (normal orientation)",
+  );
+  const linearReversed = accessPlacement(
+    outline,
+    flight.run,
+    flight.width,
+    "internalSteps",
+    reversedProfile,
+  );
+  assert(linearReversed, "linear stair placement must succeed after reversal");
+  assert(
+    Math.abs(axisValue(linearReversed!) - normalProfile.axisMax) < 1e-6,
+    "reversing the slope must move linear stairs to the new shallow (previously deep) end",
+  );
+  // Local floor under the chosen wall must be exactly that wall's own real
+  // floor -- never floating above it, never sinking below it.
+  assert(
+    Math.abs(
+      normalProfile.floorYAt(linearNormal!.x, linearNormal!.z) - normalProfile.shallowFloorY,
+    ) < 1e-6,
+    "linear stairs at the shallow wall must sit on the true shallow floor",
+  );
+
+  // Corner stairs: same shallow preference and reversal behaviour.
+  const cornerNormal = cornerStairPlan(
+    outline,
+    normalProfile.deepFloorY,
+    verticalLayout.copingY,
+    normalProfile,
+  );
+  const cornerReversed = cornerStairPlan(
+    outline,
+    reversedProfile.deepFloorY,
+    verticalLayout.copingY,
+    reversedProfile,
+  );
+  assert(cornerNormal, "corner stair placement must succeed on a sloped rectangle");
+  assert(cornerReversed, "corner stair placement must succeed after reversal");
+  // The returned x/z are inset a few centimetres in from the true corner
+  // vertex (see cornerStairPlan's `inset`, so the flight's flat flanks
+  // finish inside the wall rather than coplanar with it) -- a wide but
+  // still discriminating tolerance confirms "the shallow corner, not the
+  // deep one" (5m apart here) without asserting an exact vertex match.
+  const cornerTolerance = 0.1;
+  assert(
+    Math.abs(axisValue(cornerNormal!) - normalProfile.axisMin) < cornerTolerance,
+    "corner stairs must land on the shallow-end corner (normal orientation)",
+  );
+  assert(
+    Math.abs(axisValue(cornerReversed!) - normalProfile.axisMax) < cornerTolerance,
+    "reversing the slope must move the corner stair to the new shallow end",
+  );
+  // No floating/buried treads: rebuild height against the true local floor
+  // and confirm the resulting flight is real (finite, positive, in range).
+  const localCornerFloorY = normalProfile.floorYAt(cornerNormal!.x, cornerNormal!.z);
+  const correctedCorner = recomputeCornerHeight(
+    cornerNormal!,
+    outline,
+    localCornerFloorY,
+    verticalLayout.copingY,
+  );
+  assert(
+    correctedCorner.rise > 0 && correctedCorner.radii.every((r) => Number.isFinite(r) && r > 0),
+    "corner stair corrected for the local shallow floor must remain a real, valid flight",
+  );
+  // Within the outline: the corner point itself must lie on the basin
+  // boundary, not drift outside it.
+  const bounds = outlineBounds(outline);
+  assert(
+    cornerNormal!.x >= bounds.minX - 0.1 &&
+      cornerNormal!.x <= bounds.maxX + 0.1 &&
+      cornerNormal!.z >= bounds.minZ - 0.1 &&
+      cornerNormal!.z <= bounds.maxZ + 0.1,
+    "corner stair position must stay within the basin outline",
+  );
+
+  // Regression: omitting floorProfile (as every pre-existing call site
+  // does) must be byte-identical to a flat profile -- the preference has
+  // zero effect unless a caller actually opts in with a sloped model.
+  const linearNoProfile = accessPlacement(outline, flight.run, flight.width, "internalSteps");
+  const flatDimensions: Dimensions = { ...stairDimensions, floorProfile: "flat" };
+  const flatProfile = buildFloorProfile({
+    outline,
+    shape: "rectangle",
+    poolType: "in-ground",
+    dimensions: flatDimensions,
+    verticalLayout,
+  });
+  const linearFlatProfile = accessPlacement(
+    outline,
+    flight.run,
+    flight.width,
+    "internalSteps",
+    flatProfile,
+  );
+  assert(
+    linearNoProfile !== null &&
+      linearFlatProfile !== null &&
+      Math.abs(linearNoProfile.x - linearFlatProfile.x) < 1e-9 &&
+      Math.abs(linearNoProfile.z - linearFlatProfile.z) < 1e-9 &&
+      Math.abs(linearNoProfile.rotation - linearFlatProfile.rotation) < 1e-9,
+    "an unsloped floorProfile must place identically to omitting it entirely -- zero regression for flat pools",
+  );
+
+  // Valid fallback: a floorProfile whose "shallow" coordinate matches no
+  // real wall of this outline must still produce a valid placement rather
+  // than null or a crash -- the preference degrades gracefully to the
+  // existing length-based search.
+  const bogusProfile = {
+    ...normalProfile,
+    axisMin: normalProfile.axisMin - 50,
+    axisMax: normalProfile.axisMin - 50,
+  };
+  const linearBogus = accessPlacement(
+    outline,
+    flight.run,
+    flight.width,
+    "internalSteps",
+    bogusProfile,
+  );
+  assert(
+    linearBogus !== null,
+    "a shallow-end preference that matches no real wall must still fall back to a valid placement",
+  );
+}
+
+console.log(
+  "Shallow-end stair placement audit passed: linear + corner stairs prefer the shallow end, follow slope reversal, stay within the outline, land on their true local floor, regress to zero effect when unsloped, and fall back safely when the preference matches no real wall.",
+);
+
 console.log(
   `Floor-profile audit passed: ${slopeCases.length} sloped configurations (endpoints, monotonic slope, floor/wall closure, normals, metrics, stairs, skimmers), flat/ineligible normalisation and clamp guards all verified.`,
 );

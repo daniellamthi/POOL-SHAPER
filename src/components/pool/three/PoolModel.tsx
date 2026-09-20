@@ -187,7 +187,19 @@ float subtleCausticField(vec2 position, float time) {
 `;
 
 const CAUSTICS_LIGHT_MODULATION = `
-vec3 causticNormal = normalize(cross(dFdx(vCausticWorldPosition), dFdy(vCausticWorldPosition)));
+// A screen-space cross product of the position derivatives degenerates to
+// (near-)zero on a small or steeply foreshortened triangle -- e.g. the
+// corner staircase's tight quarter-cylinder wedges from some camera angles
+// -- and normalize() of a zero vector is NaN in GLSL, which then poisons
+// causticWeights, causticValue and finally outgoingLight itself: the whole
+// fragment silently renders as nothing rather than merely losing its
+// caustic detail. Falling back to a fixed up-facing normal on that
+// degenerate case costs nothing visually (caustics are already a subtle
+// modulation) and guarantees a finite, opaque fragment.
+vec3 causticCross = cross(dFdx(vCausticWorldPosition), dFdy(vCausticWorldPosition));
+vec3 causticNormal = dot(causticCross, causticCross) > 1e-12
+  ? normalize(causticCross)
+  : vec3(0.0, 1.0, 0.0);
 vec3 causticWeights = pow(abs(causticNormal), vec3(6.0));
 causticWeights /= max(causticWeights.x + causticWeights.y + causticWeights.z, 0.0001);
 vec3 causticProjectedPosition = vCausticWorldPosition + vec3(
@@ -921,7 +933,7 @@ export function PoolModel({
             metalness={materials.liner.metalness}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v4-${LED_TRANSPORT_CACHE_KEY}`
             }
           />
         </PoolAccessModel>
@@ -948,7 +960,7 @@ export function PoolModel({
             specularIntensity={0.58}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v4-${LED_TRANSPORT_CACHE_KEY}`
             }
             side={DoubleSide}
           />
@@ -983,7 +995,7 @@ export function PoolModel({
             envMapIntensity={0.95}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v3-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v4-${LED_TRANSPORT_CACHE_KEY}`
             }
             side={DoubleSide}
           />

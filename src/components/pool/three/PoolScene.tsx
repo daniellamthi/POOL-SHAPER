@@ -582,8 +582,9 @@ export default function PoolScene({
         skimmers: system === "skimmer" ? skimmers : { ...skimmers, positions: [] },
         access: poolAccess,
         stairType: internalStairType,
+        floorProfile,
       }),
-    [outline, verticalLayout, skimmers, system, poolAccess, internalStairType],
+    [outline, verticalLayout, skimmers, system, poolAccess, internalStairType, floorProfile],
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);

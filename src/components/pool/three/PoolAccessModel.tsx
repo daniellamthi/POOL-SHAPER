@@ -18,12 +18,25 @@ import type { FloorProfileModel } from "@/lib/pool/floor-profile";
  *   wall, hard against the far corner, and never on the wall carrying the
  *   skimmer run -- which is exactly where the shared "longest wall, 22% along"
  *   default used to put it.
+ *
+ * `floorProfile` (Geometry Pass A follow-up): on a sloped floor, internal
+ * steps additionally prefer whichever short wall sits at the SHALLOW end --
+ * physically intuitive, safer, and the only end a customer would expect to
+ * wade in from. This is a secondary sort key, applied only among walls that
+ * already satisfy every existing constraint (length, clearance, basin
+ * containment): the shallow wall wins the tie only when it is itself a
+ * valid placement, and the search falls through to the next-best wall
+ * exactly as it always has otherwise. Never applied to the ladder, whose
+ * placement philosophy is unrelated to the floor profile. The preference
+ * reads live off the canonical `FloorProfileModel` (never a cached wall
+ * index), so reversing the slope re-derives it automatically.
  */
 export function accessPlacement(
   outline: Outline,
   run: number,
   width: number,
   access: PoolAccess | null = null,
+  floorProfile?: FloorProfileModel,
 ) {
   const inside = (x: number, z: number) => {
     let hit = false;
@@ -52,6 +65,16 @@ export function accessPlacement(
   // from the stainless ladder instead of crowding it.
   const atSkimmerEnd = (point: readonly [number, number]) =>
     Math.abs(point[skimmers.axis === "x" ? 0 : 1] - skimmers.coordinate) < 1e-6;
+  const preferShallow = shortWallAccess && floorProfile?.sloped === true;
+  const shallowAxisIndex = floorProfile?.axis === "x" ? 0 : 1;
+  const shallowCoordinate = floorProfile
+    ? floorProfile.shallowAtMin
+      ? floorProfile.axisMin
+      : floorProfile.axisMax
+    : 0;
+  const onShallowWall = (a: readonly [number, number], b: readonly [number, number]) =>
+    Math.abs(a[shallowAxisIndex] - shallowCoordinate) < 1e-6 &&
+    Math.abs(b[shallowAxisIndex] - shallowCoordinate) < 1e-6;
   const edges = outline
     .map((a, i) => {
       const b = outline[(i + 1) % outline.length]!;
@@ -60,6 +83,7 @@ export function accessPlacement(
         b,
         length: Math.hypot(b[0] - a[0], b[1] - a[1]),
         skimmerWall: onSkimmerWall(a, b),
+        shallowWall: preferShallow && onShallowWall(a, b),
       };
     })
     .sort((first, second) => {
@@ -67,6 +91,13 @@ export function accessPlacement(
       // to the back of the queue before length is even considered.
       if (!shortWallAccess && first.skimmerWall !== second.skimmerWall) {
         return first.skimmerWall ? 1 : -1;
+      }
+      // Sloped internal steps: the shallow-end wall wins the tie ahead of
+      // pure length, but only among walls the rest of this function will
+      // still validate independently -- an invalid shallow wall simply
+      // fails the clearance search below and the next-sorted wall is tried.
+      if (preferShallow && first.shallowWall !== second.shallowWall) {
+        return first.shallowWall ? -1 : 1;
       }
       return shortWallAccess ? first.length - second.length : second.length - first.length;
     });
@@ -161,11 +192,20 @@ function cornerStairRadii(
  * The outer radius is taken from the basin's short span, so the flight keeps
  * its proportions from a plunge pool up to a long lane pool instead of
  * swallowing a small one.
+ *
+ * `floorProfile` (Geometry Pass A follow-up): among the (at most two) valid
+ * corners on the skimmer wall, prefer whichever sits at the shallow end --
+ * same reasoning and same live canonical-model read as `accessPlacement`'s
+ * shallow-wall preference. Geometric validity (square corner, full outer
+ * radius clear on both flanks and the diagonal) is checked first and is
+ * never relaxed for this preference; a shallow corner that fails validity
+ * is simply not a candidate, and the deep one is used instead.
  */
 export function cornerStairPlan(
   outline: Outline,
   floorY: number,
   topY: number,
+  floorProfile?: FloorProfileModel,
 ): CornerStairPlan | null {
   if (outline.length < 3) return null;
   const skimmers = skimmerWall(outline);
@@ -193,8 +233,27 @@ export function cornerStairPlan(
   // other end of the pool.
   type Flank = readonly [number, number];
   const flight = linearStairDimensions(floorY, topY);
-  const straight = accessPlacement(outline, flight.run, flight.width, "internalSteps");
+  const straight = accessPlacement(
+    outline,
+    flight.run,
+    flight.width,
+    "internalSteps",
+    floorProfile,
+  );
+  const preferShallow = floorProfile?.sloped === true;
+  const shallowAxisIndex = floorProfile?.axis === "x" ? 0 : 1;
+  const shallowCoordinate = floorProfile
+    ? floorProfile.shallowAtMin
+      ? floorProfile.axisMin
+      : floorProfile.axisMax
+    : 0;
+  const isShallowCorner = (point: Flank) =>
+    preferShallow && Math.abs(point[shallowAxisIndex] - shallowCoordinate) < 1e-6;
   let best: { point: Flank; into: readonly [Flank, Flank] } | null = null;
+  // Two-tier comparison: a shallow-end corner always beats a deep one
+  // (bestTier 0 < 1); within the same tier, the existing "closest to the
+  // straight-flight placement" distance tiebreak is unchanged.
+  let bestTier = Infinity;
   let bestDistance = Infinity;
   for (let i = 0; i < outline.length; i++) {
     const point = outline[i]!;
@@ -229,7 +288,9 @@ export function cornerStairPlan(
       (centre[1] - point[1]) * (first[1] + second[1]);
     if (towardsCentre <= 0) continue;
     const distance = straight ? Math.hypot(point[0] - straight.x, point[1] - straight.z) : i;
-    if (distance >= bestDistance) continue;
+    const tier = isShallowCorner(point) ? 0 : 1;
+    if (tier > bestTier || (tier === bestTier && distance >= bestDistance)) continue;
+    bestTier = tier;
     bestDistance = distance;
     best = { point, into: [first, second] as const };
   }
@@ -371,12 +432,12 @@ export function PoolAccessModel({
   const width = access === "internalSteps" ? flight.width : 0.62;
   const cornerStairs = access === "internalSteps" && stairType === "corner";
   const rawCorner = useMemo(
-    () => (cornerStairs ? cornerStairPlan(outline, globalFloorY, topY) : null),
-    [cornerStairs, outline, globalFloorY, topY],
+    () => (cornerStairs ? cornerStairPlan(outline, globalFloorY, topY, floorProfile) : null),
+    [cornerStairs, outline, globalFloorY, topY, floorProfile],
   );
   const placement = useMemo(
-    () => accessPlacement(outline, run, width, access),
-    [outline, run, width, access],
+    () => accessPlacement(outline, run, width, access, floorProfile),
+    [outline, run, width, access, floorProfile],
   );
   // The real, local floor under wherever the search above actually landed --
   // identical to `globalFloorY` when flat, so every step below is a no-op

@@ -306,12 +306,18 @@ export function planSceneLighting({
   skimmers,
   access,
   stairType = "linear",
+  floorProfile,
 }: {
   outline: Outline;
   layout: PoolVerticalLayout;
   skimmers: SkimmerPlan;
   access: PoolAccess | null;
   stairType?: InternalStairType;
+  /** Geometry Pass A follow-up: threaded through to `cornerStairPlan`/
+   * `accessPlacement` so the LED exclusion footprint always matches wherever
+   * the stairs actually ended up (possibly the shallow end on a sloped
+   * floor) rather than a stale, unbiased placement. */
+  floorProfile?: FloorProfileModel;
 }): SceneLightingPlan {
   const exclusions: LightingExclusion[] = skimmers.positions.map((p) => ({
     kind: "skimmer",
@@ -325,7 +331,7 @@ export function planSceneLighting({
   // rather than the straight flight's rectangle.
   const corner =
     access === "internalSteps" && stairType === "corner"
-      ? cornerStairPlan(outline, layout.floorY, layout.copingY)
+      ? cornerStairPlan(outline, layout.floorY, layout.copingY, floorProfile)
       : null;
   if (corner) {
     accessPoint = { x: corner.x, z: corner.z };
@@ -334,7 +340,7 @@ export function planSceneLighting({
     const flight = linearStairDimensions(layout.floorY, layout.copingY);
     const run = access === "internalSteps" ? flight.run : 0.55;
     const width = access === "internalSteps" ? flight.width : 0.62;
-    const placement = accessPlacement(outline, run, width, access);
+    const placement = accessPlacement(outline, run, width, access, floorProfile);
     if (placement) {
       accessPoint = placement;
       const nx = Math.sin(placement.rotation),
