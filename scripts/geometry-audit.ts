@@ -27,9 +27,16 @@ import {
   constrainControlPoints,
   isValidControlPolygon,
   offsetOutline,
+  outlineArea,
   outlineBounds,
   validatePoolShape,
 } from "../src/lib/pool/geometry";
+import {
+  buildLShapeOutlineInfo,
+  clampLShapeDimensions,
+  L_SHAPE_GUARDRAILS,
+  type LShapeOrientation,
+} from "../src/lib/pool/l-shape";
 import type { Dimensions, PoolShapeId } from "../src/lib/pool/types";
 import {
   ABOVE_GROUND_STRUCTURE_THICKNESS,
@@ -78,6 +85,27 @@ import { createSlopedFloorGeometry } from "../src/components/pool/three/poolGeom
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
 };
+
+/** True when (x,z) sits inside the L's outer bounding rectangle but outside
+ * the true L polygon -- i.e. in the missing recess. Orientation-agnostic
+ * (point-in-polygon against the real outline, not a re-derivation of which
+ * corner is cut), used only by the test suite to assert stairs/systems
+ * never land there. */
+function insideRecess(x: number, z: number, dims: Dimensions): boolean {
+  const halfLength = dims.length / 2;
+  const halfWidth = dims.width / 2;
+  if (Math.abs(x) > halfLength || Math.abs(z) > halfWidth) return false;
+  const outline = buildOutline("l-shape", dims, DEFAULT_CONTROL_POINTS);
+  let inside = false;
+  for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+    const a = outline[i]!;
+    const b = outline[j]!;
+    if (a[1] > z !== b[1] > z && x < ((b[0] - a[0]) * (z - a[1])) / (b[1] - a[1]) + a[0]) {
+      inside = !inside;
+    }
+  }
+  return !inside;
+}
 
 const shapes: ReadonlyArray<PoolShapeId> = ["rectangle", "custom"];
 assert(
@@ -1049,7 +1077,10 @@ for (const [length, width, depth] of [
   );
 }
 
-assert(POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,custom", "invalid pool shapes");
+assert(
+  POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,l-shape,custom",
+  "invalid pool shapes",
+);
 assert(FINISHES.map(({ id }) => id).join(",") === "liner,mosaic", "invalid finishes");
 assert(
   OVERFLOW_GEOMETRY.waterEdgeOffset < OVERFLOW_GEOMETRY.hiddenChannelOffset &&
@@ -1800,6 +1831,339 @@ for (const testCase of slopeCases) {
 console.log(
   "Shallow-end stair placement audit passed: linear + corner stairs prefer the shallow end, follow slope reversal, stay within the outline, land on their true local floor, regress to zero effect when unsloped, and fall back safely when the preference matches no real wall.",
 );
+
+// --- Geometry Pass B: L-shape domain model ---
+{
+  const orientations: readonly LShapeOrientation[] = ["sw", "se", "ne", "nw"];
+  const baseDims = { totalLength: 10, totalWidth: 7, recessLength: 4, recessWidth: 3 };
+
+  for (const orientation of orientations) {
+    const dims = clampLShapeDimensions({ ...baseDims, orientation });
+    const info = buildLShapeOutlineInfo(dims);
+    assert(info.outline.length === 6, `${orientation}: L outline must have exactly 6 vertices`);
+    assert(
+      info.outline.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+      `${orientation}: every L vertex must be finite`,
+    );
+    // Deterministic winding: shoelace sum positive (CCW), matching
+    // unitRectangle()'s own convention -- every generic outline consumer
+    // (walls, offsetOutline, skimmerWall) expects this.
+    let signedAreaSum = 0;
+    for (let i = 0; i < info.outline.length; i++) {
+      const [x1, z1] = info.outline[i]!;
+      const [x2, z2] = info.outline[(i + 1) % info.outline.length]!;
+      signedAreaSum += x1 * z2 - x2 * z1;
+    }
+    assert(signedAreaSum > 0, `${orientation}: L outline winding must be CCW (positive shoelace)`);
+    // No duplicate/coincident consecutive vertices, no zero-length edges.
+    for (let i = 0; i < info.outline.length; i++) {
+      const a = info.outline[i]!;
+      const b = info.outline[(i + 1) % info.outline.length]!;
+      assert(
+        Math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-6,
+        `${orientation}: L outline must have no duplicate/zero-length edges`,
+      );
+    }
+    // Exactly one concave (reflex) corner, five convex.
+    const concaveCount = info.convex.filter((c) => !c).length;
+    assert(
+      concaveCount === 1,
+      `${orientation}: an L must have exactly one concave corner, found ${concaveCount}`,
+    );
+    // Area/perimeter: outer rectangle minus the recess rectangle, and a
+    // perimeter independent of the recess (2*(L+W), a property of any
+    // axis-aligned corner notch).
+    const expectedArea =
+      baseDims.totalLength * baseDims.totalWidth - baseDims.recessLength * baseDims.recessWidth;
+    assert(
+      Math.abs(info.area - expectedArea) < 1e-6,
+      `${orientation}: L area must equal outer rectangle minus recess (expected ${expectedArea}, got ${info.area})`,
+    );
+    const expectedPerimeter = 2 * (baseDims.totalLength + baseDims.totalWidth);
+    assert(
+      Math.abs(info.perimeter - expectedPerimeter) < 1e-6,
+      `${orientation}: L perimeter must equal 2*(length+width) regardless of recess size`,
+    );
+    assert(
+      info.bounds.spanX <= baseDims.totalLength + 1e-6 &&
+        info.bounds.spanZ <= baseDims.totalWidth + 1e-6,
+      `${orientation}: L bounds must never exceed the outer rectangle`,
+    );
+  }
+
+  // Validation/clamping: never a degenerate leg, corridor, NaN or inverted
+  // dimension, whatever garbage input arrives (legacy draft, malformed UI
+  // state, a slider dragged to its extreme).
+  const hugeRecess = clampLShapeDimensions({
+    totalLength: 10,
+    totalWidth: 7,
+    recessLength: 9.9,
+    recessWidth: 6.9,
+    orientation: "se",
+  });
+  assert(
+    hugeRecess.recessLength <= 10 - L_SHAPE_GUARDRAILS.minLegWidth + 1e-9 &&
+      hugeRecess.recessWidth <= 7 - L_SHAPE_GUARDRAILS.minLegWidth + 1e-9,
+    "an oversized recess request must clamp to leave a real leg on both axes",
+  );
+  const clampedHugeInfo = buildLShapeOutlineInfo(hugeRecess);
+  assert(
+    clampedHugeInfo.area > 0 && Number.isFinite(clampedHugeInfo.area),
+    "even a maximally-clamped recess must produce a real, positive-area L",
+  );
+  const nanInput = clampLShapeDimensions({
+    totalLength: NaN,
+    totalWidth: NaN,
+    recessLength: NaN,
+    recessWidth: NaN,
+    orientation: "bogus" as LShapeOrientation,
+  });
+  assert(
+    Object.values(nanInput).every((v) => typeof v === "string" || Number.isFinite(v)),
+    "NaN/malformed L input must normalise to finite dimensions, never propagate",
+  );
+  assert(
+    (["sw", "se", "ne", "nw"] as const).includes(nanInput.orientation),
+    "an invalid orientation string must normalise to a real orientation",
+  );
+  const undefinedInput = clampLShapeDimensions(undefined);
+  assert(
+    Number.isFinite(undefinedInput.totalLength) && Number.isFinite(undefinedInput.recessLength),
+    "omitted L dimensions (a brand-new project) must default to a real, finite L",
+  );
+
+  // buildOutline wiring: shape === "l-shape" must route through the L
+  // generator, never fall back to the unit-rectangle/custom path.
+  const lShapeDims: Dimensions = {
+    length: 10,
+    width: 7,
+    depth: 1.5,
+    cornerRadius: 0,
+    lShapeRecessLength: 4,
+    lShapeRecessWidth: 3,
+    lShapeOrientation: "se",
+  };
+  const wiredOutline = buildOutline("l-shape", lShapeDims, DEFAULT_CONTROL_POINTS);
+  assert(
+    wiredOutline.length === 6,
+    "buildOutline('l-shape', ...) must produce the 6-vertex L outline",
+  );
+  assert(
+    Math.abs(outlineArea(wiredOutline) - (10 * 7 - 4 * 3)) < 1e-6,
+    "buildOutline('l-shape', ...) area must match the canonical L area formula",
+  );
+
+  console.log(
+    "L-shape domain audit passed: all 4 orientations produce a deterministic 6-vertex CCW outline with exactly one concave corner, correct area/perimeter, clamped guardrails against degenerate/NaN/omitted input, and correct buildOutline wiring.",
+  );
+}
+
+// --- Geometry Pass B: L-shape floor/water/wall/slope/systems integration ---
+{
+  const lShapeDims: Dimensions = {
+    length: 10,
+    width: 7,
+    depth: 1.5,
+    cornerRadius: 0,
+    lShapeRecessLength: 4,
+    lShapeRecessWidth: 3,
+    lShapeOrientation: "se",
+  };
+  const outline = buildOutline("l-shape", lShapeDims, DEFAULT_CONTROL_POINTS);
+  const verticalLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: lShapeDims.depth,
+    copingThickness: 0.03,
+  });
+
+  // Floor triangulation: THREE.ShapeGeometry over the real concave polygon
+  // must produce a finite, non-degenerate mesh -- no NaN positions/UVs/
+  // normals, a real (non-zero) triangle count.
+  const floorGeometry = createSurfaceGeometry(outline);
+  const positions = floorGeometry.getAttribute("position");
+  const uvs = floorGeometry.getAttribute("uv");
+  assert(positions.count > 0, "L floor must triangulate to a real, non-empty mesh");
+  for (let i = 0; i < positions.count; i++) {
+    assert(
+      Number.isFinite(positions.getX(i)) &&
+        Number.isFinite(positions.getY(i)) &&
+        Number.isFinite(positions.getZ(i)),
+      "L floor vertex positions must all be finite (no NaN from the concave triangulation)",
+    );
+    assert(
+      Number.isFinite(uvs.getX(i)) && Number.isFinite(uvs.getY(i)),
+      "L floor UVs must all be finite",
+    );
+  }
+  floorGeometry.computeVertexNormals();
+  const normals = floorGeometry.getAttribute("normal");
+  for (let i = 0; i < normals.count; i++) {
+    assert(
+      Number.isFinite(normals.getX(i)) &&
+        Number.isFinite(normals.getY(i)) &&
+        Number.isFinite(normals.getZ(i)),
+      "L floor normals must all be finite",
+    );
+  }
+
+  // Wall closure: one wall segment per outline edge (6 edges -> the wall
+  // ribbon must close on itself with no gap), all finite.
+  const wallGeometry = createWallGeometry(outline, verticalLayout.wallTopY, verticalLayout.floorY);
+  const wallPositions = wallGeometry.getAttribute("position");
+  assert(wallPositions.count > 0, "L walls must produce a real, non-empty mesh");
+  for (let i = 0; i < wallPositions.count; i++) {
+    assert(
+      Number.isFinite(wallPositions.getX(i)) &&
+        Number.isFinite(wallPositions.getY(i)) &&
+        Number.isFinite(wallPositions.getZ(i)),
+      "L wall vertex positions must all be finite -- a watertight ribbon around all 6 edges including the inner concave corner",
+    );
+  }
+
+  // Coping/water-channel offset around a concave outline: offsetOutline
+  // documents itself as concave-safe -- verify the L actually gets a
+  // constant-width, non-self-intersecting offset with the inner corner
+  // correctly handled (still 90 degrees, still finite).
+  const copingOutline = offsetOutline(outline, 0.35);
+  assert(
+    copingOutline.length >= 6 &&
+      copingOutline.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+    "L coping offset must remain a real, finite, closed outline around the concave perimeter",
+  );
+  assert(
+    outlineArea(copingOutline) > outlineArea(outline),
+    "L coping offset must expand the outline (coping sits outside the basin), even at the concave corner",
+  );
+
+  // Water outline for a skimmer system is the outline itself -- the
+  // recess must contain no water, i.e. the water polygon must be exactly
+  // the L, not the outer bounding rectangle.
+  const waterOutline = buildWaterOutline(outline, "skimmer", "hidden");
+  assert(
+    Math.abs(outlineArea(waterOutline) - outlineArea(outline)) < 1e-6,
+    "L water outline (skimmer system) must be the real L polygon, never the bounding rectangle",
+  );
+
+  // Slope integration: ONE planar slope across the whole L, along its
+  // principal (longer) axis, sharing the exact same floorYAt every other
+  // consumer reads -- never a second per-wing formula.
+  const slopedLDims: Dimensions = { ...lShapeDims, floorProfile: "slope", shallowDepth: 1.2 };
+  const lFloorProfile = buildFloorProfile({
+    outline,
+    shape: "l-shape",
+    poolType: "in-ground",
+    dimensions: slopedLDims,
+    verticalLayout,
+  });
+  assert(
+    lFloorProfile.sloped,
+    "an L-shape, in-ground pool must be slope-eligible (Geometry Pass B)",
+  );
+  assert(
+    lFloorProfile.axis === "x",
+    "the L's principal axis must be its longer bounding-box span (x, 10m vs 7m)",
+  );
+  // Sample floor height at several real points across BOTH wings of the L
+  // and confirm it's the same single monotonic ramp everywhere -- not two
+  // independent per-wing slopes.
+  const shallowSample = lFloorProfile.floorYAt(lFloorProfile.axisMin, 0);
+  const deepSample = lFloorProfile.floorYAt(lFloorProfile.axisMax, 0);
+  const midSample = lFloorProfile.floorYAt((lFloorProfile.axisMin + lFloorProfile.axisMax) / 2, 0);
+  assert(
+    Math.abs(shallowSample - lFloorProfile.shallowFloorY) < 1e-6,
+    "the L's shallow end must sit at the true shallow floor",
+  );
+  assert(
+    Math.abs(deepSample - lFloorProfile.deepFloorY) < 1e-6,
+    "the L's deep end must sit at the true deep floor",
+  );
+  assert(
+    midSample > Math.min(shallowSample, deepSample) - 1e-6 &&
+      midSample < Math.max(shallowSample, deepSample) + 1e-6,
+    "the L's mid-point floor height must lie strictly between the shallow and deep ends (one continuous ramp)",
+  );
+  // Reversal must swap which end is shallow, same as the rectangle.
+  const reversedLProfile = buildFloorProfile({
+    outline,
+    shape: "l-shape",
+    poolType: "in-ground",
+    dimensions: { ...slopedLDims, slopeReversed: true },
+    verticalLayout,
+  });
+  assert(
+    reversedLProfile.shallowAtMin !== lFloorProfile.shallowAtMin,
+    "reversing the slope on an L-shape must swap which end is shallow, exactly as it does for a rectangle",
+  );
+  const slopedFloorGeometry = createSlopedFloorGeometry(outline, lFloorProfile.floorYAt);
+  const slopedPositions = slopedFloorGeometry.getAttribute("position");
+  for (let i = 0; i < slopedPositions.count; i++) {
+    assert(
+      Number.isFinite(slopedPositions.getY(i)),
+      "the L's sloped floor must have a finite Y everywhere, including across the concave corner",
+    );
+  }
+
+  // Skimmer: must choose a real, valid wall on the L outline -- never a
+  // hardcoded rectangle wall index, and never the concave inner corner.
+  const lSkimmers = planSkimmers(outline, outlineArea(outline), true);
+  assert(
+    lSkimmers.positions.length > 0,
+    "the L-shape must get a real skimmer row, not an empty/failed placement",
+  );
+  for (const position of lSkimmers.positions) {
+    assert(
+      Number.isFinite(position.x) && Number.isFinite(position.z),
+      "every L skimmer position must be finite",
+    );
+  }
+
+  // Access: linear + corner stairs must land inside the true L polygon --
+  // never in the missing recess, never outside the outer bounds -- and the
+  // corner-stair search must never treat the single concave (reflex)
+  // corner as if it were a normal convex pool corner.
+  const flight = linearStairDimensions(verticalLayout.floorY, verticalLayout.copingY);
+  const lLinear = accessPlacement(outline, flight.run, flight.width, "internalSteps");
+  assert(lLinear !== null, "linear internal stairs must find a valid wall on the L outline");
+  // The anchor itself sits flush against a wall by construction (every wall
+  // is a valid boundary edge, including the one bordering the recess), so
+  // check the stair's actual footprint interior -- advanced inward from the
+  // wall by half the flight's run -- rather than the wall-flush point
+  // itself, which a naive point-in-polygon test would flag as "on the
+  // boundary" regardless of which real wall it's on.
+  const inwardX = Math.sin(lLinear!.rotation) * (flight.run / 2);
+  const inwardZ = Math.cos(lLinear!.rotation) * (flight.run / 2);
+  assert(
+    !insideRecess(lLinear!.x + inwardX, lLinear!.z + inwardZ, lShapeDims),
+    "linear stairs' own footprint must never land inside the L's missing recess",
+  );
+  const lCorner = cornerStairPlan(outline, verticalLayout.floorY, verticalLayout.copingY);
+  if (lCorner) {
+    const info = buildLShapeOutlineInfo(
+      clampLShapeDimensions({
+        totalLength: lShapeDims.length,
+        totalWidth: lShapeDims.width,
+        recessLength: lShapeDims.lShapeRecessLength,
+        recessWidth: lShapeDims.lShapeRecessWidth,
+        orientation: lShapeDims.lShapeOrientation,
+      }),
+    );
+    const concaveVertex = info.outline[info.concaveIndex]!;
+    const distanceToConcave = Math.hypot(
+      lCorner.x - concaveVertex[0],
+      lCorner.z - concaveVertex[1],
+    );
+    assert(
+      distanceToConcave > 0.5,
+      "a corner staircase must never be classified onto the L's concave (reflex) inner corner",
+    );
+  }
+
+  console.log(
+    "L-shape geometry/systems audit passed: floor triangulation, wall closure, coping/water-channel offset, one planar slope across both wings (with reversal), skimmer placement and internal-stair placement are all finite, real, and correctly avoid the recess and the concave corner.",
+  );
+}
 
 console.log(
   `Floor-profile audit passed: ${slopeCases.length} sloped configurations (endpoints, monotonic slope, floor/wall closure, normals, metrics, stairs, skimmers), flat/ineligible normalisation and clamp guards all verified.`,

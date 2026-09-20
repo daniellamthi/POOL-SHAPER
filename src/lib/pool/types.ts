@@ -5,12 +5,12 @@ export type PoolType = "in-ground" | "above-ground";
 export type PoolStructure =
   "reinforced-concrete" | "modular-steel-panels" | "modular-steel-structure";
 
-export type PoolShapeId = "rectangle" | "custom";
-/** Prepared, not yet buildable: no `PoolShapeId` value below is selectable in
- * production UI. Reserved for geometry passes B (L-shape) and C (organic
- * preset) -- kept as an unused alias so downstream code can start typing
- * against the eventual union without any behaviour changing today. */
-export type FuturePoolShapeId = PoolShapeId | "l-shape" | "organic";
+export type PoolShapeId = "rectangle" | "l-shape" | "custom";
+/** Prepared, not yet buildable: "organic" is not a member of `PoolShapeId`.
+ * Reserved for geometry pass C -- kept as an unused alias so downstream code
+ * can start typing against the eventual union without any behaviour
+ * changing today. */
+export type FuturePoolShapeId = PoolShapeId | "organic";
 
 export type CustomMode = "draw" | "upload";
 
@@ -103,6 +103,16 @@ export interface Dimensions {
    * outline's minimum-X wall. true: swapped via "Inverti pendenza" without
    * changing the two depth values themselves. */
   slopeReversed?: boolean;
+  /** L-shape only (`shape === "l-shape"`): `length`/`width` above are read as
+   * the OUTER bounding rectangle for the L, and these three fields describe
+   * the corner rectangle removed from it. Absent for every other shape --
+   * see `src/lib/pool/l-shape.ts`, the single canonical source for turning
+   * these into the actual outline and never duplicated elsewhere. Always
+   * normalised through `clampLShapeDimensions` before reaching geometry, so
+   * a malformed/legacy/missing value here can never produce a degenerate L. */
+  lShapeRecessLength?: number;
+  lShapeRecessWidth?: number;
+  lShapeOrientation?: import("./l-shape").LShapeOrientation;
 }
 
 /** A closed 2D outline in the XZ plane, metres, centred on the origin. */

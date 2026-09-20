@@ -112,7 +112,7 @@ export function ProjectSummary() {
 
   const poolType = poolTypeLabel(config.poolType);
   const isSlopedFloor =
-    config.shape === "rectangle" &&
+    (config.shape === "rectangle" || config.shape === "l-shape") &&
     config.poolType === "in-ground" &&
     config.dimensions.floorProfile === "slope" &&
     Number.isFinite(config.dimensions.shallowDepth) &&
@@ -120,7 +120,11 @@ export function ProjectSummary() {
   const depthLabel = isSlopedFloor
     ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
     : `${formatNumber(config.dimensions.depth, 2)} m`;
-  const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${depthLabel}`;
+  const lShapeRecessSentence =
+    config.shape === "l-shape"
+      ? `, rientro ${formatNumber(config.dimensions.lShapeRecessLength ?? 0, 2)} × ${formatNumber(config.dimensions.lShapeRecessWidth ?? 0, 2)} m`
+      : "";
+  const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m${lShapeRecessSentence}, profondità ${depthLabel}`;
   const systemLine = systemHeadline(config.system, config.overflowType);
 
   const copingMaterial = COPING_MATERIALS.find((option) => option.id === config.copingMaterial);

@@ -28,6 +28,7 @@ import type {
   RenovationConfig,
 } from "./types";
 import type { ProjectConfiguration } from "./project";
+import type { LShapeOrientation } from "./l-shape";
 
 export interface ConfiguratorContextValue {
   config: PoolConfig;
@@ -58,6 +59,7 @@ export interface ConfiguratorContextValue {
   /** Swaps which end of the slope axis is shallow without changing the two
    * selected depths. */
   toggleSlopeReversed: () => void;
+  setLShapeOrientation: (value: LShapeOrientation) => void;
   setSystem: (value: SystemType) => void;
   setOverflowType: (value: OverflowType) => void;
   setSkimmerFinish: (value: SkimmerFinishId) => void;

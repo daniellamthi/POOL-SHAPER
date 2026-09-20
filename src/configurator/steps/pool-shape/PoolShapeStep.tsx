@@ -7,6 +7,7 @@ import { DIMENSION_LIMITS, POOL_SHAPES } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { MIN_SLOPE_DIFFERENCE, slopeEligibleForDepth } from "@/lib/pool/floor-profile";
+import { L_SHAPE_ORIENTATIONS, type LShapeOrientation } from "@/lib/pool/l-shape";
 import { cn } from "@/lib/utils";
 import type { PoolShapeId } from "@/lib/pool/types";
 
@@ -48,13 +49,13 @@ export function PoolShapeStep() {
     </fieldset>
   );
 
-  // Slope is only ever built for a rectangle, in-ground pool -- see
-  // `buildFloorProfile` (floor-profile.ts). Custom shapes and above-ground
-  // pools keep the single "Profondità" control they always had.
+  // Slope is only ever built for a rectangle or L-shape, in-ground pool --
+  // see `buildFloorProfile` (floor-profile.ts). Custom shapes and
+  // above-ground pools keep the single "Profondità" control they always had.
   const supportsFloorProfile = config.poolType === "in-ground";
 
   const depthSection = (shape: PoolShapeId, disabled: boolean) =>
-    shape === "rectangle" && supportsFloorProfile ? (
+    (shape === "rectangle" || shape === "l-shape") && supportsFloorProfile ? (
       <FloorProfileSection disabled={disabled} />
     ) : (
       <fieldset disabled={disabled} className="border-0 p-0">
@@ -137,7 +138,15 @@ export function PoolShapeStep() {
                         )}
                       </>
                     ) : null}
+                    {shape.id === "l-shape" ? (
+                      <LShapeOrientationSelector disabled={!selected} />
+                    ) : null}
                     {planDimensions(!selected)}
+                    {shape.id === "l-shape" ? (
+                      <div className="flex flex-col gap-7 border-t border-hairline pt-7">
+                        <LShapeRecessControls disabled={!selected} />
+                      </div>
+                    ) : null}
                     <div className="flex flex-col gap-7 border-t border-hairline pt-7">
                       {depthSection(shape.id, !selected)}
                     </div>
@@ -154,6 +163,107 @@ export function PoolShapeStep() {
         <MetricsPanel metrics={metrics} />
       </div>
     </StepSection>
+  );
+}
+
+const L_SHAPE_ORIENTATION_LABEL: Record<LShapeOrientation, string> = {
+  nw: "Rientro in alto a sinistra",
+  ne: "Rientro in alto a destra",
+  sw: "Rientro in basso a sinistra",
+  se: "Rientro in basso a destra",
+};
+
+/** A small, literal top-down L diagram for one orientation -- the polygon a
+ * customer would actually see in plan, not a compass label. Coordinates are
+ * a fixed illustrative L (not the live dimensions): this is an orientation
+ * picker, not a live schematic -- the 3D viewport is the live feedback. */
+function LShapeOrientationIcon({ orientation }: { orientation: LShapeOrientation }) {
+  const full = "4,4 28,4 28,28 4,28";
+  const points: Record<LShapeOrientation, string> = {
+    se: "4,4 20,4 20,16 28,16 28,28 4,28",
+    sw: "12,4 28,4 28,28 4,28 4,16 12,16",
+    ne: "4,4 28,4 28,28 12,28 12,16 4,16",
+    nw: "4,4 28,4 28,16 20,16 20,28 4,28",
+  };
+  return (
+    <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden="true">
+      <polygon points={full} className="fill-none" />
+      <polygon points={points[orientation]} className="fill-current" />
+    </svg>
+  );
+}
+
+/** Orientation picker: four diagrams, never NE/SW-style compass naming --
+ * the customer recognises the shape, not a coordinate system. Changing it
+ * immediately regenerates the outline (`buildOutline` reads
+ * `dimensions.lShapeOrientation` live), which cascades through camera,
+ * floor, walls, stairs, systems and lights exactly like any other dimension
+ * edit -- no separate "rebuild" step. */
+function LShapeOrientationSelector({ disabled }: { disabled: boolean }) {
+  const { config, setLShapeOrientation } = useConfigurator();
+  const current = config.dimensions.lShapeOrientation ?? "se";
+  return (
+    <fieldset disabled={disabled} className="flex flex-col gap-4 border-0 p-0">
+      <p className="label-xs">Orientamento</p>
+      <div
+        className="grid grid-cols-4 gap-2"
+        role="group"
+        aria-label="Orientamento della forma a L"
+      >
+        {L_SHAPE_ORIENTATIONS.map((orientation) => (
+          <button
+            key={orientation}
+            type="button"
+            onClick={() => setLShapeOrientation(orientation)}
+            aria-pressed={current === orientation}
+            aria-label={L_SHAPE_ORIENTATION_LABEL[orientation]}
+            title={L_SHAPE_ORIENTATION_LABEL[orientation]}
+            className={cn(
+              "flex items-center justify-center rounded-xl border p-2 transition-all duration-300",
+              current === orientation
+                ? "border-foreground bg-foreground text-background"
+                : "border-hairline text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <LShapeOrientationIcon orientation={orientation} />
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+/** The recess dimensions -- what customer-facing language calls "il
+ * rientro" -- kept as its own compact group, visually distinct from the
+ * overall length/width above it (`planDimensions`) so the two never blur
+ * into one long, undifferentiated list of sliders. */
+function LShapeRecessControls({ disabled }: { disabled: boolean }) {
+  const { config, setDimension } = useConfigurator();
+  return (
+    <fieldset disabled={disabled} className="flex flex-col gap-7 border-0 p-0">
+      <p className="label-xs">Rientro</p>
+      {(
+        [
+          ["lShapeRecessLength", "Profondità del rientro"],
+          ["lShapeRecessWidth", "Larghezza del rientro"],
+        ] as const
+      ).map(([key, label]) => {
+        const limits = DIMENSION_LIMITS[key];
+        const value = config.dimensions[key] ?? (key === "lShapeRecessLength" ? 4 : 3);
+        return (
+          <DimensionControl
+            key={key}
+            label={label}
+            value={value}
+            unit={limits.unit}
+            min={limits.min}
+            max={limits.max}
+            step={limits.step}
+            onChange={(next) => setDimension(key, next)}
+          />
+        );
+      })}
+    </fieldset>
   );
 }
 

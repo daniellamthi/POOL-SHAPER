@@ -8,6 +8,7 @@ import type {
   SystemType,
 } from "./types";
 import { COPING_WIDTH, CURVE_SAMPLES, OVERFLOW_GEOMETRY } from "./config";
+import { buildLShapeOutline, clampLShapeDimensions } from "./l-shape";
 
 export const POOL_SHAPE_GUARDRAILS = {
   minimumPreferredRadius: 0.9,
@@ -213,6 +214,21 @@ export function buildOutline(
   dimensions: Dimensions,
   controlPoints: ReadonlyArray<ControlPoint>,
 ): Outline {
+  if (shape === "l-shape") {
+    // Own canonical generator (l-shape.ts) -- an L is not a scaled unit
+    // shape, it's an outer rectangle with an absolute-metre recess cut from
+    // one corner, so it never goes through the unit-square scaling path
+    // every other shape uses.
+    return buildLShapeOutline(
+      clampLShapeDimensions({
+        totalLength: dimensions.length,
+        totalWidth: dimensions.width,
+        recessLength: dimensions.lShapeRecessLength,
+        recessWidth: dimensions.lShapeRecessWidth,
+        orientation: dimensions.lShapeOrientation,
+      }),
+    );
+  }
   const unit = shape === "rectangle" ? unitRectangle() : unitFromControlPoints(controlPoints);
   const length = Number.isFinite(dimensions.length) ? Math.max(0.01, dimensions.length) : 1;
   const width = Number.isFinite(dimensions.width) ? Math.max(0.01, dimensions.width) : 1;

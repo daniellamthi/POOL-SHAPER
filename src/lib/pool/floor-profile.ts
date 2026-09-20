@@ -5,13 +5,14 @@
  * lighting, water, measurements -- reads it from here, never re-derives its
  * own copy.
  *
- * Scope for this pass: slope is only ever offered for a rectangular,
- * in-ground pool. Custom (arbitrary-polygon) shapes have no single
- * deterministic "principal axis" to slope along without guessing, and
- * above-ground pools are shipped as constant-height modular kits, so both
- * are kept flat regardless of `dimensions.floorProfile` -- `buildFloorProfile`
- * normalises that itself rather than trusting every call site to remember
- * the restriction.
+ * Scope: slope is offered for a rectangular or L-shaped, in-ground pool
+ * (Geometry Pass B extends the rectangle-only Pass A scope to the L, since
+ * both have a real, deterministic principal axis). Custom (arbitrary-polygon)
+ * shapes have no single deterministic "principal axis" to slope along
+ * without guessing, and above-ground pools are shipped as constant-height
+ * modular kits, so both are kept flat regardless of `dimensions.floorProfile`
+ * -- `buildFloorProfile` normalises that itself rather than trusting every
+ * call site to remember the restriction.
  */
 import { GROUND_LEVEL } from "./vertical-layout";
 import { outlineArea, outlineBounds, outlinePerimeter } from "./geometry";
@@ -105,9 +106,16 @@ export function buildFloorProfile(params: {
 }): FloorProfileModel {
   const { outline, shape, poolType, dimensions, verticalLayout } = params;
   const deepFloorY = verticalLayout.floorY;
+  // Everything below this point is already shape-agnostic -- it only reads
+  // the outline's own bounds (outlineBounds) and works out a single planar
+  // ramp along whichever axis is longer, so an L-shape gets exactly the
+  // "one planar slope across the whole basin, along its principal
+  // longitudinal axis" the L-shape spec calls for with no extra formula of
+  // its own. Custom (arbitrary-polygon) shapes are excluded: they have no
+  // single deterministic principal axis a customer would recognise.
   const eligible =
     dimensions.floorProfile === "slope" &&
-    shape === "rectangle" &&
+    (shape === "rectangle" || shape === "l-shape") &&
     poolType === "in-ground" &&
     Number.isFinite(dimensions.shallowDepth) &&
     outline.length >= 4;

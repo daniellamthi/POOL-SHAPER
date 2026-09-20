@@ -11,6 +11,7 @@ import type {
   LinerColor,
   PoolAccess,
   PoolFeatureId,
+  PoolShapeId,
   PoolStructure,
   PoolType,
   OverflowType,
@@ -20,8 +21,8 @@ import type {
 export const poolTypeLabel = (value: PoolType | null): string =>
   value === "above-ground" ? "Piscina fuori terra" : "Piscina interrata";
 
-export const shapeLabel = (shape: "rectangle" | "custom"): string =>
-  shape === "custom" ? "dalla forma personalizzata" : "rettangolare";
+export const shapeLabel = (shape: PoolShapeId): string =>
+  shape === "custom" ? "dalla forma personalizzata" : shape === "l-shape" ? "a L" : "rettangolare";
 
 /** Short, customer-facing headline for the hydraulic system -- the
  * technical `skimmer`/`overflow` + `hiddenType` pair becomes one sentence. */

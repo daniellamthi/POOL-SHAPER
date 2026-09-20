@@ -57,6 +57,7 @@ import type {
   UploadedFile,
   RenovationConfig,
 } from "./types";
+import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -71,6 +72,7 @@ type Action =
   | { type: "setDimension"; key: DimensionKey; value: number }
   | { type: "setFloorProfile"; value: FloorProfile }
   | { type: "toggleSlopeReversed" }
+  | { type: "setLShapeOrientation"; value: LShapeOrientation }
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
@@ -187,8 +189,34 @@ function reducer(state: State, action: Action): State {
         ...state,
         config: { ...config, customer: { ...config.customer, [action.key]: action.value } },
       };
-    case "setShape":
-      return { ...state, config: { ...config, shape: action.value, shapeSelected: true } };
+    case "setShape": {
+      // First activation of L-shape: seed sensible recess dimensions (rather
+      // than leaving them undefined, which `clampLShapeDimensions` would
+      // otherwise have to default blindly) from whatever length/width the
+      // pool already has -- same seeding pattern `setFloorProfile` below
+      // uses for `shallowDepth`.
+      const dimensions =
+        action.value === "l-shape" && config.dimensions.lShapeRecessLength === undefined
+          ? (() => {
+              const seeded = clampLShapeDimensions({
+                totalLength: config.dimensions.length,
+                totalWidth: config.dimensions.width,
+              });
+              return {
+                ...config.dimensions,
+                length: seeded.totalLength,
+                width: seeded.totalWidth,
+                lShapeRecessLength: seeded.recessLength,
+                lShapeRecessWidth: seeded.recessWidth,
+                lShapeOrientation: seeded.orientation,
+              };
+            })()
+          : config.dimensions;
+      return {
+        ...state,
+        config: { ...config, shape: action.value, shapeSelected: true, dimensions },
+      };
+    }
     case "setCopingMaterial":
       return { ...state, config: { ...config, copingMaterial: action.value } };
     case "setCustomMode":
@@ -245,6 +273,14 @@ function reducer(state: State, action: Action): State {
         config: {
           ...config,
           dimensions: { ...config.dimensions, slopeReversed: !config.dimensions.slopeReversed },
+        },
+      };
+    case "setLShapeOrientation":
+      return {
+        ...state,
+        config: {
+          ...config,
+          dimensions: { ...config.dimensions, lShapeOrientation: action.value },
         },
       };
     case "setSystem":
@@ -489,6 +525,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setDimension: (key, v) => dispatch({ type: "setDimension", key, value: v }),
       setFloorProfile: (v) => dispatch({ type: "setFloorProfile", value: v }),
       toggleSlopeReversed: () => dispatch({ type: "toggleSlopeReversed" }),
+      setLShapeOrientation: (v) => dispatch({ type: "setLShapeOrientation", value: v }),
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
       setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),

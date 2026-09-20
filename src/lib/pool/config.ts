@@ -24,6 +24,13 @@ export const DIMENSION_LIMITS = {
    * beach entry -- further clamped below `depth` by `clampShallowDepth`
    * (floor-profile.ts) so the slope itself is always real and finite. */
   shallowDepth: { min: 0.8, max: 1.5, step: 0.05, unit: "m" },
+  /** L-shape only. These are the SLIDER's own static range -- the real,
+   * size-dependent minimum/maximum (never let a leg thin to a corridor) is
+   * enforced by `clampLShapeDimensions` (l-shape.ts) wherever the outline is
+   * actually built, the same two-tier pattern `shallowDepth` already uses
+   * against `depth` via `clampShallowDepth`. */
+  lShapeRecessLength: { min: 1.5, max: 20, step: 0.1, unit: "m" },
+  lShapeRecessWidth: { min: 1.5, max: 12, step: 0.1, unit: "m" },
 } as const;
 
 export type DimensionKey = keyof typeof DIMENSION_LIMITS;
@@ -130,6 +137,12 @@ export const POOL_SHAPES: ReadonlyArray<ShapeDefinition> = [
     id: "rectangle",
     title: "Rettangolare",
     description: "Geometria architettonica a corsia, con spigoli puramente rettilinei.",
+    supportsCornerRadius: false,
+  },
+  {
+    id: "l-shape",
+    title: "A L",
+    description: "Due bracci rettangolari uniti ad angolo retto, per planimetrie articolate.",
     supportsCornerRadius: false,
   },
   {

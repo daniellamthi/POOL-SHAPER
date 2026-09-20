@@ -132,6 +132,17 @@ export function serializePoolRenderConfig(
         "Passa temporaneamente a fondo piano per generare il render, oppure attendi il prossimo aggiornamento.",
     );
   }
+  // Geometry Pass B (L-shape) has no Blender/Cycles counterpart yet either --
+  // same policy as the sloped-floor guard above: refuse the export with a
+  // truthful message rather than silently serialising the L pool's outline
+  // under a `PoolRenderShapeKind` ("rectangle" | "custom") that doesn't
+  // actually describe it.
+  if (config.shape === "l-shape") {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora la forma a L. " +
+        "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;
   const outputPreset = RENDER_OUTPUT_PRESETS[outputPresetId];
@@ -170,7 +181,9 @@ export function serializePoolRenderConfig(
     generatedAt: new Date().toISOString(),
     sourceProject: "pool-shape-shaper-main",
     shape: {
-      kind: config.shape,
+      // Safe: the L-shape guard above already threw for `config.shape ===
+      // "l-shape"`, so only "rectangle" | "custom" ever reach this point.
+      kind: config.shape as "rectangle" | "custom",
       outline,
     },
     dimensions: {

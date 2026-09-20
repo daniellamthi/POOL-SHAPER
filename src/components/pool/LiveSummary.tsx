@@ -28,7 +28,7 @@ export function LiveSummary() {
   const features = POOL_FEATURES.filter((item) => config.features.includes(item.id));
   const equipment = EQUIPMENT.filter((item) => config.equipment.includes(item.id));
   const isSlopedFloor =
-    config.shape === "rectangle" &&
+    (config.shape === "rectangle" || config.shape === "l-shape") &&
     config.poolType === "in-ground" &&
     config.dimensions.floorProfile === "slope" &&
     Number.isFinite(config.dimensions.shallowDepth) &&
