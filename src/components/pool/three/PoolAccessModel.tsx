@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import * as THREE from "three";
 import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
 import { skimmerWall } from "@/lib/pool/walls.ts";
+import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 
 /**
  * Select a wall with enough clear interior space for the entire access
@@ -125,6 +126,31 @@ export interface CornerStairPlan {
 }
 
 /**
+ * Proportioned to the basin, then bounded to a real swimming-pool tread
+ * depth (~28-35 cm). The 28 cm floor is a target, not a hard minimum: on a
+ * pool too small to hold it without the flight swallowing the corner, the
+ * floor backs off just far enough to keep the outer reach inside the same
+ * safe proportion of the basin that `cornerStairPlan`'s clearance search
+ * has to respect, so the stair shrinks with the pool instead of growing
+ * past it. Shared by `cornerStairPlan` and `recomputeCornerHeight` (Geometry
+ * Pass A: the corner's tread count and radii depend on the LOCAL floor
+ * under it, only known once the corner's position itself is resolved).
+ */
+function cornerStairRadii(
+  shortSpan: number,
+  steps: number,
+): { radii: readonly number[]; outerRadius: number } {
+  const outer = THREE.MathUtils.clamp(shortSpan * 0.4, 1.1, 1.85);
+  const safeOuterReach = shortSpan * 0.45;
+  const maxSafeTread = steps > 1 ? Math.max(0.22, (safeOuterReach - 0.42) / (steps - 1)) : 0.35;
+  const treadFloor = Math.min(0.28, maxSafeTread);
+  const tread = THREE.MathUtils.clamp((outer - 0.5) / Math.max(1, steps - 1), treadFloor, 0.35);
+  const firstRadius = Math.max(0.42, outer - tread * (steps - 1));
+  const radii = Array.from({ length: steps }, (_, i) => firstRadius + i * tread);
+  return { radii, outerRadius: radii[radii.length - 1]! };
+}
+
+/**
  * A radial corner staircase: quarter-round treads growing outward from the
  * corner as they descend, the way a Roman corner flight is actually built.
  *
@@ -160,21 +186,7 @@ export function cornerStairPlan(
   }
   const shortSpan = Math.min(maxX - minX, maxZ - minZ);
   const { rise, steps } = internalStairFlight(floorY, topY);
-  // Proportioned to the basin, then bounded to a real swimming-pool tread
-  // depth (~28-35 cm). The 28 cm floor is a target, not a hard minimum: on a
-  // pool too small to hold it without the flight swallowing the corner, the
-  // floor backs off just far enough to keep the outer reach inside the same
-  // safe proportion of the basin that the corner-clearance search below
-  // already has to respect, so the stair shrinks with the pool instead of
-  // growing past it.
-  const outer = THREE.MathUtils.clamp(shortSpan * 0.4, 1.1, 1.85);
-  const safeOuterReach = shortSpan * 0.45;
-  const maxSafeTread = steps > 1 ? Math.max(0.22, (safeOuterReach - 0.42) / (steps - 1)) : 0.35;
-  const treadFloor = Math.min(0.28, maxSafeTread);
-  const tread = THREE.MathUtils.clamp((outer - 0.5) / Math.max(1, steps - 1), treadFloor, 0.35);
-  const firstRadius = Math.max(0.42, outer - tread * (steps - 1));
-  const radii = Array.from({ length: steps }, (_, i) => firstRadius + i * tread);
-  const outerRadius = radii[radii.length - 1]!;
+  const { radii, outerRadius } = cornerStairRadii(shortSpan, steps);
 
   // The corner is the one the straight flight is pushed into, so switching
   // variant swaps the shape of the staircase without also moving it to the
@@ -246,6 +258,39 @@ export function cornerStairPlan(
   return { x, z, rotation, radii, rise, footprint };
 }
 
+/**
+ * Geometry Pass A: `cornerStairPlan`'s tread count/radii are sized from
+ * whatever `floorY` it was called with, but the corner it lands on isn't
+ * known until the search above finishes -- so on a sloped floor, its rise
+ * and radii are still sized against the GLOBAL (deep) floor even when the
+ * chosen corner actually sits at the shallow end. This rebuilds `radii`
+ * and `rise` for the real, LOCAL floor under that corner, keeping the same
+ * position/rotation/footprint (which never depended on floorY beyond a
+ * radius that's provably unaffected by a few centimetres of local
+ * shallow-end proportion). Treads then terminate exactly at the true local
+ * floor -- never floating above it, never sinking below it. */
+export function recomputeCornerHeight(
+  corner: CornerStairPlan,
+  outline: Outline,
+  localFloorY: number,
+  topY: number,
+): CornerStairPlan {
+  let minX = Infinity,
+    maxX = -Infinity,
+    minZ = Infinity,
+    maxZ = -Infinity;
+  for (const [x, z] of outline) {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minZ = Math.min(minZ, z);
+    maxZ = Math.max(maxZ, z);
+  }
+  const shortSpan = Math.min(maxX - minX, maxZ - minZ);
+  const { rise, steps } = internalStairFlight(localFloorY, topY);
+  const { radii } = cornerStairRadii(shortSpan, steps);
+  return { ...corner, radii, rise };
+}
+
 function normalise(x: number, z: number): readonly [number, number] | null {
   const length = Math.hypot(x, z);
   return length < 1e-6 ? null : [x / length, z / length];
@@ -304,30 +349,51 @@ export function PoolAccessModel({
   outline,
   access,
   stairType = "linear",
-  floorY,
+  floorProfile,
   topY,
   children,
 }: {
   outline: Outline;
   access: PoolAccess | null;
   stairType?: InternalStairType;
-  floorY: number;
+  floorProfile: FloorProfileModel;
   topY: number;
   children: ReactNode;
 }) {
-  const flight = linearStairDimensions(floorY, topY);
-  const { riseCount, rise, tread } = flight;
+  // Sizing/search phase: uses the GLOBAL (deep) floor, exactly as every
+  // pool did before Geometry Pass A -- byte-identical when flat, and a
+  // conservative (longer, safely clearance-tested) estimate for slope,
+  // corrected below once the actual anchor point -- and so the real local
+  // floor under it -- is known.
+  const globalFloorY = floorProfile.deepFloorY;
+  const flight = linearStairDimensions(globalFloorY, topY);
   const run = access === "internalSteps" ? flight.run : 0.55;
   const width = access === "internalSteps" ? flight.width : 0.62;
   const cornerStairs = access === "internalSteps" && stairType === "corner";
-  const corner = useMemo(
-    () => (cornerStairs ? cornerStairPlan(outline, floorY, topY) : null),
-    [cornerStairs, outline, floorY, topY],
+  const rawCorner = useMemo(
+    () => (cornerStairs ? cornerStairPlan(outline, globalFloorY, topY) : null),
+    [cornerStairs, outline, globalFloorY, topY],
   );
   const placement = useMemo(
     () => accessPlacement(outline, run, width, access),
     [outline, run, width, access],
   );
+  // The real, local floor under wherever the search above actually landed --
+  // identical to `globalFloorY` when flat, so every step below is a no-op
+  // change for the flat case.
+  const corner = useMemo(() => {
+    if (!rawCorner) return null;
+    if (!floorProfile.sloped) return rawCorner;
+    const localFloorY = floorProfile.floorYAt(rawCorner.x, rawCorner.z);
+    return recomputeCornerHeight(rawCorner, outline, localFloorY, topY);
+  }, [rawCorner, floorProfile, outline, topY]);
+  const localFloorY =
+    placement && floorProfile.sloped
+      ? floorProfile.floorYAt(placement.x, placement.z)
+      : globalFloorY;
+  const localFlight =
+    placement && floorProfile.sloped ? linearStairDimensions(localFloorY, topY) : flight;
+  const { riseCount, rise, tread } = localFlight;
   const rail = useMemo(
     () =>
       new THREE.CatmullRomCurve3(
@@ -337,12 +403,12 @@ export function PoolAccessModel({
           new THREE.Vector3(0, 0.76, -0.15),
           new THREE.Vector3(0, 0.62, 0.26),
           new THREE.Vector3(0, 0.12, 0.32),
-          new THREE.Vector3(0, -Math.min(1.15, topY - floorY - 0.15), 0.32),
+          new THREE.Vector3(0, -Math.min(1.15, topY - localFloorY - 0.15), 0.32),
         ],
         false,
         "centripetal",
       ),
-    [topY, floorY],
+    [topY, localFloorY],
   );
   // Built once per plan, not per render: computeTangents() walks every
   // triangle, and doing that on every frame would be wasted work for
@@ -376,6 +442,7 @@ export function PoolAccessModel({
 
   if (!access) return null;
   if (cornerStairs && corner) {
+    const cornerFloorY = floorProfile.floorYAt(corner.x, corner.z);
     return (
       <group
         name="pool-access-internalSteps-corner"
@@ -385,7 +452,7 @@ export function PoolAccessModel({
         {cornerTreadGeometries.map((geometry, i) => (
           <mesh
             key={i}
-            position={[0, floorY + ((corner.radii.length - i) * corner.rise) / 2, 0]}
+            position={[0, cornerFloorY + ((corner.radii.length - i) * corner.rise) / 2, 0]}
             renderOrder={corner.radii.length - i}
             geometry={geometry}
             castShadow
@@ -417,7 +484,7 @@ export function PoolAccessModel({
           return (
             <mesh
               key={i}
-              position={[0, floorY + height / 2, (i + 0.5) * tread]}
+              position={[0, localFloorY + height / 2, (i + 0.5) * tread]}
               castShadow
               receiveShadow
             >
@@ -441,7 +508,7 @@ export function PoolAccessModel({
             </group>
           ))}
           {[0.3, 0.58, 0.86]
-            .filter((d) => d < topY - floorY - 0.12)
+            .filter((d) => d < topY - localFloorY - 0.12)
             .map((d) => (
               <mesh key={d} position={[0, -d, 0.32]} castShadow>
                 <boxGeometry args={[0.5, 0.035, 0.13]} />

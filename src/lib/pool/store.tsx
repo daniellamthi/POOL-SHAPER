@@ -20,6 +20,13 @@ import {
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
 import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
+import {
+  buildFloorProfile,
+  clampShallowDepth,
+  computeSlopeMetrics,
+  suggestShallowDepth,
+} from "./floor-profile";
+import { getPoolVerticalLayout } from "./vertical-layout";
 import { getCustomerValidation } from "./validation";
 import { createProjectId, toProjectConfiguration, type ProjectConfiguration } from "./project";
 import { clearProjectDraft, loadProjectDraft, saveProjectDraft } from "./persistence";
@@ -30,6 +37,7 @@ import type {
   CustomerInfo,
   EquipmentId,
   FinishMaterial,
+  FloorProfile,
   InternalStairType,
   PoolType,
   LinerColor,
@@ -61,6 +69,8 @@ type Action =
   | { type: "setControlPoint"; index: number; value: ControlPoint }
   | { type: "resetControlPoints" }
   | { type: "setDimension"; key: DimensionKey; value: number }
+  | { type: "setFloorProfile"; value: FloorProfile }
+  | { type: "toggleSlopeReversed" }
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
@@ -198,11 +208,45 @@ function reducer(state: State, action: Action): State {
       const limits = DIMENSION_LIMITS[action.key];
       if (!Number.isFinite(action.value)) return state;
       const value = clamp(action.value, limits.min, limits.max);
+      const dimensions = { ...config.dimensions, [action.key]: value };
+      // A `shallowDepth` request is further clamped below the (possibly just
+      // updated) deep `depth` by a real minimum difference; changing `depth`
+      // itself must re-clamp an existing `shallowDepth` for the same reason
+      // -- neither a stray UI value nor a depth edit can leave the slope
+      // inverted, zero-difference or NaN.
+      if (action.key === "shallowDepth") {
+        dimensions.shallowDepth = clampShallowDepth(
+          value,
+          dimensions.depth,
+          DIMENSION_LIMITS.depth.min,
+        );
+      } else if (action.key === "depth" && dimensions.shallowDepth !== undefined) {
+        dimensions.shallowDepth = clampShallowDepth(
+          dimensions.shallowDepth,
+          value,
+          DIMENSION_LIMITS.depth.min,
+        );
+      }
+      return { ...state, config: { ...config, dimensions } };
+    }
+    case "setFloorProfile": {
+      const dimensions = { ...config.dimensions, floorProfile: action.value };
+      // First activation: seed a sensible shallow depth rather than leaving
+      // it undefined (which `floor-profile.ts` would otherwise have to guess
+      // at every read) or repeating a blind constant regardless of pool size.
+      if (action.value === "slope" && dimensions.shallowDepth === undefined) {
+        dimensions.shallowDepth = suggestShallowDepth(dimensions.depth, DIMENSION_LIMITS.depth.min);
+      }
+      return { ...state, config: { ...config, dimensions } };
+    }
+    case "toggleSlopeReversed":
       return {
         ...state,
-        config: { ...config, dimensions: { ...config.dimensions, [action.key]: value } },
+        config: {
+          ...config,
+          dimensions: { ...config.dimensions, slopeReversed: !config.dimensions.slopeReversed },
+        },
       };
-    }
     case "setSystem":
       return { ...state, config: { ...config, system: action.value } };
     case "setOverflowType":
@@ -360,10 +404,36 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     [config.shape, config.dimensions, config.controlPoints],
   );
 
-  const metrics = useMemo(
-    () => computeMetrics(outline, config.dimensions.depth),
-    [outline, config.dimensions.depth],
-  );
+  const metrics = useMemo(() => {
+    // `copingThickness` only ever feeds `copingY`, never floor/water/wall
+    // elevations -- passing 0 here keeps the store decoupled from the
+    // configurator's material/visual-preset layer for a value metrics never
+    // reads.
+    const verticalLayout = getPoolVerticalLayout({
+      poolType: config.poolType ?? "in-ground",
+      system: config.system,
+      overflowType: config.overflowType,
+      depth: config.dimensions.depth,
+      copingThickness: 0,
+    });
+    const floorProfile = buildFloorProfile({
+      outline,
+      shape: config.shape,
+      poolType: config.poolType ?? "in-ground",
+      dimensions: config.dimensions,
+      verticalLayout,
+    });
+    return floorProfile.sloped
+      ? computeSlopeMetrics(outline, floorProfile, verticalLayout.waterY, verticalLayout.wallTopY)
+      : computeMetrics(outline, config.dimensions.depth);
+  }, [
+    outline,
+    config.shape,
+    config.poolType,
+    config.system,
+    config.overflowType,
+    config.dimensions,
+  ]);
 
   const skimmers = useMemo(
     () => planSkimmers(outline, metrics.waterSurface, config.system === "skimmer"),
@@ -417,6 +487,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setControlPoint: (index, v) => dispatch({ type: "setControlPoint", index, value: v }),
       resetControlPoints: () => dispatch({ type: "resetControlPoints" }),
       setDimension: (key, v) => dispatch({ type: "setDimension", key, value: v }),
+      setFloorProfile: (v) => dispatch({ type: "setFloorProfile", value: v }),
+      toggleSlopeReversed: () => dispatch({ type: "toggleSlopeReversed" }),
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
       setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),

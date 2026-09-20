@@ -11,6 +11,11 @@ interface Props {
   floorY: number;
   wallTopY: number;
   color: string;
+  /** Sloped floor (Geometry Pass A) only: the shallow-end depth, metres.
+   * When set and different from `depth`, the depth label reads as a range
+   * ("1,20 → 1,50 m") instead of a single value -- no extra guide line, to
+   * keep the overlay from getting cluttered. */
+  shallowDepth?: number | undefined;
 }
 
 const LABEL_CLASS =
@@ -25,7 +30,12 @@ export function PoolMeasurements({
   floorY,
   wallTopY,
   color,
+  shallowDepth,
 }: Props) {
+  const depthLabel =
+    shallowDepth !== undefined && Math.abs(shallowDepth - depth) > 0.001
+      ? `D ${formatNumber(shallowDepth, 2)} → ${formatNumber(depth, 2)} m`
+      : `D ${formatNumber(depth, 2)} m`;
   const bounds = useMemo(() => {
     let maxX = 0;
     let maxZ = 0;
@@ -76,7 +86,7 @@ export function PoolMeasurements({
         lineWidth={1}
       />
       <Html position={[-xLine, (wallTopY + floorY) / 2, zLine]} center zIndexRange={[10, 0]}>
-        <span className={LABEL_CLASS}>D {formatNumber(depth, 2)} m</span>
+        <span className={LABEL_CLASS}>{depthLabel}</span>
       </Html>
     </group>
   );

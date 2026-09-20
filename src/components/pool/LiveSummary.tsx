@@ -27,6 +27,15 @@ export function LiveSummary() {
       : (LINER_COLORS.find((item) => item.id === config.linerColor)?.title ?? config.linerColor);
   const features = POOL_FEATURES.filter((item) => config.features.includes(item.id));
   const equipment = EQUIPMENT.filter((item) => config.equipment.includes(item.id));
+  const isSlopedFloor =
+    config.shape === "rectangle" &&
+    config.poolType === "in-ground" &&
+    config.dimensions.floorProfile === "slope" &&
+    Number.isFinite(config.dimensions.shallowDepth) &&
+    config.dimensions.shallowDepth! < config.dimensions.depth;
+  const depthLabel = isSlopedFloor
+    ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
+    : `${formatNumber(config.dimensions.depth, 2)} m`;
   const featureLabels = [
     ...features.map((item) => item.title),
     ...(config.poolAccess === "internalSteps"
@@ -43,7 +52,7 @@ export function LiveSummary() {
     ["Forma", getShapeDefinition(config.shape).title],
     [
       "Dimensioni",
-      `${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} × ${formatNumber(config.dimensions.depth, 2)} m`,
+      `${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m · h ${depthLabel}`,
     ],
     ["Superficie", `${formatNumber(metrics.waterSurface)} m²`],
     ["Sistema", config.system === "skimmer" ? "Piscina a skimmer" : "Piscina a sfioro"],

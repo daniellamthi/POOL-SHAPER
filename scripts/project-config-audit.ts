@@ -203,6 +203,53 @@ assert(roundTripped.config.dimensions.floorProfile === "flat", "floorProfile mus
   );
 }
 
+// 8c. A genuine sloped-floor project round-trips its shallow depth and
+// slope direction, and malformed slope data (shallow depth at or past the
+// deep depth) is normalised to a real, safe slope rather than surviving
+// inverted or zero-difference.
+{
+  const slopedProject = toProjectConfiguration(
+    createProjectId(),
+    {
+      ...fullConfig,
+      dimensions: {
+        ...fullConfig.dimensions,
+        floorProfile: "slope",
+        shallowDepth: 1.2,
+        slopeReversed: true,
+      },
+    },
+    fullRenovation,
+  );
+  const slopedRoundTrip = parseProjectConfiguration(serializeProjectConfiguration(slopedProject));
+  assert(
+    slopedRoundTrip.config.dimensions.floorProfile === "slope",
+    "slope floorProfile must survive",
+  );
+  assert(slopedRoundTrip.config.dimensions.shallowDepth === 1.2, "shallowDepth must survive");
+  assert(slopedRoundTrip.config.dimensions.slopeReversed === true, "slopeReversed must survive");
+
+  const malformedProject = toProjectConfiguration(
+    createProjectId(),
+    {
+      ...fullConfig,
+      dimensions: {
+        ...fullConfig.dimensions,
+        floorProfile: "slope",
+        shallowDepth: fullConfig.dimensions.depth + 0.5, // deeper than "deep" -- inverted
+      },
+    },
+    fullRenovation,
+  );
+  const malformedRoundTrip = parseProjectConfiguration(
+    serializeProjectConfiguration(malformedProject),
+  );
+  assert(
+    malformedRoundTrip.config.dimensions.shallowDepth! < malformedRoundTrip.config.dimensions.depth,
+    "an inverted shallowDepth must normalise below the deep depth, never survive inverted",
+  );
+}
+
 // 9. Renovation-specific data survives where applicable.
 assert(
   roundTripped.renovation.areas.length === fullRenovation.areas.length &&

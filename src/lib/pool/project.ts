@@ -15,6 +15,7 @@
  */
 import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
+import { clampShallowDepth } from "./floor-profile";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -99,14 +100,27 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
-      // A project saved before geometry pass A (sloped floor) has no
-      // `floorProfile` -- every reader today assumes flat regardless, but
-      // normalising the field itself keeps the pattern consistent for when
-      // that pass lands.
-      dimensions: {
-        ...restored.dimensions,
-        floorProfile: restored.dimensions?.floorProfile === "slope" ? "slope" : "flat",
-      },
+      // Geometry pass A (sloped floor): a project saved before it existed,
+      // or one carrying malformed slope data, always restores as a safe,
+      // real state -- "flat" with no shallowDepth/slopeReversed baggage, or
+      // "slope" with a shallowDepth clamped exactly the way the reducer and
+      // `buildFloorProfile` clamp a live edit (never inverted, never
+      // zero-difference, never NaN).
+      dimensions:
+        restored.dimensions?.floorProfile === "slope" &&
+        Number.isFinite(restored.dimensions.shallowDepth) &&
+        Number.isFinite(restored.dimensions.depth)
+          ? {
+              ...restored.dimensions,
+              floorProfile: "slope",
+              shallowDepth: clampShallowDepth(
+                restored.dimensions.shallowDepth!,
+                restored.dimensions.depth,
+                0.01,
+              ),
+              slopeReversed: restored.dimensions.slopeReversed === true,
+            }
+          : { ...restored.dimensions, floorProfile: "flat" },
     },
     renovation: renovation as RenovationConfig,
   };

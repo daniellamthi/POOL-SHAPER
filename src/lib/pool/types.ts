@@ -78,9 +78,8 @@ export interface RenovationConfig {
   equipmentUpgrades: ReadonlyArray<EquipmentUpgrade>;
 }
 
-/** Floor construction. "flat" is the only value any renderer or geometry
- * builder currently reads; "slope" is prepared for geometry pass A and is
- * not offered anywhere in production UI yet. */
+/** Floor construction. Selectable (rectangle, in-ground pools only -- see
+ * `src/lib/pool/floor-profile.ts`) since geometry pass A. */
 export type FloorProfile = "flat" | "slope";
 
 export interface Dimensions {
@@ -92,14 +91,18 @@ export interface Dimensions {
   depth: number;
   /** 0..1 relative corner rounding for the custom profile */
   cornerRadius: number;
-  /** Prepared for geometry pass A (sloped floor). Absent/"flat" everywhere
-   * today -- every renderer treats the floor as flat regardless of this
-   * field until that pass wires it in. */
+  /** "slope" is only ever built for a rectangle, in-ground pool -- see
+   * `buildFloorProfile` in floor-profile.ts, which normalises anything else
+   * back to flat regardless of this field. */
   floorProfile?: FloorProfile;
-  /** Prepared for geometry pass A. Only meaningful once `floorProfile` is
-   * "slope"; metres, shallow-end depth (the existing `depth` becomes the
-   * deep end). Unused today. */
+  /** Only meaningful once `floorProfile` is "slope"; metres, shallow-end
+   * depth (the existing `depth` is the deep end). Always clamped by
+   * `clampShallowDepth` (floor-profile.ts) before it reaches geometry. */
   shallowDepth?: number;
+  /** Which end of the slope axis is shallow. false (default/absent): the
+   * outline's minimum-X wall. true: swapped via "Inverti pendenza" without
+   * changing the two depth values themselves. */
+  slopeReversed?: boolean;
 }
 
 /** A closed 2D outline in the XZ plane, metres, centred on the origin. */

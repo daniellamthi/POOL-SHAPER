@@ -7,6 +7,7 @@ import type {
   CustomerInfo,
   EquipmentId,
   FinishMaterial,
+  FloorProfile,
   InternalStairType,
   PoolType,
   LinerColor,
@@ -53,6 +54,10 @@ export interface ConfiguratorContextValue {
   setControlPoint: (index: number, value: ControlPoint) => void;
   resetControlPoints: () => void;
   setDimension: (key: DimensionKey, value: number) => void;
+  setFloorProfile: (value: FloorProfile) => void;
+  /** Swaps which end of the slope axis is shallow without changing the two
+   * selected depths. */
+  toggleSlopeReversed: () => void;
   setSystem: (value: SystemType) => void;
   setOverflowType: (value: OverflowType) => void;
   setSkimmerFinish: (value: SkimmerFinishId) => void;

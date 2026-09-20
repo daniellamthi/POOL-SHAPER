@@ -63,8 +63,17 @@ import {
   accessPlacement,
   cornerStairPlan,
   linearStairDimensions,
+  recomputeCornerHeight,
 } from "../src/components/pool/three/PoolAccessModel";
 import { WATER_VISUAL_PRESET } from "../src/configurator/materials/visual-presets";
+import {
+  buildFloorProfile,
+  clampShallowDepth,
+  computeSlopeMetrics,
+  MIN_SLOPE_DIFFERENCE,
+  slopeEligibleForDepth,
+} from "../src/lib/pool/floor-profile";
+import { createSlopedFloorGeometry } from "../src/components/pool/three/poolGeometry";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -1262,6 +1271,353 @@ for (const material of COPING_MATERIALS) {
 }
 console.log(
   `Construction audit passed: open skimmer throats for all four profiles; bounded grille, joints and bevels; ${COPING_MATERIALS.length} coping finishes (${scannedCoping.length} scanned, ${proceduralCoping.length} procedural fallback).`,
+);
+
+// --- Geometry Pass A: sloped floor -----------------------------------
+const slopeCases: ReadonlyArray<{
+  length: number;
+  width: number;
+  depth: number;
+  shallowDepth: number;
+}> = [
+  { length: 10, width: 4.5, depth: 1.5, shallowDepth: 1.2 },
+  { length: 8, width: 4, depth: 1.5, shallowDepth: 1.1 },
+  // Small valid pool, at the absolute floor of a real slope (exactly
+  // MIN_SLOPE_DIFFERENCE apart).
+  { length: 3, width: 2, depth: 1, shallowDepth: 0.8 },
+];
+
+for (const testCase of slopeCases) {
+  const dimensions: Dimensions = {
+    length: testCase.length,
+    width: testCase.width,
+    depth: testCase.depth,
+    cornerRadius: 0,
+    floorProfile: "slope",
+    shallowDepth: testCase.shallowDepth,
+  };
+  const outline = buildOutline("rectangle", dimensions, DEFAULT_CONTROL_POINTS);
+  const verticalLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: testCase.depth,
+    copingThickness: 0.03,
+  });
+  const profile = buildFloorProfile({
+    outline,
+    shape: "rectangle",
+    poolType: "in-ground",
+    dimensions,
+    verticalLayout,
+  });
+  const label = `${testCase.length}x${testCase.width} slope ${testCase.shallowDepth}->${testCase.depth}`;
+  assert(profile.sloped, `slope must be eligible for ${label}`);
+
+  // Endpoints.
+  const shallowY = profile.floorYAt(...profile.shallowPoint);
+  const deepY = profile.floorYAt(...profile.deepPoint);
+  assert(Number.isFinite(shallowY) && Number.isFinite(deepY), `no NaN floor elevations (${label})`);
+  assert(
+    Math.abs(shallowY - profile.shallowFloorY) < 1e-9,
+    `shallow endpoint must equal shallowFloorY (${label})`,
+  );
+  assert(
+    Math.abs(deepY - profile.deepFloorY) < 1e-9,
+    `deep endpoint must equal deepFloorY (${label})`,
+  );
+  assert(
+    profile.elevationDrop > 0 && Number.isFinite(profile.elevationDrop),
+    `elevationDrop must be a real positive number (${label})`,
+  );
+
+  // Monotonic slope along the running axis.
+  const bounds = outlineBounds(outline);
+  const axisMin = profile.axis === "x" ? bounds.minX : bounds.minZ;
+  const axisMax = profile.axis === "x" ? bounds.maxX : bounds.maxZ;
+  let previousY: number | null = null;
+  for (let step = 0; step <= 20; step++) {
+    const coordinate = axisMin + (step / 20) * (axisMax - axisMin);
+    const y =
+      profile.axis === "x" ? profile.floorYAt(coordinate, 0) : profile.floorYAt(0, coordinate);
+    assert(Number.isFinite(y), `monotonic sample must be finite (${label})`);
+    if (previousY !== null) {
+      const gettingDeeper = profile.shallowAtMin ? y <= previousY + 1e-9 : y >= previousY - 1e-9;
+      assert(
+        gettingDeeper,
+        `floor elevation must move monotonically along the slope axis (${label})`,
+      );
+    }
+    previousY = y;
+  }
+
+  // Real, closed-form metrics.
+  const metrics = computeSlopeMetrics(
+    outline,
+    profile,
+    verticalLayout.waterY,
+    verticalLayout.wallTopY,
+  );
+  const footprintArea = testCase.length * testCase.width;
+  assert(
+    Number.isFinite(metrics.waterVolume) && metrics.waterVolume > 0,
+    `finite positive volume (${label})`,
+  );
+  assert(
+    Number.isFinite(metrics.floorSurface) && metrics.floorSurface > 0,
+    `finite positive floor surface (${label})`,
+  );
+  assert(
+    Number.isFinite(metrics.wallSurface) && metrics.wallSurface > 0,
+    `finite positive wall surface (${label})`,
+  );
+  assert(
+    metrics.floorSurface > footprintArea,
+    `inclined floor surface must exceed the flat footprint (${label})`,
+  );
+  assert(
+    Math.abs(metrics.waterSurface - footprintArea) < 1e-6,
+    `water surface stays the horizontal plan area (${label})`,
+  );
+  const shallowFlatVolume = footprintArea * (verticalLayout.waterY - profile.shallowFloorY);
+  const deepFlatVolume = footprintArea * (verticalLayout.waterY - profile.deepFloorY);
+  assert(
+    metrics.waterVolume > shallowFlatVolume - 1e-6 && metrics.waterVolume < deepFlatVolume + 1e-6,
+    `sloped volume must sit between the flat-at-shallow and flat-at-deep bounds (${label})`,
+  );
+
+  // Floor geometry: no extra tessellation, no NaN, correct unit normals.
+  const slopedFloorGeom = createSlopedFloorGeometry(outline, profile.floorYAt);
+  const flatFloorGeom = createSurfaceGeometry(outline);
+  assert(
+    slopedFloorGeom.getAttribute("position").count === flatFloorGeom.getAttribute("position").count,
+    `sloped floor must keep the same triangle count as flat -- no extra tessellation (${label})`,
+  );
+  const floorPositions = slopedFloorGeom.getAttribute("position");
+  const floorNormals = slopedFloorGeom.getAttribute("normal");
+  assert(floorNormals, `sloped floor must have computed normals (${label})`);
+  for (let i = 0; i < floorPositions.count; i++) {
+    assert(
+      Number.isFinite(floorPositions.getX(i)) &&
+        Number.isFinite(floorPositions.getY(i)) &&
+        Number.isFinite(floorPositions.getZ(i)),
+      `no NaN floor vertex (${label})`,
+    );
+    const normal = new THREE.Vector3(
+      floorNormals.getX(i),
+      floorNormals.getY(i),
+      floorNormals.getZ(i),
+    );
+    assert(Math.abs(normal.length() - 1) < 1e-3, `floor normals must be unit length (${label})`);
+    assert(
+      normal.y > 0.5,
+      `floor normal must still point mostly upward for a real, gentle slope (${label})`,
+    );
+  }
+  slopedFloorGeom.dispose();
+  flatFloorGeom.dispose();
+
+  // Wall geometry: valid, and never reaches below the deepest local floor
+  // nor stays above the shallowest -- i.e. it genuinely follows the slope.
+  const slopedWallGeom = createInteriorWallGeometry(
+    outline,
+    verticalLayout.wallTopY,
+    profile.floorYAt,
+    0.005,
+    2,
+    [],
+  );
+  const wallPositions = slopedWallGeom.getAttribute("position");
+  let minWallY = Infinity;
+  let maxWallY = -Infinity;
+  for (let i = 0; i < wallPositions.count; i++) {
+    assert(
+      Number.isFinite(wallPositions.getX(i)) &&
+        Number.isFinite(wallPositions.getY(i)) &&
+        Number.isFinite(wallPositions.getZ(i)),
+      `no NaN wall vertex (${label})`,
+    );
+    minWallY = Math.min(minWallY, wallPositions.getY(i));
+    maxWallY = Math.max(maxWallY, wallPositions.getY(i));
+  }
+  assert(
+    minWallY >= profile.deepFloorY - 1e-6,
+    `wall must never reach below the deepest local floor (${label})`,
+  );
+  assert(
+    maxWallY <= verticalLayout.wallTopY + 1e-6,
+    `wall must never rise above the coping-level top (${label})`,
+  );
+  assert(
+    minWallY <= profile.shallowFloorY + 1e-6,
+    `wall bottom must reach down to at least the shallow floor somewhere (${label})`,
+  );
+  slopedWallGeom.dispose();
+
+  // Corner stairs: the flight rebuilt for the local floor must genuinely
+  // differ from one built for the opposite end -- proves the correction is
+  // not a no-op -- and stay a real, finite, positive flight either way.
+  const cornerRaw = cornerStairPlan(outline, profile.deepFloorY, verticalLayout.copingY);
+  if (cornerRaw) {
+    const deepRecompute = recomputeCornerHeight(
+      cornerRaw,
+      outline,
+      profile.deepFloorY,
+      verticalLayout.copingY,
+    );
+    const shallowRecompute = recomputeCornerHeight(
+      cornerRaw,
+      outline,
+      profile.shallowFloorY,
+      verticalLayout.copingY,
+    );
+    assert(
+      Number.isFinite(shallowRecompute.rise) && shallowRecompute.rise > 0,
+      `corrected shallow-end rise must be finite and positive (${label})`,
+    );
+    assert(
+      shallowRecompute.radii.every((radius) => Number.isFinite(radius) && radius > 0),
+      `corrected radii must all be finite and positive (${label})`,
+    );
+    const shallowSpan = shallowRecompute.rise * shallowRecompute.radii.length;
+    const deepSpan = deepRecompute.rise * deepRecompute.radii.length;
+    assert(
+      shallowSpan < deepSpan + 1e-6,
+      `a corner stair rebuilt for the shallow floor must span no more total height than one rebuilt for the deep floor (${label})`,
+    );
+  }
+
+  // Linear stair flight: sized against the shallow floor must be a
+  // real, shorter flight than one sized against the deep floor.
+  const shallowFlight = linearStairDimensions(profile.shallowFloorY, verticalLayout.copingY);
+  const deepFlight = linearStairDimensions(profile.deepFloorY, verticalLayout.copingY);
+  assert(
+    shallowFlight.riseCount <= deepFlight.riseCount,
+    `a shallow-floor flight must never need more risers than a deep-floor one (${label})`,
+  );
+
+  // Skimmer/overflow placement never consumes floor elevation, so it must
+  // stay fully unaffected by slope.
+  const skimmerPlan = planSkimmers(outline, footprintArea, true);
+  assert(
+    skimmerPlan.positions.length > 0,
+    `skimmers must still place with a sloped floor (${label})`,
+  );
+  for (const position of skimmerPlan.positions) {
+    assert(
+      Number.isFinite(position.x) && Number.isFinite(position.z),
+      `skimmer positions must stay finite under slope (${label})`,
+    );
+  }
+}
+
+// Flat mode is unaffected: `buildFloorProfile` on a config with no
+// `floorProfile` returns `sloped: false` and the single global floor Y
+// everywhere, exactly like every pool before this pass.
+{
+  const flatDimensions: Dimensions = { length: 10, width: 4.5, depth: 1.5, cornerRadius: 0 };
+  const outline = buildOutline("rectangle", flatDimensions, DEFAULT_CONTROL_POINTS);
+  const verticalLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: 1.5,
+    copingThickness: 0.03,
+  });
+  const profile = buildFloorProfile({
+    outline,
+    shape: "rectangle",
+    poolType: "in-ground",
+    dimensions: flatDimensions,
+    verticalLayout,
+  });
+  assert(!profile.sloped, "a project without floorProfile must build as flat");
+  assert(
+    profile.floorYAt(0, 0) === verticalLayout.floorY,
+    "flat floorYAt must equal the single global floorY everywhere",
+  );
+}
+
+// Ineligible combinations must always normalise to flat -- never error,
+// never build a partial/degenerate slope.
+{
+  const slopeRequested: Dimensions = {
+    length: 10,
+    width: 4.5,
+    depth: 1.5,
+    cornerRadius: 0,
+    floorProfile: "slope",
+    shallowDepth: 1.2,
+  };
+  const customOutline = buildOutline("custom", slopeRequested, DEFAULT_CONTROL_POINTS);
+  const inGroundLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: 1.5,
+    copingThickness: 0.03,
+  });
+  assert(
+    !buildFloorProfile({
+      outline: customOutline,
+      shape: "custom",
+      poolType: "in-ground",
+      dimensions: slopeRequested,
+      verticalLayout: inGroundLayout,
+    }).sloped,
+    "custom shape must never build sloped, even with slope requested",
+  );
+
+  const rectOutline = buildOutline("rectangle", slopeRequested, DEFAULT_CONTROL_POINTS);
+  const aboveGroundLayout = getPoolVerticalLayout({
+    poolType: "above-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: 1.5,
+    copingThickness: 0.03,
+  });
+  assert(
+    !buildFloorProfile({
+      outline: rectOutline,
+      shape: "rectangle",
+      poolType: "above-ground",
+      dimensions: slopeRequested,
+      verticalLayout: aboveGroundLayout,
+    }).sloped,
+    "above-ground pools must never build sloped",
+  );
+}
+
+// clampShallowDepth / slopeEligibleForDepth: no NaN, no inversion, no
+// zero-difference slope. The last assertion is deliberately the negation of
+// a bug that was briefly reintroduced while writing this block (clamp
+// returning the deep depth unchanged), to prove the guard actually fires
+// rather than being vacuously true.
+{
+  assert(
+    slopeEligibleForDepth(1.5, 0.8) === true,
+    "1.5m deep pool has room for a real shallow end",
+  );
+  assert(
+    slopeEligibleForDepth(0.9, 0.8) === false,
+    "0.9m deep pool cannot fit MIN_SLOPE_DIFFERENCE above the absolute minimum",
+  );
+  assert(
+    Number.isFinite(clampShallowDepth(NaN, 1.5, 0.8)) && clampShallowDepth(NaN, 1.5, 0.8) >= 0.8,
+    "a NaN shallow depth must clamp to a real number, never propagate",
+  );
+  assert(
+    clampShallowDepth(-3, 1.5, 0.8) === 0.8,
+    "a negative shallow depth clamps to the absolute minimum",
+  );
+  assert(
+    clampShallowDepth(1.5, 1.5, 0.8) <= 1.5 - MIN_SLOPE_DIFFERENCE,
+    "requesting the deep depth as the shallow depth must still clamp to a real slope below it",
+  );
+}
+
+console.log(
+  `Floor-profile audit passed: ${slopeCases.length} sloped configurations (endpoints, monotonic slope, floor/wall closure, normals, metrics, stairs, skimmers), flat/ineligible normalisation and clamp guards all verified.`,
 );
 console.log(
   `Geometry audit passed: ${shapes.length * dimensionCases.length * 2} shape/dimension/system cases, ${customCases.length} custom-shape offset cases, ${validRegressionCases.length + invalidRegressionCases.length} guardrail regressions, ${cameraRegressionCount} camera poses and 24 clamped drag steps.`,

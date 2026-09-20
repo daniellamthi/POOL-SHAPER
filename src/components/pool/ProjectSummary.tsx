@@ -111,7 +111,16 @@ export function ProjectSummary() {
   const editStep = (index: number) => (index >= 0 ? () => goToStep(index) : undefined);
 
   const poolType = poolTypeLabel(config.poolType);
-  const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${formatNumber(config.dimensions.depth, 2)} m`;
+  const isSlopedFloor =
+    config.shape === "rectangle" &&
+    config.poolType === "in-ground" &&
+    config.dimensions.floorProfile === "slope" &&
+    Number.isFinite(config.dimensions.shallowDepth) &&
+    config.dimensions.shallowDepth! < config.dimensions.depth;
+  const depthLabel = isSlopedFloor
+    ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
+    : `${formatNumber(config.dimensions.depth, 2)} m`;
+  const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${depthLabel}`;
   const systemLine = systemHeadline(config.system, config.overflowType);
 
   const copingMaterial = COPING_MATERIALS.find((option) => option.id === config.copingMaterial);
@@ -176,6 +185,16 @@ export function ProjectSummary() {
       <Section title="La tua piscina" onEdit={editStep(dimensionsStepIndex)}>
         <Row label="Tipologia" value={poolType} />
         <Row label="Dimensioni" value={dimensionsSentence} />
+        {isSlopedFloor ? (
+          <>
+            <Row label="Fondo" value="In pendenza" />
+            <Row label="Profondità" value={depthLabel} />
+            <Row
+              label="Dislivello"
+              value={`${Math.round((config.dimensions.depth - config.dimensions.shallowDepth!) * 100)} cm`}
+            />
+          </>
+        ) : null}
       </Section>
 
       <Section title="Linea d'acqua" onEdit={editStep(systemStepIndex)}>

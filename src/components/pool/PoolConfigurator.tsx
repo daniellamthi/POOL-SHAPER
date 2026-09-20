@@ -401,6 +401,9 @@ function ConfiguratorLayout() {
             length={config.dimensions.length}
             width={config.dimensions.width}
             depth={config.dimensions.depth}
+            floorProfile={config.dimensions.floorProfile}
+            shallowDepth={config.dimensions.shallowDepth}
+            slopeReversed={config.dimensions.slopeReversed}
             showMeasurements={showMeasurements}
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}

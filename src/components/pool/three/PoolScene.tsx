@@ -24,6 +24,7 @@ import { createSurfaceGeometry } from "./poolGeometry";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
 import type {
+  FloorProfile,
   Outline,
   OverflowType,
   PoolFeatureId,
@@ -32,6 +33,8 @@ import type {
   PoolType,
   SystemType,
 } from "@/lib/pool/types";
+import { buildFloorProfile } from "@/lib/pool/floor-profile";
+import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import type { Theme } from "@/lib/theme";
 import {
   ACTIVE_RENDERING_QUALITY,
@@ -79,6 +82,12 @@ export interface SceneProps {
   length: number;
   width: number;
   depth: number;
+  /** Geometry pass A. Absent/"flat" renders and measures exactly as before
+   * this pass -- only selectable for a rectangle, in-ground pool (see
+   * `buildFloorProfile`, floor-profile.ts). */
+  floorProfile?: FloorProfile | undefined;
+  shallowDepth?: number | undefined;
+  slopeReversed?: boolean | undefined;
   showMeasurements: boolean;
   frameToken: number;
   focus: SceneFocus;
@@ -501,6 +510,9 @@ export default function PoolScene({
   length,
   width,
   depth,
+  floorProfile: floorProfileSetting = "flat",
+  shallowDepth,
+  slopeReversed = false,
   showMeasurements,
   frameToken,
   focus,
@@ -525,6 +537,39 @@ export default function PoolScene({
   const verticalLayout = useMemo(
     () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
     [poolType, system, overflowType, depth, copingThickness],
+  );
+
+  // Single source of truth for every floor elevation -- rendering, stairs,
+  // lighting and measurements all read the same model (see floor-profile.ts).
+  const floorProfile: FloorProfileModel = useMemo(
+    () =>
+      buildFloorProfile({
+        outline,
+        shape,
+        poolType,
+        dimensions: {
+          length,
+          width,
+          depth,
+          cornerRadius: 0,
+          floorProfile: floorProfileSetting,
+          ...(shallowDepth !== undefined ? { shallowDepth } : {}),
+          ...(slopeReversed !== undefined ? { slopeReversed } : {}),
+        },
+        verticalLayout,
+      }),
+    [
+      outline,
+      shape,
+      poolType,
+      length,
+      width,
+      depth,
+      floorProfileSetting,
+      shallowDepth,
+      slopeReversed,
+      verticalLayout,
+    ],
   );
 
   // Computed once here so the luminaires and the camera that frames them are
@@ -678,6 +723,7 @@ export default function PoolScene({
         skimmers={skimmers}
         outline={outline}
         depth={depth}
+        floorProfile={floorProfile}
         materials={materials}
         system={system}
         overflowType={overflowType}
@@ -690,6 +736,7 @@ export default function PoolScene({
         <PoolLights
           lighting={lighting}
           layout={verticalLayout}
+          floorProfile={floorProfile}
           showWater={showWater}
           ledColor={ledColor}
           ledIntensity={ledIntensity}
@@ -732,6 +779,9 @@ export default function PoolScene({
           floorY={verticalLayout.floorY}
           wallTopY={verticalLayout.wallTopY}
           color={palette.guide}
+          shallowDepth={
+            floorProfile.sloped ? verticalLayout.groundY - floorProfile.shallowFloorY : undefined
+          }
         />
       ) : null}
 

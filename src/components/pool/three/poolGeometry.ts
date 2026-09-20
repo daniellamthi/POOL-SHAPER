@@ -17,6 +17,32 @@ export function createSurfaceGeometry(outline: Outline, hole?: Outline): THREE.B
 }
 
 /**
+ * The same flat XZ triangulation as `createSurfaceGeometry`, with each
+ * vertex's world Y then displaced to `floorYAt(x, z)` -- X, Z and UVs are
+ * untouched, so plan-view texel density (and tile count) stays exactly what
+ * flat mode already uses; only the true, physically real elevation changes.
+ * A single-axis linear ramp is a genuinely flat (non-curved) inclined plane,
+ * so `computeVertexNormals()` on the displaced mesh yields the exact,
+ * uniform tilted normal -- no faceting, no extra tessellation needed.
+ * Positioned at world origin (unlike the flat mesh, which is raised via
+ * `position={[0, floorY, 0]}`): every vertex already carries its absolute
+ * world Y.
+ */
+export function createSlopedFloorGeometry(
+  outline: Outline,
+  floorYAt: (x: number, z: number) => number,
+): THREE.BufferGeometry {
+  const geometry = createSurfaceGeometry(outline);
+  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
+  for (let i = 0; i < position.count; i++) {
+    position.setY(i, floorYAt(position.getX(i), position.getZ(i)));
+  }
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/**
  * Constant-correspondence horizontal ring. Inner and outer outlines must come
  * from the same sampled master outline, so every segment is joined locally
  * instead of allowing a generic polygon triangulator to bridge the opening.
@@ -187,20 +213,38 @@ export function createWallGeometry(outline: Outline, top: number, bottom: number
  * Interior wall with a millimetric wall/floor cove. The authoritative outline
  * remains the wall's top/vertical boundary; only the final radius turns inward.
  * Invalid concave offsets fall back to the original sharp wall deterministically.
+ *
+ * `bottom` is either the usual constant (flat floor -- every call site below
+ * that passes a plain number gets byte-for-byte the same geometry as before)
+ * or a `(x, z) => number` function for a sloped floor, evaluated per vertex.
+ * UV V and the cove's radius-safety margin are still measured against a
+ * single global reference height (the deepest/tallest point the wall ever
+ * reaches) rather than a locally-varying one: that keeps physical texture
+ * density constant everywhere, so a shorter, shallower run of wall simply
+ * shows a shorter slice of the same tile instead of a squashed one.
  */
 export function createInteriorWallGeometry(
   outline: Outline,
   top: number,
-  bottom: number,
+  bottom: number | ((x: number, z: number) => number),
   radius = 0.005,
   segments = 2,
   openings: readonly WallOpening[] = [],
 ): THREE.BufferGeometry {
-  const height = top - bottom;
-  const safeRadius = Math.min(Math.max(radius, 0), 0.008, height * 0.05);
+  const bottomAt = typeof bottom === "function" ? bottom : () => bottom;
+  const bottomSamples = outline.map(([x, z]) => bottomAt(x, z));
+  // Deepest point: the fixed reference `height`/UV scale is measured against.
+  const referenceBottom = Math.min(...bottomSamples);
+  // Shallowest point: what actually bounds how large the cove radius may
+  // safely be everywhere along the wall.
+  const shallowestBottom = Math.max(...bottomSamples);
+  const height = top - referenceBottom;
+  const minHeight = top - shallowestBottom;
+  const safeRadius = Math.min(Math.max(radius, 0), 0.008, minHeight * 0.05);
   const safeSegments = Math.min(3, Math.max(2, Math.floor(segments)));
-  if (outline.length < 3 || !Number.isFinite(height) || height <= 0 || safeRadius < 0.003) {
-    return createWallGeometry(outline, top, bottom);
+  const flatFallback = () => createWallGeometry(outline, top, referenceBottom);
+  if (outline.length < 3 || !Number.isFinite(height) || minHeight <= 0 || safeRadius < 0.003) {
+    return flatFallback();
   }
 
   const perimeterDistances = [0];
@@ -212,12 +256,15 @@ export function createInteriorWallGeometry(
     perimeterDistances.push(perimeter);
   }
   if (!Number.isFinite(perimeter) || perimeter <= 1e-6) {
-    return createWallGeometry(outline, top, bottom);
+    return flatFallback();
   }
 
-  const layers: Array<{ outline: Outline; y: number }> = [
-    { outline, y: top },
-    { outline, y: bottom + safeRadius },
+  // Each layer is a fixed vertical offset from the LOCAL floor at whatever
+  // (x, z) a given vertex sits at (the top layer is the one exception: it is
+  // always the constant wall-top elevation, never floor-relative).
+  const layers: Array<{ outline: Outline; offsetFromBottom: number | null }> = [
+    { outline, offsetFromBottom: null },
+    { outline, offsetFromBottom: safeRadius },
   ];
   for (let step = 1; step <= safeSegments; step++) {
     const angle = (step / safeSegments) * (Math.PI / 2);
@@ -227,10 +274,12 @@ export function createInteriorWallGeometry(
       insetOutline.length !== outline.length ||
       insetOutline.some((point) => !point.every(Number.isFinite))
     ) {
-      return createWallGeometry(outline, top, bottom);
+      return flatFallback();
     }
-    layers.push({ outline: insetOutline, y: bottom + safeRadius * (1 - Math.sin(angle)) });
+    layers.push({ outline: insetOutline, offsetFromBottom: safeRadius * (1 - Math.sin(angle)) });
   }
+  const layerY = (layer: { offsetFromBottom: number | null }, x: number, z: number): number =>
+    layer.offsetFromBottom === null ? top : bottomAt(x, z) + layer.offsetFromBottom;
 
   const positions: number[] = [];
   const uvs: number[] = [];
@@ -243,10 +292,16 @@ export function createInteriorWallGeometry(
       const upperB = upper.outline[next]!;
       const lowerA = lower.outline[index]!;
       const lowerB = lower.outline[next]!;
+      const upperAY = layerY(upper, upperA[0], upperA[1]);
+      const upperBY = layerY(upper, upperB[0], upperB[1]);
+      const lowerAY = layerY(lower, lowerA[0], lowerA[1]);
+      const lowerBY = layerY(lower, lowerB[0], lowerB[1]);
       const u1 = perimeterDistances[index]! / perimeter;
       const u2 = perimeterDistances[index + 1]! / perimeter;
-      const upperV = (upper.y - bottom) / height;
-      const lowerV = (lower.y - bottom) / height;
+      const upperAV = (upperAY - referenceBottom) / height;
+      const upperBV = (upperBY - referenceBottom) / height;
+      const lowerAV = (lowerAY - referenceBottom) / height;
+      const lowerBV = (lowerBY - referenceBottom) / height;
       // Only the straight vertical band intersects the skimmers. Split it
       // at the aperture boundaries; retain physical holes in raster and shadows.
       if (layer === 0 && openings.length) {
@@ -276,6 +331,11 @@ export function createInteriorWallGeometry(
         const cuts = [...new Set([0, 1, ...holes.flatMap((h) => [h.a, h.b])])].sort(
           (a, b) => a - b,
         );
+        // The opening itself is always narrow relative to the whole wall run,
+        // so the local floor barely moves across it -- interpolating the
+        // upper/lower Y at each cut's own midpoint (rather than reusing a
+        // single value across the whole opening) is exact for a constant-Y
+        // wall and a close approximation for a gently sloped one.
         const append = (a: number, b: number, y0: number, y1: number) => {
           if (y0 - y1 < 1e-8) return;
           for (const [t, y] of [
@@ -287,27 +347,30 @@ export function createInteriorWallGeometry(
             [b, y0],
           ]) {
             positions.push(upperA[0] + dx * t!, y!, upperA[1] + dz * t!);
-            uvs.push(THREE.MathUtils.lerp(u1, u2, t!), (y! - bottom) / height);
+            uvs.push(THREE.MathUtils.lerp(u1, u2, t!), (y! - referenceBottom) / height);
           }
         };
         for (let i = 0; i < cuts.length - 1; i++) {
           const a = cuts[i]!;
           const b = cuts[i + 1]!;
-          const hole = holes.find((h) => (a + b) / 2 >= h.a && (a + b) / 2 <= h.b);
+          const mid = (a + b) / 2;
+          const upperMidY = THREE.MathUtils.lerp(upperAY, upperBY, mid);
+          const lowerMidY = THREE.MathUtils.lerp(lowerAY, lowerBY, mid);
+          const hole = holes.find((h) => mid >= h.a && mid <= h.b);
           if (hole) {
-            append(a, b, upper.y, Math.min(upper.y, hole.top));
-            append(a, b, Math.max(lower.y, hole.bottom), lower.y);
-          } else append(a, b, upper.y, lower.y);
+            append(a, b, upperMidY, Math.min(upperMidY, hole.top));
+            append(a, b, Math.max(lowerMidY, hole.bottom), lowerMidY);
+          } else append(a, b, upperMidY, lowerMidY);
         }
         continue;
       }
       const triangles = [
-        [upperA, upper.y, u1, upperV],
-        [lowerA, lower.y, u1, lowerV],
-        [lowerB, lower.y, u2, lowerV],
-        [upperA, upper.y, u1, upperV],
-        [lowerB, lower.y, u2, lowerV],
-        [upperB, upper.y, u2, upperV],
+        [upperA, upperAY, u1, upperAV],
+        [lowerA, lowerAY, u1, lowerAV],
+        [lowerB, lowerBY, u2, lowerBV],
+        [upperA, upperAY, u1, upperAV],
+        [lowerB, lowerBY, u2, lowerBV],
+        [upperB, upperBY, u2, upperBV],
       ] as const;
       for (const [[x, z], y, u, v] of triangles) {
         positions.push(x, y, z);

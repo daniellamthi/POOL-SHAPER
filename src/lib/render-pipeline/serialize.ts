@@ -116,6 +116,22 @@ export function serializePoolRenderConfig(
   options: SerializePoolRenderConfigOptions = {},
 ): PoolRenderConfig {
   const { config, outline, skimmers, theme } = input;
+  // Geometry Pass A (sloped floor) has no Blender/Cycles counterpart yet --
+  // the live configurator and the photorealistic export must never disagree
+  // about the basin's shape, so a sloped project refuses to export rather
+  // than silently rendering the flat pool it would otherwise fall back to.
+  const isSlopedFloor =
+    config.shape === "rectangle" &&
+    (config.poolType ?? "in-ground") === "in-ground" &&
+    config.dimensions.floorProfile === "slope" &&
+    Number.isFinite(config.dimensions.shallowDepth) &&
+    config.dimensions.shallowDepth! < config.dimensions.depth;
+  if (isSlopedFloor) {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora il fondo in pendenza. " +
+        "Passa temporaneamente a fondo piano per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;
   const outputPreset = RENDER_OUTPUT_PRESETS[outputPresetId];

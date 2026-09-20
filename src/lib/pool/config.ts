@@ -19,6 +19,11 @@ export const DIMENSION_LIMITS = {
   width: { min: 2, max: 12, step: 0.1, unit: "m" },
   depth: { min: 0.8, max: 1.5, step: 0.05, unit: "m" },
   cornerRadius: { min: 0, max: 1, step: 0.01, unit: "" },
+  /** Shallow-end depth for a sloped floor. Same physical range as `depth` --
+   * the shallow end is still a real, standing-depth pool floor, never a
+   * beach entry -- further clamped below `depth` by `clampShallowDepth`
+   * (floor-profile.ts) so the slope itself is always real and finite. */
+  shallowDepth: { min: 0.8, max: 1.5, step: 0.05, unit: "m" },
 } as const;
 
 export type DimensionKey = keyof typeof DIMENSION_LIMITS;

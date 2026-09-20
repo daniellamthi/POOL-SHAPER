@@ -6,9 +6,11 @@ import {
   createBeveledRingGeometry,
   createInteriorWallGeometry,
   createRingGeometry,
+  createSlopedFloorGeometry,
   createSurfaceGeometry,
   createWallGeometry,
 } from "./poolGeometry";
+import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import {
   createMaterialMicroAoMap,
   createCausticsMap,
@@ -72,6 +74,7 @@ interface PoolModelProps {
   internalStairType: import("@/lib/pool/types").InternalStairType;
   outline: Outline;
   depth: number;
+  floorProfile: FloorProfileModel;
   materials: ResolvedMaterials;
   system: SystemType;
   overflowType: OverflowType;
@@ -363,6 +366,7 @@ function cloneDataTexture(
 export function PoolModel({
   outline,
   depth,
+  floorProfile,
   materials,
   system,
   overflowType,
@@ -766,19 +770,25 @@ export function PoolModel({
     aboveGroundPanelBumpMap.repeat.copy(aboveGroundPanelMap.repeat);
   }, [structuralPerimeter, aboveGroundPanelMap, aboveGroundPanelBumpMap]);
 
-  const floor = useDisposable(() => createSurfaceGeometry(outline), [outline]);
+  const floor = useDisposable(
+    () =>
+      floorProfile.sloped
+        ? createSlopedFloorGeometry(outline, floorProfile.floorYAt)
+        : createSurfaceGeometry(outline),
+    [outline, floorProfile],
+  );
   const water = useDisposable(() => createSurfaceGeometry(waterOutline), [waterOutline]);
   const walls = useDisposable(
     () =>
       createInteriorWallGeometry(
         outline,
         verticalLayout.wallTopY,
-        verticalLayout.floorY,
+        floorProfile.sloped ? floorProfile.floorYAt : verticalLayout.floorY,
         INTERIOR_FLOOR_COVE_RADIUS,
         2,
         openings,
       ),
-    [outline, verticalLayout.wallTopY, verticalLayout.floorY, openings],
+    [outline, verticalLayout.wallTopY, verticalLayout.floorY, floorProfile, openings],
   );
   const exteriorWalls = useDisposable(
     () => createWallGeometry(structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY),
@@ -896,7 +906,7 @@ export function PoolModel({
           outline={outline}
           access={poolAccess}
           stairType={internalStairType}
-          floorY={verticalLayout.floorY}
+          floorProfile={floorProfile}
           topY={verticalLayout.copingY}
         >
           <meshPhysicalMaterial
@@ -944,8 +954,15 @@ export function PoolModel({
           />
         </mesh>
 
-        {/* Floor with animated caustics */}
-        <mesh geometry={floor} position={[0, verticalLayout.floorY, 0]} receiveShadow>
+        {/* Floor with animated caustics. Sloped floors bake their absolute
+            world Y into every vertex (see createSlopedFloorGeometry), so
+            the mesh itself sits at the origin; flat floors keep the single
+            constant-Y geometry raised by `position`, exactly as before. */}
+        <mesh
+          geometry={floor}
+          position={floorProfile.sloped ? [0, 0, 0] : [0, verticalLayout.floorY, 0]}
+          receiveShadow
+        >
           <meshPhysicalMaterial
             color={materials.floor.color}
             map={floorSurfaceMap}

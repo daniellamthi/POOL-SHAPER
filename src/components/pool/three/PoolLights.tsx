@@ -11,6 +11,7 @@ import {
 import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
+import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import {
   calibratedLedColor,
   ledCandela,
@@ -138,10 +139,28 @@ void main() {
 }
 `;
 
-function RecessedPoolLight({ position, floorY, powered, presentation, revision, colour, intensity, dimmer, diffuser, glow, scatterGeometry, scatterMaterial, occlusion }: {
-  position: PoolLightPosition; floorY: number; powered: boolean;
-  presentation: keyof typeof POOL_LED_PRESENTATIONS; revision: string;
-  colour: THREE.Color; intensity: number;
+function RecessedPoolLight({
+  position,
+  floorY,
+  powered,
+  presentation,
+  revision,
+  colour,
+  intensity,
+  dimmer,
+  diffuser,
+  glow,
+  scatterGeometry,
+  scatterMaterial,
+  occlusion,
+}: {
+  position: PoolLightPosition;
+  floorY: number;
+  powered: boolean;
+  presentation: keyof typeof POOL_LED_PRESENTATIONS;
+  revision: string;
+  colour: THREE.Color;
+  intensity: number;
   dimmer: { output: number; emission: number };
   diffuser: THREE.DataTexture;
   glow: THREE.DataTexture;
@@ -152,7 +171,11 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
   const light = useRef<THREE.SpotLight>(null);
   const target = useMemo(() => {
     const object = new THREE.Object3D();
-    object.position.set(0, -(position.y - floorY) * LED_OPTICS.targetFloorFraction, position.throwDistance * LED_OPTICS.targetThrowFraction);
+    object.position.set(
+      0,
+      -(position.y - floorY) * LED_OPTICS.targetFloorFraction,
+      position.throwDistance * LED_OPTICS.targetThrowFraction,
+    );
     return object;
   }, [position.y, position.throwDistance, floorY]);
   useLayoutEffect(() => {
@@ -160,14 +183,22 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
   }, [revision, target, occlusion]);
   const level = POOL_LED_PRESENTATIONS[presentation];
   return (
-    <group name="pool-underwater-led" position={[position.x, position.y, position.z]} rotation={[0, position.rotation, 0]}>
+    <group
+      name="pool-underwater-led"
+      position={[position.x, position.y, position.z]}
+      rotation={[0, position.rotation, 0]}
+    >
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.002]} castShadow>
         <cylinderGeometry args={[0.128, 0.118, 0.028, 40]} />
         <meshStandardMaterial color="#69777b" roughness={0.4} metalness={0.8} />
       </mesh>
       <mesh position={[0, 0, 0.022]} castShadow>
         <torusGeometry args={[0.116, 0.009, 10, 48]} />
-        <meshStandardMaterial color={POOL_LUMINAIRE.trim === "steel" ? "#cbd1d2" : "#e9e9e3"} metalness={POOL_LUMINAIRE.trim === "steel" ? 1 : 0} roughness={0.34} />
+        <meshStandardMaterial
+          color={POOL_LUMINAIRE.trim === "steel" ? "#cbd1d2" : "#e9e9e3"}
+          metalness={POOL_LUMINAIRE.trim === "steel" ? 1 : 0}
+          roughness={0.34}
+        />
       </mesh>
       <mesh position={[0, 0, 0.019]}>
         <ringGeometry args={[0.1, 0.108, 40]} />
@@ -175,9 +206,16 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
       </mesh>
       <mesh position={[0, 0, 0.017]}>
         <circleGeometry args={[0.1, 40]} />
-        <meshPhysicalMaterial color="#aabfc3" roughness={0.18} clearcoat={0.8} clearcoatRoughness={0.12} emissive={colour} emissiveIntensity={powered ? level.emission * dimmer.emission : 0} />
+        <meshPhysicalMaterial
+          color="#aabfc3"
+          roughness={0.18}
+          clearcoat={0.8}
+          clearcoatRoughness={0.12}
+          emissive={colour}
+          emissiveIntensity={powered ? level.emission * dimmer.emission : 0}
+        />
       </mesh>
-      {[-1, 1].map(sign => (
+      {[-1, 1].map((sign) => (
         <mesh key={sign} position={[sign * 0.116, 0, 0.032]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.003, 0.003, 0.0015, 10]} />
           <meshStandardMaterial color="#798487" roughness={0.4} metalness={0.9} />
@@ -192,7 +230,10 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
         // of the opaque list gets painted first and then completely painted
         // over by the liner behind it. Drawing last within the opaque pass
         // keeps it visible in both the main image and the water's refraction.
-        <mesh position={[0, 0, LED_OPTICS.lensCenter + 0.0004]} renderOrder={LED_OPTICS.glowRenderOrder}>
+        <mesh
+          position={[0, 0, LED_OPTICS.lensCenter + 0.0004]}
+          renderOrder={LED_OPTICS.glowRenderOrder}
+        >
           <circleGeometry args={[LED_OPTICS.glowRadius, 24]} />
           <meshBasicMaterial
             map={glow}
@@ -219,24 +260,26 @@ function RecessedPoolLight({ position, floorY, powered, presentation, revision, 
           <primitive object={scatterMaterial} attach="material" />
         </mesh>
       ) : null}
-      {powered ? <spotLight
-        ref={light}
-        position={[0, 0, LED_OPTICS.lensCenter + LED_OPTICS.emitterEpsilon]}
-        target={target}
-        color={colour}
-        map={diffuser}
-        intensity={intensity}
-        angle={LED_OPTICS.angle}
-        penumbra={LED_OPTICS.penumbra}
-        decay={LED_OPTICS.decay}
-        distance={position.throwDistance * LED_OPTICS.rangeMultiplier}
-        castShadow={occlusion}
-        shadow-mapSize={[LED_OPTICS.shadowSize, LED_OPTICS.shadowSize]}
-        shadow-camera-near={0.08}
-        shadow-bias={-0.0001}
-        shadow-normalBias={0.012}
-        shadow-autoUpdate={false}
-      /> : null}
+      {powered ? (
+        <spotLight
+          ref={light}
+          position={[0, 0, LED_OPTICS.lensCenter + LED_OPTICS.emitterEpsilon]}
+          target={target}
+          color={colour}
+          map={diffuser}
+          intensity={intensity}
+          angle={LED_OPTICS.angle}
+          penumbra={LED_OPTICS.penumbra}
+          decay={LED_OPTICS.decay}
+          distance={position.throwDistance * LED_OPTICS.rangeMultiplier}
+          castShadow={occlusion}
+          shadow-mapSize={[LED_OPTICS.shadowSize, LED_OPTICS.shadowSize]}
+          shadow-camera-near={0.08}
+          shadow-bias={-0.0001}
+          shadow-normalBias={0.012}
+          shadow-autoUpdate={false}
+        />
+      ) : null}
     </group>
   );
 }
@@ -270,7 +313,12 @@ export function planSceneLighting({
   access: PoolAccess | null;
   stairType?: InternalStairType;
 }): SceneLightingPlan {
-  const exclusions: LightingExclusion[] = skimmers.positions.map(p => ({ kind: "skimmer", x: p.x, z: p.z, radius: 0.65 }));
+  const exclusions: LightingExclusion[] = skimmers.positions.map((p) => ({
+    kind: "skimmer",
+    x: p.x,
+    z: p.z,
+    radius: 0.65,
+  }));
   let accessPoint: { x: number; z: number } | null = null;
   // The footprint fittings must avoid comes from the same plan the staircase
   // is built from, so a corner flight excludes the quarter it actually fills
@@ -289,30 +337,62 @@ export function planSceneLighting({
     const placement = accessPlacement(outline, run, width, access);
     if (placement) {
       accessPoint = placement;
-      const nx = Math.sin(placement.rotation), nz = Math.cos(placement.rotation);
-      const polygon: Outline = [[-width / 2, -0.05], [width / 2, -0.05], [width / 2, run + 0.1], [-width / 2, run + 0.1]].map(([x, z]) => [placement.x + nz * x! + nx * z!, placement.z - nx * x! + nz * z!] as const);
+      const nx = Math.sin(placement.rotation),
+        nz = Math.cos(placement.rotation);
+      const polygon: Outline = [
+        [-width / 2, -0.05],
+        [width / 2, -0.05],
+        [width / 2, run + 0.1],
+        [-width / 2, run + 0.1],
+      ].map(
+        ([x, z]) => [placement.x + nz * x! + nx * z!, placement.z - nx * x! + nz * z!] as const,
+      );
       exclusions.push({ kind: "access", polygon, clearance: 0.2 });
     }
   }
-  const plan = planPoolLighting({ outline, waterY: layout.waterY, floorY: layout.floorY, exclusions });
+  const plan = planPoolLighting({
+    outline,
+    waterY: layout.waterY,
+    floorY: layout.floorY,
+    exclusions,
+  });
   // In a convex rectangle the basin walls cannot occlude one another. Keep
   // the dominant access shadow; distant fill lights are intentionally soft.
   // Non-rectangular outlines retain full occlusion for re-entrant corners.
-  let shadowIndex = -1, nearest = Infinity;
-  if (accessPoint) plan.positions.forEach((p, i) => {
-    const distance = Math.hypot(p.x - accessPoint.x, p.z - accessPoint.z);
-    if (distance < nearest) { nearest = distance; shadowIndex = i; }
-  });
+  let shadowIndex = -1,
+    nearest = Infinity;
+  if (accessPoint)
+    plan.positions.forEach((p, i) => {
+      const distance = Math.hypot(p.x - accessPoint.x, p.z - accessPoint.z);
+      if (distance < nearest) {
+        nearest = distance;
+        shadowIndex = i;
+      }
+    });
   const turns = outline.map((a, i) => {
-    const b = outline[(i + 1) % outline.length]!, c = outline[(i + 2) % outline.length]!;
+    const b = outline[(i + 1) % outline.length]!,
+      c = outline[(i + 2) % outline.length]!;
     return (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
   });
-  const convexQuad = outline.length === 4 && (turns.every(v => v > 0) || turns.every(v => v < 0));
+  const convexQuad =
+    outline.length === 4 && (turns.every((v) => v > 0) || turns.every((v) => v < 0));
   return { plan, shadowIndex, convexQuad };
 }
 
-export function PoolLights({ lighting, layout, showWater, presentation = "day", ledColor = "#ffffff", ledIntensity }: {
-  lighting: SceneLightingPlan; layout: PoolVerticalLayout;
+export function PoolLights({
+  lighting,
+  layout,
+  floorProfile,
+  showWater,
+  presentation = "day",
+  ledColor = "#ffffff",
+  ledIntensity,
+}: {
+  lighting: SceneLightingPlan;
+  layout: PoolVerticalLayout;
+  /** Geometry Pass A: per-fixture local floor for the beam aim and the
+   * shared scatter-volume floor cutoff. */
+  floorProfile: FloorProfileModel;
   showWater: boolean;
   presentation?: keyof typeof POOL_LED_PRESENTATIONS;
   ledColor?: string;
@@ -326,7 +406,11 @@ export function PoolLights({ lighting, layout, showWater, presentation = "day", 
     const size = LED_OPTICS.diffuserSize;
     const data = new Uint8Array(size * size * 4);
     for (let y = 0; y < size; y++) {
-      const transmission = THREE.MathUtils.smoothstep(LED_OPTICS.upperCutoff - y / (size - 1), 0, LED_OPTICS.upperFeather);
+      const transmission = THREE.MathUtils.smoothstep(
+        LED_OPTICS.upperCutoff - y / (size - 1),
+        0,
+        LED_OPTICS.upperFeather,
+      );
       for (let x = 0; x < size; x++) {
         // Caustics, baked into the projector rather than added as a second
         // pass: the beam crosses a rippled surface on its way out, so the
@@ -437,7 +521,7 @@ export function PoolLights({ lighting, layout, showWater, presentation = "day", 
   );
   useEffect(() => () => scatterMaterial.dispose(), [scatterMaterial]);
   const { plan, shadowIndex, convexQuad } = lighting;
-  const revision = `${plan.positions.map(p => `${p.x},${p.y},${p.z}`).join(";")}|${showWater}`;
+  const revision = `${plan.positions.map((p) => `${p.x},${p.y},${p.z}`).join(";")}|${showWater}`;
   const colour = useMemo(() => calibratedLedColor(ledColor), [ledColor]);
   // One dimmer factor for the whole luminaire. Changing it only rewrites
   // uniforms and light parameters on the existing objects -- no geometry, no
@@ -457,10 +541,39 @@ export function PoolLights({ lighting, layout, showWater, presentation = "day", 
     ? POOL_LED_PRESENTATIONS[presentation].scatter * dimmer.output
     : 0;
   scatterMaterial.uniforms["waterLevel"]!.value = layout.waterY;
-  scatterMaterial.uniforms["floorLevel"]!.value = layout.floorY;
+  // One shared uniform serves every beam; a genuinely per-fixture cutoff
+  // would need a shader rewrite. Using the SHALLOWEST local floor among the
+  // row (the highest, i.e. least-negative, floorYAt across the fixtures)
+  // guarantees no beam ever renders through any local floor -- the accepted
+  // trade-off is that a fixture further into the slope may read as stopping
+  // very slightly short of its own true (deeper) local floor.
+  scatterMaterial.uniforms["floorLevel"]!.value =
+    floorProfile.sloped && plan.positions.length > 0
+      ? Math.max(...plan.positions.map((p) => floorProfile.floorYAt(p.x, p.z)))
+      : layout.floorY;
   return (
-    <group name="pool-automatic-lighting" userData={{ lightingPlan: plan, luminaire: POOL_LUMINAIRE }}>
-      {plan.positions.map((position, i) => <RecessedPoolLight key={i} position={position} floorY={layout.floorY} powered={showWater} presentation={presentation} revision={revision} colour={colour} intensity={intensity} dimmer={dimmer} diffuser={diffuser} glow={glow} scatterGeometry={scatterGeometry} scatterMaterial={scatterMaterial} occlusion={!convexQuad || i === shadowIndex} />)}
+    <group
+      name="pool-automatic-lighting"
+      userData={{ lightingPlan: plan, luminaire: POOL_LUMINAIRE }}
+    >
+      {plan.positions.map((position, i) => (
+        <RecessedPoolLight
+          key={i}
+          position={position}
+          floorY={floorProfile.floorYAt(position.x, position.z)}
+          powered={showWater}
+          presentation={presentation}
+          revision={revision}
+          colour={colour}
+          intensity={intensity}
+          dimmer={dimmer}
+          diffuser={diffuser}
+          glow={glow}
+          scatterGeometry={scatterGeometry}
+          scatterMaterial={scatterMaterial}
+          occlusion={!convexQuad || i === shadowIndex}
+        />
+      ))}
     </group>
   );
 }
