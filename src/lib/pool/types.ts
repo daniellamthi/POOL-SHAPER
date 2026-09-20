@@ -6,11 +6,21 @@ export type PoolStructure =
   "reinforced-concrete" | "modular-steel-panels" | "modular-steel-structure";
 
 export type PoolShapeId = "rectangle" | "custom";
+/** Prepared, not yet buildable: no `PoolShapeId` value below is selectable in
+ * production UI. Reserved for geometry passes B (L-shape) and C (organic
+ * preset) -- kept as an unused alias so downstream code can start typing
+ * against the eventual union without any behaviour changing today. */
+export type FuturePoolShapeId = PoolShapeId | "l-shape" | "organic";
 
 export type CustomMode = "draw" | "upload";
 
 export type SystemType = "skimmer" | "overflow";
 export type OverflowType = "hidden" | "visible";
+/** Prepared, not yet buildable: "infinity" is not a member of `OverflowType`
+ * and never reaches `config.overflowType` -- the real single-edge Infinity
+ * geometry is geometry pass D. Reserved so the "Linea d'acqua" step's future
+ * Infinity choice can be typed ahead of the actual construction work. */
+export type FutureOverflowType = OverflowType | "infinity";
 
 export type FinishMaterial = "liner" | "mosaic";
 export type LinerColor =
@@ -68,6 +78,11 @@ export interface RenovationConfig {
   equipmentUpgrades: ReadonlyArray<EquipmentUpgrade>;
 }
 
+/** Floor construction. "flat" is the only value any renderer or geometry
+ * builder currently reads; "slope" is prepared for geometry pass A and is
+ * not offered anywhere in production UI yet. */
+export type FloorProfile = "flat" | "slope";
+
 export interface Dimensions {
   /** metres */
   length: number;
@@ -77,6 +92,14 @@ export interface Dimensions {
   depth: number;
   /** 0..1 relative corner rounding for the custom profile */
   cornerRadius: number;
+  /** Prepared for geometry pass A (sloped floor). Absent/"flat" everywhere
+   * today -- every renderer treats the floor as flat regardless of this
+   * field until that pass wires it in. */
+  floorProfile?: FloorProfile;
+  /** Prepared for geometry pass A. Only meaningful once `floorProfile` is
+   * "slope"; metres, shallow-end depth (the existing `depth` becomes the
+   * deep end). Unused today. */
+  shallowDepth?: number;
 }
 
 /** A closed 2D outline in the XZ plane, metres, centred on the origin. */

@@ -15,11 +15,12 @@ import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 export function LiveSummary() {
   const { config, metrics } = useConfigurator();
   const project =
-    PROJECT_TYPES.find((item) => item.id === config.projectType)?.title ?? "Not selected";
+    PROJECT_TYPES.find((item) => item.id === config.projectType)?.title ?? "Non selezionato";
   const finish = FINISHES.find((item) => item.id === config.finish)?.title ?? config.finish;
-  const poolType = POOL_TYPES.find((item) => item.id === config.poolType)?.title ?? "Not selected";
+  const poolType =
+    POOL_TYPES.find((item) => item.id === config.poolType)?.title ?? "Non selezionato";
   const structure =
-    POOL_STRUCTURES.find((item) => item.id === config.structure)?.title ?? "Not selected";
+    POOL_STRUCTURES.find((item) => item.id === config.structure)?.title ?? "Non selezionata";
   const color =
     config.finish === "mosaic"
       ? getMosaicFinish(config.mosaicFinish).name
@@ -29,34 +30,34 @@ export function LiveSummary() {
   const featureLabels = [
     ...features.map((item) => item.title),
     ...(config.poolAccess === "internalSteps"
-      ? ["Internal stairs"]
+      ? ["Scala interna"]
       : config.poolAccess === "stainlessSteelLadder"
-        ? ["External ladder (stainless steel)"]
+        ? ["Scaletta esterna in acciaio inox"]
         : []),
     ...equipment.map((item) => item.title),
   ];
   const rows = [
-    ["Project", project],
-    ["Pool Type", poolType],
-    ["Structure", structure],
-    ["Shape", getShapeDefinition(config.shape).title],
+    ["Progetto", project],
+    ["Tipo piscina", poolType],
+    ["Struttura", structure],
+    ["Forma", getShapeDefinition(config.shape).title],
     [
-      "Dimensions",
+      "Dimensioni",
       `${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} × ${formatNumber(config.dimensions.depth, 2)} m`,
     ],
-    ["Surface", `${formatNumber(metrics.waterSurface)} m²`],
-    ["System", config.system === "skimmer" ? "Skimmer Pool" : "Overflow Edge Pool"],
-    ["Finish", finish],
-    ["Color", color],
-    ["Features / Accessories", featureLabels.length ? featureLabels.join(", ") : "None"],
+    ["Superficie", `${formatNumber(metrics.waterSurface)} m²`],
+    ["Sistema", config.system === "skimmer" ? "Piscina a skimmer" : "Piscina a sfioro"],
+    ["Rivestimento", finish],
+    ["Colore", color],
+    ["Comfort / Accessori", featureLabels.length ? featureLabels.join(", ") : "Nessuno"],
   ] as const;
 
   return (
     <aside
       className="pointer-events-none absolute right-6 top-6 z-10 hidden w-56 border-l border-hairline/80 bg-card/88 px-4 py-3.5 text-foreground backdrop-blur-sm xl:block"
-      aria-label="Live configuration summary"
+      aria-label="Riepilogo configurazione"
     >
-      <p className="label-xs mb-2.5">Live specification</p>
+      <p className="label-xs mb-2.5">Specifica live</p>
       <dl>
         {rows.map(([label, value]) => (
           <div

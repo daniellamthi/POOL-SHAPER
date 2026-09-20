@@ -50,10 +50,13 @@ function validate(form: FormState): Partial<Record<keyof FormState, string>> {
 
 export function LeadRequestDialog({
   projectConfiguration,
-  defaultCustomer,
+  defaultCustomer = { name: "", email: "", phone: "" },
 }: {
   projectConfiguration: ProjectConfiguration;
-  defaultCustomer: { name: string; email: string; phone: string };
+  /** Optional -- with Customer Details no longer a mandatory earlier step,
+   * this dialog is normally the first and only place contact details are
+   * collected, so it starts blank unless a caller has something to prefill. */
+  defaultCustomer?: { name: string; email: string; phone: string };
 }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");

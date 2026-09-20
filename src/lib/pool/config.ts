@@ -56,13 +56,14 @@ export const DEFAULT_CONTROL_POINTS: ReadonlyArray<ControlPoint> = [
 export const PROJECT_TYPES = [
   {
     id: "new" as const,
-    title: "New Pool",
-    description: "A complete build, from excavation and structure to finishing and technology.",
+    title: "Nuova piscina",
+    description:
+      "Una costruzione completa, dallo scavo e la struttura fino a finiture e tecnologia.",
   },
   {
     id: "renovation" as const,
-    title: "Pool Renovation",
-    description: "Reshape, reline and modernise an existing basin with contemporary systems.",
+    title: "Ristrutturazione piscina",
+    description: "Rimodella, riveste e ammoderna una vasca esistente con impianti contemporanei.",
   },
 ];
 
@@ -73,13 +74,13 @@ export const POOL_TYPES: ReadonlyArray<{
 }> = [
   {
     id: "in-ground",
-    title: "In-Ground Pool",
-    description: "A pool installed completely below ground level.",
+    title: "Piscina interrata",
+    description: "Una piscina installata completamente sotto il livello del terreno.",
   },
   {
     id: "above-ground",
-    title: "Above-Ground Pool",
-    description: "A pool installed above the surrounding ground level.",
+    title: "Piscina fuori terra",
+    description: "Una piscina installata sopra il livello del terreno circostante.",
   },
 ];
 
@@ -88,12 +89,12 @@ export const POOL_STRUCTURES: ReadonlyArray<{
   poolTypes: ReadonlyArray<PoolType>;
   title: string;
 }> = [
-  { id: "reinforced-concrete", poolTypes: ["in-ground"], title: "Reinforced Concrete" },
-  { id: "modular-steel-panels", poolTypes: ["in-ground"], title: "Modular Steel Panels" },
+  { id: "reinforced-concrete", poolTypes: ["in-ground"], title: "Cemento armato" },
+  { id: "modular-steel-panels", poolTypes: ["in-ground"], title: "Pannelli modulari in acciaio" },
   {
     id: "modular-steel-structure",
     poolTypes: ["above-ground"],
-    title: "Modular Steel Structure",
+    title: "Struttura modulare in acciaio",
   },
 ];
 
@@ -122,14 +123,15 @@ export interface ShapeDefinition {
 export const POOL_SHAPES: ReadonlyArray<ShapeDefinition> = [
   {
     id: "rectangle",
-    title: "Rectangle",
-    description: "Architectural lap geometry with pure straight edges.",
+    title: "Rettangolare",
+    description: "Geometria architettonica a corsia, con spigoli puramente rettilinei.",
     supportsCornerRadius: false,
   },
   {
     id: "custom",
-    title: "Custom Shape",
-    description: "Draw the outline with editable control points, or upload a plan.",
+    title: "Forma personalizzata",
+    description:
+      "Disegna il perimetro con punti di controllo modificabili, o carica una planimetria.",
     supportsCornerRadius: false,
   },
 ];
@@ -147,16 +149,16 @@ export const FINISHES: ReadonlyArray<{
 }> = [
   {
     id: "liner",
-    title: "PVC Liner",
-    description: "Reinforced 150/100 membrane, welded on site. Six architectural finishes.",
+    title: "Liner PVC",
+    description: "Membrana rinforzata 150/100, saldata in opera. Sei finiture architettoniche.",
     color: "#dfe9ec",
     roughness: 0.32,
     metalness: 0.02,
   },
   {
     id: "mosaic",
-    title: "Mosaic",
-    description: "Vitreous glass tesserae with iridescent depth and fine grout lines.",
+    title: "Mosaico",
+    description: "Tessere in vetro con profondità iridescente e fughe sottili.",
     color: "#8fc4d2",
     roughness: 0.12,
     metalness: 0.06,
@@ -192,23 +194,24 @@ export const SKIMMER_TYPES: ReadonlyArray<{
 }> = [
   {
     id: "standard",
-    title: "Standard Refined",
-    description: "Moulded face frame with a visible raised profile and classic proportions.",
+    title: "Standard raffinato",
+    description: "Cornice stampata con profilo rialzato ben visibile e proporzioni classiche.",
   },
   {
     id: "slim",
-    title: "Slim / Modern",
-    description: "Thin low-profile frame, minimal reveal, wider glass-like opening.",
+    title: "Slim / Moderno",
+    description: "Cornice sottile a basso profilo, bordo minimo, apertura più ampia.",
   },
   {
     id: "highWaterline",
-    title: "High-Waterline",
-    description: "Short housing set high against the coping for a near-brimming water line.",
+    title: "Livello acqua alto",
+    description: "Corpo basso posizionato in alto contro il bordo, per un livello quasi a filo.",
   },
   {
     id: "flush",
-    title: "Architectural Flush",
-    description: "Frameless, near-flush plate with a fine shadow-gap reveal in the wall.",
+    title: "Filo parete architettonico",
+    description:
+      "Piastra senza cornice, quasi a filo, con una sottile fessura d'ombra nella parete.",
   },
 ];
 
@@ -340,11 +343,11 @@ export const POOL_FEATURES: ReadonlyArray<{
   title: string;
   description: string;
 }> = [
-  { id: "ledLighting", title: "LED Pool Lights", description: "Underwater lighting." },
+  { id: "ledLighting", title: "Illuminazione LED", description: "Illuminazione subacquea." },
   {
     id: "hydromassage",
-    title: "Hydromassage Jets",
-    description: "Integrated hydromassage jets.",
+    title: "Idromassaggio",
+    description: "Ugelli idromassaggio integrati.",
   },
 ];
 
@@ -353,91 +356,136 @@ export const EQUIPMENT: ReadonlyArray<{
   title: string;
   description: string;
 }> = [
-  { id: "automaticCover", title: "Automatic Cover", description: "Safety and thermal cover." },
-  { id: "heatPump", title: "Heat Pump", description: "Efficient pool water heating." },
+  {
+    id: "automaticCover",
+    title: "Copertura automatica",
+    description: "Copertura di sicurezza e termica.",
+  },
+  { id: "heatPump", title: "Pompa di calore", description: "Riscaldamento efficiente dell'acqua." },
   {
     id: "saltElectrolysis",
-    title: "Salt Electrolysis",
-    description: "Automated salt-water treatment.",
+    title: "Elettrolisi al sale",
+    description: "Trattamento automatico dell'acqua salata.",
   },
   {
     id: "automaticDosing",
-    title: "Automatic Chlorine / pH Dosing",
-    description: "Automatic water treatment control.",
+    title: "Dosaggio automatico cloro / pH",
+    description: "Controllo automatico del trattamento dell'acqua.",
   },
+];
+
+/** Customer-facing subgroups for the Technology step -- purely a display
+ * grouping over `EQUIPMENT`, every id must exist there. */
+export const EQUIPMENT_GROUPS: ReadonlyArray<{
+  id: string;
+  title: string;
+  equipmentIds: ReadonlyArray<EquipmentId>;
+}> = [
+  {
+    id: "water-treatment",
+    title: "Trattamento acqua",
+    equipmentIds: ["saltElectrolysis", "automaticDosing"],
+  },
+  { id: "temperature", title: "Temperatura", equipmentIds: ["heatPump"] },
+  { id: "protection", title: "Protezione", equipmentIds: ["automaticCover"] },
 ];
 
 export const STEPS: ReadonlyArray<StepDefinition> = [
   {
     id: "project",
     index: 0,
-    title: "Project Type",
-    subtitle: "Tell us the nature of the intervention.",
-    short: "Project",
+    title: "Tipo di progetto",
+    subtitle: "Indicaci la natura dell'intervento.",
+    short: "Progetto",
   },
   {
     id: "pool-type",
     index: 1,
-    title: "Pool Type",
-    subtitle: "Choose the installation type for your new pool.",
-    short: "Type",
+    title: "Tipo di piscina",
+    subtitle: "Scegli la tipologia di installazione della tua nuova piscina.",
+    short: "Tipologia",
   },
   {
     id: "structure",
     index: 2,
-    title: "Pool Structure",
-    subtitle: "Choose the construction system for your pool.",
-    short: "Structure",
+    title: "Struttura della piscina",
+    subtitle: "Scegli il sistema costruttivo della tua piscina.",
+    short: "Struttura",
   },
   {
     id: "shape-dimensions",
     index: 3,
-    title: "Shape & Dimensions",
-    subtitle: "Choose the silhouette and size the basin in real time.",
-    short: "Shape",
+    title: "Forma e dimensioni",
+    subtitle: "Scegli la sagoma e dimensiona la vasca in tempo reale.",
+    short: "Forma",
   },
   {
     id: "system",
     index: 4,
-    title: "Pool System",
-    subtitle: "Hydraulic principle and water line management.",
-    short: "System",
+    title: "Sistema idraulico",
+    subtitle: "Principio idraulico e gestione della linea d'acqua.",
+    short: "Acqua",
   },
   {
-    id: "finish",
+    id: "style",
     index: 5,
-    title: "Interior Finish",
-    subtitle: "The material that defines the colour of the water.",
-    short: "Finish",
+    title: "Materiali e stile",
+    subtitle: "Il materiale che definisce carattere e colore dell'acqua, e il bordo vasca.",
+    short: "Stile",
   },
   {
-    id: "features",
+    id: "access",
     index: 6,
-    title: "Pool Features",
-    subtitle: "Select the essential features built into the pool.",
-    short: "Features",
+    title: "Accesso e comfort",
+    subtitle: "Scale, scaletta e comfort in acqua.",
+    short: "Comfort",
   },
   {
-    id: "equipment",
+    id: "lighting",
     index: 7,
-    title: "Equipment",
-    subtitle: "Select equipment to include in the quotation.",
-    short: "Equipment",
+    title: "Illuminazione",
+    subtitle: "Illuminazione subacquea a LED: colore e intensità.",
+    short: "Luce",
   },
   {
-    id: "contact",
+    id: "technology",
     index: 8,
-    title: "Customer Details",
-    subtitle: "Contact and project location information.",
-    short: "Customer",
+    title: "Tecnologia",
+    subtitle: "Seleziona la tecnologia da includere nel preventivo.",
+    short: "Tecnologia",
   },
   {
     id: "review",
     index: 9,
-    title: "Final Review",
-    subtitle: "Review the pool configuration before requesting a quote.",
-    short: "Review",
+    title: "Revisione finale",
+    subtitle: "Rivedi la configurazione della piscina prima di richiedere un preventivo.",
+    short: "Riepilogo",
   },
+];
+
+/** The customer-facing "Nuova piscina" rail: seven groups over the ten
+ * internal `STEPS`. Purely a display grouping -- `PoolConfigurator` still
+ * navigates step-by-step through every id in `stepIds`; `StepIndicator`
+ * collapses them into one dot per group so the rail stays uncrowded.
+ * Renovation is untouched and never uses this. */
+export interface StepGroup {
+  id: string;
+  label: string;
+  stepIds: ReadonlyArray<string>;
+}
+
+export const STEP_GROUPS: ReadonlyArray<StepGroup> = [
+  {
+    id: "vasca",
+    label: "Vasca",
+    stepIds: ["project", "pool-type", "structure", "shape-dimensions"],
+  },
+  { id: "acqua", label: "Acqua", stepIds: ["system"] },
+  { id: "stile", label: "Stile", stepIds: ["style"] },
+  { id: "comfort", label: "Comfort", stepIds: ["access"] },
+  { id: "luce", label: "Luce", stepIds: ["lighting"] },
+  { id: "tecnologia", label: "Tecnologia", stepIds: ["technology"] },
+  { id: "progetto", label: "Progetto", stepIds: ["review"] },
 ];
 
 export const RENOVATION_STEPS: ReadonlyArray<StepDefinition> = [

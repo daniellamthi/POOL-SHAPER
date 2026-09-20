@@ -24,9 +24,9 @@ export function PoolShapeStep() {
     >
       {(
         [
-          ["length", "Length"],
-          ["width", "Width"],
-          ["depth", "Depth"],
+          ["length", "Lunghezza"],
+          ["width", "Larghezza"],
+          ["depth", "Profondità"],
         ] as ReadonlyArray<readonly [DimensionKey, string]>
       ).map(([key, label]) => {
         const limits = DIMENSION_LIMITS[key];
@@ -48,10 +48,10 @@ export function PoolShapeStep() {
 
   return (
     <StepSection
-      title="Shape & Dimensions"
-      subtitle="Choose the silhouette and size the basin in real time."
+      title="Forma e dimensioni"
+      subtitle="Scegli la sagoma e dimensiona la vasca in tempo reale."
     >
-      <div className="grid gap-4" role="group" aria-label="Pool shape">
+      <div className="grid gap-4" role="group" aria-label="Forma della piscina">
         {POOL_SHAPES.map((shape) => {
           const selected = config.shapeSelected === true && config.shape === shape.id;
           return (
@@ -77,12 +77,12 @@ export function PoolShapeStep() {
                         <div
                           className="grid grid-cols-2 gap-2 rounded-full border border-hairline p-1"
                           role="group"
-                          aria-label="Custom shape input method"
+                          aria-label="Metodo di inserimento forma personalizzata"
                         >
                           {(
                             [
-                              ["draw", "Draw outline"],
-                              ["upload", "Upload plan"],
+                              ["draw", "Disegna perimetro"],
+                              ["upload", "Carica planimetria"],
                             ] as const
                           ).map(([mode, label]) => (
                             <button
@@ -107,8 +107,8 @@ export function PoolShapeStep() {
                         ) : (
                           <FileDrop
                             category="reference"
-                            label="Architectural reference"
-                            hint="PDF, floor plan, architectural drawing or reference image. Used as design reference only."
+                            label="Riferimento architettonico"
+                            hint="PDF, planimetria, disegno tecnico o immagine di riferimento. Usato solo come riferimento progettuale."
                           />
                         )}
                       </>
@@ -123,7 +123,7 @@ export function PoolShapeStep() {
       </div>
 
       <div className="flex flex-col gap-6 border-t border-hairline pt-8">
-        <h3 className="label-xs">Calculated values</h3>
+        <h3 className="label-xs">Valori calcolati</h3>
         <MetricsPanel metrics={metrics} />
       </div>
     </StepSection>

@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
+import { RENOVATION_STEPS, STEPS, STEP_GROUPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
 import { resolveMaterials } from "@/lib/pool/materials";
@@ -25,9 +25,9 @@ import { PoolStructureStep } from "@/configurator/steps/pool-structure";
 import { PoolShapeStep } from "@/configurator/steps/pool-shape";
 import { PoolSystemStep } from "@/configurator/steps/pool-system";
 import { InteriorFinishStep } from "@/configurator/steps/interior-finish";
-import { PoolFeaturesStep } from "@/configurator/steps/pool-features";
+import { AccessStep } from "@/configurator/steps/access";
+import { LightingStep } from "@/configurator/steps/lighting";
 import { EquipmentStep } from "@/configurator/steps/equipment";
-import { ContactDetailsStep } from "@/configurator/steps/contact-details";
 import { FinalReviewStep } from "@/configurator/steps/final-review";
 import {
   RenovationCustomerStep,
@@ -50,9 +50,9 @@ const STEP_COMPONENTS = [
   PoolShapeStep,
   PoolSystemStep,
   InteriorFinishStep,
-  PoolFeaturesStep,
+  AccessStep,
+  LightingStep,
   EquipmentStep,
-  ContactDetailsStep,
   FinalReviewStep,
 ] as const;
 
@@ -298,9 +298,9 @@ function ConfiguratorLayout() {
           ? "overflow-visible"
           : "overflow-hidden"
         : "skimmer-detail"
-      : activeStepId === "finish" || activeStepId === "color"
+      : activeStepId === "style"
         ? "liner"
-        : activeStepId === "features"
+        : activeStepId === "lighting"
           ? "features"
           : activeStepId === "review"
             ? "review"
@@ -326,11 +326,11 @@ function ConfiguratorLayout() {
             variant="ghost"
             size="sm"
             onClick={reset}
-            aria-label="Reset"
+            aria-label="Ricomincia"
             className="rounded-full px-3"
           >
             <RotateCcw />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline">Ricomincia</span>
           </Button>
         </div>
       </header>
@@ -341,6 +341,7 @@ function ConfiguratorLayout() {
             <StepIndicator
               current={step}
               steps={activeSteps}
+              groups={renovationWorkflow ? undefined : STEP_GROUPS}
               isStepComplete={isStepComplete}
               onSelect={goToStep}
             />
@@ -356,20 +357,20 @@ function ConfiguratorLayout() {
               variant="ghost"
               onClick={previous}
               disabled={step === 0}
-              aria-label="Back"
+              aria-label="Indietro"
               className="px-0 hover:bg-transparent"
             >
               <ArrowLeft />
-              <span className="hidden sm:inline">Back</span>
+              <span className="hidden sm:inline">Indietro</span>
             </Button>
             <Button
               type="button"
               onClick={next}
               disabled={isLast || !canContinue}
-              title={canContinue ? undefined : "Complete this step to continue"}
+              title={canContinue ? undefined : "Completa questo passaggio per continuare"}
               className="px-6"
             >
-              Continue
+              Continua
               <ArrowRight className="size-3.5" strokeWidth={1.5} />
             </Button>
           </div>
@@ -406,7 +407,7 @@ function ConfiguratorLayout() {
             frameToken={frameToken}
             focus={cameraFocus}
             cameraLocked={cameraLocked}
-            showWater={renovationWorkflow || activeStepId !== "finish"}
+            showWater={renovationWorkflow || activeStepId !== "style"}
             theme={theme}
             photoMode={photoMode}
             onTogglePhotoMode={togglePhotoMode}

@@ -84,7 +84,7 @@ async function clickOptionByTitle(page, groupLabel, title) {
 async function clickContinue(page) {
   await page.evaluate(() => {
     const button = Array.from(document.querySelectorAll("button")).find(
-      (b) => b.textContent?.trim() === "Continue",
+      (b) => b.textContent?.trim() === "Continua",
     );
     if (!button) throw new Error("clickContinue: no Continue button found");
     button.click();
@@ -100,11 +100,11 @@ async function clickContinue(page) {
  * finish selected and expanded (matches `InteriorFinishStep`'s
  * `useState(config.finish)` initial expansion), which is also what puts the
  * live camera in the "liner" `CameraIntent` (see `PoolConfigurator.tsx`'s
- * `activeStepId === "finish"` branch and `getCameraPose`/
+ * `activeStepId === "style"` branch and `getCameraPose`/
  * `getInteriorFinishCamera` in `src/lib/pool/camera.ts`).
  */
 async function navigateToInteriorFinish(page) {
-  for (const groupLabel of ["Project type", "Pool type", "Pool structure"]) {
+  for (const groupLabel of ["Tipo di progetto", "Tipo di piscina", "Struttura della piscina"]) {
     await clickFirstOption(page, groupLabel);
     await page.waitForTimeout(400);
     await clickContinue(page);
@@ -168,7 +168,7 @@ const REFERENCES = [
     // photographed base texture/grout pattern.
     async run(page) {
       await navigateToInteriorFinish(page);
-      await clickOptionByTitle(page, "Interior finish", "Mosaic");
+      await clickOptionByTitle(page, "Rivestimento interno", "Mosaico");
       await settleCameraFlight(page);
     },
   },

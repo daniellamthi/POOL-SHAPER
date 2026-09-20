@@ -9,8 +9,11 @@ export function PoolStructureStep() {
   );
 
   return (
-    <StepSection title="Pool Structure" subtitle="Choose the construction system for your pool.">
-      <div className="grid gap-4" role="group" aria-label="Pool structure">
+    <StepSection
+      title="Struttura della piscina"
+      subtitle="Scegli il sistema costruttivo della tua piscina."
+    >
+      <div className="grid gap-4" role="group" aria-label="Struttura della piscina">
         {structures.map((structure) => (
           <OptionCard
             key={structure.id}

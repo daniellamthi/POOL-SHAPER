@@ -28,7 +28,7 @@ const fullConfig: PoolConfig = {
     [0.5, 0.5],
     [-0.5, 0.5],
   ],
-  dimensions: { length: 8, width: 4, depth: 1.5, cornerRadius: 0.1 },
+  dimensions: { length: 8, width: 4, depth: 1.5, cornerRadius: 0.1, floorProfile: "flat" },
   system: "overflow",
   overflowType: "visible",
   skimmerFinish: "steel",
@@ -180,6 +180,28 @@ assert(roundTripped.config.ledIntensity === 0.75, "LED intensity must survive");
   assert(clamped.config.ledIntensity === 1, "an out-of-range ledIntensity must be clamped to 0..1");
 }
 assert(roundTripped.config.features.includes("ledLighting"), "LED feature flag must survive");
+
+// 8b. `dimensions.floorProfile` -- the backward-compatible foundation for
+// geometry pass A (sloped floor) -- normalises the same way: a project
+// saved before it existed restores as "flat", the only value any renderer
+// reads today.
+assert(roundTripped.config.dimensions.floorProfile === "flat", "floorProfile must survive");
+{
+  const { floorProfile: _omitted, ...legacyDimensions } = fullConfig.dimensions;
+  const legacy = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(
+        createProjectId(),
+        { ...fullConfig, dimensions: legacyDimensions as PoolConfig["dimensions"] },
+        fullRenovation,
+      ),
+    ),
+  );
+  assert(
+    legacy.config.dimensions.floorProfile === "flat",
+    "a project without dimensions.floorProfile must restore as flat",
+  );
+}
 
 // 9. Renovation-specific data survives where applicable.
 assert(

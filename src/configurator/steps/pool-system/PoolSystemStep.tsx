@@ -1,38 +1,16 @@
-import { useState } from "react";
-import {
-  OptionCard,
-  MaterialSwatch,
-  StepSection,
-  SwatchOption,
-} from "@/components/pool/StepSection";
+import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
-import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
-import { getCopingSwatchDataUrl } from "@/components/pool/copingSwatchPreview";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 /**
- * Step 4 — selects the hydraulic system.
+ * Step 4 — selects the hydraulic system (Acqua / Linea d'acqua).
  * Engineering values remain derived from the existing configurator store.
+ * Coping/border material selection lives in the Style step, not here.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const {
-    config,
-    setSystem,
-    setOverflowType,
-    setSkimmerFinish,
-    setSkimmerType,
-    setCopingMaterial,
-  } = useConfigurator();
-  const [detailMaterial, setDetailMaterial] = useState<CopingMaterialId | null>(null);
-  const detail = COPING_MATERIALS.find((item) => item.id === detailMaterial) ?? null;
+  const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType } =
+    useConfigurator();
 
   const selectSkimmer = () => {
     setSystem("skimmer");
@@ -40,11 +18,14 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
   };
 
   return (
-    <StepSection title="Pool System" subtitle="Hydraulic principle and water line management.">
-      <div className="grid gap-4" role="group" aria-label="Pool system">
+    <StepSection
+      title="Sistema idraulico"
+      subtitle="Principio idraulico e gestione della linea d'acqua."
+    >
+      <div className="grid gap-4" role="group" aria-label="Sistema idraulico">
         <OptionCard
-          title="Skimmer Pool"
-          description="Water line 12 cm below the coping. Skimmers sized to industry standard."
+          title="Piscina a skimmer"
+          description="Linea d'acqua 12 cm sotto il bordo. Skimmer dimensionati secondo lo standard di settore."
           selected={config.system === "skimmer"}
           onSelect={selectSkimmer}
         />
@@ -89,69 +70,29 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
         </div>
 
         <OptionCard
-          title="Overflow Edge Pool"
-          description="A flush water line with selectable perimeter overflow collection."
+          title="Piscina a sfioro"
+          description="Linea d'acqua a filo bordo, con raccolta perimetrale a sfioro selezionabile."
           selected={config.system === "overflow"}
           onSelect={() => setSystem("overflow")}
         />
         {config.system === "overflow" ? (
-          <div className="mt-4 grid gap-4" role="group" aria-label="Overflow type">
-            <p className="label-xs">Overflow Type</p>
+          <div className="mt-4 grid gap-4" role="group" aria-label="Tipo di sfioro">
+            <p className="label-xs">Tipo di sfioro</p>
             <OptionCard
-              title="Hidden Overflow"
-              description="Overflow channel concealed beneath the perimeter coping."
+              title="Sfioro nascosto"
+              description="Canale di sfioro nascosto sotto il bordo perimetrale."
               selected={config.overflowType === "hidden"}
               onSelect={() => setOverflowType("hidden")}
             />
             <OptionCard
-              title="Visible Overflow"
-              description="Deck-level overflow with visible perimeter drainage channel."
+              title="Sfioro a vista"
+              description="Sfioro a livello del bordo con canale di drenaggio perimetrale a vista."
               selected={config.overflowType === "visible"}
               onSelect={() => setOverflowType("visible")}
             />
           </div>
         ) : null}
       </div>
-      {!(config.system === "overflow" && config.overflowType === "visible") && (
-        <div className="flex flex-col gap-3">
-          <p className="label-xs">Coping Material</p>
-          <div role="group" aria-label="Coping material" className="grid grid-cols-2 gap-3">
-            {COPING_MATERIALS.map((option) => (
-              <MaterialSwatch
-                key={option.id}
-                title={option.title}
-                subtitle={option.subtitle}
-                previewUrl={getCopingSwatchDataUrl(option.id)}
-                selected={(config.copingMaterial ?? "travertine") === option.id}
-                onSelect={() => setCopingMaterial(option.id)}
-                onViewDetail={() => setDetailMaterial(option.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <Dialog open={detail !== null} onOpenChange={(open) => !open && setDetailMaterial(null)}>
-        <DialogContent className="max-w-sm gap-5 rounded-2xl border-hairline p-6">
-          {detail ? (
-            <>
-              <div
-                className="aspect-[4/3] w-full rounded-xl border border-hairline bg-cover bg-center"
-                style={{ backgroundImage: `url(${getCopingSwatchDataUrl(detail.id)})` }}
-              />
-              <DialogHeader className="gap-1.5">
-                <p className="label-xs text-muted-foreground">{detail.category}</p>
-                <DialogTitle className="text-[19px] font-extralight tracking-[-0.02em] text-foreground">
-                  {detail.title}
-                </DialogTitle>
-                <DialogDescription className="text-[12.5px] leading-[1.7] font-light text-muted-foreground">
-                  {detail.description}
-                </DialogDescription>
-              </DialogHeader>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </StepSection>
   );
 }

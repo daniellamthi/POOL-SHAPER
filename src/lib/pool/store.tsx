@@ -316,8 +316,7 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
     if (stepId === "pool-type" && config.poolType === null) return index;
     if (stepId === "shape-dimensions" && config.shapeSelected !== true) return index;
     if (stepId === "structure" && config.structure === null) return index;
-    if (stepId === "features" && config.poolAccess === null) return index;
-    if (stepId === "contact" && !getCustomerValidation(config.customer).valid) return index;
+    if (stepId === "access" && config.poolAccess === null) return index;
   }
   return STEPS.length - 1;
 }
@@ -373,7 +372,6 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
 
   const isStepComplete = useCallback(
     (index: number) => {
-      const customer = config.customer;
       if (index === 0) return config.projectType !== null;
       if (config.projectType === "renovation") {
         if (index === 1) return renovation.areas.length > 0;
@@ -391,8 +389,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       if (stepId === "pool-type") return config.poolType !== null;
       if (stepId === "shape-dimensions") return config.shapeSelected === true;
       if (stepId === "structure") return config.structure !== null;
-      if (stepId === "features") return config.poolAccess !== null;
-      if (stepId === "contact") return getCustomerValidation(customer).valid;
+      if (stepId === "access") return config.poolAccess !== null;
       return true;
     },
     [config, renovation],

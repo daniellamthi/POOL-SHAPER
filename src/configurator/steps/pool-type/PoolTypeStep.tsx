@@ -7,12 +7,16 @@ export function PoolTypeStep() {
   const { config, setPoolType } = useConfigurator();
 
   return (
-    <StepSection title="Pool Type" subtitle="Choose the installation type for your new pool.">
-      <div className="grid gap-4" role="group" aria-label="Pool type">
+    <StepSection
+      title="Tipo di piscina"
+      subtitle="Scegli la tipologia di installazione della tua nuova piscina."
+    >
+      <div className="grid gap-4" role="group" aria-label="Tipo di piscina">
         {POOL_TYPES.map((poolType) => (
           <OptionCard
             key={poolType.id}
             title={poolType.title}
+            description={poolType.description}
             selected={config.poolType === poolType.id}
             onSelect={() => setPoolType(poolType.id)}
           />

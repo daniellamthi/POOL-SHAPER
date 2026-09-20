@@ -99,6 +99,14 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
+      // A project saved before geometry pass A (sloped floor) has no
+      // `floorProfile` -- every reader today assumes flat regardless, but
+      // normalising the field itself keeps the pattern consistent for when
+      // that pass lands.
+      dimensions: {
+        ...restored.dimensions,
+        floorProfile: restored.dimensions?.floorProfile === "slope" ? "slope" : "flat",
+      },
     },
     renovation: renovation as RenovationConfig,
   };

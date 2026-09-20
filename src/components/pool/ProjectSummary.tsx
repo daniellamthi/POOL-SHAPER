@@ -104,9 +104,10 @@ export function ProjectSummary() {
 
   const dimensionsStepIndex = stepIndex("shape-dimensions");
   const systemStepIndex = stepIndex("system");
-  const finishStepIndex = stepIndex("finish");
-  const featuresStepIndex = stepIndex("features");
-  const equipmentStepIndex = stepIndex("equipment");
+  const styleStepIndex = stepIndex("style");
+  const accessStepIndex = stepIndex("access");
+  const lightingStepIndex = stepIndex("lighting");
+  const technologyStepIndex = stepIndex("technology");
   const editStep = (index: number) => (index >= 0 ? () => goToStep(index) : undefined);
 
   const poolType = poolTypeLabel(config.poolType);
@@ -175,10 +176,13 @@ export function ProjectSummary() {
       <Section title="La tua piscina" onEdit={editStep(dimensionsStepIndex)}>
         <Row label="Tipologia" value={poolType} />
         <Row label="Dimensioni" value={dimensionsSentence} />
-        <Row label="Sistema idraulico" value={systemLine} onEdit={editStep(systemStepIndex)} />
       </Section>
 
-      <Section title="Materiali e atmosfera" onEdit={editStep(finishStepIndex)}>
+      <Section title="Linea d'acqua" onEdit={editStep(systemStepIndex)}>
+        <Row label="Sistema idraulico" value={systemLine} />
+      </Section>
+
+      <Section title="Materiali" onEdit={editStep(styleStepIndex)}>
         <Row
           label="Rivestimento"
           value={finishTitle}
@@ -195,12 +199,12 @@ export function ProjectSummary() {
           label="Bordo"
           value={copingMaterial?.title ?? "Da selezionare"}
           swatch={copingMaterial ? <Swatch hex={copingMaterial.color} /> : undefined}
-          onEdit={editStep(systemStepIndex)}
+          onEdit={editStep(styleStepIndex)}
         />
       </Section>
 
       {comfortItems.length > 0 ? (
-        <Section title="Accesso e comfort" onEdit={editStep(featuresStepIndex)}>
+        <Section title="Accesso e comfort" onEdit={editStep(accessStepIndex)}>
           {comfortItems.map((item) => (
             <Row key={item} label="Incluso" value={item} />
           ))}
@@ -208,7 +212,7 @@ export function ProjectSummary() {
       ) : null}
 
       {hasLed ? (
-        <Section title="Illuminazione" onEdit={editStep(featuresStepIndex)}>
+        <Section title="Illuminazione" onEdit={editStep(lightingStepIndex)}>
           <Row label="Impianto" value="Illuminazione subacquea a LED" />
           <Row
             label="Colore selezionato"
@@ -220,7 +224,7 @@ export function ProjectSummary() {
       ) : null}
 
       {selectedEquipment.length > 0 ? (
-        <Section title="Gestione della piscina" onEdit={editStep(equipmentStepIndex)}>
+        <Section title="Tecnologia" onEdit={editStep(technologyStepIndex)}>
           {selectedEquipment.map((option) => (
             <Row key={option.id} label="Incluso" value={EQUIPMENT_LABEL[option.id]} />
           ))}

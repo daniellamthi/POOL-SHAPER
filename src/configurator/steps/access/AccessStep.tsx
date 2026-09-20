@@ -1,55 +1,24 @@
 import { Footprints } from "lucide-react";
 import { OptionCard, StepSection } from "@/components/pool/StepSection";
-import { POOL_FEATURES } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
-import { LedColorWheel } from "./LedColorWheel";
-import { LedIntensityControl } from "./LedIntensityControl";
 
-export function PoolFeaturesStep() {
-  const {
-    config,
-    togglePoolFeature,
-    setPoolAccess,
-    setLedColor,
-    setLedIntensity,
-    setInternalStairType,
-  } = useConfigurator();
+/** Step 6 (Comfort) — pool access (internal stairs / external ladder) and
+ * the in-water comfort feature (hydromassage). Split out of the old,
+ * bundled "Pool Features" step so lighting and access are each their own
+ * clear decision. */
+export function AccessStep() {
+  const { config, togglePoolFeature, setPoolAccess, setInternalStairType } = useConfigurator();
   const stairType = config.internalStairType ?? "linear";
 
   return (
-    <StepSection
-      title="Pool Features"
-      subtitle="Select the essential features built into the pool."
-    >
+    <StepSection title="Accesso e comfort" subtitle="Scale, scaletta e comfort in acqua.">
       <div className="flex flex-col gap-5">
-        <h3 className="label-xs">Pool features</h3>
-        <div className="grid gap-3" role="group" aria-label="Pool features">
-          {POOL_FEATURES.map((feature) => (
-            <div key={feature.id} className="grid gap-3">
-              <OptionCard
-                title={feature.title}
-                description={feature.description}
-                selected={config.features.includes(feature.id)}
-                onSelect={() => togglePoolFeature(feature.id)}
-              />
-              {feature.id === "ledLighting" && config.features.includes(feature.id) ? (
-                <>
-                  <LedColorWheel value={config.ledColor ?? "#ffffff"} onChange={setLedColor} />
-                  <LedIntensityControl value={config.ledIntensity} onChange={setLedIntensity} />
-                </>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-5 border-t border-hairline pt-8">
-        <h3 className="label-xs">Pool access</h3>
-        <div className="grid gap-4" role="group" aria-label="Pool access">
+        <h3 className="label-xs">Accesso alla piscina</h3>
+        <div className="grid gap-4" role="group" aria-label="Accesso alla piscina">
           <div className="grid gap-3">
             <OptionCard
-              title="Internal stairs"
-              description="Integrated concrete stairs, matching the selected interior finish."
+              title="Scala interna"
+              description="Scala integrata in cemento, coordinata con la finitura interna selezionata."
               selected={config.poolAccess === "internalSteps"}
               onSelect={() => setPoolAccess("internalSteps")}
             />
@@ -77,19 +46,30 @@ export function PoolFeaturesStep() {
             ) : null}
           </div>
           <OptionCard
-            title="External ladder"
-            description="Classic stainless-steel pool ladder with three non-slip treads."
+            title="Scaletta esterna"
+            description="Scaletta classica in acciaio inox con tre pedate antiscivolo."
             selected={config.poolAccess === "stainlessSteelLadder"}
             onSelect={() => setPoolAccess("stainlessSteelLadder")}
           />
         </div>
       </div>
+
+      <div className="flex flex-col gap-5 border-t border-hairline pt-8">
+        <h3 className="label-xs">Comfort in acqua</h3>
+        <OptionCard
+          title="Idromassaggio"
+          description="Ugelli idromassaggio integrati."
+          selected={config.features.includes("hydromassage")}
+          onSelect={() => togglePoolFeature("hydromassage")}
+        />
+      </div>
+
       {config.poolType === "above-ground" ? (
         <div className="flex flex-col gap-5 border-t border-hairline pt-8">
-          <h3 className="label-xs">Above-ground approach</h3>
+          <h3 className="label-xs">Accesso piscina fuori terra</h3>
           <OptionCard
             title="Scala esterna"
-            description="Accesso esterno alla piscina"
+            description="Accesso esterno alla piscina."
             selected={config.features.includes("externalStaircase")}
             onSelect={() => togglePoolFeature("externalStaircase")}
             meta={<Footprints className="size-5 text-muted-foreground" strokeWidth={1.25} />}

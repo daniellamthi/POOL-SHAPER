@@ -12,8 +12,8 @@ export function ProjectTypeStep() {
   const { config, setProjectType } = useConfigurator();
 
   return (
-    <StepSection title="Project Type" subtitle="Tell us the nature of the intervention.">
-      <div className="grid gap-4" role="group" aria-label="Project type">
+    <StepSection title="Tipo di progetto" subtitle="Indicaci la natura dell'intervento.">
+      <div className="grid gap-4" role="group" aria-label="Tipo di progetto">
         {PROJECT_TYPES.map((projectType) => (
           <OptionCard
             key={projectType.id}
