@@ -103,6 +103,7 @@ import {
   clampInfinityEdgeParams,
   computeInfinityEdgeGeometry,
   defaultInfinityEdgeParams,
+  infinityExclusion,
   INFINITY_EDGE_DIMENSIONS,
   isRectangleSideExcludedByInfinity,
   lShapeInfinityZones,
@@ -111,6 +112,13 @@ import {
   rectangleInfinityZones,
   type InfinityEdgeParams,
 } from "../src/lib/pool/infinity-edge";
+import {
+  createInfinityCascadeGeometry,
+  createInfinityCatchBasinGeometry,
+  createInfinityLipGeometry,
+  createInfinityTransitionCapGeometry,
+  isGeometryFinite,
+} from "../src/components/pool/three/infinityEdgeGeometry";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -3279,6 +3287,155 @@ console.log(
     );
   }
 
+  // --- Real lip/cascade/catch-basin geometry: finite, no-NaN, every side ---
+  const infinityDims = clampInfinityEdgeDimensions(undefined);
+  for (const side of RECTANGLE_INFINITY_SIDES) {
+    const zone = zones.find((z) => z.side === side)!;
+    const lipTopY = 0.003;
+    const lip = createInfinityLipGeometry(zone, infinityDims, lipTopY);
+    assert(isGeometryFinite(lip), `Infinity: side ${side} lip geometry must be entirely finite`);
+    assert(
+      lip.getAttribute("position").count > 0,
+      `Infinity: side ${side} lip geometry must have real vertices`,
+    );
+    const cascade = createInfinityCascadeGeometry(zone, infinityDims, lipTopY);
+    assert(
+      isGeometryFinite(cascade),
+      `Infinity: side ${side} cascade geometry must be entirely finite`,
+    );
+    assert(
+      cascade.getAttribute("position").count > 0,
+      `Infinity: side ${side} cascade geometry must have real vertices`,
+    );
+    const basin = createInfinityCatchBasinGeometry(zone, infinityDims, lipTopY);
+    for (const [name, geometry] of Object.entries(basin)) {
+      assert(
+        isGeometryFinite(geometry),
+        `Infinity: side ${side} catch-basin ${name} geometry must be entirely finite`,
+      );
+      assert(
+        geometry.getAttribute("position").count > 0,
+        `Infinity: side ${side} catch-basin ${name} geometry must have real vertices`,
+      );
+    }
+    const transitions = createInfinityTransitionCapGeometry(
+      zone,
+      infinityDims,
+      lipTopY,
+      0.35,
+      0.32,
+    );
+    assert(
+      transitions.start !== null && transitions.end !== null,
+      `Infinity: side ${side} must produce both transition caps when there is a real height step`,
+    );
+    assert(
+      isGeometryFinite(transitions.start!) && isGeometryFinite(transitions.end!),
+      `Infinity: side ${side} transition caps must be entirely finite`,
+    );
+    // No real step (lip already flush with the coping) must never fabricate
+    // a zero-height cap.
+    const flushTransitions = createInfinityTransitionCapGeometry(
+      zone,
+      infinityDims,
+      lipTopY,
+      lipTopY,
+      0.32,
+    );
+    assert(
+      flushTransitions.start === null && flushTransitions.end === null,
+      `Infinity: side ${side} must not build a transition cap when there is no height step`,
+    );
+  }
+
+  // --- Exclusion wiring: skimmer/ladder/LED must never select the Infinity
+  // side, across all 4 Rectangle sides, and must be completely unaffected
+  // (byte-identical to the pre-Infinity result) when nothing is excluded. ---
+  const excludedSideOutline = buildOutline(
+    "rectangle",
+    { length: 10, width: 6, depth: 1.5, cornerRadius: 0 },
+    [],
+  );
+  const baselineSkimmerWall = skimmerWall(excludedSideOutline, null);
+  const baselineSkimmers = planSkimmers(excludedSideOutline, 40, true, null);
+  for (const side of RECTANGLE_INFINITY_SIDES) {
+    const excluded = infinityExclusion(excludedSideOutline, {
+      enabled: true,
+      side,
+      startT: 0,
+      endT: 1,
+      dropDirection: "outward",
+    });
+    assert(excluded !== null, `Infinity: side ${side} must resolve to a real axis/coordinate`);
+
+    const excludedWall = skimmerWall(excludedSideOutline, excluded);
+    const wallOnExcludedSide =
+      excludedWall.axis === excluded!.axis &&
+      Math.abs(excludedWall.coordinate - excluded!.coordinate) < 1e-6;
+    assert(
+      !wallOnExcludedSide,
+      `Infinity: skimmerWall must never select the excluded side ${side}`,
+    );
+
+    const excludedSkimmers = planSkimmers(excludedSideOutline, 40, true, excluded);
+    for (const position of excludedSkimmers.positions) {
+      const coordinate = excluded!.axis === "x" ? position.x : position.z;
+      assert(
+        Math.abs(coordinate - excluded!.coordinate) > 1e-6,
+        `Infinity: side ${side} must have no skimmer placed on the excluded side`,
+      );
+    }
+
+    const layout = getPoolVerticalLayout({
+      poolType: "in-ground",
+      system: "skimmer",
+      overflowType: "hidden",
+      depth: 1.5,
+      copingThickness: 0.04,
+    });
+    const excludedLighting = planPoolLighting({
+      outline: excludedSideOutline,
+      waterY: layout.waterY,
+      floorY: layout.floorY,
+      infinityExcluded: excluded,
+    });
+    for (const position of excludedLighting.positions) {
+      const coordinate = excluded!.axis === "x" ? position.x : position.z;
+      assert(
+        Math.abs(coordinate - excluded!.coordinate) > 0.05,
+        `Infinity: side ${side} must have no LED placed on the excluded side`,
+      );
+    }
+
+    // Ladder never mounts on the excluded side either.
+    const ladderPlacement = accessPlacement(
+      excludedSideOutline,
+      0.55,
+      0.62,
+      "stainlessSteelLadder",
+      undefined,
+      excluded,
+    );
+    if (ladderPlacement) {
+      const coordinate = excluded!.axis === "x" ? ladderPlacement.x : ladderPlacement.z;
+      assert(
+        Math.abs(coordinate - excluded!.coordinate) > 0.3,
+        `Infinity: side ${side} must never place the ladder on the excluded side`,
+      );
+    }
+  }
+  // `null` (no exclusion) is a complete no-op -- exact regression against the
+  // pre-Infinity baseline.
+  assert(
+    skimmerWall(excludedSideOutline, null).coordinate === baselineSkimmerWall.coordinate,
+    "Infinity: a null exclusion must not change skimmerWall's own result",
+  );
+  assert(
+    JSON.stringify(planSkimmers(excludedSideOutline, 40, true, null).positions) ===
+      JSON.stringify(baselineSkimmers.positions),
+    "Infinity: a null exclusion must not change planSkimmers' own result",
+  );
+
   // Disabled params never produce geometry, regardless of a stale `side`.
   const disabled = computeInfinityEdgeGeometry(rectOutline, {
     enabled: false,
@@ -3348,5 +3505,5 @@ console.log(
   }
 }
 console.log(
-  "Infinity edge audit passed: 4 rectangle candidate zones (positive length, unit outward normals), stubbed L-shape/Organic zones honestly empty, malformed-input and legacy-project normalisation, dimension clamps, per-side finite geometry + exclusion checks, disabled-params guard, and 2 non-vacuous break/restore proofs (wrong-side selection, inverted drop direction).",
+  "Infinity edge audit passed: 4 rectangle candidate zones (positive length, unit outward normals), stubbed L-shape/Organic zones honestly empty, malformed-input and legacy-project normalisation, dimension clamps, per-side finite geometry + exclusion checks, real finite lip/cascade/catch-basin/transition-cap geometry for all 4 sides, skimmer/LED/ladder exclusion wiring (all 4 sides, plus a null-exclusion regression), disabled-params guard, and 2 non-vacuous break/restore proofs (wrong-side selection, inverted drop direction).",
 );
