@@ -11,7 +11,7 @@ import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import {
   clampInfinityEdgeDimensions,
   computeInfinityEdgeGeometry,
-  rectangleInfinityZones,
+  infinityZonesForOutline,
 } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { Outline } from "@/lib/pool/types";
@@ -37,10 +37,11 @@ interface InfinityEdgeProps {
 }
 
 /**
- * Geometry Pass D (Infinity, Rectangle-only first slice): the visible
+ * Geometry Pass D (Infinity, Rectangle + L-shape): the visible
  * disappearing-lip / waterfall cascade / catch-basin / coping-transition
- * assembly for the one selected rectangle side. Renders nothing when
- * Infinity isn't enabled or the outline isn't a valid 4-vertex rectangle --
+ * assembly for the one selected side. Renders nothing when Infinity isn't
+ * enabled or the outline has no valid candidate zone for the selected side
+ * (wrong shape, an excluded L-shape recess edge, Organic) --
  * `computeInfinityEdgeGeometry` is the single source of truth for that
  * check, never re-derived here.
  */
@@ -59,7 +60,7 @@ export function InfinityEdge({
   );
   const zone = useMemo(() => {
     if (!geometryData) return null;
-    const zones = rectangleInfinityZones(outline);
+    const zones = infinityZonesForOutline(outline);
     return zones.find((z) => z.side === geometryData.side) ?? null;
   }, [outline, geometryData]);
 

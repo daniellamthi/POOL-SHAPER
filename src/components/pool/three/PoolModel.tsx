@@ -69,7 +69,7 @@ import {
   SKIMMER_PROFILES,
 } from "./poolConstruction";
 import { InfinityEdge } from "./InfinityEdge";
-import { rectangleInfinityZones } from "@/lib/pool/infinity-edge";
+import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 
@@ -86,7 +86,7 @@ interface PoolModelProps {
   copingThickness: number;
   showWater: boolean;
   skimmers: SkimmerPlan;
-  /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
+  /** Geometry Pass D (Infinity, Rectangle + L-shape). Only meaningful
    * while `system === "infinity"`. */
   infinityEdge?: InfinityEdgeParams;
   infinityExcluded?: InfinityExclusion | null;
@@ -400,12 +400,13 @@ export function PoolModel({
   infinityExcluded = null,
 }: PoolModelProps) {
   const isInfinity = system === "infinity" && infinityEdge?.enabled === true;
-  // Rectangle-only this pass: `rectangleInfinityZones` is honestly empty for
-  // any other shape, so `excludeSection` stays `null` and every coping/ring
-  // builder below renders its normal, full, byte-identical geometry.
+  // Rectangle + L-shape this pass: `infinityZonesForOutline` is honestly
+  // empty for Organic (or any outline with no candidate zones), so
+  // `excludeSection` stays `null` and every coping/ring builder below
+  // renders its normal, full, byte-identical geometry.
   const infinitySection = useMemo(() => {
     if (!isInfinity || infinityEdge?.side === null || infinityEdge?.side === undefined) return null;
-    const zones = rectangleInfinityZones(outline);
+    const zones = infinityZonesForOutline(outline);
     return zones.some((zone) => zone.side === infinityEdge.side) ? infinityEdge.side : null;
   }, [isInfinity, infinityEdge, outline]);
   const verticalLayout = getPoolVerticalLayout({

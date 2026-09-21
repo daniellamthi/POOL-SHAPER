@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { rectangleInfinityZones } from "@/lib/pool/infinity-edge";
-import type { RectangleInfinitySide } from "@/lib/pool/infinity-edge";
+import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
 import type { Outline } from "@/lib/pool/types";
 import { cn } from "@/lib/utils";
 
@@ -18,10 +17,17 @@ function sideLabel(normal: readonly [number, number]): string {
 }
 
 /**
- * Small inline SVG plan of the 4 rectangle sides -- lets the customer pick
- * "LATO INFINITY" visually instead of typing/reading raw coordinates.
- * Rectangle-only (mirrors `rectangleInfinityZones`'s own honest emptiness
- * for any other shape -- the Acqua step never renders this for L-shape/
+ * Small inline SVG plan of the pool's own candidate Infinity sides -- lets
+ * the customer pick "LATO INFINITY" visually instead of typing/reading raw
+ * coordinates or vertex indices. Shape-generic: draws whatever outline it's
+ * given and whatever valid zones `infinityZonesForOutline` returns for it
+ * (4 sides for Rectangle, up to 4 of L-shape's 6 -- the two recess-adjacent
+ * edges are never candidates, see `lShapeInfinityZones`), so this is the one
+ * selector both shapes share rather than a duplicate L-shape component. The
+ * outline itself may be concave (L-shape); the SVG polygon fill and the
+ * `toView` projection make no convexity assumption. Renders nothing when
+ * there are no candidate zones at all (mirrors `infinityZonesForOutline`'s
+ * own honest emptiness for Organic -- the Acqua step never renders this for
  * Organic to begin with, but this stays defensive regardless).
  */
 export function InfinitySideSelector({
@@ -30,11 +36,11 @@ export function InfinitySideSelector({
   onSelect,
 }: {
   outline: Outline;
-  selectedSide: RectangleInfinitySide | null;
-  onSelect: (side: RectangleInfinitySide) => void;
+  selectedSide: number | null;
+  onSelect: (side: number) => void;
 }) {
-  const zones = useMemo(() => rectangleInfinityZones(outline), [outline]);
-  if (zones.length !== 4) return null;
+  const zones = useMemo(() => infinityZonesForOutline(outline), [outline]);
+  if (zones.length === 0) return null;
 
   const minX = Math.min(...outline.map((p) => p[0]));
   const maxX = Math.max(...outline.map((p) => p[0]));
@@ -61,7 +67,7 @@ export function InfinitySideSelector({
         viewBox={`0 0 ${viewW} ${viewH}`}
         className="h-40 w-40"
         role="img"
-        aria-label="Pianta della piscina con i 4 lati selezionabili"
+        aria-label={`Pianta della piscina con ${zones.length} lati selezionabili`}
       >
         {/* Basin fill, just so the plan reads as a pool rather than 4 loose bars. */}
         <polygon

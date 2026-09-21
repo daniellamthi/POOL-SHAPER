@@ -59,7 +59,7 @@ import type {
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
-import { clampInfinityEdgeParams, type RectangleInfinitySide } from "./infinity-edge";
+import { clampInfinityEdgeParams } from "./infinity-edge";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -78,7 +78,7 @@ type Action =
   | { type: "setOrganicMirror"; value: boolean }
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
-  | { type: "setInfinitySide"; value: RectangleInfinitySide }
+  | { type: "setInfinitySide"; value: number }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
   | { type: "setSkimmerType"; value: SkimmerTypeId }
   | { type: "setFinish"; value: FinishMaterial }
@@ -230,14 +230,15 @@ function reducer(state: State, action: Action): State {
                 };
               })()
             : config.dimensions;
-      // Geometry Pass D (Infinity, Rectangle-only first slice): switching
-      // away from Rectangle while Infinity is selected falls back to
-      // skimmer live, in-session -- the same rule `project.ts`'s
+      // Geometry Pass D (Infinity, Rectangle + L-shape): switching to a shape
+      // Infinity has no real zones for (Organic) while Infinity is selected
+      // falls back to skimmer live, in-session -- the same rule project.ts's
       // normalisation already applies on load/save, so the UI and the 3D
       // view are never left showing a system that has no zones for the new
       // shape until a reload happens to correct it.
+      const infinityCapableShape = action.value === "rectangle" || action.value === "l-shape";
       const system =
-        config.system === "infinity" && action.value !== "rectangle" ? "skimmer" : config.system;
+        config.system === "infinity" && !infinityCapableShape ? "skimmer" : config.system;
       return {
         ...state,
         config: { ...config, shape: action.value, shapeSelected: true, dimensions, system },
@@ -322,9 +323,9 @@ function reducer(state: State, action: Action): State {
     case "setOverflowType":
       return { ...state, config: { ...config, overflowType: action.value } };
     case "setInfinitySide":
-      // Rectangle only, this pass -- the Acqua step never dispatches this for
-      // any other shape (see the mini-plan's own gating), but the reducer
-      // itself never trusts that and re-normalises through the one
+      // Rectangle and L-shape, this pass -- the Acqua step never dispatches
+      // this for any other shape (see the mini-plan's own gating), but the
+      // reducer itself never trusts that and re-normalises through the one
       // canonical clamp regardless.
       return {
         ...state,

@@ -49,7 +49,7 @@ import type { InternalStairType } from "@/lib/pool/types";
 import {
   infinityExclusion,
   clampInfinityEdgeParams,
-  rectangleInfinityZones,
+  infinityZonesForOutline,
 } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams, RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
@@ -614,12 +614,12 @@ export default function PoolScene({
     [outline, normalisedInfinityEdge],
   );
   // Camera-only: the selected side's zone, for the "infinity" pose. `null`
-  // (Infinity off, no side chosen yet, or an outline that isn't currently a
-  // valid Rectangle zone) makes `getCameraPose` fall back to the plain
-  // overview rather than a bogus/degenerate framing.
+  // (Infinity off, no side chosen yet, or an outline that currently has no
+  // valid candidate zone for that side) makes `getCameraPose` fall back to
+  // the plain overview rather than a bogus/degenerate framing.
   const infinityZone: RectangleInfinityZone | null = useMemo(() => {
     if (!normalisedInfinityEdge || normalisedInfinityEdge.side === null) return null;
-    const zones = rectangleInfinityZones(outline);
+    const zones = infinityZonesForOutline(outline);
     return zones.find((zone) => zone.side === normalisedInfinityEdge.side) ?? null;
   }, [outline, normalisedInfinityEdge]);
 

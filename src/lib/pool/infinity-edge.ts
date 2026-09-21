@@ -1,7 +1,8 @@
 /**
  * Canonical Infinity / vanishing-edge waterline domain model (Geometry Pass D
- * -- first slice, Rectangle only). Single source of truth for which side of a
- * pool's outline is a disappearing edge, what the lip/waterfall/catch-basin
+ * -- Rectangle and L-shape; Organic stays a stub, see `organicInfinityZones`).
+ * Single source of truth for which side of a pool's outline is a
+ * disappearing edge, what the lip/waterfall/catch-basin
  * dimensions are, and the 3D geometry data (points, tangent, length) a
  * consumer derives from a selection. No other module may re-derive Infinity
  * side selection or dimension clamping -- `walls.ts`/`lighting.ts`/the R3F
@@ -27,6 +28,7 @@
  */
 import type { Outline } from "./types";
 import { outlineBounds, outlinePerimeter, pointAtPerimeter } from "./geometry";
+import { classifyOutlineCorners } from "./l-shape";
 
 /** The 4 candidate sides of an axis-aligned rectangle outline, identified by
  * the index of the outline vertex the side starts at (CCW winding, same
@@ -36,11 +38,26 @@ export type RectangleInfinitySide = 0 | 1 | 2 | 3;
 
 export const RECTANGLE_INFINITY_SIDES: readonly RectangleInfinitySide[] = [0, 1, 2, 3];
 
+/** L-shape's 6-vertex outline has 6 edges (see `buildLShapeOutline`,
+ * l-shape.ts); a side is identified the same way a Rectangle side is -- the
+ * index of the outline vertex it starts at. Not every index is ever a valid
+ * Infinity zone (see `lShapeInfinityZones`), so this is the full domain of
+ * indices, not the domain of valid selections. */
+export type LShapeInfinitySide = 0 | 1 | 2 | 3 | 4 | 5;
+
+export const L_SHAPE_INFINITY_SIDES: readonly LShapeInfinitySide[] = [0, 1, 2, 3, 4, 5];
+
 export interface InfinityEdgeParams {
   enabled: boolean;
-  /** Rectangle only, this pass. `null` once L-shape/Organic candidate zones
-   * exist and the selection is expressed some other shape-specific way. */
-  side: RectangleInfinitySide | null;
+  /** Index of the outline vertex the selected side starts at -- Rectangle
+   * (0-3) or L-shape (0-5), whichever the current shape's outline actually
+   * has. `null` when nothing is selected, or for Organic, which has no
+   * straight "side" to select at all. Real validity (does this index name an
+   * actual candidate zone for the CURRENT outline) is always re-checked at
+   * the point of use via `infinityZonesForOutline`/`computeInfinityEdgeGeometry`
+   * -- this field alone never guarantees a valid selection, the same
+   * contract it already had when only Rectangle existed. */
+  side: number | null;
   /** Arc-length-normalised [0, 1) start/end along the *selected side only*
    * (not the whole perimeter) -- lets a future pass allow a partial-width
    * disappearing edge without changing this type. This pass always clamps
@@ -69,9 +86,19 @@ export function clampInfinityEdgeParams(
 ): InfinityEdgeParams {
   const fallback = defaultInfinityEdgeParams();
   if (!input) return fallback;
-  const side = RECTANGLE_INFINITY_SIDES.includes(input.side as RectangleInfinitySide)
-    ? (input.side as RectangleInfinitySide)
-    : null;
+  // This clamp has no outline in hand, so it can only reject values that
+  // could never be a real side for ANY shape this module knows about (a
+  // negative index, a fraction, 6+) -- the same "syntactically plausible,
+  // semantically re-checked downstream" contract Rectangle already had, now
+  // widened to cover L-shape's extra two indices too. Whether a given index
+  // is an actual candidate zone for the CURRENT outline is always re-checked
+  // where the outline is available (`infinityZonesForOutline`/
+  // `computeInfinityEdgeGeometry`), exactly as before.
+  const sideRaw = input.side;
+  const side =
+    typeof sideRaw === "number" && Number.isInteger(sideRaw) && sideRaw >= 0 && sideRaw <= 5
+      ? sideRaw
+      : null;
   const enabled = input.enabled === true && side !== null;
   const startTRaw = Number.isFinite(input.startT) ? (input.startT as number) : 0;
   const endTRaw = Number.isFinite(input.endT) ? (input.endT as number) : 1;
@@ -144,13 +171,18 @@ export function clampInfinityEdgeDimensions(
 }
 
 export interface RectangleInfinityZone {
-  side: RectangleInfinitySide;
+  /** Index of the outline vertex this zone's edge starts at. Rectangle:
+   * 0-3. L-shape: 0-5 (see `LShapeInfinitySide`) -- the field stayed typed
+   * as a plain `number` rather than a shape-specific union so this one zone
+   * shape keeps serving every outline consumer (3D geometry, camera,
+   * mini-plan selector) without a parallel type per shape. */
+  side: number;
   /** Outline vertex the side starts at. */
   start: readonly [number, number];
   /** Outline vertex the side ends at. */
   end: readonly [number, number];
   length: number;
-  /** Unit outward normal (away from the rectangle's interior). */
+  /** Unit outward normal (away from the outline's interior). */
   normal: readonly [number, number];
 }
 
@@ -183,14 +215,103 @@ export function rectangleInfinityZones(outline: Outline): readonly RectangleInfi
     const towardCandidateA =
       candidateA[0] * (midX - centroidX) + candidateA[1] * (midZ - centroidZ);
     const normal = towardCandidateA >= 0 ? candidateA : ([-candidateA[0], -candidateA[1]] as const);
-    zones.push({ side: i as RectangleInfinitySide, start, end, length, normal });
+    zones.push({ side: i, start, end, length, normal });
   }
   return zones;
 }
 
-/** L-shape candidate zones: not built yet (next pass -- concave corners
- * need real validity rules, not a guess). Correctly typed, honestly empty. */
-export function lShapeInfinityZones(_outline: Outline): readonly RectangleInfinityZone[] {
+/** Minimum real-world length a candidate Infinity zone must have -- below
+ * this a run can't physically fit a lip + catch basin outward, with any
+ * usable margin. Reuses `INFINITY_EDGE_DIMENSIONS` (this module's own
+ * clamped, GLB-referenced structural constants) rather than a fresh guess:
+ * the widest lip + catch basin combination the dimension clamps ever allow,
+ * so a zone this module hands out is never one its own geometry builders
+ * couldn't actually place without the basin's end walls colliding or the
+ * assembly reading as a sliver. Rectangle sides never hit this floor (they
+ * always span the pool's own length/width guardrail minimums, several
+ * metres); it matters for L-shape, where a leg shortened by a large recess
+ * could otherwise come close. */
+const MIN_INFINITY_ZONE_LENGTH =
+  INFINITY_EDGE_DIMENSIONS.lipWidth.max + INFINITY_EDGE_DIMENSIONS.catchBasinWidth.max;
+
+/**
+ * Every valid Infinity candidate zone for an L-shape outline (Geometry Pass
+ * D, L-shape slice). An L outline (`buildLShapeOutline`, l-shape.ts) always
+ * has exactly 6 vertices/edges and exactly one reflex (concave) vertex --
+ * `classifyOutlineCorners` is the same reflex detector every other L-shape
+ * consumer (`cornerStairPlan`, floor/wall/coping) already uses, never
+ * re-derived here.
+ *
+ * Validity rules (mirrors the task's own numbering):
+ *  (a)/(b) The two edges that touch the reflex vertex are always excluded --
+ *      both are structurally the recess's own walls, so a catch basin built
+ *      outward from either would extend directly into the recess notch
+ *      (empty space outside the pool's own footprint), not real open ground.
+ *      This also naturally excludes any edge short enough to fail the
+ *      `MIN_INFINITY_ZONE_LENGTH` floor, since the recess edges (length ==
+ *      `recessWidth`/`recessLength`) are exactly the ones this touches --
+ *      still checked explicitly below as defence in depth, not assumed.
+ *  (c) The remaining 4 edges are the outline's genuinely long, straight,
+ *      convex-corner-bounded runs -- structurally identical to a Rectangle
+ *      side (two of them shortened by the recess, but touching it at only
+ *      ONE endpoint each, never crossing it), so a catch basin built on any
+ *      of them stays entirely within that edge's own start/end span and
+ *      outward along its normal, exactly like `rectangleInfinityZones` --
+ *      never overlapping the recess, never floating outside the L's own
+ *      footprint.
+ *
+ * Orientation-aware by construction: works from the outline and its own
+ * reflex index, never a hardcoded `LShapeOrientation` case.
+ */
+export function lShapeInfinityZones(outline: Outline): readonly RectangleInfinityZone[] {
+  if (outline.length !== 6) return [];
+  const bounds = outlineBounds(outline);
+  if (!Number.isFinite(bounds.spanX) || !Number.isFinite(bounds.spanZ)) return [];
+  if (bounds.spanX <= 0 || bounds.spanZ <= 0) return [];
+  const convex = classifyOutlineCorners(outline);
+  const reflexIndex = convex.findIndex((isConvex) => !isConvex);
+  if (reflexIndex < 0) return []; // Not a real L (defensive -- should never happen).
+  const n = outline.length;
+  // The two edges incident to the reflex vertex: the one ending there and
+  // the one starting there.
+  const excludedEdges = new Set<number>([(reflexIndex - 1 + n) % n, reflexIndex]);
+  const centroidX = (bounds.minX + bounds.maxX) / 2;
+  const centroidZ = (bounds.minZ + bounds.maxZ) / 2;
+  const zones: RectangleInfinityZone[] = [];
+  for (let i = 0; i < n; i++) {
+    if (excludedEdges.has(i)) continue;
+    const start = outline[i]!;
+    const end = outline[(i + 1) % n]!;
+    const length = Math.hypot(end[0] - start[0], end[1] - start[1]);
+    if (!(length >= MIN_INFINITY_ZONE_LENGTH)) continue;
+    const midX = (start[0] + end[0]) / 2;
+    const midZ = (start[1] + end[1]) / 2;
+    const dx = end[0] - start[0];
+    const dz = end[1] - start[1];
+    const candidateA: readonly [number, number] = [-dz / length, dx / length];
+    const towardCandidateA =
+      candidateA[0] * (midX - centroidX) + candidateA[1] * (midZ - centroidZ);
+    const normal = towardCandidateA >= 0 ? candidateA : ([-candidateA[0], -candidateA[1]] as const);
+    zones.push({ side: i, start, end, length, normal });
+  }
+  return zones;
+}
+
+/**
+ * Every valid candidate zone for WHATEVER outline is passed -- dispatches on
+ * vertex count (4 -> Rectangle, 6 -> L-shape) rather than requiring the
+ * caller to separately know and pass the shape id, the same "derive it from
+ * the outline itself" convention `classifyOutlineCorners` already uses. Any
+ * other outline (Organic's curved boundary, or anything malformed) has no
+ * straight "side" to select and returns an honestly empty array. Every
+ * consumer that used to call `rectangleInfinityZones` directly (the 3D
+ * Infinity geometry, the camera pose, the mini-plan selector) now goes
+ * through this instead, so none of them has to special-case L-shape
+ * separately.
+ */
+export function infinityZonesForOutline(outline: Outline): readonly RectangleInfinityZone[] {
+  if (outline.length === 4) return rectangleInfinityZones(outline);
+  if (outline.length === 6) return lShapeInfinityZones(outline);
   return [];
 }
 
@@ -202,7 +323,7 @@ export function organicInfinityZones(_outline: Outline): readonly RectangleInfin
 }
 
 export interface InfinityEdgeGeometryData {
-  side: RectangleInfinitySide;
+  side: number;
   /** Lip centreline start/end points, in the outline's real-world XZ. */
   start: readonly [number, number];
   end: readonly [number, number];
@@ -214,18 +335,20 @@ export interface InfinityEdgeGeometryData {
 }
 
 /**
- * Lip/edge geometry data for a selected Rectangle side, given the pool's
- * outline and validated `InfinityEdgeParams`. Returns `null` when the
- * params don't currently select a valid Rectangle side (disabled, no side,
- * or the outline isn't a 4-vertex rectangle) -- callers must handle that
- * rather than assuming a selection is always renderable.
+ * Lip/edge geometry data for a selected side (Rectangle or L-shape), given
+ * the pool's outline and validated `InfinityEdgeParams`. Returns `null`
+ * when the params don't currently select a valid candidate zone for the
+ * CURRENT outline (disabled, no side, an index that isn't a real zone for
+ * this shape, or an outline with no candidate zones at all, e.g. Organic) --
+ * callers must handle that rather than assuming a selection is always
+ * renderable.
  */
 export function computeInfinityEdgeGeometry(
   outline: Outline,
   params: InfinityEdgeParams,
 ): InfinityEdgeGeometryData | null {
   if (!params.enabled || params.side === null) return null;
-  const zones = rectangleInfinityZones(outline);
+  const zones = infinityZonesForOutline(outline);
   const zone = zones.find((z) => z.side === params.side);
   if (!zone) return null;
   const length = zone.length;

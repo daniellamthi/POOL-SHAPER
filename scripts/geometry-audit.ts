@@ -34,6 +34,7 @@ import {
   validatePoolShape,
 } from "../src/lib/pool/geometry";
 import {
+  buildLShapeOutline,
   buildLShapeOutlineInfo,
   clampLShapeDimensions,
   L_SHAPE_GUARDRAILS,
@@ -105,6 +106,7 @@ import {
   computeInfinityEdgeGeometry,
   defaultInfinityEdgeParams,
   infinityExclusion,
+  infinityZonesForOutline,
   INFINITY_EDGE_DIMENSIONS,
   isRectangleSideExcludedByInfinity,
   lShapeInfinityZones,
@@ -3208,10 +3210,12 @@ console.log(
     assert(towardOutside > 0, "Infinity: zone normal must point outward from the centroid");
   }
 
-  // L-shape / Organic candidate zones: honestly empty this pass, not faked.
+  // `lShapeInfinityZones` given a 4-vertex Rectangle outline (not its own
+  // 6-vertex shape) correctly returns nothing real to offer, same defensive
+  // contract as before. Organic stays a genuine stub this pass.
   assert(
     lShapeInfinityZones(rectOutline).length === 0,
-    "Infinity: L-shape candidate zones must be the stubbed empty array this pass",
+    "Infinity: lShapeInfinityZones must return no zones for a non-L-shape (4-vertex) outline",
   );
   assert(
     organicInfinityZones(rectOutline).length === 0,
@@ -3652,4 +3656,298 @@ console.log(
 }
 console.log(
   "Infinity edge audit passed: 4 rectangle candidate zones (positive length, unit outward normals), stubbed L-shape/Organic zones honestly empty, malformed-input and legacy-project normalisation, dimension clamps, per-side finite geometry + exclusion checks, real finite lip/cascade/catch-basin/transition-cap geometry for all 4 sides, skimmer/LED/ladder exclusion wiring (all 4 sides, plus a null-exclusion regression), disabled-params guard, and 2 non-vacuous break/restore proofs (wrong-side selection, inverted drop direction).",
+);
+
+// --- Geometry Pass D: Infinity edge, L-shape slice -------------------------
+{
+  /** Recompute the recess sub-rectangle (the box `buildLShapeOutline`, l-shape.ts,
+   * cuts out of the outer bounding rectangle) directly from dimensions/orientation
+   * -- an independent geometric computation from the one under test, so this can
+   * actually catch a basin-overlaps-recess regression rather than reusing the
+   * same maths and trivially agreeing with it. */
+  function recessBoxFor(dims: {
+    totalLength: number;
+    totalWidth: number;
+    recessLength: number;
+    recessWidth: number;
+    orientation: LShapeOrientation;
+  }) {
+    const x0 = -dims.totalLength / 2;
+    const x1 = dims.totalLength / 2;
+    const z0 = -dims.totalWidth / 2;
+    const z1 = dims.totalWidth / 2;
+    switch (dims.orientation) {
+      case "se":
+        return { minX: x1 - dims.recessLength, maxX: x1, minZ: z0, maxZ: z0 + dims.recessWidth };
+      case "sw":
+        return { minX: x0, maxX: x0 + dims.recessLength, minZ: z0, maxZ: z0 + dims.recessWidth };
+      case "ne":
+        return { minX: x1 - dims.recessLength, maxX: x1, minZ: z1 - dims.recessWidth, maxZ: z1 };
+      case "nw":
+        return { minX: x0, maxX: x0 + dims.recessLength, minZ: z1 - dims.recessWidth, maxZ: z1 };
+    }
+  }
+
+  const insideRecess = (
+    point: readonly [number, number],
+    box: { minX: number; maxX: number; minZ: number; maxZ: number },
+  ) => {
+    const eps = 1e-6;
+    return (
+      point[0] > box.minX + eps &&
+      point[0] < box.maxX - eps &&
+      point[1] > box.minZ + eps &&
+      point[1] < box.maxZ - eps
+    );
+  };
+
+  let totalValidZonesAcrossOrientations = 0;
+  for (const orientation of L_SHAPE_ORIENTATIONS) {
+    const dims = clampLShapeDimensions({
+      totalLength: 10,
+      totalWidth: 7,
+      recessLength: 4,
+      recessWidth: 3,
+      orientation,
+    });
+    const info = buildLShapeOutlineInfo(dims);
+    const outline = info.outline;
+    assert(outline.length === 6, `Infinity/L-shape (${orientation}): outline must have 6 vertices`);
+
+    const zones = lShapeInfinityZones(outline);
+    // Exactly 4 of the 6 edges are ever valid -- the 2 recess-adjacent ones
+    // (touching the single reflex vertex) are always excluded, for every
+    // orientation, not just one hardcoded case.
+    assert(
+      zones.length === 4,
+      `Infinity/L-shape (${orientation}): expected exactly 4 valid candidate zones, got ${zones.length}`,
+    );
+    totalValidZonesAcrossOrientations += zones.length;
+
+    // The two excluded edges are precisely the ones incident to the reflex
+    // vertex -- computed independently here (not by calling
+    // `lShapeInfinityZones` again) so this actually exercises the
+    // reflex-adjacency rule rather than restating it.
+    const reflexIndex = info.concaveIndex;
+    const expectedExcluded = new Set([(reflexIndex - 1 + 6) % 6, reflexIndex]);
+    const actualSides = new Set(zones.map((z) => z.side));
+    for (let edge = 0; edge < 6; edge++) {
+      if (expectedExcluded.has(edge)) {
+        assert(
+          !actualSides.has(edge),
+          `Infinity/L-shape (${orientation}): recess-adjacent edge ${edge} must never be a valid zone`,
+        );
+      } else {
+        assert(
+          actualSides.has(edge),
+          `Infinity/L-shape (${orientation}): non-recess edge ${edge} must be a valid zone`,
+        );
+      }
+    }
+
+    // Also generically consistent with `infinityZonesForOutline`'s own
+    // dispatch -- the 3D components/camera/UI never call
+    // `lShapeInfinityZones` directly, they go through the dispatcher.
+    assert(
+      JSON.stringify(infinityZonesForOutline(outline)) === JSON.stringify(zones),
+      `Infinity/L-shape (${orientation}): infinityZonesForOutline must dispatch to the same zones`,
+    );
+
+    const bounds = outlineBounds(outline);
+    const centroidX = (bounds.minX + bounds.maxX) / 2;
+    const centroidZ = (bounds.minZ + bounds.maxZ) / 2;
+    const recessBox = recessBoxFor(dims);
+    const infDims = clampInfinityEdgeDimensions(undefined);
+    const lipTopY = 0.003;
+
+    for (const zone of zones) {
+      assert(
+        zone.length > 0,
+        `Infinity/L-shape (${orientation}) side ${zone.side}: zone length must be positive`,
+      );
+      assert(
+        zone.length >=
+          INFINITY_EDGE_DIMENSIONS.lipWidth.max + INFINITY_EDGE_DIMENSIONS.catchBasinWidth.max,
+        `Infinity/L-shape (${orientation}) side ${zone.side}: zone must clear the minimum real-world assembly length`,
+      );
+      const normalMagnitude = Math.hypot(zone.normal[0], zone.normal[1]);
+      assert(
+        Number.isFinite(normalMagnitude) && Math.abs(normalMagnitude - 1) < 1e-9,
+        `Infinity/L-shape (${orientation}) side ${zone.side}: normal must be finite unit length`,
+      );
+      const midX = (zone.start[0] + zone.end[0]) / 2;
+      const midZ = (zone.start[1] + zone.end[1]) / 2;
+      const towardOutside =
+        zone.normal[0] * (midX - centroidX) + zone.normal[1] * (midZ - centroidZ);
+      assert(
+        towardOutside > 0,
+        `Infinity/L-shape (${orientation}) side ${zone.side}: normal must point outward from the centroid`,
+      );
+
+      // The full geometry pipeline (lip/cascade/catch-basin/transition caps)
+      // must be finite for every valid L-shape zone, exactly as for Rectangle.
+      const lip = createInfinityLipGeometry(zone, infDims, lipTopY);
+      assert(
+        isGeometryFinite(lip),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: lip must be finite`,
+      );
+      const cascade = createInfinityCascadeGeometry(zone, infDims, lipTopY);
+      assert(
+        isGeometryFinite(cascade),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: cascade must be finite`,
+      );
+      const basin = createInfinityCatchBasinGeometry(zone, infDims, lipTopY);
+      for (const [name, geometry] of Object.entries(basin)) {
+        assert(
+          isGeometryFinite(geometry),
+          `Infinity/L-shape (${orientation}) side ${zone.side}: catch-basin ${name} must be finite`,
+        );
+      }
+      const transitions = createInfinityTransitionCapGeometry(zone, infDims, lipTopY, 0.35, 0.32);
+      assert(
+        transitions.start !== null &&
+          transitions.end !== null &&
+          isGeometryFinite(transitions.start) &&
+          isGeometryFinite(transitions.end),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: transition caps must be real and finite`,
+      );
+
+      // The one property the task explicitly calls out: the catch basin's
+      // own footprint (near + far corners, at both the lip and lip+width
+      // offsets) must never land inside the recess's sub-rectangle -- would
+      // mean the basin physically overlaps the notch cut out of the pool's
+      // own footprint.
+      const nearStart: readonly [number, number] = [
+        zone.start[0] + zone.normal[0] * infDims.lipWidth,
+        zone.start[1] + zone.normal[1] * infDims.lipWidth,
+      ];
+      const nearEnd: readonly [number, number] = [
+        zone.end[0] + zone.normal[0] * infDims.lipWidth,
+        zone.end[1] + zone.normal[1] * infDims.lipWidth,
+      ];
+      const farStart: readonly [number, number] = [
+        zone.start[0] + zone.normal[0] * (infDims.lipWidth + infDims.catchBasinWidth),
+        zone.start[1] + zone.normal[1] * (infDims.lipWidth + infDims.catchBasinWidth),
+      ];
+      const farEnd: readonly [number, number] = [
+        zone.end[0] + zone.normal[0] * (infDims.lipWidth + infDims.catchBasinWidth),
+        zone.end[1] + zone.normal[1] * (infDims.lipWidth + infDims.catchBasinWidth),
+      ];
+      for (const [label, corner] of [
+        ["nearStart", nearStart],
+        ["nearEnd", nearEnd],
+        ["farStart", farStart],
+        ["farEnd", farEnd],
+      ] as const) {
+        assert(
+          !insideRecess(corner, recessBox),
+          `Infinity/L-shape (${orientation}) side ${zone.side}: catch-basin corner ${label} must not fall inside the recess`,
+        );
+      }
+
+      // Deck cutout: generic notch-insertion must also work for an L-shape
+      // (6-vertex) outline, not just Rectangle's 4.
+      const baseOffset = copingOuterOffset("infinity", "hidden");
+      const cutout = buildDeckCutoutOutline(outline, baseOffset, zone);
+      assert(
+        cutout.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: deck cutout must be entirely finite`,
+      );
+      assert(
+        cutout.length === outline.length + 2,
+        `Infinity/L-shape (${orientation}) side ${zone.side}: deck cutout must insert exactly 2 vertices`,
+      );
+    }
+
+    // Camera pose: finite and outside the basin bounds, for every valid
+    // L-shape zone of this orientation.
+    const layout = getPoolVerticalLayout({
+      poolType: "in-ground",
+      system: "infinity",
+      overflowType: "hidden",
+      depth: 1.5,
+      copingThickness: 0.04,
+    });
+    for (const zone of zones) {
+      const pose = getCameraPose({
+        intent: "infinity",
+        outline,
+        layout,
+        depth: 1.5,
+        skimmers: { count: 0, positions: [], spacing: 0, cornerDistance: 0 },
+        infinityZone: zone,
+      });
+      assert(
+        [...pose.position, ...pose.target].every(Number.isFinite),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: camera pose must be entirely finite`,
+      );
+      const outsideX = pose.position[0] < bounds.minX - 0.5 || pose.position[0] > bounds.maxX + 0.5;
+      const outsideZ = pose.position[2] < bounds.minZ - 0.5 || pose.position[2] > bounds.maxZ + 0.5;
+      assert(
+        outsideX || outsideZ,
+        `Infinity/L-shape (${orientation}) side ${zone.side}: camera must sit outside the basin bounds`,
+      );
+    }
+  }
+  assert(
+    totalValidZonesAcrossOrientations === 16,
+    `Infinity/L-shape: expected 4 valid zones x 4 orientations = 16 total, got ${totalValidZonesAcrossOrientations}`,
+  );
+
+  // --- Break/restore proof: naive "all 6 edges are valid" must be caught ---
+  // Deliberately assert that an L-shape outline exposes 6 candidate zones
+  // (the naive, wrong answer that ignores the reflex corner) -- this MUST
+  // fail against the real `lShapeInfinityZones`, proving the recess
+  // exclusion is actually doing something rather than this test suite
+  // vacuously agreeing with whatever the function returns.
+  {
+    const seDims = clampLShapeDimensions({
+      totalLength: 10,
+      totalWidth: 7,
+      recessLength: 4,
+      recessWidth: 3,
+      orientation: "se",
+    });
+    const seOutline = buildLShapeOutline(seDims);
+    const realZoneCount = lShapeInfinityZones(seOutline).length;
+    let caughtNaiveAllSix = false;
+    try {
+      assert(realZoneCount === 6, "deliberate naive-all-6-edges-valid break");
+    } catch {
+      caughtNaiveAllSix = true;
+    }
+    assert(
+      caughtNaiveAllSix,
+      "Infinity/L-shape: break/restore proof failed to catch the naive all-6-edges-valid assumption",
+    );
+  }
+
+  // Too-small recess (near the L_SHAPE_GUARDRAILS minimum) must still clamp
+  // safely and never crash the zone computation, even though its recess
+  // edges are then very short.
+  {
+    const tinyRecessDims = clampLShapeDimensions({
+      totalLength: 5,
+      totalWidth: 4,
+      recessLength: 0.1,
+      recessWidth: 0.1,
+      orientation: "se",
+    });
+    const tinyOutline = buildLShapeOutline(tinyRecessDims);
+    const tinyZones = lShapeInfinityZones(tinyOutline);
+    assert(
+      tinyZones.every(
+        (z) =>
+          Number.isFinite(z.length) && Number.isFinite(z.normal[0]) && Number.isFinite(z.normal[1]),
+      ),
+      "Infinity/L-shape: a near-guardrail-minimum recess must still produce entirely finite zones",
+    );
+    assert(
+      tinyZones.length <= 4,
+      "Infinity/L-shape: a near-guardrail-minimum recess must never expose more than 4 zones",
+    );
+  }
+}
+console.log(
+  "Infinity edge audit (L-shape) passed: exactly 4 of 6 edges valid (recess-adjacent pair correctly excluded) for all 4 orientations, infinityZonesForOutline dispatch parity, finite unit-length outward normals, full lip/cascade/catch-basin/transition-cap geometry finiteness, catch-basin-never-overlaps-recess for every corner of every valid zone, generic deck-cutout notch insertion, finite outside-the-basin camera poses, and 1 non-vacuous break/restore proof (naive all-6-edges-valid assumption).",
 );

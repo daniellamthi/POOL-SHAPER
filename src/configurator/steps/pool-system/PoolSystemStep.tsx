@@ -25,11 +25,12 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
     onSkimmerSelect?.();
   };
 
-  // Geometry Pass D: Infinity's real geometry only exists for Rectangle this
-  // pass (see infinity-edge.ts) -- mirrors the exact same gate project.ts's
-  // normalisation already applies, so the UI never offers a selection the
-  // 3D view/export guard would then have to silently reject.
-  const infinityAvailable = config.shape === "rectangle";
+  // Geometry Pass D: Infinity's real geometry exists for Rectangle and
+  // L-shape (see infinity-edge.ts); Organic stays a stub. Mirrors the exact
+  // same gate project.ts's normalisation already applies, so the UI never
+  // offers a selection the 3D view/export guard would then have to silently
+  // reject.
+  const infinityAvailable = config.shape === "rectangle" || config.shape === "l-shape";
 
   return (
     <StepSection
