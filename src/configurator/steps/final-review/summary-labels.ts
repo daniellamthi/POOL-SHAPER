@@ -32,8 +32,12 @@ export const shapeLabel = (shape: PoolShapeId): string =>
 
 /** Short, customer-facing headline for the hydraulic system -- the
  * technical `skimmer`/`overflow` + `hiddenType` pair becomes one sentence. */
-export function systemHeadline(system: "skimmer" | "overflow", overflowType: OverflowType): string {
+export function systemHeadline(
+  system: "skimmer" | "overflow" | "infinity",
+  overflowType: OverflowType,
+): string {
   if (system === "skimmer") return "Skimmer — bordo classico";
+  if (system === "infinity") return "Infinity — bordo a sfioro invisibile";
   return overflowType === "visible" ? "Sfioro con griglia" : "Sfioro nascosto — acqua a filo";
 }
 

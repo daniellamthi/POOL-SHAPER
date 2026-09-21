@@ -13,12 +13,18 @@ export type FuturePoolShapeId = PoolShapeId;
 
 export type CustomMode = "draw" | "upload";
 
-export type SystemType = "skimmer" | "overflow";
+/** Geometry Pass D (Infinity, Rectangle-only first slice): "infinity" is now
+ * a real, buildable member of `SystemType`, alongside skimmer and the
+ * existing perimeter-overflow family. When `system === "infinity"`,
+ * `overflowType` is not read by any renderer -- the actual Infinity edge/
+ * side selection lives in `config.infinityEdge` (see
+ * `src/lib/pool/infinity-edge.ts`, the single source of truth for it).
+ * Mutually exclusive with skimmer/overflow waterline treatment by
+ * construction: nothing reads `overflowType` or renders a skimmer wall
+ * while `system === "infinity"`. */
+export type SystemType = "skimmer" | "overflow" | "infinity";
 export type OverflowType = "hidden" | "visible";
-/** Prepared, not yet buildable: "infinity" is not a member of `OverflowType`
- * and never reaches `config.overflowType` -- the real single-edge Infinity
- * geometry is geometry pass D. Reserved so the "Linea d'acqua" step's future
- * Infinity choice can be typed ahead of the actual construction work. */
+/** Historical alias kept so any code still importing it keeps compiling. */
 export type FutureOverflowType = OverflowType | "infinity";
 
 export type FinishMaterial = "liner" | "mosaic";
@@ -172,6 +178,13 @@ export interface PoolConfig {
   /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before
    * the control existed; readers substitute LED_OPTICS.defaultIntensity. */
   ledIntensity?: number;
+  /** Only meaningful while `system === "infinity"` (Rectangle only, this
+   * pass). Always normalised through `clampInfinityEdgeParams`
+   * (infinity-edge.ts) before reaching geometry, the same contract every
+   * other shape/system-specific field in this interface follows. Absent on
+   * projects saved before Infinity existed; readers substitute
+   * `defaultInfinityEdgeParams()`. */
+  infinityEdge?: import("./infinity-edge").InfinityEdgeParams;
   poolAccess: PoolAccess | null;
   /** Only meaningful while `poolAccess` is "internalSteps". Absent on projects
    *  saved before the corner staircase existed; readers substitute "linear". */

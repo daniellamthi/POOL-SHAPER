@@ -151,6 +151,18 @@ export function serializePoolRenderConfig(
         "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
     );
   }
+  // Geometry Pass D (Infinity, Rectangle-only first slice) has no
+  // Blender/Cycles counterpart yet either -- same honest-refusal policy as
+  // the sloped-floor/L-shape/Organic guards above: refuse rather than
+  // silently exporting the Infinity pool as an ordinary skimmer/overflow
+  // rectangle, which would drop the disappearing edge, waterfall and catch
+  // basin entirely without saying so.
+  if (config.system === "infinity") {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora la vasca a sfioro infinity. " +
+        "Passa temporaneamente a skimmer o sfioro perimetrale per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;
   const outputPreset = RENDER_OUTPUT_PRESETS[outputPresetId];

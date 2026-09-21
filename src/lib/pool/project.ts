@@ -18,6 +18,7 @@ import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
 import { clampLShapeDimensions } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
+import { clampInfinityEdgeParams } from "./infinity-edge";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -158,6 +159,25 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     }
     return slopeNormalisedDimensions;
   })();
+  // Geometry pass D (Infinity, Rectangle-only first slice): a project saved
+  // before Infinity existed, or one carrying malformed/legacy Infinity data,
+  // always restores through `clampInfinityEdgeParams` -- same contract as
+  // the L-shape/Organic branches above. Infinity candidate zones only exist
+  // for Rectangle this pass (see `infinity-edge.ts`), so a project that
+  // somehow saved `system: "infinity"` against a non-Rectangle shape falls
+  // back to skimmer rather than rendering a system that was never built for
+  // that shape.
+  const systemIsInfinityCapable = restored.shape === "rectangle";
+  const system: PoolConfig["system"] =
+    restored.system === "infinity" && !systemIsInfinityCapable ? "skimmer" : restored.system;
+  // Only ever attach an `infinityEdge` field when the project actually has
+  // one to normalise (already carried the field, or is genuinely on
+  // "infinity") -- a project that never touched Infinity must round-trip
+  // byte-for-byte identical, never gain a new field it didn't have before.
+  const infinityEdge =
+    restored.infinityEdge !== undefined || system === "infinity"
+      ? clampInfinityEdgeParams(systemIsInfinityCapable ? restored.infinityEdge : undefined)
+      : undefined;
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
@@ -168,6 +188,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
       dimensions,
+      system,
+      ...(infinityEdge !== undefined ? { infinityEdge } : {}),
     },
     renovation: renovation as RenovationConfig,
   };
