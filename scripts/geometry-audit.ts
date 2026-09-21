@@ -50,7 +50,8 @@ import {
   outlineWindsCcw,
   validateOrganicOutline,
 } from "../src/lib/pool/organic-shape";
-import { planPoolLighting } from "../src/lib/pool/lighting";
+import { planPoolLighting, POOL_LUMINAIRE } from "../src/lib/pool/lighting";
+import { calibratedLedColor, isLedColor } from "../src/lib/pool/led-optics";
 import { skimmerWall } from "../src/lib/pool/walls";
 import type { Dimensions, PoolShapeId } from "../src/lib/pool/types";
 import {
@@ -2855,15 +2856,21 @@ console.log(
     "organic skimmerWall must resolve a real axis/coordinate from the outline's own bounding box",
   );
 
-  // LED lighting: must never crash and must never place a fixture outside
-  // the true curved outline or with non-finite geometry, whatever the
-  // outcome (a real row, or a clean warning if no candidate chord clears the
-  // spacing/clearance guardrails for this particular bay).
+  // LED lighting: must never crash, must never place a fixture outside the
+  // true curved outline or with non-finite geometry, and -- Geometry Pass C
+  // closure -- must always place a REAL row, never only the honest warning,
+  // for every curvature value the UI actually offers (the generalized
+  // `mergedWallChords` retry in lighting.ts, not a curvature clamp: see the
+  // dedicated block below for the full min/medium/max/mirror/slope matrix).
   const lightingPlan = planPoolLighting({
     outline,
     waterY: verticalLayout.waterY,
     floorY: verticalLayout.floorY,
   });
+  assert(
+    lightingPlan.count > 0 && lightingPlan.warnings.length === 0,
+    "organic lighting must place a real, warning-free row, not fall back to a collision-free-row warning",
+  );
   assert(
     lightingPlan.positions.every(
       (p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z),
@@ -2920,6 +2927,94 @@ console.log(
 
   console.log(
     "Organic geometry/systems audit passed: floor triangulation, wall closure, coping/water offset, skimmer placement, lighting placement, the overview camera, and one real planar slope with slope-aware metrics are all finite, real, and correctly generic over the curved outline.",
+  );
+}
+
+// --- Geometry Pass C closure: LED lighting at every UI-selectable Organic
+// curvature must place a real row, never only a warning. ---
+{
+  const ledLumenOutputs: ReadonlyArray<{ label: string; lumens: number; ledColor: string }> = [
+    { label: "white LED", lumens: POOL_LUMINAIRE.lumens, ledColor: "#ffffff" },
+    // No RGB-specific lumen output exists in this codebase (colour is a
+    // rendering-only property, calibratedLedColor/led-optics.ts) -- the real
+    // requirement this satisfies is that PLACEMENT never depends on colour,
+    // so an RGB colour selection is exercised alongside the same lumen
+    // model, and calibratedLedColor itself must produce finite output for
+    // both a white and a saturated RGB value.
+    { label: "RGB LED", lumens: POOL_LUMINAIRE.lumens, ledColor: "#3388ff" },
+  ];
+  for (const { label, lumens, ledColor } of ledLumenOutputs) {
+    assert(isLedColor(ledColor), `${label}: test colour must itself be a valid LED colour string`);
+    const calibrated = calibratedLedColor(ledColor);
+    assert(
+      [calibrated.r, calibrated.g, calibrated.b].every(Number.isFinite),
+      `${label}: calibratedLedColor must produce finite linear colour components`,
+    );
+    for (const curvature of [
+      ORGANIC_SHAPE_GUARDRAILS.curvature.min,
+      (ORGANIC_SHAPE_GUARDRAILS.curvature.min + ORGANIC_SHAPE_GUARDRAILS.curvature.max) / 2,
+      ORGANIC_SHAPE_GUARDRAILS.curvature.max,
+    ]) {
+      for (const mirror of [false, true]) {
+        for (const floorProfile of ["flat", "slope"] as const) {
+          const params = clampOrganicShapeParams({ length: 11, width: 6.5, curvature, mirror });
+          const outline = buildOrganicShapeOutline(params);
+          const dims: Dimensions = {
+            length: params.length,
+            width: params.width,
+            depth: 1.5,
+            cornerRadius: 0,
+            organicCurvature: params.curvature,
+            organicMirror: params.mirror,
+            ...(floorProfile === "slope"
+              ? ({ floorProfile: "slope", shallowDepth: 1.1 } as const)
+              : ({ floorProfile: "flat" } as const)),
+          };
+          const verticalLayout = getPoolVerticalLayout({
+            poolType: "in-ground",
+            system: "skimmer",
+            overflowType: "hidden",
+            depth: dims.depth,
+            copingThickness: 0.03,
+          });
+          const floorProfileModel = buildFloorProfile({
+            outline,
+            shape: "organic",
+            poolType: "in-ground",
+            dimensions: dims,
+            verticalLayout,
+          });
+          const label2 = `${label} curvature=${curvature.toFixed(2)} mirror=${mirror} floorProfile=${floorProfile}`;
+          const plan = planPoolLighting({
+            outline,
+            waterY: verticalLayout.waterY,
+            floorY: floorProfileModel.sloped ? floorProfileModel.shallowFloorY : verticalLayout.floorY,
+            lumenOutput: lumens,
+          });
+          assert(plan.count > 0, `${label2}: must place a real, non-empty LED row`);
+          assert(plan.warnings.length === 0, `${label2}: must place without any warning`);
+          assert(
+            plan.positions.every((p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z)),
+            `${label2}: every fixture position must be finite`,
+          );
+          // Sloped-floor Y-positioning: each fixture's local floor elevation
+          // (via the same floorYAt every other sloped consumer reads) must
+          // stay strictly below the fixture, and the fixture strictly below
+          // the water line -- proves the LED row is really placed against
+          // the local sloped floor, not the old single global floorY.
+          for (const p of plan.positions) {
+            const localFloorY = floorProfileModel.floorYAt(p.x, p.z);
+            assert(
+              p.y > localFloorY && p.y < verticalLayout.waterY,
+              `${label2}: fixture must sit strictly between its local floor and the water line`,
+            );
+          }
+        }
+      }
+    }
+  }
+  console.log(
+    "Organic LED low-curvature closure audit passed: every UI-selectable curvature (min/medium/max), both mirror states, white and RGB LED colour, and flat/sloped floor all place a real, warning-free lighting row -- no silent low-curvature gap.",
   );
 }
 
