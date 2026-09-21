@@ -49,13 +49,13 @@ export function PoolShapeStep() {
     </fieldset>
   );
 
-  // Slope is only ever built for a rectangle or L-shape, in-ground pool --
-  // see `buildFloorProfile` (floor-profile.ts). Custom shapes and
+  // Slope is only ever built for a rectangle, L-shape or Organic, in-ground
+  // pool -- see `buildFloorProfile` (floor-profile.ts). Custom shapes and
   // above-ground pools keep the single "Profondità" control they always had.
   const supportsFloorProfile = config.poolType === "in-ground";
 
   const depthSection = (shape: PoolShapeId, disabled: boolean) =>
-    (shape === "rectangle" || shape === "l-shape") && supportsFloorProfile ? (
+    (shape === "rectangle" || shape === "l-shape" || shape === "organic") && supportsFloorProfile ? (
       <FloorProfileSection disabled={disabled} />
     ) : (
       <fieldset disabled={disabled} className="border-0 p-0">
@@ -331,8 +331,8 @@ function OrganicShapeControls({ disabled }: { disabled: boolean }) {
  * "Profilo del fondo" -- Geometry Pass A. A refined two-state selector (the
  * same segmented-pill pattern the custom-shape draw/upload control already
  * uses, not a checkbox), then the depth control(s) that state calls for.
- * Only ever rendered for a rectangle, in-ground pool -- see
- * `supportsFloorProfile` above and `buildFloorProfile` (floor-profile.ts).
+ * Only ever rendered for a rectangle, L-shape or Organic, in-ground pool --
+ * see `supportsFloorProfile` above and `buildFloorProfile` (floor-profile.ts).
  */
 function FloorProfileSection({ disabled }: { disabled: boolean }) {
   const { config, setDimension, setFloorProfile, toggleSlopeReversed } = useConfigurator();

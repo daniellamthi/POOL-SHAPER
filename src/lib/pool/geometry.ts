@@ -260,6 +260,43 @@ export function outlineArea(outline: Outline): number {
   return Math.abs(sum) / 2;
 }
 
+/**
+ * Exact area centroid (signed shoelace formula) of a simple polygon -- NOT
+ * the mean of its vertices, which is wrong for any non-regular polygon (an
+ * L-shape or a densely-sampled organic curve most of all, since extra
+ * vertices along a nearly-straight run would silently drag a vertex-average
+ * off-centre). Used by `computeSlopeMetrics` (floor-profile.ts): because a
+ * single-axis planar ramp's elevation is an affine function of (x, z), the
+ * exact integral of that elevation over the polygon equals the elevation
+ * evaluated at this centroid, times the area -- a real closed-form identity,
+ * not an approximation, and it is what makes sloped-floor volume correct for
+ * a non-constant-cross-width basin (L-shape, organic) instead of only a
+ * constant-width rectangle. */
+export function outlineCentroid(outline: Outline): readonly [number, number] {
+  let signedAreaSum = 0;
+  let cx = 0;
+  let cz = 0;
+  for (let i = 0; i < outline.length; i++) {
+    const [x1, z1] = outline[i]!;
+    const [x2, z2] = outline[(i + 1) % outline.length]!;
+    const cross = x1 * z2 - x2 * z1;
+    signedAreaSum += cross;
+    cx += (x1 + x2) * cross;
+    cz += (z1 + z2) * cross;
+  }
+  const signedArea = signedAreaSum / 2;
+  if (Math.abs(signedArea) < 1e-12) {
+    // Degenerate (zero-area) polygon: fall back to the plain vertex mean
+    // rather than dividing by ~zero.
+    const n = Math.max(1, outline.length);
+    const mean = outline.reduce((sum, [x, z]) => [sum[0] + x / n, sum[1] + z / n] as const, [
+      0, 0,
+    ] as readonly [number, number]);
+    return mean;
+  }
+  return [cx / (6 * signedArea), cz / (6 * signedArea)];
+}
+
 export function outlinePerimeter(outline: Outline): number {
   let total = 0;
   for (let i = 0; i < outline.length; i++) {

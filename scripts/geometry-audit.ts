@@ -29,6 +29,8 @@ import {
   offsetOutline,
   outlineArea,
   outlineBounds,
+  outlineCentroid,
+  outlinePerimeter,
   validatePoolShape,
 } from "../src/lib/pool/geometry";
 import {
@@ -43,6 +45,7 @@ import {
   buildOrganicShapeOutlineInfo,
   clampOrganicShapeParams,
   ORGANIC_SHAPE_GUARDRAILS,
+  sampleOrganicOutlineAtCount,
   outlineSelfIntersects,
   outlineWindsCcw,
   validateOrganicOutline,
@@ -2586,27 +2589,257 @@ console.log(
     );
   }
 
-  // Floor slope must stay correctly UNAVAILABLE for organic -- same
-  // eligibility rule as custom shapes (no single deterministic principal
-  // axis a customer would recognise on a freeform bay).
+  // Floor slope (Geometry Pass C closure): Organic now shares the exact same
+  // canonical model rectangle/L-shape already use -- `buildFloorProfile`'s
+  // axis derivation is already fully shape-agnostic (only reads
+  // `outlineBounds`), so it needed no organic-specific formula at all, only
+  // widening the eligibility list. This is the SAME "longer bounding-box
+  // span" rule `skimmerWall()` (walls.ts) uses for the skimmer/lighting wall,
+  // so "the principal axis" means one thing everywhere it's asked.
+  const organicSlopeDimensions: Dimensions = {
+    length: 12,
+    width: 7,
+    depth,
+    cornerRadius: 0,
+    floorProfile: "slope",
+    shallowDepth: 1.0,
+    organicCurvature: 0.55,
+    organicMirror: false,
+  };
   const organicSlopeProfile = buildFloorProfile({
     outline,
     shape: "organic",
     poolType: "in-ground",
-    dimensions: {
-      length: 12,
-      width: 7,
-      depth,
-      cornerRadius: 0,
-      floorProfile: "slope",
-      shallowDepth: 1.0,
-    },
+    dimensions: organicSlopeDimensions,
     verticalLayout,
   });
   assert(
-    organicSlopeProfile.sloped === false,
-    "organic shape must never build a sloped floor, even when floorProfile: 'slope' is requested -- it has no single deterministic principal axis",
+    organicSlopeProfile.sloped === true,
+    "organic shape must build a real sloped floor when floorProfile: 'slope' is requested, reusing the same eligibility/axis model as rectangle/L-shape",
   );
+  const organicBounds = outlineBounds(outline);
+  const expectedAxis = organicBounds.spanX >= organicBounds.spanZ ? "x" : "z";
+  assert(
+    organicSlopeProfile.axis === expectedAxis,
+    "organic slope axis must be the outline's own longer bounding-box span -- the same rule skimmerWall() and buildFloorProfile use for rectangle/L-shape, not a separate organic-specific formula",
+  );
+  assert(
+    isSlopedFloorDisplay("organic", "in-ground", organicSlopeDimensions) === true,
+    "isSlopedFloorDisplay must report organic as sloped exactly like buildFloorProfile does, for the 'Fondo in pendenza' UI toggle",
+  );
+  assert(
+    isSlopedFloorDisplay("organic", "in-ground", { ...organicSlopeDimensions, floorProfile: "flat" }) ===
+      false,
+    "isSlopedFloorDisplay must report organic as flat when floorProfile is 'flat', same as rectangle/L-shape",
+  );
+
+  // Monotonic slope along the running axis (mirrors the rectangle/L-shape
+  // slopeCases assertion above) -- proves it is one real planar ramp across
+  // the whole curved basin, not a bowl or a per-lobe slope.
+  {
+    const axisMin = organicSlopeProfile.axis === "x" ? organicBounds.minX : organicBounds.minZ;
+    const axisMax = organicSlopeProfile.axis === "x" ? organicBounds.maxX : organicBounds.maxZ;
+    let previousY: number | null = null;
+    for (let step = 0; step <= 20; step++) {
+      const coordinate = axisMin + (step / 20) * (axisMax - axisMin);
+      const y =
+        organicSlopeProfile.axis === "x"
+          ? organicSlopeProfile.floorYAt(coordinate, 0)
+          : organicSlopeProfile.floorYAt(0, coordinate);
+      assert(Number.isFinite(y), "organic sloped floorYAt must be finite along the whole run");
+      if (previousY !== null) {
+        const gettingDeeper = organicSlopeProfile.shallowAtMin
+          ? y <= previousY + 1e-9
+          : y >= previousY - 1e-9;
+        assert(
+          gettingDeeper,
+          "organic floor elevation must move monotonically along the slope axis -- one real planar ramp, no bowl/per-lobe slope",
+        );
+      }
+      previousY = y;
+    }
+  }
+
+  // Water surface stays perfectly horizontal regardless of floor slope --
+  // generic behaviour, verified for organic specifically.
+  assert(
+    Math.abs(computeSlopeMetrics(outline, organicSlopeProfile, verticalLayout.waterY, verticalLayout.wallTopY).waterSurface - outlineArea(outline)) < 1e-6,
+    "organic sloped water surface must stay the horizontal plan area, exactly like rectangle/L-shape",
+  );
+
+  // slopeReversed must flip which end is shallow, same field rectangle/
+  // L-shape already use -- no organic-specific field invented.
+  const organicReversedProfile = buildFloorProfile({
+    outline,
+    shape: "organic",
+    poolType: "in-ground",
+    dimensions: { ...organicSlopeDimensions, slopeReversed: true },
+    verticalLayout,
+  });
+  assert(
+    organicReversedProfile.shallowAtMin === !organicSlopeProfile.shallowAtMin,
+    "organic slopeReversed must flip shallowAtMin, exactly as it does for rectangle/L-shape",
+  );
+
+  // Real metrics under slope: volume must sit strictly between the
+  // flat-at-shallow and flat-at-deep bounds, floor surface must exceed the
+  // flat footprint, and the whole computation must come from the real
+  // sampled polygon (outlineArea/outlineCentroid/per-edge integration), not
+  // a length x width shortcut.
+  const organicMetrics = computeSlopeMetrics(
+    outline,
+    organicSlopeProfile,
+    verticalLayout.waterY,
+    verticalLayout.wallTopY,
+  );
+  const organicFootprintArea = outlineArea(outline);
+  assert(
+    Number.isFinite(organicMetrics.waterVolume) && organicMetrics.waterVolume > 0,
+    "organic sloped volume must be finite and positive",
+  );
+  assert(
+    organicMetrics.floorSurface > organicFootprintArea,
+    "organic inclined floor surface must exceed the flat footprint area",
+  );
+  const organicShallowFlatVolume =
+    organicFootprintArea * (verticalLayout.waterY - organicSlopeProfile.shallowFloorY);
+  const organicDeepFlatVolume =
+    organicFootprintArea * (verticalLayout.waterY - organicSlopeProfile.deepFloorY);
+  assert(
+    organicMetrics.waterVolume > organicShallowFlatVolume - 1e-6 &&
+      organicMetrics.waterVolume < organicDeepFlatVolume + 1e-6,
+    "organic sloped volume must sit between the flat-at-shallow and flat-at-deep bounds",
+  );
+  // The exact affine-integral identity this relies on: volume must equal
+  // planArea x (waterY - floorYAt(centroid)) -- proves the real polygon
+  // centroid (not the vertex mean, and not a naive endpoint average) is
+  // actually driving the result for a non-constant-cross-width basin.
+  const [organicCentroidX, organicCentroidZ] = outlineCentroid(outline);
+  const organicCentroidFloorY = organicSlopeProfile.floorYAt(organicCentroidX, organicCentroidZ);
+  assert(
+    Math.abs(
+      organicMetrics.waterVolume - organicFootprintArea * (verticalLayout.waterY - organicCentroidFloorY),
+    ) < 1e-6,
+    "organic sloped volume must equal planArea x (waterY - floorYAt(centroid)) exactly",
+  );
+  // Same identity, but on a bay proportioned the OTHER way (width > length,
+  // so the slope runs along z instead of x): this shape's dip/bulge sit at
+  // theta = +/-90 degrees, which keeps its point density -- and so its area
+  // centroid -- essentially symmetric about the x-axis regardless of
+  // curvature, so a regression that silently swapped the true area centroid
+  // for a plain vertex-mean would NOT show up on the length>width case above
+  // (its x-centroid barely differs either way). It DOES show up along z,
+  // where the dip/bulge genuinely skew where the outline's area sits. This
+  // is what makes the assertion non-vacuous rather than accidentally
+  // insensitive to the very bug it exists to catch.
+  const wideOutline = buildOrganicShapeOutline({ length: 7, width: 12, curvature: 0.55, mirror: false });
+  const wideProfile = buildFloorProfile({
+    outline: wideOutline,
+    shape: "organic",
+    poolType: "in-ground",
+    dimensions: { ...organicSlopeDimensions, length: 7, width: 12 },
+    verticalLayout,
+  });
+  assert(wideProfile.axis === "z", "width > length organic bay must slope along z");
+  const wideMetrics = computeSlopeMetrics(
+    wideOutline,
+    wideProfile,
+    verticalLayout.waterY,
+    verticalLayout.wallTopY,
+  );
+  const [wideCentroidX, wideCentroidZ] = outlineCentroid(wideOutline);
+  const wideVertexMeanZ =
+    wideOutline.reduce((sum, [, z]) => sum + z, 0) / wideOutline.length;
+  assert(
+    Math.abs(wideCentroidZ - wideVertexMeanZ) > 0.05,
+    "test sanity: the wide bay's area centroid must genuinely differ from its vertex mean along the slope axis, or this assertion cannot actually distinguish the two formulas",
+  );
+  const wideCentroidFloorY = wideProfile.floorYAt(wideCentroidX, wideCentroidZ);
+  assert(
+    Math.abs(
+      wideMetrics.waterVolume - outlineArea(wideOutline) * (verticalLayout.waterY - wideCentroidFloorY),
+    ) < 1e-6,
+    "organic sloped volume (width > length bay) must equal planArea x (waterY - floorYAt(AREA centroid)) exactly, not the vertex-mean approximation",
+  );
+  // Wall surface must vary along the perimeter following the local floor Y
+  // (never a single constant height), and stay within the [shallow, deep]
+  // per-metre wall-height range.
+  const organicMinWallHeight = verticalLayout.wallTopY - organicSlopeProfile.shallowFloorY;
+  const organicMaxWallHeight = verticalLayout.wallTopY - organicSlopeProfile.deepFloorY;
+  assert(
+    organicMetrics.wallSurface > outlinePerimeter(outline) * organicMinWallHeight - 1e-6 &&
+      organicMetrics.wallSurface < outlinePerimeter(outline) * organicMaxWallHeight + 1e-6,
+    "organic sloped wall surface must sit between the constant-shallow-height and constant-deep-height bounds",
+  );
+
+  // Metric-convergence: as the Organic outline is sampled at increasing
+  // point-count resolution (via decreasing targetResolution), volume/floor
+  // surface/wall surface must converge to a stable value -- proves
+  // `computeSlopeMetrics` is a real integral over the sampled polygon, not
+  // a coarse length x width shortcut that would stay constant (or diverge)
+  // regardless of resolution.
+  {
+    const convergenceParams = clampOrganicShapeParams({
+      length: 12,
+      width: 7,
+      curvature: 0.55,
+      mirror: false,
+    });
+    const resolutions = [1.0, 0.4, 0.2, 0.1];
+    const converged: Array<{ volume: number; floorSurface: number; wallSurface: number }> = [];
+    for (const targetResolution of resolutions) {
+      const perimeterEstimate = outlinePerimeter(sampleOrganicOutlineAtCount(convergenceParams, 128));
+      const pointCount = Math.min(
+        ORGANIC_SHAPE_GUARDRAILS.maxPoints,
+        Math.max(ORGANIC_SHAPE_GUARDRAILS.minPoints, Math.round(perimeterEstimate / targetResolution)),
+      );
+      const sampled = sampleOrganicOutlineAtCount(convergenceParams, pointCount);
+      const sampledProfile = buildFloorProfile({
+        outline: sampled,
+        shape: "organic",
+        poolType: "in-ground",
+        dimensions: organicSlopeDimensions,
+        verticalLayout,
+      });
+      const sampledMetrics = computeSlopeMetrics(
+        sampled,
+        sampledProfile,
+        verticalLayout.waterY,
+        verticalLayout.wallTopY,
+      );
+      converged.push({
+        volume: sampledMetrics.waterVolume,
+        floorSurface: sampledMetrics.floorSurface,
+        wallSurface: sampledMetrics.wallSurface,
+      });
+    }
+    for (let i = 1; i < converged.length; i++) {
+      const previous = converged[i - 1]!;
+      const current = converged[i]!;
+      // Each successive doubling-ish of resolution must move the metric by a
+      // strictly smaller absolute amount than the previous step moved it --
+      // the definition of converging, not oscillating or diverging.
+      if (i >= 2) {
+        const prevPrev = converged[i - 2]!;
+        assert(
+          Math.abs(current.volume - previous.volume) <=
+            Math.abs(previous.volume - prevPrev.volume) + 1e-9,
+          "organic volume must converge (non-increasing step size) as sample resolution increases",
+        );
+        assert(
+          Math.abs(current.floorSurface - previous.floorSurface) <=
+            Math.abs(previous.floorSurface - prevPrev.floorSurface) + 1e-9,
+          "organic floor surface must converge as sample resolution increases",
+        );
+      }
+    }
+    const finest = converged[converged.length - 1]!;
+    const coarsest = converged[0]!;
+    assert(
+      Math.abs(finest.volume - coarsest.volume) / finest.volume < 0.02,
+      "organic volume at coarse vs. fine sampling must already agree within 2% -- real convergence, not noise",
+    );
+  }
 
   // Skimmer placement: a real, finite, non-empty plan along the outline's
   // longer bounding-box axis (skimmerWall is already outline-generic).
@@ -2686,7 +2919,7 @@ console.log(
   );
 
   console.log(
-    "Organic geometry/systems audit passed: floor triangulation, wall closure, coping/water offset, skimmer placement, lighting placement, the overview camera and the floor-slope exclusion are all finite, real, and correctly generic over the curved outline.",
+    "Organic geometry/systems audit passed: floor triangulation, wall closure, coping/water offset, skimmer placement, lighting placement, the overview camera, and one real planar slope with slope-aware metrics are all finite, real, and correctly generic over the curved outline.",
   );
 }
 

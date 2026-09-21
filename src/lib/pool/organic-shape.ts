@@ -96,6 +96,21 @@ function radiusAt(theta: number, curvature: number, mirror: boolean): number {
   return 1 - dip + bulge;
 }
 
+/**
+ * Sample the same deterministic polar curve at an explicit point count,
+ * bypassing `buildOrganicShapeOutline`'s own adaptive arc-length resolution.
+ * Exported only for the metric-convergence test (geometry-audit.ts), which
+ * needs to sample the exact same curve at several different resolutions to
+ * prove `computeSlopeMetrics` (floor-profile.ts) is a real integral over the
+ * sampled polygon -- not a length x width shortcut that would stay flat
+ * regardless of resolution. `params` must already be
+ * `clampOrganicShapeParams`-normalised, same contract as every other
+ * function in this module.
+ */
+export function sampleOrganicOutlineAtCount(params: OrganicShapeParams, count: number): Outline {
+  return sampleAtCount(params, count);
+}
+
 function sampleAtCount(params: OrganicShapeParams, count: number): Outline {
   const rx = params.length / 2;
   const rz = params.width / 2;

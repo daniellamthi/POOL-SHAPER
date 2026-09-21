@@ -5,17 +5,23 @@
  * lighting, water, measurements -- reads it from here, never re-derives its
  * own copy.
  *
- * Scope: slope is offered for a rectangular or L-shaped, in-ground pool
- * (Geometry Pass B extends the rectangle-only Pass A scope to the L, since
- * both have a real, deterministic principal axis). Custom (arbitrary-polygon)
- * shapes have no single deterministic "principal axis" to slope along
- * without guessing, and above-ground pools are shipped as constant-height
- * modular kits, so both are kept flat regardless of `dimensions.floorProfile`
- * -- `buildFloorProfile` normalises that itself rather than trusting every
- * call site to remember the restriction.
+ * Scope: slope is offered for a rectangular, L-shaped or Organic, in-ground
+ * pool (Geometry Pass B extends the rectangle-only Pass A scope to the L;
+ * Geometry Pass C extends it again to Organic). All three have a real,
+ * deterministic principal axis -- the outline's own longer bounding-box
+ * span, exactly the rule `skimmerWall()` (walls.ts) already uses to decide
+ * which wall the skimmer run sits on, so "the principal axis" means the same
+ * thing everywhere it is asked: here, for the slope; in walls.ts, for the
+ * skimmer/ladder run; and in lighting.ts (via `skimmerWall`), for which wall
+ * the LED row faces. Custom (arbitrary-polygon) shapes have no single
+ * deterministic "principal axis" to slope along without guessing, and
+ * above-ground pools are shipped as constant-height modular kits, so both
+ * are kept flat regardless of `dimensions.floorProfile` -- `buildFloorProfile`
+ * normalises that itself rather than trusting every call site to remember
+ * the restriction.
  */
 import { GROUND_LEVEL } from "./vertical-layout";
-import { outlineArea, outlineBounds, outlinePerimeter } from "./geometry";
+import { outlineArea, outlineBounds, outlineCentroid, outlinePerimeter } from "./geometry";
 import type { PoolVerticalLayout } from "./vertical-layout";
 import type { Dimensions, Outline, PoolMetrics, PoolShapeId, PoolType } from "./types";
 
@@ -44,7 +50,7 @@ export function isSlopedFloorDisplay(
   dimensions: Pick<Dimensions, "floorProfile" | "shallowDepth" | "depth">,
 ): boolean {
   return (
-    (shape === "rectangle" || shape === "l-shape") &&
+    (shape === "rectangle" || shape === "l-shape" || shape === "organic") &&
     poolType === "in-ground" &&
     dimensions.floorProfile === "slope" &&
     Number.isFinite(dimensions.shallowDepth) &&
@@ -136,7 +142,7 @@ export function buildFloorProfile(params: {
   // single deterministic principal axis a customer would recognise.
   const eligible =
     dimensions.floorProfile === "slope" &&
-    (shape === "rectangle" || shape === "l-shape") &&
+    (shape === "rectangle" || shape === "l-shape" || shape === "organic") &&
     poolType === "in-ground" &&
     Number.isFinite(dimensions.shallowDepth) &&
     outline.length >= 4;
@@ -194,13 +200,40 @@ export function buildFloorProfile(params: {
 }
 
 /**
- * Real, closed-form metrics for a sloped rectangular basin -- exact, not
- * sampled/integrated, because a single-axis linear ramp under a horizontal
- * water plane and horizontal-width side walls is exactly the ruled ramp
- * surface + trapezoidal-prism volume these formulas describe.
+ * Real, exact metrics for a sloped basin of ANY outline -- rectangle,
+ * L-shape or Organic alike -- not sampled/integrated at a fixed resolution,
+ * because a single-axis linear ramp (`floorYAt` is an affine function of
+ * whichever coordinate the slope runs along) admits closed-form integrals
+ * over the true sampled polygon:
+ *
+ * - Floor surface: a planar ramp tilted only along `profile.axis` scales
+ *   every plan-area element by the SAME factor `hypot(run, drop) / run`
+ *   regardless of how the cross-width varies along the run (a rectangle's
+ *   constant width, an L-shape's notch, or an Organic curve's varying
+ *   waist are all fine) -- so `floorSurface = planArea * hypot(run, drop) /
+ *   run` is exact, not an approximation, for any of them.
+ * - Water volume: for any affine function f, the integral of f over a
+ *   region equals f(centroid) * area -- a real identity, not a numerical
+ *   shortcut. `floorYAt` is affine in the run coordinate, so the exact
+ *   volume is `planArea * (waterY - floorYAt(centroid))`. This is the part
+ *   the previous rectangle-only formula got wrong for a non-constant cross-
+ *   width basin: it used the average of the two END depths, which is only
+ *   the same as the centroid-weighted depth when the cross-width is
+ *   constant along the run (true for a rectangle, false for an L-shape or
+ *   Organic curve where more area sits toward one end).
+ * - Wall surface: each straight outline edge has a wall whose height is
+ *   also affine along that edge (a straight line between two points of an
+ *   affine function), so edge_area = edge_length * average(height at the
+ *   two endpoints), exactly -- summed over every real outline edge (not
+ *   just two "end walls"), which is what makes this correct for an
+ *   arbitrary polygon perimeter instead of only a two-long-wall rectangle.
  *
  * `computeMetrics` (geometry.ts) remains the flat/shape-generic path; this is
- * the slope-aware sibling, called only when `profile.sloped` is true.
+ * the slope-aware sibling, called only when `profile.sloped` is true. A
+ * metric-convergence test (geometry-audit.ts) builds the Organic outline at
+ * increasing sample resolutions and checks these values stabilise, since
+ * this formula is exact FOR THE SAMPLED POLYGON -- it converges to the true
+ * curved-basin values as the polygon approximates the curve more closely.
  */
 export function computeSlopeMetrics(
   outline: Outline,
@@ -208,27 +241,30 @@ export function computeSlopeMetrics(
   waterY: number,
   wallTopY: number,
 ): PoolMetrics {
-  const runLength = profile.axisMax - profile.axisMin;
   const waterSurface = outlineArea(outline);
-  const crossWidth = waterSurface / Math.max(1e-6, runLength);
   const perimeter = outlinePerimeter(outline);
+  const runLength = Math.max(1e-6, profile.axisMax - profile.axisMin);
 
-  // Ruled surface: a rectangle tilted about its cross axis has exactly the
-  // same cross width and a hypotenuse run of sqrt(runLength^2 + drop^2).
-  const floorSurface = crossWidth * Math.hypot(runLength, profile.elevationDrop);
+  // Ruled floor surface: exact regardless of cross-width variation (see
+  // module docs above) -- one scale factor applied to the true plan area.
+  const floorSurface = waterSurface * (Math.hypot(runLength, profile.elevationDrop) / runLength);
 
-  // Trapezoidal cross-section (constant width) integrated along the length:
-  // exactly the footprint area times the average of the two end depths.
-  const shallowDepthColumn = waterY - profile.shallowFloorY;
-  const deepDepthColumn = waterY - profile.deepFloorY;
-  const waterVolume = waterSurface * (shallowDepthColumn + deepDepthColumn) * 0.5;
+  // Exact volume via the affine-integral identity: f(centroid) * area.
+  const [centroidX, centroidZ] = outlineCentroid(outline);
+  const centroidFloorY = profile.floorYAt(centroidX, centroidZ);
+  const waterVolume = waterSurface * (waterY - centroidFloorY);
 
-  // Two end walls (each the plan width tall) + two side walls whose height
-  // varies linearly end to end -- their area is exactly width x average
-  // height, so the whole perimeter collapses to perimeter/2 x (h1 + h2).
-  const shallowWallHeight = wallTopY - profile.shallowFloorY;
-  const deepWallHeight = wallTopY - profile.deepFloorY;
-  const wallSurface = (perimeter / 2) * (shallowWallHeight + deepWallHeight);
+  // Exact wall surface: sum every real edge's length x its average height
+  // (both endpoints' local floor elevation), not just two end walls.
+  let wallSurface = 0;
+  for (let i = 0; i < outline.length; i++) {
+    const a = outline[i]!;
+    const b = outline[(i + 1) % outline.length]!;
+    const edgeLength = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const heightA = wallTopY - profile.floorYAt(a[0], a[1]);
+    const heightB = wallTopY - profile.floorYAt(b[0], b[1]);
+    wallSurface += edgeLength * ((heightA + heightB) / 2);
+  }
 
   return {
     waterVolume,
