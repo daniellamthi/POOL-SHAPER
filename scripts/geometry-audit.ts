@@ -2544,6 +2544,48 @@ console.log(
     "organic water outline (skimmer system) must be the real curved polygon, never its bounding rectangle",
   );
 
+  // Overflow (hidden + visible): the generic offset/water/grille machinery
+  // must hold up on the densely-sampled curved outline exactly as it does on
+  // the L-shape's single concave corner -- real, finite rings, real positive
+  // water area, a finite grille mesh.
+  const organicWaterEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset);
+  const organicHiddenChannelEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset);
+  const organicVisibleChannelEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset);
+  for (const [label, ring] of [
+    ["water edge", organicWaterEdge],
+    ["hidden channel", organicHiddenChannelEdge],
+    ["visible channel outer", organicVisibleChannelEdge],
+  ] as const) {
+    assert(
+      ring.length >= outline.length - 4 &&
+        ring.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+      `organic overflow ${label} offset must remain a real, finite, closed outline around the curved perimeter`,
+    );
+  }
+  for (const [label, water] of [
+    ["hidden", buildWaterOutline(outline, "overflow", "hidden")],
+    ["visible", buildWaterOutline(outline, "overflow", "visible")],
+  ] as const) {
+    assert(
+      Number.isFinite(outlineArea(water)) && outlineArea(water) > 0,
+      `organic ${label}-overflow water outline must triangulate to a real, positive, finite area`,
+    );
+  }
+  const organicGrate = createGrateGeometry(
+    organicVisibleChannelEdge,
+    offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset + 0.02),
+  );
+  const organicGratePositions = organicGrate.getAttribute("position");
+  assert(organicGratePositions.count > 0, "organic visible-overflow grille must be a real, non-empty mesh");
+  for (let i = 0; i < organicGratePositions.count; i++) {
+    assert(
+      Number.isFinite(organicGratePositions.getX(i)) &&
+        Number.isFinite(organicGratePositions.getY(i)) &&
+        Number.isFinite(organicGratePositions.getZ(i)),
+      "organic visible-overflow grille positions must all be finite",
+    );
+  }
+
   // Floor slope must stay correctly UNAVAILABLE for organic -- same
   // eligibility rule as custom shapes (no single deterministic principal
   // axis a customer would recognise on a freeform bay).
