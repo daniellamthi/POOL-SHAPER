@@ -400,6 +400,7 @@ function ConfiguratorLayout() {
             internalStairType={config.internalStairType ?? "linear"}
             poolAccess={config.poolAccess}
             skimmers={skimmers}
+            {...(config.infinityEdge ? { infinityEdge: config.infinityEdge } : {})}
             length={config.dimensions.length}
             width={config.dimensions.width}
             depth={config.dimensions.depth}
