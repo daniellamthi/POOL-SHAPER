@@ -3,8 +3,47 @@ import type { SkimmerPlan } from "./engineering";
 import { outlineArea, outlineBounds } from "./geometry";
 import { POOL_LIGHTING_DESIGN } from "./lighting";
 import type { PoolLightPosition } from "./lighting";
+import { classifyOutlineCorners } from "./l-shape";
 import type { Outline } from "./types";
 import type { PoolVerticalLayout } from "./vertical-layout";
+
+/** The fixed three-quarter angle every overview pose used before this shape
+ * awareness was added -- kept as the direction for any outline with no
+ * reflex corner (rectangle, custom-but-convex), so a shape that was never
+ * the problem never sees a behaviour change. */
+const DEFAULT_OVERVIEW_DIRECTION: readonly [number, number] = [1.7, 0.7];
+
+/**
+ * The overview camera's horizontal look direction, made shape-aware
+ * (Geometry Pass B closure). The fixed `[1.7, 0.7]` direction it replaces
+ * only ever happened to look right because it points roughly toward where
+ * the L's recess sits under the "se" orientation -- every other orientation
+ * turned the concave corner away from the camera, letting the L read as a
+ * plain rectangle. Any outline with a reflex (concave) vertex now looks
+ * from that vertex's own side of the centroid instead, at the SAME
+ * horizontal distance ratio the fixed direction always used -- so the
+ * concavity sits in the near half of the frame with both wings receding
+ * behind it, for every orientation, continuously (no jump) as recess
+ * dimensions are dragged, since the reflex vertex's position is itself a
+ * continuous function of those dimensions. A rectangle has no reflex vertex
+ * and takes the untouched `else` branch, so this is a zero-risk change for
+ * every pre-existing shape. */
+function overviewDirection(
+  outline: Outline,
+  centre: readonly [number, number],
+): readonly [number, number] {
+  if (outline.length < 5) return DEFAULT_OVERVIEW_DIRECTION;
+  const convex = classifyOutlineCorners(outline);
+  const concaveIndex = convex.findIndex((isConvex) => !isConvex);
+  if (concaveIndex < 0) return DEFAULT_OVERVIEW_DIRECTION;
+  const vertex = outline[concaveIndex]!;
+  const dx = vertex[0] - centre[0];
+  const dz = vertex[1] - centre[1];
+  const length = Math.hypot(dx, dz);
+  if (length < 1e-6) return DEFAULT_OVERVIEW_DIRECTION;
+  const horizontalMagnitude = Math.hypot(...DEFAULT_OVERVIEW_DIRECTION);
+  return [(dx / length) * horizontalMagnitude, (dz / length) * horizontalMagnitude];
+}
 
 export type CameraIntent =
   | "overview"
@@ -425,7 +464,8 @@ export function getCameraPose({
   // Photographic overview only: clear the full coping and view along the
   // basin at a lower elevation. Interaction and all detail poses are unchanged.
   const distance = radius * 3.4;
-  const direction: CameraPoint = [1.7, 0.9, 0.7];
+  const [overviewDx, overviewDz] = overviewDirection(outline, centre);
+  const direction: CameraPoint = [overviewDx, 0.9, overviewDz];
   const directionLength = Math.hypot(...direction);
   return {
     target: [centre[0], verticalCentre, centre[1]],

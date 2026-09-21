@@ -35,6 +35,7 @@ import {
   buildLShapeOutlineInfo,
   clampLShapeDimensions,
   L_SHAPE_GUARDRAILS,
+  L_SHAPE_ORIENTATIONS,
   type LShapeOrientation,
 } from "../src/lib/pool/l-shape";
 import type { Dimensions, PoolShapeId } from "../src/lib/pool/types";
@@ -2245,8 +2246,87 @@ console.log(
     );
   }
 
+  // L-aware overview camera (Geometry Pass B closure): the "overview" pose
+  // (also used by Final Review) must look FROM the side of the concave
+  // corner, for every orientation -- never a single fixed direction that
+  // only happens to suit one of the four. Position minus target, projected
+  // onto XZ, must point the same general way as centroid-to-concave-vertex.
+  for (const orientation of L_SHAPE_ORIENTATIONS) {
+    const orientedDims = clampLShapeDimensions({
+      totalLength: 10,
+      totalWidth: 7,
+      recessLength: 4,
+      recessWidth: 3,
+      orientation,
+    });
+    const orientedOutline = buildLShapeOutlineInfo(orientedDims);
+    const orientedLayout = getPoolVerticalLayout({
+      poolType: "in-ground",
+      system: "skimmer",
+      depth: lShapeDims.depth,
+      copingThickness: 0.03,
+    });
+    const orientedSkimmers = planSkimmers(orientedOutline.outline, orientedOutline.area, true);
+    const orientedPose = getCameraPose({
+      intent: "overview",
+      outline: orientedOutline.outline,
+      layout: orientedLayout,
+      depth: lShapeDims.depth,
+      skimmers: orientedSkimmers,
+    });
+    assert(
+      [...orientedPose.position, ...orientedPose.target].every(Number.isFinite),
+      `L overview camera (${orientation}): non-finite pose`,
+    );
+    const concaveVertex = orientedOutline.outline[orientedOutline.concaveIndex]!;
+    const centroid = orientedOutline.centroid;
+    const toConcaveX = concaveVertex[0] - centroid[0];
+    const toConcaveZ = concaveVertex[1] - centroid[1];
+    const cameraOffsetX = orientedPose.position[0] - orientedPose.target[0];
+    const cameraOffsetZ = orientedPose.position[2] - orientedPose.target[2];
+    const alignment = toConcaveX * cameraOffsetX + toConcaveZ * cameraOffsetZ;
+    assert(
+      alignment > 0,
+      `L overview camera (${orientation}) must look from the same side as the concave corner, not a fixed direction that only suits one orientation`,
+    );
+  }
+  // Regression guard: a fully convex outline (the rectangle) must be
+  // completely untouched by the above -- same fixed direction as always.
+  {
+    const rectOutline = buildOutline(
+      "rectangle",
+      { ...lShapeDims, cornerRadius: 0 },
+      DEFAULT_CONTROL_POINTS,
+    );
+    const rectLayout = getPoolVerticalLayout({
+      poolType: "in-ground",
+      system: "skimmer",
+      depth: lShapeDims.depth,
+      copingThickness: 0.03,
+    });
+    const rectSkimmers = planSkimmers(rectOutline, outlineArea(rectOutline), true);
+    const rectPose = getCameraPose({
+      intent: "overview",
+      outline: rectOutline,
+      layout: rectLayout,
+      depth: lShapeDims.depth,
+      skimmers: rectSkimmers,
+    });
+    const rectCentre: readonly [number, number] = [
+      rectOutline.reduce((sum, [x]) => sum + x, 0) / rectOutline.length,
+      rectOutline.reduce((sum, [, z]) => sum + z, 0) / rectOutline.length,
+    ];
+    const rectOffsetX = rectPose.position[0] - rectCentre[0];
+    const rectOffsetZ = rectPose.position[2] - rectCentre[1];
+    // The original, pre-Pass-B fixed direction's XZ ratio was exactly 1.7:0.7.
+    assert(
+      Math.abs(rectOffsetX / rectOffsetZ - 1.7 / 0.7) < 1e-6,
+      "rectangle overview camera direction must stay exactly the original fixed [1.7, 0.7] ratio -- untouched by the L-shape concave-direction logic",
+    );
+  }
+
   console.log(
-    "L-shape geometry/systems audit passed: floor triangulation, wall closure, coping/water-channel offset, one planar slope across both wings (with reversal), skimmer placement and internal-stair placement are all finite, real, and correctly avoid the recess and the concave corner.",
+    "L-shape geometry/systems audit passed: floor triangulation, wall closure, coping/water-channel offset, one planar slope across both wings (with reversal), skimmer placement, internal-stair placement and the overview camera (all 4 orientations) are all finite, real, and correctly avoid or expose the recess/concave corner as appropriate.",
   );
 }
 
