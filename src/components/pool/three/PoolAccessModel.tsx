@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import * as THREE from "three";
 import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
 import { skimmerWall } from "@/lib/pool/walls.ts";
+import { mergedWallChords } from "@/lib/pool/lighting";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 
 /**
@@ -49,11 +50,19 @@ export function accessPlacement(
     return hit;
   };
   const skimmers = skimmerWall(outline);
+  // "On the skimmer/shallow wall" is a neighbourhood test, not exact-endpoint
+  // equality: a rectangle/L-shape wall really does sit at a single constant
+  // coordinate end to end (equality was always true there), but a curved
+  // (Organic) outline only ever touches that exact extreme at one point --
+  // exact equality would silently never match either endpoint of a real
+  // merged run along that side, so the exclusion/preference would quietly
+  // stop doing anything the moment the outline stopped being polygonal.
+  const wallProximity = 0.3;
   const onSkimmerWall = (a: readonly [number, number], b: readonly [number, number]) => {
     const index = skimmers.axis === "x" ? 0 : 1;
     return (
-      Math.abs(a[index] - skimmers.coordinate) < 1e-6 &&
-      Math.abs(b[index] - skimmers.coordinate) < 1e-6
+      Math.abs(a[index] - skimmers.coordinate) < wallProximity &&
+      Math.abs(b[index] - skimmers.coordinate) < wallProximity
     );
   };
   const shortWallAccess = access === "internalSteps";
@@ -64,7 +73,7 @@ export function accessPlacement(
   // with the skimmer run, which puts them at the opposite end of the basin
   // from the stainless ladder instead of crowding it.
   const atSkimmerEnd = (point: readonly [number, number]) =>
-    Math.abs(point[skimmers.axis === "x" ? 0 : 1] - skimmers.coordinate) < 1e-6;
+    Math.abs(point[skimmers.axis === "x" ? 0 : 1] - skimmers.coordinate) < wallProximity;
   const preferShallow = shortWallAccess && floorProfile?.sloped === true;
   const shallowAxisIndex = floorProfile?.axis === "x" ? 0 : 1;
   const shallowCoordinate = floorProfile
@@ -73,64 +82,74 @@ export function accessPlacement(
       : floorProfile.axisMax
     : 0;
   const onShallowWall = (a: readonly [number, number], b: readonly [number, number]) =>
-    Math.abs(a[shallowAxisIndex] - shallowCoordinate) < 1e-6 &&
-    Math.abs(b[shallowAxisIndex] - shallowCoordinate) < 1e-6;
-  const edges = outline
-    .map((a, i) => {
-      const b = outline[(i + 1) % outline.length]!;
-      return {
+    Math.abs(a[shallowAxisIndex] - shallowCoordinate) < wallProximity &&
+    Math.abs(b[shallowAxisIndex] - shallowCoordinate) < wallProximity;
+  // Candidate walls come from merged wall CHORDS, not raw per-vertex edges:
+  // for a rectangle/L-shape (a handful of true corners) the very first,
+  // tightest tolerance is already a no-op -- byte-identical to the old raw
+  // edges, so every pre-Organic placement is unchanged. For a densely
+  // sampled curve outline (Organic, ~15-25cm point spacing) every raw edge
+  // is only a few centimetres long -- far short of any real stair/ladder
+  // footprint -- so without merging, this search always failed and silently
+  // rendered no access at all. Escalating tolerances (same ladder
+  // `mergedWallChords` already climbs for LED placement) collapses the
+  // curve's low-curvature runs into real, placeable candidate walls instead.
+  const mergeTolerances = [0.06, 0.15, 0.3, 0.6, 1.0];
+  for (const tolerance of mergeTolerances) {
+    const edges = mergedWallChords(outline, tolerance)
+      .map(({ a, b, length }) => ({
         a,
         b,
-        length: Math.hypot(b[0] - a[0], b[1] - a[1]),
+        length,
         skimmerWall: onSkimmerWall(a, b),
         shallowWall: preferShallow && onShallowWall(a, b),
-      };
-    })
-    .sort((first, second) => {
-      // The ladder shares its wall with nothing: push the skimmer run's wall
-      // to the back of the queue before length is even considered.
-      if (!shortWallAccess && first.skimmerWall !== second.skimmerWall) {
-        return first.skimmerWall ? 1 : -1;
-      }
-      // Sloped internal steps: the shallow-end wall wins the tie ahead of
-      // pure length, but only among walls the rest of this function will
-      // still validate independently -- an invalid shallow wall simply
-      // fails the clearance search below and the next-sorted wall is tried.
-      if (preferShallow && first.shallowWall !== second.shallowWall) {
-        return first.shallowWall ? -1 : 1;
-      }
-      return shortWallAccess ? first.length - second.length : second.length - first.length;
-    });
-  for (const { a, b, length } of edges) {
-    if (length < width + 0.2) continue;
-    const tx = (b[0] - a[0]) / length,
-      tz = (b[1] - a[1]) / length;
-    // Hard into one corner for both, then the other corner, then centred only
-    // as a last resort when an obstruction leaves nowhere else.
-    const cornerFirst = shortWallAccess ? atSkimmerEnd(a) : false;
-    const fractions = shortWallAccess
-      ? cornerFirst
-        ? [0, 1, 0.5]
-        : [1, 0, 0.5]
-      : [0.88, 0.12, 0.5];
-    for (const fraction of fractions) {
-      const along = THREE.MathUtils.clamp(
-        length * fraction,
-        width / 2 + edgeMargin,
-        length - width / 2 - edgeMargin,
-      );
-      const x = a[0] + tx * along,
-        z = a[1] + tz * along;
-      const sign = inside(x - tz * 0.05, z + tx * 0.05) ? 1 : -1;
-      const nx = -tz * sign,
-        nz = tx * sign;
-      let clear = true;
-      for (let d = 0.05; d <= run + 0.05; d += 0.1) {
-        for (const w of [-width / 2, 0, width / 2]) {
-          if (!inside(x + nx * d + nz * w, z + nz * d - nx * w)) clear = false;
+      }))
+      .sort((first, second) => {
+        // The ladder shares its wall with nothing: push the skimmer run's
+        // wall to the back of the queue before length is even considered.
+        if (!shortWallAccess && first.skimmerWall !== second.skimmerWall) {
+          return first.skimmerWall ? 1 : -1;
         }
+        // Sloped internal steps: the shallow-end wall wins the tie ahead of
+        // pure length, but only among walls the rest of this function will
+        // still validate independently -- an invalid shallow wall simply
+        // fails the clearance search below and the next-sorted wall is tried.
+        if (preferShallow && first.shallowWall !== second.shallowWall) {
+          return first.shallowWall ? -1 : 1;
+        }
+        return shortWallAccess ? first.length - second.length : second.length - first.length;
+      });
+    for (const { a, b, length } of edges) {
+      if (length < width + 0.2) continue;
+      const tx = (b[0] - a[0]) / length,
+        tz = (b[1] - a[1]) / length;
+      // Hard into one corner for both, then the other corner, then centred
+      // only as a last resort when an obstruction leaves nowhere else.
+      const cornerFirst = shortWallAccess ? atSkimmerEnd(a) : false;
+      const fractions = shortWallAccess
+        ? cornerFirst
+          ? [0, 1, 0.5]
+          : [1, 0, 0.5]
+        : [0.88, 0.12, 0.5];
+      for (const fraction of fractions) {
+        const along = THREE.MathUtils.clamp(
+          length * fraction,
+          width / 2 + edgeMargin,
+          length - width / 2 - edgeMargin,
+        );
+        const x = a[0] + tx * along,
+          z = a[1] + tz * along;
+        const sign = inside(x - tz * 0.05, z + tx * 0.05) ? 1 : -1;
+        const nx = -tz * sign,
+          nz = tx * sign;
+        let clear = true;
+        for (let d = 0.05; d <= run + 0.05; d += 0.1) {
+          for (const w of [-width / 2, 0, width / 2]) {
+            if (!inside(x + nx * d + nz * w, z + nz * d - nx * w)) clear = false;
+          }
+        }
+        if (clear) return { x, z, rotation: Math.atan2(nx, nz) };
       }
-      if (clear) return { x, z, rotation: Math.atan2(nx, nz) };
     }
   }
   return null;

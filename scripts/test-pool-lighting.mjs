@@ -6,6 +6,7 @@ import {
   planPoolLighting,
   clearsLightingExclusions,
   POOL_LIGHTING_DESIGN,
+  mergedWallChords,
 } from "../src/lib/pool/lighting.ts";
 import { skimmerWall } from "../src/lib/pool/walls.ts";
 
@@ -31,9 +32,10 @@ const compiled = ts.transpileModule(declaration.getText(ast), {
 const accessPlacement = new Function(
   "THREE",
   "skimmerWall",
+  "mergedWallChords",
   "exports",
   `${compiled}; return exports.accessPlacement;`,
-)(THREE, skimmerWall, {});
+)(THREE, skimmerWall, mergedWallChords, {});
 const rectangle = (length, width) => [
   [-length / 2, -width / 2],
   [length / 2, -width / 2],

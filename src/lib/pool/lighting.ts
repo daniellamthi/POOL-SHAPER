@@ -48,7 +48,7 @@ function hasReflexCorner(outline: Outline): boolean {
  * runs against the true curve, only the candidate wall's tangent/normal is
  * approximated locally.
  */
-function mergedWallChords(
+export function mergedWallChords(
   outline: Outline,
   tolerance = 0.06,
 ): ReadonlyArray<{ a: readonly [number, number]; b: readonly [number, number]; length: number }> {
