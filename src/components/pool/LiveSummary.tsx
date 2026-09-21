@@ -51,7 +51,14 @@ export function LiveSummary() {
       `${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m · h ${depthLabel}`,
     ],
     ["Superficie", `${formatNumber(metrics.waterSurface)} m²`],
-    ["Sistema", config.system === "skimmer" ? "Piscina a skimmer" : "Piscina a sfioro"],
+    [
+      "Sistema",
+      config.system === "skimmer"
+        ? "Piscina a skimmer"
+        : config.system === "infinity"
+          ? "Piscina Infinity"
+          : "Piscina a sfioro",
+    ],
     ["Rivestimento", finish],
     ["Colore", color],
     ["Comfort / Accessori", featureLabels.length ? featureLabels.join(", ") : "Nessuno"],

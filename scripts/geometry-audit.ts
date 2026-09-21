@@ -3436,6 +3436,56 @@ console.log(
     "Infinity: a null exclusion must not change planSkimmers' own result",
   );
 
+  // --- "infinity" camera intent: finite, real, outside the basin --------
+  const infinityLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "infinity",
+    overflowType: "hidden",
+    depth: 1.5,
+    copingThickness: 0.04,
+  });
+  const infinityBounds = outlineBounds(excludedSideOutline);
+  for (const side of RECTANGLE_INFINITY_SIDES) {
+    const zone = zones.find((z) => z.side === side)!;
+    const pose = getCameraPose({
+      intent: "infinity",
+      outline: excludedSideOutline,
+      layout: infinityLayout,
+      depth: 1.5,
+      skimmers: { count: 0, positions: [], spacing: 0, cornerDistance: 0 },
+      infinityZone: zone,
+    });
+    assert(
+      [...pose.position, ...pose.target].every(Number.isFinite),
+      `Infinity: camera pose for side ${side} must be entirely finite`,
+    );
+    // The camera sits OUTSIDE the basin (beyond its bounding box, along the
+    // zone's own outward normal) -- the whole point of this intent versus
+    // every other system detail pose, which looks in from inside.
+    const outsideX =
+      pose.position[0] < infinityBounds.minX - 0.5 || pose.position[0] > infinityBounds.maxX + 0.5;
+    const outsideZ =
+      pose.position[2] < infinityBounds.minZ - 0.5 || pose.position[2] > infinityBounds.maxZ + 0.5;
+    assert(
+      outsideX || outsideZ,
+      `Infinity: camera pose for side ${side} must sit outside the basin bounds`,
+    );
+  }
+  // No zone (Infinity intent requested but nothing selected yet) must never
+  // crash or degenerate -- falls back to the plain overview.
+  const fallbackPose = getCameraPose({
+    intent: "infinity",
+    outline: excludedSideOutline,
+    layout: infinityLayout,
+    depth: 1.5,
+    skimmers: { count: 0, positions: [], spacing: 0, cornerDistance: 0 },
+    infinityZone: null,
+  });
+  assert(
+    [...fallbackPose.position, ...fallbackPose.target].every(Number.isFinite),
+    "Infinity: the no-zone camera fallback must still be entirely finite",
+  );
+
   // Disabled params never produce geometry, regardless of a stale `side`.
   const disabled = computeInfinityEdgeGeometry(rectOutline, {
     enabled: false,

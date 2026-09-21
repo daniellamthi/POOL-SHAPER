@@ -46,8 +46,12 @@ import { getCameraPose } from "@/lib/pool/camera";
 import type { CameraIntent } from "@/lib/pool/camera";
 import type { PoolLightPosition } from "@/lib/pool/lighting";
 import type { InternalStairType } from "@/lib/pool/types";
-import { infinityExclusion, clampInfinityEdgeParams } from "@/lib/pool/infinity-edge";
-import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
+import {
+  infinityExclusion,
+  clampInfinityEdgeParams,
+  rectangleInfinityZones,
+} from "@/lib/pool/infinity-edge";
+import type { InfinityEdgeParams, RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
@@ -254,6 +258,7 @@ function CameraRig({
   ledRow,
   includeExternalStaircase,
   photoMode,
+  infinityZone,
 }: {
   cameraLocked: boolean;
   radius: number;
@@ -268,6 +273,9 @@ function CameraRig({
   ledRow: readonly PoolLightPosition[];
   includeExternalStaircase: boolean;
   photoMode: boolean;
+  /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
+   * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
+  infinityZone: RectangleInfinityZone | null;
 }) {
   const camera = useThree((state) => state.camera);
   const viewportSize = useThree((state) => state.size);
@@ -336,6 +344,7 @@ function CameraRig({
       verticalFov: SCENE_VISUAL_PRESET.camera.fov,
       viewportAspect: viewportSize.width / Math.max(1, viewportSize.height),
       includeExternalStaircase,
+      infinityZone,
     });
     goal.current.set(...pose.position);
     lookAt.current.set(...pose.target);
@@ -391,6 +400,7 @@ function CameraRig({
     includeExternalStaircase,
     viewportSize.width,
     viewportSize.height,
+    infinityZone,
   ]);
 
   useFrame((_, delta) => {
@@ -593,6 +603,15 @@ export default function PoolScene({
     () => (normalisedInfinityEdge ? infinityExclusion(outline, normalisedInfinityEdge) : null),
     [outline, normalisedInfinityEdge],
   );
+  // Camera-only: the selected side's zone, for the "infinity" pose. `null`
+  // (Infinity off, no side chosen yet, or an outline that isn't currently a
+  // valid Rectangle zone) makes `getCameraPose` fall back to the plain
+  // overview rather than a bogus/degenerate framing.
+  const infinityZone: RectangleInfinityZone | null = useMemo(() => {
+    if (!normalisedInfinityEdge || normalisedInfinityEdge.side === null) return null;
+    const zones = rectangleInfinityZones(outline);
+    return zones.find((zone) => zone.side === normalisedInfinityEdge.side) ?? null;
+  }, [outline, normalisedInfinityEdge]);
 
   // Computed once here so the luminaires and the camera that frames them are
   // driven by the same row.
@@ -878,6 +897,7 @@ export default function PoolScene({
         skimmers={skimmers}
         ledRow={lighting.plan.positions}
         photoMode={photoMode}
+        infinityZone={infinityZone}
         // The exterior/staircase framing must never hijack the Step 05
         // Pool System camera -- that step's premium front view (both
         // skimmers, centred, from inside looking out) always wins.

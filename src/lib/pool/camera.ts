@@ -6,6 +6,7 @@ import type { PoolLightPosition } from "./lighting";
 import { classifyOutlineCorners } from "./l-shape";
 import type { Outline } from "./types";
 import type { PoolVerticalLayout } from "./vertical-layout";
+import type { RectangleInfinityZone } from "./infinity-edge";
 
 /** The fixed three-quarter angle every overview pose used before this shape
  * awareness was added -- kept as the direction for any outline with no
@@ -55,7 +56,13 @@ export type CameraIntent =
   | "liner"
   | "mosaic"
   | "features"
-  | "review";
+  | "review"
+  /** Geometry Pass D (Infinity): frames the selected side from OUTSIDE the
+   * basin -- the disappearing lip, the falling cascade and the catch basin
+   * -- rather than the inside-looking-at-the-wall framing every other
+   * system detail intent uses. Only meaningful with `infinityZone` set;
+   * falls back to the plain overview otherwise (see `getCameraPose`). */
+  | "infinity";
 export type CameraPoint = readonly [number, number, number];
 
 export interface CameraPose {
@@ -233,6 +240,51 @@ function getSystemDetailCamera({
   });
 }
 
+/**
+ * Geometry Pass D (Infinity): frames the selected side from OUTSIDE the
+ * basin, low and close, so the disappearing lip, the falling cascade and
+ * the catch basin all read clearly -- the opposite vantage from every other
+ * system detail pose (`getSystemDetailCamera`), which looks IN at the wall
+ * from inside the water.
+ */
+function getInfinityDetailCamera({
+  zone,
+  layout,
+  verticalFov,
+  viewportAspect,
+}: {
+  zone: RectangleInfinityZone;
+  layout: PoolVerticalLayout;
+  verticalFov: number;
+  viewportAspect: number;
+}): CameraPose {
+  const midpoint: readonly [number, number] = [
+    (zone.start[0] + zone.end[0]) / 2,
+    (zone.start[1] + zone.end[1]) / 2,
+  ];
+  const safeAspect = clamp(viewportAspect, 0.6, 3);
+  const verticalFovRadians = (clamp(verticalFov, 20, 75) * Math.PI) / 180;
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFovRadians / 2) * safeAspect);
+  const framedSpan = clamp(zone.length * 0.75, 2.6, 5.5);
+  const distance = Math.max(
+    2.2,
+    Math.min(framedSpan / 2 / Math.tan(horizontalFov / 2), zone.length * 0.9),
+  );
+  // Just above the catch-basin floor, looking slightly up across the
+  // cascade -- the vantage that actually shows the waterfall as a sheet
+  // rather than foreshortened from directly above.
+  const cameraY = layout.floorY + Math.max(0.35, (layout.wallTopY - layout.floorY) * 0.28);
+  const targetY = layout.waterY - 0.15;
+  return {
+    target: [midpoint[0] + zone.normal[0] * 0.6, targetY, midpoint[1] + zone.normal[1] * 0.6],
+    position: [
+      midpoint[0] + zone.normal[0] * distance,
+      cameraY,
+      midpoint[1] + zone.normal[1] * distance,
+    ],
+  };
+}
+
 /** Close, perpendicular material view of the same Skimmer reference wall. */
 function getInteriorFinishCamera({
   reference,
@@ -392,6 +444,7 @@ export function getCameraPose({
   verticalFov = 35,
   viewportAspect = 1.5,
   includeExternalStaircase = false,
+  infinityZone = null,
 }: {
   intent: CameraIntent;
   outline: Outline;
@@ -403,6 +456,11 @@ export function getCameraPose({
   verticalFov?: number;
   viewportAspect?: number;
   includeExternalStaircase?: boolean;
+  /** Geometry Pass D (Infinity): the selected Rectangle side's zone, only
+   * meaningful with `intent: "infinity"`. `null` (every pre-Infinity call,
+   * and "infinity" intent with no side selected yet) falls back to the
+   * plain overview below, never a bogus/degenerate pose. */
+  infinityZone?: RectangleInfinityZone | null;
 }): CameraPose {
   const bounds = outlineBounds(outline);
   const centre = outlineCentre(outline);
@@ -459,6 +517,10 @@ export function getCameraPose({
 
   if (intent === "features") {
     return getFeaturesCamera({ outline, layout, centre, radius, ledRow });
+  }
+
+  if (intent === "infinity" && infinityZone) {
+    return getInfinityDetailCamera({ zone: infinityZone, layout, verticalFov, viewportAspect });
   }
 
   // Photographic overview only: clear the full coping and view along the
