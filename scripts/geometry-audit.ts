@@ -2433,7 +2433,8 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
             Math.sin(theta - (bayCentre + Math.PI)),
             Math.cos(theta - (bayCentre + Math.PI)),
           );
-          if (Math.abs(toOpposite) < 0.35) oppositeMaxDistance = Math.max(oppositeMaxDistance, distance);
+          if (Math.abs(toOpposite) < 0.35)
+            oppositeMaxDistance = Math.max(oppositeMaxDistance, distance);
         }
         assert(
           Number.isFinite(bayMinDistance) && oppositeMaxDistance > 0,
@@ -2512,12 +2513,17 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
     "buildOutline('organic', ...) must produce the real sampled organic outline, not a 4-vertex rectangle",
   );
   assert(
-    Math.abs(outlineArea(wiredOutline) - outlineArea(buildOrganicShapeOutline({
-      length: 10,
-      width: 6,
-      curvature: 0.6,
-      mirror: false,
-    }))) < 1e-9,
+    Math.abs(
+      outlineArea(wiredOutline) -
+        outlineArea(
+          buildOrganicShapeOutline({
+            length: 10,
+            width: 6,
+            curvature: 0.6,
+            mirror: false,
+          }),
+        ),
+    ) < 1e-9,
     "buildOutline('organic', ...) must match the canonical organic-shape.ts generator exactly",
   );
 
@@ -2557,7 +2563,10 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
         Number.isFinite(positions.getZ(i)),
       "organic floor vertex positions must all be finite",
     );
-    assert(Number.isFinite(uvs.getX(i)) && Number.isFinite(uvs.getY(i)), "organic floor UVs must all be finite");
+    assert(
+      Number.isFinite(uvs.getX(i)) && Number.isFinite(uvs.getY(i)),
+      "organic floor UVs must all be finite",
+    );
   }
 
   // Wall closure around every sampled curve segment.
@@ -2592,10 +2601,7 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
     outlineArea(copingOutline) > outlineArea(outline),
     "organic coping offset must expand the outline outward",
   );
-  assert(
-    !outlineSelfIntersects(copingOutline),
-    "organic coping offset must not self-intersect",
-  );
+  assert(!outlineSelfIntersects(copingOutline), "organic coping offset must not self-intersect");
 
   // Real regression proof for the exact runtime crash: `createCopingSlabGeometry`
   // (poolConstruction.ts) itself, called across the full curvature range, both
@@ -2641,7 +2647,10 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
   // water area, a finite grille mesh.
   const organicWaterEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset);
   const organicHiddenChannelEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset);
-  const organicVisibleChannelEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset);
+  const organicVisibleChannelEdge = offsetOutline(
+    outline,
+    OVERFLOW_GEOMETRY.visibleChannelOuterOffset,
+  );
   for (const [label, ring] of [
     ["water edge", organicWaterEdge],
     ["hidden channel", organicHiddenChannelEdge],
@@ -2667,7 +2676,10 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
     offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset + 0.02),
   );
   const organicGratePositions = organicGrate.getAttribute("position");
-  assert(organicGratePositions.count > 0, "organic visible-overflow grille must be a real, non-empty mesh");
+  assert(
+    organicGratePositions.count > 0,
+    "organic visible-overflow grille must be a real, non-empty mesh",
+  );
   for (let i = 0; i < organicGratePositions.count; i++) {
     assert(
       Number.isFinite(organicGratePositions.getX(i)) &&
@@ -2716,8 +2728,10 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
     "isSlopedFloorDisplay must report organic as sloped exactly like buildFloorProfile does, for the 'Fondo in pendenza' UI toggle",
   );
   assert(
-    isSlopedFloorDisplay("organic", "in-ground", { ...organicSlopeDimensions, floorProfile: "flat" }) ===
-      false,
+    isSlopedFloorDisplay("organic", "in-ground", {
+      ...organicSlopeDimensions,
+      floorProfile: "flat",
+    }) === false,
     "isSlopedFloorDisplay must report organic as flat when floorProfile is 'flat', same as rectangle/L-shape",
   );
 
@@ -2751,7 +2765,14 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
   // Water surface stays perfectly horizontal regardless of floor slope --
   // generic behaviour, verified for organic specifically.
   assert(
-    Math.abs(computeSlopeMetrics(outline, organicSlopeProfile, verticalLayout.waterY, verticalLayout.wallTopY).waterSurface - outlineArea(outline)) < 1e-6,
+    Math.abs(
+      computeSlopeMetrics(
+        outline,
+        organicSlopeProfile,
+        verticalLayout.waterY,
+        verticalLayout.wallTopY,
+      ).waterSurface - outlineArea(outline),
+    ) < 1e-6,
     "organic sloped water surface must stay the horizontal plan area, exactly like rectangle/L-shape",
   );
 
@@ -2806,7 +2827,8 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
   const organicCentroidFloorY = organicSlopeProfile.floorYAt(organicCentroidX, organicCentroidZ);
   assert(
     Math.abs(
-      organicMetrics.waterVolume - organicFootprintArea * (verticalLayout.waterY - organicCentroidFloorY),
+      organicMetrics.waterVolume -
+        organicFootprintArea * (verticalLayout.waterY - organicCentroidFloorY),
     ) < 1e-6,
     "organic sloped volume must equal planArea x (waterY - floorYAt(centroid)) exactly",
   );
@@ -2820,7 +2842,12 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
   // where the dip/bulge genuinely skew where the outline's area sits. This
   // is what makes the assertion non-vacuous rather than accidentally
   // insensitive to the very bug it exists to catch.
-  const wideOutline = buildOrganicShapeOutline({ length: 7, width: 12, curvature: 0.55, mirror: false });
+  const wideOutline = buildOrganicShapeOutline({
+    length: 7,
+    width: 12,
+    curvature: 0.55,
+    mirror: false,
+  });
   const wideProfile = buildFloorProfile({
     outline: wideOutline,
     shape: "organic",
@@ -2836,8 +2863,7 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
     verticalLayout.wallTopY,
   );
   const [wideCentroidX, wideCentroidZ] = outlineCentroid(wideOutline);
-  const wideVertexMeanZ =
-    wideOutline.reduce((sum, [, z]) => sum + z, 0) / wideOutline.length;
+  const wideVertexMeanZ = wideOutline.reduce((sum, [, z]) => sum + z, 0) / wideOutline.length;
   assert(
     Math.abs(wideCentroidZ - wideVertexMeanZ) > 0.05,
     "test sanity: the wide bay's area centroid must genuinely differ from its vertex mean along the slope axis, or this assertion cannot actually distinguish the two formulas",
@@ -2845,7 +2871,8 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
   const wideCentroidFloorY = wideProfile.floorYAt(wideCentroidX, wideCentroidZ);
   assert(
     Math.abs(
-      wideMetrics.waterVolume - outlineArea(wideOutline) * (verticalLayout.waterY - wideCentroidFloorY),
+      wideMetrics.waterVolume -
+        outlineArea(wideOutline) * (verticalLayout.waterY - wideCentroidFloorY),
     ) < 1e-6,
     "organic sloped volume (width > length bay) must equal planArea x (waterY - floorYAt(AREA centroid)) exactly, not the vertex-mean approximation",
   );
@@ -2876,10 +2903,15 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
     const resolutions = [1.0, 0.4, 0.2, 0.1];
     const converged: Array<{ volume: number; floorSurface: number; wallSurface: number }> = [];
     for (const targetResolution of resolutions) {
-      const perimeterEstimate = outlinePerimeter(sampleOrganicOutlineAtCount(convergenceParams, 128));
+      const perimeterEstimate = outlinePerimeter(
+        sampleOrganicOutlineAtCount(convergenceParams, 128),
+      );
       const pointCount = Math.min(
         ORGANIC_SHAPE_GUARDRAILS.maxPoints,
-        Math.max(ORGANIC_SHAPE_GUARDRAILS.minPoints, Math.round(perimeterEstimate / targetResolution)),
+        Math.max(
+          ORGANIC_SHAPE_GUARDRAILS.minPoints,
+          Math.round(perimeterEstimate / targetResolution),
+        ),
       );
       const sampled = sampleOrganicOutlineAtCount(convergenceParams, pointCount);
       const sampledProfile = buildFloorProfile({
@@ -3002,7 +3034,12 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
 
   // Mirror flips the bay to the opposite side -- the two outlines must be
   // genuinely different (not accidentally ignored) but the same area.
-  const mirrored = buildOrganicShapeOutline({ length: 12, width: 7, curvature: 0.55, mirror: true });
+  const mirrored = buildOrganicShapeOutline({
+    length: 12,
+    width: 7,
+    curvature: 0.55,
+    mirror: true,
+  });
   assert(
     Math.abs(outlineArea(mirrored) - outlineInfo.area) < 1e-6,
     "mirroring the organic bay must not change the real area",
@@ -3075,13 +3112,17 @@ const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
           const plan = planPoolLighting({
             outline,
             waterY: verticalLayout.waterY,
-            floorY: floorProfileModel.sloped ? floorProfileModel.shallowFloorY : verticalLayout.floorY,
+            floorY: floorProfileModel.sloped
+              ? floorProfileModel.shallowFloorY
+              : verticalLayout.floorY,
             lumenOutput: lumens,
           });
           assert(plan.count > 0, `${label2}: must place a real, non-empty LED row`);
           assert(plan.warnings.length === 0, `${label2}: must place without any warning`);
           assert(
-            plan.positions.every((p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z)),
+            plan.positions.every(
+              (p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z),
+            ),
             `${label2}: every fixture position must be finite`,
           );
           // Sloped-floor Y-positioning: each fixture's local floor elevation
