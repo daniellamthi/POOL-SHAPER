@@ -5,6 +5,7 @@ import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
+import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
 import {
   EQUIPMENT_LABEL,
   linerWaterCharacter,
@@ -111,12 +112,7 @@ export function ProjectSummary() {
   const editStep = (index: number) => (index >= 0 ? () => goToStep(index) : undefined);
 
   const poolType = poolTypeLabel(config.poolType);
-  const isSlopedFloor =
-    (config.shape === "rectangle" || config.shape === "l-shape") &&
-    config.poolType === "in-ground" &&
-    config.dimensions.floorProfile === "slope" &&
-    Number.isFinite(config.dimensions.shallowDepth) &&
-    config.dimensions.shallowDepth! < config.dimensions.depth;
+  const isSlopedFloor = isSlopedFloorDisplay(config.shape, config.poolType, config.dimensions);
   const depthLabel = isSlopedFloor
     ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
     : `${formatNumber(config.dimensions.depth, 2)} m`;

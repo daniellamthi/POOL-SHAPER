@@ -31,6 +31,27 @@ export function slopeEligibleForDepth(depth: number, minDepth: number): boolean 
   return Number.isFinite(depth) && depth - MIN_SLOPE_DIFFERENCE >= minDepth;
 }
 
+/** Whether a summary display (LiveSummary, ProjectSummary) should show a
+ * shallow→deep depth range instead of a single depth. The single source of
+ * truth for this decision -- both call sites previously carried their own
+ * copy of this exact condition, which meant Geometry Pass B's rectangle
+ * -only -> rectangle-or-L-shape widening had to be remembered and applied
+ * twice. Mirrors `buildFloorProfile`'s own eligibility rule (rectangle or
+ * L-shape, in-ground, real slope data) rather than re-deriving it. */
+export function isSlopedFloorDisplay(
+  shape: PoolShapeId,
+  poolType: PoolType | null,
+  dimensions: Pick<Dimensions, "floorProfile" | "shallowDepth" | "depth">,
+): boolean {
+  return (
+    (shape === "rectangle" || shape === "l-shape") &&
+    poolType === "in-ground" &&
+    dimensions.floorProfile === "slope" &&
+    Number.isFinite(dimensions.shallowDepth) &&
+    dimensions.shallowDepth! < dimensions.depth
+  );
+}
+
 /** Clamp a requested shallow depth into the range that keeps the slope real:
  * never below the absolute minimum pool depth, never within
  * `MIN_SLOPE_DIFFERENCE` of the deep depth. */

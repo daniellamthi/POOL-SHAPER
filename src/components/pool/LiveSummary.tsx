@@ -11,6 +11,7 @@ import {
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
+import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
 
 export function LiveSummary() {
   const { config, metrics } = useConfigurator();
@@ -27,12 +28,7 @@ export function LiveSummary() {
       : (LINER_COLORS.find((item) => item.id === config.linerColor)?.title ?? config.linerColor);
   const features = POOL_FEATURES.filter((item) => config.features.includes(item.id));
   const equipment = EQUIPMENT.filter((item) => config.equipment.includes(item.id));
-  const isSlopedFloor =
-    (config.shape === "rectangle" || config.shape === "l-shape") &&
-    config.poolType === "in-ground" &&
-    config.dimensions.floorProfile === "slope" &&
-    Number.isFinite(config.dimensions.shallowDepth) &&
-    config.dimensions.shallowDepth! < config.dimensions.depth;
+  const isSlopedFloor = isSlopedFloorDisplay(config.shape, config.poolType, config.dimensions);
   const depthLabel = isSlopedFloor
     ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
     : `${formatNumber(config.dimensions.depth, 2)} m`;

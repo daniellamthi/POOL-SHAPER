@@ -77,6 +77,7 @@ import {
   buildFloorProfile,
   clampShallowDepth,
   computeSlopeMetrics,
+  isSlopedFloorDisplay,
   MIN_SLOPE_DIFFERENCE,
   slopeEligibleForDepth,
 } from "../src/lib/pool/floor-profile";
@@ -2046,6 +2047,52 @@ console.log(
     "L water outline (skimmer system) must be the real L polygon, never the bounding rectangle",
   );
 
+  // Overflow (hidden + visible): every offset ring `offsetOutline` derives
+  // from the L's own boundary -- water edge, channel edge(s) -- must stay a
+  // real, finite, closed outline with no NaN/invalid coordinate, including
+  // right at the single concave (reflex) corner, which is the one place a
+  // constant-width offset is most likely to misbehave (self-intersection,
+  // a collapsed segment). This is the "does the generic overflow-outline
+  // machinery actually hold up on a concave shape" guarantee the visible
+  // overflow grille (createGrateGeometry) is built on top of.
+  const lOverflowWaterEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset);
+  const lHiddenChannelEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset);
+  const lVisibleChannelEdge = offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset);
+  for (const [label, ring] of [
+    ["water edge", lOverflowWaterEdge],
+    ["hidden channel", lHiddenChannelEdge],
+    ["visible channel outer", lVisibleChannelEdge],
+  ] as const) {
+    assert(
+      ring.length >= 6 && ring.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+      `L overflow ${label} offset must remain a real, finite, closed outline around the concave perimeter -- never NaN, never a collapsed/degenerate ring at the reflex corner`,
+    );
+  }
+  const lHiddenOverflowWater = buildWaterOutline(outline, "overflow", "hidden");
+  const lVisibleOverflowWater = buildWaterOutline(outline, "overflow", "visible");
+  for (const [label, water] of [
+    ["hidden", lHiddenOverflowWater],
+    ["visible", lVisibleOverflowWater],
+  ] as const) {
+    assert(
+      Number.isFinite(outlineArea(water)) && outlineArea(water) > 0,
+      `L ${label}-overflow water outline must triangulate to a real, positive, finite area`,
+    );
+  }
+  const lGrate = createGrateGeometry(
+    lVisibleChannelEdge,
+    offsetOutline(outline, OVERFLOW_GEOMETRY.visibleChannelOuterOffset + 0.02),
+  );
+  const lGratePositions = lGrate.getAttribute("position");
+  for (let i = 0; i < lGratePositions.count; i++) {
+    assert(
+      Number.isFinite(lGratePositions.getX(i)) &&
+        Number.isFinite(lGratePositions.getY(i)) &&
+        Number.isFinite(lGratePositions.getZ(i)),
+      "L visible-overflow grate geometry must be entirely finite, including the ribs mitring around the concave corner",
+    );
+  }
+
   // Slope integration: ONE planar slope across the whole L, along its
   // principal (longer) axis, sharing the exact same floorYAt every other
   // consumer reads -- never a second per-wing formula.
@@ -2084,6 +2131,44 @@ console.log(
       midSample < Math.max(shallowSample, deepSample) + 1e-6,
     "the L's mid-point floor height must lie strictly between the shallow and deep ends (one continuous ramp)",
   );
+
+  // Summary depth display (LiveSummary/ProjectSummary): the L's sloped depth
+  // must show as a shallow->deep range, exactly like a sloped rectangle,
+  // never silently collapsing back to a single flat-looking number just
+  // because the shape isn't "rectangle".
+  assert(
+    isSlopedFloorDisplay("l-shape", "in-ground", {
+      floorProfile: "slope",
+      shallowDepth: 1.2,
+      depth: 1.5,
+    }),
+    "an in-ground, sloped L-shape must display a shallow->deep depth range",
+  );
+  assert(
+    isSlopedFloorDisplay("rectangle", "in-ground", {
+      floorProfile: "slope",
+      shallowDepth: 1.2,
+      depth: 1.5,
+    }),
+    "an in-ground, sloped rectangle must still display a shallow->deep depth range (unchanged by the L-shape widening)",
+  );
+  assert(
+    !isSlopedFloorDisplay("l-shape", "in-ground", {
+      floorProfile: "flat",
+      shallowDepth: undefined,
+      depth: 1.5,
+    }),
+    "a flat L-shape must display a single depth, never a range",
+  );
+  assert(
+    !isSlopedFloorDisplay("custom", "in-ground", {
+      floorProfile: "slope",
+      shallowDepth: 1.2,
+      depth: 1.5,
+    }),
+    "a custom shape must never display a sloped depth range (slope is only offered for rectangle/L-shape)",
+  );
+
   // Reversal must swap which end is shallow, same as the rectangle.
   const reversedLProfile = buildFloorProfile({
     outline,

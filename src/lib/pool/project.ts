@@ -16,6 +16,7 @@
 import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
+import { clampLShapeDimensions } from "./l-shape";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -91,6 +92,47 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // commercial email, quotation -- sees a real number instead of each having
   // to guess a fallback of its own.
   const restored = config as PoolConfig;
+  const slopeNormalisedDimensions =
+    restored.dimensions?.floorProfile === "slope" &&
+    Number.isFinite(restored.dimensions.shallowDepth) &&
+    Number.isFinite(restored.dimensions.depth)
+      ? {
+          ...restored.dimensions,
+          floorProfile: "slope" as const,
+          shallowDepth: clampShallowDepth(
+            restored.dimensions.shallowDepth!,
+            restored.dimensions.depth,
+            0.01,
+          ),
+          slopeReversed: restored.dimensions.slopeReversed === true,
+        }
+      : { ...restored.dimensions, floorProfile: "flat" as const };
+  // Geometry pass B (L-shape): a project saved before it existed, or one
+  // carrying malformed/legacy/missing recess data (NaN, negative, an
+  // oversized recess, a zero-width leg, an unrecognised orientation string),
+  // always restores as the same safe, real dimensions `clampLShapeDimensions`
+  // already guarantees the 3D geometry -- so every OTHER reader (the recess
+  // sliders, the orientation diagram, ProjectSummary) sees the same clean
+  // numbers too, instead of relying on `buildOutline`'s defensive clamp to
+  // save just the render while the UI displays raw garbage underneath it.
+  const dimensions = (() => {
+    if (restored.shape !== "l-shape") return slopeNormalisedDimensions;
+    const clamped = clampLShapeDimensions({
+      totalLength: slopeNormalisedDimensions.length,
+      totalWidth: slopeNormalisedDimensions.width,
+      recessLength: slopeNormalisedDimensions.lShapeRecessLength,
+      recessWidth: slopeNormalisedDimensions.lShapeRecessWidth,
+      orientation: slopeNormalisedDimensions.lShapeOrientation,
+    });
+    return {
+      ...slopeNormalisedDimensions,
+      length: clamped.totalLength,
+      width: clamped.totalWidth,
+      lShapeRecessLength: clamped.recessLength,
+      lShapeRecessWidth: clamped.recessWidth,
+      lShapeOrientation: clamped.orientation,
+    };
+  })();
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
@@ -100,27 +142,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
-      // Geometry pass A (sloped floor): a project saved before it existed,
-      // or one carrying malformed slope data, always restores as a safe,
-      // real state -- "flat" with no shallowDepth/slopeReversed baggage, or
-      // "slope" with a shallowDepth clamped exactly the way the reducer and
-      // `buildFloorProfile` clamp a live edit (never inverted, never
-      // zero-difference, never NaN).
-      dimensions:
-        restored.dimensions?.floorProfile === "slope" &&
-        Number.isFinite(restored.dimensions.shallowDepth) &&
-        Number.isFinite(restored.dimensions.depth)
-          ? {
-              ...restored.dimensions,
-              floorProfile: "slope",
-              shallowDepth: clampShallowDepth(
-                restored.dimensions.shallowDepth!,
-                restored.dimensions.depth,
-                0.01,
-              ),
-              slopeReversed: restored.dimensions.slopeReversed === true,
-            }
-          : { ...restored.dimensions, floorProfile: "flat" },
+      dimensions,
     },
     renovation: renovation as RenovationConfig,
   };
