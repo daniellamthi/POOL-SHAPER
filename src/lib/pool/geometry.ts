@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { COPING_WIDTH, CURVE_SAMPLES, OVERFLOW_GEOMETRY } from "./config";
 import { buildLShapeOutline, clampLShapeDimensions } from "./l-shape";
+import { buildOrganicShapeOutline, clampOrganicShapeParams } from "./organic-shape";
 
 export const POOL_SHAPE_GUARDRAILS = {
   minimumPreferredRadius: 0.9,
@@ -226,6 +227,19 @@ export function buildOutline(
         recessLength: dimensions.lShapeRecessLength,
         recessWidth: dimensions.lShapeRecessWidth,
         orientation: dimensions.lShapeOrientation,
+      }),
+    );
+  }
+  if (shape === "organic") {
+    // Own canonical generator (organic-shape.ts) -- a deterministic smooth
+    // closed curve in real metres, likewise never going through the unit
+    // -square scaling path (it already samples at the real length/width).
+    return buildOrganicShapeOutline(
+      clampOrganicShapeParams({
+        length: dimensions.length,
+        width: dimensions.width,
+        curvature: dimensions.organicCurvature,
+        mirror: dimensions.organicMirror,
       }),
     );
   }

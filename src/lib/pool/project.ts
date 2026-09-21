@@ -17,6 +17,7 @@ import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
 import { clampLShapeDimensions } from "./l-shape";
+import { clampOrganicShapeParams } from "./organic-shape";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -116,22 +117,46 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // numbers too, instead of relying on `buildOutline`'s defensive clamp to
   // save just the render while the UI displays raw garbage underneath it.
   const dimensions = (() => {
-    if (restored.shape !== "l-shape") return slopeNormalisedDimensions;
-    const clamped = clampLShapeDimensions({
-      totalLength: slopeNormalisedDimensions.length,
-      totalWidth: slopeNormalisedDimensions.width,
-      recessLength: slopeNormalisedDimensions.lShapeRecessLength,
-      recessWidth: slopeNormalisedDimensions.lShapeRecessWidth,
-      orientation: slopeNormalisedDimensions.lShapeOrientation,
-    });
-    return {
-      ...slopeNormalisedDimensions,
-      length: clamped.totalLength,
-      width: clamped.totalWidth,
-      lShapeRecessLength: clamped.recessLength,
-      lShapeRecessWidth: clamped.recessWidth,
-      lShapeOrientation: clamped.orientation,
-    };
+    if (restored.shape === "l-shape") {
+      const clamped = clampLShapeDimensions({
+        totalLength: slopeNormalisedDimensions.length,
+        totalWidth: slopeNormalisedDimensions.width,
+        recessLength: slopeNormalisedDimensions.lShapeRecessLength,
+        recessWidth: slopeNormalisedDimensions.lShapeRecessWidth,
+        orientation: slopeNormalisedDimensions.lShapeOrientation,
+      });
+      return {
+        ...slopeNormalisedDimensions,
+        length: clamped.totalLength,
+        width: clamped.totalWidth,
+        lShapeRecessLength: clamped.recessLength,
+        lShapeRecessWidth: clamped.recessWidth,
+        lShapeOrientation: clamped.orientation,
+      };
+    }
+    // Geometry pass C (Organic): same "always restore to safe, real
+    // dimensions" contract as the L-shape branch above -- a project saved
+    // before Organic existed, or one carrying malformed/legacy/missing
+    // curvature/mirror data (NaN, out-of-range, non-boolean), always
+    // restores through `clampOrganicShapeParams` so every OTHER reader (the
+    // character slider, the mirror toggle, ProjectSummary) sees the same
+    // clean numbers the 3D geometry itself is built from.
+    if (restored.shape === "organic") {
+      const clamped = clampOrganicShapeParams({
+        length: slopeNormalisedDimensions.length,
+        width: slopeNormalisedDimensions.width,
+        curvature: slopeNormalisedDimensions.organicCurvature,
+        mirror: slopeNormalisedDimensions.organicMirror,
+      });
+      return {
+        ...slopeNormalisedDimensions,
+        length: clamped.length,
+        width: clamped.width,
+        organicCurvature: clamped.curvature,
+        organicMirror: clamped.mirror,
+      };
+    }
+    return slopeNormalisedDimensions;
   })();
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,

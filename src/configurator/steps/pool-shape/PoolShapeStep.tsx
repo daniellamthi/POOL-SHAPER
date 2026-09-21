@@ -147,6 +147,11 @@ export function PoolShapeStep() {
                         <LShapeRecessControls disabled={!selected} />
                       </div>
                     ) : null}
+                    {shape.id === "organic" ? (
+                      <div className="flex flex-col gap-7 border-t border-hairline pt-7">
+                        <OrganicShapeControls disabled={!selected} />
+                      </div>
+                    ) : null}
                     <div className="flex flex-col gap-7 border-t border-hairline pt-7">
                       {depthSection(shape.id, !selected)}
                     </div>
@@ -263,6 +268,61 @@ function LShapeRecessControls({ disabled }: { disabled: boolean }) {
           />
         );
       })}
+    </fieldset>
+  );
+}
+
+/**
+ * Organic shape controls -- Geometry Pass C. A single "character" slider
+ * (how pronounced the kidney-style bay is) plus a mirror toggle for which
+ * side it sits on. Changing either immediately regenerates the outline
+ * (`buildOutline` reads `dimensions.organicCurvature`/`organicMirror` live),
+ * cascading through the same pipeline any other dimension edit does.
+ */
+function OrganicShapeControls({ disabled }: { disabled: boolean }) {
+  const { config, setDimension, setOrganicMirror } = useConfigurator();
+  const limits = DIMENSION_LIMITS.organicCurvature;
+  const curvature = config.dimensions.organicCurvature ?? 0.5;
+  const mirror = config.dimensions.organicMirror === true;
+  return (
+    <fieldset disabled={disabled} className="flex flex-col gap-7 border-0 p-0">
+      <p className="label-xs">Carattere organico</p>
+      <DimensionControl
+        label="Insenatura"
+        value={curvature}
+        unit={limits.unit}
+        min={limits.min}
+        max={limits.max}
+        step={limits.step}
+        onChange={(next) => setDimension("organicCurvature", next)}
+      />
+      <div
+        className="grid grid-cols-2 gap-2 rounded-full border border-hairline p-1"
+        role="group"
+        aria-label="Lato dell'insenatura"
+      >
+        {(
+          [
+            [false, "Insenatura a destra"],
+            [true, "Insenatura a sinistra"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={String(value)}
+            type="button"
+            onClick={() => setOrganicMirror(value)}
+            aria-pressed={mirror === value}
+            className={cn(
+              "rounded-full px-4 py-2 text-[11.5px] tracking-tight transition-all duration-500",
+              mirror === value
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </fieldset>
   );
 }

@@ -5,12 +5,11 @@ export type PoolType = "in-ground" | "above-ground";
 export type PoolStructure =
   "reinforced-concrete" | "modular-steel-panels" | "modular-steel-structure";
 
-export type PoolShapeId = "rectangle" | "l-shape" | "custom";
-/** Prepared, not yet buildable: "organic" is not a member of `PoolShapeId`.
- * Reserved for geometry pass C -- kept as an unused alias so downstream code
- * can start typing against the eventual union without any behaviour
- * changing today. */
-export type FuturePoolShapeId = PoolShapeId | "organic";
+export type PoolShapeId = "rectangle" | "l-shape" | "custom" | "organic";
+/** Historical alias kept so any code still importing it keeps compiling --
+ * "organic" is now a real, buildable member of `PoolShapeId` (geometry pass
+ * C), so this is simply equal to it. */
+export type FuturePoolShapeId = PoolShapeId;
 
 export type CustomMode = "draw" | "upload";
 
@@ -113,6 +112,16 @@ export interface Dimensions {
   lShapeRecessLength?: number;
   lShapeRecessWidth?: number;
   lShapeOrientation?: import("./l-shape").LShapeOrientation;
+  /** Organic shape only (`shape === "organic"`): `length`/`width` above are
+   * read as the overall bounding span of the organic silhouette. This is the
+   * single 0..1 "character" control -- how pronounced the kidney-style bay
+   * is, 0 = plain ellipse. Absent for every other shape -- see
+   * `src/lib/pool/organic-shape.ts`, the single canonical source for turning
+   * these into the actual outline. Always normalised through
+   * `clampOrganicShapeParams` before reaching geometry. */
+  organicCurvature?: number;
+  /** Organic shape only: which side the bay sits on. */
+  organicMirror?: boolean;
 }
 
 /** A closed 2D outline in the XZ plane, metres, centred on the origin. */

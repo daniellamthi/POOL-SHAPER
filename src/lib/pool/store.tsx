@@ -58,6 +58,7 @@ import type {
   RenovationConfig,
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
+import { clampOrganicShapeParams } from "./organic-shape";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -73,6 +74,7 @@ type Action =
   | { type: "setFloorProfile"; value: FloorProfile }
   | { type: "toggleSlopeReversed" }
   | { type: "setLShapeOrientation"; value: LShapeOrientation }
+  | { type: "setOrganicMirror"; value: boolean }
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
@@ -211,7 +213,21 @@ function reducer(state: State, action: Action): State {
                 lShapeOrientation: seeded.orientation,
               };
             })()
-          : config.dimensions;
+          : action.value === "organic" && config.dimensions.organicCurvature === undefined
+            ? (() => {
+                const seeded = clampOrganicShapeParams({
+                  length: config.dimensions.length,
+                  width: config.dimensions.width,
+                });
+                return {
+                  ...config.dimensions,
+                  length: seeded.length,
+                  width: seeded.width,
+                  organicCurvature: seeded.curvature,
+                  organicMirror: seeded.mirror,
+                };
+              })()
+            : config.dimensions;
       return {
         ...state,
         config: { ...config, shape: action.value, shapeSelected: true, dimensions },
@@ -281,6 +297,14 @@ function reducer(state: State, action: Action): State {
         config: {
           ...config,
           dimensions: { ...config.dimensions, lShapeOrientation: action.value },
+        },
+      };
+    case "setOrganicMirror":
+      return {
+        ...state,
+        config: {
+          ...config,
+          dimensions: { ...config.dimensions, organicMirror: action.value },
         },
       };
     case "setSystem":
@@ -526,6 +550,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setFloorProfile: (v) => dispatch({ type: "setFloorProfile", value: v }),
       toggleSlopeReversed: () => dispatch({ type: "toggleSlopeReversed" }),
       setLShapeOrientation: (v) => dispatch({ type: "setLShapeOrientation", value: v }),
+      setOrganicMirror: (v) => dispatch({ type: "setOrganicMirror", value: v }),
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
       setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),

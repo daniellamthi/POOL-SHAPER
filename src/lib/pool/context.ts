@@ -29,6 +29,7 @@ import type {
 } from "./types";
 import type { ProjectConfiguration } from "./project";
 import type { LShapeOrientation } from "./l-shape";
+import type { OrganicShapeParams } from "./organic-shape";
 
 export interface ConfiguratorContextValue {
   config: PoolConfig;
@@ -60,6 +61,9 @@ export interface ConfiguratorContextValue {
    * selected depths. */
   toggleSlopeReversed: () => void;
   setLShapeOrientation: (value: LShapeOrientation) => void;
+  /** Curvature is a plain dimension (`organicCurvature`, via `setDimension`).
+   * Mirror is a boolean flag, mirroring `setLShapeOrientation`'s own pattern. */
+  setOrganicMirror: (value: boolean) => void;
   setSystem: (value: SystemType) => void;
   setOverflowType: (value: OverflowType) => void;
   setSkimmerFinish: (value: SkimmerFinishId) => void;

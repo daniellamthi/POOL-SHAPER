@@ -31,6 +31,11 @@ export const DIMENSION_LIMITS = {
    * against `depth` via `clampShallowDepth`. */
   lShapeRecessLength: { min: 1.5, max: 20, step: 0.1, unit: "m" },
   lShapeRecessWidth: { min: 1.5, max: 12, step: 0.1, unit: "m" },
+  /** Organic shape only. The slider's own static range -- the real,
+   * area-dependent minimum (never let curvature collapse the basin toward
+   * zero area) is enforced by `clampOrganicShapeParams` (organic-shape.ts)
+   * wherever the outline is actually built, same two-tier pattern as above. */
+  organicCurvature: { min: 0, max: 1, step: 0.01, unit: "" },
 } as const;
 
 export type DimensionKey = keyof typeof DIMENSION_LIMITS;
@@ -150,6 +155,13 @@ export const POOL_SHAPES: ReadonlyArray<ShapeDefinition> = [
     title: "Forma personalizzata",
     description:
       "Disegna il perimetro con punti di controllo modificabili, o carica una planimetria.",
+    supportsCornerRadius: false,
+  },
+  {
+    id: "organic",
+    title: "Organica",
+    description:
+      "Una sagoma fluida a forma di fagiolo, con un'unica insenatura morbida su un lato.",
     supportsCornerRadius: false,
   },
 ];

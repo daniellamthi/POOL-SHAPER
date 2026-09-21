@@ -143,6 +143,14 @@ export function serializePoolRenderConfig(
         "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
     );
   }
+  // Geometry Pass C (Organic) has no Blender/Cycles counterpart yet either --
+  // same honest-refusal policy as the sloped-floor and L-shape guards above.
+  if (config.shape === "organic") {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora la forma organica. " +
+        "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;
   const outputPreset = RENDER_OUTPUT_PRESETS[outputPresetId];
