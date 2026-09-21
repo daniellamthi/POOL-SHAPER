@@ -14,7 +14,7 @@ import {
   infinityZonesForOutline,
 } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
-import type { Outline } from "@/lib/pool/types";
+import type { Outline, PoolShapeId } from "@/lib/pool/types";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
 
 function useDisposableGeometry<T extends THREE.BufferGeometry>(
@@ -29,6 +29,7 @@ function useDisposableGeometry<T extends THREE.BufferGeometry>(
 
 interface InfinityEdgeProps {
   outline: Outline;
+  shape: PoolShapeId;
   infinityEdge: InfinityEdgeParams | undefined;
   waterLevel: number;
   copingSurfaceY: number;
@@ -37,16 +38,17 @@ interface InfinityEdgeProps {
 }
 
 /**
- * Geometry Pass D (Infinity, Rectangle + L-shape): the visible
+ * Geometry Pass D (Infinity, Rectangle + L-shape + Organic): the visible
  * disappearing-lip / waterfall cascade / catch-basin / coping-transition
- * assembly for the one selected side. Renders nothing when Infinity isn't
- * enabled or the outline has no valid candidate zone for the selected side
- * (wrong shape, an excluded L-shape recess edge, Organic) --
- * `computeInfinityEdgeGeometry` is the single source of truth for that
- * check, never re-derived here.
+ * assembly for the one selected side/arc. Renders nothing when Infinity
+ * isn't enabled or the outline has no valid candidate zone for the selected
+ * side (wrong shape, an excluded L-shape recess edge, an Organic index that
+ * isn't currently a candidate arc) -- `computeInfinityEdgeGeometry` is the
+ * single source of truth for that check, never re-derived here.
  */
 export function InfinityEdge({
   outline,
+  shape,
   infinityEdge,
   waterLevel,
   copingSurfaceY,
@@ -55,14 +57,14 @@ export function InfinityEdge({
 }: InfinityEdgeProps) {
   const params = infinityEdge;
   const geometryData = useMemo(
-    () => (params ? computeInfinityEdgeGeometry(outline, params) : null),
-    [outline, params],
+    () => (params ? computeInfinityEdgeGeometry(outline, params, shape) : null),
+    [outline, params, shape],
   );
   const zone = useMemo(() => {
     if (!geometryData) return null;
-    const zones = infinityZonesForOutline(outline);
+    const zones = infinityZonesForOutline(outline, shape);
     return zones.find((z) => z.side === geometryData.side) ?? null;
-  }, [outline, geometryData]);
+  }, [outline, shape, geometryData]);
 
   // Just above the waterline so the main water body reads as running
   // straight into the lip with no visible reveal.

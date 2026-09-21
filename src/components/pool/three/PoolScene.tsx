@@ -610,8 +610,9 @@ export default function PoolScene({
     [system, infinityEdge],
   );
   const infinityExcluded = useMemo(
-    () => (normalisedInfinityEdge ? infinityExclusion(outline, normalisedInfinityEdge) : null),
-    [outline, normalisedInfinityEdge],
+    () =>
+      normalisedInfinityEdge ? infinityExclusion(outline, normalisedInfinityEdge, shape) : null,
+    [outline, normalisedInfinityEdge, shape],
   );
   // Camera-only: the selected side's zone, for the "infinity" pose. `null`
   // (Infinity off, no side chosen yet, or an outline that currently has no
@@ -619,9 +620,9 @@ export default function PoolScene({
   // the plain overview rather than a bogus/degenerate framing.
   const infinityZone: RectangleInfinityZone | null = useMemo(() => {
     if (!normalisedInfinityEdge || normalisedInfinityEdge.side === null) return null;
-    const zones = infinityZonesForOutline(outline);
+    const zones = infinityZonesForOutline(outline, shape);
     return zones.find((zone) => zone.side === normalisedInfinityEdge.side) ?? null;
-  }, [outline, normalisedInfinityEdge]);
+  }, [outline, shape, normalisedInfinityEdge]);
 
   // Computed once here so the luminaires and the camera that frames them are
   // driven by the same row.
@@ -784,6 +785,7 @@ export default function PoolScene({
         poolAccess={poolAccess}
         internalStairType={internalStairType}
         skimmers={skimmers}
+        shape={shape}
         outline={outline}
         depth={depth}
         floorProfile={floorProfile}

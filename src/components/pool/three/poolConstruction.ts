@@ -22,12 +22,28 @@ export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
  * uniform offset. Left uniform, the deck's own opaque floor plane simply
  * covers the outer half of the catch basin, hiding its far wall/floor/end
  * walls under solid deck with no visible drop or basin at all -- not a
- * camera problem, a real occlusion bug. Steps just that one side's cutout
- * edge out to clear the assembly, inserting two extra vertices so the other
- * 3 sides and every corner stay exactly the plain uniform offset (a single
- * rectangular notch, not a diagonal/mitred re-offset of the whole outline).
- * `zone` `null` (every pre-Infinity call, or Infinity with no side chosen
- * yet) returns the plain uniform-offset outline, byte-identical to before.
+ * camera problem, a real occlusion bug. Steps just that one zone's cutout
+ * edge out to clear the assembly so every other side and every corner stays
+ * exactly the plain uniform offset. `zone` `null` (every pre-Infinity call,
+ * or Infinity with no side chosen yet) returns the plain uniform-offset
+ * outline, byte-identical to before.
+ *
+ * Arc-length/normal-generic (Rectangle, L-shape AND Organic): a zone's own
+ * `points`/`pointNormals` (`infinity-edge.ts`) drive the notch, not a single
+ * edge/normal pair. A single-edge zone (Rectangle/L-shape, `points.length ===
+ * 2`) has no interior vertex to drop, so this is byte-identical to the
+ * original "insert 2 extra vertices, keep everything else" behaviour (still
+ * covered by the L-shape audit's own `outline.length + 2` assertion). A
+ * multi-point Organic arc instead drops its own interior original vertices
+ * (which would otherwise leave a stray un-offset kink cutting back into the
+ * notch) and replaces the whole span with each point pushed out along its
+ * OWN local normal -- so the cutout edge follows the true curve outward
+ * instead of jumping in a straight line between the arc's two shoulders,
+ * which could leave a sliver of deck still overlapping the catch basin on
+ * the outside of a curve. Net vertex-count change is always the same +2
+ * regardless of span length (`points.length` pushed out, `points.length - 2`
+ * interior originals dropped) -- the same invariant the L-shape test asserts
+ * on, now proven to hold generically rather than only for a 2-point span.
  */
 export function buildDeckCutoutOutline(
   outline: Outline,
@@ -42,15 +58,27 @@ export function buildDeckCutoutOutline(
   if (!(extra > 1e-6)) return base;
   const n = base.length;
   const i = zone.side;
-  const j = (i + 1) % n;
-  const pushOut = (p: readonly [number, number]): [number, number] => [
-    p[0] + zone.normal[0] * extra,
-    p[1] + zone.normal[1] * extra,
-  ];
+  const spanCount = zone.points.length;
+  // Every outline index strictly between the arc's start (i) and end
+  // (i + spanCount - 1, mod n) -- dropped from the plain offset ring below,
+  // replaced by their own pushed-out position instead.
+  const interiorIndices = new Set<number>();
+  for (let m = 1; m < spanCount - 1; m++) interiorIndices.add((i + m) % n);
+  const pushOut = (
+    base: readonly [number, number],
+    normal: readonly [number, number],
+  ): [number, number] => [base[0] + normal[0] * extra, base[1] + normal[1] * extra];
   const result: Array<readonly [number, number]> = [];
   for (let k = 0; k < n; k++) {
+    if (interiorIndices.has(k)) continue;
     result.push(base[k]!);
-    if (k === i) result.push(pushOut(base[i]!), pushOut(base[j]!));
+    if (k === i) {
+      for (let m = 0; m < spanCount; m++) {
+        const idx = (i + m) % n;
+        const normal = zone.pointNormals[m] ?? zone.normal;
+        result.push(pushOut(base[idx]!, normal));
+      }
+    }
   }
   return result;
 }

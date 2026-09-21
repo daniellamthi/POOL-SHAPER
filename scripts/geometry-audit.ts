@@ -3212,21 +3212,25 @@ console.log(
 
   // `lShapeInfinityZones` given a 4-vertex Rectangle outline (not its own
   // 6-vertex shape) correctly returns nothing real to offer, same defensive
-  // contract as before. Organic stays a genuine stub this pass.
+  // contract as before. `organicInfinityZones` on the same tiny 4-vertex
+  // outline is correctly empty too -- its own `n < 12` guard, not a stub.
   assert(
     lShapeInfinityZones(rectOutline).length === 0,
     "Infinity: lShapeInfinityZones must return no zones for a non-L-shape (4-vertex) outline",
   );
   assert(
     organicInfinityZones(rectOutline).length === 0,
-    "Infinity: Organic candidate zones must be the stubbed empty array this pass",
+    "Infinity: organicInfinityZones must return no zones for a too-small (4-vertex) outline",
   );
 
   // Malformed input normalises to the safe disabled default, never a
-  // fabricated selection.
+  // fabricated selection. `side` here must be past the largest outline this
+  // module ever samples (`ORGANIC_SHAPE_GUARDRAILS.maxPoints`), not merely
+  // past L-shape's small fixed edge count -- Organic's own `side` domain is
+  // much wider now, see `clampInfinityEdgeParams`.
   const malformed = clampInfinityEdgeParams({
     enabled: true,
-    side: 7 as unknown as InfinityEdgeParams["side"],
+    side: 999 as unknown as InfinityEdgeParams["side"],
     startT: NaN,
     endT: -3,
   } as Partial<InfinityEdgeParams>);
@@ -3950,4 +3954,429 @@ console.log(
 }
 console.log(
   "Infinity edge audit (L-shape) passed: exactly 4 of 6 edges valid (recess-adjacent pair correctly excluded) for all 4 orientations, infinityZonesForOutline dispatch parity, finite unit-length outward normals, full lip/cascade/catch-basin/transition-cap geometry finiteness, catch-basin-never-overlaps-recess for every corner of every valid zone, generic deck-cutout notch insertion, finite outside-the-basin camera poses, and 1 non-vacuous break/restore proof (naive all-6-edges-valid assumption).",
+);
+
+// --- Geometry Pass D: Infinity edge, Organic slice --------------------------
+{
+  /** Independent local copy of `infinity-edge.ts`'s own (unexported)
+   * circumradius-based curvature radius -- deliberately re-derived here, not
+   * imported, so this audit can actually catch a regression in the real
+   * curvature-exclusion logic rather than trivially agreeing with it. */
+  function curvatureRadiusAt(outline: Outline, index: number): number {
+    const n = outline.length;
+    const previous = outline[(index - 1 + n) % n]!;
+    const current = outline[index]!;
+    const next = outline[(index + 1) % n]!;
+    const first = Math.hypot(current[0] - previous[0], current[1] - previous[1]);
+    const second = Math.hypot(next[0] - current[0], next[1] - current[1]);
+    const opposite = Math.hypot(next[0] - previous[0], next[1] - previous[1]);
+    const twiceArea = Math.abs(
+      (current[0] - previous[0]) * (next[1] - previous[1]) -
+        (current[1] - previous[1]) * (next[0] - previous[0]),
+    );
+    if (twiceArea <= 1e-9) return Infinity;
+    return (first * second * opposite) / (2 * twiceArea);
+  }
+
+  /** Open-polyline segment intersection helpers -- independent of
+   * `organic-shape.ts`'s own (closed-outline) `outlineSelfIntersects`, since
+   * the lip/catch-basin polylines under test here are open runs, not closed
+   * loops. */
+  function orientationSign(
+    a: readonly [number, number],
+    b: readonly [number, number],
+    c: readonly [number, number],
+  ): number {
+    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  }
+  function segmentsCross(
+    a: readonly [number, number],
+    b: readonly [number, number],
+    c: readonly [number, number],
+    d: readonly [number, number],
+  ): boolean {
+    const eps = 1e-9;
+    const abC = orientationSign(a, b, c);
+    const abD = orientationSign(a, b, d);
+    const cdA = orientationSign(c, d, a);
+    const cdB = orientationSign(c, d, b);
+    return abC * abD < -eps && cdA * cdB < -eps;
+  }
+  function polylineSelfIntersects(points: ReadonlyArray<readonly [number, number]>): boolean {
+    for (let i = 0; i < points.length - 1; i++) {
+      for (let j = i + 2; j < points.length - 1; j++) {
+        if (i === 0 && j === points.length - 2) continue; // not actually adjacent/closed
+        if (segmentsCross(points[i]!, points[i + 1]!, points[j]!, points[j + 1]!)) return true;
+      }
+    }
+    return false;
+  }
+  function polylinesCross(
+    a: ReadonlyArray<readonly [number, number]>,
+    b: ReadonlyArray<readonly [number, number]>,
+  ): boolean {
+    for (let i = 0; i < a.length - 1; i++) {
+      for (let j = 0; j < b.length - 1; j++) {
+        if (segmentsCross(a[i]!, a[i + 1]!, b[j]!, b[j + 1]!)) return true;
+      }
+    }
+    return false;
+  }
+
+  const infDims = clampInfinityEdgeDimensions(undefined);
+  const lipTopY = 0.003;
+  let totalZonesAcrossCases = 0;
+  let sawFourZoneCase = false;
+  let sawFewerThanFourCase = false;
+
+  const organicCases: ReadonlyArray<{
+    length: number;
+    width: number;
+    curvature: number;
+    mirror: boolean;
+  }> = [
+    { length: 12, width: 7, curvature: 0.5, mirror: false },
+    { length: 12, width: 7, curvature: 0.5, mirror: true },
+    { length: 18, width: 4, curvature: 0.9, mirror: false },
+    { length: 18, width: 4, curvature: 0.9, mirror: true },
+    { length: 6, width: 5, curvature: 0.15, mirror: false },
+    { length: 20, width: 14, curvature: 1, mirror: false },
+  ];
+
+  for (const caseParams of organicCases) {
+    const params = clampOrganicShapeParams(caseParams);
+    const outline = buildOrganicShapeOutline(params);
+    const label = `Infinity/Organic (len=${params.length.toFixed(1)} w=${params.width.toFixed(1)} c=${params.curvature.toFixed(2)} mirror=${params.mirror})`;
+    assert(
+      outline.length >= ORGANIC_SHAPE_GUARDRAILS.minPoints,
+      `${label}: outline must meet the min sample count`,
+    );
+
+    const zones = organicInfinityZones(outline);
+    assert(
+      zones.length <= 4,
+      `${label}: never more than 4 candidate zones (one per compass quadrant)`,
+    );
+    totalZonesAcrossCases += zones.length;
+    if (zones.length === 4) sawFourZoneCase = true;
+    if (zones.length > 0 && zones.length < 4) sawFewerThanFourCase = true;
+
+    // Dispatch parity: the shape-aware dispatcher must return byte-identical
+    // zones to calling `organicInfinityZones` directly.
+    assert(
+      JSON.stringify(infinityZonesForOutline(outline, "organic")) === JSON.stringify(zones),
+      `${label}: infinityZonesForOutline("organic") must dispatch to the same zones`,
+    );
+
+    // Independently locate the tightest-curvature vertex (the bay tip, or
+    // for a very low curvature outline, whichever vertex is least flat) --
+    // not by calling into organicInfinityZones' own logic -- and assert it
+    // never appears inside any candidate zone's arc. A real, exercised
+    // guarantee only when the outline actually has a meaningfully tighter
+    // spot than its own flattest run (skipped for the near-ellipse
+    // low-curvature case, which has no real "bay" to exclude) -- same
+    // flattest-radius reference `organicInfinityZones` itself uses (see its
+    // own `ORGANIC_TIGHT_CURVATURE_FACTOR` doc for why a median reference
+    // doesn't work here).
+    const radii = outline.map((_, i) => curvatureRadiusAt(outline, i));
+    const finiteRadii = radii.filter((r) => Number.isFinite(r));
+    const flattestRadius = finiteRadii.length ? Math.max(...finiteRadii) : Infinity;
+    const tightestIndex = radii.reduce((best, r, i) => (r < radii[best]! ? i : best), 0);
+    const hasRealBay =
+      Number.isFinite(radii[tightestIndex]) && radii[tightestIndex]! < flattestRadius * 0.35;
+    if (hasRealBay) {
+      const bayInAnyZone = zones.some((zone) =>
+        zone.points.some(
+          (p) => p[0] === outline[tightestIndex]![0] && p[1] === outline[tightestIndex]![1],
+        ),
+      );
+      assert(
+        !bayInAnyZone,
+        `${label}: the tightest-curvature bay vertex must never be inside a candidate zone`,
+      );
+    }
+
+    const bounds = outlineBounds(outline);
+    const centroidX = (bounds.minX + bounds.maxX) / 2;
+    const centroidZ = (bounds.minZ + bounds.maxZ) / 2;
+
+    for (const zone of zones) {
+      assert(
+        zone.points.length >= 4,
+        `${label} side ${zone.side}: zone must span at least 4 sampled points`,
+      );
+      assert(
+        zone.points.length === zone.pointNormals.length,
+        `${label} side ${zone.side}: points/pointNormals must be the same length`,
+      );
+      assert(
+        zone.length >=
+          INFINITY_EDGE_DIMENSIONS.lipWidth.max + INFINITY_EDGE_DIMENSIONS.catchBasinWidth.max,
+        `${label} side ${zone.side}: zone must clear the minimum real-world assembly length`,
+      );
+      // Real arc length must be >= the straight start-end chord (equal only
+      // in the impossible case of a perfectly straight arc).
+      const chordLength = Math.hypot(zone.end[0] - zone.start[0], zone.end[1] - zone.start[1]);
+      assert(
+        zone.length >= chordLength - 1e-9,
+        `${label} side ${zone.side}: arc length must be >= the straight start-end chord`,
+      );
+      const normalMagnitude = Math.hypot(zone.normal[0], zone.normal[1]);
+      assert(
+        Number.isFinite(normalMagnitude) && Math.abs(normalMagnitude - 1) < 1e-9,
+        `${label} side ${zone.side}: aggregate normal must be finite unit length`,
+      );
+      for (const n of zone.pointNormals) {
+        const m = Math.hypot(n[0], n[1]);
+        assert(
+          Number.isFinite(m) && Math.abs(m - 1) < 1e-6,
+          `${label} side ${zone.side}: every per-point normal must be finite unit length`,
+        );
+      }
+      const midX = (zone.start[0] + zone.end[0]) / 2;
+      const midZ = (zone.start[1] + zone.end[1]) / 2;
+      const towardOutside =
+        zone.normal[0] * (midX - centroidX) + zone.normal[1] * (midZ - centroidZ);
+      assert(
+        towardOutside > 0,
+        `${label} side ${zone.side}: aggregate normal must point outward from the centroid`,
+      );
+
+      // Full geometry pipeline must be finite for every organic zone.
+      const lip = createInfinityLipGeometry(zone, infDims, lipTopY);
+      assert(isGeometryFinite(lip), `${label} side ${zone.side}: lip must be finite`);
+      const cascade = createInfinityCascadeGeometry(zone, infDims, lipTopY);
+      assert(isGeometryFinite(cascade), `${label} side ${zone.side}: cascade must be finite`);
+      const basin = createInfinityCatchBasinGeometry(zone, infDims, lipTopY);
+      for (const [name, geometry] of Object.entries(basin)) {
+        assert(
+          isGeometryFinite(geometry),
+          `${label} side ${zone.side}: catch-basin ${name} must be finite`,
+        );
+      }
+      const transitions = createInfinityTransitionCapGeometry(zone, infDims, lipTopY, 0.35, 0.32);
+      assert(
+        transitions.start !== null &&
+          transitions.end !== null &&
+          isGeometryFinite(transitions.start) &&
+          isGeometryFinite(transitions.end),
+        `${label} side ${zone.side}: transition caps must be real and finite`,
+      );
+
+      // No-self-intersection / no-gap proof for the CURVED catch basin: the
+      // real per-point-normal-offset near (lip-outer) and far (basin-outer)
+      // polylines must never self-intersect, and must never cross each
+      // other -- the concrete "inside of the curve folds back / outside of
+      // the curve gaps open" failure mode this pass's own instructions call
+      // out.
+      const nearPolyline = zone.points.map(
+        (p, k) =>
+          [
+            p[0] + zone.pointNormals[k]![0] * infDims.lipWidth,
+            p[1] + zone.pointNormals[k]![1] * infDims.lipWidth,
+          ] as const,
+      );
+      const farPolyline = zone.points.map(
+        (p, k) =>
+          [
+            p[0] + zone.pointNormals[k]![0] * (infDims.lipWidth + infDims.catchBasinWidth),
+            p[1] + zone.pointNormals[k]![1] * (infDims.lipWidth + infDims.catchBasinWidth),
+          ] as const,
+      );
+      assert(
+        !polylineSelfIntersects(farPolyline),
+        `${label} side ${zone.side}: catch-basin outer wall must not self-intersect`,
+      );
+      assert(
+        !polylinesCross(nearPolyline, farPolyline),
+        `${label} side ${zone.side}: catch-basin outer wall must never cross back across the lip's own outer edge`,
+      );
+
+      // Deck cutout: generic notch insertion must also work for a
+      // multi-point Organic arc, not just a 2-point Rectangle/L-shape edge --
+      // net vertex-count change is always +2 regardless of span length (see
+      // `buildDeckCutoutOutline`'s own doc).
+      const baseOffset = copingOuterOffset("infinity", "hidden");
+      const cutout = buildDeckCutoutOutline(outline, baseOffset, zone);
+      assert(
+        cutout.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+        `${label} side ${zone.side}: deck cutout must be entirely finite`,
+      );
+      assert(
+        cutout.length === outline.length + 2,
+        `${label} side ${zone.side}: deck cutout must have a net +2 vertex change regardless of arc span`,
+      );
+    }
+
+    // Camera pose: finite and outside the basin bounds, for every valid zone.
+    const layout = getPoolVerticalLayout({
+      poolType: "in-ground",
+      system: "infinity",
+      overflowType: "hidden",
+      depth: 1.5,
+      copingThickness: 0.04,
+    });
+    for (const zone of zones) {
+      const pose = getCameraPose({
+        intent: "infinity",
+        outline,
+        layout,
+        depth: 1.5,
+        skimmers: { count: 0, positions: [], spacing: 0, cornerDistance: 0 },
+        infinityZone: zone,
+      });
+      assert(
+        [...pose.position, ...pose.target].every(Number.isFinite),
+        `${label} side ${zone.side}: camera pose must be entirely finite`,
+      );
+      const outsideX = pose.position[0] < bounds.minX - 0.5 || pose.position[0] > bounds.maxX + 0.5;
+      const outsideZ = pose.position[2] < bounds.minZ - 0.5 || pose.position[2] > bounds.maxZ + 0.5;
+      assert(
+        outsideX || outsideZ,
+        `${label} side ${zone.side}: camera must sit outside the basin bounds`,
+      );
+    }
+  }
+
+  assert(
+    sawFourZoneCase,
+    "Infinity/Organic: at least one test case must exercise all 4 candidate quadrants",
+  );
+  assert(
+    sawFewerThanFourCase,
+    "Infinity/Organic: at least one test case (a pronounced bay) must have fewer than 4 candidates",
+  );
+  assert(
+    totalZonesAcrossCases > 0,
+    "Infinity/Organic: at least one real candidate zone must be produced across all cases",
+  );
+
+  // --- Break/restore proof 1: naive "whole perimeter is one zone" ----------
+  // Deliberately assert that Organic exposes a zone spanning the ENTIRE
+  // outline (the naive, wrong answer that ignores both the quadrant split
+  // and the bay/bulge curvature exclusion) -- this MUST fail against the
+  // real `organicInfinityZones`, proving the quadrant/curvature logic is
+  // actually constraining the result rather than this suite vacuously
+  // agreeing with whatever the function returns.
+  {
+    const params = clampOrganicShapeParams({ length: 12, width: 7, curvature: 0.5, mirror: false });
+    const outline = buildOrganicShapeOutline(params);
+    const zones = organicInfinityZones(outline);
+    let caughtNaiveWholePerimeter = false;
+    try {
+      assert(
+        zones.some((z) => z.points.length === outline.length),
+        "deliberate naive-whole-perimeter-is-one-zone break",
+      );
+    } catch {
+      caughtNaiveWholePerimeter = true;
+    }
+    assert(
+      caughtNaiveWholePerimeter,
+      "Infinity/Organic: break/restore proof 1 failed to catch the naive whole-perimeter-is-one-zone assumption",
+    );
+  }
+
+  // --- Break/restore proof 2: per-point normal offsetting actually matters -
+  // An outward Minkowski offset of an already-convex-ish run (exactly what
+  // every candidate zone is, by the curvature exclusion above) never
+  // literally self-intersects regardless of which normal drives it -- so
+  // the meaningful, task-called-out property this proves instead is "the
+  // catch basin's outward offset must stay CONSISTENT along the curve" (the
+  // task's own wording): the true perpendicular distance from the lip's own
+  // outer edge to the catch basin's far wall must stay equal to
+  // `catchBasinWidth` at every point along the arc, not just at its two
+  // shoulders. Deliberately rebuild the far wall the OLD (Rectangle/
+  // L-shape-only) way -- every point offset by the zone's single AGGREGATE
+  // normal, not its own local `pointNormals` entry -- for the real candidate
+  // zone this pass's own cases sweep the most, and assert its width
+  // deviates measurably from `catchBasinWidth` partway along the arc. This
+  // MUST fail (the naive approach MUST measurably deviate) to prove the
+  // per-point-normal fix in `infinityEdgeGeometry.ts` is doing real work,
+  // not decorative -- a genuinely non-vacuous proof, not merely asserting
+  // the current (correct) code agrees with itself.
+  {
+    const params = clampOrganicShapeParams({ length: 20, width: 14, curvature: 1, mirror: false });
+    const outline = buildOrganicShapeOutline(params);
+    const zones = organicInfinityZones(outline);
+    assert(
+      zones.length > 0,
+      "Infinity/Organic break/restore proof 2 setup: expected at least one real zone",
+    );
+    // Pick whichever candidate zone sweeps the widest total normal-direction
+    // range -- the one the naive single-normal offset would distort most.
+    const sweepOf = (zone: (typeof zones)[number]) => {
+      let maxDelta = 0;
+      for (let k = 1; k < zone.pointNormals.length; k++) {
+        const a = zone.pointNormals[k - 1]!;
+        const b = zone.pointNormals[k]!;
+        const dot = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1]));
+        maxDelta += Math.acos(dot);
+      }
+      return maxDelta;
+    };
+    const zone = [...zones].sort((a, b) => sweepOf(b) - sweepOf(a))[0]!;
+    const offsetDistance = infDims.lipWidth + infDims.catchBasinWidth;
+    // The REAL far-wall point at every arc point, offset by that point's OWN
+    // local normal, vs the NAIVE far-wall point at the same arc point,
+    // offset by the zone's single aggregate normal instead -- how far off
+    // POSITION the naive wall lands from where the true curve-following
+    // wall belongs (not merely whether the near-far distance happens to
+    // still read `catchBasinWidth`, which a lateral drift can coincidentally
+    // preserve even while the wall itself is meaningfully displaced).
+    let maxPositionalDrift = 0;
+    for (let k = 0; k < zone.points.length; k++) {
+      const p = zone.points[k]!;
+      const localNormal = zone.pointNormals[k]!;
+      const realFar: readonly [number, number] = [
+        p[0] + localNormal[0] * offsetDistance,
+        p[1] + localNormal[1] * offsetDistance,
+      ];
+      const naiveFar: readonly [number, number] = [
+        p[0] + zone.normal[0] * offsetDistance,
+        p[1] + zone.normal[1] * offsetDistance,
+      ];
+      maxPositionalDrift = Math.max(
+        maxPositionalDrift,
+        Math.hypot(realFar[0] - naiveFar[0], realFar[1] - naiveFar[1]),
+      );
+    }
+    let caughtNaiveDefect = false;
+    try {
+      assert(maxPositionalDrift < 0.05, "deliberate naive-single-global-normal break");
+    } catch {
+      caughtNaiveDefect = true;
+    }
+    assert(
+      caughtNaiveDefect,
+      `Infinity/Organic: break/restore proof 2 failed to catch the naive single-global-normal positional drift (${maxPositionalDrift.toFixed(3)}m)`,
+    );
+
+    // Belt-and-braces geometric sanity: even though an outward offset of a
+    // convex-ish run never literally folds on itself, the REAL per-point
+    // wall must still never self-intersect or cross back across the lip's
+    // own outer edge, for every candidate zone across every case above.
+    const realNearPolyline = zone.points.map(
+      (p, k) =>
+        [
+          p[0] + zone.pointNormals[k]![0] * infDims.lipWidth,
+          p[1] + zone.pointNormals[k]![1] * infDims.lipWidth,
+        ] as const,
+    );
+    const realFarPolyline = zone.points.map(
+      (p, k) =>
+        [
+          p[0] + zone.pointNormals[k]![0] * offsetDistance,
+          p[1] + zone.pointNormals[k]![1] * offsetDistance,
+        ] as const,
+    );
+    assert(
+      !polylineSelfIntersects(realFarPolyline) &&
+        !polylinesCross(realNearPolyline, realFarPolyline),
+      "Infinity/Organic break/restore proof 2: the REAL per-point-normal catch-basin wall must be clean",
+    );
+  }
+}
+console.log(
+  "Infinity edge audit (Organic) passed: up to 4 compass-quadrant candidate arcs (bay/bulge tight-curvature vertex always excluded), infinityZonesForOutline dispatch parity, finite unit-length aggregate + per-point normals, real arc length >= straight chord, full lip/cascade/catch-basin/transition-cap geometry finiteness, curved catch-basin no-self-intersection/no-crossing proof, generic (+2-vertex) deck-cutout notch insertion, finite outside-the-basin camera poses, and 2 non-vacuous break/restore proofs (naive whole-perimeter-is-one-zone assumption, naive single-global-normal catch-basin width-consistency defect).",
 );

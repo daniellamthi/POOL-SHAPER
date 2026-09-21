@@ -159,15 +159,16 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     }
     return slopeNormalisedDimensions;
   })();
-  // Geometry pass D (Infinity, Rectangle + L-shape): a project saved before
-  // Infinity existed, or one carrying malformed/legacy Infinity data, always
-  // restores through `clampInfinityEdgeParams` -- same contract as the
-  // L-shape/Organic branches above. Infinity candidate zones only exist for
-  // Rectangle and L-shape this pass (see `infinity-edge.ts`), so a project
-  // that somehow saved `system: "infinity"` against Organic falls back to
-  // skimmer rather than rendering a system that was never built for that
-  // shape.
-  const systemIsInfinityCapable = restored.shape === "rectangle" || restored.shape === "l-shape";
+  // Geometry pass D (Infinity, Rectangle + L-shape + Organic): a project
+  // saved before Infinity existed, or one carrying malformed/legacy Infinity
+  // data, always restores through `clampInfinityEdgeParams` -- same contract
+  // as the L-shape/Organic branches above. Infinity candidate zones now
+  // exist for all 3 buildable shapes (see `infinity-edge.ts`); only a
+  // "custom" free-draw outline has none, so a project that somehow saved
+  // `system: "infinity"` against "custom" falls back to skimmer rather than
+  // rendering a system that was never built for that shape.
+  const systemIsInfinityCapable =
+    restored.shape === "rectangle" || restored.shape === "l-shape" || restored.shape === "organic";
   const system: PoolConfig["system"] =
     restored.system === "infinity" && !systemIsInfinityCapable ? "skimmer" : restored.system;
   // Only ever attach an `infinityEdge` field when the project actually has

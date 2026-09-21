@@ -25,12 +25,15 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
     onSkimmerSelect?.();
   };
 
-  // Geometry Pass D: Infinity's real geometry exists for Rectangle and
-  // L-shape (see infinity-edge.ts); Organic stays a stub. Mirrors the exact
-  // same gate project.ts's normalisation already applies, so the UI never
-  // offers a selection the 3D view/export guard would then have to silently
-  // reject.
-  const infinityAvailable = config.shape === "rectangle" || config.shape === "l-shape";
+  // Geometry Pass D: Infinity's real geometry now exists for all 3 buildable
+  // shapes -- Rectangle, L-shape and Organic (see infinity-edge.ts's
+  // `organicInfinityZones`). "custom" (the generic draw-your-own outline,
+  // not one of the 3 procedural shapes) still has no candidate-zone logic at
+  // all and stays gated off, mirroring the same gate `infinityZonesForOutline`
+  // itself applies, so the UI never offers a selection the 3D view/export
+  // guard would then have to silently reject.
+  const infinityAvailable =
+    config.shape === "rectangle" || config.shape === "l-shape" || config.shape === "organic";
 
   return (
     <StepSection
@@ -126,6 +129,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
             {infinityAvailable ? (
               <InfinitySideSelector
                 outline={outline}
+                shape={config.shape}
                 selectedSide={config.infinityEdge?.side ?? null}
                 onSelect={setInfinitySide}
               />

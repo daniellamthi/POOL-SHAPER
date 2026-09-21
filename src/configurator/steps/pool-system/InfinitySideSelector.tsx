@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
-import type { Outline } from "@/lib/pool/types";
+import type { Outline, PoolShapeId } from "@/lib/pool/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,24 +22,31 @@ function sideLabel(normal: readonly [number, number]): string {
  * coordinates or vertex indices. Shape-generic: draws whatever outline it's
  * given and whatever valid zones `infinityZonesForOutline` returns for it
  * (4 sides for Rectangle, up to 4 of L-shape's 6 -- the two recess-adjacent
- * edges are never candidates, see `lShapeInfinityZones`), so this is the one
- * selector both shapes share rather than a duplicate L-shape component. The
- * outline itself may be concave (L-shape); the SVG polygon fill and the
- * `toView` projection make no convexity assumption. Renders nothing when
- * there are no candidate zones at all (mirrors `infinityZonesForOutline`'s
- * own honest emptiness for Organic -- the Acqua step never renders this for
- * Organic to begin with, but this stays defensive regardless).
+ * edges are never candidates, see `lShapeInfinityZones` -- or up to 4 named
+ * flat arcs of Organic's curved perimeter, see `organicInfinityZones`), so
+ * this is the one selector all 3 buildable shapes share rather than a
+ * duplicate per-shape component. Each zone is drawn as its own real
+ * `zone.points` polyline rather than a straight `start`-`end` line -- for
+ * Rectangle/L-shape that is still exactly one straight segment (2 points),
+ * byte-identical to before; for Organic it is what actually draws the curved
+ * arc instead of a misleading straight chord cutting across the bay. The
+ * outline itself may be concave (L-shape) or smoothly curved (Organic); the
+ * SVG polygon fill and the `toView` projection make no convexity assumption.
+ * Renders nothing when there are no candidate zones at all (a "custom"
+ * free-draw outline, or a real outline too small/degenerate to offer any).
  */
 export function InfinitySideSelector({
   outline,
+  shape,
   selectedSide,
   onSelect,
 }: {
   outline: Outline;
+  shape: PoolShapeId;
   selectedSide: number | null;
   onSelect: (side: number) => void;
 }) {
-  const zones = useMemo(() => infinityZonesForOutline(outline), [outline]);
+  const zones = useMemo(() => infinityZonesForOutline(outline, shape), [outline, shape]);
   if (zones.length === 0) return null;
 
   const minX = Math.min(...outline.map((p) => p[0]));
@@ -75,18 +82,15 @@ export function InfinitySideSelector({
           className="fill-foreground/5 stroke-none"
         />
         {zones.map((zone) => {
-          const [x1, y1] = toView(zone.start);
-          const [x2, y2] = toView(zone.end);
           const selected = selectedSide === zone.side;
           return (
-            <line
+            <polyline
               key={zone.side}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
+              points={zone.points.map((p) => toView(p).join(",")).join(" ")}
+              fill="none"
               strokeWidth={selected ? 7 : 5}
               strokeLinecap="round"
+              strokeLinejoin="round"
               className={cn(
                 "cursor-pointer transition-colors duration-300",
                 selected ? "stroke-brand" : "stroke-foreground/25 hover:stroke-foreground/55",

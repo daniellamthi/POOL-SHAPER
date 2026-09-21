@@ -70,23 +70,38 @@ function finishGeometry(positions: number[], uvs: number[]): THREE.BufferGeometr
 
 /**
  * The disappearing lip itself: a thin slab from the pool's true edge
- * (`zone.start`/`zone.end`, the same footprint normal coping would have
- * started from) out to `lipWidth`, flat at `lipTopY` -- just above the
- * waterline, so the main water body appears to run directly into it with no
- * visible reveal, and the water sheets over its outer edge into the cascade.
+ * (`zone.points`, the same footprint normal coping would have started from)
+ * out to `lipWidth`, flat at `lipTopY` -- just above the waterline, so the
+ * main water body appears to run directly into it with no visible reveal,
+ * and the water sheets over its outer edge into the cascade.
+ *
+ * Walks `zone.points`/`zone.pointNormals` one segment at a time rather than a
+ * single inner-to-outer quad across `zone.start`/`zone.end` -- for
+ * Rectangle/L-shape (`points.length === 2`, a single straight edge) this is
+ * exactly one quad, byte-identical to before; for Organic's multi-point
+ * curved arc it produces a real fan of quads that follows the true curve
+ * (each segment offset along its OWN local normal), instead of a single flat
+ * chord cutting straight across the bay -- the defect this pass's own
+ * "curved lip must follow the curve smoothly" check exists to catch.
  */
 export function createInfinityLipGeometry(
   zone: RectangleInfinityZone,
   dims: InfinityEdgeDimensions,
   lipTopY: number,
 ): THREE.BufferGeometry {
-  const innerA = toV3(zone.start, lipTopY);
-  const innerB = toV3(zone.end, lipTopY);
-  const outerA = toV3(offsetPoint(zone.start, zone.normal, dims.lipWidth), lipTopY);
-  const outerB = toV3(offsetPoint(zone.end, zone.normal, dims.lipWidth), lipTopY);
   const positions: number[] = [];
   const uvs: number[] = [];
-  addQuad(positions, uvs, innerA, innerB, outerB, outerA, 1, 1 / Math.max(dims.lipWidth, 1e-3));
+  for (let k = 0; k < zone.points.length - 1; k++) {
+    const p0 = zone.points[k]!;
+    const p1 = zone.points[k + 1]!;
+    const n0 = zone.pointNormals[k] ?? zone.normal;
+    const n1 = zone.pointNormals[k + 1] ?? zone.normal;
+    const innerA = toV3(p0, lipTopY);
+    const innerB = toV3(p1, lipTopY);
+    const outerA = toV3(offsetPoint(p0, n0, dims.lipWidth), lipTopY);
+    const outerB = toV3(offsetPoint(p1, n1, dims.lipWidth), lipTopY);
+    addQuad(positions, uvs, innerA, innerB, outerB, outerA, 1, 1 / Math.max(dims.lipWidth, 1e-3));
+  }
   return finishGeometry(positions, uvs);
 }
 
@@ -96,6 +111,17 @@ export function createInfinityLipGeometry(
  * full side length and dropping `dropHeight`. Subdivided along its drop so
  * the reused water shader's ripple/refraction reads correctly instead of a
  * single flat quad.
+ *
+ * Follows `zone.points`/`zone.pointNormals` (each offset outward by
+ * `lipWidth`, its own knife-edge polyline) rather than lerping a single
+ * straight chord between `zone.start` and `zone.end` -- for Rectangle/
+ * L-shape this is the same straight run subdivided by real length (byte-
+ * identical geometry, just re-derived per-segment instead of via a single
+ * `t`-lerp), and for Organic's curved arc the falling sheet's top edge
+ * actually follows the curve instead of cutting a straight chord across it.
+ * Each real outline segment gets its own length-proportional subdivision
+ * (never fewer than 1) so a short trailing segment near the arc's ends never
+ * gets an oversized, under-subdivided quad.
  */
 export function createInfinityCascadeGeometry(
   zone: RectangleInfinityZone,
@@ -103,28 +129,33 @@ export function createInfinityCascadeGeometry(
   lipTopY: number,
 ): THREE.BufferGeometry {
   const dropSegments = 6;
-  const lengthSegments = Math.max(1, Math.round(zone.length / 0.4));
   const positions: number[] = [];
   const uvs: number[] = [];
-  const edgeStart = offsetPoint(zone.start, zone.normal, dims.lipWidth);
-  const edgeEnd = offsetPoint(zone.end, zone.normal, dims.lipWidth);
-  const pointAtT = (t: number): readonly [number, number] => [
-    THREE.MathUtils.lerp(edgeStart[0], edgeEnd[0], t),
-    THREE.MathUtils.lerp(edgeStart[1], edgeEnd[1], t),
-  ];
-  for (let li = 0; li < lengthSegments; li++) {
-    const t0 = li / lengthSegments;
-    const t1 = (li + 1) / lengthSegments;
-    const p0 = pointAtT(t0);
-    const p1 = pointAtT(t1);
-    for (let di = 0; di < dropSegments; di++) {
-      const y0 = lipTopY - (dims.dropHeight * di) / dropSegments;
-      const y1 = lipTopY - (dims.dropHeight * (di + 1)) / dropSegments;
-      const a = toV3(p0, y0);
-      const b = toV3(p1, y0);
-      const c = toV3(p1, y1);
-      const d = toV3(p0, y1);
-      addQuad(positions, uvs, a, b, c, d, 1, 1);
+  for (let k = 0; k < zone.points.length - 1; k++) {
+    const p0 = zone.points[k]!;
+    const p1 = zone.points[k + 1]!;
+    const n0 = zone.pointNormals[k] ?? zone.normal;
+    const n1 = zone.pointNormals[k + 1] ?? zone.normal;
+    const edge0 = offsetPoint(p0, n0, dims.lipWidth);
+    const edge1 = offsetPoint(p1, n1, dims.lipWidth);
+    const segmentLength = Math.hypot(edge1[0] - edge0[0], edge1[1] - edge0[1]);
+    const lengthSegments = Math.max(1, Math.round(segmentLength / 0.4));
+    const pointAtT = (t: number): readonly [number, number] => [
+      THREE.MathUtils.lerp(edge0[0], edge1[0], t),
+      THREE.MathUtils.lerp(edge0[1], edge1[1], t),
+    ];
+    for (let li = 0; li < lengthSegments; li++) {
+      const p0t = pointAtT(li / lengthSegments);
+      const p1t = pointAtT((li + 1) / lengthSegments);
+      for (let di = 0; di < dropSegments; di++) {
+        const y0 = lipTopY - (dims.dropHeight * di) / dropSegments;
+        const y1 = lipTopY - (dims.dropHeight * (di + 1)) / dropSegments;
+        const a = toV3(p0t, y0);
+        const b = toV3(p1t, y0);
+        const c = toV3(p1t, y1);
+        const d = toV3(p0t, y1);
+        addQuad(positions, uvs, a, b, c, d, 1, 1);
+      }
     }
   }
   return finishGeometry(positions, uvs);
@@ -144,6 +175,21 @@ export interface InfinityCatchBasinGeometry {
  * (the lip's own outer edge, the same start the cascade falls from), and its
  * tangential extent matches `zone.start`/`zone.end` exactly, so its end
  * walls sit directly under the coping transition caps with no gap or overlap.
+ *
+ * Floor and outer wall walk `zone.points`/`zone.pointNormals` segment by
+ * segment (each offset by its OWN local normal, exactly like the lip/
+ * cascade above) rather than a single quad spanning `zone.start`/`zone.end`
+ * directly -- for Rectangle/L-shape this is one quad, byte-identical to
+ * before; for Organic it is what actually keeps the far (outer) wall a
+ * constant `catchBasinWidth` OUTWARD of the near/lip edge at every point
+ * along the curve. A single global normal applied uniformly to a curved
+ * near edge would place the far edge too close on the inside of a curve
+ * (risking the basin self-intersecting the lip) and too far on the outside
+ * (opening a gap) -- offsetting per-point along each point's own true local
+ * normal is what keeps the basin's width genuinely constant along the arc.
+ * The two end walls only ever need the arc's two shoulders (its overall
+ * `start`/`end` and their own local normals, i.e. `pointNormals[0]`/
+ * `pointNormals[last]`), the same as before.
  */
 export function createInfinityCatchBasinGeometry(
   zone: RectangleInfinityZone,
@@ -152,43 +198,58 @@ export function createInfinityCatchBasinGeometry(
 ): InfinityCatchBasinGeometry {
   const basinTopY = lipTopY - dims.dropHeight;
   const basinFloorY = basinTopY - dims.catchBasinDepth;
-  const nearStart = offsetPoint(zone.start, zone.normal, dims.lipWidth);
-  const nearEnd = offsetPoint(zone.end, zone.normal, dims.lipWidth);
-  const farStart = offsetPoint(zone.start, zone.normal, dims.lipWidth + dims.catchBasinWidth);
-  const farEnd = offsetPoint(zone.end, zone.normal, dims.lipWidth + dims.catchBasinWidth);
 
-  // Floor: horizontal quad at the basin's bottom.
   const floorPositions: number[] = [];
   const floorUvs: number[] = [];
-  addQuad(
-    floorPositions,
-    floorUvs,
-    toV3(nearStart, basinFloorY),
-    toV3(nearEnd, basinFloorY),
-    toV3(farEnd, basinFloorY),
-    toV3(farStart, basinFloorY),
-    1,
-    1,
-  );
-  const floor = finishGeometry(floorPositions, floorUvs);
-
-  // Outer (far) wall: vertical, facing back toward the pool.
   const outerPositions: number[] = [];
   const outerUvs: number[] = [];
-  addQuad(
-    outerPositions,
-    outerUvs,
-    toV3(farStart, basinTopY),
-    toV3(farEnd, basinTopY),
-    toV3(farEnd, basinFloorY),
-    toV3(farStart, basinFloorY),
-    1,
-    1,
-  );
+  for (let k = 0; k < zone.points.length - 1; k++) {
+    const p0 = zone.points[k]!;
+    const p1 = zone.points[k + 1]!;
+    const n0 = zone.pointNormals[k] ?? zone.normal;
+    const n1 = zone.pointNormals[k + 1] ?? zone.normal;
+    const near0 = offsetPoint(p0, n0, dims.lipWidth);
+    const near1 = offsetPoint(p1, n1, dims.lipWidth);
+    const far0 = offsetPoint(p0, n0, dims.lipWidth + dims.catchBasinWidth);
+    const far1 = offsetPoint(p1, n1, dims.lipWidth + dims.catchBasinWidth);
+
+    // Floor: horizontal quad at the basin's bottom for this segment.
+    addQuad(
+      floorPositions,
+      floorUvs,
+      toV3(near0, basinFloorY),
+      toV3(near1, basinFloorY),
+      toV3(far1, basinFloorY),
+      toV3(far0, basinFloorY),
+      1,
+      1,
+    );
+    // Outer (far) wall: vertical, facing back toward the pool, for this segment.
+    addQuad(
+      outerPositions,
+      outerUvs,
+      toV3(far0, basinTopY),
+      toV3(far1, basinTopY),
+      toV3(far1, basinFloorY),
+      toV3(far0, basinFloorY),
+      1,
+      1,
+    );
+  }
+  const floor = finishGeometry(floorPositions, floorUvs);
   const outerWall = finishGeometry(outerPositions, outerUvs);
 
-  // End walls: close the channel at each end, spanning from the near (lip)
-  // edge to the far (outer) edge, full basin height.
+  // End walls: close the channel at each end (the arc's two shoulders),
+  // spanning from the near (lip) edge to the far (outer) edge, full basin
+  // height -- each using its OWN endpoint's local normal, not the zone's
+  // aggregate average.
+  const startNormal = zone.pointNormals[0] ?? zone.normal;
+  const endNormal = zone.pointNormals[zone.pointNormals.length - 1] ?? zone.normal;
+  const nearStart = offsetPoint(zone.start, startNormal, dims.lipWidth);
+  const nearEnd = offsetPoint(zone.end, endNormal, dims.lipWidth);
+  const farStart = offsetPoint(zone.start, startNormal, dims.lipWidth + dims.catchBasinWidth);
+  const farEnd = offsetPoint(zone.end, endNormal, dims.lipWidth + dims.catchBasinWidth);
+
   const endWallStartPositions: number[] = [];
   const endWallStartUvs: number[] = [];
   addQuad(
@@ -241,9 +302,9 @@ export function createInfinityTransitionCapGeometry(
   const height = copingSurfaceY - lipTopY;
   if (!(height > 1e-4)) return { start: null, end: null };
   const outerDistance = Math.max(dims.lipWidth, copingOuterOffsetDistance);
-  const build = (corner: readonly [number, number]) => {
+  const build = (corner: readonly [number, number], normal: readonly [number, number]) => {
     const inner = corner;
-    const outer = offsetPoint(corner, zone.normal, outerDistance);
+    const outer = offsetPoint(corner, normal, outerDistance);
     const positions: number[] = [];
     const uvs: number[] = [];
     addQuad(
@@ -258,7 +319,9 @@ export function createInfinityTransitionCapGeometry(
     );
     return finishGeometry(positions, uvs);
   };
-  return { start: build(zone.start), end: build(zone.end) };
+  const startNormal = zone.pointNormals[0] ?? zone.normal;
+  const endNormal = zone.pointNormals[zone.pointNormals.length - 1] ?? zone.normal;
+  return { start: build(zone.start, startNormal), end: build(zone.end, endNormal) };
 }
 
 /** Finiteness/no-NaN guard used both by the geometry audit script and by the

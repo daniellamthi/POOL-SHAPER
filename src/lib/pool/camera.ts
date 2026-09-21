@@ -249,11 +249,13 @@ function getSystemDetailCamera({
  * from inside the water.
  */
 function getInfinityDetailCamera({
+  outline,
   zone,
   layout,
   verticalFov,
   viewportAspect,
 }: {
+  outline: Outline;
   zone: RectangleInfinityZone;
   layout: PoolVerticalLayout;
   verticalFov: number;
@@ -267,10 +269,43 @@ function getInfinityDetailCamera({
   const verticalFovRadians = (clamp(verticalFov, 20, 75) * Math.PI) / 180;
   const horizontalFov = 2 * Math.atan(Math.tan(verticalFovRadians / 2) * safeAspect);
   const framedSpan = clamp(zone.length * 0.5, 2, 3.6);
-  const distance = Math.max(
+  let distance = Math.max(
     1.8,
     Math.min(framedSpan / 2 / Math.tan(horizontalFov / 2), zone.length * 0.9),
   );
+  // A Rectangle/L-shape zone's `start`/`end` always sit exactly at the
+  // outline's own bounding-box extreme on the SAME axis its (always
+  // axis-aligned) `normal` points along, so stepping out along that normal
+  // by even a couple of metres always clears that axis -- the fixed
+  // `framedSpan`-driven distance above was never observed to under-clear
+  // for either shape. An Organic zone's own local point can sit well inside
+  // the bbox on one axis while only marginally past the other (a diagonal
+  // compass-quadrant normal on a highly eccentric, highly curved outline),
+  // so the same short standoff can leave the camera still inside the
+  // bounding box on BOTH axes -- a real "camera stuck near the basin"
+  // defect found via this pass's own geometry audit (extreme 20x14,
+  // curvature=1 case), not a hypothetical. Floor `distance` at whatever is
+  // actually needed to clear the NEARER of the two axis bounds along this
+  // zone's own normal direction (never less than the framing distance
+  // above, so a well-behaved near-axis-aligned zone -- every Rectangle/
+  // L-shape zone, and most Organic ones -- never regresses).
+  const bounds = outlineBounds(outline);
+  const clearanceMargin = 0.6;
+  const axisCandidates: number[] = [];
+  if (zone.normal[0] > 1e-6) {
+    axisCandidates.push((bounds.maxX + clearanceMargin - midpoint[0]) / zone.normal[0]);
+  } else if (zone.normal[0] < -1e-6) {
+    axisCandidates.push((bounds.minX - clearanceMargin - midpoint[0]) / zone.normal[0]);
+  }
+  if (zone.normal[1] > 1e-6) {
+    axisCandidates.push((bounds.maxZ + clearanceMargin - midpoint[1]) / zone.normal[1]);
+  } else if (zone.normal[1] < -1e-6) {
+    axisCandidates.push((bounds.minZ - clearanceMargin - midpoint[1]) / zone.normal[1]);
+  }
+  const positiveAxisCandidates = axisCandidates.filter((d) => Number.isFinite(d) && d > 0);
+  if (positiveAxisCandidates.length > 0) {
+    distance = Math.max(distance, Math.min(...positiveAxisCandidates));
+  }
   // Eye-level, just outside the pool, looking down and across the lip into
   // the cascade and catch basin. The catch basin itself is a genuinely
   // shallow structure right at grade (lipTopY down by dropHeight +
@@ -543,7 +578,13 @@ export function getCameraPose({
   }
 
   if (intent === "infinity" && infinityZone) {
-    return getInfinityDetailCamera({ zone: infinityZone, layout, verticalFov, viewportAspect });
+    return getInfinityDetailCamera({
+      outline,
+      zone: infinityZone,
+      layout,
+      verticalFov,
+      viewportAspect,
+    });
   }
 
   // Photographic overview only: clear the full coping and view along the

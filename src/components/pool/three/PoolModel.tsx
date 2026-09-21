@@ -51,7 +51,7 @@ import { photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
 import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
-import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
+import type { Outline, OverflowType, PoolShapeId, PoolType, SystemType } from "@/lib/pool/types";
 import {
   ABOVE_GROUND_STRUCTURE_THICKNESS,
   getPoolVerticalLayout,
@@ -76,6 +76,7 @@ import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 interface PoolModelProps {
   poolAccess: import("@/lib/pool/types").PoolAccess | null;
   internalStairType: import("@/lib/pool/types").InternalStairType;
+  shape: PoolShapeId;
   outline: Outline;
   depth: number;
   floorProfile: FloorProfileModel;
@@ -385,6 +386,7 @@ function cloneDataTexture(
  */
 export function PoolModel({
   outline,
+  shape,
   depth,
   floorProfile,
   materials,
@@ -406,9 +408,9 @@ export function PoolModel({
   // renders its normal, full, byte-identical geometry.
   const infinitySection = useMemo(() => {
     if (!isInfinity || infinityEdge?.side === null || infinityEdge?.side === undefined) return null;
-    const zones = infinityZonesForOutline(outline);
+    const zones = infinityZonesForOutline(outline, shape);
     return zones.some((zone) => zone.side === infinityEdge.side) ? infinityEdge.side : null;
-  }, [isInfinity, infinityEdge, outline]);
+  }, [isInfinity, infinityEdge, outline, shape]);
   const verticalLayout = getPoolVerticalLayout({
     poolType,
     system,
@@ -1199,6 +1201,7 @@ export function PoolModel({
       {isInfinity && infinitySection !== null ? (
         <InfinityEdge
           outline={outline}
+          shape={shape}
           infinityEdge={infinityEdge}
           waterLevel={waterLevel}
           copingSurfaceY={copingSurfaceY}
