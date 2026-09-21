@@ -68,6 +68,10 @@ import {
   createGrateGeometry,
   SKIMMER_PROFILES,
 } from "./poolConstruction";
+import { InfinityEdge } from "./InfinityEdge";
+import { rectangleInfinityZones } from "@/lib/pool/infinity-edge";
+import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
+import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 
 interface PoolModelProps {
   poolAccess: import("@/lib/pool/types").PoolAccess | null;
@@ -82,6 +86,10 @@ interface PoolModelProps {
   copingThickness: number;
   showWater: boolean;
   skimmers: SkimmerPlan;
+  /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
+   * while `system === "infinity"`. */
+  infinityEdge?: InfinityEdgeParams;
+  infinityExcluded?: InfinityExclusion | null;
 }
 
 function createNeutralSurfaceTexture() {
@@ -388,7 +396,18 @@ export function PoolModel({
   skimmers,
   poolAccess,
   internalStairType,
+  infinityEdge,
+  infinityExcluded = null,
 }: PoolModelProps) {
+  const isInfinity = system === "infinity" && infinityEdge?.enabled === true;
+  // Rectangle-only this pass: `rectangleInfinityZones` is honestly empty for
+  // any other shape, so `excludeSection` stays `null` and every coping/ring
+  // builder below renders its normal, full, byte-identical geometry.
+  const infinitySection = useMemo(() => {
+    if (!isInfinity || infinityEdge?.side === null || infinityEdge?.side === undefined) return null;
+    const zones = rectangleInfinityZones(outline);
+    return zones.some((zone) => zone.side === infinityEdge.side) ? infinityEdge.side : null;
+  }, [isInfinity, infinityEdge, outline]);
   const verticalLayout = getPoolVerticalLayout({
     poolType,
     system,
@@ -810,8 +829,8 @@ export function PoolModel({
     () =>
       isVisibleOverflow
         ? new THREE.BufferGeometry()
-        : createCopingSlabGeometry(copingInner, copingOutline, copingThickness),
-    [copingInner, copingOutline, copingThickness, isVisibleOverflow],
+        : createCopingSlabGeometry(copingInner, copingOutline, copingThickness, infinitySection),
+    [copingInner, copingOutline, copingThickness, isVisibleOverflow, infinitySection],
   );
   const overflowLip = useDisposable(
     () =>
@@ -824,8 +843,8 @@ export function PoolModel({
     () =>
       isVisibleOverflow
         ? new THREE.BufferGeometry()
-        : createRingGeometry(copingInner, copingOutline),
-    [copingInner, copingOutline, isVisibleOverflow],
+        : createRingGeometry(copingInner, copingOutline, false, infinitySection),
+    [copingInner, copingOutline, isVisibleOverflow, infinitySection],
   );
   const grilleInnerSeat = useDisposable(
     () => createRingGeometry(overflowKerbOuter, offsetOutline(overflowKerbOuter, 0.012)),
@@ -920,6 +939,7 @@ export function PoolModel({
           stairType={internalStairType}
           floorProfile={floorProfile}
           topY={verticalLayout.copingY}
+          infinityExcluded={infinityExcluded}
         >
           <meshPhysicalMaterial
             color={materials.liner.color}
@@ -1174,6 +1194,17 @@ export function PoolModel({
           </mesh>
         </group>
       )}
+
+      {isInfinity && infinitySection !== null ? (
+        <InfinityEdge
+          outline={outline}
+          infinityEdge={infinityEdge}
+          waterLevel={waterLevel}
+          copingSurfaceY={copingSurfaceY}
+          copingOuterOffsetDistance={copingOuterOffset(system, overflowType)}
+          materials={materials}
+        />
+      ) : null}
     </group>
   );
 }

@@ -10,6 +10,7 @@ import {
 } from "@/lib/pool/lighting";
 import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
+import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import {
@@ -308,6 +309,7 @@ export function planSceneLighting({
   access,
   stairType = "linear",
   floorProfile,
+  infinityExcluded = null,
 }: {
   outline: Outline;
   layout: PoolVerticalLayout;
@@ -319,6 +321,10 @@ export function planSceneLighting({
    * the stairs actually ended up (possibly the shallow end on a sloped
    * floor) rather than a stale, unbiased placement. */
   floorProfile?: FloorProfileModel;
+  /** Geometry Pass D (Infinity): keeps the LED row, and the access exclusion
+   * footprint it's derived from, off the selected side. `null` (every
+   * pre-Infinity call) is a complete no-op. */
+  infinityExcluded?: InfinityExclusion | null;
 }): SceneLightingPlan {
   const exclusions: LightingExclusion[] = skimmers.positions.map((p) => ({
     kind: "skimmer",
@@ -332,7 +338,7 @@ export function planSceneLighting({
   // rather than the straight flight's rectangle.
   const corner =
     access === "internalSteps" && stairType === "corner"
-      ? cornerStairPlan(outline, layout.floorY, layout.copingY, floorProfile)
+      ? cornerStairPlan(outline, layout.floorY, layout.copingY, floorProfile, infinityExcluded)
       : null;
   if (corner) {
     accessPoint = { x: corner.x, z: corner.z };
@@ -341,7 +347,7 @@ export function planSceneLighting({
     const flight = linearStairDimensions(layout.floorY, layout.copingY);
     const run = access === "internalSteps" ? flight.run : 0.55;
     const width = access === "internalSteps" ? flight.width : 0.62;
-    const placement = accessPlacement(outline, run, width, access, floorProfile);
+    const placement = accessPlacement(outline, run, width, access, floorProfile, infinityExcluded);
     if (placement) {
       accessPoint = placement;
       const nx = Math.sin(placement.rotation),
@@ -362,6 +368,7 @@ export function planSceneLighting({
     waterY: layout.waterY,
     floorY: layout.floorY,
     exclusions,
+    infinityExcluded,
   });
   // In a convex rectangle the basin walls cannot occlude one another. Keep
   // the dominant access shadow; distant fill lights are intentionally soft.

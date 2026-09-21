@@ -51,6 +51,11 @@ export function createRingGeometry(
   inner: Outline,
   outer: Outline,
   perimeterUvs = false,
+  /** Geometry Pass D (Infinity): skip the side starting at this vertex index
+   * (Rectangle only -- the caller derives it from `RectangleInfinityZone.side`),
+   * leaving an open gap there instead of a closed ring. `null`/`undefined`
+   * (every pre-Infinity call site) is byte-identical to before. */
+  excludeSide: number | null = null,
 ): THREE.BufferGeometry {
   if (inner.length !== outer.length || inner.length < 3) {
     throw new Error("Ring outlines must have the same vertex count");
@@ -61,6 +66,7 @@ export function createRingGeometry(
   let uvOffset = 0;
 
   for (let index = 0; index < inner.length; index++) {
+    if (excludeSide !== null && index === excludeSide) continue;
     const innerA = inner[index]!;
     const innerB = inner[(index + 1) % inner.length]!;
     const outerA = outer[index]!;
@@ -84,9 +90,14 @@ export function createRingGeometry(
     }
   }
 
+  // Trimmed to what was actually written: an excluded side leaves the
+  // pre-sized buffers short of the full ring, and the untouched tail must
+  // never be submitted as a degenerate zero-position triangle.
+  const trimmedPositions = excludeSide === null ? positions : positions.subarray(0, positionOffset);
+  const trimmedUvs = excludeSide === null ? uvs : uvs.subarray(0, uvOffset);
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+  geometry.setAttribute("position", new THREE.BufferAttribute(trimmedPositions, 3));
+  geometry.setAttribute("uv", new THREE.BufferAttribute(trimmedUvs, 2));
   geometry.computeVertexNormals();
   return geometry;
 }

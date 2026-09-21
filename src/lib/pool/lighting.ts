@@ -1,5 +1,6 @@
 import type { Outline } from "./types";
 import { skimmerWall } from "./walls.ts";
+import type { InfinityExclusion } from "./walls.ts";
 
 /** Per-vertex convex/reflex classification, generic over any simple,
  * consistently-wound polygon. Deliberately a local copy of the identical
@@ -197,6 +198,10 @@ export function planPoolLighting({
   lumenOutput = POOL_LUMINAIRE.lumens,
   exclusions = [],
   design = POOL_LIGHTING_DESIGN,
+  /** Geometry Pass D (Infinity): the selected side never becomes an LED
+   * mounting wall -- not the primary candidate, not a wing wall. `null`
+   * (every pre-Infinity call) is a complete no-op. */
+  infinityExcluded = null,
 }: {
   outline: Outline;
   waterY: number;
@@ -204,6 +209,7 @@ export function planPoolLighting({
   lumenOutput?: number;
   exclusions?: readonly LightingExclusion[];
   design?: { [K in keyof typeof POOL_LIGHTING_DESIGN]: number };
+  infinityExcluded?: InfinityExclusion | null;
 }): PoolLightingPlan {
   const empty = (warning: string): PoolLightingPlan => ({
     count: 0,
@@ -241,8 +247,17 @@ export function planPoolLighting({
   // skimmer wall itself. The wall is derived from the same canonical rule the
   // skimmers are placed by, so the two can never drift apart, and the row's
   // spacing still comes from the wall's own length.
-  const skimmers = skimmerWall(outline);
+  const skimmers = skimmerWall(outline, infinityExcluded);
   const axis = skimmers.axis === "x" ? 0 : 1;
+  const infinityAxisIndex = infinityExcluded ? (infinityExcluded.axis === "x" ? 0 : 1) : null;
+  // An edge IS the excluded Infinity side only when both its endpoints sit
+  // on that exact axis/coordinate -- a merely perpendicular (end) wall that
+  // happens to touch the same coordinate at one corner is never excluded.
+  const isInfinityEdge = (a: readonly number[], b: readonly number[]) =>
+    infinityAxisIndex !== null &&
+    infinityExcluded !== null &&
+    Math.abs(a[infinityAxisIndex]! - infinityExcluded.coordinate) < 1e-6 &&
+    Math.abs(b[infinityAxisIndex]! - infinityExcluded.coordinate) < 1e-6;
   // 0 = the wall opposite the skimmers, 1 = any other wall, 2 = theirs.
   const wallRank = (a: readonly number[], b: readonly number[]) => {
     if (Math.abs(a[axis]! - b[axis]!) > 1e-6) return 1;
@@ -280,6 +295,7 @@ export function planPoolLighting({
     const edges = mergedWallChords(outline, tolerance)
       .map((chord) => ({ ...chord, rank: wallRank(chord.a, chord.b) }))
       .filter((edge) => edge.length > 2 * design.cornerClearance)
+      .filter((edge) => !isInfinityEdge(edge.a, edge.b))
       .sort((a, b) => a.rank - b.rank || b.length - a.length);
     if (!edges.length) continue;
     // Photometrics follow the longest CANDIDATE wall (rank 0 or 1 -- never

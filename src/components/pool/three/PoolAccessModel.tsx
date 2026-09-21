@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import * as THREE from "three";
 import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
 import { skimmerWall } from "@/lib/pool/walls.ts";
+import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 import { mergedWallChords } from "@/lib/pool/lighting";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 
@@ -38,6 +39,9 @@ export function accessPlacement(
   width: number,
   access: PoolAccess | null = null,
   floorProfile?: FloorProfileModel,
+  /** Geometry Pass D (Infinity): the selected side is never a valid
+   * ladder/steps wall. `null` (every pre-Infinity call) is a no-op. */
+  infinityExcluded: InfinityExclusion | null = null,
 ) {
   const inside = (x: number, z: number) => {
     let hit = false;
@@ -84,6 +88,12 @@ export function accessPlacement(
   const onShallowWall = (a: readonly [number, number], b: readonly [number, number]) =>
     Math.abs(a[shallowAxisIndex] - shallowCoordinate) < wallProximity &&
     Math.abs(b[shallowAxisIndex] - shallowCoordinate) < wallProximity;
+  const infinityAxisIndex = infinityExcluded ? (infinityExcluded.axis === "x" ? 0 : 1) : null;
+  const onInfinityWall = (a: readonly [number, number], b: readonly [number, number]) =>
+    infinityAxisIndex !== null &&
+    infinityExcluded !== null &&
+    Math.abs(a[infinityAxisIndex] - infinityExcluded.coordinate) < wallProximity &&
+    Math.abs(b[infinityAxisIndex] - infinityExcluded.coordinate) < wallProximity;
   // Candidate walls come from merged wall CHORDS, not raw per-vertex edges:
   // for a rectangle/L-shape (a handful of true corners) the very first,
   // tightest tolerance is already a no-op -- byte-identical to the old raw
@@ -104,6 +114,7 @@ export function accessPlacement(
         skimmerWall: onSkimmerWall(a, b),
         shallowWall: preferShallow && onShallowWall(a, b),
       }))
+      .filter(({ a, b }) => !onInfinityWall(a, b))
       .sort((first, second) => {
         // The ladder shares its wall with nothing: push the skimmer run's
         // wall to the back of the queue before length is even considered.
@@ -225,9 +236,14 @@ export function cornerStairPlan(
   floorY: number,
   topY: number,
   floorProfile?: FloorProfileModel,
+  /** Geometry Pass D (Infinity): a corner touching the selected side is
+   * never a valid flight anchor. `null` (every pre-Infinity call) is a
+   * no-op. */
+  infinityExcluded: InfinityExclusion | null = null,
 ): CornerStairPlan | null {
   if (outline.length < 3) return null;
-  const skimmers = skimmerWall(outline);
+  const skimmers = skimmerWall(outline, infinityExcluded);
+  const infinityAxisIndex = infinityExcluded ? (infinityExcluded.axis === "x" ? 0 : 1) : null;
   const axis = skimmers.axis === "x" ? 0 : 1;
   const centre: readonly [number, number] = [
     outline.reduce((sum, [x]) => sum + x, 0) / outline.length,
@@ -258,6 +274,7 @@ export function cornerStairPlan(
     flight.width,
     "internalSteps",
     floorProfile,
+    infinityExcluded,
   );
   const preferShallow = floorProfile?.sloped === true;
   const shallowAxisIndex = floorProfile?.axis === "x" ? 0 : 1;
@@ -284,6 +301,17 @@ export function cornerStairPlan(
     // Square corners only: a radial flight cannot sit in a swept one.
     if (Math.abs(first[0] * second[0] + first[1] * second[1]) > 0.08) continue;
     if (Math.abs(point[axis] - skimmers.coordinate) > 1e-6) continue;
+    // Geometry Pass D (Infinity): reject a corner where either flank runs
+    // along the excluded side -- the flight would land one flat flank
+    // against the disappearing edge, which has no wall there to seat against.
+    if (
+      infinityAxisIndex !== null &&
+      infinityExcluded !== null &&
+      Math.abs(point[infinityAxisIndex] - infinityExcluded.coordinate) < 1e-6 &&
+      (Math.abs(previous[infinityAxisIndex] - infinityExcluded.coordinate) < 1e-6 ||
+        Math.abs(next[infinityAxisIndex] - infinityExcluded.coordinate) < 1e-6)
+    )
+      continue;
     // Both flanks, and the diagonal between them, must have basin behind them
     // for the full outer radius. Each probe is nudged off the wall it runs
     // along: a point sampled exactly on the boundary is neither in nor out,
@@ -432,6 +460,7 @@ export function PoolAccessModel({
   floorProfile,
   topY,
   children,
+  infinityExcluded = null,
 }: {
   outline: Outline;
   access: PoolAccess | null;
@@ -439,6 +468,10 @@ export function PoolAccessModel({
   floorProfile: FloorProfileModel;
   topY: number;
   children: ReactNode;
+  /** Geometry Pass D (Infinity): forwarded, unchanged, to
+   * `accessPlacement`/`cornerStairPlan` -- `null` on every call site that
+   * hasn't opted into Infinity is a complete no-op. */
+  infinityExcluded?: InfinityExclusion | null;
 }) {
   // Sizing/search phase: uses the GLOBAL (deep) floor, exactly as every
   // pool did before Geometry Pass A -- byte-identical when flat, and a
@@ -451,12 +484,15 @@ export function PoolAccessModel({
   const width = access === "internalSteps" ? flight.width : 0.62;
   const cornerStairs = access === "internalSteps" && stairType === "corner";
   const rawCorner = useMemo(
-    () => (cornerStairs ? cornerStairPlan(outline, globalFloorY, topY, floorProfile) : null),
-    [cornerStairs, outline, globalFloorY, topY, floorProfile],
+    () =>
+      cornerStairs
+        ? cornerStairPlan(outline, globalFloorY, topY, floorProfile, infinityExcluded)
+        : null,
+    [cornerStairs, outline, globalFloorY, topY, floorProfile, infinityExcluded],
   );
   const placement = useMemo(
-    () => accessPlacement(outline, run, width, access, floorProfile),
-    [outline, run, width, access, floorProfile],
+    () => accessPlacement(outline, run, width, access, floorProfile, infinityExcluded),
+    [outline, run, width, access, floorProfile, infinityExcluded],
   );
   // The real, local floor under wherever the search above actually landed --
   // identical to `globalFloorY` when flat, so every step below is a no-op

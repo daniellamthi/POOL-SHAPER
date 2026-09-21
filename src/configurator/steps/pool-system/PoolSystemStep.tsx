@@ -2,6 +2,7 @@ import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSec
 import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
+import { InfinitySideSelector } from "./InfinitySideSelector";
 
 /**
  * Step 4 — selects the hydraulic system (Acqua / Linea d'acqua).
@@ -9,13 +10,26 @@ import { cn } from "@/lib/utils";
  * Coping/border material selection lives in the Style step, not here.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const { config, setSystem, setOverflowType, setSkimmerFinish, setSkimmerType } =
-    useConfigurator();
+  const {
+    config,
+    outline,
+    setSystem,
+    setOverflowType,
+    setSkimmerFinish,
+    setSkimmerType,
+    setInfinitySide,
+  } = useConfigurator();
 
   const selectSkimmer = () => {
     setSystem("skimmer");
     onSkimmerSelect?.();
   };
+
+  // Geometry Pass D: Infinity's real geometry only exists for Rectangle this
+  // pass (see infinity-edge.ts) -- mirrors the exact same gate project.ts's
+  // normalisation already applies, so the UI never offers a selection the
+  // 3D view/export guard would then have to silently reject.
+  const infinityAvailable = config.shape === "rectangle";
 
   return (
     <StepSection
@@ -92,6 +106,38 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
             />
           </div>
         ) : null}
+
+        <OptionCard
+          title="Piscina Infinity"
+          description="Bordo a sfioro totale su un lato, con cascata e canale di raccolta a vista."
+          selected={config.system === "infinity"}
+          onSelect={() => setSystem("infinity")}
+          disabled={!infinityAvailable}
+          disabledReason="Infinity non ancora disponibile per questa forma."
+        />
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            config.system === "infinity" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}
+        >
+          <div className="overflow-hidden">
+            {infinityAvailable ? (
+              <InfinitySideSelector
+                outline={outline}
+                selectedSide={config.infinityEdge?.side ?? null}
+                onSelect={setInfinitySide}
+              />
+            ) : (
+              <div className="rounded-2xl border border-hairline p-5">
+                <p className="text-[13px] font-light text-muted-foreground">
+                  Infinity non ancora disponibile per questa forma. Torna allo step Forma e
+                  seleziona Rettangolare per attivarlo.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </StepSection>
   );

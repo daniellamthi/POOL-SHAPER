@@ -424,7 +424,10 @@ export function buildWaterOutline(
   system: SystemType,
   overflowType: OverflowType,
 ): Outline {
-  if (system === "skimmer") return outline;
+  // Infinity's own disappearing side is handled entirely by InfinityEdge.tsx
+  // (the lip/cascade geometry, not the main water body); the other 3 sides
+  // meet the water exactly the way skimmer coping does.
+  if (system === "skimmer" || system === "infinity") return outline;
   // A visible overflow edge is contained by its kerb: the water stops at the
   // basin wall and the raised kerb stands proud of it, with the grated channel
   // outboard again. A film spreading past the wall would float over the kerb

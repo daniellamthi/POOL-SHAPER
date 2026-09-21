@@ -1,6 +1,7 @@
 import { SQM_PER_SKIMMER } from "./config";
 import { outlineBounds } from "./geometry";
 import { skimmerWall } from "./walls.ts";
+import type { InfinityExclusion } from "./walls.ts";
 import type { Outline } from "./types";
 
 export interface SkimmerPlan {
@@ -15,7 +16,16 @@ export interface SkimmerPlan {
  * Industry standard: one skimmer every 25 m² of water surface.
  * Skimmers are distributed evenly along one long side, away from corners.
  */
-export function planSkimmers(outline: Outline, waterSurface: number, enabled = true): SkimmerPlan {
+export function planSkimmers(
+  outline: Outline,
+  waterSurface: number,
+  enabled = true,
+  /** Geometry Pass D (Infinity): keeps the skimmer row off the selected
+   * Infinity side. Moot while `system === "infinity"` (skimmers are never
+   * enabled then), but threaded through anyway so `skimmerWall` has one
+   * exclusion contract everywhere it's called. */
+  infinityExcluded: InfinityExclusion | null = null,
+): SkimmerPlan {
   if (!enabled || outline.length < 3 || !Number.isFinite(waterSurface) || waterSurface <= 0) {
     return { count: 0, positions: [], spacing: 0, cornerDistance: 0 };
   }
@@ -29,7 +39,7 @@ export function planSkimmers(outline: Outline, waterSurface: number, enabled = t
   // (Organic) outline where the flatter side isn't always the bounding-box
   // minimum stays exactly in step with the wall lighting/access already key
   // off of, instead of silently drifting back onto the tightest bend.
-  const wall = skimmerWall(outline);
+  const wall = skimmerWall(outline, infinityExcluded);
   const runAlongX = wall.runsAlongX;
   const runLength = runAlongX ? spanX : spanZ;
   const rowCoordinate = wall.coordinate;

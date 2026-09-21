@@ -89,7 +89,20 @@ function worstCurvatureNear(
  * anything that must stay clear of that run -- the stainless ladder above all
  * -- are driven by one rule rather than by two that can drift apart.
  */
-export function skimmerWall(outline: Outline): {
+/** Geometry Pass D (Infinity): the one rectangle side that must never be
+ * chosen as a mounting/placement wall (skimmer row, ladder/steps, LED row) --
+ * a plain axis/coordinate pair so `walls.ts` never has to import
+ * `infinity-edge.ts` (keeping its own no-external-deps contract). `null`
+ * (every pre-Infinity call) is a complete no-op. */
+export interface InfinityExclusion {
+  axis: "x" | "z";
+  coordinate: number;
+}
+
+export function skimmerWall(
+  outline: Outline,
+  excluded: InfinityExclusion | null = null,
+): {
   runsAlongX: boolean;
   axis: "x" | "z";
   coordinate: number;
@@ -119,6 +132,14 @@ export function skimmerWall(outline: Outline): {
   // Ties (rectangle/L-shape: both Infinity) keep the original "low side"
   // default. Only switch to the high side when it is a real, measurable
   // improvement.
-  const coordinate = highCurvature > lowCurvature ? highExtreme : lowExtreme;
+  let coordinate = highCurvature > lowCurvature ? highExtreme : lowExtreme;
+  // Geometry Pass D (Infinity): the chosen side is the one wall that has been
+  // replaced by the disappearing edge -- never a valid mounting run. Flip to
+  // the opposite extreme (the only other candidate this rule ever considers)
+  // rather than re-running the curvature comparison, which the exclusion
+  // itself doesn't change.
+  if (excluded && excluded.axis === axis && Math.abs(excluded.coordinate - coordinate) < 1e-6) {
+    coordinate = coordinate === lowExtreme ? highExtreme : lowExtreme;
+  }
   return { runsAlongX, axis, coordinate };
 }

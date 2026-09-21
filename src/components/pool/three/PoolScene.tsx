@@ -46,6 +46,8 @@ import { getCameraPose } from "@/lib/pool/camera";
 import type { CameraIntent } from "@/lib/pool/camera";
 import type { PoolLightPosition } from "@/lib/pool/lighting";
 import type { InternalStairType } from "@/lib/pool/types";
+import { infinityExclusion, clampInfinityEdgeParams } from "@/lib/pool/infinity-edge";
+import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
@@ -79,6 +81,10 @@ export interface SceneProps {
   internalStairType: InternalStairType;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
+  /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
+   * while `system === "infinity"`; absent/undefined renders and excludes
+   * exactly as before Infinity existed. */
+  infinityEdge?: InfinityEdgeParams;
   length: number;
   width: number;
   depth: number;
@@ -507,6 +513,7 @@ export default function PoolScene({
   internalStairType,
   poolAccess,
   skimmers,
+  infinityEdge,
   length,
   width,
   depth,
@@ -572,6 +579,21 @@ export default function PoolScene({
     ],
   );
 
+  // Geometry Pass D (Infinity): a plain axis/coordinate pair, not re-derived
+  // per consumer -- the single source of truth for which side to keep every
+  // skimmer/ladder/LED placement off is `infinity-edge.ts`'s own zone
+  // lookup, always run through `clampInfinityEdgeParams` first the same way
+  // `project.ts` normalises it, so malformed/legacy data can never produce a
+  // bogus exclusion.
+  const normalisedInfinityEdge = useMemo(
+    () => (system === "infinity" ? clampInfinityEdgeParams(infinityEdge) : null),
+    [system, infinityEdge],
+  );
+  const infinityExcluded = useMemo(
+    () => (normalisedInfinityEdge ? infinityExclusion(outline, normalisedInfinityEdge) : null),
+    [outline, normalisedInfinityEdge],
+  );
+
   // Computed once here so the luminaires and the camera that frames them are
   // driven by the same row.
   const lighting = useMemo(
@@ -583,8 +605,18 @@ export default function PoolScene({
         access: poolAccess,
         stairType: internalStairType,
         floorProfile,
+        infinityExcluded,
       }),
-    [outline, verticalLayout, skimmers, system, poolAccess, internalStairType, floorProfile],
+    [
+      outline,
+      verticalLayout,
+      skimmers,
+      system,
+      poolAccess,
+      internalStairType,
+      floorProfile,
+      infinityExcluded,
+    ],
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
@@ -731,6 +763,8 @@ export default function PoolScene({
         poolType={poolType}
         copingThickness={copingThickness}
         showWater={showWater}
+        {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
+        infinityExcluded={infinityExcluded}
       />
 
       {features.includes("ledLighting") ? (

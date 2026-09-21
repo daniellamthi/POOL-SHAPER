@@ -30,6 +30,7 @@ import type {
 import type { ProjectConfiguration } from "./project";
 import type { LShapeOrientation } from "./l-shape";
 import type { OrganicShapeParams } from "./organic-shape";
+import type { RectangleInfinitySide } from "./infinity-edge";
 
 export interface ConfiguratorContextValue {
   config: PoolConfig;
@@ -66,6 +67,10 @@ export interface ConfiguratorContextValue {
   setOrganicMirror: (value: boolean) => void;
   setSystem: (value: SystemType) => void;
   setOverflowType: (value: OverflowType) => void;
+  /** Geometry Pass D (Infinity, Rectangle-only first slice): selects the
+   * disappearing-edge side and marks it enabled in one step -- the Acqua
+   * step never has to know about `InfinityEdgeParams`'s other fields. */
+  setInfinitySide: (value: RectangleInfinitySide) => void;
   setSkimmerFinish: (value: SkimmerFinishId) => void;
   setSkimmerType: (value: SkimmerTypeId) => void;
   setFinish: (value: FinishMaterial) => void;

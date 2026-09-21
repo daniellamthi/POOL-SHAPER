@@ -271,6 +271,30 @@ export function infinitySideStartT(outline: Outline, side: RectangleInfinitySide
   return accumulated / perimeter;
 }
 
+/** The excluded axis/coordinate pair `skimmerWall`/`lighting.ts`/
+ * `PoolAccessModel.tsx` need to keep every skimmer, ladder/steps and LED
+ * placement off the selected Infinity side -- expressed as a plain
+ * `{ axis, coordinate }` (see `InfinityExclusion` in walls.ts) rather than a
+ * `RectangleInfinitySide`, so those consumers never have to re-derive which
+ * of the rectangle's two axes a given side index falls on. Returns `null`
+ * whenever there is nothing to exclude (disabled, no side, or the outline
+ * isn't currently a valid Rectangle zone for that side) -- callers treat
+ * `null` as a complete no-op, identical to before Infinity existed. */
+export function infinityExclusion(
+  outline: Outline,
+  params: InfinityEdgeParams,
+): { axis: "x" | "z"; coordinate: number } | null {
+  const geometry = computeInfinityEdgeGeometry(outline, params);
+  if (!geometry) return null;
+  const [x1, z1] = geometry.start;
+  const [x2, z2] = geometry.end;
+  // A Rectangle side is always axis-aligned: it shares exactly one
+  // coordinate between its two endpoints.
+  if (Math.abs(x1 - x2) < 1e-6) return { axis: "x", coordinate: x1 };
+  if (Math.abs(z1 - z2) < 1e-6) return { axis: "z", coordinate: z1 };
+  return null;
+}
+
 /** Re-exported for consumers that want the raw perimeter point rather than
  * the zone data (e.g. positioning a UI marker) -- avoids re-importing
  * `geometry.ts` directly just to stay consistent with this module's t

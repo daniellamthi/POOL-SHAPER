@@ -54,7 +54,19 @@ export const SKIMMER_PROFILES = {
 
 /** Individually eased, full-thickness slabs, including real mitres at hard corners.
  * All slabs share one geometry/material draw; colour variation is per slab. */
-export function createCopingSlabGeometry(inner: Outline, outer: Outline, thickness: number) {
+export function createCopingSlabGeometry(
+  inner: Outline,
+  outer: Outline,
+  thickness: number,
+  /** Geometry Pass D (Infinity): the coping SECTION to omit entirely (Rectangle
+   * only -- for a 4-vertex rectangle each section between corners corresponds
+   * exactly 1:1 to `RectangleInfinityZone.side`). The remaining sections keep
+   * their own mitred end faces untouched, so the horseshoe this leaves has
+   * clean vertical end caps at both open ends with no extra geometry needed.
+   * `null`/`undefined` (every pre-Infinity call site) is byte-identical to
+   * before. */
+  excludeSection: number | null = null,
+) {
   if (inner.length !== outer.length || inner.length < 3)
     throw new Error("Mismatched coping outlines");
   const distances = [0];
@@ -88,6 +100,7 @@ export function createCopingSlabGeometry(inner: Outline, outer: Outline, thickne
   };
   const parts: THREE.BufferGeometry[] = [];
   for (let section = 0; section < corners.length - 1; section++) {
+    if (excludeSection !== null && section === excludeSection) continue;
     const start = corners[section]!,
       length = corners[section + 1]! - start;
     const count = Math.max(1, Math.round(length / 0.62));

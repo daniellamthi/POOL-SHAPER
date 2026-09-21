@@ -59,6 +59,7 @@ import type {
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
+import { clampInfinityEdgeParams, type RectangleInfinitySide } from "./infinity-edge";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -77,6 +78,7 @@ type Action =
   | { type: "setOrganicMirror"; value: boolean }
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
+  | { type: "setInfinitySide"; value: RectangleInfinitySide }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
   | { type: "setSkimmerType"; value: SkimmerTypeId }
   | { type: "setFinish"; value: FinishMaterial }
@@ -228,9 +230,17 @@ function reducer(state: State, action: Action): State {
                 };
               })()
             : config.dimensions;
+      // Geometry Pass D (Infinity, Rectangle-only first slice): switching
+      // away from Rectangle while Infinity is selected falls back to
+      // skimmer live, in-session -- the same rule `project.ts`'s
+      // normalisation already applies on load/save, so the UI and the 3D
+      // view are never left showing a system that has no zones for the new
+      // shape until a reload happens to correct it.
+      const system =
+        config.system === "infinity" && action.value !== "rectangle" ? "skimmer" : config.system;
       return {
         ...state,
-        config: { ...config, shape: action.value, shapeSelected: true, dimensions },
+        config: { ...config, shape: action.value, shapeSelected: true, dimensions, system },
       };
     }
     case "setCopingMaterial":
@@ -311,6 +321,22 @@ function reducer(state: State, action: Action): State {
       return { ...state, config: { ...config, system: action.value } };
     case "setOverflowType":
       return { ...state, config: { ...config, overflowType: action.value } };
+    case "setInfinitySide":
+      // Rectangle only, this pass -- the Acqua step never dispatches this for
+      // any other shape (see the mini-plan's own gating), but the reducer
+      // itself never trusts that and re-normalises through the one
+      // canonical clamp regardless.
+      return {
+        ...state,
+        config: {
+          ...config,
+          infinityEdge: clampInfinityEdgeParams({
+            ...(config.infinityEdge ?? {}),
+            enabled: true,
+            side: action.value,
+          }),
+        },
+      };
     case "setSkimmerFinish":
       return { ...state, config: { ...config, skimmerFinish: action.value } };
     case "setSkimmerType":
@@ -553,6 +579,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setOrganicMirror: (v) => dispatch({ type: "setOrganicMirror", value: v }),
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
+      setInfinitySide: (v) => dispatch({ type: "setInfinitySide", value: v }),
       setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),
       setSkimmerType: (v) => dispatch({ type: "setSkimmerType", value: v }),
       setFinish: (v) => dispatch({ type: "setFinish", value: v }),
