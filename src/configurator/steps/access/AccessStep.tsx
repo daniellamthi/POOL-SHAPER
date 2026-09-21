@@ -9,6 +9,13 @@ import { useConfigurator } from "@/lib/pool/context";
 export function AccessStep() {
   const { config, togglePoolFeature, setPoolAccess, setInternalStairType } = useConfigurator();
   const stairType = config.internalStairType ?? "linear";
+  // The corner (radial) staircase needs a real square corner to land its two
+  // flanks against -- an Organic outline is a smooth curve with no corner in
+  // that sense at all (see `cornerStairPlan`'s own square-corner check,
+  // walls.ts). Rather than let the customer pick an option that silently
+  // renders nothing, it is disabled with a real, honest explanation -- never
+  // a fake corner invented just to satisfy the control.
+  const cornerStairsUnavailable = config.shape === "organic";
 
   return (
     <StepSection title="Accesso e comfort" subtitle="Scale, scaletta e comfort in acqua.">
@@ -38,7 +45,9 @@ export function AccessStep() {
                   <OptionCard
                     title="Scala ad angolo"
                     description="Gradini a quarto di cerchio che si aprono dall'angolo della vasca."
-                    selected={stairType === "corner"}
+                    disabled={cornerStairsUnavailable}
+                    disabledReason="Non disponibile per la forma organica: la sagoma non ha un angolo vero su cui appoggiare la scala."
+                    selected={stairType === "corner" && !cornerStairsUnavailable}
                     onSelect={() => setInternalStairType("corner")}
                   />
                 </div>

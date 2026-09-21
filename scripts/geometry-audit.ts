@@ -2604,6 +2604,17 @@ console.log(
     );
   }
 
+  // Corner (radial) stairs must be correctly UNAVAILABLE for an organic
+  // outline -- it has no real square corner for a radial flight to land its
+  // two flanks against (cornerStairPlan's own square-corner dot-product
+  // check, walls.ts, rejects every vertex of a smooth curve). This must
+  // return null cleanly, never fabricate a fake corner.
+  const organicCorner = cornerStairPlan(outline, verticalLayout.floorY, verticalLayout.copingY);
+  assert(
+    organicCorner === null,
+    "organic shape must never produce a corner staircase plan -- it has no real square corner, and cornerStairPlan must not invent one",
+  );
+
   // Overview camera: must resolve a finite pose from the curve's own
   // bounding box / centroid (no reflex-corner assumption required to not
   // crash -- an organic outline has none in the L-shape sense, but the

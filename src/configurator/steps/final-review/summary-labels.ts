@@ -22,7 +22,13 @@ export const poolTypeLabel = (value: PoolType | null): string =>
   value === "above-ground" ? "Piscina fuori terra" : "Piscina interrata";
 
 export const shapeLabel = (shape: PoolShapeId): string =>
-  shape === "custom" ? "dalla forma personalizzata" : shape === "l-shape" ? "a L" : "rettangolare";
+  shape === "custom"
+    ? "dalla forma personalizzata"
+    : shape === "l-shape"
+      ? "a L"
+      : shape === "organic"
+        ? "organica"
+        : "rettangolare";
 
 /** Short, customer-facing headline for the hydraulic system -- the
  * technical `skimmer`/`overflow` + `hiddenType` pair becomes one sentence. */

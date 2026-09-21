@@ -33,23 +33,36 @@ export function OptionCard({
   selected,
   onSelect,
   meta,
+  disabled,
+  disabledReason,
 }: {
   title: string;
   description?: string;
   selected: boolean;
   onSelect: () => void;
   meta?: ReactNode;
+  /** A real, customer-friendly disabled state -- greyed out and inert,
+   * never a fake/broken selection that silently does nothing. */
+  disabled?: boolean;
+  /** Shown in place of `description` while disabled, explaining WHY (e.g.
+   * "not available for this shape"), never just hiding the reason. */
+  disabledReason?: string;
 }) {
   return (
     <button
       type="button"
-      onClick={onSelect}
+      onClick={disabled ? undefined : onSelect}
       aria-pressed={selected}
+      aria-disabled={disabled}
+      disabled={disabled}
+      title={disabled ? disabledReason : undefined}
       className={cn(
         "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-7 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992]",
-        selected
-          ? "border-brand bg-transparent pl-3"
-          : "border-hairline bg-transparent hover:border-foreground/30 hover:pl-3",
+        disabled
+          ? "cursor-not-allowed border-hairline bg-transparent opacity-40"
+          : selected
+            ? "border-brand bg-transparent pl-3"
+            : "border-hairline bg-transparent hover:border-foreground/30 hover:pl-3",
       )}
     >
       <span className="flex items-start justify-between gap-4">
@@ -71,7 +84,11 @@ export function OptionCard({
           />
         </span>
       </span>
-      {description ? (
+      {disabled && disabledReason ? (
+        <span className="max-w-[38ch] text-[12.5px] leading-[1.65] font-light text-muted-foreground">
+          {disabledReason}
+        </span>
+      ) : description ? (
         <span className="max-w-[38ch] text-[12.5px] leading-[1.65] font-light text-muted-foreground">
           {description}
         </span>
