@@ -24,12 +24,19 @@ export function planSkimmers(outline: Outline, waterSurface: number, enabled = t
   const centreX = outline.reduce((sum, [x]) => sum + x, 0) / outline.length;
   const centreZ = outline.reduce((sum, [, z]) => sum + z, 0) / outline.length;
   const positions: Array<{ x: number; z: number; rotation: number }> = [];
-  const runAlongX = skimmerWall(outline).runsAlongX;
+  // Which side of the principal axis the run actually sits on -- read from
+  // the single shared rule (walls.ts), not re-derived here, so a curved
+  // (Organic) outline where the flatter side isn't always the bounding-box
+  // minimum stays exactly in step with the wall lighting/access already key
+  // off of, instead of silently drifting back onto the tightest bend.
+  const wall = skimmerWall(outline);
+  const runAlongX = wall.runsAlongX;
   const runLength = runAlongX ? spanX : spanZ;
+  const rowCoordinate = wall.coordinate;
   for (let index = 0; index < count; index++) {
     const t = (index + 0.5) / count;
-    const targetX = runAlongX ? minX + spanX * t : minX;
-    const targetZ = runAlongX ? minZ : minZ + spanZ * t;
+    const targetX = runAlongX ? minX + spanX * t : rowCoordinate;
+    const targetZ = runAlongX ? rowCoordinate : minZ + spanZ * t;
     const boundary = closestPointOnOutline(outline, targetX, targetZ);
     const firstNormal: readonly [number, number] = [-boundary.tangent[1], boundary.tangent[0]];
     const secondNormal: readonly [number, number] = [boundary.tangent[1], -boundary.tangent[0]];
