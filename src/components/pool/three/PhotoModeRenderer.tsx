@@ -36,8 +36,27 @@ export const HDRI_BY_THEME: Record<Theme, string> = {
   dark: "/hdri/qwantani-dusk-puresky-2k.hdr",
 };
 
-/** Objects the path tracer cannot or should not trace -- see docs/PHOTO_MODE.md. */
-const PHOTO_MODE_EXCLUDED_NAMES = new Set(["contact-ao-decal"]);
+/**
+ * Objects the path tracer cannot or should not trace -- see
+ * docs/PHOTO_MODE.md.
+ *
+ * `led-beam-scatter` (PoolLights.tsx's underwater-LED beam volume) is a
+ * `THREE.ShaderMaterial` with its colour driven entirely by a `beamColor`
+ * uniform -- it has no `.color` property at all. three-gpu-pathtracer's
+ * `StaticGeometryGenerator` collects the material off of every visible Mesh
+ * unconditionally (it doesn't special-case ShaderMaterial), and
+ * `MaterialsTexture.updateFrom` then reads `material.color.r` on every
+ * material it's handed with no guard, which throws
+ * "Cannot read properties of undefined (reading 'r')" the moment any LED
+ * fixture is powered (default: whenever the water is shown) -- reproduced
+ * with the Organic shape's default LED-lit preset, but not shape-specific;
+ * any shape with lit underwater LEDs hits the same crash. The beam is a
+ * raster-only volumetric-scatter trick anyway (see its own comments), not a
+ * real light-transporting surface the path tracer could usefully trace, so
+ * it's excluded the same way `contact-ao-decal` is: hidden only for the
+ * traced scene, restored for the live view.
+ */
+const PHOTO_MODE_EXCLUDED_NAMES = new Set(["contact-ao-decal", "led-beam-scatter"]);
 
 /**
  * Marker baked into WaterSurfaceMaterial's `customProgramCacheKey` (see

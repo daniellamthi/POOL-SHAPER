@@ -253,6 +253,7 @@ function RecessedPoolLight({
         // outward -- this is what closes the gap between the fixture and the
         // surfaces it illuminates.
         <mesh
+          name="led-beam-scatter"
           position={[0, 0, LED_OPTICS.lensCenter]}
           geometry={scatterGeometry}
           renderOrder={LED_OPTICS.beamRenderOrder}
