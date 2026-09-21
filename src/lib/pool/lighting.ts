@@ -66,8 +66,11 @@ function mergedWallChords(
     const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / lengthSquared));
     return Math.hypot(p[0] - (a[0] + dx * t), p[1] - (a[1] + dz * t));
   };
-  const chords: Array<{ a: readonly [number, number]; b: readonly [number, number]; length: number }> =
-    [];
+  const chords: Array<{
+    a: readonly [number, number];
+    b: readonly [number, number];
+    length: number;
+  }> = [];
   let startIndex = 0;
   let consumed = 0;
   while (consumed < n) {

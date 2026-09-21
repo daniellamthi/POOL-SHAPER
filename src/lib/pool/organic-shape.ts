@@ -205,7 +205,12 @@ export function outlineSelfIntersects(outline: Outline): boolean {
       const secondNext = (second + 1) % outline.length;
       if (first === secondNext || firstNext === second) continue;
       if (
-        segmentsIntersect(outline[first]!, outline[firstNext]!, outline[second]!, outline[secondNext]!)
+        segmentsIntersect(
+          outline[first]!,
+          outline[firstNext]!,
+          outline[second]!,
+          outline[secondNext]!,
+        )
       ) {
         return true;
       }

@@ -55,7 +55,8 @@ export function PoolShapeStep() {
   const supportsFloorProfile = config.poolType === "in-ground";
 
   const depthSection = (shape: PoolShapeId, disabled: boolean) =>
-    (shape === "rectangle" || shape === "l-shape" || shape === "organic") && supportsFloorProfile ? (
+    (shape === "rectangle" || shape === "l-shape" || shape === "organic") &&
+    supportsFloorProfile ? (
       <FloorProfileSection disabled={disabled} />
     ) : (
       <fieldset disabled={disabled} className="border-0 p-0">
