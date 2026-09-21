@@ -210,6 +210,35 @@ console.log(
   "PASS — E) Organic export guard: refuses cleanly, never exports as rectangle/custom, clear Italian message",
 );
 
+// --- F. An Infinity-system rectangle project must refuse to export at all,
+// never as a plain skimmer/overflow rectangle. ---
+let infinityThrew = false;
+try {
+  serializePoolRenderConfig({
+    config: {
+      ...baseConfig,
+      system: "infinity",
+      infinityEdge: { enabled: true, side: 0, startT: 0, endT: 1, dropDirection: "outward" },
+    },
+    outline: rectangle(10, 4.5),
+    skimmers,
+    theme: "light",
+  });
+} catch (error) {
+  infinityThrew = true;
+  assert(
+    error instanceof Error && /infinity/.test(error.message) && /skimmer/.test(error.message),
+    "Infinity export guard must give a clear, customer-facing Italian message naming Infinity and a real workaround",
+  );
+}
+assert(
+  infinityThrew,
+  "an Infinity-system project must refuse to export -- it must NEVER silently serialise as a plain skimmer/overflow rectangle",
+);
 console.log(
-  "Export guard audit complete: rectangle regression clean, L-shape, sloped-L-shape and Organic all refuse cleanly with a clear message.",
+  "PASS — F) Infinity export guard: refuses cleanly, never exports as a plain skimmer/overflow rectangle, clear Italian message",
+);
+
+console.log(
+  "Export guard audit complete: rectangle regression clean, L-shape, sloped-L-shape, Organic and Infinity all refuse cleanly with a clear message.",
 );

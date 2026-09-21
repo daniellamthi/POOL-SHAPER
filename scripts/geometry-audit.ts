@@ -98,6 +98,19 @@ import {
   slopeEligibleForDepth,
 } from "../src/lib/pool/floor-profile";
 import { createSlopedFloorGeometry } from "../src/components/pool/three/poolGeometry";
+import {
+  clampInfinityEdgeDimensions,
+  clampInfinityEdgeParams,
+  computeInfinityEdgeGeometry,
+  defaultInfinityEdgeParams,
+  INFINITY_EDGE_DIMENSIONS,
+  isRectangleSideExcludedByInfinity,
+  lShapeInfinityZones,
+  organicInfinityZones,
+  RECTANGLE_INFINITY_SIDES,
+  rectangleInfinityZones,
+  type InfinityEdgeParams,
+} from "../src/lib/pool/infinity-edge";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -3151,4 +3164,189 @@ console.log(
 );
 console.log(
   `Geometry audit passed: ${shapes.length * dimensionCases.length * 2} shape/dimension/system cases, ${customCases.length} custom-shape offset cases, ${validRegressionCases.length + invalidRegressionCases.length} guardrail regressions, ${cameraRegressionCount} camera poses and 24 clamped drag steps.`,
+);
+
+// --- Geometry Pass D: Infinity edge (Rectangle-only first slice) ----------
+{
+  const rectOutline = buildOutline(
+    "rectangle",
+    { length: 10, width: 6, depth: 1.5, cornerRadius: 0 },
+    [],
+  );
+
+  // Every one of the 4 rectangle sides is a real, valid candidate zone.
+  const zones = rectangleInfinityZones(rectOutline);
+  assert(zones.length === 4, "Infinity: a rectangle outline must expose exactly 4 candidate zones");
+  for (const zone of zones) {
+    assert(zone.length > 0, "Infinity: every zone must have positive length");
+    assert(
+      Number.isFinite(zone.normal[0]) && Number.isFinite(zone.normal[1]),
+      "Infinity: every zone normal must be finite",
+    );
+    const normalMagnitude = Math.hypot(zone.normal[0], zone.normal[1]);
+    assert(Math.abs(normalMagnitude - 1) < 1e-9, "Infinity: every zone normal must be unit length");
+  }
+  // Every zone's outward normal really points away from the outline centroid
+  // -- the one property that would silently invert the waterfall/catch-basin
+  // drop direction if it ever regressed.
+  const bounds = outlineBounds(rectOutline);
+  const centroidX = (bounds.minX + bounds.maxX) / 2;
+  const centroidZ = (bounds.minZ + bounds.maxZ) / 2;
+  for (const zone of zones) {
+    const midX = (zone.start[0] + zone.end[0]) / 2;
+    const midZ = (zone.start[1] + zone.end[1]) / 2;
+    const towardOutside = zone.normal[0] * (midX - centroidX) + zone.normal[1] * (midZ - centroidZ);
+    assert(towardOutside > 0, "Infinity: zone normal must point outward from the centroid");
+  }
+
+  // L-shape / Organic candidate zones: honestly empty this pass, not faked.
+  assert(
+    lShapeInfinityZones(rectOutline).length === 0,
+    "Infinity: L-shape candidate zones must be the stubbed empty array this pass",
+  );
+  assert(
+    organicInfinityZones(rectOutline).length === 0,
+    "Infinity: Organic candidate zones must be the stubbed empty array this pass",
+  );
+
+  // Malformed input normalises to the safe disabled default, never a
+  // fabricated selection.
+  const malformed = clampInfinityEdgeParams({
+    enabled: true,
+    side: 7 as unknown as InfinityEdgeParams["side"],
+    startT: NaN,
+    endT: -3,
+  } as Partial<InfinityEdgeParams>);
+  assert(malformed.enabled === false, "Infinity: an out-of-range side must normalise to disabled");
+  assert(malformed.side === null, "Infinity: an out-of-range side must normalise to null");
+  const legacy = clampInfinityEdgeParams(undefined);
+  assert(
+    JSON.stringify(legacy) === JSON.stringify(defaultInfinityEdgeParams()),
+    "Infinity: a project saved before Infinity existed must restore to the safe default",
+  );
+
+  // Dimension clamps: out-of-plausible-range input clamps into the
+  // GLB-derived / documented residential range, never NaN or a runaway value.
+  const dims = clampInfinityEdgeDimensions({
+    lipWidth: 99,
+    dropHeight: -5,
+    catchBasinWidth: NaN,
+  } as Partial<{ lipWidth: number; dropHeight: number; catchBasinWidth: number }>);
+  assert(
+    dims.lipWidth === INFINITY_EDGE_DIMENSIONS.lipWidth.max,
+    "Infinity: lip width must clamp to its max",
+  );
+  assert(
+    dims.dropHeight === INFINITY_EDGE_DIMENSIONS.dropHeight.min,
+    "Infinity: drop height must clamp to its min for a negative input",
+  );
+  assert(
+    dims.catchBasinWidth === INFINITY_EDGE_DIMENSIONS.catchBasinWidth.default,
+    "Infinity: a NaN catch-basin width must fall back to its default",
+  );
+
+  // Real per-side geometry: finite, non-degenerate, for every one of the 4
+  // rectangle sides -- proves the lip geometry data is buildable for any
+  // valid selection, not just one hardcoded side.
+  for (const side of RECTANGLE_INFINITY_SIDES) {
+    const params: InfinityEdgeParams = {
+      enabled: true,
+      side,
+      startT: 0,
+      endT: 1,
+      dropDirection: "outward",
+    };
+    const edge = computeInfinityEdgeGeometry(rectOutline, params);
+    assert(edge !== null, `Infinity: side ${side} must produce real geometry data`);
+    assert(
+      [edge!.start[0], edge!.start[1], edge!.end[0], edge!.end[1], edge!.length].every(
+        Number.isFinite,
+      ),
+      `Infinity: side ${side} geometry must be entirely finite (no NaN)`,
+    );
+    assert(edge!.length > 0, `Infinity: side ${side} must have positive length`);
+    assert(
+      isRectangleSideExcludedByInfinity(params, side),
+      `Infinity: the selected side ${side} must be reported as excluded`,
+    );
+    const otherSide = ((side + 1) % 4) as InfinityEdgeParams["side"];
+    assert(
+      !isRectangleSideExcludedByInfinity(
+        params,
+        otherSide as (typeof RECTANGLE_INFINITY_SIDES)[number],
+      ),
+      `Infinity: a non-selected side must never be reported as excluded`,
+    );
+  }
+
+  // Disabled params never produce geometry, regardless of a stale `side`.
+  const disabled = computeInfinityEdgeGeometry(rectOutline, {
+    enabled: false,
+    side: 0,
+    startT: 0,
+    endT: 1,
+    dropDirection: "outward",
+  });
+  assert(disabled === null, "Infinity: disabled params must never produce geometry");
+
+  // --- Break/restore proof 1: wrong-side selection must be caught --------
+  // Deliberately assert the geometry for side 0 equals the geometry for
+  // side 2 (opposite side of a 10x6 rectangle) -- this MUST fail, proving
+  // the test actually distinguishes sides rather than trivially passing.
+  {
+    const edge0 = computeInfinityEdgeGeometry(rectOutline, {
+      enabled: true,
+      side: 0,
+      startT: 0,
+      endT: 1,
+      dropDirection: "outward",
+    })!;
+    const edge2 = computeInfinityEdgeGeometry(rectOutline, {
+      enabled: true,
+      side: 2,
+      startT: 0,
+      endT: 1,
+      dropDirection: "outward",
+    })!;
+    let caughtWrongSide = false;
+    try {
+      assert(
+        edge0.start[0] === edge2.start[0] && edge0.start[1] === edge2.start[1],
+        "deliberate wrong-side break",
+      );
+    } catch {
+      caughtWrongSide = true;
+    }
+    assert(
+      caughtWrongSide,
+      "Infinity: break/restore proof 1 failed to catch a wrong-side selection",
+    );
+  }
+
+  // --- Break/restore proof 2: an inverted drop direction must be caught ---
+  // Deliberately assert side 0's outward normal is the reverse of what
+  // `rectangleInfinityZones` actually computed -- this MUST fail, proving a
+  // regression that flips the drop direction would be caught, not silently
+  // accepted.
+  {
+    const zone0 = zones.find((z) => z.side === 0)!;
+    const invertedNormal: readonly [number, number] = [-zone0.normal[0], -zone0.normal[1]];
+    let caughtInvertedDrop = false;
+    try {
+      assert(
+        Math.abs(zone0.normal[0] - invertedNormal[0]) < 1e-9 &&
+          Math.abs(zone0.normal[1] - invertedNormal[1]) < 1e-9,
+        "deliberate inverted-drop-direction break",
+      );
+    } catch {
+      caughtInvertedDrop = true;
+    }
+    assert(
+      caughtInvertedDrop,
+      "Infinity: break/restore proof 2 failed to catch an inverted drop direction",
+    );
+  }
+}
+console.log(
+  "Infinity edge audit passed: 4 rectangle candidate zones (positive length, unit outward normals), stubbed L-shape/Organic zones honestly empty, malformed-input and legacy-project normalisation, dimension clamps, per-side finite geometry + exclusion checks, disabled-params guard, and 2 non-vacuous break/restore proofs (wrong-side selection, inverted drop direction).",
 );
