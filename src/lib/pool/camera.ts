@@ -6,6 +6,7 @@ import type { PoolLightPosition } from "./lighting";
 import { classifyOutlineCorners } from "./l-shape";
 import type { Outline } from "./types";
 import type { PoolVerticalLayout } from "./vertical-layout";
+import { clampInfinityEdgeDimensions } from "./infinity-edge";
 import type { RectangleInfinityZone } from "./infinity-edge";
 
 /** The fixed three-quarter angle every overview pose used before this shape
@@ -265,18 +266,40 @@ function getInfinityDetailCamera({
   const safeAspect = clamp(viewportAspect, 0.6, 3);
   const verticalFovRadians = (clamp(verticalFov, 20, 75) * Math.PI) / 180;
   const horizontalFov = 2 * Math.atan(Math.tan(verticalFovRadians / 2) * safeAspect);
-  const framedSpan = clamp(zone.length * 0.75, 2.6, 5.5);
+  const framedSpan = clamp(zone.length * 0.5, 2, 3.6);
   const distance = Math.max(
-    2.2,
+    1.8,
     Math.min(framedSpan / 2 / Math.tan(horizontalFov / 2), zone.length * 0.9),
   );
-  // Just above the catch-basin floor, looking slightly up across the
-  // cascade -- the vantage that actually shows the waterfall as a sheet
-  // rather than foreshortened from directly above.
-  const cameraY = layout.floorY + Math.max(0.35, (layout.wallTopY - layout.floorY) * 0.28);
-  const targetY = layout.waterY - 0.15;
+  // Eye-level, just outside the pool, looking down and across the lip into
+  // the cascade and catch basin. The catch basin itself is a genuinely
+  // shallow structure right at grade (lipTopY down by dropHeight +
+  // catchBasinDepth -- mirrors InfinityEdge.tsx's own lipTopY/basinFloorY
+  // maths exactly), but the camera's XZ position (up to `distance`, which
+  // can be several metres along the normal for a long side) lands well
+  // outside the basin's own ~lipWidth+catchBasinWidth footprint -- ordinary
+  // open deck/grade out there, not basin interior. A `cameraY` derived from
+  // the basin floor (as this used to be, and before that `layout.floorY`,
+  // the *main pool's* much deeper floor) put the camera underground/
+  // embedded in the surrounding terrain at that distance, producing a
+  // broken, flat-banded, backface-only view instead of the lip/cascade/
+  // basin. Eye height above grade is correct everywhere along the normal,
+  // not just directly over the basin.
+  const dims = clampInfinityEdgeDimensions(undefined);
+  const lipTopY = layout.waterY + 0.003;
+  const basinFloorY = lipTopY - dims.dropHeight - dims.catchBasinDepth;
+  const cameraY = layout.wallTopY + 0.9;
+  const targetY = (lipTopY + basinFloorY) / 2;
+  // Centred on the catch basin's own footprint (lip, then basin width),
+  // not just 0.6m past the wall -- keeps the whole assembly (lip, cascade,
+  // basin far wall) in frame instead of cropping past it.
+  const targetOffset = dims.lipWidth + dims.catchBasinWidth * 0.5;
   return {
-    target: [midpoint[0] + zone.normal[0] * 0.6, targetY, midpoint[1] + zone.normal[1] * 0.6],
+    target: [
+      midpoint[0] + zone.normal[0] * targetOffset,
+      targetY,
+      midpoint[1] + zone.normal[1] * targetOffset,
+    ],
     position: [
       midpoint[0] + zone.normal[0] * distance,
       cameraY,

@@ -15,7 +15,7 @@ import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
 import { PoolLights, planSceneLighting } from "./PoolLights";
 import { DaylightEnvironment } from "./DaylightEnvironment";
-import { copingOuterOffset } from "./poolConstruction";
+import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
 import { createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
@@ -443,6 +443,7 @@ function StudioFloor({
   poolType,
   system,
   overflowType,
+  infinityZone,
 }: {
   outline: Outline;
   size: number;
@@ -450,6 +451,11 @@ function StudioFloor({
   poolType: PoolType;
   system: SystemType;
   overflowType: OverflowType;
+  /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
+   * deck's own cutout can widen on that one side to clear the catch basin.
+   * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
+   * keeps the plain uniform-offset cutout, byte-identical to before. */
+  infinityZone?: RectangleInfinityZone | null;
 }) {
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const geometry = useMemo(() => {
@@ -460,13 +466,17 @@ function StudioFloor({
       [half, half],
       [-half, half],
     ];
-    return createSurfaceGeometry(
-      outer,
+    const baseOffset = copingOuterOffset(system, overflowType);
+    const inner =
       poolType === "in-ground"
-        ? offsetOutline(outline, copingOuterOffset(system, overflowType))
-        : undefined,
-    );
-  }, [outline, size, poolType, system, overflowType]);
+        ? buildDeckCutoutOutline(
+            outline,
+            baseOffset,
+            system === "infinity" ? (infinityZone ?? null) : null,
+          )
+        : undefined;
+    return createSurfaceGeometry(outer, inner);
+  }, [outline, size, poolType, system, overflowType, infinityZone]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   const stone = useMemo(() => createTravertineMaps(), []);
@@ -767,6 +777,7 @@ export default function PoolScene({
         poolType={poolType}
         system={system}
         overflowType={overflowType}
+        infinityZone={infinityZone}
       />
 
       <PoolModel

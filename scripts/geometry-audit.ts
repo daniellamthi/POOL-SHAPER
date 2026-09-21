@@ -77,6 +77,7 @@ import {
   createCopingJointGeometry,
   createCopingSlabGeometry,
   copingOuterOffset,
+  buildDeckCutoutOutline,
   SKIMMER_PROFILES,
 } from "../src/components/pool/three/poolConstruction";
 import * as THREE from "three";
@@ -3469,6 +3470,101 @@ console.log(
     assert(
       outsideX || outsideZ,
       `Infinity: camera pose for side ${side} must sit outside the basin bounds`,
+    );
+    // Non-vacuous break/restore proof for the "camera underground" defect
+    // found and fixed during Geometry Pass D visual QA: the camera must sit
+    // at or above the catch basin's own floor -- a `cameraY` wrongly derived
+    // from the *main pool's* much deeper floor (or, before that, from the
+    // basin floor but reused at an XZ distance well outside the basin's own
+    // footprint) put the camera underground, producing a broken, flat,
+    // backface-only render instead of the lip/cascade/basin.
+    const infinityDimsForCamera = clampInfinityEdgeDimensions(undefined);
+    const lipTopYForCamera = infinityLayout.waterY + 0.003;
+    const basinFloorYForCamera =
+      lipTopYForCamera - infinityDimsForCamera.dropHeight - infinityDimsForCamera.catchBasinDepth;
+    assert(
+      pose.position[1] >= basinFloorYForCamera - 1e-6,
+      `Infinity: camera pose for side ${side} must sit at or above the catch basin floor (was ${pose.position[1]}, basin floor ${basinFloorYForCamera})`,
+    );
+    const brokenUndergroundCameraY = infinityLayout.floorY + 0.35;
+    assert(
+      brokenUndergroundCameraY < basinFloorYForCamera,
+      "Infinity: non-vacuous proof setup -- the old main-pool-floor-derived cameraY must actually be " +
+        "below the catch basin floor for this depth, or this proof checks nothing",
+    );
+  }
+
+  // --- Studio deck cutout: must clear the whole Infinity assembly --------
+  // Non-vacuous break/restore proof for the "catch basin hidden under the
+  // deck" defect found and fixed during Geometry Pass D visual QA: the
+  // deck's own opening used a uniform `copingOuterOffset` on every side,
+  // including the Infinity one, whose real assembly (lip + catch basin +
+  // wall thickness) reaches well past that -- the deck's solid floor plane
+  // then covered the outer half of the basin, hiding it entirely regardless
+  // of camera angle. `buildDeckCutoutOutline` must step the selected side's
+  // cutout edge out to actually clear the assembly, while every OTHER
+  // side's cutout stays exactly the plain uniform offset.
+  {
+    const baseOffset = copingOuterOffset("infinity", "hidden");
+    const dimsForDeck = clampInfinityEdgeDimensions(undefined);
+    const requiredReach =
+      dimsForDeck.lipWidth + dimsForDeck.catchBasinWidth + dimsForDeck.wallThickness;
+    assert(
+      requiredReach > baseOffset,
+      "Infinity: non-vacuous proof setup -- the assembly's real reach must actually exceed the " +
+        "uniform coping offset, or this proof checks nothing",
+    );
+    const plainCutout = offsetOutline(excludedSideOutline, baseOffset);
+    for (const side of RECTANGLE_INFINITY_SIDES) {
+      const zone = zones.find((z) => z.side === side)!;
+      const cutout = buildDeckCutoutOutline(excludedSideOutline, baseOffset, zone);
+      assert(
+        cutout.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+        `Infinity: deck cutout for side ${side} must be entirely finite`,
+      );
+      assert(
+        cutout.length === plainCutout.length + 2,
+        `Infinity: deck cutout for side ${side} must insert exactly 2 vertices (a rectangular ` +
+          `notch), not re-offset the whole outline (got ${cutout.length} vs plain ${plainCutout.length})`,
+      );
+      // Every cutout vertex must be at least as far from the pool's own
+      // outline as the plain uniform offset -- the notch only ever pushes
+      // OUT, never pulls a normal side back in.
+      const bounds = outlineBounds(cutout);
+      const plainBounds = outlineBounds(plainCutout);
+      assert(
+        bounds.minX <= plainBounds.minX + 1e-9 &&
+          bounds.maxX >= plainBounds.maxX - 1e-9 &&
+          bounds.minZ <= plainBounds.minZ + 1e-9 &&
+          bounds.maxZ >= plainBounds.maxZ - 1e-9,
+        `Infinity: deck cutout for side ${side} must fully contain the plain uniform-offset cutout`,
+      );
+      // The notch must actually reach the assembly's real footprint along
+      // the selected side's own outward normal, not just nudge outward by
+      // an arbitrary amount.
+      const pushedVertices = cutout.filter(
+        ([x, z]) =>
+          !plainCutout.some(([px, pz]) => Math.abs(px - x) < 1e-9 && Math.abs(pz - z) < 1e-9),
+      );
+      assert(
+        pushedVertices.length === 2,
+        `Infinity: deck cutout for side ${side} must add exactly 2 genuinely new vertices`,
+      );
+      for (const [x, z] of pushedVertices) {
+        const reachAlongNormal =
+          (x - zone.start[0]) * zone.normal[0] + (z - zone.start[1]) * zone.normal[1];
+        assert(
+          reachAlongNormal >= requiredReach - 1e-6,
+          `Infinity: deck cutout for side ${side} must reach at least ${requiredReach}m past the ` +
+            `wall along the outward normal (got ${reachAlongNormal})`,
+        );
+      }
+    }
+    // No zone: byte-identical to the plain uniform-offset cutout.
+    const noZoneCutout = buildDeckCutoutOutline(excludedSideOutline, baseOffset, null);
+    assert(
+      JSON.stringify(noZoneCutout) === JSON.stringify(plainCutout),
+      "Infinity: a null zone must leave the deck cutout byte-identical to the plain uniform offset",
     );
   }
   // No zone (Infinity intent requested but nothing selected yet) must never

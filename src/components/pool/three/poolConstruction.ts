@@ -3,6 +3,8 @@ import { mergeGeometries, toCreasedNormals } from "three/addons/utils/BufferGeom
 import type { Outline, OverflowType, SkimmerTypeId, SystemType } from "@/lib/pool/types";
 import { offsetOutline } from "@/lib/pool/geometry";
 import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
+import { clampInfinityEdgeDimensions } from "@/lib/pool/infinity-edge";
+import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 
 /** Architectural presentation only; never changes basin dimensions or quotation logic. */
 export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
@@ -10,6 +12,47 @@ export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
   if (system === "overflow" && overflow === "visible")
     return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;
   return 0.32 + (system === "overflow" ? OVERFLOW_GEOMETRY.hiddenChannelOffset : 0);
+}
+
+/**
+ * Geometry Pass D (Infinity): the deck's own cutout normally clears the pool
+ * by a uniform `copingOuterOffset` on every side -- fine everywhere except
+ * the Infinity side, whose real assembly (lip + catch basin, out to
+ * `lipWidth + catchBasinWidth + wallThickness`) reaches well past that
+ * uniform offset. Left uniform, the deck's own opaque floor plane simply
+ * covers the outer half of the catch basin, hiding its far wall/floor/end
+ * walls under solid deck with no visible drop or basin at all -- not a
+ * camera problem, a real occlusion bug. Steps just that one side's cutout
+ * edge out to clear the assembly, inserting two extra vertices so the other
+ * 3 sides and every corner stay exactly the plain uniform offset (a single
+ * rectangular notch, not a diagonal/mitred re-offset of the whole outline).
+ * `zone` `null` (every pre-Infinity call, or Infinity with no side chosen
+ * yet) returns the plain uniform-offset outline, byte-identical to before.
+ */
+export function buildDeckCutoutOutline(
+  outline: Outline,
+  baseOffset: number,
+  zone: RectangleInfinityZone | null,
+): Outline {
+  const base = offsetOutline(outline, baseOffset);
+  if (!zone || base.length !== outline.length) return base;
+  const dims = clampInfinityEdgeDimensions(undefined);
+  const reach = dims.lipWidth + dims.catchBasinWidth + dims.wallThickness;
+  const extra = reach - baseOffset;
+  if (!(extra > 1e-6)) return base;
+  const n = base.length;
+  const i = zone.side;
+  const j = (i + 1) % n;
+  const pushOut = (p: readonly [number, number]): [number, number] => [
+    p[0] + zone.normal[0] * extra,
+    p[1] + zone.normal[1] * extra,
+  ];
+  const result: Array<readonly [number, number]> = [];
+  for (let k = 0; k < n; k++) {
+    result.push(base[k]!);
+    if (k === i) result.push(pushOut(base[i]!), pushOut(base[j]!));
+  }
+  return result;
 }
 
 /** Metres; shared by the wall apertures and the manufactured face assemblies. */
