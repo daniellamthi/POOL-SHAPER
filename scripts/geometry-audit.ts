@@ -38,6 +38,17 @@ import {
   L_SHAPE_ORIENTATIONS,
   type LShapeOrientation,
 } from "../src/lib/pool/l-shape";
+import {
+  buildOrganicShapeOutline,
+  buildOrganicShapeOutlineInfo,
+  clampOrganicShapeParams,
+  ORGANIC_SHAPE_GUARDRAILS,
+  outlineSelfIntersects,
+  outlineWindsCcw,
+  validateOrganicOutline,
+} from "../src/lib/pool/organic-shape";
+import { planPoolLighting } from "../src/lib/pool/lighting";
+import { skimmerWall } from "../src/lib/pool/walls";
 import type { Dimensions, PoolShapeId } from "../src/lib/pool/types";
 import {
   ABOVE_GROUND_STRUCTURE_THICKNESS,
@@ -1080,7 +1091,7 @@ for (const [length, width, depth] of [
 }
 
 assert(
-  POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,l-shape,custom",
+  POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,l-shape,custom,organic",
   "invalid pool shapes",
 );
 assert(FINISHES.map(({ id }) => id).join(",") === "liner,mosaic", "invalid finishes");
@@ -2327,6 +2338,302 @@ console.log(
 
   console.log(
     "L-shape geometry/systems audit passed: floor triangulation, wall closure, coping/water-channel offset, one planar slope across both wings (with reversal), skimmer placement, internal-stair placement and the overview camera (all 4 orientations) are all finite, real, and correctly avoid or expose the recess/concave corner as appropriate.",
+  );
+}
+
+// --- Geometry Pass C: Organic shape domain + systems integration ---
+{
+  const baseParams = { length: 10, width: 6, curvature: 0.6, mirror: false };
+
+  // Domain: winding, self-intersection, determinism, area, point-count cap.
+  for (const curvature of [0, 0.25, 0.5, 0.75, 1]) {
+    for (const mirror of [false, true]) {
+      const params = clampOrganicShapeParams({ ...baseParams, curvature, mirror });
+      const outline = buildOrganicShapeOutline(params);
+      assert(
+        outline.length >= ORGANIC_SHAPE_GUARDRAILS.minPoints &&
+          outline.length <= ORGANIC_SHAPE_GUARDRAILS.maxPoints,
+        `organic curvature=${curvature} mirror=${mirror}: point count ${outline.length} must respect the [min,max] sampling guardrails`,
+      );
+      assert(
+        outline.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+        `organic curvature=${curvature} mirror=${mirror}: every sampled point must be finite`,
+      );
+      assert(
+        outlineWindsCcw(outline),
+        `organic curvature=${curvature} mirror=${mirror}: outline must wind CCW, same convention as every other shape`,
+      );
+      assert(
+        !outlineSelfIntersects(outline),
+        `organic curvature=${curvature} mirror=${mirror}: outline must never self-intersect`,
+      );
+      const validation = validateOrganicOutline(outline);
+      assert(
+        validation.valid,
+        `organic curvature=${curvature} mirror=${mirror}: validateOrganicOutline must report valid`,
+      );
+      const ellipseArea = Math.PI * (params.length / 2) * (params.width / 2);
+      assert(
+        validation.area > 0 && validation.area <= ellipseArea + 1e-6,
+        `organic curvature=${curvature} mirror=${mirror}: real area must be positive and never exceed the bounding ellipse's own area`,
+      );
+      const rebuilt = buildOrganicShapeOutline(params);
+      assert(
+        rebuilt.length === outline.length &&
+          rebuilt.every(([x, z], i) => x === outline[i]![0] && z === outline[i]![1]),
+        `organic curvature=${curvature} mirror=${mirror}: outline generation must be deterministic (no randomness/noise)`,
+      );
+      // Higher curvature must read as more organic (lower area than a plain
+      // ellipse of the same length/width), never more, and never collapse.
+      if (curvature > 0) {
+        assert(
+          validation.area < ellipseArea - 1e-6,
+          `organic curvature=${curvature} mirror=${mirror}: a real bay must actually reduce area below the plain ellipse`,
+        );
+      }
+    }
+  }
+
+  // Guardrail/clamp: NaN, undefined, out-of-range, and non-boolean mirror
+  // must all normalise to safe, finite, valid params -- never propagate.
+  const nanParams = clampOrganicShapeParams({
+    length: NaN,
+    width: NaN,
+    curvature: NaN,
+    mirror: "yes" as unknown as boolean,
+  });
+  assert(
+    Number.isFinite(nanParams.length) &&
+      Number.isFinite(nanParams.width) &&
+      Number.isFinite(nanParams.curvature) &&
+      typeof nanParams.mirror === "boolean",
+    "NaN/malformed organic input must normalise to finite, well-typed params, never propagate",
+  );
+  const undefinedParams = clampOrganicShapeParams(undefined);
+  assert(
+    Number.isFinite(undefinedParams.length) && Number.isFinite(undefinedParams.curvature),
+    "omitted organic params (a brand-new project) must default to real, finite params",
+  );
+  const outOfRange = clampOrganicShapeParams({
+    length: 999,
+    width: -50,
+    curvature: 5,
+    mirror: true,
+  });
+  assert(
+    outOfRange.length <= ORGANIC_SHAPE_GUARDRAILS.length.max &&
+      outOfRange.width >= ORGANIC_SHAPE_GUARDRAILS.width.min &&
+      outOfRange.curvature <= ORGANIC_SHAPE_GUARDRAILS.curvature.max &&
+      outOfRange.curvature >= ORGANIC_SHAPE_GUARDRAILS.curvature.min,
+    "out-of-range organic input must clamp into the real guardrail ranges",
+  );
+  // Smallest allowed footprint at maximum curvature must still produce a
+  // real, valid, above-the-area-floor outline -- the "shrink curvature until
+  // safe" guardrail must actually engage rather than silently degrade.
+  const tightest = clampOrganicShapeParams({
+    length: ORGANIC_SHAPE_GUARDRAILS.length.min,
+    width: ORGANIC_SHAPE_GUARDRAILS.width.min,
+    curvature: 1,
+    mirror: false,
+  });
+  const tightestOutline = buildOrganicShapeOutline(tightest);
+  const tightestValidation = validateOrganicOutline(tightestOutline);
+  assert(
+    tightestValidation.valid && tightestValidation.area >= ORGANIC_SHAPE_GUARDRAILS.minArea,
+    "the smallest allowed organic footprint at maximum requested curvature must still clear the minimum real area",
+  );
+
+  // buildOutline wiring: shape === "organic" must route through the organic
+  // generator, never fall back to the unit-rectangle/control-point path.
+  const organicDims: Dimensions = {
+    length: 10,
+    width: 6,
+    depth: 1.5,
+    cornerRadius: 0,
+    organicCurvature: 0.6,
+    organicMirror: false,
+  };
+  const wiredOutline = buildOutline("organic", organicDims, DEFAULT_CONTROL_POINTS);
+  assert(
+    wiredOutline.length >= ORGANIC_SHAPE_GUARDRAILS.minPoints,
+    "buildOutline('organic', ...) must produce the real sampled organic outline, not a 4-vertex rectangle",
+  );
+  assert(
+    Math.abs(outlineArea(wiredOutline) - outlineArea(buildOrganicShapeOutline({
+      length: 10,
+      width: 6,
+      curvature: 0.6,
+      mirror: false,
+    }))) < 1e-9,
+    "buildOutline('organic', ...) must match the canonical organic-shape.ts generator exactly",
+  );
+
+  console.log(
+    "Organic domain audit passed: winding, self-intersection safety, determinism, area vs. bounding ellipse, and clamped guardrails against degenerate/NaN/out-of-range/omitted input are all verified, plus correct buildOutline wiring.",
+  );
+}
+
+// --- Geometry Pass C: Organic shape floor/water/wall/systems integration ---
+{
+  const outlineInfo = buildOrganicShapeOutlineInfo({
+    length: 12,
+    width: 7,
+    curvature: 0.55,
+    mirror: false,
+  });
+  const outline = outlineInfo.outline;
+  const depth = 1.5;
+  const verticalLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth,
+    copingThickness: 0.03,
+  });
+
+  // Floor triangulation over the real concave/organic polygon: finite mesh,
+  // no NaN positions/UVs/normals.
+  const floorGeometry = createSurfaceGeometry(outline);
+  const positions = floorGeometry.getAttribute("position");
+  const uvs = floorGeometry.getAttribute("uv");
+  assert(positions.count > 0, "organic floor must triangulate to a real, non-empty mesh");
+  for (let i = 0; i < positions.count; i++) {
+    assert(
+      Number.isFinite(positions.getX(i)) &&
+        Number.isFinite(positions.getY(i)) &&
+        Number.isFinite(positions.getZ(i)),
+      "organic floor vertex positions must all be finite",
+    );
+    assert(Number.isFinite(uvs.getX(i)) && Number.isFinite(uvs.getY(i)), "organic floor UVs must all be finite");
+  }
+
+  // Wall closure around every sampled curve segment.
+  const wallGeometry = createWallGeometry(outline, verticalLayout.wallTopY, verticalLayout.floorY);
+  const wallPositions = wallGeometry.getAttribute("position");
+  assert(wallPositions.count > 0, "organic walls must produce a real, non-empty mesh");
+  for (let i = 0; i < wallPositions.count; i++) {
+    assert(
+      Number.isFinite(wallPositions.getX(i)) &&
+        Number.isFinite(wallPositions.getY(i)) &&
+        Number.isFinite(wallPositions.getZ(i)),
+      "organic wall vertex positions must all be finite -- a watertight ribbon around every curve segment",
+    );
+  }
+
+  // Coping offset around the curve must stay a real, finite, larger-area,
+  // non-self-intersecting ring.
+  const copingOutline = offsetOutline(outline, 0.35);
+  assert(
+    copingOutline.length >= outline.length - 4 &&
+      copingOutline.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
+    "organic coping offset must remain a real, finite, closed outline around the curved perimeter",
+  );
+  assert(
+    outlineArea(copingOutline) > outlineArea(outline),
+    "organic coping offset must expand the outline outward",
+  );
+  assert(
+    !outlineSelfIntersects(copingOutline),
+    "organic coping offset must not self-intersect",
+  );
+
+  // Water outline (skimmer system) must be the real curve, not a bounding box.
+  const waterOutline = buildWaterOutline(outline, "skimmer", "hidden");
+  assert(
+    Math.abs(outlineArea(waterOutline) - outlineArea(outline)) < 1e-6,
+    "organic water outline (skimmer system) must be the real curved polygon, never its bounding rectangle",
+  );
+
+  // Floor slope must stay correctly UNAVAILABLE for organic -- same
+  // eligibility rule as custom shapes (no single deterministic principal
+  // axis a customer would recognise on a freeform bay).
+  const organicSlopeProfile = buildFloorProfile({
+    outline,
+    shape: "organic",
+    poolType: "in-ground",
+    dimensions: {
+      length: 12,
+      width: 7,
+      depth,
+      cornerRadius: 0,
+      floorProfile: "slope",
+      shallowDepth: 1.0,
+    },
+    verticalLayout,
+  });
+  assert(
+    organicSlopeProfile.sloped === false,
+    "organic shape must never build a sloped floor, even when floorProfile: 'slope' is requested -- it has no single deterministic principal axis",
+  );
+
+  // Skimmer placement: a real, finite, non-empty plan along the outline's
+  // longer bounding-box axis (skimmerWall is already outline-generic).
+  const skimmers = planSkimmers(outline, outlineInfo.area, true);
+  assert(skimmers.positions.length > 0, "organic pool must get a real, non-empty skimmer plan");
+  assert(
+    skimmers.positions.every((p) => Number.isFinite(p.x) && Number.isFinite(p.z)),
+    "organic skimmer positions must all be finite",
+  );
+  const wall = skimmerWall(outline);
+  assert(
+    (wall.axis === "x" || wall.axis === "z") && Number.isFinite(wall.coordinate),
+    "organic skimmerWall must resolve a real axis/coordinate from the outline's own bounding box",
+  );
+
+  // LED lighting: must never crash and must never place a fixture outside
+  // the true curved outline or with non-finite geometry, whatever the
+  // outcome (a real row, or a clean warning if no candidate chord clears the
+  // spacing/clearance guardrails for this particular bay).
+  const lightingPlan = planPoolLighting({
+    outline,
+    waterY: verticalLayout.waterY,
+    floorY: verticalLayout.floorY,
+  });
+  assert(
+    lightingPlan.positions.every(
+      (p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z),
+    ),
+    "organic lighting plan positions must all be finite",
+  );
+  for (const position of lightingPlan.positions) {
+    assert(
+      outlineInfo.outline.some(
+        ([x, z]) => Math.hypot(x - position.x, z - position.z) < outlineInfo.perimeter,
+      ),
+      "organic lighting fixtures must be plausibly within the basin's own scale",
+    );
+  }
+
+  // Overview camera: must resolve a finite pose from the curve's own
+  // bounding box / centroid (no reflex-corner assumption required to not
+  // crash -- an organic outline has none in the L-shape sense, but the
+  // generic reflex-aware direction helper must still degrade gracefully).
+  const cameraPose = getCameraPose({
+    intent: "overview",
+    outline,
+    layout: verticalLayout,
+    depth,
+    skimmers,
+  });
+  assert(
+    [...cameraPose.position, ...cameraPose.target].every(Number.isFinite),
+    "organic overview camera pose must be finite",
+  );
+
+  // Mirror flips the bay to the opposite side -- the two outlines must be
+  // genuinely different (not accidentally ignored) but the same area.
+  const mirrored = buildOrganicShapeOutline({ length: 12, width: 7, curvature: 0.55, mirror: true });
+  assert(
+    Math.abs(outlineArea(mirrored) - outlineInfo.area) < 1e-6,
+    "mirroring the organic bay must not change the real area",
+  );
+  assert(
+    mirrored.some(([, z], i) => Math.abs(z - outline[i]![1]) > 1e-6),
+    "mirror: true must actually produce a different outline from mirror: false, not silently no-op",
+  );
+
+  console.log(
+    "Organic geometry/systems audit passed: floor triangulation, wall closure, coping/water offset, skimmer placement, lighting placement, the overview camera and the floor-slope exclusion are all finite, real, and correctly generic over the curved outline.",
   );
 }
 

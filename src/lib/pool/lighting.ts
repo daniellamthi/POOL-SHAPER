@@ -29,6 +29,74 @@ function hasReflexCorner(outline: Outline): boolean {
   });
 }
 
+/**
+ * Merge consecutive outline edges into longer "logical" wall chords while
+ * every point between the chord's endpoints stays within `tolerance` of the
+ * straight line between them. For a rectangle/L-shape outline (only ever a
+ * handful of true corner vertices) this is a no-op -- the very first
+ * candidate chord already deviates past `tolerance` at the next real corner,
+ * so the result is byte-identical to the raw per-vertex edges every existing
+ * lighting test asserts against. For a densely-sampled curve outline (the
+ * Organic shape, ~15-25cm point spacing) it collapses the low-curvature runs
+ * of the curve into real, placeable candidate walls instead of leaving every
+ * edge a few centimetres long and unconditionally rejected by the
+ * `cornerClearance`-based length filter below -- exactly the "arc-length
+ * distribution along candidate curve segments instead of assuming straight
+ * polygon walls" the Organic shape needs, without a parallel
+ * Organic-specific formula: the merged chord's own endpoints are always real
+ * outline vertices, so every downstream containment/exclusion check still
+ * runs against the true curve, only the candidate wall's tangent/normal is
+ * approximated locally.
+ */
+function mergedWallChords(
+  outline: Outline,
+  tolerance = 0.06,
+): ReadonlyArray<{ a: readonly [number, number]; b: readonly [number, number]; length: number }> {
+  const n = outline.length;
+  if (n < 3) return [];
+  const pointLineDistance = (
+    p: readonly [number, number],
+    a: readonly [number, number],
+    b: readonly [number, number],
+  ) => {
+    const dx = b[0] - a[0];
+    const dz = b[1] - a[1];
+    const lengthSquared = dx * dx + dz * dz;
+    if (lengthSquared < 1e-12) return Math.hypot(p[0] - a[0], p[1] - a[1]);
+    const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / lengthSquared));
+    return Math.hypot(p[0] - (a[0] + dx * t), p[1] - (a[1] + dz * t));
+  };
+  const chords: Array<{ a: readonly [number, number]; b: readonly [number, number]; length: number }> =
+    [];
+  let startIndex = 0;
+  let consumed = 0;
+  while (consumed < n) {
+    let bestSteps = 1;
+    for (let steps = 2; steps <= n - consumed; steps++) {
+      const endIndex = (startIndex + steps) % n;
+      const start = outline[startIndex]!;
+      const end = outline[endIndex]!;
+      let withinTolerance = true;
+      for (let k = 1; k < steps; k++) {
+        const point = outline[(startIndex + k) % n]!;
+        if (pointLineDistance(point, start, end) > tolerance) {
+          withinTolerance = false;
+          break;
+        }
+      }
+      if (!withinTolerance) break;
+      bestSteps = steps;
+    }
+    const endIndex = (startIndex + bestSteps) % n;
+    const a = outline[startIndex]!;
+    const b = outline[endIndex]!;
+    chords.push({ a, b, length: Math.hypot(b[0] - a[0], b[1] - a[1]) });
+    startIndex = endIndex;
+    consumed += bestSteps;
+  }
+  return chords;
+}
+
 /** Lighting DESIGN defaults, not a statutory light count or a compliance check. */
 export const POOL_LIGHTING_DESIGN = {
   targetIlluminance: 45,
@@ -171,12 +239,13 @@ export function planPoolLighting({
     if (Math.abs(a[axis]! - skimmers.coordinate) < 1e-6) return 2;
     return a[axis]! > skimmers.coordinate ? 0 : 1;
   };
-  const edges = outline
-    .map((a, i) => {
-      const b = outline[(i + 1) % outline.length]!;
-      signedArea += a[0] * b[1] - b[0] * a[1];
-      return { a, b, length: Math.hypot(b[0] - a[0], b[1] - a[1]), rank: wallRank(a, b) };
-    })
+  for (let i = 0; i < outline.length; i++) {
+    const a = outline[i]!;
+    const b = outline[(i + 1) % outline.length]!;
+    signedArea += a[0] * b[1] - b[0] * a[1];
+  }
+  const edges = mergedWallChords(outline)
+    .map((chord) => ({ ...chord, rank: wallRank(chord.a, chord.b) }))
     .filter((edge) => edge.length > 2 * design.cornerClearance)
     .sort((a, b) => a.rank - b.rank || b.length - a.length);
   const area = Math.abs(signedArea) / 2;

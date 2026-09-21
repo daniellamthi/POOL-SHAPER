@@ -171,6 +171,45 @@ try {
 assert(slopedLThrew, "a sloped L-shape must also refuse to export");
 console.log("PASS — D) sloped L-shape also refuses to export");
 
+// --- E. An Organic-shape project must refuse to export, never as
+// rectangle/custom, with a clear Italian message naming the organic shape
+// and a real workaround. ---
+let organicThrew = false;
+try {
+  serializePoolRenderConfig({
+    config: {
+      ...baseConfig,
+      shape: "organic",
+      dimensions: { ...baseConfig.dimensions, organicCurvature: 0.6, organicMirror: false },
+    },
+    outline: [
+      [-5, 0],
+      [-3, -3],
+      [3, -3],
+      [5, 0],
+      [3, 3],
+      [-3, 3],
+    ],
+    skimmers,
+    theme: "light",
+  });
+} catch (error) {
+  organicThrew = true;
+  assert(
+    error instanceof Error &&
+      /forma organica/.test(error.message) &&
+      /rettangolare/.test(error.message),
+    "Organic export guard must give a clear, customer-facing Italian message naming the organic shape and a real workaround",
+  );
+}
+assert(
+  organicThrew,
+  "an Organic-shape project must refuse to export -- it must NEVER silently serialise as 'rectangle' or 'custom'",
+);
 console.log(
-  "Export guard audit complete: rectangle regression clean, L-shape and sloped-L-shape both refuse cleanly with a clear message.",
+  "PASS — E) Organic export guard: refuses cleanly, never exports as rectangle/custom, clear Italian message",
+);
+
+console.log(
+  "Export guard audit complete: rectangle regression clean, L-shape, sloped-L-shape and Organic all refuse cleanly with a clear message.",
 );

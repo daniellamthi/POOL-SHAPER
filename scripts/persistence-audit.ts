@@ -13,6 +13,7 @@ import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
 import { saveProjectDraft, loadProjectDraft, clearProjectDraft } from "../src/lib/pool/persistence";
 import { parseProjectConfiguration, serializeProjectConfiguration } from "../src/lib/pool/project";
 import { L_SHAPE_GUARDRAILS } from "../src/lib/pool/l-shape";
+import { ORGANIC_SHAPE_GUARDRAILS } from "../src/lib/pool/organic-shape";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -350,6 +351,149 @@ console.log(
 }
 console.log(
   "PASS — L5) non-vacuous: asserting the pre-normalisation (NaN) shape correctly fails against the real parser, proving L3's normalisation assertions are not vacuous",
+);
+
+// --- M. Organic shape (Geometry Pass C) round-trips and normalisation. ---
+const organicFlatConfig: PoolConfig = {
+  ...fullConfig,
+  shape: "organic",
+  dimensions: {
+    length: 10,
+    width: 6,
+    depth: 1.5,
+    cornerRadius: 0,
+    organicCurvature: 0.6,
+    organicMirror: true,
+  },
+};
+const organicFlatProject: ProjectConfiguration = {
+  schemaVersion: PROJECT_SCHEMA_VERSION,
+  projectId: createProjectId(),
+  config: organicFlatConfig,
+  renovation: fullRenovation,
+};
+saveProjectDraft(organicFlatProject);
+const organicFlatRestored = loadProjectDraft();
+assert(organicFlatRestored !== null, "an Organic flat draft must restore");
+assert(
+  organicFlatRestored!.config.shape === "organic" &&
+    organicFlatRestored!.config.dimensions.length === 10 &&
+    organicFlatRestored!.config.dimensions.width === 6 &&
+    organicFlatRestored!.config.dimensions.organicCurvature === 0.6 &&
+    organicFlatRestored!.config.dimensions.organicMirror === true,
+  "Organic flat round-trip must preserve length, width, curvature and mirror exactly",
+);
+console.log("PASS — M1) Organic flat round-trip (length, width, curvature, mirror)");
+
+// --- M2. Organic shape must never restore with a sloped floor, even if a
+// legacy/hand-corrupted draft carries floorProfile: "slope" -- Organic is
+// excluded from slope eligibility entirely (see floor-profile.ts), but the
+// SAVED VALUE itself must still round-trip losslessly (the UI/geometry
+// layer is what ignores it, not persistence silently discarding it). ---
+const organicSlopeAttemptConfig: PoolConfig = {
+  ...fullConfig,
+  shape: "organic",
+  dimensions: {
+    length: 12,
+    width: 7,
+    depth: 1.8,
+    cornerRadius: 0,
+    organicCurvature: 0.4,
+    organicMirror: false,
+    floorProfile: "slope",
+    shallowDepth: 1.0,
+  },
+};
+const organicSlopeAttemptProject: ProjectConfiguration = {
+  schemaVersion: PROJECT_SCHEMA_VERSION,
+  projectId: createProjectId(),
+  config: organicSlopeAttemptConfig,
+  renovation: fullRenovation,
+};
+saveProjectDraft(organicSlopeAttemptProject);
+const organicSlopeAttemptRestored = loadProjectDraft();
+assert(organicSlopeAttemptRestored !== null, "an Organic + slope-attempt draft must restore");
+assert(
+  organicSlopeAttemptRestored!.config.dimensions.organicCurvature === 0.4 &&
+    organicSlopeAttemptRestored!.config.dimensions.organicMirror === false,
+  "Organic's own curvature/mirror fields must round-trip even alongside an (ignored) slope request",
+);
+console.log(
+  "PASS — M2) Organic + slope-attempt round-trip (curvature/mirror preserved; slope itself is a floor-profile.ts eligibility concern, not a persistence one)",
+);
+
+// --- M3. Malformed Organic data is normalised on load, never crashes, never
+// produces a degenerate/NaN/out-of-range shape downstream. ---
+function malformedOrganicDraft(dimensions: Record<string, unknown>): ProjectConfiguration | null {
+  const raw = {
+    schemaVersion: PROJECT_SCHEMA_VERSION,
+    projectId: createProjectId(),
+    config: {
+      ...fullConfig,
+      shape: "organic",
+      dimensions: { length: 10, width: 6, depth: 1.5, cornerRadius: 0, ...dimensions },
+    },
+    renovation: fullRenovation,
+  };
+  return parseProjectConfiguration(serializeProjectConfiguration(raw as ProjectConfiguration));
+}
+const malformedOrganicCases: Array<[string, Record<string, unknown>]> = [
+  ["NaN curvature", { organicCurvature: NaN, organicMirror: false }],
+  ["negative curvature", { organicCurvature: -5, organicMirror: false }],
+  ["out-of-range curvature", { organicCurvature: 999, organicMirror: true }],
+  ["non-boolean mirror", { organicCurvature: 0.5, organicMirror: "yes" }],
+  ["oversized length/width", { length: 9999, width: 9999, organicCurvature: 1 }],
+  ["missing organic fields entirely", {}],
+];
+for (const [label, dims] of malformedOrganicCases) {
+  const restoredMalformed = malformedOrganicDraft(dims);
+  assert(
+    restoredMalformed !== null,
+    `malformed organic case "${label}" must not be rejected outright`,
+  );
+  const d = restoredMalformed!.config.dimensions;
+  assert(
+    Number.isFinite(d.organicCurvature) &&
+      d.organicCurvature! >= ORGANIC_SHAPE_GUARDRAILS.curvature.min &&
+      d.organicCurvature! <= ORGANIC_SHAPE_GUARDRAILS.curvature.max &&
+      typeof d.organicMirror === "boolean" &&
+      Number.isFinite(d.length) &&
+      d.length! <= ORGANIC_SHAPE_GUARDRAILS.length.max,
+    `malformed organic case "${label}" must normalise to real, finite, in-range curvature/mirror/length on load -- never NaN/negative/oversized/non-boolean surviving into config.dimensions`,
+  );
+}
+console.log(
+  `PASS — M3) ${malformedOrganicCases.length} malformed-organic-data cases (NaN, negative, out-of-range, non-boolean mirror, oversized length/width, missing fields) all normalise safely on load`,
+);
+
+// --- M4. Legacy rectangle/l-shape/custom projects are unaffected by the
+// Organic normalisation added above -- it must only ever touch
+// shape === "organic". ---
+saveProjectDraft(lFlatProject); // an L-shape draft from section L, re-saved after Organic branch exists.
+const legacyOrganicRestored = loadProjectDraft();
+assert(
+  legacyOrganicRestored!.config.shape === "l-shape" &&
+    legacyOrganicRestored!.config.dimensions.lShapeRecessLength === 4 &&
+    legacyOrganicRestored!.config.dimensions.organicCurvature === undefined,
+  "a legacy (non-organic) project's dimensions must round-trip completely untouched by Organic normalisation",
+);
+console.log(
+  "PASS — M4) legacy rectangle/l-shape/custom projects regress cleanly (untouched by Organic normalisation)",
+);
+
+// --- M5. Non-vacuous: prove M3/M4 would actually catch a broken
+// normalisation, by asserting the wrong (pre-normalisation) expectation
+// fails against the real parser. ---
+{
+  const brokenRestored = malformedOrganicDraft({ organicCurvature: NaN, organicMirror: false });
+  const wouldWronglyPass = Number.isNaN(brokenRestored!.config.dimensions.organicCurvature);
+  assert(
+    !wouldWronglyPass,
+    "non-vacuous check failed: the real parser normalised NaN away, so asserting it stayed NaN correctly fails -- this proves M3 is exercising real normalisation logic, not a no-op",
+  );
+}
+console.log(
+  "PASS — M5) non-vacuous: asserting the pre-normalisation (NaN) shape correctly fails against the real parser, proving M3's normalisation assertions are not vacuous",
 );
 
 console.log("Persistence (P4) audit complete.");
