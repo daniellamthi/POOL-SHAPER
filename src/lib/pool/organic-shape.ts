@@ -29,7 +29,7 @@
  * (`outlineSelfIntersects`) as a defensive, real safety net, not decoration.
  */
 import type { Outline } from "./types";
-import { outlineArea, outlineBounds, outlinePerimeter } from "./geometry";
+import { offsetOutline, outlineArea, outlineBounds, outlinePerimeter } from "./geometry";
 
 export interface OrganicShapeParams {
   /** Overall bounding span along X, metres. */
@@ -74,11 +74,53 @@ function angularDelta(a: number, b: number): number {
 /** Bay depth / opposite-side fullness as fractions of the base radius, at
  * curvature === 1. Kept well inside (0, 1) so `radiusAt` can never reach or
  * cross zero for any curvature in [0, 1] -- the structural guarantee that
- * makes self-intersection impossible by construction. */
-const MAX_DIP_FRACTION = 0.34;
-const MAX_BULGE_FRACTION = 0.12;
-const DIP_ANGULAR_WIDTH = 0.62;
-const BULGE_ANGULAR_WIDTH = 0.9;
+ * makes self-intersection impossible by construction.
+ *
+ * These were originally 0.34 / 0.12 with wide (0.62 / 0.9 rad) Gaussians --
+ * mathematically a real dip, but so shallow and so spread out relative to
+ * the base ellipse that it rendered as visually indistinguishable from a
+ * plain oval at both the default curvature (0.5) and near the max (0.95):
+ * area only moved ~2% across the whole range, and a symmetric bulge that
+ * grew in lockstep with the dip actively clawed most of that area back at
+ * high curvature.
+ *
+ * A first pass over-corrected to a very narrow (0.35 rad), very deep (72%)
+ * Gaussian: visually dramatic, but its local radius of curvature at the
+ * bottom of the bay got tight enough that `offsetOutline` (geometry.ts),
+ * used for every real outward offset a customer actually sees (coping,
+ * hidden/visible overflow channels -- up to ~0.425 m outward), would
+ * self-intersect and get pruned by `removeOffsetLoops`, throwing
+ * `createCopingSlabGeometry`'s "Mismatched coping outlines" guard. Widened
+ * back out (still much deeper/narrower than the original) to a combination
+ * verified, by direct probe against the real `offsetOutline`, to never
+ * shrink the point count for any real outward offset up to 0.45 m across
+ * the full guardrail range of length/width/curvature/mirror -- see the
+ * `copingSafeAtOffset` guardrail below, which also catches the rare
+ * remaining extreme-aspect-ratio edge case by shrinking curvature exactly
+ * the way the area-floor guardrail already does. At curvature=1 the bay
+ * still cuts the local radius by 55% (a dramatic waist); the safety
+ * boundary only constrains the CONCAVE (dip) side -- an outward offset of a
+ * convex bulge never self-intersects -- so the opposite side's bulge is
+ * free to be both narrower and deeper (25%) than the dip's own angular
+ * width without touching coping-safety at all. That asymmetry (a wide,
+ * gentle waist against a narrower, fuller far side) is what makes the
+ * silhouette actually read as a kidney/bean rather than a lopsided oval:
+ * verified visually (Playwright screenshots at curvature 0.5 and 1) as well
+ * as by the area-divergence and bay/opposite-side notch-depth assertions
+ * below. 1 - MAX_DIP_FRACTION (0.45) is `radiusAt`'s own worst case --
+ * still comfortably clear of zero. */
+const MAX_DIP_FRACTION = 0.55;
+const MAX_BULGE_FRACTION = 0.25;
+const DIP_ANGULAR_WIDTH = 1.3;
+const BULGE_ANGULAR_WIDTH = 0.8;
+
+/** The largest real outward offset any consumer of an organic outline ever
+ * applies -- see `copingOuterOffset` (poolConstruction.ts: 0.32 m skimmer,
+ * 0.32 + `OVERFLOW_GEOMETRY.hiddenChannelOffset` (0.105 m) = 0.425 m hidden
+ * overflow) and `OVERFLOW_GEOMETRY.visibleChannelOuterOffset` (0.355 m) --
+ * rounded up for margin. Used only by the `copingSafeAtOffset` guardrail
+ * below; not itself a rendering constant. */
+const MAX_REAL_OUTWARD_OFFSET = 0.45;
 
 function radiusAt(theta: number, curvature: number, mirror: boolean): number {
   const bayCentre = mirror ? -Math.PI / 2 : Math.PI / 2;
@@ -92,7 +134,7 @@ function radiusAt(theta: number, curvature: number, mirror: boolean): number {
     MAX_BULGE_FRACTION *
     curvature *
     Math.exp(-(bulgeDelta * bulgeDelta) / (2 * BULGE_ANGULAR_WIDTH * BULGE_ANGULAR_WIDTH));
-  // 1 - MAX_DIP_FRACTION (0.66) is the worst case; never near zero.
+  // 1 - MAX_DIP_FRACTION (0.45) is the worst case; never near zero.
   return 1 - dip + bulge;
 }
 
@@ -236,21 +278,35 @@ export function clampOrganicShapeParams(
   );
   const mirror = input?.mirror === true;
 
-  // Binary-search curvature down (never up) until the resulting outline's
-  // real area clears the guardrail floor. At curvature 0 the outline is a
-  // pure ellipse of area pi * (length/2) * (width/2), which for the smallest
-  // allowed length/width (4 x 3) is already ~9.4 m^2 -- comfortably above
-  // `minArea` (4 m^2) -- so this loop only ever has real work to do if the
-  // guardrail constants themselves are tightened later; it is a genuine
-  // safety net, not a no-op.
+  // Binary-search curvature down (never up) until the resulting outline is
+  // safe on BOTH counts: (a) real area clears the guardrail floor, and (b)
+  // every real outward offset a customer's pool actually gets (coping,
+  // overflow channels -- see `MAX_REAL_OUTWARD_OFFSET`) stays a simple
+  // polygon with the same point count, never triggering `offsetOutline`'s
+  // self-intersection cleanup (`removeOffsetLoops`), which would otherwise
+  // reach `createCopingSlabGeometry`'s "Mismatched coping outlines" guard.
+  // At curvature 0 the outline is a pure ellipse of area
+  // pi * (length/2) * (width/2), which for the smallest allowed length/width
+  // (4 x 3) is already ~9.4 m^2 -- comfortably above `minArea` (4 m^2) -- and
+  // a plain ellipse's offset never self-intersects, so this loop only ever
+  // has real work to do for a genuinely tight combination of length, width,
+  // curvature and offset; it is a real safety net, not a no-op (verified: it
+  // engages for the smallest allowed length paired with the largest allowed
+  // width at curvature 1).
+  const copingSafeAtOffset = (outline: Outline) => {
+    const offset = offsetOutline(outline, MAX_REAL_OUTWARD_OFFSET);
+    return offset.length === outline.length;
+  };
   let low = 0;
   let high = requestedCurvature;
-  const probe = (curvature: number) =>
-    outlineArea(sampleAtCount({ length, width, curvature, mirror }, 48));
-  if (probe(high) < ORGANIC_SHAPE_GUARDRAILS.minArea) {
+  const probe = (curvature: number) => {
+    const outline = sampleAtCount({ length, width, curvature, mirror }, 128);
+    return outlineArea(outline) >= ORGANIC_SHAPE_GUARDRAILS.minArea && copingSafeAtOffset(outline);
+  };
+  if (!probe(high)) {
     for (let iteration = 0; iteration < 20; iteration++) {
       const mid = (low + high) / 2;
-      if (probe(mid) >= ORGANIC_SHAPE_GUARDRAILS.minArea) low = mid;
+      if (probe(mid)) low = mid;
       else high = mid;
     }
     return { length, width, curvature: low, mirror };
@@ -280,7 +336,14 @@ export function buildOrganicShapeOutline(params: OrganicShapeParams): Outline {
   );
   const outline = sampleAtCount(safe, targetCount);
   const validation = validateOrganicOutline(outline);
-  if (validation.valid) return outline;
+  // `clampOrganicShapeParams` already verified coping-safety at a fixed
+  // 128-point sample; re-check it here too at the outline's own adaptive
+  // `targetCount` (28-160, arc-length driven), since that can differ from
+  // 128 and a mismatch would otherwise only surface downstream as
+  // `createCopingSlabGeometry`'s "Mismatched coping outlines" throw.
+  const offset = offsetOutline(outline, MAX_REAL_OUTWARD_OFFSET);
+  const copingSafe = offset.length === outline.length;
+  if (validation.valid && copingSafe) return outline;
   // Structurally should be unreachable (see module docs), but never trust a
   // curve into downstream geometry without checking: fall back to the
   // provably-safe curvature-0 ellipse at the same length/width.

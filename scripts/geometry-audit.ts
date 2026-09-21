@@ -2345,6 +2345,14 @@ console.log(
   );
 }
 
+// Mirrors organic-shape.ts's own `MAX_REAL_OUTWARD_OFFSET` (not imported --
+// that constant is intentionally private to the module) -- the largest real
+// outward offset any consumer (coping, hidden/visible overflow channels)
+// ever applies. Kept as a literal here so this test independently pins down
+// the real value rather than trusting the module's own guardrail to grade
+// itself.
+const MAX_REAL_OUTWARD_OFFSET_FOR_TEST = 0.45;
+
 // --- Geometry Pass C: Organic shape domain + systems integration ---
 {
   const baseParams = { length: 10, width: 6, curvature: 0.6, mirror: false };
@@ -2393,6 +2401,47 @@ console.log(
         assert(
           validation.area < ellipseArea - 1e-6,
           `organic curvature=${curvature} mirror=${mirror}: a real bay must actually reduce area below the plain ellipse`,
+        );
+      }
+      // Regression guard for the "reads as a plain ellipse" defect: at the
+      // default (0.5) and max (1) curvature the bay must be a REAL,
+      // visually-legible notch, not a shallow wobble. Area alone is a weak
+      // signal (a wide, shallow dip can move area a little while looking
+      // like an oval), so this also checks the outline's own
+      // distance-from-centroid profile has a deep local minimum on the bay
+      // side relative to the opposite (bulge) side -- the actual geometric
+      // signature of a kidney/bean waist.
+      if (curvature >= 0.5) {
+        const divergence = (ellipseArea - validation.area) / ellipseArea;
+        assert(
+          divergence >= 0.05,
+          `organic curvature=${curvature} mirror=${mirror}: area must diverge from the bounding ellipse by at least 5% (got ${(divergence * 100).toFixed(2)}%) -- otherwise the bay reads as a plain ellipse`,
+        );
+        const centroid = outline.reduce(
+          (sum, [x, z]) => [sum[0] + x / outline.length, sum[1] + z / outline.length] as const,
+          [0, 0] as readonly [number, number],
+        );
+        const bayCentre = mirror ? -Math.PI / 2 : Math.PI / 2;
+        let bayMinDistance = Infinity;
+        let oppositeMaxDistance = 0;
+        for (const [x, z] of outline) {
+          const theta = Math.atan2(z, x);
+          const distance = Math.hypot(x - centroid[0], z - centroid[1]);
+          const toBay = Math.atan2(Math.sin(theta - bayCentre), Math.cos(theta - bayCentre));
+          if (Math.abs(toBay) < 0.35) bayMinDistance = Math.min(bayMinDistance, distance);
+          const toOpposite = Math.atan2(
+            Math.sin(theta - (bayCentre + Math.PI)),
+            Math.cos(theta - (bayCentre + Math.PI)),
+          );
+          if (Math.abs(toOpposite) < 0.35) oppositeMaxDistance = Math.max(oppositeMaxDistance, distance);
+        }
+        assert(
+          Number.isFinite(bayMinDistance) && oppositeMaxDistance > 0,
+          `organic curvature=${curvature} mirror=${mirror}: could not sample both the bay side and its opposite side for the notch-depth check`,
+        );
+        assert(
+          bayMinDistance <= oppositeMaxDistance * 0.85,
+          `organic curvature=${curvature} mirror=${mirror}: the bay side's centroid distance (${bayMinDistance.toFixed(3)}) must sit meaningfully closer in than the opposite (fuller) side (${oppositeMaxDistance.toFixed(3)}) -- a real, visible notch, not a plain ellipse`,
         );
       }
     }
@@ -2525,12 +2574,19 @@ console.log(
   }
 
   // Coping offset around the curve must stay a real, finite, larger-area,
-  // non-self-intersecting ring.
+  // non-self-intersecting ring, with EXACTLY the same point count as the
+  // basin outline -- not "close enough": a dropped point here means
+  // `offsetOutline`'s self-intersection cleanup (`removeOffsetLoops`) fired,
+  // which is exactly the defect that let `createCopingSlabGeometry` throw
+  // "Mismatched coping outlines" at runtime for a real Organic pool (a too
+  // narrow/deep bay dip whose radius of curvature was tighter than the real
+  // coping offset). A previous, looser version of this assertion (tolerating
+  // up to 4 dropped points) let that regression through; it must not again.
   const copingOutline = offsetOutline(outline, 0.35);
   assert(
-    copingOutline.length >= outline.length - 4 &&
+    copingOutline.length === outline.length &&
       copingOutline.every(([x, z]) => Number.isFinite(x) && Number.isFinite(z)),
-    "organic coping offset must remain a real, finite, closed outline around the curved perimeter",
+    "organic coping offset must remain a real, finite, closed outline around the curved perimeter, with no points dropped by self-intersection cleanup",
   );
   assert(
     outlineArea(copingOutline) > outlineArea(outline),
@@ -2540,6 +2596,37 @@ console.log(
     !outlineSelfIntersects(copingOutline),
     "organic coping offset must not self-intersect",
   );
+
+  // Real regression proof for the exact runtime crash: `createCopingSlabGeometry`
+  // (poolConstruction.ts) itself, called across the full curvature range, both
+  // mirror states, and the largest real outward offset any consumer ever
+  // applies (coping, hidden/visible overflow channels). Must never throw
+  // "Mismatched coping outlines".
+  for (const sweepCurvature of [0, 0.25, 0.5, 0.75, 1]) {
+    for (const sweepMirror of [false, true]) {
+      const sweepOutline = buildOrganicShapeOutline({
+        length: 12,
+        width: 7,
+        curvature: sweepCurvature,
+        mirror: sweepMirror,
+      });
+      const sweepOuter = offsetOutline(sweepOutline, MAX_REAL_OUTWARD_OFFSET_FOR_TEST);
+      assert(
+        sweepOuter.length === sweepOutline.length,
+        `organic curvature=${sweepCurvature} mirror=${sweepMirror}: the ${MAX_REAL_OUTWARD_OFFSET_FOR_TEST}m outward offset (the largest any real consumer applies) must not drop points`,
+      );
+      let threw = false;
+      try {
+        createCopingSlabGeometry(sweepOutline, sweepOuter, 0.03);
+      } catch {
+        threw = true;
+      }
+      assert(
+        !threw,
+        `organic curvature=${sweepCurvature} mirror=${sweepMirror}: createCopingSlabGeometry must never throw "Mismatched coping outlines" for any real, guardrail-clamped organic outline`,
+      );
+    }
+  }
 
   // Water outline (skimmer system) must be the real curve, not a bounding box.
   const waterOutline = buildWaterOutline(outline, "skimmer", "hidden");
