@@ -16,6 +16,7 @@ import {
 import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { Outline, PoolShapeId } from "@/lib/pool/types";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
+import type { StoneMaps } from "./stoneTextures";
 
 function useDisposableGeometry<T extends THREE.BufferGeometry>(
   factory: () => T,
@@ -35,6 +36,16 @@ interface InfinityEdgeProps {
   copingSurfaceY: number;
   copingOuterOffsetDistance: number;
   materials: ResolvedMaterials;
+  /** Same procedural/scanned stone bake `PoolModel` samples triplanar (world
+   * -space, not mesh UV) for the main coping ring -- shared here so the lip
+   * and coping transition caps ("the coping-equivalent cap the water sheets
+   * over", see infinity-edge.ts) render the SAME finish as the rest of the
+   * coping instead of a flat, texture-less swatch of `materials.coping.color`
+   * (pure white for every scanned finish -- travertine, gres, ardesia, deck
+   * -marrone -- whose colour is deliberately neutral so the real maps drive
+   * the look, per coping-materials.ts). */
+  copingDetail: StoneMaps;
+  configureCopingTriplanar: (shader: THREE.WebGLProgramParametersWithUniforms) => void;
 }
 
 /**
@@ -54,6 +65,8 @@ export function InfinityEdge({
   copingSurfaceY,
   copingOuterOffsetDistance,
   materials,
+  copingDetail,
+  configureCopingTriplanar,
 }: InfinityEdgeProps) {
   const params = infinityEdge;
   const geometryData = useMemo(
@@ -119,28 +132,60 @@ export function InfinityEdge({
 
   if (!zone || !dims || !basin) return null;
 
+  // Same triplanar (world-space, not mesh-UV) stone material PoolModel uses
+  // for the main coping ring -- see `copingDetail`/`configureCopingTriplanar`
+  // doc on the props above. Sampling is triplanar, so it is correct
+  // regardless of each piece's own UVs (the lip is a per-segment fan for a
+  // curved Organic arc, the caps are small end quads) and needs no seam
+  // alignment with the coping ring's own UVs -- world position alone keeps
+  // the stone pattern continuous across the coping -> transition cap -> lip
+  // boundary.
+  // `key` is passed directly on each JSX element below, never inside this
+  // spread object -- React warns (and, in some versions, throws) when a
+  // spread props object carries its own `key`, since key is special JSX
+  // metadata, not a real prop.
+  const copingMaterialKey = materials.coping.moduleSize;
   const copingMaterialProps = {
     color: materials.coping.color,
+    normalMap: copingDetail.normalMap,
+    normalScale: [materials.coping.normalStrength, materials.coping.normalStrength] as [
+      number,
+      number,
+    ],
+    roughnessMap: copingDetail.roughnessMap,
     roughness: materials.coping.roughness,
+    metalness: 0,
+    clearcoat: 0,
+    clearcoatRoughness: 0.45,
+    onBeforeCompile: configureCopingTriplanar,
+    customProgramCacheKey: () => "coping-triplanar-v4",
   };
 
   return (
     <group name="infinity-edge">
       {/* Lip: same finish as the rest of the coping, just lowered/thinned. */}
       <mesh geometry={lip} receiveShadow castShadow>
-        <meshStandardMaterial {...copingMaterialProps} side={DoubleSide} />
+        <meshPhysicalMaterial key={copingMaterialKey} {...copingMaterialProps} side={DoubleSide} />
       </mesh>
 
       {/* Coping transition caps: close the step at both ends against the
           adjoining normal coping run. */}
       {transitions.start ? (
         <mesh geometry={transitions.start} receiveShadow castShadow>
-          <meshStandardMaterial {...copingMaterialProps} side={DoubleSide} />
+          <meshPhysicalMaterial
+            key={copingMaterialKey}
+            {...copingMaterialProps}
+            side={DoubleSide}
+          />
         </mesh>
       ) : null}
       {transitions.end ? (
         <mesh geometry={transitions.end} receiveShadow castShadow>
-          <meshStandardMaterial {...copingMaterialProps} side={DoubleSide} />
+          <meshPhysicalMaterial
+            key={copingMaterialKey}
+            {...copingMaterialProps}
+            side={DoubleSide}
+          />
         </mesh>
       ) : null}
 

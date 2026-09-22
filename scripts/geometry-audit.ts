@@ -123,6 +123,7 @@ import {
   createInfinityLipGeometry,
   createInfinityTransitionCapGeometry,
   isGeometryFinite,
+  isUvAttributeSane,
 } from "../src/components/pool/three/infinityEdgeGeometry";
 
 const assert = (condition: unknown, message: string): asserts condition => {
@@ -3309,6 +3310,10 @@ console.log(
       lip.getAttribute("position").count > 0,
       `Infinity: side ${side} lip geometry must have real vertices`,
     );
+    assert(
+      isUvAttributeSane(lip),
+      `Infinity: side ${side} lip geometry must have a real, non-degenerate UV attribute`,
+    );
     const cascade = createInfinityCascadeGeometry(zone, infinityDims, lipTopY);
     assert(
       isGeometryFinite(cascade),
@@ -3317,6 +3322,10 @@ console.log(
     assert(
       cascade.getAttribute("position").count > 0,
       `Infinity: side ${side} cascade geometry must have real vertices`,
+    );
+    assert(
+      isUvAttributeSane(cascade),
+      `Infinity: side ${side} cascade geometry must have a real, non-degenerate UV attribute`,
     );
     const basin = createInfinityCatchBasinGeometry(zone, infinityDims, lipTopY);
     for (const [name, geometry] of Object.entries(basin)) {
@@ -3327,6 +3336,10 @@ console.log(
       assert(
         geometry.getAttribute("position").count > 0,
         `Infinity: side ${side} catch-basin ${name} geometry must have real vertices`,
+      );
+      assert(
+        isUvAttributeSane(geometry),
+        `Infinity: side ${side} catch-basin ${name} geometry must have a real, non-degenerate UV attribute`,
       );
     }
     const transitions = createInfinityTransitionCapGeometry(
@@ -3343,6 +3356,10 @@ console.log(
     assert(
       isGeometryFinite(transitions.start!) && isGeometryFinite(transitions.end!),
       `Infinity: side ${side} transition caps must be entirely finite`,
+    );
+    assert(
+      isUvAttributeSane(transitions.start!) && isUvAttributeSane(transitions.end!),
+      `Infinity: side ${side} transition caps must have a real, non-degenerate UV attribute`,
     );
     // No real step (lip already flush with the coping) must never fabricate
     // a zero-height cap.
@@ -3797,16 +3814,28 @@ console.log(
         isGeometryFinite(lip),
         `Infinity/L-shape (${orientation}) side ${zone.side}: lip must be finite`,
       );
+      assert(
+        isUvAttributeSane(lip),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: lip must have a real, non-degenerate UV attribute`,
+      );
       const cascade = createInfinityCascadeGeometry(zone, infDims, lipTopY);
       assert(
         isGeometryFinite(cascade),
         `Infinity/L-shape (${orientation}) side ${zone.side}: cascade must be finite`,
+      );
+      assert(
+        isUvAttributeSane(cascade),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: cascade must have a real, non-degenerate UV attribute`,
       );
       const basin = createInfinityCatchBasinGeometry(zone, infDims, lipTopY);
       for (const [name, geometry] of Object.entries(basin)) {
         assert(
           isGeometryFinite(geometry),
           `Infinity/L-shape (${orientation}) side ${zone.side}: catch-basin ${name} must be finite`,
+        );
+        assert(
+          isUvAttributeSane(geometry),
+          `Infinity/L-shape (${orientation}) side ${zone.side}: catch-basin ${name} must have a real, non-degenerate UV attribute`,
         );
       }
       const transitions = createInfinityTransitionCapGeometry(zone, infDims, lipTopY, 0.35, 0.32);
@@ -3816,6 +3845,10 @@ console.log(
           isGeometryFinite(transitions.start) &&
           isGeometryFinite(transitions.end),
         `Infinity/L-shape (${orientation}) side ${zone.side}: transition caps must be real and finite`,
+      );
+      assert(
+        isUvAttributeSane(transitions.start!) && isUvAttributeSane(transitions.end!),
+        `Infinity/L-shape (${orientation}) side ${zone.side}: transition caps must have a real, non-degenerate UV attribute`,
       );
 
       // The one property the task explicitly calls out: the catch basin's
@@ -4147,13 +4180,25 @@ console.log(
       // Full geometry pipeline must be finite for every organic zone.
       const lip = createInfinityLipGeometry(zone, infDims, lipTopY);
       assert(isGeometryFinite(lip), `${label} side ${zone.side}: lip must be finite`);
+      assert(
+        isUvAttributeSane(lip),
+        `${label} side ${zone.side}: lip must have a real, non-degenerate UV attribute`,
+      );
       const cascade = createInfinityCascadeGeometry(zone, infDims, lipTopY);
       assert(isGeometryFinite(cascade), `${label} side ${zone.side}: cascade must be finite`);
+      assert(
+        isUvAttributeSane(cascade),
+        `${label} side ${zone.side}: cascade must have a real, non-degenerate UV attribute`,
+      );
       const basin = createInfinityCatchBasinGeometry(zone, infDims, lipTopY);
       for (const [name, geometry] of Object.entries(basin)) {
         assert(
           isGeometryFinite(geometry),
           `${label} side ${zone.side}: catch-basin ${name} must be finite`,
+        );
+        assert(
+          isUvAttributeSane(geometry),
+          `${label} side ${zone.side}: catch-basin ${name} must have a real, non-degenerate UV attribute`,
         );
       }
       const transitions = createInfinityTransitionCapGeometry(zone, infDims, lipTopY, 0.35, 0.32);
@@ -4163,6 +4208,10 @@ console.log(
           isGeometryFinite(transitions.start) &&
           isGeometryFinite(transitions.end),
         `${label} side ${zone.side}: transition caps must be real and finite`,
+      );
+      assert(
+        isUvAttributeSane(transitions.start!) && isUvAttributeSane(transitions.end!),
+        `${label} side ${zone.side}: transition caps must have a real, non-degenerate UV attribute`,
       );
 
       // No-self-intersection / no-gap proof for the CURVED catch basin: the

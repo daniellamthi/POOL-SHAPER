@@ -341,3 +341,40 @@ export function isGeometryFinite(geometry: THREE.BufferGeometry): boolean {
   }
   return true;
 }
+
+/**
+ * UV sanity guard for every piece built above (lip, cascade, catch-basin
+ * floor/walls, transition caps): a real, non-degenerate `uv` attribute,
+ * present for every vertex, entirely finite, and within a real-world metre
+ * -scale sane range -- catches a missing/degenerate UV attribute (the
+ * classic cause of black triangles or a material that can't sample its map
+ * at all) as well as a UV blow-up (e.g. a near-zero-width piece dividing a
+ * `uvScaleU`/`uvScaleV` by an unclamped near-zero dimension) the way a
+ * finiteness-only check on `position` never would. The lip/cap materials
+ * this module feeds (`InfinityEdge.tsx`) sample their stone finish
+ * triplanar, in world space, so THEY don't depend on this attribute being
+ * meaningful -- but the `uv` attribute is still built and shipped on every
+ * piece (see `addQuad`/`finishGeometry`), and any future consumer that DOES
+ * read it (or a regression that starts sampling it) deserves the same
+ * "never silently degenerate" guarantee `isGeometryFinite` gives `position`.
+ */
+export function isUvAttributeSane(geometry: THREE.BufferGeometry): boolean {
+  const uv = geometry.getAttribute("uv");
+  const position = geometry.getAttribute("position");
+  if (!uv || !position) return false;
+  if (uv.count !== position.count) return false;
+  let maxAbsValue = 0;
+  for (let i = 0; i < uv.count; i++) {
+    const u = uv.getX(i);
+    const v = uv.getY(i);
+    if (!Number.isFinite(u) || !Number.isFinite(v)) return false;
+    // Real-world metre-scale UVs (see `addQuad`): a value past this is a
+    // sign generation blew up (e.g. a near-zero divisor), not a legitimate
+    // tiling repeat for any pool this app can build.
+    if (Math.abs(u) > 500 || Math.abs(v) > 500) return false;
+    maxAbsValue = Math.max(maxAbsValue, Math.abs(u), Math.abs(v));
+  }
+  // A present-but-never-written (all-zero) UV attribute would pass every
+  // check above -- this is what actually catches that degenerate case.
+  return maxAbsValue > 1e-6;
+}

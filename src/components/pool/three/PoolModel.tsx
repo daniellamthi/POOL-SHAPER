@@ -1207,6 +1207,8 @@ export function PoolModel({
           copingSurfaceY={copingSurfaceY}
           copingOuterOffsetDistance={copingOuterOffset(system, overflowType)}
           materials={materials}
+          copingDetail={copingDetail}
+          configureCopingTriplanar={configureCopingTriplanar}
         />
       ) : null}
     </group>
