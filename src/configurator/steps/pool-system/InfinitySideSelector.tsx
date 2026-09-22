@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * understand. Picks whichever axis the normal points along more strongly,
  * which is always unambiguous for an axis-aligned Rectangle side.
  */
-function sideLabel(normal: readonly [number, number]): string {
+export function sideLabel(normal: readonly [number, number]): string {
   if (Math.abs(normal[0]) >= Math.abs(normal[1])) {
     return normal[0] >= 0 ? "Lato Est" : "Lato Ovest";
   }

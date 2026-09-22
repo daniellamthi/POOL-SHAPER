@@ -6,6 +6,8 @@ import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
+import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
+import { sideLabel } from "@/configurator/steps/pool-system/InfinitySideSelector";
 import {
   EQUIPMENT_LABEL,
   linerWaterCharacter,
@@ -101,7 +103,7 @@ function Row({
  * shown here is read directly off `config`/`metrics`/`projectId`, nothing
  * is re-collected or re-derived into a second summary model. */
 export function ProjectSummary() {
-  const { config, metrics, projectId, goToStep } = useConfigurator();
+  const { config, metrics, projectId, goToStep, outline } = useConfigurator();
 
   const dimensionsStepIndex = stepIndex("shape-dimensions");
   const systemStepIndex = stepIndex("system");
@@ -122,6 +124,19 @@ export function ProjectSummary() {
       : "";
   const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m${lShapeRecessSentence}, profondità ${depthLabel}`;
   const systemLine = systemHeadline(config.system, config.overflowType);
+  // Customer-facing Infinity zone/side -- never a raw vertex index. Mirrors
+  // the same `infinityZonesForOutline` + `sideLabel` pair the Acqua step's
+  // own `InfinitySideSelector` uses, so the summary always agrees with
+  // whatever the customer actually picked there.
+  const infinityZone =
+    config.system === "infinity" &&
+    config.infinityEdge?.enabled &&
+    config.infinityEdge.side !== null
+      ? infinityZonesForOutline(outline, config.shape).find(
+          (zone) => zone.side === config.infinityEdge!.side,
+        )
+      : null;
+  const infinitySideLine = infinityZone ? sideLabel(infinityZone.normal) : null;
 
   const copingMaterial = COPING_MATERIALS.find((option) => option.id === config.copingMaterial);
   const isMosaic = config.finish === "mosaic";
@@ -199,6 +214,7 @@ export function ProjectSummary() {
 
       <Section title="Linea d'acqua" onEdit={editStep(systemStepIndex)}>
         <Row label="Sistema idraulico" value={systemLine} />
+        {infinitySideLine ? <Row label="Lato Infinity" value={infinitySideLine} /> : null}
       </Section>
 
       <Section title="Materiali" onEdit={editStep(styleStepIndex)}>
