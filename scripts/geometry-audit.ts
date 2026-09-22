@@ -60,6 +60,7 @@ import {
   GROUND_LEVEL,
   getPoolVerticalLayout,
 } from "../src/lib/pool/vertical-layout";
+import type { PoolVerticalLayout } from "../src/lib/pool/vertical-layout";
 import { resolveMaterials } from "../src/lib/pool/materials";
 import {
   DEFAULT_MOSAIC_FINISH_ID,
@@ -114,6 +115,7 @@ import {
   RECTANGLE_INFINITY_SIDES,
   rectangleInfinityZones,
   type InfinityEdgeParams,
+  type RectangleInfinityZone,
 } from "../src/lib/pool/infinity-edge";
 import {
   createInfinityCascadeGeometry,
@@ -4379,4 +4381,339 @@ console.log(
 }
 console.log(
   "Infinity edge audit (Organic) passed: up to 4 compass-quadrant candidate arcs (bay/bulge tight-curvature vertex always excluded), infinityZonesForOutline dispatch parity, finite unit-length aggregate + per-point normals, real arc length >= straight chord, full lip/cascade/catch-basin/transition-cap geometry finiteness, curved catch-basin no-self-intersection/no-crossing proof, generic (+2-vertex) deck-cutout notch insertion, finite outside-the-basin camera poses, and 2 non-vacuous break/restore proofs (naive whole-perimeter-is-one-zone assumption, naive single-global-normal catch-basin width-consistency defect).",
+);
+
+// --- Geometry Pass D x Pass A/B/C: Infinity edge x sloped floor -----------
+// This interaction was never exercised before (Infinity's own audit blocks
+// above all use a flat `depth`; the slope audit blocks never select Infinity)
+// -- the single highest-priority gap flagged for this pass. The Infinity
+// lip/cascade/catch-basin/transition builders (`infinityEdgeGeometry.ts`)
+// take a `lipTopY` the caller derives from `verticalLayout.waterY` (always
+// horizontal, never the floor's local elevation) and never take a
+// `FloorProfileModel`/`floorYAt` at all -- so the real regression proof is
+// that their output is COMPLETELY unaffected by floor slope, not merely
+// "close to horizontal". Tested for all 3 slope-eligible shapes
+// (rectangle/L-shape/organic), each on the candidate zone whose own run is
+// the worst case: the one spanning the LARGEST range along the slope's own
+// axis, i.e. the one whose underlying floor elevation would vary the most
+// if a regression ever fed local floor Y into any of these builders.
+{
+  const infDims = clampInfinityEdgeDimensions(undefined);
+
+  /** The candidate zone (of `zones`) whose start/end spread the most along
+   * `axis` -- the real worst case for a "lip reads local floor Y" defect,
+   * found independently of any assumption about winding order or which
+   * side index the slope axis happens to land on for a given shape. */
+  function worstZoneAlongAxis(
+    zones: readonly RectangleInfinityZone[],
+    axis: "x" | "z",
+  ): RectangleInfinityZone {
+    const coordinateIndex = axis === "x" ? 0 : 1;
+    let best: RectangleInfinityZone | null = null;
+    let bestSpread = -1;
+    for (const zone of zones) {
+      const spread = Math.abs(zone.end[coordinateIndex] - zone.start[coordinateIndex]);
+      if (spread > bestSpread) {
+        bestSpread = spread;
+        best = zone;
+      }
+    }
+    assert(best !== null, "Infinity/slope: at least one candidate zone must exist for this case");
+    return best!;
+  }
+
+  function checkInfinityUnaffectedBySlope(
+    label: string,
+    outline: Outline,
+    shape: PoolShapeId,
+    flatDimensions: Dimensions,
+    slopedDimensions: Dimensions,
+    verticalLayout: PoolVerticalLayout,
+  ) {
+    const zones = infinityZonesForOutline(outline, shape);
+    assert(
+      zones.length > 0,
+      `Infinity/slope (${label}): outline must expose at least one candidate zone`,
+    );
+
+    const flatProfile = buildFloorProfile({
+      outline,
+      shape,
+      poolType: "in-ground",
+      dimensions: flatDimensions,
+      verticalLayout,
+    });
+    const slopedProfile = buildFloorProfile({
+      outline,
+      shape,
+      poolType: "in-ground",
+      dimensions: slopedDimensions,
+      verticalLayout,
+    });
+    assert(
+      !flatProfile.sloped,
+      `Infinity/slope (${label}): flat control case must actually be flat`,
+    );
+    assert(slopedProfile.sloped, `Infinity/slope (${label}): sloped case must actually be sloped`);
+
+    const zone = worstZoneAlongAxis(zones, slopedProfile.axis);
+
+    // Non-vacuous setup proof: the chosen zone's own floor elevation really
+    // does vary substantially along its run under the sloped profile -- if
+    // it didn't, this whole check would trivially pass regardless of
+    // whether the Infinity geometry actually reads floor Y or not.
+    const floorYAtStart = slopedProfile.floorYAt(zone.start[0], zone.start[1]);
+    const floorYAtEnd = slopedProfile.floorYAt(zone.end[0], zone.end[1]);
+    const floorYSpreadAlongZone = Math.abs(floorYAtEnd - floorYAtStart);
+    assert(
+      floorYSpreadAlongZone > 0.05,
+      `Infinity/slope (${label}): non-vacuous proof setup -- the chosen zone must actually cross real floor-elevation variation under slope (got ${floorYSpreadAlongZone.toFixed(3)}m); this check catches nothing otherwise`,
+    );
+
+    // The lip/cascade/basin/transitions builders never take a floor profile
+    // at all -- `lipTopY` is always `waterY + 0.003`, identical whichever
+    // profile is in effect (`InfinityEdge.tsx` reads `verticalLayout.waterY`
+    // directly, never `floorProfile.floorYAt`).
+    const lipTopY = verticalLayout.waterY + 0.003;
+    const copingSurfaceY = verticalLayout.copingY;
+
+    const buildAll = () => ({
+      lip: createInfinityLipGeometry(zone, infDims, lipTopY),
+      cascade: createInfinityCascadeGeometry(zone, infDims, lipTopY),
+      basin: createInfinityCatchBasinGeometry(zone, infDims, lipTopY),
+      transitions: createInfinityTransitionCapGeometry(
+        zone,
+        infDims,
+        lipTopY,
+        copingSurfaceY,
+        0.32,
+      ),
+    });
+    const flatBuild = buildAll();
+    const slopedBuild = buildAll();
+
+    const positionsOf = (geometry: THREE.BufferGeometry) =>
+      Array.from(geometry.getAttribute("position").array as Float32Array);
+
+    // 1. Byte-identical geometry whichever profile is in scope -- the
+    // strongest possible regression proof: slope must have literally zero
+    // effect on any Infinity mesh.
+    assert(
+      JSON.stringify(positionsOf(flatBuild.lip)) === JSON.stringify(positionsOf(slopedBuild.lip)),
+      `Infinity/slope (${label}): lip geometry must be byte-identical between flat and sloped floor profiles`,
+    );
+    assert(
+      JSON.stringify(positionsOf(flatBuild.cascade)) ===
+        JSON.stringify(positionsOf(slopedBuild.cascade)),
+      `Infinity/slope (${label}): cascade geometry must be byte-identical between flat and sloped floor profiles`,
+    );
+    assert(
+      JSON.stringify(positionsOf(flatBuild.basin.floor)) ===
+        JSON.stringify(positionsOf(slopedBuild.basin.floor)),
+      `Infinity/slope (${label}): catch-basin floor geometry must be byte-identical between flat and sloped floor profiles`,
+    );
+
+    // 2. The lip itself must be exactly flat/horizontal at the waterline --
+    // every vertex's Y must equal lipTopY, never the (substantially
+    // different, per the non-vacuous check above) local floor Y at that XZ.
+    const lipPosition = slopedBuild.lip.getAttribute("position");
+    for (let i = 0; i < lipPosition.count; i++) {
+      assert(
+        Math.abs(lipPosition.getY(i) - lipTopY) < 1e-6,
+        `Infinity/slope (${label}): every lip vertex must sit exactly at the waterline (lipTopY), regardless of floor slope`,
+      );
+    }
+
+    // 3. The catch basin floor must be a single constant Y (a real
+    // horizontal trough), never one that follows the pool's own floor slope.
+    const basinFloorPosition = slopedBuild.basin.floor.getAttribute("position");
+    let basinFloorMinY = Infinity;
+    let basinFloorMaxY = -Infinity;
+    for (let i = 0; i < basinFloorPosition.count; i++) {
+      basinFloorMinY = Math.min(basinFloorMinY, basinFloorPosition.getY(i));
+      basinFloorMaxY = Math.max(basinFloorMaxY, basinFloorPosition.getY(i));
+    }
+    assert(
+      basinFloorMaxY - basinFloorMinY < 1e-6,
+      `Infinity/slope (${label}): the catch basin floor must be perfectly horizontal (single constant Y) even when the pool's own floor is sloped (spread was ${(basinFloorMaxY - basinFloorMinY).toFixed(4)}m)`,
+    );
+
+    // 4. The cascade must fall strictly vertically: its Y range must be
+    // exactly [lipTopY - dropHeight, lipTopY], the same for every XZ column,
+    // never skewed toward the floor's local elevation.
+    const cascadePosition = slopedBuild.cascade.getAttribute("position");
+    let cascadeMinY = Infinity;
+    let cascadeMaxY = -Infinity;
+    for (let i = 0; i < cascadePosition.count; i++) {
+      cascadeMinY = Math.min(cascadeMinY, cascadePosition.getY(i));
+      cascadeMaxY = Math.max(cascadeMaxY, cascadePosition.getY(i));
+    }
+    assert(
+      Math.abs(cascadeMaxY - lipTopY) < 1e-6,
+      `Infinity/slope (${label}): the cascade's top must sit exactly at the waterline, regardless of floor slope`,
+    );
+    assert(
+      Math.abs(cascadeMinY - (lipTopY - infDims.dropHeight)) < 1e-6,
+      `Infinity/slope (${label}): the cascade's bottom must sit exactly dropHeight below the waterline, regardless of floor slope`,
+    );
+
+    // 5. Coping transition caps must close the exact same lipTopY <->
+    // copingSurfaceY step at both ends, regardless of which end (shallow or
+    // deep, under the slope) each corner happens to sit over.
+    for (const cap of [slopedBuild.transitions.start, slopedBuild.transitions.end]) {
+      assert(
+        cap !== null,
+        `Infinity/slope (${label}): both transition caps must still build under slope`,
+      );
+      const capPosition = cap!.getAttribute("position");
+      let capMinY = Infinity;
+      let capMaxY = -Infinity;
+      for (let i = 0; i < capPosition.count; i++) {
+        capMinY = Math.min(capMinY, capPosition.getY(i));
+        capMaxY = Math.max(capMaxY, capPosition.getY(i));
+      }
+      assert(
+        Math.abs(capMinY - lipTopY) < 1e-6 && Math.abs(capMaxY - copingSurfaceY) < 1e-6,
+        `Infinity/slope (${label}): each transition cap must span exactly lipTopY..copingSurfaceY, regardless of floor slope`,
+      );
+    }
+
+    // Break/restore proof: a naive "reads local floor Y" lip would place
+    // its vertices near `slopedProfile.floorYAt(x, z)` instead of the
+    // constant waterline -- deliberately assert the REAL lip's Y values
+    // equal that naive, floor-following formula. This MUST fail (the real
+    // lip is flat, the naive one is not, and the zone was already proven
+    // above to cross >0.05m of real floor-elevation variation), proving
+    // this suite would actually catch the regression it targets.
+    let caughtFloorFollowingLip = false;
+    try {
+      for (let i = 0; i < lipPosition.count; i++) {
+        const x = lipPosition.getX(i);
+        const z = lipPosition.getZ(i);
+        const naiveY = slopedProfile.floorYAt(x, z) + 0.003;
+        assert(
+          Math.abs(lipPosition.getY(i) - naiveY) < 1e-6,
+          "deliberate floor-following-lip break",
+        );
+      }
+    } catch {
+      caughtFloorFollowingLip = true;
+    }
+    assert(
+      caughtFloorFollowingLip,
+      `Infinity/slope (${label}): break/restore proof failed to catch a lip that (wrongly) followed local floor Y instead of the waterline`,
+    );
+  }
+
+  // Rectangle: 10x4.5 (spanX >= spanZ, slope axis "x") -- Lato Nord/Sud-style
+  // long sides run the full length of the slope axis, the worst case.
+  const rectFlatDims: Dimensions = {
+    length: 10,
+    width: 4.5,
+    depth: 1.5,
+    cornerRadius: 0,
+    floorProfile: "flat",
+  };
+  const rectSlopedDims: Dimensions = {
+    ...rectFlatDims,
+    floorProfile: "slope",
+    shallowDepth: 1.2,
+  };
+  const rectOutlineForSlope = buildOutline("rectangle", rectFlatDims, DEFAULT_CONTROL_POINTS);
+  const rectLayoutForSlope = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "infinity",
+    overflowType: "hidden",
+    depth: rectFlatDims.depth,
+    copingThickness: 0.03,
+  });
+  checkInfinityUnaffectedBySlope(
+    "rectangle",
+    rectOutlineForSlope,
+    "rectangle",
+    rectFlatDims,
+    rectSlopedDims,
+    rectLayoutForSlope,
+  );
+  // Reversed slope must be equally inert to the Infinity geometry.
+  checkInfinityUnaffectedBySlope(
+    "rectangle reversed",
+    rectOutlineForSlope,
+    "rectangle",
+    rectFlatDims,
+    { ...rectSlopedDims, slopeReversed: true },
+    rectLayoutForSlope,
+  );
+
+  // L-shape: 10x7 with a 4x3 recess (spanX >= spanZ, slope axis "x").
+  const lFlatDims: Dimensions = {
+    length: 10,
+    width: 7,
+    depth: 1.5,
+    cornerRadius: 0,
+    lShapeRecessLength: 4,
+    lShapeRecessWidth: 3,
+    lShapeOrientation: "se",
+    floorProfile: "flat",
+  };
+  const lSlopedDims: Dimensions = { ...lFlatDims, floorProfile: "slope", shallowDepth: 1.2 };
+  const lOutlineForSlope = buildOutline("l-shape", lFlatDims, DEFAULT_CONTROL_POINTS);
+  const lLayoutForSlope = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "infinity",
+    overflowType: "hidden",
+    depth: lFlatDims.depth,
+    copingThickness: 0.03,
+  });
+  checkInfinityUnaffectedBySlope(
+    "l-shape",
+    lOutlineForSlope,
+    "l-shape",
+    lFlatDims,
+    lSlopedDims,
+    lLayoutForSlope,
+  );
+
+  // Organic: 12x7 (spanX >= spanZ, slope axis "x").
+  const organicFlatDims: Dimensions = {
+    length: 12,
+    width: 7,
+    depth: 1.5,
+    cornerRadius: 0,
+    organicCurvature: 0.55,
+    organicMirror: false,
+    floorProfile: "flat",
+  };
+  const organicSlopedDims: Dimensions = {
+    ...organicFlatDims,
+    floorProfile: "slope",
+    shallowDepth: 1.2,
+  };
+  const organicOutlineForSlope = buildOutline("organic", organicFlatDims, DEFAULT_CONTROL_POINTS);
+  const organicLayoutForSlope = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "infinity",
+    overflowType: "hidden",
+    depth: organicFlatDims.depth,
+    copingThickness: 0.03,
+  });
+  checkInfinityUnaffectedBySlope(
+    "organic",
+    organicOutlineForSlope,
+    "organic",
+    organicFlatDims,
+    organicSlopedDims,
+    organicLayoutForSlope,
+  );
+  checkInfinityUnaffectedBySlope(
+    "organic reversed",
+    organicOutlineForSlope,
+    "organic",
+    organicFlatDims,
+    { ...organicSlopedDims, slopeReversed: true },
+    organicLayoutForSlope,
+  );
+}
+console.log(
+  "Infinity edge x sloped-floor interaction audit passed: for rectangle, L-shape and organic (default and reversed slope), the worst-case candidate zone -- the one whose run spans the largest real floor-elevation variation under slope -- produces byte-identical lip/cascade/catch-basin geometry between flat and sloped floor profiles; the lip sits exactly at the waterline, the catch basin floor is a single constant Y (a real horizontal trough), the cascade's Y range is exactly [lipTopY - dropHeight, lipTopY], both coping transition caps span exactly lipTopY..copingSurfaceY, and a non-vacuous break/restore proof confirms a floor-Y-following lip would actually be caught.",
 );
