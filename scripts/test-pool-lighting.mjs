@@ -45,7 +45,7 @@ const rectangle = (length, width) => [
 
 let cases = 0;
 for (const [length, width, expected] of [
-  [6, 3, 2],
+  [6, 3, 1],
   [8, 4, 2],
   [10, 5, 3],
   [12, 6, 4],

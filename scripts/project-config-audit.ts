@@ -36,7 +36,7 @@ const fullConfig: PoolConfig = {
   finish: "mosaic",
   linerColor: "motionGreyRock798",
   mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
-  features: ["ledLighting", "hydromassage", "externalStaircase"],
+  features: ["ledLighting", "hydromassage"],
   ledColor: "#3fa8ff",
   ledIntensity: 0.75,
   poolAccess: "stainlessSteelLadder",
@@ -87,6 +87,17 @@ assert(
   "schemaVersion must be stamped on the project",
 );
 const json = serializeProjectConfiguration(project);
+for (const poolType of ["in-ground", "above-ground"] as const) {
+  const restored = parseProjectConfiguration(JSON.stringify({
+    ...project,
+    config: { ...fullConfig, poolType, features: [...fullConfig.features, "externalStaircase"] },
+  }));
+  assert(
+    restored.config.features.includes("externalStaircase") === (poolType === "above-ground"),
+    "External stairs must only survive restoration for above-ground pools",
+  );
+  assert(restored.config.poolAccess === fullConfig.poolAccess, "Internal access must remain unchanged");
+}
 assert(typeof json === "string" && json.length > 0, "serialization must produce a JSON string");
 
 // 2 & 3. Serialization retains every important selection; round trip preserves values.

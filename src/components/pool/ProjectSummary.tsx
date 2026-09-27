@@ -1,5 +1,6 @@
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
+import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, STEPS } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { useConfigurator } from "@/lib/pool/context";
@@ -136,7 +137,11 @@ export function ProjectSummary() {
           (zone) => zone.side === config.infinityEdge!.side,
         )
       : null;
-  const infinitySideLine = infinityZone ? sideLabel(infinityZone.normal) : null;
+  const infinitySideLine = infinityZone ? sideLabel(infinityZone.side) : null;
+  const lightingPlan = useMemo(
+    () => (config.features.includes("ledLighting") ? configuredLightingPlan(config) : null),
+    [config],
+  );
 
   const copingMaterial = COPING_MATERIALS.find((option) => option.id === config.copingMaterial);
   const isMosaic = config.finish === "mosaic";
@@ -249,6 +254,10 @@ export function ProjectSummary() {
       {hasLed ? (
         <Section title="Illuminazione" onEdit={editStep(lightingStepIndex)}>
           <Row label="Impianto" value="Illuminazione subacquea a LED" />
+          <Row
+            label="Punti luce"
+            value={`${lightingPlan?.count ?? 0} · automatici, dimensionamento indicativo`}
+          />
           <Row
             label="Colore selezionato"
             value={ledColor.toUpperCase()}

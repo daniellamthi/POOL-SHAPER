@@ -4,8 +4,10 @@ import { OrbitControls, ContactShadows } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   Vector3,
+  Vector2,
   AgXToneMapping,
   Color,
+  DoubleSide,
   MathUtils,
   NoToneMapping,
   PCFShadowMap,
@@ -14,9 +16,14 @@ import {
 import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
 import { PoolLights, planSceneLighting } from "./PoolLights";
-import { DaylightEnvironment } from "./DaylightEnvironment";
+import { InfinityEdgePicker } from "./InfinityEdgePicker";
+import { createInfinityLandscape, createInfinityDeck, infinityGroundHeight } from "./infinityLandscape";
+import { excludeSubmergedDirectLights } from "./exteriorLightMask";
+import { CoastalVista } from "./CoastalVista";
+import { coastalCamera, coastalGrade, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
+import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
-import { createTravertineMaps } from "./stoneTextures";
+import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
 import { ExternalStaircase } from "./ExternalStaircase";
@@ -41,8 +48,9 @@ import {
   SCENE_VISUAL_PRESET,
 } from "@/configurator/3d/scene/visual-preset";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
-import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
+import { outlineBounds } from "@/lib/pool/geometry";
 import { getCameraPose } from "@/lib/pool/camera";
+import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
 import type { PoolLightPosition } from "@/lib/pool/lighting";
 import type { InternalStairType } from "@/lib/pool/types";
@@ -89,6 +97,7 @@ export interface SceneProps {
    * while `system === "infinity"`; absent/undefined renders and excludes
    * exactly as before Infinity existed. */
   infinityEdge?: InfinityEdgeParams;
+  onSelectInfinitySide?: ((side: number) => void) | undefined;
   length: number;
   width: number;
   depth: number;
@@ -139,6 +148,7 @@ function SceneMood({
   baseBackground,
   baseExposure,
   baseEnvironment,
+  coastalDaylight = false,
   sky,
   sun,
   auxiliary,
@@ -147,6 +157,7 @@ function SceneMood({
   baseBackground: string;
   baseExposure: number;
   baseEnvironment: number;
+  coastalDaylight?: boolean;
   sky: React.RefObject<HemisphereLight | null>;
   sun: React.RefObject<DirectionalLight | null>;
   auxiliary: React.RefObject<SpotLight | null>;
@@ -179,9 +190,9 @@ function SceneMood({
     if (scene.background instanceof Color) scene.background.copy(scratch);
     if (scene.fog) scene.fog.color.copy(scratch);
     if (sky.current)
-      sky.current.intensity = MathUtils.lerp(baseSky.current, preset.skyIntensity, t);
+      sky.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sky : baseSky.current, preset.skyIntensity, t);
     if (sun.current)
-      sun.current.intensity = MathUtils.lerp(baseSun.current, preset.sunIntensity, t);
+      sun.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sun : baseSun.current, preset.sunIntensity, t);
     if (auxiliary.current) {
       auxiliary.current.intensity = MathUtils.lerp(baseAux.current, preset.auxiliaryIntensity, t);
     }
@@ -193,12 +204,31 @@ function DevelopmentRendererMetrics() {
   const gl = useThree((state) => state.gl);
   const elapsed = useRef(0);
   const frames = useRef(0);
+  const inspectedPrograms = useRef(new Set<number>());
+  const peakSamplers = useRef(0);
 
   useFrame((_, delta) => {
     elapsed.current += delta;
     frames.current += 1;
     if (elapsed.current < 2) return;
     const frameTime = (elapsed.current / frames.current) * 1000;
+    const context = gl.getContext() as WebGL2RenderingContext;
+    for (const program of gl.info.programs ?? []) {
+      if (inspectedPrograms.current.has(program.id)) continue;
+      inspectedPrograms.current.add(program.id);
+      const samplers: string[] = [];
+      const handle = program.program as WebGLProgram;
+      const count = context.getProgramParameter(handle, context.ACTIVE_UNIFORMS) as number;
+      for (let i = 0; i < count; i++) {
+        const uniform = context.getActiveUniform(handle, i);
+        if (uniform && (uniform.type === context.SAMPLER_2D || uniform.type === context.SAMPLER_CUBE || uniform.type === context.SAMPLER_2D_SHADOW))
+          for (let n = 0; n < uniform.size; n++) samplers.push(`${uniform.name}:${n}`);
+      }
+      if (samplers.length > peakSamplers.current) {
+        peakSamplers.current = samplers.length;
+        console.debug("[Pool3D sampler budget]", JSON.stringify({ count: samplers.length, limit: gl.capabilities.maxTextures, samplers }));
+      }
+    }
     console.debug(
       "[Pool3D performance]",
       JSON.stringify({
@@ -209,6 +239,9 @@ function DevelopmentRendererMetrics() {
         geometries: gl.info.memory.geometries,
         textures: gl.info.memory.textures,
         dpr: gl.getPixelRatio(),
+        viewport: [gl.domElement.clientWidth, gl.domElement.clientHeight],
+        maxTextureUnits: gl.capabilities.maxTextures,
+        peakProgramSamplers: peakSamplers.current,
         shadowMapSize: ACTIVE_RENDERING_QUALITY.shadowMapSize,
         qualityPreset: ACTIVE_RENDERING_QUALITY.id,
       }),
@@ -245,6 +278,7 @@ function AdaptiveQuality() {
 
 /** Smoothly restores a stable product view when dimensions or framing change. */
 function CameraRig({
+  accessPlan,
   cameraLocked,
   radius,
   controls,
@@ -260,6 +294,7 @@ function CameraRig({
   photoMode,
   infinityZone,
 }: {
+  accessPlan: SceneLightingPlan["accessPlan"];
   cameraLocked: boolean;
   radius: number;
   controls: React.RefObject<OrbitControlsImpl | null>;
@@ -279,6 +314,7 @@ function CameraRig({
 }) {
   const camera = useThree((state) => state.camera);
   const viewportSize = useThree((state) => state.size);
+  const canvas = useThree((state) => state.gl.domElement);
   const goal = useRef(new Vector3());
   const lookAt = useRef(new Vector3());
   const startPosition = useRef(new Vector3());
@@ -298,6 +334,7 @@ function CameraRig({
     if (!control) return;
     const handleStart = () => {
       interacting.current = true;
+      flying.current = false;
     };
     const handleEnd = () => {
       interacting.current = false;
@@ -333,8 +370,13 @@ function CameraRig({
     }
   });
 
-  useLayoutEffect(() => {
-    const pose = getCameraPose({
+  const detail = focus === "access" || focus === "liner" || focus === "mosaic";
+  const summaryRect = detail ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
+  const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
+  const pose = focus === "infinity" && infinityZone
+    ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov)
+    : getCameraPose({
+      accessPlan,
       intent: focus,
       outline,
       layout,
@@ -342,10 +384,22 @@ function CameraRig({
       skimmers,
       ledRow,
       verticalFov: SCENE_VISUAL_PRESET.camera.fov,
-      viewportAspect: viewportSize.width / Math.max(1, viewportSize.height),
+      viewportAspect: (viewportSize.width - reservedRight) / Math.max(1, viewportSize.height),
       includeExternalStaircase,
       infinityZone,
     });
+  if (reservedRight) {
+    const eye = new Vector3(...pose.position), target = new Vector3(...pose.target);
+    const right = target.clone().sub(eye).cross(new Vector3(0, 1, 0)).normalize();
+    const offset = eye.distanceTo(target) * Math.tan(SCENE_VISUAL_PRESET.camera.fov * Math.PI / 360) * reservedRight / viewportSize.height;
+    right.multiplyScalar(offset);
+    pose.position = eye.add(right).toArray() as [number, number, number];
+    pose.target = target.add(right).toArray() as [number, number, number];
+  }
+  // Material changes can recreate plans without moving their geometry.
+  // Only a different pose/intent or explicit reframe starts a new flight.
+  const poseKey = JSON.stringify(pose);
+  useLayoutEffect(() => {
     goal.current.set(...pose.position);
     lookAt.current.set(...pose.target);
     startPosition.current.copy(camera.position);
@@ -388,19 +442,10 @@ function CameraRig({
   }, [
     cameraLocked,
     camera,
-    ledRow,
     controls,
     frameToken,
     focus,
-    shape,
-    depth,
-    outline,
-    layout,
-    skimmers,
-    includeExternalStaircase,
-    viewportSize.width,
-    viewportSize.height,
-    infinityZone,
+    poseKey,
   ]);
 
   useFrame((_, delta) => {
@@ -444,6 +489,7 @@ function StudioFloor({
   system,
   overflowType,
   infinityZone,
+  waterY,
 }: {
   outline: Outline;
   size: number;
@@ -451,6 +497,7 @@ function StudioFloor({
   poolType: PoolType;
   system: SystemType;
   overflowType: OverflowType;
+  waterY: number;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -458,7 +505,64 @@ function StudioFloor({
   infinityZone?: RectangleInfinityZone | null;
 }) {
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
+  const premiumInfinity = poolType === "in-ground" && system === "infinity" && !!infinityZone;
+  const photographicCoast = premiumInfinity && theme === "light";
+  const pavingGeometry = useMemo(
+    () =>
+      premiumInfinity && infinityZone
+        ? createInfinityDeck(outline, infinityZone, copingOuterOffset(system, overflowType))
+        : null,
+    [premiumInfinity, infinityZone, outline, system, overflowType],
+  );
+  useEffect(() => () => pavingGeometry?.dispose(), [pavingGeometry]);
   const geometry = useMemo(() => {
+    if (premiumInfinity && infinityZone) {
+      const landscape = createInfinityLandscape(
+        outline,
+        infinityZone,
+        size,
+        copingOuterOffset(system, overflowType),
+      );
+      // Extend only the distant landscape: retain near-pool tessellation and
+      // topology, without a dense 400 m terrain or a visible showroom edge.
+      const bounds = outlineBounds(outline);
+      const p = landscape.getAttribute("position");
+      const uv = landscape.getAttribute("uv");
+      const near = Math.max(bounds.spanX, bounds.spanZ) / 2 + 12;
+      for (let i = 0; i < p.count; i++) {
+        const extend = (v: number) => {
+          const beyond = Math.max(0, Math.abs(v) - near);
+          // Continuous first derivative avoids a hard normal crease where
+          // the near terrain starts stretching toward the distant horizon.
+          return Math.sign(v) * (Math.abs(v) + 80 * beyond * beyond / (beyond + 4));
+        };
+        p.setX(i, extend(p.getX(i)));
+        p.setZ(i, extend(p.getZ(i)));
+        // Broad distant relief only: the surveyed near-pool grade and deck
+        // junctions remain byte-identical. No extra terrain meshes/textures.
+        const distance = Math.hypot(p.getX(i), p.getZ(i));
+        const relief = MathUtils.smoothstep(distance, near + 8, near + 55);
+        // Evaluate the grade at its final position, not the pre-stretch
+        // coordinates (which dragged near slopes across hundreds of metres).
+        // A gentle distant fall avoids undersampled sinusoidal ridge teeth.
+        p.setY(i, infinityGroundHeight(outline, infinityZone, p.getX(i), p.getZ(i)) - relief * distance * 0.006);
+        uv.setXY(i, p.getX(i), p.getZ(i));
+      }
+      coastalGrade(landscape, infinityZone);
+      // Only the immediate site stays geometric; the photographic coast owns
+      // the far field. Retain a full triangle apron around the fade boundary.
+      const index=landscape.getIndex(), kept:number[]=[];
+      if(index && photographicCoast) {
+        for(let i=0;i<index.count;i+=3) {
+          const ids=[index.getX(i),index.getX(i+1),index.getX(i+2)];
+          if(ids.some(id=>p.getX(id)>bounds.minX-7 && p.getX(id)<bounds.maxX+7 && p.getZ(id)>bounds.minZ-7 && p.getZ(id)<bounds.maxZ+7)) kept.push(...ids);
+        }
+        landscape.setIndex(kept);
+      }
+      landscape.computeVertexNormals();
+      landscape.computeBoundingSphere();
+      return landscape;
+    }
     const half = size / 2;
     const outer: Outline = [
       [-half, -half],
@@ -476,10 +580,10 @@ function StudioFloor({
           )
         : undefined;
     return createSurfaceGeometry(outer, inner);
-  }, [outline, size, poolType, system, overflowType, infinityZone]);
+  }, [outline, size, poolType, system, overflowType, infinityZone, premiumInfinity, photographicCoast]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
-  const stone = useMemo(() => createTravertineMaps(), []);
+  const stone = useMemo(() => premiumInfinity ? createLimestoneMaps() : createTravertineMaps(), [premiumInfinity]);
   useEffect(() => {
     const textures = Object.values(stone).filter((texture) => texture !== null);
     for (const texture of textures) {
@@ -491,32 +595,139 @@ function StudioFloor({
   }, [stone, maxAnisotropy]);
 
   return (
-    <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
-      <meshStandardMaterial
-        color={theme === "dark" ? "#151617" : "#d8d6d1"}
-        map={stone.colorMap}
-        roughness={0.86}
-        normalMap={stone.normalMap}
-        normalScale={[0.28, 0.28]}
-        roughnessMap={stone.roughnessMap}
-        metalness={0}
-        onBeforeCompile={(shader) => {
-          shader.fragmentShader = shader.fragmentShader.replace(
-            "#include <map_fragment>",
-            `
+    <group>
+      {pavingGeometry ? (
+        <mesh
+          name="infinity-level-limestone-deck"
+          geometry={pavingGeometry}
+          receiveShadow
+          castShadow
+        >
+          <meshStandardMaterial
+            side={DoubleSide}
+            color="#f0eade"
+            map={stone.colorMap}
+            normalMap={stone.normalMap}
+            normalScale={[0.3, 0.3]}
+            roughnessMap={stone.roughnessMap}
+            roughness={0.72}
+            metalness={0}
+            onBeforeCompile={(shader) => {
+              excludeSubmergedDirectLights(shader, waterY);
+              shader.fragmentShader = shader.fragmentShader.replace(
+                "#include <map_fragment>",
+                `
+              #include <map_fragment>
+              vec2 slabs = vMapUv / vec2(3.0, 1.5);
+              vec2 edge = min(fract(slabs), 1.0 - fract(slabs));
+              vec2 joint = smoothstep(vec2(0.0015), vec2(0.0015) + fwidth(slabs), edge);
+              float variation = fract(sin(dot(floor(slabs), vec2(127.1,311.7))) * 43758.5453);
+              diffuseColor.rgb *= mix(0.8, 0.98 + variation * 0.025, min(joint.x, joint.y));
+            `,
+              );
+            }}
+            customProgramCacheKey={() => `level-limestone-120x60-v3-${waterY}`}
+          />
+        </mesh>
+      ) : null}
+      <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
+        <meshStandardMaterial
+          key={
+            premiumInfinity
+              ? `coastal-photo-near-${theme}`
+              : "studio"
+          }
+          color={
+            premiumInfinity
+              ? theme === "dark"
+                ? "#7a7b75"
+                : "#ffffff"
+              : theme === "dark"
+                ? "#151617"
+                : "#d8d6d1"
+          }
+          vertexColors={false}
+          transparent={photographicCoast}
+          depthWrite={!photographicCoast}
+          map={premiumInfinity ? null : stone.colorMap}
+          roughness={0.86}
+          normalMap={premiumInfinity ? null : stone.normalMap}
+          normalScale={premiumInfinity ? [0, 0] : [0.28, 0.28]}
+          roughnessMap={premiumInfinity ? null : stone.roughnessMap}
+          metalness={0}
+          onBeforeCompile={(shader) => {
+            if (premiumInfinity) {
+              excludeSubmergedDirectLights(shader, waterY);
+              const bounds = outlineBounds(outline);
+              shader.uniforms["deckMin"] = { value: new Vector2(bounds.minX,bounds.minZ) };
+              shader.uniforms["deckMax"] = { value: new Vector2(bounds.maxX,bounds.maxZ) };
+              shader.vertexShader =
+                "varying float vGrade; varying vec2 vGroundPlan;\n" + shader.vertexShader;
+              shader.vertexShader = shader.vertexShader.replace(
+                "#include <begin_vertex>",
+                "#include <begin_vertex>\n vGrade = position.y; vGroundPlan = position.xz;",
+              );
+              shader.fragmentShader =
+                `varying float vGrade; varying vec2 vGroundPlan; uniform vec2 deckMin; uniform vec2 deckMax;
+                float meadowHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+                float meadowNoise(vec2 p) {
+                  vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+                  return mix(mix(meadowHash(i), meadowHash(i + vec2(1,0)), f.x), mix(meadowHash(i + vec2(0,1)), meadowHash(i + vec2(1)), f.x), f.y);
+                }\n` +
+                shader.fragmentShader;
+              shader.fragmentShader = shader.fragmentShader.replace("#include <color_fragment>", `
+                #include <color_fragment>
+                vec2 outside = max(max(deckMin-vGroundPlan,vGroundPlan-deckMax),vec2(0.0));
+                ${photographicCoast ? "if(length(outside)>6.0) discard;" : ""}
+                float broad = 0.65 * meadowNoise(vGroundPlan * 0.23) + 0.35 * meadowNoise(vGroundPlan * 0.71);
+                float detail = meadowNoise(vGroundPlan * 32.0);
+                float nearDetail = 1.0 - smoothstep(0.015, 0.1, max(fwidth(vGroundPlan.x), fwidth(vGroundPlan.y)));
+                ${photographicCoast ? `
+                  vec3 coastGround = mix(vec3(0.17,0.155,0.12),vec3(0.28,0.26,0.21),broad);
+                  diffuseColor.rgb *= coastGround * (1.0 + (detail - 0.5) * 0.4 * nearDetail);
+                  diffuseColor.a *= 1.0-smoothstep(3.2,6.0,length(outside));
+                ` : `
+                  vec3 grass = mix(vec3(0.085,0.12,0.057),vec3(0.14,0.17,0.09),broad);
+                  diffuseColor.rgb *= grass * (1.0 + (detail - 0.5) * 0.65 * nearDetail);
+                `}
+              `);
+              return;
+            }
+            const bounds = outlineBounds(outline);
+            shader.uniforms["deckMin"] = { value: new Vector2(bounds.minX, bounds.minZ) };
+            shader.uniforms["deckMax"] = { value: new Vector2(bounds.maxX, bounds.maxZ) };
+            shader.fragmentShader = shader.fragmentShader.replace(
+              "#include <map_fragment>",
+              `
             #include <map_fragment>
-            vec2 slabCoord = vMapUv / 3.0;
+            vec2 slabCoord = vMapUv / ${premiumInfinity ? "vec2(3.0, 1.5)" : "3.0"};
             vec2 toJoint = min(fract(slabCoord), 1.0 - fract(slabCoord));
             vec2 aa = fwidth(slabCoord);
             vec2 grout = smoothstep(vec2(0.001), vec2(0.001) + aa, toJoint);
             float slabSeed = fract(sin(dot(floor(slabCoord), vec2(127.1, 311.7))) * 43758.5453);
-            diffuseColor.rgb *= mix(0.73, 0.97 + slabSeed * 0.045, min(grout.x, grout.y));
+            ${
+              premiumInfinity
+                ? `
+              vec2 outsideDeck = max(max(deckMin - vGroundPlan, vGroundPlan - deckMax), 0.0);
+              float paving = 0.0;
+              float groundVariation = 0.65 * meadowNoise(vGroundPlan * 0.14) + 0.35 * meadowNoise(vGroundPlan * 0.53);
+              float grain = fract(sin(dot(floor(vGroundPlan * 95.0), vec2(12.9898, 78.233))) * 43758.5453);
+              float grainVisibility = 1.0 - smoothstep(0.01, 0.05, max(fwidth(vGroundPlan.x), fwidth(vGroundPlan.y)));
+              vec3 meadow = mix(vec3(0.09, 0.15, 0.045), vec3(0.18, 0.23, 0.085), groundVariation) * (1.0 + (grain - 0.5) * 0.35 * grainVisibility);
+              diffuseColor.rgb = mix(meadow, diffuseColor.rgb, paving);
+              diffuseColor.rgb *= mix(1.0, mix(0.78, 0.98 + slabSeed * 0.02, min(grout.x, grout.y)), paving);
+            `
+                : "diffuseColor.rgb *= mix(0.73, 0.97 + slabSeed * 0.045, min(grout.x, grout.y));"
+            }
           `,
-          );
-        }}
-        customProgramCacheKey={() => "architectural-stone-paving-v1"}
-      />
-    </mesh>
+            );
+          }}
+          customProgramCacheKey={() =>
+            premiumInfinity ? `coastal-photo-near-v3-${theme}-${waterY}` : "architectural-stone-paving-v1"
+          }
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -534,6 +745,7 @@ export default function PoolScene({
   poolAccess,
   skimmers,
   infinityEdge,
+  onSelectInfinitySide,
   length,
   width,
   depth,
@@ -553,13 +765,21 @@ export default function PoolScene({
   const controls = useRef<OrbitControlsImpl | null>(null);
   const radius = Math.hypot(length, width) / 2;
   const palette = PALETTE[theme];
-  const background = palette.background;
+  const background = system === "infinity" && theme === "light" ? "#cee0ec" : palette.background;
   const copingThickness = POOL_BORDER_PRESET.thickness;
   // The lighting step drops the scene to blue hour so the LEDs are visible.
   const dusk = focus === "features";
   const skyLight = useRef<HemisphereLight | null>(null);
   const sunLight = useRef<DirectionalLight | null>(null);
   const auxiliaryLight = useRef<SpotLight | null>(null);
+
+  // Pool geometry and the sun are static between configuration commits.
+  // Orbit/ripples do not change their shadow silhouette. Invalidate after
+  // each React commit (including dimensions/access/system changes), rather
+  // than rebuilding the same 4K shadow map every animation frame.
+  useLayoutEffect(() => {
+    if (sunLight.current) sunLight.current.shadow.needsUpdate = true;
+  });
 
   const verticalLayout = useMemo(
     () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
@@ -629,6 +849,8 @@ export default function PoolScene({
   const lighting = useMemo(
     () =>
       planSceneLighting({
+        system,
+        overflowType,
         outline,
         layout: verticalLayout,
         skimmers: system === "skimmer" ? skimmers : { ...skimmers, positions: [] },
@@ -646,6 +868,7 @@ export default function PoolScene({
       internalStairType,
       floorProfile,
       infinityExcluded,
+      overflowType,
     ],
   );
 
@@ -658,13 +881,21 @@ export default function PoolScene({
     () => outline.map(([x, z]) => `${x.toFixed(4)},${z.toFixed(4)}`).join(";"),
     [outline],
   );
-  const sunPosition: [number, number, number] = [radius * 2 + 6, radius * 2.4 + 12, radius + 6];
+  const sunPosition: [number, number, number] = system === "infinity" && theme === "light" && infinityZone
+    ? coastalPhotoSun(infinityZone,radius*4+25)
+    : [radius * 2 + 6, radius * 2.4 + 12, radius + 6];
   // Remount PhotoModeRenderer (fresh WebGLPathTracer + setScene) whenever the
   // traced geometry or materials could have changed -- setScene is the
   // documented "relatively expensive" call, so a clean re-init on real scene
   // changes is simpler and safer than trying to patch the tracer in place.
   const photoModeSceneKey = [
     outlineSignature,
+    normalisedInfinityEdge?.enabled,
+    normalisedInfinityEdge?.side,
+    internalStairType,
+    floorProfileSetting,
+    shallowDepth,
+    slopeReversed,
     system,
     overflowType,
     poolType,
@@ -715,7 +946,14 @@ export default function PoolScene({
       }}
     >
       <color attach="background" args={[background]} />
-      <fog attach="fog" args={[background, radius * 6, radius * 20]} />
+      {system !== "infinity" ? <fog
+        attach="fog"
+        args={[
+          background,
+          radius * 6,
+          radius * 20,
+        ]}
+      /> : null}
 
       {/* Real scene geometry standing in for a local HDRI: gives the planar
           water reflector (and the main view) a photographic sky gradient
@@ -723,13 +961,14 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} outdoor={system === "infinity"} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} /> : null}
 
       <SceneMood
         dusk={dusk}
         baseBackground={background}
         baseExposure={SCENE_VISUAL_PRESET.exposure[theme]}
-        baseEnvironment={SCENE_VISUAL_PRESET.environment[theme]}
+        baseEnvironment={system === "infinity" && theme === "light" ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]}
+        coastalDaylight={system === "infinity" && theme === "light"}
         sky={skyLight}
         sun={sunLight}
         auxiliary={auxiliaryLight}
@@ -747,6 +986,7 @@ export default function PoolScene({
         intensity={SCENE_VISUAL_PRESET.lighting.sun.intensity[theme]}
         color={SCENE_VISUAL_PRESET.lighting.sun.color}
         castShadow
+        shadow-autoUpdate={false}
         shadow-bias={SCENE_VISUAL_PRESET.lighting.sun.bias}
         shadow-normalBias={SCENE_VISUAL_PRESET.lighting.sun.normalBias}
         shadow-mapSize={[
@@ -779,8 +1019,10 @@ export default function PoolScene({
         system={system}
         overflowType={overflowType}
         infinityZone={infinityZone}
+        waterY={verticalLayout.waterY}
       />
 
+      {system === "infinity" && theme === "dark" && poolType === "in-ground" && infinityZone ? <CoastalVista zone={infinityZone} theme={theme}/> : null}
       <PoolModel
         poolAccess={poolAccess}
         internalStairType={internalStairType}
@@ -799,6 +1041,15 @@ export default function PoolScene({
         infinityExcluded={infinityExcluded}
       />
 
+      {system === "infinity" && !photoMode && onSelectInfinitySide ? (
+        <InfinityEdgePicker
+          outline={outline}
+          shape={shape}
+          selectedSide={normalisedInfinityEdge?.side ?? null}
+          y={verticalLayout.copingY + 0.035}
+          onSelect={onSelectInfinitySide}
+        />
+      ) : null}
       {features.includes("ledLighting") ? (
         <PoolLights
           lighting={lighting}
@@ -814,8 +1065,10 @@ export default function PoolScene({
       {poolType === "above-ground" && features.includes("externalStaircase") ? (
         <ExternalStaircase
           outline={outline}
+          copingOffset={copingOuterOffset(system, overflowType)}
+          infinityExcluded={infinityExcluded}
           groundY={verticalLayout.groundY}
-          topY={verticalLayout.copingY}
+          topY={system === "overflow" ? verticalLayout.waterY - 0.001 : verticalLayout.copingY}
         />
       ) : null}
 
@@ -852,7 +1105,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {ACTIVE_RENDERING_QUALITY.contactShadows.enabled ? (
+      {ACTIVE_RENDERING_QUALITY.contactShadows.enabled && system !== "infinity" ? (
         <ContactShadows
           name="pool-contact-shadows"
           key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}`}
@@ -898,11 +1151,12 @@ export default function PoolScene({
         maxPolarAngle={Math.PI / 2.05}
       />
       <CameraRig
+        accessPlan={lighting.accessPlan}
         cameraLocked={cameraLocked}
         radius={radius}
         controls={controls}
         frameToken={frameToken}
-        focus={focus}
+        focus={infinityZone && focus === "overview" ? "infinity" : focus}
         shape={shape}
         depth={depth}
         outline={outline}

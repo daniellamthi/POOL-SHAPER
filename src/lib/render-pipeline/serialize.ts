@@ -139,7 +139,7 @@ export function serializePoolRenderConfig(
   // actually describe it.
   if (config.shape === "l-shape") {
     throw new Error(
-      "Il rendering fotorealistico non supporta ancora la forma a L. " +
+      "Il rendering fotorealistico non supporta ancora la forma angolare. " +
         "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
     );
   }

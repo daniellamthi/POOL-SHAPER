@@ -1,4 +1,6 @@
 import { Footprints } from "lucide-react";
+import { useMemo } from "react";
+import { configuredAccessPlan } from "@/lib/pool/access-plan";
 import { OptionCard, StepSection } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 
@@ -9,13 +11,30 @@ import { useConfigurator } from "@/lib/pool/context";
 export function AccessStep() {
   const { config, togglePoolFeature, setPoolAccess, setInternalStairType } = useConfigurator();
   const stairType = config.internalStairType ?? "linear";
-  // The corner (radial) staircase needs a real square corner to land its two
-  // flanks against -- an Organic outline is a smooth curve with no corner in
-  // that sense at all (see `cornerStairPlan`'s own square-corner check,
-  // walls.ts). Rather than let the customer pick an option that silently
-  // renders nothing, it is disabled with a real, honest explanation -- never
-  // a fake corner invented just to satisfy the control.
-  const cornerStairsUnavailable = config.shape === "organic";
+  // Geometry, obstacles and elevations determine availability, not a shape label.
+  const plans = useMemo(
+    () => ({
+      linear: configuredAccessPlan({
+        ...config,
+        poolAccess: "internalSteps",
+        internalStairType: "linear",
+      }),
+      corner: configuredAccessPlan({
+        ...config,
+        poolAccess: "internalSteps",
+        internalStairType: "corner",
+      }),
+      ladder: configuredAccessPlan({ ...config, poolAccess: "stainlessSteelLadder" }),
+    }),
+    [config],
+  );
+  const selected = config.poolAccess === "stainlessSteelLadder" ? plans.ladder : plans[stairType];
+  const dimensions = (plan: typeof selected) =>
+    plan.reason ? undefined : (
+      <span className="text-xs text-muted-foreground">
+        {plan.steps} gradini · {plan.width.toFixed(2)} × {plan.run.toFixed(2)} m
+      </span>
+    );
 
   return (
     <StepSection title="Accesso e comfort" subtitle="Scale, scaletta e comfort in acqua.">
@@ -37,30 +56,42 @@ export function AccessStep() {
                 <h4 className="label-xs mb-4">Tipo di scala</h4>
                 <div className="grid gap-3" role="group" aria-label="Tipo di scala interna">
                   <OptionCard
-                    title="Scala lineare"
+                    title="Scala interna rettilinea"
                     description="Gradini dritti sul lato corto, addossati alla parete lunga."
                     selected={stairType === "linear"}
                     onSelect={() => setInternalStairType("linear")}
+                    disabled={!!plans.linear.reason}
+                    disabledReason={plans.linear.reason}
+                    meta={dimensions(plans.linear)}
                   />
                   <OptionCard
-                    title="Scala ad angolo"
+                    title="Scala interna angolare"
                     description="Gradini a quarto di cerchio che si aprono dall'angolo della vasca."
-                    disabled={cornerStairsUnavailable}
-                    disabledReason="Non disponibile per la forma organica: la sagoma non ha un angolo vero su cui appoggiare la scala."
-                    selected={stairType === "corner" && !cornerStairsUnavailable}
+                    disabled={!!plans.corner.reason}
+                    disabledReason={plans.corner.reason}
+                    selected={stairType === "corner"}
                     onSelect={() => setInternalStairType("corner")}
+                    meta={dimensions(plans.corner)}
                   />
                 </div>
               </section>
             ) : null}
           </div>
           <OptionCard
-            title="Scaletta esterna"
-            description="Scaletta classica in acciaio inox con tre pedate antiscivolo."
+            title="Scaletta inox"
+            description="Corrimano tubolari e pedate antiscivolo, dimensionati sulla profondità utile."
             selected={config.poolAccess === "stainlessSteelLadder"}
             onSelect={() => setPoolAccess("stainlessSteelLadder")}
+            disabled={!!plans.ladder.reason}
+            disabledReason={plans.ladder.reason}
+            meta={dimensions(plans.ladder)}
           />
         </div>
+        {config.poolAccess && selected.reason ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            {selected.reason} Scegli un accesso compatibile.
+          </p>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-5 border-t border-hairline pt-8">

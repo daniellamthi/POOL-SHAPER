@@ -17,6 +17,8 @@ export interface ResolvedMaterials {
   liner: { color: string; roughness: number; metalness: number };
   floor: { color: string; roughness: number };
   surface: {
+    kind: PoolConfig["finish"];
+    calibrateSample: boolean;
     textureUrl: string;
     maps: {
       baseColorMap: string;
@@ -59,24 +61,35 @@ export function resolveMaterials(
     SKIMMER_FINISHES.find((item) => item.id === config.skimmerFinish) ?? SKIMMER_FINISHES[0]!;
   const mosaic = getMosaicFinish(config.mosaicFinish);
   const textureUrl = getInteriorTexture(config.finish, config.linerColor, config.mosaicFinish);
+  // Indicative PVC calibration using the existing sample, not a measured scan.
+  const sandSample = config.finish === "liner" && config.linerColor === "motionSandBeach179";
+  const linerModule = sandSample ? PVC_TEXTURE_MODULE_SIZE_METERS * 4 : PVC_TEXTURE_MODULE_SIZE_METERS;
   return {
     liner: {
       color: "#ffffff",
-      roughness: config.finish === "mosaic" ? mosaic.materialSettings.roughness : finish.roughness,
-      metalness: config.finish === "mosaic" ? mosaic.materialSettings.metalness : finish.metalness,
+      roughness: config.finish === "mosaic" ? mosaic.materialSettings.roughness : sandSample ? 0.5 : finish.roughness,
+      metalness: config.finish === "mosaic" ? mosaic.materialSettings.metalness : sandSample ? 0 : finish.metalness,
     },
     floor: {
       color: "#ffffff",
-      roughness: config.finish === "mosaic" ? mosaic.materialSettings.roughness : finish.roughness,
+      roughness: config.finish === "mosaic" ? mosaic.materialSettings.roughness : sandSample ? 0.5 : finish.roughness,
     },
     surface: {
+      kind: config.finish,
+      calibrateSample: sandSample,
       textureUrl,
       maps: {
         baseColorMap: textureUrl,
       },
       textureMetadata:
-        config.finish === "mosaic" ? mosaic.textureMetadata : INTERIOR_TEXTURE_METADATA.liner,
-      tileSize: config.finish === "mosaic" ? mosaic.tileSize : PVC_TEXTURE_MODULE_SIZE_METERS,
+        config.finish === "mosaic" ? mosaic.textureMetadata : {
+          ...INTERIOR_TEXTURE_METADATA.liner,
+          physicalWidth: linerModule,
+          physicalHeight: linerModule,
+        },
+      // The sample's very fine grain needs a millimetric reading, not an
+      // unresolvable subpixel field. Provisional until a metric scan exists.
+      tileSize: config.finish === "mosaic" ? mosaic.tileSize : linerModule,
       // Nudged up from 0.003: at that strength the liner read as a
       // perfectly flat plastic sheet under close, stationary cameras --
       // still a subtle membrane relief, not a heavily textured surface.
@@ -84,7 +97,7 @@ export function resolveMaterials(
       microDetail:
         config.finish === "mosaic"
           ? MATERIAL_MICRO_DETAIL_PRESET.mosaic
-          : MATERIAL_MICRO_DETAIL_PRESET.liner,
+          : sandSample ? { ...MATERIAL_MICRO_DETAIL_PRESET.liner, normalStrength: 1.4 } : MATERIAL_MICRO_DETAIL_PRESET.liner,
       wallClearcoat:
         config.finish === "mosaic"
           ? mosaic.materialSettings.clearcoat

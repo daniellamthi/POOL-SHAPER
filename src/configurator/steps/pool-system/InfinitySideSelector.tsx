@@ -1,19 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
 import type { Outline, PoolShapeId } from "@/lib/pool/types";
 import { cn } from "@/lib/utils";
 
-/**
- * Compass-style side label derived from the zone's own outward normal --
- * never the raw "X+/Z-" coordinate axis a customer has no reason to
- * understand. Picks whichever axis the normal points along more strongly,
- * which is always unambiguous for an axis-aligned Rectangle side.
- */
-export function sideLabel(normal: readonly [number, number]): string {
-  if (Math.abs(normal[0]) >= Math.abs(normal[1])) {
-    return normal[0] >= 0 ? "Lato Est" : "Lato Ovest";
-  }
-  return normal[1] >= 0 ? "Lato Sud" : "Lato Nord";
+/** Stable edge label shared with summary/export; never camera-relative. */
+export function sideLabel(side: number): string {
+  return `Lato ${side + 1}`;
 }
 
 /**
@@ -47,6 +39,7 @@ export function InfinitySideSelector({
   onSelect: (side: number) => void;
 }) {
   const zones = useMemo(() => infinityZonesForOutline(outline, shape), [outline, shape]);
+  const [hovered, setHovered] = useState<number | null>(null);
   if (zones.length === 0) return null;
 
   const minX = Math.min(...outline.map((p) => p[0]));
@@ -58,9 +51,11 @@ export function InfinitySideSelector({
   const pad = 14;
   const viewW = 160;
   const viewH = 160;
+  const scale = (viewW - pad * 2) / Math.max(spanX, spanZ);
+  const selectedZone = zones.find((zone) => zone.side === selectedSide);
   const toView = ([x, z]: readonly [number, number]): readonly [number, number] => [
-    pad + ((x - minX) / spanX) * (viewW - pad * 2),
-    pad + ((z - minZ) / spanZ) * (viewH - pad * 2),
+    (viewW - spanX * scale) / 2 + (x - minX) * scale,
+    (viewH - spanZ * scale) / 2 + (z - minZ) * scale,
   ];
 
   return (
@@ -69,7 +64,7 @@ export function InfinitySideSelector({
       role="group"
       aria-label="Selezione lato Infinity"
     >
-      <p className="label-xs self-start">Lato Infinity</p>
+      <p className="label-xs self-start">Scegli il lato Infinity</p>
       <svg
         viewBox={`0 0 ${viewW} ${viewH}`}
         className="h-40 w-40"
@@ -84,35 +79,59 @@ export function InfinitySideSelector({
         {zones.map((zone) => {
           const selected = selectedSide === zone.side;
           return (
-            <polyline
+            <g
               key={zone.side}
-              points={zone.points.map((p) => toView(p).join(",")).join(" ")}
-              fill="none"
-              strokeWidth={selected ? 7 : 5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={cn(
-                "cursor-pointer transition-colors duration-300",
-                selected ? "stroke-brand" : "stroke-foreground/25 hover:stroke-foreground/55",
-              )}
-              tabIndex={0}
-              role="button"
-              aria-pressed={selected}
-              aria-label={sideLabel(zone.normal)}
-              onClick={() => onSelect(zone.side)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onSelect(zone.side);
-                }
-              }}
-            />
+              onPointerEnter={() => setHovered(zone.side)}
+              onPointerLeave={() => setHovered(null)}
+            >
+              <polyline
+                key={zone.side}
+                points={zone.points.map((p) => toView(p).join(",")).join(" ")}
+                fill="none"
+                strokeWidth={selected ? 7 : 5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={cn(
+                  "cursor-pointer motion-safe:transition-colors duration-200",
+                  selected || hovered === zone.side ? "stroke-brand" : "stroke-foreground/25",
+                )}
+                onClick={() => onSelect(zone.side)}
+              />
+              <polyline
+                points={zone.points.map((p) => toView(p).join(",")).join(" ")}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={16}
+                onClick={() => onSelect(zone.side)}
+                className="cursor-pointer"
+              />
+            </g>
           );
         })}
       </svg>
+      <div className="flex flex-wrap justify-center gap-2">
+        {zones.map((zone) => (
+          <button
+            key={zone.side}
+            type="button"
+            aria-pressed={selectedSide === zone.side}
+            onClick={() => onSelect(zone.side)}
+            onFocus={() => setHovered(zone.side)}
+            onBlur={() => setHovered(null)}
+            className={cn(
+              "min-h-11 rounded-lg border px-3 text-xs motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-brand",
+              selectedSide === zone.side
+                ? "border-brand bg-brand/10 text-brand"
+                : "border-hairline hover:border-brand",
+            )}
+          >
+            {sideLabel(zone.side)}
+          </button>
+        ))}
+      </div>
       <p className="text-center text-[12px] font-light text-muted-foreground">
-        {selectedSide !== null
-          ? sideLabel(zones.find((z) => z.side === selectedSide)!.normal)
+        {selectedZone
+          ? sideLabel(selectedZone.side)
           : "Seleziona il lato che scompare a filo orizzonte"}
       </p>
     </div>

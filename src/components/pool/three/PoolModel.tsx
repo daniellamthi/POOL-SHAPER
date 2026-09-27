@@ -14,6 +14,7 @@ import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import {
   createMaterialMicroAoMap,
   createCausticsMap,
+  createLinerSampleMap,
   createMaterialMicroNormalMap,
   createMaterialMicroRoughnessMap,
   createTriplanarDetailMaps,
@@ -21,6 +22,7 @@ import {
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { PoolAccessModel } from "./PoolAccessModel";
+import { accessMounting } from "@/lib/pool/access-plan";
 import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
 import {
   createAnthraciteMaps,
@@ -187,7 +189,7 @@ uniform float waterAbsorptionOpticalPathScale;
 varying vec3 vCausticWorldPosition;
 
 float subtleCausticField(vec2 position, float time) {
-  vec2 p = position * 0.22;
+  vec2 p = position * 0.4;
   vec2 warp = vec2(sin(p.y * 7.0 + time * 0.51), sin(p.x * 8.0 - time * 0.39)) * 0.012;
   float a = texture2D(causticMap, p + warp + vec2(time * 0.013, -time * 0.008)).r;
   float b = texture2D(causticMap, mat2(0.8, -0.6, 0.6, 0.8) * p * 1.23 - warp + vec2(-time * 0.011, time * 0.015)).r;
@@ -241,7 +243,10 @@ float scatteringEnergy = min(
   maxWaterScatteringEnergy
 );
 vec3 inScattering = waterScatteringColor * scatteringEnergy;
-float causticLight = causticValue * 8.0 * min(causticStrength, 0.007) * exp(-underwaterDepth * 0.35);
+// Reject the diffuse pedestal from the soft, crossed texture projections.
+// Concentrations retain their peak gain; the whole floor is not brightened.
+float causticLight = smoothstep(0.08, 0.24, causticValue) * 10.0
+  * min(causticStrength, 0.035) * exp(-underwaterDepth * 0.35);
 // Sun-caustics cannot illuminate a face hidden from the sun. Modulate only
 // direct diffuse light, leaving sky bounce and specular energy untouched.
 vec3 submergedLight = (outgoingLight + reflectedLight.directDiffuse * causticLight) * waterTransmission + inScattering;
@@ -409,7 +414,15 @@ export function PoolModel({
   const infinitySection = useMemo(() => {
     if (!isInfinity || infinityEdge?.side === null || infinityEdge?.side === undefined) return null;
     const zones = infinityZonesForOutline(outline, shape);
-    return zones.some((zone) => zone.side === infinityEdge.side) ? infinityEdge.side : null;
+    const zone = zones.find((zone) => zone.side === infinityEdge.side);
+    return zone
+      ? new Set(
+          Array.from(
+            { length: zone.points.length - 1 },
+            (_, i) => (zone.side + i) % outline.length,
+          ),
+        )
+      : null;
   }, [isInfinity, infinityEdge, outline, shape]);
   const verticalLayout = getPoolVerticalLayout({
     poolType,
@@ -434,8 +447,14 @@ export function PoolModel({
     [outline],
   );
   const structuralOutline = useMemo(
-    () => offsetOutline(outline, ABOVE_GROUND_STRUCTURE_THICKNESS),
-    [outline],
+    () =>
+      offsetOutline(
+        outline,
+        isVisibleOverflow
+          ? OVERFLOW_GEOMETRY.visibleChannelOuterOffset + 0.025
+          : ABOVE_GROUND_STRUCTURE_THICKNESS,
+      ),
+    [outline, isVisibleOverflow],
   );
   const overflowWaterEdge = useMemo(
     () => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset),
@@ -485,10 +504,16 @@ export function PoolModel({
     }));
   }, [system, skimmers.positions, materials.skimmer.type, verticalLayout.wallTopY]);
   const sourceSurfaceMap = useSafeSurfaceTexture(materials.surface.maps.baseColorMap);
+  const calibratedSurfaceMap = useMemo(() => materials.surface.calibrateSample
+    ? createLinerSampleMap(sourceSurfaceMap) : sourceSurfaceMap,
+  [sourceSurfaceMap, materials.surface.calibrateSample]);
+  useEffect(() => () => {
+    if (calibratedSurfaceMap !== sourceSurfaceMap) calibratedSurfaceMap.dispose();
+  }, [calibratedSurfaceMap, sourceSurfaceMap]);
 
   const [floorSurfaceMap, wallSurfaceMap] = useMemo(() => {
-    const floorMap = sourceSurfaceMap.clone();
-    const wallMap = sourceSurfaceMap.clone();
+    const floorMap = calibratedSurfaceMap.clone();
+    const wallMap = calibratedSurfaceMap.clone();
     for (const texture of [floorMap, wallMap]) {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
@@ -501,12 +526,12 @@ export function PoolModel({
     wallMap.colorSpace = THREE.SRGBColorSpace;
     floorMap.repeat.set(1 / materials.surface.tileSize, 1 / materials.surface.tileSize);
     wallMap.repeat.set(
-      Math.max(1, perimeter / materials.surface.tileSize),
-      Math.max(1, depth / materials.surface.tileSize),
+      materials.surface.kind === "liner" ? perimeter / materials.surface.tileSize : Math.max(1, perimeter / materials.surface.tileSize),
+      materials.surface.kind === "liner" ? depth / materials.surface.tileSize : Math.max(1, depth / materials.surface.tileSize),
     );
     for (const texture of [floorMap, wallMap]) texture.needsUpdate = true;
     return [floorMap, wallMap];
-  }, [sourceSurfaceMap, materials.surface.tileSize, perimeter, depth, maxAnisotropy]);
+  }, [calibratedSurfaceMap, materials.surface.tileSize, materials.surface.kind, perimeter, depth, maxAnisotropy]);
 
   useEffect(
     () => () => {
@@ -531,7 +556,10 @@ export function PoolModel({
   const surfaceMicroRoughness = derivedSurfaceDetail?.roughnessMap ?? materialMicroRoughness;
   const surfaceMicroAo = derivedSurfaceDetail?.aoMap ?? materialMicroAo;
   const interiorMicroMaps = useMemo(() => {
-    const moduleSize = materials.surface.microDetail.moduleSize;
+    // Photo-derived PVC maps describe the same patch as the colour image.
+    // The fallback micrograin keeps its independent small-scale repeat.
+    const moduleSize = derivedSurfaceDetail && materials.surface.kind === "liner"
+      ? materials.surface.tileSize : materials.surface.microDetail.moduleSize;
     const floorRepeat = 1 / moduleSize;
     const wallRepeatX = perimeter / moduleSize;
     const wallRepeatY = depth / moduleSize;
@@ -558,6 +586,9 @@ export function PoolModel({
     surfaceMicroRoughness,
     surfaceMicroAo,
     materials.surface.microDetail.moduleSize,
+    materials.surface.tileSize,
+    derivedSurfaceDetail,
+    materials.surface.kind,
     perimeter,
     depth,
     dataAnisotropy,
@@ -599,7 +630,10 @@ export function PoolModel({
     const maps = Object.values(copingDetail).filter((map) => map !== null);
     maps.forEach((map) => {
       map.anisotropy = dataAnisotropy;
-      map.needsUpdate = true;
+      // TextureLoader returns an empty placeholder immediately. It marks
+      // the texture dirty itself after the image arrives; uploading here
+      // before that point produces the GPU "no image data" warning.
+      if (map.image) map.needsUpdate = true;
     });
     return () => maps.forEach((map) => map.dispose());
   }, [copingDetail, dataAnisotropy]);
@@ -943,6 +977,8 @@ export function PoolModel({
           floorProfile={floorProfile}
           topY={verticalLayout.copingY}
           infinityExcluded={infinityExcluded}
+          obstacles={system === "skimmer" ? skimmers.positions : []}
+          {...accessMounting(system, overflowType, verticalLayout)}
         >
           <meshPhysicalMaterial
             color={materials.liner.color}
@@ -954,9 +990,12 @@ export function PoolModel({
             ]}
             roughness={materials.liner.roughness}
             metalness={materials.liner.metalness}
+            roughnessMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null}
+            aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
+            aoMapIntensity={0.6}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v4-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
             }
           />
         </PoolAccessModel>
@@ -983,7 +1022,7 @@ export function PoolModel({
             specularIntensity={0.58}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v4-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
             }
             side={DoubleSide}
           />
@@ -1018,7 +1057,7 @@ export function PoolModel({
             envMapIntensity={0.95}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v4-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
             }
             side={DoubleSide}
           />
@@ -1031,6 +1070,7 @@ export function PoolModel({
               waterLevel={waterLevel}
               depth={waterLevel - verticalLayout.floorY}
               outline={waterOutline}
+              flowing={system === "infinity"}
             />
           </mesh>
         ) : null}

@@ -214,7 +214,7 @@ function LShapeOrientationSelector({ disabled }: { disabled: boolean }) {
       <div
         className="grid grid-cols-4 gap-2"
         role="group"
-        aria-label="Orientamento della forma a L"
+        aria-label="Orientamento della forma Angolare"
       >
         {L_SHAPE_ORIENTATIONS.map((orientation) => (
           <button

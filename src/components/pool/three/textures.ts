@@ -273,23 +273,22 @@ export function createCausticsMap(size = 512): THREE.Texture {
               first = distance;
             } else if (distance < second) second = distance;
           }
+        // Concentrate light near cell boundaries instead of lifting the
+        // whole cell interior. Keep the existing soft filter and peak gain.
         const edge =
-          Math.exp(-(second - first) * 10) *
-          THREE.MathUtils.smoothstep(hash(ix, iy + 29), 0.72, 0.94);
+          Math.exp(-(second - first) * 22) *
+          (0.3 + 0.7 * THREE.MathUtils.smoothstep(hash(ix, iy + 29), 0.15, 0.85));
         const value = Math.round(edge * 255),
           o = (y * size + x) * 4;
         data[o] = data[o + 1] = data[o + 2] = value;
         data[o + 3] = 255;
       }
-    // Sparse, broad, low-contrast light traces rather than a sharp cellular
-    // net. Periodic separable Gaussian blur is baked once, not per frame.
-    // Widened (radius 6 -> 14) so the underlying Worley cells diffuse into
-    // barely-there light suggestions instead of a recognisable repeated
-    // pattern -- the single biggest lever for "almost invisible" caustics,
-    // independent of the intensity uniform applied at render time.
-    const radius = 14;
+    // Soft finite-width light traces; contrast is bounded in the receiving
+    // material, rather than erasing the spatial cue with a very broad blur.
+    // Periodic separable Gaussian filtering is baked once, not per frame.
+    const radius = 6;
     const kernel = Array.from({ length: radius * 2 + 1 }, (_, i) =>
-      Math.exp(-((i - radius) ** 2) / 98),
+      Math.exp(-((i - radius) ** 2) / 18),
     );
     const weight = kernel.reduce((sum, value) => sum + value, 0);
     const horizontal = new Float32Array(size * size);
@@ -379,6 +378,43 @@ export interface DerivedDetailMaps {
 }
 
 const derivedDetailCache = new Map<string, DerivedDetailMaps>();
+
+/** Indicative PVC sample calibration, not a measured product scan.
+ * Remove broad photographic shading and recover the existing fine grain;
+ * no new pattern, displacement, hue tint or per-frame shader work. */
+export function createLinerSampleMap(source: THREE.Texture): THREE.Texture {
+  const image = source.image as HTMLImageElement | undefined;
+  if (!image?.width || !image.height) return source;
+  const size = 1024;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return source;
+  ctx.drawImage(image, 0, 0, size, size);
+  const pixels = ctx.getImageData(0, 0, size, size);
+  const luminance = new Float32Array(size * size);
+  let mean = 0;
+  for (let i = 0; i < luminance.length; i++) {
+    const o = i * 4;
+    luminance[i] = (pixels.data[o]! * 0.2126 + pixels.data[o + 1]! * 0.7152 + pixels.data[o + 2]! * 0.0722) / 255;
+    mean += luminance[i]! / luminance.length;
+  }
+  const broad = boxBlurWrapped(luminance, size, 32);
+  for (let i = 0; i < luminance.length; i++) {
+    // Bounded enhancement keeps embossed PVC soft rather than stony.
+    const grain = THREE.MathUtils.clamp((luminance[i]! - broad[i]!) * 2.5, -0.12, 0.12);
+    const target = mean + (broad[i]! - mean) * 0.2 + grain;
+    const gain = target / Math.max(luminance[i]!, 0.01);
+    for (let channel = 0; channel < 3; channel++) pixels.data[i * 4 + channel] = pixels.data[i * 4 + channel]! * gain;
+  }
+  ctx.putImageData(pixels, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  return texture;
+}
 
 /**
  * Derives a real normal + micro-roughness pair from an already-loaded

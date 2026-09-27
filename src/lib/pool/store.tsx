@@ -19,6 +19,7 @@ import {
 } from "./config";
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
+import { configuredAccessPlan } from "./access-plan";
 import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
 import {
   buildFloorProfile,
@@ -59,7 +60,7 @@ import type {
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
-import { clampInfinityEdgeParams } from "./infinity-edge";
+import { clampInfinityEdgeParams, infinityZonesForOutline } from "./infinity-edge";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -159,6 +160,17 @@ function createInitialState(): State {
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
+  if (!config.infinityEdge) return config;
+  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const valid =
+    !invalidate &&
+    infinityZonesForOutline(outline, config.shape).some(
+      (z) => z.side === config.infinityEdge?.side,
+    );
+  return valid ? config : { ...config, infinityEdge: clampInfinityEdgeParams(undefined) };
+}
+
 function reducer(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
@@ -184,7 +196,10 @@ function reducer(state: State, action: Action): State {
           : config.structure === "modular-steel-structure"
             ? config.structure
             : null;
-      return { ...state, config: { ...config, poolType: action.value, structure } };
+      const features = action.value === "above-ground"
+        ? config.features
+        : config.features.filter((id) => id !== "externalStaircase");
+      return { ...state, config: { ...config, poolType: action.value, structure, features } };
     }
     case "setPoolStructure":
       return { ...state, config: { ...config, structure: action.value } };
@@ -236,12 +251,15 @@ function reducer(state: State, action: Action): State {
       // normalisation already applies on load/save, so the UI and the 3D
       // view are never left showing a system that has no zones for the new
       // shape until a reload happens to correct it.
-      const infinityCapableShape = action.value === "rectangle" || action.value === "l-shape";
+      const infinityCapableShape = infinityZonesForOutline(buildOutline(action.value, dimensions, config.controlPoints), action.value).length > 0;
       const system =
         config.system === "infinity" && !infinityCapableShape ? "skimmer" : config.system;
       return {
         ...state,
-        config: { ...config, shape: action.value, shapeSelected: true, dimensions, system },
+        config: validateInfinity(
+          { ...config, shape: action.value, shapeSelected: true, dimensions, system },
+          action.value !== config.shape,
+        ),
       };
     }
     case "setCopingMaterial":
@@ -282,7 +300,15 @@ function reducer(state: State, action: Action): State {
           DIMENSION_LIMITS.depth.min,
         );
       }
-      return { ...state, config: { ...config, dimensions } };
+      return {
+        ...state,
+        config: validateInfinity(
+          { ...config, dimensions },
+          config.shape === "organic" &&
+            ["length", "width", "organicCurvature"].includes(action.key) &&
+            value !== config.dimensions[action.key],
+        ),
+      };
     }
     case "setFloorProfile": {
       const dimensions = { ...config.dimensions, floorProfile: action.value };
@@ -305,18 +331,24 @@ function reducer(state: State, action: Action): State {
     case "setLShapeOrientation":
       return {
         ...state,
-        config: {
-          ...config,
-          dimensions: { ...config.dimensions, lShapeOrientation: action.value },
-        },
+        config: validateInfinity(
+          {
+            ...config,
+            dimensions: { ...config.dimensions, lShapeOrientation: action.value },
+          },
+          action.value !== config.dimensions.lShapeOrientation,
+        ),
       };
     case "setOrganicMirror":
       return {
         ...state,
-        config: {
-          ...config,
-          dimensions: { ...config.dimensions, organicMirror: action.value },
-        },
+        config: validateInfinity(
+          {
+            ...config,
+            dimensions: { ...config.dimensions, organicMirror: action.value },
+          },
+          action.value !== config.dimensions.organicMirror,
+        ),
       };
     case "setSystem":
       return { ...state, config: { ...config, system: action.value } };
@@ -349,6 +381,7 @@ function reducer(state: State, action: Action): State {
     case "setMosaicFinish":
       return { ...state, config: { ...config, mosaicFinish: action.value } };
     case "togglePoolFeature": {
+      if (action.value === "externalStaircase" && config.poolType !== "above-ground") return state;
       const features = config.features.includes(action.value)
         ? config.features.filter((id) => id !== action.value)
         : [...config.features, action.value];
@@ -447,7 +480,9 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
     if (stepId === "pool-type" && config.poolType === null) return index;
     if (stepId === "shape-dimensions" && config.shapeSelected !== true) return index;
     if (stepId === "structure" && config.structure === null) return index;
-    if (stepId === "access" && config.poolAccess === null) return index;
+    if (stepId === "system" && config.system === "infinity" && !config.infinityEdge?.enabled)
+      return index;
+    if (stepId === "access" && (config.poolAccess === null || configuredAccessPlan(config).reason)) return index;
   }
   return STEPS.length - 1;
 }
@@ -546,10 +581,17 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       if (stepId === "pool-type") return config.poolType !== null;
       if (stepId === "shape-dimensions") return config.shapeSelected === true;
       if (stepId === "structure") return config.structure !== null;
-      if (stepId === "access") return config.poolAccess !== null;
+      if (stepId === "system" && config.system === "infinity")
+        return (
+          !!config.infinityEdge?.enabled &&
+          infinityZonesForOutline(outline, config.shape).some(
+            (z) => z.side === config.infinityEdge?.side,
+          )
+        );
+      if (stepId === "access") return config.poolAccess !== null && !configuredAccessPlan(config).reason;
       return true;
     },
-    [config, renovation],
+    [config, renovation, outline],
   );
 
   const value = useMemo<ConfiguratorContextValue>(

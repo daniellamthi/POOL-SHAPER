@@ -6,6 +6,86 @@ import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 import { mergedWallChords } from "@/lib/pool/lighting";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 
+/** Metres. Internal design criteria, not certified regulatory limits. */
+export const ACCESS_DIMENSIONS = {
+  maxRise: 0.25,
+  minRise: 0.15,
+  tread: 0.3,
+  minWidth: 0.8,
+  maxWidth: 1.15,
+  cornerFirstRadius: 0.45,
+  landingTolerance: 0.005,
+  landingClearance: 0.3,
+  fittingClearance: 0.32,
+  ladderPitch: 0.28,
+  ladderFloorClearance: 0.18,
+  ladderMaxTreads: 5,
+  ladderWidth: 0.5,
+  ladderRun: 0.55,
+  ladderTubeRadius: 0.021,
+  ladderFootDrop: 0.1,
+  ladderFootPad: 0.035,
+} as const;
+type AccessPosition = { x: number; z: number; rotation: number };
+
+/** Real wall intersections for the two lower ladder returns, in local coordinates. */
+export function ladderWallContacts(outline: Outline, placement: AccessPosition) {
+  const c = Math.cos(placement.rotation),
+    s = Math.sin(placement.rotation);
+  const local = outline.map(
+    ([x, z]) =>
+      [
+        c * (x - placement.x) - s * (z - placement.z),
+        s * (x - placement.x) + c * (z - placement.z),
+      ] as const,
+  );
+  return [-ACCESS_DIMENSIONS.ladderWidth / 2, ACCESS_DIMENSIONS.ladderWidth / 2].map((x) => {
+    const hits = local.flatMap((a, i) => {
+      const b = local[(i + 1) % local.length]!;
+      if (Math.abs(b[0] - a[0]) < 1e-8) return [];
+      const t = (x - a[0]) / (b[0] - a[0]);
+      if (t < 0 || t > 1) return [];
+      const z = a[1] + t * (b[1] - a[1]);
+      return z <= 0.05 ? [z] : [];
+    });
+    return { x, z: hits.length ? Math.max(...hits) : NaN };
+  });
+}
+
+/** Same SL-style return as the reference, with a monotone lower bend. */
+export function ladderRailCurve(anchorOffset: number, lastDepth: number, wallZ: number) {
+  const bottomY = -lastDepth - ACCESS_DIMENSIONS.ladderFootDrop;
+  const path = new THREE.CurvePath<THREE.Vector3>();
+  path.add(
+    new THREE.CatmullRomCurve3(
+      [
+        new THREE.Vector3(0, 0, -anchorOffset),
+        new THREE.Vector3(0, 0.62, -anchorOffset),
+        new THREE.Vector3(0, 0.76, 0),
+        new THREE.Vector3(0, 0.62, 0.26),
+        new THREE.Vector3(0, 0.12, 0.32),
+        new THREE.Vector3(0, -lastDepth, 0.32),
+      ],
+      false,
+      "centripetal",
+    ),
+  );
+  path.add(
+    new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(0, -lastDepth, 0.32),
+      new THREE.Vector3(0, bottomY, 0.32),
+      new THREE.Vector3(0, bottomY, 0.22),
+    ),
+  );
+  path.add(
+    new THREE.LineCurve3(
+      new THREE.Vector3(0, bottomY, 0.22),
+      new THREE.Vector3(0, bottomY, wallZ + ACCESS_DIMENSIONS.ladderFootPad),
+    ),
+  );
+  return path;
+}
+
 /**
  * Select a wall with enough clear interior space for the entire access
  * footprint, then place the access on it the way that access type is actually
@@ -42,6 +122,7 @@ export function accessPlacement(
   /** Geometry Pass D (Infinity): the selected side is never a valid
    * ladder/steps wall. `null` (every pre-Infinity call) is a no-op. */
   infinityExcluded: InfinityExclusion | null = null,
+  accept?: (placement: AccessPosition) => boolean,
 ) {
   const inside = (x: number, z: number) => {
     let hit = false;
@@ -150,16 +231,34 @@ export function accessPlacement(
         );
         const x = a[0] + tx * along,
           z = a[1] + tz * along;
+        // Curved Infinity zones cannot be represented by a single axis coordinate.
+        const overlapsInfinity = infinityExcluded?.edgeIndices?.some((index) => {
+          const p = outline[index]!,
+            q = outline[(index + 1) % outline.length]!;
+          const dx = q[0] - p[0],
+            dz = q[1] - p[1];
+          const t = Math.max(
+            0,
+            Math.min(1, ((x - p[0]) * dx + (z - p[1]) * dz) / (dx * dx + dz * dz)),
+          );
+          return Math.hypot(x - p[0] - t * dx, z - p[1] - t * dz) < width / 2 + 0.15;
+        });
+        if (overlapsInfinity) continue;
         const sign = inside(x - tz * 0.05, z + tx * 0.05) ? 1 : -1;
         const nx = -tz * sign,
           nz = tx * sign;
         let clear = true;
-        for (let d = 0.05; d <= run + 0.05; d += 0.1) {
-          for (const w of [-width / 2, 0, width / 2]) {
+        for (
+          let d = 0.05;
+          d <= run + (shortWallAccess ? ACCESS_DIMENSIONS.landingClearance : 0.05);
+          d += 0.1
+        ) {
+          for (let w = -width / 2; w <= width / 2 + 1e-6; w += width / 8) {
             if (!inside(x + nx * d + nz * w, z + nz * d - nx * w)) clear = false;
           }
         }
-        if (clear) return { x, z, rotation: Math.atan2(nx, nz) };
+        const candidate = { x, z, rotation: Math.atan2(nx, nz) };
+        if (clear && (!accept || accept(candidate))) return candidate;
       }
     }
   }
@@ -169,7 +268,7 @@ export function accessPlacement(
 /** Treads and risers shared by both internal staircases, so switching variant
  *  changes the shape of the flight and never how steep it is. */
 export function internalStairFlight(floorY: number, topY: number) {
-  const riseCount = Math.max(3, Math.ceil((topY - floorY) / 0.25));
+  const riseCount = Math.max(3, Math.ceil((topY - floorY) / ACCESS_DIMENSIONS.maxRise));
   return { riseCount, rise: (topY - floorY) / riseCount, steps: riseCount - 1 };
 }
 
@@ -187,27 +286,19 @@ export interface CornerStairPlan {
 }
 
 /**
- * Proportioned to the basin, then bounded to a real swimming-pool tread
- * depth (~28-35 cm). The 28 cm floor is a target, not a hard minimum: on a
- * pool too small to hold it without the flight swallowing the corner, the
- * floor backs off just far enough to keep the outer reach inside the same
- * safe proportion of the basin that `cornerStairPlan`'s clearance search
- * has to respect, so the stair shrinks with the pool instead of growing
- * past it. Shared by `cornerStairPlan` and `recomputeCornerHeight` (Geometry
- * Pass A: the corner's tread count and radii depend on the LOCAL floor
- * under it, only known once the corner's position itself is resolved).
+ * Fixed, usable radial pitch. Depth determines the tread count; the basin
+ * determines availability, never a compressed version of the same flight.
  */
 function cornerStairRadii(
   shortSpan: number,
   steps: number,
 ): { radii: readonly number[]; outerRadius: number } {
-  const outer = THREE.MathUtils.clamp(shortSpan * 0.4, 1.1, 1.85);
-  const safeOuterReach = shortSpan * 0.45;
-  const maxSafeTread = steps > 1 ? Math.max(0.22, (safeOuterReach - 0.42) / (steps - 1)) : 0.35;
-  const treadFloor = Math.min(0.28, maxSafeTread);
-  const tread = THREE.MathUtils.clamp((outer - 0.5) / Math.max(1, steps - 1), treadFloor, 0.35);
-  const firstRadius = Math.max(0.42, outer - tread * (steps - 1));
-  const radii = Array.from({ length: steps }, (_, i) => firstRadius + i * tread);
+  // Never squeeze usable treads to force a fit. The boundary search rejects
+  // a flight that cannot accommodate this real radial walking path.
+  const radii = Array.from(
+    { length: steps },
+    (_, i) => ACCESS_DIMENSIONS.cornerFirstRadius + i * ACCESS_DIMENSIONS.tread,
+  );
   return { radii, outerRadius: radii[radii.length - 1]! };
 }
 
@@ -219,9 +310,8 @@ function cornerStairRadii(
  * about the corner vertex, so the two flanks land flat against the two walls
  * and the nosings fan out into the basin.
  *
- * The outer radius is taken from the basin's short span, so the flight keeps
- * its proportions from a plunge pool up to a long lane pool instead of
- * swallowing a small one.
+ * The outer radius follows the riser count at constant tread depth.
+ * Reject corners without enough basin space and a clear bottom landing.
  *
  * `floorProfile` (Geometry Pass A follow-up): among the (at most two) valid
  * corners on the skimmer wall, prefer whichever sits at the shallow end --
@@ -240,6 +330,7 @@ export function cornerStairPlan(
    * never a valid flight anchor. `null` (every pre-Infinity call) is a
    * no-op. */
   infinityExcluded: InfinityExclusion | null = null,
+  accept?: (footprint: Outline) => boolean,
 ): CornerStairPlan | null {
   if (outline.length < 3) return null;
   const skimmers = skimmerWall(outline, infinityExcluded);
@@ -293,14 +384,17 @@ export function cornerStairPlan(
   let bestDistance = Infinity;
   for (let i = 0; i < outline.length; i++) {
     const point = outline[i]!;
+    if (
+      infinityExcluded?.edgeIndices?.some((edge) => edge === i || (edge + 1) % outline.length === i)
+    )
+      continue;
     const previous = outline[(i - 1 + outline.length) % outline.length]!;
     const next = outline[(i + 1) % outline.length]!;
     const first = normalise(next[0] - point[0], next[1] - point[1]);
     const second = normalise(previous[0] - point[0], previous[1] - point[1]);
     if (!first || !second) continue;
     // Square corners only: a radial flight cannot sit in a swept one.
-    if (Math.abs(first[0] * second[0] + first[1] * second[1]) > 0.08) continue;
-    if (Math.abs(point[axis] - skimmers.coordinate) > 1e-6) continue;
+    if (Math.abs(first[0] * second[0] + first[1] * second[1]) > 0.001) continue;
     // Geometry Pass D (Infinity): reject a corner where either flank runs
     // along the excluded side -- the flight would land one flat flank
     // against the disappearing edge, which has no wall there to seat against.
@@ -334,6 +428,41 @@ export function cornerStairPlan(
       (centre[0] - point[0]) * (first[0] + second[0]) +
       (centre[1] - point[1]) * (first[1] + second[1]);
     if (towardsCentre <= 0) continue;
+    const footprint: Outline = [
+      point,
+      [point[0] + first[0] * outerRadius, point[1] + first[1] * outerRadius],
+      [
+        point[0] + (first[0] + second[0]) * outerRadius,
+        point[1] + (first[1] + second[1]) * outerRadius,
+      ],
+      [point[0] + second[0] * outerRadius, point[1] + second[1] * outerRadius],
+    ];
+    let contained = true;
+    // Include the exact outer arc and its clear bottom landing: a 10 cm
+    // interior sampling pitch alone can miss the last few centimetres.
+    for (let j = 1; j < 64; j++) {
+      const angle = ((j / 64) * Math.PI) / 2;
+      const r = outerRadius + ACCESS_DIMENSIONS.landingClearance;
+      if (
+        !insideOutline(
+          outline,
+          point[0] + r * (first[0] * Math.cos(angle) + second[0] * Math.sin(angle)),
+          point[1] + r * (first[1] * Math.cos(angle) + second[1] * Math.sin(angle)),
+        )
+      )
+        contained = false;
+    }
+    for (let angle = 0.02; angle < Math.PI / 2; angle += 0.06)
+      for (let r = 0.1; r <= outerRadius + 0.01; r += 0.1)
+        if (
+          !insideOutline(
+            outline,
+            point[0] + r * (first[0] * Math.cos(angle) + second[0] * Math.sin(angle)),
+            point[1] + r * (first[1] * Math.cos(angle) + second[1] * Math.sin(angle)),
+          )
+        )
+          contained = false;
+    if (!contained || (accept && !accept(footprint))) continue;
     const distance = straight ? Math.hypot(point[0] - straight.x, point[1] - straight.z) : i;
     const tier = isShallowCorner(point) ? 0 : 1;
     if (tier > bestTier || (tier === bestTier && distance >= bestDistance)) continue;
@@ -415,42 +544,316 @@ function insideOutline(outline: Outline, x: number, z: number) {
   return hit;
 }
 
-/**
- * Every corner tread's cap is a fan of triangles converging on the flight's
- * own vertical axis (the pie-slice centre). Three.js has no explicit tangent
- * for that fan, so a tangent-space normal map falls back to a per-fragment
- * derivative reconstruction -- and directly at a fan's centre, adjacent
- * wedges disagree wildly about which way "u" points, so the reconstructed
- * tangent (and the bump lighting built on it) swings hard between them. The
- * cap itself is flat (its vertex normal is a constant straight up), so the
- * physically correct tangent there is ALSO constant -- there is no real
- * discontinuity to reconstruct. This only ever shows up on the innermost
- * tread: every other tread's own fan centre sits at radius 0, which is
- * always hidden under the next-smaller, taller cylinder nested in front of
- * it, so only the smallest tread ever exposes its own centre to the camera.
- */
-function flattenCapTangent(geometry: THREE.CylinderGeometry): THREE.CylinderGeometry {
-  geometry.computeTangents();
-  const normal = geometry.getAttribute("normal");
-  const tangent = geometry.getAttribute("tangent");
-  for (let i = 0; i < normal.count; i++) {
-    // Top cap only: its vertex normal points straight up. The curved side
-    // wall and the bottom cap (never seen, but left untouched for safety)
-    // keep the tangents computeTangents() derived for them, which are
-    // correct there -- their normals genuinely vary or are already uniform
-    // without a fan singularity.
-    if (normal.getY(i) > 0.999) tangent.setXYZW(i, 1, 0, 0, 1);
-  }
-  tangent.needsUpdate = true;
-  return geometry;
-}
-
 /** Plan dimensions for the straight flight, shared by the mesh and by anything
  *  that has to keep fittings clear of it. */
 export function linearStairDimensions(floorY: number, topY: number) {
   const { riseCount, rise, steps } = internalStairFlight(floorY, topY);
-  const tread = 0.3;
-  return { riseCount, rise, steps, tread, width: 1.15, run: steps * tread };
+  const tread = ACCESS_DIMENSIONS.tread;
+  return { riseCount, rise, steps, tread, width: ACCESS_DIMENSIONS.maxWidth, run: steps * tread };
+}
+
+export function resolveAccessPlan({
+  outline,
+  access,
+  stairType = "linear",
+  floorProfile,
+  topY,
+  infinityExcluded = null,
+  obstacles = [],
+  ladderAnchorOffset = 0.2,
+  ladderAnchorY = topY,
+  ladderDeckAvailable = true,
+}: {
+  outline: Outline;
+  access: PoolAccess | null;
+  stairType?: InternalStairType;
+  floorProfile: FloorProfileModel;
+  topY: number;
+  infinityExcluded?: InfinityExclusion | null;
+  obstacles?: ReadonlyArray<{ x: number; z: number }>;
+  ladderAnchorOffset?: number;
+  ladderAnchorY?: number;
+  ladderDeckAvailable?: boolean;
+}) {
+  const empty = {
+    placement: null as AccessPosition | null,
+    corner: null as CornerStairPlan | null,
+    riseCount: 0,
+    steps: 0,
+    rise: 0,
+    tread: ACCESS_DIMENSIONS.tread as number,
+    width: 0,
+    run: 0,
+    footprint: [] as Outline,
+    ladderDepths: [] as number[],
+    ladderAnchorOffset,
+    ladderAnchorY,
+    reason: "Spazio insufficiente per pedate e alzate regolari, senza interferenze.",
+  };
+  if (!access) return empty;
+  const clearOfFittings = (polygon: Outline) =>
+    !obstacles.some((p) => {
+      if (insideOutline(polygon, p.x, p.z)) return true;
+      return polygon.some((a, i) => {
+        const b = polygon[(i + 1) % polygon.length]!;
+        const dx = b[0] - a[0],
+          dz = b[1] - a[1];
+        const t = THREE.MathUtils.clamp(
+          ((p.x - a[0]) * dx + (p.z - a[1]) * dz) / (dx * dx + dz * dz),
+          0,
+          1,
+        );
+        return (
+          Math.hypot(p.x - a[0] - t * dx, p.z - a[1] - t * dz) < ACCESS_DIMENSIONS.fittingClearance
+        );
+      });
+    });
+  const footprintAt = (p: AccessPosition, width: number, run: number): Outline =>
+    [
+      [-width / 2, 0],
+      [width / 2, 0],
+      [width / 2, run],
+      [-width / 2, run],
+    ].map(
+      ([x, z]) =>
+        [
+          p.x + Math.cos(p.rotation) * x! + Math.sin(p.rotation) * z!,
+          p.z - Math.sin(p.rotation) * x! + Math.cos(p.rotation) * z!,
+        ] as const,
+    );
+  if (access === "internalSteps" && stairType === "corner") {
+    // A horizontal curved last nosing cannot meet a sloping plane with a
+    // constant final rise. Do not silently substitute another staircase.
+    if (floorProfile.sloped)
+      return {
+        ...empty,
+        reason:
+          "Scala angolare non disponibile sul fondo inclinato: il raccordo curvo richiede un pianerottolo piano.",
+      };
+    const corner = cornerStairPlan(
+      outline,
+      floorProfile.deepFloorY,
+      topY,
+      floorProfile,
+      infinityExcluded,
+      clearOfFittings,
+    );
+    if (!corner)
+      return {
+        ...empty,
+        reason: "Nessun angolo retto libero con spazio sufficiente per i gradini curvi.",
+      };
+    return {
+      ...empty,
+      corner,
+      placement: corner,
+      steps: corner.radii.length,
+      riseCount: corner.radii.length + 1,
+      rise: corner.rise,
+      width: corner.radii.at(-1)!,
+      run: corner.radii.at(-1)!,
+      footprint: corner.footprint,
+      reason: "",
+    };
+  }
+  const boundsX = outline.map((p) => p[0]),
+    boundsZ = outline.map((p) => p[1]);
+  const shortSpan = Math.min(
+    Math.max(...boundsX) - Math.min(...boundsX),
+    Math.max(...boundsZ) - Math.min(...boundsZ),
+  );
+  const width =
+    access === "internalSteps"
+      ? THREE.MathUtils.clamp(
+          shortSpan * 0.32,
+          ACCESS_DIMENSIONS.minWidth,
+          ACCESS_DIMENSIONS.maxWidth,
+        )
+      : 0.62;
+  if (access === "stainlessSteelLadder") {
+    if (!ladderDeckAvailable)
+      return { ...empty, reason: "Serve un piano esterno portante oltre il canale di sfioro." };
+    let depths: number[] = [];
+    const placement = accessPlacement(
+      outline,
+      ACCESS_DIMENSIONS.ladderRun,
+      width,
+      access,
+      floorProfile,
+      infinityExcluded,
+      (p) => {
+        const footprint = footprintAt(p, width, ACCESS_DIMENSIONS.ladderRun);
+        if (!clearOfFittings(footprint)) return false;
+        const contacts = ladderWallContacts(outline, p);
+        if (contacts.some((contact) => !Number.isFinite(contact.z))) return false;
+        const c = Math.cos(p.rotation),
+          s = Math.sin(p.rotation);
+        const contactFloors = contacts.map(({ x, z }) =>
+          floorProfile.floorYAt(p.x + c * x + s * z, p.z - s * x + c * z),
+        );
+        const floorY = Math.max(
+          ...contactFloors,
+          ...footprint.map(([x, z]) => floorProfile.floorYAt(x, z)),
+        );
+        depths = Array.from(
+          { length: ACCESS_DIMENSIONS.ladderMaxTreads },
+          (_, i) => (i + 1) * ACCESS_DIMENSIONS.ladderPitch,
+        ).filter((d) => d <= ladderAnchorY - floorY - ACCESS_DIMENSIONS.ladderFloorClearance);
+        // Both flange discs must be wholly outside the actual basin.
+        const nx = Math.sin(p.rotation),
+          nz = Math.cos(p.rotation);
+        for (const w of [-0.25, 0.25])
+          for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+            const x = p.x - nx * ladderAnchorOffset + nz * w + Math.cos(a) * 0.06;
+            const z = p.z - nz * ladderAnchorOffset - nx * w + Math.sin(a) * 0.06;
+            if (insideOutline(outline, x, z)) return false;
+          }
+        return depths.length >= 2;
+      },
+    );
+    return placement
+      ? {
+          ...empty,
+          placement,
+          width,
+          run: ACCESS_DIMENSIONS.ladderRun,
+          footprint: footprintAt(placement, width, ACCESS_DIMENSIONS.ladderRun),
+          ladderDepths: depths,
+          steps: depths.length,
+          tread: ACCESS_DIMENSIONS.ladderPitch,
+          reason: "",
+        }
+      : empty;
+  }
+  const estimate = Math.ceil((topY - floorProfile.shallowFloorY) / ACCESS_DIMENSIONS.maxRise);
+  const counts = Array.from({ length: 8 }, (_, i) => i + 3).sort(
+    (a, b) => Math.abs(a - estimate) - Math.abs(b - estimate),
+  );
+  for (const riseCount of counts) {
+    const steps = riseCount - 1,
+      run = steps * ACCESS_DIMENSIONS.tread;
+    let rise = 0;
+    const placement = accessPlacement(
+      outline,
+      run,
+      width,
+      access,
+      floorProfile,
+      infinityExcluded,
+      (p) => {
+        const footprint = footprintAt(p, width, run);
+        if (!clearOfFittings(footprint)) return false;
+        const ends = footprint.slice(2).map(([x, z]) => floorProfile.floorYAt(x, z));
+        if (Math.abs(ends[0]! - ends[1]!) > ACCESS_DIMENSIONS.landingTolerance) return false;
+        rise = (topY - (ends[0]! + ends[1]!) / 2) / riseCount;
+        if (rise < ACCESS_DIMENSIONS.minRise || rise > ACCESS_DIMENSIONS.maxRise) return false;
+        return Array.from({ length: steps }, (_, i) => {
+          const treadTop = topY - (i + 1) * rise;
+          return [-width / 2, 0, width / 2].every((x) =>
+            [i * ACCESS_DIMENSIONS.tread, (i + 1) * ACCESS_DIMENSIONS.tread].every(
+              (z) =>
+                treadTop >
+                floorProfile.floorYAt(
+                  p.x + Math.cos(p.rotation) * x + Math.sin(p.rotation) * z,
+                  p.z - Math.sin(p.rotation) * x + Math.cos(p.rotation) * z,
+                ) +
+                  0.02,
+            ),
+          );
+        }).every(Boolean);
+      },
+    );
+    if (placement)
+      return {
+        ...empty,
+        placement,
+        riseCount,
+        steps,
+        rise,
+        width,
+        run,
+        footprint: footprintAt(placement, width, run),
+        reason: "",
+      };
+  }
+  return empty;
+}
+
+/** Close the curved-wall pocket behind the first tread without moving the flight. */
+export function stairBackfillOutline(
+  outline: Outline,
+  placement: { x: number; z: number; rotation: number },
+  width: number,
+): Outline {
+  const c = Math.cos(placement.rotation),
+    s = Math.sin(placement.rotation);
+  let polygon = outline.map(
+    ([x, z]) =>
+      [
+        c * (x - placement.x) - s * (z - placement.z),
+        s * (x - placement.x) + c * (z - placement.z),
+      ] as const,
+  );
+  // Intersect the real basin with the shallow strip behind the chord. This
+  // fills only basin space; it cannot protrude through the curved wall.
+  for (const [axis, limit, direction] of [
+    [0, -width / 2, 1],
+    [0, width / 2, -1],
+    [1, -0.3, 1],
+    [1, 0.001, -1],
+  ] as const) {
+    const result: (readonly [number, number])[] = [];
+    for (let i = 0; i < polygon.length; i++) {
+      const a = polygon[i]!,
+        b = polygon[(i + 1) % polygon.length]!;
+      const da = (a[axis] - limit) * direction,
+        db = (b[axis] - limit) * direction;
+      if (da >= 0) result.push(a);
+      if (da >= 0 !== db >= 0) {
+        const t = da / (da - db);
+        result.push([a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])]);
+      }
+    }
+    polygon = result;
+  }
+  return polygon.some((p) => p[1] < -0.002) ? polygon : [];
+}
+
+/** Closed stair segment with horizontal walking surface and a floor-following base.
+ * Metric UVs retain the liner's real-world scale on both risers and treads. */
+export function stairSolid(
+  points: Outline,
+  treadY: number,
+  placement: AccessPosition,
+  floor: FloorProfileModel,
+) {
+  const shape = new THREE.Shape(points.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const geometry = new THREE.ExtrudeGeometry(shape, { depth: 1, bevelEnabled: false, steps: 1 });
+  geometry.rotateX(-Math.PI / 2);
+  const position = geometry.getAttribute("position");
+  const c = Math.cos(placement.rotation),
+    s = Math.sin(placement.rotation);
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i),
+      z = position.getZ(i);
+    const floorY = floor.floorYAt(placement.x + c * x + s * z, placement.z - s * x + c * z);
+    position.setY(i, position.getY(i) > 0.5 ? treadY : floorY);
+  }
+  geometry.computeVertexNormals();
+  const normal = geometry.getAttribute("normal"),
+    uv = geometry.getAttribute("uv");
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i),
+      y = position.getY(i),
+      z = position.getZ(i);
+    uv.setXY(
+      i,
+      Math.abs(normal.getY(i)) > 0.9 ? x : Math.abs(normal.getX(i)) > 0.5 ? z : x,
+      Math.abs(normal.getY(i)) > 0.9 ? z : y,
+    );
+  }
+  geometry.computeBoundingSphere();
+  return geometry;
 }
 
 export function PoolAccessModel({
@@ -461,6 +864,10 @@ export function PoolAccessModel({
   topY,
   children,
   infinityExcluded = null,
+  obstacles = [],
+  ladderAnchorOffset = 0.2,
+  ladderAnchorY = topY,
+  ladderDeckAvailable = true,
 }: {
   outline: Outline;
   access: PoolAccess | null;
@@ -468,169 +875,142 @@ export function PoolAccessModel({
   floorProfile: FloorProfileModel;
   topY: number;
   children: ReactNode;
-  /** Geometry Pass D (Infinity): forwarded, unchanged, to
-   * `accessPlacement`/`cornerStairPlan` -- `null` on every call site that
-   * hasn't opted into Infinity is a complete no-op. */
   infinityExcluded?: InfinityExclusion | null;
+  obstacles?: ReadonlyArray<{ x: number; z: number }>;
+  ladderAnchorOffset?: number;
+  ladderAnchorY?: number;
+  ladderDeckAvailable?: boolean;
 }) {
-  // Sizing/search phase: uses the GLOBAL (deep) floor, exactly as every
-  // pool did before Geometry Pass A -- byte-identical when flat, and a
-  // conservative (longer, safely clearance-tested) estimate for slope,
-  // corrected below once the actual anchor point -- and so the real local
-  // floor under it -- is known.
-  const globalFloorY = floorProfile.deepFloorY;
-  const flight = linearStairDimensions(globalFloorY, topY);
-  const run = access === "internalSteps" ? flight.run : 0.55;
-  const width = access === "internalSteps" ? flight.width : 0.62;
-  const cornerStairs = access === "internalSteps" && stairType === "corner";
-  const rawCorner = useMemo(
+  const plan = useMemo(
     () =>
-      cornerStairs
-        ? cornerStairPlan(outline, globalFloorY, topY, floorProfile, infinityExcluded)
-        : null,
-    [cornerStairs, outline, globalFloorY, topY, floorProfile, infinityExcluded],
+      resolveAccessPlan({
+        outline,
+        access,
+        stairType,
+        floorProfile,
+        topY,
+        infinityExcluded,
+        obstacles,
+        ladderAnchorOffset,
+        ladderAnchorY,
+        ladderDeckAvailable,
+      }),
+    [
+      outline,
+      access,
+      stairType,
+      floorProfile,
+      topY,
+      infinityExcluded,
+      obstacles,
+      ladderAnchorOffset,
+      ladderAnchorY,
+      ladderDeckAvailable,
+    ],
   );
-  const placement = useMemo(
-    () => accessPlacement(outline, run, width, access, floorProfile, infinityExcluded),
-    [outline, run, width, access, floorProfile, infinityExcluded],
-  );
-  // The real, local floor under wherever the search above actually landed --
-  // identical to `globalFloorY` when flat, so every step below is a no-op
-  // change for the flat case.
-  const corner = useMemo(() => {
-    if (!rawCorner) return null;
-    if (!floorProfile.sloped) return rawCorner;
-    const localFloorY = floorProfile.floorYAt(rawCorner.x, rawCorner.z);
-    return recomputeCornerHeight(rawCorner, outline, localFloorY, topY);
-  }, [rawCorner, floorProfile, outline, topY]);
-  const localFloorY =
-    placement && floorProfile.sloped
-      ? floorProfile.floorYAt(placement.x, placement.z)
-      : globalFloorY;
-  const localFlight =
-    placement && floorProfile.sloped ? linearStairDimensions(localFloorY, topY) : flight;
-  const { riseCount, rise, tread } = localFlight;
-  const rail = useMemo(
+  const geometries = useMemo(() => {
+    if (!plan.placement || access !== "internalSteps") return [];
+    const { placement, corner, width, steps, tread, rise } = plan;
+    const result: THREE.BufferGeometry[] = [];
+    if (corner) {
+      // Disjoint annular sectors: no stacked/overlapping full cylinders.
+      corner.radii.forEach((radius, i) => {
+        const inner = i ? corner.radii[i - 1]! : 0;
+        const points: [number, number][] = [];
+        for (let j = 0; j <= 48; j++) {
+          const a = ((j / 48) * Math.PI) / 2;
+          points.push([radius * Math.sin(a), radius * Math.cos(a)]);
+        }
+        if (inner)
+          for (let j = 48; j >= 0; j--) {
+            const a = ((j / 48) * Math.PI) / 2;
+            points.push([inner * Math.sin(a), inner * Math.cos(a)]);
+          }
+        else points.push([0, 0]);
+        result.push(stairSolid(points, topY - (i + 1) * rise, placement, floorProfile));
+      });
+    } else {
+      for (let i = 0; i < steps; i++)
+        result.push(
+          stairSolid(
+            [
+              [-width / 2, i * tread],
+              [width / 2, i * tread],
+              [width / 2, (i + 1) * tread],
+              [-width / 2, (i + 1) * tread],
+            ],
+            topY - (i + 1) * rise,
+            placement,
+            floorProfile,
+          ),
+        );
+      const backfill = stairBackfillOutline(outline, placement, width);
+      if (backfill.length >= 3)
+        result.push(stairSolid(backfill, topY - rise, placement, floorProfile));
+    }
+    return result;
+  }, [plan, access, outline, floorProfile, topY]);
+  useEffect(() => () => geometries.forEach((g) => g.dispose()), [geometries]);
+  const rails = useMemo(
     () =>
-      new THREE.CatmullRomCurve3(
-        [
-          new THREE.Vector3(0, 0, -0.36),
-          new THREE.Vector3(0, 0.62, -0.36),
-          new THREE.Vector3(0, 0.76, -0.15),
-          new THREE.Vector3(0, 0.62, 0.26),
-          new THREE.Vector3(0, 0.12, 0.32),
-          new THREE.Vector3(0, -Math.min(1.15, topY - localFloorY - 0.15), 0.32),
-        ],
-        false,
-        "centripetal",
-      ),
-    [topY, localFloorY],
+      plan.placement && access === "stainlessSteelLadder"
+        ? ladderWallContacts(outline, plan.placement).map((contact) => ({
+            ...contact,
+            curve: ladderRailCurve(ladderAnchorOffset, plan.ladderDepths.at(-1) ?? 0.56, contact.z),
+          }))
+        : [],
+    [outline, access, plan.placement, ladderAnchorOffset, plan.ladderDepths],
   );
-  // Built once per plan, not per render: computeTangents() walks every
-  // triangle, and doing that on every frame would be wasted work for
-  // geometry that only changes when the basin or the flight does.
-  const cornerTreadGeometries = useMemo(() => {
-    if (!corner) return [];
-    return corner.radii.map((radius, i) => {
-      // Innermost tread is the highest: the flight descends as it fans out,
-      // so the nested solids read as one stepped quarter-round.
-      const height = (corner.radii.length - i) * corner.rise;
-      const geometry = new THREE.CylinderGeometry(
-        radius,
-        radius,
-        height,
-        Math.max(14, Math.round(radius * 20)),
-        1,
-        false,
-        0,
-        Math.PI / 2,
-      );
-      // Only the innermost tread ever exposes its own fan centre to the
-      // camera (see flattenCapTangent) -- skip the extra work everywhere
-      // else, since nothing there is visibly wrong.
-      return i === 0 ? flattenCapTangent(geometry) : geometry;
-    });
-  }, [corner]);
-  useEffect(
-    () => () => cornerTreadGeometries.forEach((geometry) => geometry.dispose()),
-    [cornerTreadGeometries],
-  );
-
-  if (!access) return null;
-  if (cornerStairs && corner) {
-    const cornerFloorY = floorProfile.floorYAt(corner.x, corner.z);
-    return (
-      <group
-        name="pool-access-internalSteps-corner"
-        position={[corner.x, 0, corner.z]}
-        rotation={[0, corner.rotation, 0]}
-      >
-        {cornerTreadGeometries.map((geometry, i) => (
-          <mesh
-            key={i}
-            position={[0, cornerFloorY + ((corner.radii.length - i) * corner.rise) / 2, 0]}
-            renderOrder={corner.radii.length - i}
-            geometry={geometry}
-            castShadow
-            // The innermost tread's cap is the one fan whose own centre is
-            // never hidden under a taller neighbour (see flattenCapTangent),
-            // and that same singular point is where a shadow map's depth
-            // precision is thinnest across this mesh: under the pool LED's
-            // grazing spotlight it self-shadowed a hairline crease radiating
-            // from that centre, on this tread only. It still casts its own
-            // shadow onto the tread below; it just cannot flatten under it.
-            receiveShadow={i !== 0}
-          >
-            {children}
-          </mesh>
-        ))}
-      </group>
-    );
-  }
-  if (!placement) return null;
+  if (!access || !plan.placement || plan.reason) return null;
   return (
     <group
-      name={`pool-access-${access}`}
-      position={[placement.x, 0, placement.z]}
-      rotation={[0, placement.rotation, 0]}
+      name={`pool-access-${access}-${stairType}`}
+      position={[plan.placement.x, 0, plan.placement.z]}
+      rotation={[0, plan.placement.rotation, 0]}
     >
       {access === "internalSteps" ? (
-        Array.from({ length: riseCount - 1 }, (_, i) => {
-          const height = (riseCount - 1 - i) * rise;
-          return (
-            <mesh
-              key={i}
-              position={[0, localFloorY + height / 2, (i + 0.5) * tread]}
-              castShadow
-              receiveShadow
-            >
-              <boxGeometry args={[width, height, tread + 0.002]} />
-              {children}
-            </mesh>
-          );
-        })
+        geometries.map((geometry, i) => (
+          <mesh key={i} geometry={geometry} castShadow receiveShadow>
+            {children}
+          </mesh>
+        ))
       ) : (
-        <group position={[0, topY, 0]}>
-          {[-0.25, 0.25].map((x) => (
+        <group position={[0, ladderAnchorY, 0]}>
+          {rails.map(({ x, z, curve }) => (
             <group key={x} position={[x, 0, 0]}>
               <mesh castShadow>
-                <tubeGeometry args={[rail, 40, 0.021, 12, false]} />
-                <meshStandardMaterial color="#e5e8e9" metalness={1} roughness={0.2} />
+                <tubeGeometry args={[curve, 64, ACCESS_DIMENSIONS.ladderTubeRadius, 12, false]} />
+                <meshStandardMaterial color="#e5e8e9" metalness={1} roughness={0.22} />
               </mesh>
-              <mesh position={[0, 0.012, -0.36]}>
+              <mesh position={[0, 0.012, -ladderAnchorOffset]}>
                 <cylinderGeometry args={[0.06, 0.06, 0.024, 24]} />
                 <meshStandardMaterial color="#d5dadd" metalness={1} roughness={0.24} />
               </mesh>
+              <mesh
+                position={[
+                  0,
+                  -(plan.ladderDepths.at(-1) ?? 0.56) - ACCESS_DIMENSIONS.ladderFootDrop,
+                  z + ACCESS_DIMENSIONS.ladderFootPad / 2,
+                ]}
+                rotation={[Math.PI / 2, 0, 0]}
+              >
+                <cylinderGeometry args={[0.034, 0.034, ACCESS_DIMENSIONS.ladderFootPad, 16]} />
+                <meshStandardMaterial color="#373c3e" roughness={0.88} />
+              </mesh>
             </group>
           ))}
-          {[0.3, 0.58, 0.86]
-            .filter((d) => d < topY - localFloorY - 0.12)
-            .map((d) => (
-              <mesh key={d} position={[0, -d, 0.32]} castShadow>
-                <boxGeometry args={[0.5, 0.035, 0.13]} />
-                <meshStandardMaterial color="#bbc3c6" metalness={0.9} roughness={0.32} />
+          {plan.ladderDepths.map((d) => (
+            <group key={d} position={[0, -d, 0.32]}>
+              <mesh castShadow>
+                <boxGeometry args={[ACCESS_DIMENSIONS.ladderWidth, 0.035, 0.13]} />
+                <meshStandardMaterial color="#bbc3c6" metalness={1} roughness={0.32} />
               </mesh>
-            ))}
+              <mesh position={[0, 0.019, 0]}>
+                <boxGeometry args={[0.4, 0.004, 0.105]} />
+                <meshStandardMaterial color="#444a4c" roughness={0.85} />
+              </mesh>
+            </group>
+          ))}
         </group>
       )}
     </group>

@@ -3,6 +3,7 @@ import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
 import { InfinitySideSelector } from "./InfinitySideSelector";
+import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
 
 /**
  * Step 4 — selects the hydraulic system (Acqua / Linea d'acqua).
@@ -32,8 +33,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
   // all and stays gated off, mirroring the same gate `infinityZonesForOutline`
   // itself applies, so the UI never offers a selection the 3D view/export
   // guard would then have to silently reject.
-  const infinityAvailable =
-    config.shape === "rectangle" || config.shape === "l-shape" || config.shape === "organic";
+  const infinityAvailable = infinityZonesForOutline(outline, config.shape).length > 0;
 
   return (
     <StepSection
@@ -52,6 +52,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
             makes this smoothly animate to its natural height without a
             measured-pixel-height hack. */}
         <div
+          inert={config.system !== "skimmer"}
           className={cn(
             "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
             config.system === "skimmer" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
@@ -120,6 +121,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
           disabledReason="Infinity non ancora disponibile per questa forma."
         />
         <div
+          inert={config.system !== "infinity"}
           className={cn(
             "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
             config.system === "infinity" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",

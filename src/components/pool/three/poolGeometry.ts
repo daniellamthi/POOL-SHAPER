@@ -55,7 +55,7 @@ export function createRingGeometry(
    * (Rectangle only -- the caller derives it from `RectangleInfinityZone.side`),
    * leaving an open gap there instead of a closed ring. `null`/`undefined`
    * (every pre-Infinity call site) is byte-identical to before. */
-  excludeSide: number | null = null,
+  excludeSide: number | ReadonlySet<number> | null = null,
 ): THREE.BufferGeometry {
   if (inner.length !== outer.length || inner.length < 3) {
     throw new Error("Ring outlines must have the same vertex count");
@@ -66,7 +66,7 @@ export function createRingGeometry(
   let uvOffset = 0;
 
   for (let index = 0; index < inner.length; index++) {
-    if (excludeSide !== null && index === excludeSide) continue;
+    if (typeof excludeSide === "number" ? index === excludeSide : excludeSide?.has(index)) continue;
     const innerA = inner[index]!;
     const innerB = inner[(index + 1) % inner.length]!;
     const outerA = outer[index]!;

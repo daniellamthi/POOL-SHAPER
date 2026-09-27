@@ -1,16 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { accessPlacement, cornerStairPlan, linearStairDimensions } from "./PoolAccessModel";
-import {
-  planPoolLighting,
-  POOL_LUMINAIRE,
-  type LightingExclusion,
-  type PoolLightPosition,
-  type PoolLightingPlan,
-} from "@/lib/pool/lighting";
-import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
-import type { SkimmerPlan } from "@/lib/pool/engineering";
-import type { InfinityExclusion } from "@/lib/pool/walls.ts";
+import { type SceneLightingPlan } from "@/lib/pool/lighting-plan";
+export { planSceneLighting } from "@/lib/pool/lighting-plan";
+import { POOL_LUMINAIRE, type PoolLightPosition } from "@/lib/pool/lighting";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import {
@@ -284,113 +276,6 @@ function RecessedPoolLight({
       ) : null}
     </group>
   );
-}
-
-export interface SceneLightingPlan {
-  plan: PoolLightingPlan;
-  shadowIndex: number;
-  convexQuad: boolean;
-}
-
-/**
- * The single source of truth for where the luminaires end up.
- *
- * Hoisted out of the component so the camera can be aimed at the row that is
- * actually built. `planPoolLighting` falls through to the second-longest wall
- * whenever skimmers or the access steps obstruct the first, so anything that
- * re-derives the wall independently -- as the lighting-step camera used to --
- * can end up framing the opposite side of the basin, with the fixtures behind
- * the viewer.
- */
-export function planSceneLighting({
-  outline,
-  layout,
-  skimmers,
-  access,
-  stairType = "linear",
-  floorProfile,
-  infinityExcluded = null,
-}: {
-  outline: Outline;
-  layout: PoolVerticalLayout;
-  skimmers: SkimmerPlan;
-  access: PoolAccess | null;
-  stairType?: InternalStairType;
-  /** Geometry Pass A follow-up: threaded through to `cornerStairPlan`/
-   * `accessPlacement` so the LED exclusion footprint always matches wherever
-   * the stairs actually ended up (possibly the shallow end on a sloped
-   * floor) rather than a stale, unbiased placement. */
-  floorProfile?: FloorProfileModel;
-  /** Geometry Pass D (Infinity): keeps the LED row, and the access exclusion
-   * footprint it's derived from, off the selected side. `null` (every
-   * pre-Infinity call) is a complete no-op. */
-  infinityExcluded?: InfinityExclusion | null;
-}): SceneLightingPlan {
-  const exclusions: LightingExclusion[] = skimmers.positions.map((p) => ({
-    kind: "skimmer",
-    x: p.x,
-    z: p.z,
-    radius: 0.65,
-  }));
-  let accessPoint: { x: number; z: number } | null = null;
-  // The footprint fittings must avoid comes from the same plan the staircase
-  // is built from, so a corner flight excludes the quarter it actually fills
-  // rather than the straight flight's rectangle.
-  const corner =
-    access === "internalSteps" && stairType === "corner"
-      ? cornerStairPlan(outline, layout.floorY, layout.copingY, floorProfile, infinityExcluded)
-      : null;
-  if (corner) {
-    accessPoint = { x: corner.x, z: corner.z };
-    exclusions.push({ kind: "access", polygon: corner.footprint, clearance: 0.2 });
-  } else if (access) {
-    const flight = linearStairDimensions(layout.floorY, layout.copingY);
-    const run = access === "internalSteps" ? flight.run : 0.55;
-    const width = access === "internalSteps" ? flight.width : 0.62;
-    const placement = accessPlacement(outline, run, width, access, floorProfile, infinityExcluded);
-    if (placement) {
-      accessPoint = placement;
-      const nx = Math.sin(placement.rotation),
-        nz = Math.cos(placement.rotation);
-      const polygon: Outline = [
-        [-width / 2, -0.05],
-        [width / 2, -0.05],
-        [width / 2, run + 0.1],
-        [-width / 2, run + 0.1],
-      ].map(
-        ([x, z]) => [placement.x + nz * x! + nx * z!, placement.z - nx * x! + nz * z!] as const,
-      );
-      exclusions.push({ kind: "access", polygon, clearance: 0.2 });
-    }
-  }
-  const plan = planPoolLighting({
-    outline,
-    waterY: layout.waterY,
-    floorY: layout.floorY,
-    exclusions,
-    infinityExcluded,
-  });
-  // In a convex rectangle the basin walls cannot occlude one another. Keep
-  // the dominant access shadow; distant fill lights are intentionally soft.
-  // Non-rectangular outlines retain full occlusion for re-entrant corners.
-  let shadowIndex = -1,
-    nearest = Infinity;
-  if (accessPoint)
-    plan.positions.forEach((p, i) => {
-      const distance = Math.hypot(p.x - accessPoint.x, p.z - accessPoint.z);
-      if (distance < nearest) {
-        nearest = distance;
-        shadowIndex = i;
-      }
-    });
-  const turns = outline.map((a, i) => {
-    const b = outline[(i + 1) % outline.length]!,
-      c = outline[(i + 2) % outline.length]!;
-    return (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
-  });
-  const convexQuad =
-    outline.length === 4 && (turns.every((v) => v > 0) || turns.every((v) => v < 0));
-  return { plan, shadowIndex, convexQuad };
 }
 
 export function PoolLights({

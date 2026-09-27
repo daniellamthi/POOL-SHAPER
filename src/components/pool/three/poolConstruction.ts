@@ -53,7 +53,9 @@ export function buildDeckCutoutOutline(
   const base = offsetOutline(outline, baseOffset);
   if (!zone || base.length !== outline.length) return base;
   const dims = clampInfinityEdgeDimensions(undefined);
-  const reach = dims.lipWidth + dims.catchBasinWidth + dims.wallThickness;
+  // Clear the receiving assembly and leave a visible dry inspection margin.
+  // Only the selected outward arc is cut back, never a bounding-box half-plane.
+  const reach = dims.lipWidth + dims.catchBasinWidth + dims.wallThickness + 2.4;
   const extra = reach - baseOffset;
   if (!(extra > 1e-6)) return base;
   const n = base.length;
@@ -136,7 +138,7 @@ export function createCopingSlabGeometry(
    * clean vertical end caps at both open ends with no extra geometry needed.
    * `null`/`undefined` (every pre-Infinity call site) is byte-identical to
    * before. */
-  excludeSection: number | null = null,
+  excludeSection: number | ReadonlySet<number> | null = null,
 ) {
   if (inner.length !== outer.length || inner.length < 3)
     throw new Error("Mismatched coping outlines");
@@ -154,7 +156,13 @@ export function createCopingSlabGeometry(
       c = inner[(i + 1) % inner.length]!;
     const u = new THREE.Vector2(b[0] - a[0], b[1] - a[1]).normalize();
     const v = new THREE.Vector2(c[0] - b[0], c[1] - b[1]).normalize();
-    if (u.dot(v) < 0.94) corners.push(distances[i]!);
+    if (
+      u.dot(v) < 0.94 ||
+      (typeof excludeSection !== "number" &&
+        excludeSection &&
+        excludeSection.has(i) !== excludeSection.has(i - 1))
+    )
+      corners.push(distances[i]!);
   }
   corners.push(total);
   const pointAt = (ring: Outline, d: number): [number, number] => {
@@ -171,7 +179,11 @@ export function createCopingSlabGeometry(
   };
   const parts: THREE.BufferGeometry[] = [];
   for (let section = 0; section < corners.length - 1; section++) {
-    if (excludeSection !== null && section === excludeSection) continue;
+    const rawEdge = distances.findIndex((d) => Math.abs(d - corners[section]!) < 1e-7);
+    if (
+      typeof excludeSection === "number" ? section === excludeSection : excludeSection?.has(rawEdge)
+    )
+      continue;
     const start = corners[section]!,
       length = corners[section + 1]! - start;
     const count = Math.max(1, Math.round(length / 0.62));
@@ -272,10 +284,10 @@ export function createGrateGeometry(inner: Outline, outer: Outline) {
     new THREE.Vector2(-0.0045, 0),
     new THREE.Vector2(0.0045, 0),
     new THREE.Vector2(0.006, -0.0015),
-    new THREE.Vector2(0.006, -0.0175),
-    new THREE.Vector2(0.0045, -0.019),
-    new THREE.Vector2(-0.0045, -0.019),
-    new THREE.Vector2(-0.006, -0.0175),
+    new THREE.Vector2(0.006, -0.0235),
+    new THREE.Vector2(0.0045, -0.025),
+    new THREE.Vector2(-0.0045, -0.025),
+    new THREE.Vector2(-0.006, -0.0235),
     new THREE.Vector2(-0.006, -0.0015),
   ]);
   const parts: THREE.BufferGeometry[] = [];

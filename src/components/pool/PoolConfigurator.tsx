@@ -115,6 +115,7 @@ function ConfiguratorLayout() {
     reset,
     canContinue,
     isStepComplete,
+    setInfinitySide,
     justRestoredProject,
     dismissRestoredProjectNotice,
   } = useConfigurator();
@@ -289,7 +290,8 @@ function ConfiguratorLayout() {
   const dimensionsStep = activeSteps.findIndex(
     ({ id }) => id === (renovationWorkflow ? "renovation-pool" : "shape-dimensions"),
   );
-  const cameraLocked = dimensionsStep >= 0 && step > dimensionsStep;
+  // System details frame automatically, but remain inspectable by orbit/touch.
+  const cameraLocked = dimensionsStep >= 0 && step > dimensionsStep && !["system", "style", "access"].includes(activeStepId ?? "");
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
     : activeStepId === "system"
@@ -302,6 +304,8 @@ function ConfiguratorLayout() {
           : "skimmer-detail"
       : activeStepId === "style"
         ? "liner"
+        : activeStepId === "access"
+          ? "access"
         : activeStepId === "lighting"
           ? "features"
           : activeStepId === "review"
@@ -401,6 +405,11 @@ function ConfiguratorLayout() {
             poolAccess={config.poolAccess}
             skimmers={skimmers}
             {...(config.infinityEdge ? { infinityEdge: config.infinityEdge } : {})}
+            onSelectInfinitySide={
+              activeStepId === "system" && config.system === "infinity"
+                ? setInfinitySide
+                : undefined
+            }
             length={config.dimensions.length}
             width={config.dimensions.width}
             depth={config.dimensions.depth}
@@ -413,7 +422,7 @@ function ConfiguratorLayout() {
             frameToken={frameToken}
             focus={cameraFocus}
             cameraLocked={cameraLocked}
-            showWater={renovationWorkflow || activeStepId !== "style"}
+            showWater={true}
             theme={theme}
             photoMode={photoMode}
             onTogglePhotoMode={togglePhotoMode}

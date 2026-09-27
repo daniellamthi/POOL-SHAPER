@@ -1,110 +1,72 @@
 import { useEffect, useMemo } from "react";
 import type { Outline } from "@/lib/pool/types";
-import { COPING_WIDTH } from "@/lib/pool/config";
+import { boundaryRuns, sampleWall, pointInBasin } from "@/lib/pool/boundary-placement";
+import type { InfinityExclusion } from "@/lib/pool/walls";
 import { createContactAOGradientMap } from "./textures";
 
 interface ExternalStaircaseProps {
   outline: Outline;
   groundY: number;
   topY: number;
+  copingOffset: number;
+  infinityExcluded?: InfinityExclusion | null;
 }
 
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
 
-export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseProps) {
+export function ExternalStaircase({
+  outline,
+  groundY,
+  topY,
+  copingOffset,
+  infinityExcluded = null,
+}: ExternalStaircaseProps) {
   const layout = useMemo(() => {
-    const centre = outline.reduce(
-      (sum, [x, z]) => [sum[0] + x / outline.length, sum[1] + z / outline.length] as const,
-      [0, 0] as const,
-    );
-    let longest: {
-      length: number;
-      midpoint: readonly [number, number];
-      outward: readonly [number, number];
-      tangent: readonly [number, number];
-    } = { length: 0, midpoint: [0, 0], outward: [0, 1], tangent: [1, 0] };
-    for (let index = 0; index < outline.length; index++) {
-      const start = outline[index]!;
-      const end = outline[(index + 1) % outline.length]!;
-      const dx = end[0] - start[0];
-      const dz = end[1] - start[1];
-      const length = Math.hypot(dx, dz);
-      if (length <= longest.length) continue;
-      const midpoint: readonly [number, number] = [
-        (start[0] + end[0]) / 2,
-        (start[1] + end[1]) / 2,
-      ];
-      const firstNormal: readonly [number, number] = [-dz / length, dx / length];
-      const pointsOutward =
-        firstNormal[0] * (midpoint[0] - centre[0]) + firstNormal[1] * (midpoint[1] - centre[1]) > 0;
-      longest = {
-        length,
-        midpoint,
-        outward: pointsOutward ? firstNormal : [-firstNormal[0], -firstNormal[1]],
-        tangent:
-          dx > 0 || (Math.abs(dx) < 1e-9 && dz > 0)
-            ? [dx / length, dz / length]
-            : [-dx / length, -dz / length],
-      };
-    }
-    const height = Math.max(0.6, topY - groundY);
-    const stepCount = clamp(Math.ceil(height / 0.2), 3, 10);
+    const height = topY - groundY;
+    const stepCount = clamp(Math.ceil(height / 0.2), 1, 14);
     const rise = height / stepCount;
     const treadDepth = clamp(height * 0.19, 0.27, 0.34);
     const width = 0.96;
-    const endOffset = longest.length / 2;
-    return {
-      ...longest,
-      centre,
-      midpoint: [
-        longest.midpoint[0] + longest.tangent[0] * endOffset,
-        longest.midpoint[1] + longest.tangent[1] * endOffset,
-      ] as const,
-      height,
-      stepCount,
-      rise,
-      treadDepth,
-      width,
-      rotation: Math.atan2(-longest.tangent[0], -longest.tangent[1]),
-    };
-  }, [groundY, outline, topY]);
-
-  // `outline` is the pool's wall outline; the coping band extends
-  // COPING_WIDTH beyond it (see PoolModel's `offsetOutline(outline,
-  // COPING_WIDTH)`). The staircase sits right at the wall's end, where the
-  // coping's mitred corner bulges slightly past that straight-edge offset --
-  // a small extra clearance keeps the staircase clear of that corner too,
-  // without reading as a gap at real scale.
-  const CORNER_MITRE_CLEARANCE = 0.05;
-  const copingClearance = COPING_WIDTH + CORNER_MITRE_CLEARANCE;
-  const groupPosition: readonly [number, number, number] = [
-    layout.midpoint[0] + layout.outward[0] * (layout.width / 2 + copingClearance),
-    0,
-    layout.midpoint[1] + layout.outward[1] * (layout.width / 2 + copingClearance),
-  ];
-  // The staircase sits at the end of its wall (see `endOffset` above), so
-  // one of its two rails can land past the corner, next to (or over) the
-  // adjacent wall -- an "inner" rail that reads as entering the pool. Keep
-  // only whichever rail is actually farther from the pool's own centre,
-  // i.e. genuinely external, for any wall/corner this ends up on.
-  const cosRotation = Math.cos(layout.rotation);
-  const sinRotation = Math.sin(layout.rotation);
-  const railSides = [-1, 1] as const;
-  const externalSide = railSides.reduce((farthest, side) => {
-    const localX = side * layout.width * 0.49;
-    const worldX = groupPosition[0] + localX * cosRotation;
-    const worldZ = groupPosition[2] - localX * sinRotation;
-    const distance = Math.hypot(worldX - layout.centre[0], worldZ - layout.centre[1]);
-    const farthestLocalX = farthest * layout.width * 0.49;
-    const farthestWorldX = groupPosition[0] + farthestLocalX * cosRotation;
-    const farthestWorldZ = groupPosition[2] - farthestLocalX * sinRotation;
-    const farthestDistance = Math.hypot(
-      farthestWorldX - layout.centre[0],
-      farthestWorldZ - layout.centre[1],
-    );
-    return distance > farthestDistance ? side : farthest;
-  }, railSides[0]);
+    const runs = boundaryRuns(outline, infinityExcluded)
+      .filter((r) => r.length >= width + 0.4)
+      .sort((a, b) => b.length - a.length);
+    for (const wall of runs)
+      for (const fraction of [0.5, 0.25, 0.75]) {
+        const p = sampleWall(
+          wall,
+          Math.max(
+            width / 2 + 0.2,
+            Math.min(wall.length - width / 2 - 0.2, wall.length * fraction),
+          ),
+        );
+        const outward = [-p.nx, -p.nz] as const;
+        const x = p.x + outward[0] * copingOffset,
+          z = p.z + outward[1] * copingOffset;
+        let clear = true;
+        for (let d = 0.02; d <= stepCount * treadDepth + 0.1; d += 0.15)
+          for (const w of [-width / 2, 0, width / 2]) {
+            if (pointInBasin(x + outward[0] * d + p.tx * w, z + outward[1] * d + p.tz * w, outline))
+              clear = false;
+          }
+        if (clear)
+          return {
+            height,
+            stepCount,
+            rise,
+            treadDepth,
+            width,
+            x,
+            z,
+            rotation: Math.atan2(outward[0], outward[1]),
+          };
+      }
+    return null;
+  }, [groundY, outline, topY, copingOffset, infinityExcluded]);
+  const contactAOMap = useMemo(() => createContactAOGradientMap(), []);
+  useEffect(() => () => contactAOMap.dispose(), [contactAOMap]);
+  if (!layout || layout.height <= 0) return null;
+  const groupPosition: [number, number, number] = [layout.x, 0, layout.z];
 
   const railHeight = 0.88;
   const lowestZ = (layout.stepCount - 0.5) * layout.treadDepth;
@@ -113,9 +75,6 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
   const upperRailY = topY + railHeight;
   const railLength = Math.hypot(upperRailY - lowerRailY, highestZ - lowestZ);
   const railAngle = Math.atan2(highestZ - lowestZ, upperRailY - lowerRailY);
-
-  const contactAOMap = useMemo(() => createContactAOGradientMap(), []);
-  useEffect(() => () => contactAOMap.dispose(), [contactAOMap]);
 
   return (
     <group position={groupPosition} rotation={[0, layout.rotation, 0]}>
@@ -159,7 +118,7 @@ export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseP
         );
       })}
 
-      {[externalSide].map((side) => (
+      {[-1, 1].map((side) => (
         <group key={side} position={[side * layout.width * 0.49, 0, 0]}>
           {[0, Math.floor((layout.stepCount - 1) / 2), layout.stepCount - 1].map((index) => {
             const stepY = groundY + layout.rise * (index + 1);

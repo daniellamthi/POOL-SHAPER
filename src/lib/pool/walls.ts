@@ -97,6 +97,8 @@ function worstCurvatureNear(
 export interface InfinityExclusion {
   axis: "x" | "z";
   coordinate: number;
+  /** Exact canonical arc, including curved Infinity zones. */
+  edgeIndices?: readonly number[];
 }
 
 export function skimmerWall(

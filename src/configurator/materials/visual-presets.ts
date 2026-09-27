@@ -66,17 +66,15 @@ const WATER_CONFIGURATION_PRESET = {
   scatteringContribution: 0.16,
   maxScatteringEnergy: 0.06,
   scatteringDepthStart: 0.18,
-  // Halved again in the calm-water pass: even the already-reduced value
-  // still let the underlying cellular texture read as a recognisable
-  // repeated pattern rather than a bare lighting suggestion.
-  causticVisibility: 0.012,
+  // The field is already softly filtered and modulates direct light only.
+  // Keep a readable underwater light cue without a white emissive overlay.
+  causticVisibility: 0.75,
   caustics: { strength: 0.027, scale: 20, speed: 0.28 },
-  // Reduced large/micro ripple strength for a calmer, more architectural
-  // surface -- less "game water" shimmer/glitter, closer to the calm
-  // overflow reference water. Depth/transmission/IOR left untouched.
+  // Normal textures encode small finite-difference slopes; retain enough
+  // amplitude to read the surface without displacing transmitted geometry.
   normals: {
-    large: { scale: 1.65, strength: 0.045, rotation: 0.24 },
-    micro: { scale: 1.15, strength: 0.012, rotation: -0.68 },
+    large: { scale: 1.65, strength: 0.08, rotation: 0.24 },
+    micro: { scale: 1.15, strength: 0.024, rotation: -0.68 },
   },
   waves: {
     speed: [0.0013, 0.00086] as const,

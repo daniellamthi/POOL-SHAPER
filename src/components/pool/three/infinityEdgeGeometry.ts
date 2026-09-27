@@ -68,6 +68,34 @@ function finishGeometry(positions: number[], uvs: number[]): THREE.BufferGeometr
   return geometry;
 }
 
+/** Horizontal water film connects the basin to the cascade, without an opaque dry lip. */
+export function createInfinityWaterFilmGeometry(
+  zone: RectangleInfinityZone,
+  width: number,
+  waterY: number,
+  innerOffset = 0,
+) {
+  const positions: number[] = [],
+    uvs: number[] = [];
+  for (let i = 0; i < zone.points.length - 1; i++) {
+    const a = zone.points[i]!,
+      b = zone.points[i + 1]!;
+    const na = zone.pointNormals[i]!,
+      nb = zone.pointNormals[i + 1]!;
+    addQuad(
+      positions,
+      uvs,
+      toV3(offsetPoint(a, na, innerOffset), waterY),
+      toV3(offsetPoint(b, nb, innerOffset), waterY),
+      toV3(offsetPoint(b, nb, width), waterY),
+      toV3(offsetPoint(a, na, width), waterY),
+      1,
+      1,
+    );
+  }
+  return finishGeometry(positions, uvs);
+}
+
 /**
  * The disappearing lip itself: a thin slab from the pool's true edge
  * (`zone.points`, the same footprint normal coping would have started from)
@@ -131,6 +159,7 @@ export function createInfinityCascadeGeometry(
   const dropSegments = 6;
   const positions: number[] = [];
   const uvs: number[] = [];
+  let run = 0;
   for (let k = 0; k < zone.points.length - 1; k++) {
     const p0 = zone.points[k]!;
     const p1 = zone.points[k + 1]!;
@@ -155,8 +184,85 @@ export function createInfinityCascadeGeometry(
         const c = toV3(p1t, y1);
         const d = toV3(p0t, y1);
         addQuad(positions, uvs, a, b, c, d, 1, 1);
+        const u0 = run + (segmentLength * li) / lengthSegments;
+        const u1 = run + (segmentLength * (li + 1)) / lengthSegments;
+        const v0 = lipTopY - y0,
+          v1 = lipTopY - y1;
+        uvs.splice(uvs.length - 12, 12, u0, v0, u1, v0, u1, v1, u0, v0, u1, v1, u0, v1);
       }
     }
+    run += segmentLength;
+  }
+  return finishGeometry(positions, uvs);
+}
+
+/** Closed narrow support behind the film; end faces stop at the crest,
+ * rather than extending across the receiving channel as tall pillars. */
+export function createInfinitySupportGeometry(
+  zone: RectangleInfinityZone,
+  dims: InfinityEdgeDimensions,
+  topY: number,
+  returnWidth = 0.32,
+) {
+  const face = createInfinityCascadeGeometry(zone, dims, topY);
+  const positions = Array.from(face.getAttribute("position").array);
+  const uvs = Array.from(face.getAttribute("uv").array);
+  face.dispose();
+  const bottomY = topY - dims.dropHeight;
+  for (let i = 0; i < zone.points.length - 1; i++) {
+    const a = zone.points[i]!,
+      b = zone.points[i + 1]!;
+    const oa = offsetPoint(a, zone.pointNormals[i]!, dims.lipWidth);
+    const ob = offsetPoint(b, zone.pointNormals[i + 1]!, dims.lipWidth);
+    addQuad(
+      positions,
+      uvs,
+      toV3(a, bottomY),
+      toV3(b, bottomY),
+      toV3(ob, bottomY),
+      toV3(oa, bottomY),
+      1,
+      1,
+    );
+  }
+  for (const index of [0, zone.points.length - 1]) {
+    const a = zone.points[index]!;
+    const normal = zone.pointNormals[index]!;
+    const b = offsetPoint(a, normal, dims.lipWidth);
+    const sign = index === 0 ? -1 : 1;
+    const tangent: readonly [number, number] = [-normal[1] * sign, normal[0] * sign];
+    const outerA = offsetPoint(a, tangent, returnWidth);
+    const outerB = offsetPoint(outerA, normal, Math.max(dims.lipWidth, returnWidth));
+    addQuad(
+      positions,
+      uvs,
+      toV3(b, topY),
+      toV3(outerB, topY),
+      toV3(outerB, bottomY),
+      toV3(b, bottomY),
+      1,
+      1,
+    );
+    addQuad(
+      positions,
+      uvs,
+      toV3(a, topY),
+      toV3(outerA, topY),
+      toV3(outerB, topY),
+      toV3(b, topY),
+      1,
+      1,
+    );
+    addQuad(
+      positions,
+      uvs,
+      toV3(outerA, topY),
+      toV3(outerB, topY),
+      toV3(outerB, bottomY),
+      toV3(outerA, bottomY),
+      1,
+      1,
+    );
   }
   return finishGeometry(positions, uvs);
 }
@@ -195,6 +301,7 @@ export function createInfinityCatchBasinGeometry(
   zone: RectangleInfinityZone,
   dims: InfinityEdgeDimensions,
   lipTopY: number,
+  supportInset = 0,
 ): InfinityCatchBasinGeometry {
   const basinTopY = lipTopY - dims.dropHeight;
   const basinFloorY = basinTopY - dims.catchBasinDepth;
@@ -208,8 +315,8 @@ export function createInfinityCatchBasinGeometry(
     const p1 = zone.points[k + 1]!;
     const n0 = zone.pointNormals[k] ?? zone.normal;
     const n1 = zone.pointNormals[k + 1] ?? zone.normal;
-    const near0 = offsetPoint(p0, n0, dims.lipWidth);
-    const near1 = offsetPoint(p1, n1, dims.lipWidth);
+    const near0 = offsetPoint(p0, n0, dims.lipWidth - supportInset);
+    const near1 = offsetPoint(p1, n1, dims.lipWidth - supportInset);
     const far0 = offsetPoint(p0, n0, dims.lipWidth + dims.catchBasinWidth);
     const far1 = offsetPoint(p1, n1, dims.lipWidth + dims.catchBasinWidth);
 
@@ -235,6 +342,51 @@ export function createInfinityCatchBasinGeometry(
       1,
       1,
     );
+    // A real masonry rim, not a zero-thickness dark rectangle viewed from outside.
+    const back0 = offsetPoint(p0, n0, dims.lipWidth + dims.catchBasinWidth + dims.wallThickness);
+    const back1 = offsetPoint(p1, n1, dims.lipWidth + dims.catchBasinWidth + dims.wallThickness);
+    addQuad(
+      outerPositions,
+      outerUvs,
+      toV3(far0, basinTopY),
+      toV3(back0, basinTopY),
+      toV3(back1, basinTopY),
+      toV3(far1, basinTopY),
+      1,
+      1,
+    );
+    addQuad(
+      outerPositions,
+      outerUvs,
+      toV3(back1, basinTopY),
+      toV3(back0, basinTopY),
+      toV3(back0, basinFloorY),
+      toV3(back1, basinFloorY),
+      1,
+      1,
+    );
+    if (k === 0)
+      addQuad(
+        outerPositions,
+        outerUvs,
+        toV3(back0, basinTopY),
+        toV3(far0, basinTopY),
+        toV3(far0, basinFloorY),
+        toV3(back0, basinFloorY),
+        1,
+        1,
+      );
+    if (k === zone.points.length - 2)
+      addQuad(
+        outerPositions,
+        outerUvs,
+        toV3(far1, basinTopY),
+        toV3(back1, basinTopY),
+        toV3(back1, basinFloorY),
+        toV3(far1, basinFloorY),
+        1,
+        1,
+      );
   }
   const floor = finishGeometry(floorPositions, floorUvs);
   const outerWall = finishGeometry(outerPositions, outerUvs);
@@ -245,8 +397,8 @@ export function createInfinityCatchBasinGeometry(
   // aggregate average.
   const startNormal = zone.pointNormals[0] ?? zone.normal;
   const endNormal = zone.pointNormals[zone.pointNormals.length - 1] ?? zone.normal;
-  const nearStart = offsetPoint(zone.start, startNormal, dims.lipWidth);
-  const nearEnd = offsetPoint(zone.end, endNormal, dims.lipWidth);
+  const nearStart = offsetPoint(zone.start, startNormal, dims.lipWidth - supportInset);
+  const nearEnd = offsetPoint(zone.end, endNormal, dims.lipWidth - supportInset);
   const farStart = offsetPoint(zone.start, startNormal, dims.lipWidth + dims.catchBasinWidth);
   const farEnd = offsetPoint(zone.end, endNormal, dims.lipWidth + dims.catchBasinWidth);
 
@@ -262,7 +414,6 @@ export function createInfinityCatchBasinGeometry(
     1,
     1,
   );
-  const endWallStart = finishGeometry(endWallStartPositions, endWallStartUvs);
 
   const endWallEndPositions: number[] = [];
   const endWallEndUvs: number[] = [];
@@ -276,8 +427,48 @@ export function createInfinityCatchBasinGeometry(
     1,
     1,
   );
+  // Low return cheeks close the receiver without projecting above its rim.
+  // Their thickness runs along the tangent, away from the falling sheet.
+  for (const [positions, uvs, near, far, normal, sign] of [
+    [endWallStartPositions, endWallStartUvs, nearStart, farStart, startNormal, -1],
+    [endWallEndPositions, endWallEndUvs, nearEnd, farEnd, endNormal, 1],
+  ] as const) {
+    const tangent: readonly [number, number] = [-normal[1] * sign, normal[0] * sign];
+    const nearBack = offsetPoint(near, tangent, dims.wallThickness);
+    const farBack = offsetPoint(far, tangent, dims.wallThickness);
+    addQuad(
+      positions,
+      uvs,
+      toV3(near, basinTopY),
+      toV3(nearBack, basinTopY),
+      toV3(farBack, basinTopY),
+      toV3(far, basinTopY),
+      1,
+      1,
+    );
+    addQuad(
+      positions,
+      uvs,
+      toV3(farBack, basinTopY),
+      toV3(nearBack, basinTopY),
+      toV3(nearBack, basinFloorY),
+      toV3(farBack, basinFloorY),
+      1,
+      1,
+    );
+    addQuad(
+      positions,
+      uvs,
+      toV3(far, basinTopY),
+      toV3(farBack, basinTopY),
+      toV3(farBack, basinFloorY),
+      toV3(far, basinFloorY),
+      1,
+      1,
+    );
+  }
   const endWallEnd = finishGeometry(endWallEndPositions, endWallEndUvs);
-
+  const endWallStart = finishGeometry(endWallStartPositions, endWallStartUvs);
   return { floor, outerWall, endWallStart, endWallEnd };
 }
 

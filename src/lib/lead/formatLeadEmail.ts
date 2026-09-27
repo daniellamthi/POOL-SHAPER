@@ -13,7 +13,8 @@
  * LED, etc.) that may not even be meaningfully set for a renovation.
  */
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
-import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES } from "@/lib/pool/config";
+import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, getShapeDefinition } from "@/lib/pool/config";
+import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { formatNumber } from "@/lib/pool/format";
@@ -74,6 +75,12 @@ function newPoolLines(submission: LeadSubmission): string[] {
   return [
     `--- PISCINA ---`,
     `Tipologia: ${poolTypeLabel(config.poolType)}`,
+    `Forma: ${getShapeDefinition(config.shape).title}`,
+    ...(config.system === "infinity" &&
+    config.infinityEdge?.enabled &&
+    config.infinityEdge.side !== null
+      ? [`Lato Infinity: Lato ${config.infinityEdge.side + 1}`]
+      : []),
     `Dimensioni: ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${formatNumber(config.dimensions.depth, 2)} m`,
     `Sistema idraulico: ${systemHeadline(config.system, config.overflowType)}${skimmerDetail ? ` (${skimmerDetail})` : ""}`,
     `Rivestimento: ${finishTitle}`,
@@ -83,6 +90,7 @@ function newPoolLines(submission: LeadSubmission): string[] {
     ...(hasLed
       ? [
           `Illuminazione LED: sì — colore ${(config.ledColor ?? "#ffffff").toUpperCase()}, intensità ${Math.round(normalisedLedIntensity(config.ledIntensity) * 100)}%`,
+          `Punti luce: ${configuredLightingPlan(config).count} — automatici, dimensionamento indicativo (preset generico 1500 lm)`,
         ]
       : []),
     ...(equipmentLabels.length ? [`Gestione piscina: ${equipmentLabels.join(", ")}`] : []),

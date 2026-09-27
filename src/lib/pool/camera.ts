@@ -8,6 +8,7 @@ import type { Outline } from "./types";
 import type { PoolVerticalLayout } from "./vertical-layout";
 import { clampInfinityEdgeDimensions } from "./infinity-edge";
 import type { RectangleInfinityZone } from "./infinity-edge";
+import type { SceneLightingPlan } from "./lighting-plan";
 
 /** The fixed three-quarter angle every overview pose used before this shape
  * awareness was added -- kept as the direction for any outline with no
@@ -55,6 +56,7 @@ export type CameraIntent =
   | "overflow-hidden"
   | "overflow-visible"
   | "liner"
+  | "access"
   | "mosaic"
   | "features"
   | "review"
@@ -235,7 +237,7 @@ function getSystemDetailCamera({
   return detailPose({
     focus: reference,
     targetY: layout.waterY + 0.03,
-    cameraY: layout.waterY + Math.max(0.48, distance * (overflow ? 0.58 : 0.3)),
+    cameraY: layout.waterY + Math.max(0.48, distance * (overflow ? 0.72 : 0.3)),
     distance,
     tangentAmount: 0,
   });
@@ -265,13 +267,19 @@ function getInfinityDetailCamera({
     (zone.start[0] + zone.end[0]) / 2,
     (zone.start[1] + zone.end[1]) / 2,
   ];
-  const safeAspect = clamp(viewportAspect, 0.6, 3);
+  // Expanded portrait phones can be narrower than 0.6. Respect their
+  // actual horizontal field of view instead of cropping the end closures.
+  const safeAspect = clamp(viewportAspect, 0.2, 3);
   const verticalFovRadians = (clamp(verticalFov, 20, 75) * Math.PI) / 180;
   const horizontalFov = 2 * Math.atan(Math.tan(verticalFovRadians / 2) * safeAspect);
-  const framedSpan = clamp(zone.length * 0.5, 2, 3.6);
+  const bounds = outlineBounds(outline);
+  // Fit the architecture, not a cropped two-metre section of the crest.
+  // Include the two-metre usable deck on each side, not just the water
+  // outline: its end returns were clipped on narrow portrait viewports.
+  const framedSpan = Math.hypot(bounds.maxX - bounds.minX + 4, bounds.maxZ - bounds.minZ + 4) * 1.04;
   let distance = Math.max(
     1.8,
-    Math.min(framedSpan / 2 / Math.tan(horizontalFov / 2), zone.length * 0.9),
+    framedSpan / 2 / Math.tan(Math.min(horizontalFov, verticalFovRadians) / 2),
   );
   // A Rectangle/L-shape zone's `start`/`end` always sit exactly at the
   // outline's own bounding-box extreme on the SAME axis its (always
@@ -289,18 +297,20 @@ function getInfinityDetailCamera({
   // zone's own normal direction (never less than the framing distance
   // above, so a well-behaved near-axis-aligned zone -- every Rectangle/
   // L-shape zone, and most Organic ones -- never regresses).
-  const bounds = outlineBounds(outline);
+  // Apply the clearance to the actual oblique viewing ray, not just the wall normal.
+  const viewX = (zone.normal[0] - zone.normal[1] * 0.65) / Math.hypot(1, 0.65);
+  const viewZ = (zone.normal[1] + zone.normal[0] * 0.65) / Math.hypot(1, 0.65);
   const clearanceMargin = 0.6;
   const axisCandidates: number[] = [];
-  if (zone.normal[0] > 1e-6) {
-    axisCandidates.push((bounds.maxX + clearanceMargin - midpoint[0]) / zone.normal[0]);
-  } else if (zone.normal[0] < -1e-6) {
-    axisCandidates.push((bounds.minX - clearanceMargin - midpoint[0]) / zone.normal[0]);
+  if (viewX > 1e-6) {
+    axisCandidates.push((bounds.maxX + clearanceMargin - midpoint[0]) / viewX);
+  } else if (viewX < -1e-6) {
+    axisCandidates.push((bounds.minX - clearanceMargin - midpoint[0]) / viewX);
   }
-  if (zone.normal[1] > 1e-6) {
-    axisCandidates.push((bounds.maxZ + clearanceMargin - midpoint[1]) / zone.normal[1]);
-  } else if (zone.normal[1] < -1e-6) {
-    axisCandidates.push((bounds.minZ - clearanceMargin - midpoint[1]) / zone.normal[1]);
+  if (viewZ > 1e-6) {
+    axisCandidates.push((bounds.maxZ + clearanceMargin - midpoint[1]) / viewZ);
+  } else if (viewZ < -1e-6) {
+    axisCandidates.push((bounds.minZ - clearanceMargin - midpoint[1]) / viewZ);
   }
   const positiveAxisCandidates = axisCandidates.filter((d) => Number.isFinite(d) && d > 0);
   if (positiveAxisCandidates.length > 0) {
@@ -321,48 +331,37 @@ function getInfinityDetailCamera({
   // basin. Eye height above grade is correct everywhere along the normal,
   // not just directly over the basin.
   const dims = clampInfinityEdgeDimensions(undefined);
-  const lipTopY = layout.waterY + 0.003;
-  const basinFloorY = lipTopY - dims.dropHeight - dims.catchBasinDepth;
-  const cameraY = layout.wallTopY + 0.9;
-  const targetY = (lipTopY + basinFloorY) / 2;
+  const lipTopY = layout.waterY;
+  const cameraY = layout.wallTopY + Math.max(1.8, distance * 0.4);
+  const targetY = lipTopY - dims.dropHeight * 0.5;
   // Centred on the catch basin's own footprint (lip, then basin width),
   // not just 0.6m past the wall -- keeps the whole assembly (lip, cascade,
   // basin far wall) in frame instead of cropping past it.
-  const targetOffset = dims.lipWidth + dims.catchBasinWidth * 0.5;
+  const centerX = (bounds.minX + bounds.maxX) / 2;
+  const centerZ = (bounds.minZ + bounds.maxZ) / 2;
   return {
-    target: [
-      midpoint[0] + zone.normal[0] * targetOffset,
-      targetY,
-      midpoint[1] + zone.normal[1] * targetOffset,
-    ],
-    position: [
-      midpoint[0] + zone.normal[0] * distance,
-      cameraY,
-      midpoint[1] + zone.normal[1] * distance,
-    ],
+    target: [midpoint[0] * 0.35 + centerX * 0.65, targetY, midpoint[1] * 0.35 + centerZ * 0.65],
+    position: [midpoint[0] + viewX * distance, cameraY, midpoint[1] + viewZ * distance],
   };
 }
 
-/** Close, perpendicular material view of the same Skimmer reference wall. */
+/** Oblique wall/floor material view, stable while comparing finishes. */
 function getInteriorFinishCamera({
+  outline,
   reference,
   bounds,
   layout,
   depth,
   verticalFov,
   viewportAspect,
-  isLiner,
 }: {
+  outline: Outline;
   reference: BoundaryFocus;
   bounds: ReturnType<typeof outlineBounds>;
   layout: PoolVerticalLayout;
   depth: number;
   verticalFov: number;
   viewportAspect: number;
-  /** Liner gets a slightly pulled-back, more architectural composition than
-   * the tight material-swatch framing Mosaic keeps -- more of the pool
-   * interior in frame while the liner texture itself stays clearly legible. */
-  isLiner: boolean;
 }): CameraPose {
   const inwardSpan =
     Math.abs(reference.inward[0]) * bounds.spanX + Math.abs(reference.inward[1]) * bounds.spanZ;
@@ -373,28 +372,48 @@ function getInteriorFinishCamera({
   const centreOffset =
     (boundsCentre[0] - reference.point[0]) * reference.tangent[0] +
     (boundsCentre[1] - reference.point[1]) * reference.tangent[1];
-  const wallCentre: readonly [number, number] = [
+  const wallCentre: readonly [number, number] = outline.length > 4 ? reference.point : [
     reference.point[0] + reference.tangent[0] * centreOffset,
     reference.point[1] + reference.tangent[1] * centreOffset,
   ];
-  const maximumInteriorDistance = Math.max(1.7, inwardSpan * 0.82) * (isLiner ? 1.65 : 1);
-  const baseDistance = clamp(
-    Math.max(1.6, inwardSpan * 0.64, depth * 1.35),
-    1.6,
-    maximumInteriorDistance,
-  );
-  const distance = isLiner ? baseDistance * 1.65 : baseDistance;
-  const targetY = layout.wallTopY - depth * 0.3;
-  const cameraY =
-    layout.waterY + clamp(depth * (isLiner ? 0.3 : 0.18), 0.22, isLiner ? 0.56 : 0.38);
+  // Frame a wall/floor patch, not the entire bounding-box span. The old low
+  // eye could end up behind the opposite wall of a narrow pool.
+  const inset = Math.min(0.7, inwardSpan * 0.22);
+  const targetY = layout.wallTopY - depth * 0.48;
+  const halfFov = Math.atan(Math.tan(verticalFov * Math.PI / 360) * Math.min(1, Math.max(0.25, viewportAspect)));
+  const distance = Math.max(3.1, 1.25 / Math.sin(halfFov));
+  const eyeRise = distance * 0.72;
   return {
-    target: [wallCentre[0], targetY, wallCentre[1]],
+    target: [wallCentre[0] + reference.inward[0] * inset, targetY, wallCentre[1] + reference.inward[1] * inset],
     position: [
-      wallCentre[0] + reference.inward[0] * distance,
-      cameraY,
-      wallCentre[1] + reference.inward[1] * distance,
+      wallCentre[0] + reference.inward[0] * distance * 0.7 + reference.tangent[0] * distance * 0.22,
+      targetY + eyeRise,
+      wallCentre[1] + reference.inward[1] * distance * 0.7 + reference.tangent[1] * distance * 0.22,
     ],
   };
+}
+
+/** Bounds of the canonical access plan, never a second placement algorithm. */
+export function getAccessDetailCamera(plan: SceneLightingPlan["accessPlan"], layout: PoolVerticalLayout, verticalFov: number, aspect: number): CameraPose | null {
+  const p = plan.placement;
+  if (!p || !plan.footprint.length) return null;
+  const ladder = plan.ladderDepths.length > 0;
+  const points = [...plan.footprint];
+  if (ladder) points.push([p.x - Math.sin(p.rotation) * plan.ladderAnchorOffset, p.z - Math.cos(p.rotation) * plan.ladderAnchorOffset]);
+  const bounds = outlineBounds(points);
+  const low = ladder ? plan.ladderAnchorY - plan.ladderDepths.at(-1)! - 0.15 : layout.copingY - plan.rise * plan.riseCount;
+  const high = ladder ? plan.ladderAnchorY + 0.82 : layout.copingY;
+  const target: CameraPoint = [(bounds.minX + bounds.maxX) / 2, (low + high) / 2, (bounds.minZ + bounds.maxZ) / 2];
+  let nx = target[0] - p.x, nz = target[2] - p.z;
+  const n = Math.hypot(nx, nz);
+  if (n < 0.05 || ladder) { nx = Math.sin(p.rotation); nz = Math.cos(p.rotation); }
+  else { nx /= n; nz /= n; }
+  const radius = Math.hypot(bounds.spanX + 0.35, bounds.spanZ + 0.35, high - low + 0.25) / 2;
+  const halfFov = Math.atan(Math.tan(verticalFov * Math.PI / 360) * Math.min(1, Math.max(0.2, aspect)));
+  const distance = radius / Math.sin(halfFov) * 1.12;
+  const elevation = ladder ? 0.72 : 1.5;
+  const length = Math.hypot(1, elevation);
+  return { target, position: [target[0] + nx * distance / length, target[1] + elevation * distance / length, target[2] + nz * distance / length] };
 }
 
 /** Locked, closer "hero" 3/4 view for the Features / Pool Access step: same
@@ -503,8 +522,10 @@ export function getCameraPose({
   viewportAspect = 1.5,
   includeExternalStaircase = false,
   infinityZone = null,
+  accessPlan,
 }: {
   intent: CameraIntent;
+  accessPlan?: SceneLightingPlan["accessPlan"];
   outline: Outline;
   layout: PoolVerticalLayout;
   depth: number;
@@ -525,6 +546,10 @@ export function getCameraPose({
   const safeDepth = Math.max(0.01, depth);
   const radius = Math.max(1, Math.hypot(bounds.spanX, bounds.spanZ, safeDepth) / 2);
   const verticalCentre = (layout.floorY + layout.wallTopY) / 2;
+  if (intent === "access" && accessPlan) {
+    const pose = getAccessDetailCamera(accessPlan, layout, verticalFov, viewportAspect);
+    if (pose) return pose;
+  }
   if (
     intent === "skimmer" ||
     intent === "skimmer-detail" ||
@@ -534,7 +559,24 @@ export function getCameraPose({
     intent === "liner" ||
     intent === "mosaic"
   ) {
-    const reference = getFrontWallReference(outline, skimmers);
+    let reference = getFrontWallReference(outline, skimmers);
+    if ((intent === "liner" || intent === "mosaic") && outline.length >= 3) {
+      // A material detail needs a real lined wall, not the disappearing lip
+      // or a bounding-box centre that can fall inside an L-shaped recess.
+      const winding = Math.sign(outline.reduce((sum, a, i) => {
+        const b = outline[(i + 1) % outline.length]!;
+        return sum + a[0] * b[1] - b[0] * a[1];
+      }, 0)) || 1;
+      const edges = outline.map((a, i) => {
+        const b = outline[(i + 1) % outline.length]!;
+        return { a, b, i, length: Math.hypot(b[0] - a[0], b[1] - a[1]) };
+      }).filter((edge) => edge.length > 0.01 && edge.i !== infinityZone?.side).sort((a, b) => b.length - a.length);
+      const edge = edges[0];
+      if (edge) {
+        const tx = (edge.b[0] - edge.a[0]) / edge.length, tz = (edge.b[1] - edge.a[1]) / edge.length;
+        reference = { point: [(edge.a[0] + edge.b[0]) / 2, (edge.a[1] + edge.b[1]) / 2], inward: [-tz * winding, tx * winding], tangent: [tx, tz] };
+      }
+    }
     if (
       intent === "skimmer-detail" ||
       intent === "overflow-hidden" ||
@@ -560,14 +602,13 @@ export function getCameraPose({
     });
     if (intent === "liner" || intent === "mosaic") {
       return getInteriorFinishCamera({
+        outline,
         reference,
         bounds,
         layout,
         depth: safeDepth,
         verticalFov,
         viewportAspect,
-        // Compare all finishes from the same existing architectural pose.
-        isLiner: true,
       });
     }
     return master;

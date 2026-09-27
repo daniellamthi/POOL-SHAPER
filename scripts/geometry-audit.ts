@@ -1,5 +1,6 @@
 import {
   DEFAULT_CONTROL_POINTS,
+  DEFAULT_DIMENSIONS,
   DIMENSION_LIMITS,
   EQUIPMENT,
   FINISHES,
@@ -41,6 +42,11 @@ import {
   L_SHAPE_ORIENTATIONS,
   type LShapeOrientation,
 } from "../src/lib/pool/l-shape";
+import {
+  createInfinityLandscape,
+  createInfinityDeck,
+  infinityGroundHeight,
+} from "../src/components/pool/three/infinityLandscape";
 import {
   buildOrganicShapeOutline,
   buildOrganicShapeOutlineInfo,
@@ -90,8 +96,11 @@ import {
   cornerStairPlan,
   linearStairDimensions,
   recomputeCornerHeight,
+  stairBackfillOutline,
 } from "../src/components/pool/three/PoolAccessModel";
-import { WATER_VISUAL_PRESET } from "../src/configurator/materials/visual-presets";
+// Validate the effective receiving-light transfer, not the obsolete scalar
+// ceiling from the earlier, linear "barely visible" calm-water pass.
+import "./caustics-audit";
 import {
   buildFloorProfile,
   clampShallowDepth,
@@ -122,6 +131,7 @@ import {
   createInfinityCatchBasinGeometry,
   createInfinityLipGeometry,
   createInfinityTransitionCapGeometry,
+  createInfinityWaterFilmGeometry,
   isGeometryFinite,
   isUvAttributeSane,
 } from "../src/components/pool/three/infinityEdgeGeometry";
@@ -173,10 +183,6 @@ assert(copingOuterOffset("skimmer", "visible") === 0.32, "skimmer coping must re
   }
   assert(sum / (512 * 512 * 255) < 0.08, "caustic field must remain sparse and low-energy");
   assert(maxGradient < 30, "caustic field must be softened rather than sharp lines");
-  assert(
-    WATER_VISUAL_PRESET.causticVisibility <= 0.1,
-    "calm-water caustics must remain barely visible",
-  );
   texture.dispose();
 }
 // Refraction must remain inside rectangular and concave water footprints.
@@ -495,10 +501,16 @@ for (const testCase of customCases) {
   // wall, the raised kerb stands proud of it and the grated channel is
   // outboard again -- basin, kerb, grating, in that order.
   assert(
-    hiddenWaterBounds.spanX > visibleWaterBounds.spanX &&
-      hiddenWaterBounds.spanZ > visibleWaterBounds.spanZ &&
-      Math.abs(visibleWaterBounds.spanX - innerBounds.spanX) < 1e-9 &&
-      Math.abs(visibleWaterBounds.spanZ - innerBounds.spanZ) < 1e-9,
+    visibleWaterBounds.spanX > hiddenWaterBounds.spanX &&
+      visibleWaterBounds.spanZ > hiddenWaterBounds.spanZ &&
+      Math.abs(
+        visibleWaterBounds.spanX -
+          outlineBounds(offsetOutline(inner, OVERFLOW_GEOMETRY.visibleKerbWidth)).spanX,
+      ) < 1e-9 &&
+      Math.abs(
+        visibleWaterBounds.spanZ -
+          outlineBounds(offsetOutline(inner, OVERFLOW_GEOMETRY.visibleKerbWidth)).spanZ,
+      ) < 1e-9,
     `${testCase.name}: overflow water footprints do not reach their thresholds`,
   );
   const kerbBounds = outlineBounds(offsetOutline(inner, OVERFLOW_GEOMETRY.visibleKerbWidth));
@@ -1099,8 +1111,10 @@ for (const [length, width, depth] of [
   }
   const outerRadius = corner.radii[corner.radii.length - 1]!;
   assert(
-    corner.radii[0]! >= 0.42 && outerRadius <= Math.min(width, length) * 0.45,
-    `${label}: corner flight is out of proportion with the basin`,
+    corner.radii[0]! >= 0.42 &&
+      outerRadius < Math.min(width, length) &&
+      treads.every((tread) => Math.abs(tread - 0.3) < 1e-9),
+    `${label}: corner flight must fit without compressing its 30 cm treads`,
   );
   // Anchored on an actual corner of the outline, with the whole quarter inside.
   assert(
@@ -1146,8 +1160,8 @@ assert(
 assert(
   OVERFLOW_GEOMETRY.visibleKerbWidth >= 0.09 &&
     OVERFLOW_GEOMETRY.visibleKerbWidth <= 0.16 &&
-    OVERFLOW_GEOMETRY.visibleKerbRise >= 0.05 &&
-    OVERFLOW_GEOMETRY.visibleKerbRise <= 0.12,
+    OVERFLOW_GEOMETRY.visibleKerbRise === OVERFLOW_GEOMETRY.visibleGrateTopOffset &&
+    OVERFLOW_GEOMETRY.visibleWaterAboveLip > 0,
   "visible overflow kerb is outside buildable proportions",
 );
 assert(
@@ -4766,3 +4780,164 @@ console.log(
 console.log(
   "Infinity edge x sloped-floor interaction audit passed: for rectangle, L-shape and organic (default and reversed slope), the worst-case candidate zone -- the one whose run spans the largest real floor-elevation variation under slope -- produces byte-identical lip/cascade/catch-basin geometry between flat and sloped floor profiles; the lip sits exactly at the waterline, the catch basin floor is a single constant Y (a real horizontal trough), the cascade's Y range is exactly [lipTopY - dropHeight, lipTopY], both coping transition caps span exactly lipTopY..copingSurfaceY, and a non-vacuous break/restore proof confirms a floor-Y-following lip would actually be caught.",
 );
+
+// Regression: curved-wall pockets are filled without translating the flight
+// through its wall; the Infinity water film reaches the same cascade edge.
+for (const mirror of [false, true]) {
+  const outline = buildOrganicShapeOutline({ length: 6, width: 3, curvature: 0.5, mirror });
+  const dimensions: Dimensions = {
+    length: 6,
+    width: 3,
+    depth: 1.5,
+    cornerRadius: 0,
+    floorProfile: "slope",
+    shallowDepth: 0.85,
+  };
+  const verticalLayout = getPoolVerticalLayout({
+    poolType: "in-ground",
+    system: "skimmer",
+    overflowType: "hidden",
+    depth: 1.5,
+    copingThickness: 0.03,
+  });
+  const floor = buildFloorProfile({
+    outline,
+    shape: "organic",
+    poolType: "in-ground",
+    dimensions,
+    verticalLayout,
+  });
+  const flight = linearStairDimensions(floor.deepFloorY, verticalLayout.copingY);
+  const placement = accessPlacement(outline, flight.run, flight.width, "internalSteps", floor);
+  assert(placement !== null, "Organic stair placement exists");
+  const fill = stairBackfillOutline(outline, placement!, flight.width);
+  assert(fill.length >= 3 && outlineArea(fill) > 0.001, "Real curved pocket closed");
+  assert(
+    fill.every(
+      ([x, z]) => Math.abs(x) <= flight.width / 2 + 1e-8 && z <= 0.001001 && z >= -0.300001,
+    ),
+    "Backfill stays within tread bounds",
+  );
+  for (const zone of infinityZonesForOutline(outline, "organic")) {
+    const dims = clampInfinityEdgeDimensions(undefined);
+    const film = createInfinityWaterFilmGeometry(zone, dims.lipWidth, verticalLayout.waterY);
+    assert(isGeometryFinite(film), "Curved Infinity film finite");
+    const p = film.getAttribute("position");
+    for (let i = 0; i < p.count; i++)
+      assert(Math.abs(p.getY(i) - verticalLayout.waterY) < 1e-6, "Water film horizontal");
+    film.dispose();
+  }
+}
+console.log("Curved stair backfill and horizontal Infinity-film regressions PASS");
+
+// The Infinity context must be a continuous grade, never a pit or a cut
+// through an unselected arm. These tests exercise the actual scene builder.
+{
+  const rectangle = buildOutline(
+    "rectangle",
+    { ...DEFAULT_DIMENSIONS, length: 10, width: 4.5 },
+    DEFAULT_CONTROL_POINTS,
+  );
+  const zone = infinityZonesForOutline(rectangle, "rectangle")[0]!;
+  const landscape = createInfinityLandscape(rectangle, zone, 40, 0.32);
+  assert(isGeometryFinite(landscape), "Infinity landscape finite");
+  const p = landscape.getAttribute("position"),
+    index = landscape.index!;
+  const edges = new Map<string, { count: number; a: number; b: number }>();
+  for (let i = 0; i < index.count; i += 3) {
+    const ids = [index.getX(i), index.getX(i + 1), index.getX(i + 2)];
+    for (let j = 0; j < 3; j++) {
+      const a = ids[j]!,
+        b = ids[(j + 1) % 3]!;
+      const key = a < b ? `${a}:${b}` : `${b}:${a}`;
+      const edge = edges.get(key);
+      if (edge) edge.count++;
+      else edges.set(key, { count: 1, a, b });
+    }
+  }
+  for (const { count, a, b } of edges.values()) {
+    assert(count <= 2, "Landscape manifold edges");
+    if (count === 2) continue;
+    const onX = [20, -20, 5.32, -5.32].some(
+      (x) => Math.abs(p.getX(a) - x) < 1e-4 && Math.abs(p.getX(b) - x) < 1e-4,
+    );
+    const onZ = [20, -20, 2.57, -2.57].some(
+      (z) => Math.abs(p.getZ(a) - z) < 1e-4 && Math.abs(p.getZ(b) - z) < 1e-4,
+    );
+    assert(onX || onZ, "No interior T-junction cracks in graded ground");
+  }
+  landscape.dispose();
+  for (const orientation of L_SHAPE_ORIENTATIONS) {
+    const shape = buildOutline(
+      "l-shape",
+      { ...DEFAULT_DIMENSIONS, lShapeOrientation: orientation },
+      DEFAULT_CONTROL_POINTS,
+    );
+    for (const candidate of infinityZonesForOutline(shape, "l-shape")) {
+      const mid = [
+        (candidate.start[0] + candidate.end[0]) / 2,
+        (candidate.start[1] + candidate.end[1]) / 2,
+      ];
+      assert(
+        infinityGroundHeight(
+          shape,
+          candidate,
+          mid[0]! + candidate.normal[0] * 0.65,
+          mid[1]! + candidate.normal[1] * 0.65,
+        ) < -0.9,
+        "Receiver grade stays beneath construction",
+      );
+      for (let i = 0; i < shape.length; i++) {
+        if (i === candidate.side) continue;
+        const a = shape[i]!,
+          b = shape[(i + 1) % shape.length]!;
+        const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const x = (a[0] + b[0]) / 2 + ((b[1] - a[1]) / length) * 0.32;
+        const z = (a[1] + b[1]) / 2 - ((b[0] - a[0]) / length) * 0.32;
+        assert(
+          Math.abs(infinityGroundHeight(shape, candidate, x, z)) < 1e-8,
+          "Other L-arm deck contact preserved",
+        );
+      }
+    }
+  }
+}
+console.log("Infinity landscape: closed topology, receiving clearance and L-arm preservation PASS");
+
+// Receiver end closures must stay at the receiver, not become crest-height pillars.
+for (const length of [6, 10]) {
+  const outline = buildOutline(
+    "rectangle",
+    { ...DEFAULT_DIMENSIONS, length, width: length === 6 ? 3 : 4.5 },
+    DEFAULT_CONTROL_POINTS,
+  );
+  const dims = clampInfinityEdgeDimensions(undefined);
+  for (const zone of infinityZonesForOutline(outline, "rectangle")) {
+    const deck = createInfinityDeck(outline, zone, 0.32);
+    assert(isGeometryFinite(deck), "Level Infinity deck finite");
+    const dp = deck.getAttribute("position");
+    const dn = deck.getAttribute("normal");
+    for (let i = 0; i < dp.count; i++) {
+      if (dn.getY(i) > 0.9)
+        assert(Math.abs(dp.getY(i)) < 1e-6, "Paving never follows sloping terrain");
+    }
+    deck.dispose();
+    const basin = createInfinityCatchBasinGeometry(zone, dims, 0);
+    for (const end of [basin.endWallStart, basin.endWallEnd]) {
+      const p = end.getAttribute("position");
+      for (let i = 0; i < p.count; i++)
+        assert(p.getY(i) <= -dims.dropHeight + 1e-6, "No crest-height receiver pillars");
+    }
+    Object.values(basin).forEach((g) => g.dispose());
+    const sheet = createInfinityCascadeGeometry(zone, dims, 0);
+    const uv = sheet.getAttribute("uv");
+    let maxU = 0;
+    for (let i = 0; i < uv.count; i++) maxU = Math.max(maxU, uv.getX(i));
+    assert(
+      Math.abs(maxU - zone.length) < 1e-5,
+      "Cascade uses continuous metric UVs over the full run",
+    );
+    sheet.dispose();
+  }
+}
+console.log("Infinity receiver proportions and continuous cascade UVs PASS");

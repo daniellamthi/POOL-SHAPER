@@ -25,7 +25,7 @@ export const shapeLabel = (shape: PoolShapeId): string =>
   shape === "custom"
     ? "dalla forma personalizzata"
     : shape === "l-shape"
-      ? "a L"
+      ? "angolare"
       : shape === "organic"
         ? "organica"
         : "rettangolare";
@@ -62,12 +62,12 @@ export const MOSAIC_WATER_CHARACTER =
 
 export const POOL_ACCESS_LABEL: Record<PoolAccess, string> = {
   internalSteps: "Scala interna integrata",
-  stainlessSteelLadder: "Scaletta in acciaio inox",
+  stainlessSteelLadder: "Scaletta inox",
 };
 
 export const INTERNAL_STAIR_LABEL: Record<InternalStairType, string> = {
-  linear: "Scala lineare",
-  corner: "Scala ad angolo",
+  linear: "Scala interna rettilinea",
+  corner: "Scala interna angolare",
 };
 
 export const POOL_FEATURE_LABEL: Record<PoolFeatureId, string> = {

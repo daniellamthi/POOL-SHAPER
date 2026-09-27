@@ -1,6 +1,6 @@
 /**
  * Canonical Infinity / vanishing-edge waterline domain model (Geometry Pass D
- * -- Rectangle and L-shape; Organic stays a stub, see `organicInfinityZones`).
+ * -- Rectangle, Angolare and eligible Organic arcs).
  * Single source of truth for which side of a pool's outline is a
  * disappearing edge, what the lip/waterfall/catch-basin
  * dimensions are, and the 3D geometry data (points, tangent, length) a
@@ -11,20 +11,16 @@
  * Coordinate layer only: this module works in the same real-world (metre),
  * CCW-wound XZ outline every other shape module (`l-shape.ts`,
  * `organic-shape.ts`, `geometry.ts`) already uses. Customer-friendly side
- * naming ("Lato Nord", "Lato Sud" or similar) is a UI-layer concern, not
+ * naming (stable numbered sides) is a UI-layer concern, not
  * this one's -- see the Acqua step component, which maps a
  * `RectangleInfinitySide` to a label and a mini-plan diagram.
  *
- * Real-world proportions referenced below come from inspecting the supplied
- * `INFINITY_POOL.glb` reference model (mesh bounding boxes only -- the file
- * itself is never imported into the app or read at runtime). The GLB's
- * accessor units resolve to inches; converted to millimetres for the
- * comments below. Two figures (waterfall drop height) could not be reliably
- * isolated from the flat node/accessor list the GLB exposes (no baked
- * per-node transform hierarchy was present to separate the cascade sheet
- * from its parent), so that one constant instead uses a documented
- * industry-typical residential range -- called out explicitly, not
- * presented as GLB-measured.
+ * The supplied `INFINITY POOL.glb` was inspected with its node transforms:
+ * glTF metres, Y-up, main basin approximately 8.25 x 4 x 1.5 m and a falling
+ * sheet from Y=-0.04 to -1.0 m. It guides the continuous lip, exposed face
+ * and receiving channel, not a replacement runtime scene. The dimensions
+ * below retain the configurator's compact parametric assembly; they are
+ * design defaults, NOT measurements copied from that larger reference.
  */
 import type { Outline, PoolShapeId } from "./types";
 import { outlineBounds, outlinePerimeter, pointAtPerimeter } from "./geometry";
@@ -118,35 +114,20 @@ export function clampInfinityEdgeParams(
 }
 
 /**
- * Structural dimension constants, real-world (metres), with residential/
- * luxury-pool-plausible clamps. Each has a one-line comment citing the
- * GLB-derived reference value (or, where the GLB didn't expose it reliably,
- * the industry-typical range used instead -- see file header).
+ * Structural design defaults in metres; indicative visualization dimensions,
+ * not construction certification or manufacturer specifications.
  */
 export const INFINITY_EDGE_DIMENSIONS = {
-  /** Disappearing-edge lip cap width (the coping-equivalent cap the water
-   * sheets over). GLB reference: the catch-basin assembly's outer envelope
-   * extends ~0.50m beyond the main basin's coping line on the drop side
-   * (9002mm vs 8502mm outer length) -- the lip itself is the inner slice of
-   * that overhang, budgeted at 0.15m here (rest is catch-basin clearance). */
-  lipWidth: { min: 0.08, max: 0.3, default: 0.15 },
-  /** Exterior vertical drop / waterfall cascade sheet height, lip to catch
-   * basin water level. Not reliably isolable from the inspected GLB's flat
-   * node list (no exposed transform hierarchy separated the cascade mesh
-   * from its parent) -- uses the documented residential-infinity-pool
-   * typical range (6-12in / ~150-300mm) instead of a GLB-measured figure. */
-  dropHeight: { min: 0.1, max: 0.4, default: 0.2 },
-  /** Catch basin / receiving channel width (horizontal, outward from the
-   * lip). GLB reference: catch-basin assembly width exceeds the main basin
-   * width by ~0.25m per side (4500mm vs 4250mm outer envelope). */
-  catchBasinWidth: { min: 0.3, max: 1.2, default: 0.5 },
-  /** Catch basin depth (below the lip's waterline). GLB reference: the
-   * catch-basin structural node's Z span is ~0.60m (1879mm - 1279mm). */
-  catchBasinDepth: { min: 0.25, max: 0.9, default: 0.6 },
-  /** Structural wall thickness of the lip/catch-basin assembly. GLB
-   * reference: ~0.25m offset between the main basin's outer wall face and
-   * the catch-basin assembly's own outer face (250mm). */
-  wallThickness: { min: 0.15, max: 0.4, default: 0.25 },
+  /** Width of the water-covered structural crest. */
+  lipWidth: { min: 0.08, max: 0.3, default: 0.12 },
+  /** Architectural drop to a shallow receiving trough, independent of basin depth. */
+  dropHeight: { min: 0.1, max: 0.9, default: 0.55 },
+  /** Receiving channel clear width, measured outward from the crest. */
+  catchBasinWidth: { min: 0.3, max: 1.2, default: 0.35 },
+  /** Receiving channel depth below its own water level. */
+  catchBasinDepth: { min: 0.25, max: 0.9, default: 0.25 },
+  /** Nominal structural wall thickness. */
+  wallThickness: { min: 0.15, max: 0.4, default: 0.15 },
 } as const;
 
 function clampDim(
@@ -373,10 +354,32 @@ export function infinityZonesForOutline(
   if (shape === "rectangle") return rectangleInfinityZones(outline);
   if (shape === "l-shape") return lShapeInfinityZones(outline);
   if (shape === "organic") return organicInfinityZones(outline);
-  if (shape === "custom") return [];
+  if (shape === "custom") return customInfinityZones(outline);
   if (outline.length === 4) return rectangleInfinityZones(outline);
   if (outline.length === 6) return lShapeInfinityZones(outline);
   return [];
+}
+
+/** Custom candidates are real supporting edges of the outline, not bounds.
+ * Recess edges are excluded: every pool vertex must remain on the basin side. */
+export function customInfinityZones(outline: Outline): readonly RectangleInfinityZone[] {
+  if (outline.length < 3) return [];
+  if (outline.length >= 12) return organicInfinityZones(outline).filter(zone =>
+    zone.points.every((p, i) => outline.every(q =>
+      (q[0] - p[0]) * zone.pointNormals[i]![0] + (q[1] - p[1]) * zone.pointNormals[i]![1] <= 0.03)));
+  const winding = Math.sign(outline.reduce((sum, a, i) => {
+    const b = outline[(i + 1) % outline.length]!;
+    return sum + a[0] * b[1] - b[0] * a[1];
+  }, 0));
+  if (!winding) return [];
+  return outline.flatMap((start, side) => {
+    const end = outline[(side + 1) % outline.length]!;
+    const dx = end[0] - start[0], dz = end[1] - start[1], length = Math.hypot(dx, dz);
+    if (length < MIN_INFINITY_ZONE_LENGTH) return [];
+    const normal = [winding * dz / length, -winding * dx / length] as const;
+    if (outline.some(p => (p[0] - start[0]) * normal[0] + (p[1] - start[1]) * normal[1] > 1e-6)) return [];
+    return [{ side, start, end, length, normal, points: [start, end], pointNormals: [normal, normal] }];
+  });
 }
 
 /** Local, dependency-free circumradius-based curvature radius at one outline
@@ -706,13 +709,17 @@ export function infinityExclusion(
   outline: Outline,
   params: InfinityEdgeParams,
   shape?: PoolShapeId,
-): { axis: "x" | "z"; coordinate: number } | null {
+): { axis: "x" | "z"; coordinate: number; edgeIndices: number[] } | null {
   const geometry = computeInfinityEdgeGeometry(outline, params, shape);
   if (!geometry) return null;
+  const edgeIndices = Array.from(
+    { length: geometry.points.length - 1 },
+    (_, i) => (geometry.side + i) % outline.length,
+  );
   const [x1, z1] = geometry.start;
   const [x2, z2] = geometry.end;
-  if (Math.abs(x1 - x2) < 1e-6) return { axis: "x", coordinate: x1 };
-  if (Math.abs(z1 - z2) < 1e-6) return { axis: "z", coordinate: z1 };
+  if (Math.abs(x1 - x2) < 1e-6) return { axis: "x", coordinate: x1, edgeIndices };
+  if (Math.abs(z1 - z2) < 1e-6) return { axis: "z", coordinate: z1, edgeIndices };
   // Curved (Organic) zone: pick the dominant axis from the average normal,
   // and the extreme coordinate the zone's own points reach along it.
   const axis: "x" | "z" = Math.abs(geometry.normal[0]) >= Math.abs(geometry.normal[1]) ? "x" : "z";
@@ -724,7 +731,7 @@ export function infinityExclusion(
       coordinate = point[axisIndex];
     }
   }
-  return { axis, coordinate };
+  return { axis, coordinate, edgeIndices };
 }
 
 /** Re-exported for consumers that want the raw perimeter point rather than

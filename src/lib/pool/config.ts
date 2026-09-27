@@ -146,7 +146,7 @@ export const POOL_SHAPES: ReadonlyArray<ShapeDefinition> = [
   },
   {
     id: "l-shape",
-    title: "A L",
+    title: "Angolare",
     description: "Due bracci rettangolari uniti ad angolo retto, per planimetrie articolate.",
     supportsCornerRadius: false,
   },
@@ -576,12 +576,10 @@ export const OVERFLOW_GEOMETRY = {
    */
   visibleKerbWidth: 0.11,
   /**
-   * How far the kerb's top stands above the pool wall top. 75 mm leaves ~68 mm
-   * of kerb face above the waterline: enough to read as a built containment
-   * edge at every camera distance, and in the range a real coping course
-   * stands proud of the water.
+   * Flush overflow crest: the reference grille and lip share the wall-top
+   * datum. The water film overtops it; there is no skimmer-like dry upstand.
    */
-  visibleKerbRise: 0.075,
+  visibleKerbRise: 0,
   /**
    * Overflow grille width. 245 mm is a stock section (the common residential
    * size between 195 and 295), so the grille is proportioned like a product
@@ -590,7 +588,7 @@ export const OVERFLOW_GEOMETRY = {
   visibleGrateWidth: 0.245,
   visibleWaterFilmWidth: 0.02,
   hiddenWaterChannelClearance: 0.015,
-  visibleGrateTopOffset: 0.006,
+  visibleGrateTopOffset: 0,
   visibleWaterAboveLip: 0.001,
   hiddenWaterTopClearance: 0.0005,
   surfaceMovementAmplitude: 0.00025,
