@@ -987,6 +987,9 @@ export default function PoolScene({
         color={SCENE_VISUAL_PRESET.lighting.sun.color}
         castShadow
         shadow-autoUpdate={false}
+        // Canvas mounts asynchronously: the parent's layout effect can run
+        // before this light exists. Allocate its cached shadow on first draw.
+        shadow-needsUpdate
         shadow-bias={SCENE_VISUAL_PRESET.lighting.sun.bias}
         shadow-normalBias={SCENE_VISUAL_PRESET.lighting.sun.normalBias}
         shadow-mapSize={[
