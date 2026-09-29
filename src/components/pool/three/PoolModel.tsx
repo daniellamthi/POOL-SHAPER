@@ -25,8 +25,6 @@ import { PoolAccessModel } from "./PoolAccessModel";
 import { PoolComfortModel } from "./PoolComfortModel";
 import { subdivideFloorBoundary } from "@/lib/pool/floor-profile";
 import { accessMounting } from "@/lib/pool/access-plan";
-import { resolveAccessPlan } from "./PoolAccessModel";
-import { resolveComfortPlan } from "@/lib/pool/comfort-plan";
 import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
 import {
   createAnthraciteMaps,
@@ -80,6 +78,7 @@ import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 
 interface PoolModelProps {
+  resolvedLayout: import("@/lib/pool/resolved-layout").ResolvedPoolLayout;
   features: ReadonlyArray<PoolFeatureId>;
   poolAccess: import("@/lib/pool/types").PoolAccess | null;
   internalStairType: import("@/lib/pool/types").InternalStairType;
@@ -395,6 +394,7 @@ function cloneDataTexture(
  * concealed perimeter gutter used by residential overflow-edge systems.
  */
 export function PoolModel({
+  resolvedLayout,
   features,
   outline,
   shape,
@@ -968,56 +968,7 @@ export function PoolModel({
     [overflowChannelOuter, verticalLayout.wallTopY],
   );
 
-  const accessPlan = useMemo(
-    () =>
-      resolveAccessPlan({
-        outline,
-        access: poolAccess,
-        stairType: internalStairType,
-        floorProfile,
-        topY: verticalLayout.copingY,
-        infinityExcluded,
-        obstacles: system === "skimmer" ? skimmers.positions : [],
-        ...accessMounting(system, overflowType, verticalLayout),
-      }),
-    [
-      outline,
-      poolAccess,
-      internalStairType,
-      floorProfile,
-      verticalLayout,
-      infinityExcluded,
-      system,
-      skimmers.positions,
-      overflowType,
-    ],
-  );
-  const comfortPlan = useMemo(
-    () =>
-      resolveComfortPlan({
-        outline,
-        shape,
-        poolType,
-        system,
-        floorProfile,
-        waterY: verticalLayout.waterY,
-        enabled: features,
-        accessFootprint: features.includes("sunShelf") && poolAccess === "internalSteps" ? [] : accessPlan.footprint,
-        infinityExcluded,
-      }),
-    [
-      outline,
-      shape,
-      poolType,
-      system,
-      floorProfile,
-      verticalLayout.waterY,
-      features,
-      accessPlan.footprint,
-      poolAccess,
-      infinityExcluded,
-    ],
-  );
+  const comfortPlan = resolvedLayout.comfort;
 
   return (
     <group>
@@ -1048,8 +999,9 @@ export function PoolModel({
           />
         </PoolComfortModel>
         <PoolAccessModel
+          resolvedPlan={resolvedLayout.access}
           outline={outline}
-          access={comfortPlan.elements.some(element => element.kind === "sunShelf") && poolAccess === "internalSteps" ? null : poolAccess}
+          access={resolvedLayout.effectiveAccess}
           stairType={internalStairType}
           floorProfile={floorProfile}
           topY={verticalLayout.copingY}

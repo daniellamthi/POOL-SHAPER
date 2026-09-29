@@ -46,6 +46,9 @@ export function AccessStep() {
   return (
     <StepSection title="Accesso e comfort" subtitle="Scale, scaletta e comfort in acqua.">
       <div className="flex flex-col gap-5">
+        {comfort.adjusted ? <p className="text-xs text-muted-foreground">Optimized for your pool</p> : null}
+        {shelfEnabled && !comfort.availability.sunShelf.available ?
+          <p className="text-xs text-muted-foreground">Sun Shelf: {comfort.availability.sunShelf.reason}</p> : null}
         <h3 className="label-xs">Accesso alla piscina</h3>
         <div className="grid gap-4" role="group" aria-label="Accesso alla piscina">
           <div className="grid gap-3">
@@ -126,7 +129,7 @@ export function AccessStep() {
             description="Seduta sommersa lungo parete, chiusa fino al fondo e coordinata al rivestimento."
             selected={config.features.includes("integratedBench")}
             onSelect={() => togglePoolFeature("integratedBench")}
-            disabled={!comfort.availability.integratedBench.available}
+            disabled={!config.features.includes("integratedBench") && !comfort.availability.integratedBench.available}
             {...(comfort.availability.integratedBench.reason
               ? { disabledReason: comfort.availability.integratedBench.reason }
               : {})}

@@ -15,7 +15,8 @@ import {
 } from "three";
 import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
-import { PoolLights, planSceneLighting } from "./PoolLights";
+import { PoolLights } from "./PoolLights";
+import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
 import { createInfinityLandscape, createInfinityDeck, infinityGroundHeight } from "./infinityLandscape";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
@@ -860,9 +861,12 @@ export default function PoolScene({
 
   // Computed once here so the luminaires and the camera that frames them are
   // driven by the same row.
-  const lighting = useMemo(
+  const resolvedLayout = useMemo(
     () =>
-      planSceneLighting({
+      resolvePoolLayout({
+        shape,
+        poolType,
+        features,
         system,
         overflowType,
         outline,
@@ -877,6 +881,9 @@ export default function PoolScene({
       outline,
       verticalLayout,
       skimmers,
+      shape,
+      poolType,
+      features,
       system,
       poolAccess,
       internalStairType,
@@ -887,6 +894,7 @@ export default function PoolScene({
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
+  const lighting = resolvedLayout.lighting;
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
@@ -1041,6 +1049,7 @@ export default function PoolScene({
       />
 
       <PoolModel
+        resolvedLayout={resolvedLayout}
         features={features}
         poolAccess={poolAccess}
         internalStairType={internalStairType}

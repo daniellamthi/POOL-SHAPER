@@ -26,7 +26,10 @@ const declaration = ast.statements.find(
   (node) => ts.isFunctionDeclaration(node) && node.name?.text === "accessPlacement",
 );
 assert.ok(declaration, "Shared access placement must remain available");
-const compiled = ts.transpileModule(declaration.getText(ast), {
+const dimensionsDeclaration = ast.statements.find(node => ts.isVariableStatement(node)
+  && node.declarationList.declarations.some(item => item.name.getText(ast) === "ACCESS_DIMENSIONS"));
+assert.ok(dimensionsDeclaration, "Shared access dimensions must remain available");
+const compiled = ts.transpileModule(`${dimensionsDeclaration.getText(ast)}\n${declaration.getText(ast)}`, {
   compilerOptions: { module: ts.ModuleKind.CommonJS },
 }).outputText;
 const accessPlacement = new Function(

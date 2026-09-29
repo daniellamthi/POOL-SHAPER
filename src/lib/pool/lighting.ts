@@ -121,10 +121,11 @@ export const POOL_LIGHTING_DESIGN = {
   submergence: 0.6,
   floorClearance: 0.2,
   cornerClearance: 0.6,
-  fixtureRadius: 0.13,
+  fixtureRadius: 0.08,
 } as const;
 
 export const POOL_LUMINAIRE = {
+  diameter: POOL_LIGHTING_DESIGN.fixtureRadius * 2,
   // Generic preview product, not a certified or selected commercial SKU.
   lumens: 1500,
   trim: "steel" as "steel" | "white",
@@ -306,6 +307,19 @@ export function planPoolLighting({
         fixture(run, run.length / 2 + (n === 1 ? 0 : span * (i / (n - 1) - 0.5))),
       );
       if (points.every((p) => p !== null)) return points as PoolLightPosition[];
+    }
+    // Allocate across available wall stations, not a centred row with missing
+    // fixtures. Sampling is configuration-time only, at a conservative 5 cm.
+    const stations: PoolLightPosition[] = [];
+    for (let s = design.cornerClearance; s <= run.length - design.cornerClearance; s += 0.05) {
+      const p = fixture(run, s);
+      if (p) stations.push(p);
+    }
+    if (stations.length >= n) {
+      const points = Array.from({length:n}, (_,i) => stations[Math.min(stations.length-1,
+        Math.floor(stations.length*(i+0.5)/n))]!);
+      if (points.every((p,i) => points.slice(0,i).every(q =>
+        Math.hypot(p.x-q.x,p.z-q.z) >= 2*design.fixtureRadius+0.35))) return points;
     }
     return null;
   };

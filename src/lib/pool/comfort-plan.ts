@@ -1,11 +1,9 @@
-import { configuredAccessPlan } from "./access-plan";
-import { buildFloorProfile, splitFloorOutline } from "./floor-profile";
-import { buildOutline, outlineBounds, outlineArea, outlineCentroid } from "./geometry";
-import { infinityExclusion } from "./infinity-edge";
+import { configuredPoolLayout } from "./resolved-layout";
+import { splitFloorOutline } from "./floor-profile";
+import { outlineBounds, outlineArea, outlineCentroid } from "./geometry";
 import type { FloorProfileModel } from "./floor-profile";
 import type { Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, SystemType } from "./types";
 import type { InfinityExclusion } from "./walls";
-import { getPoolVerticalLayout } from "./vertical-layout";
 
 export type ComfortKind = "sunShelf" | "integratedBench";
 
@@ -23,6 +21,7 @@ export interface ComfortElementPlan {
 }
 
 export interface ComfortPlan {
+  adjusted?: boolean;
   elements: ReadonlyArray<ComfortElementPlan>;
   availability: Record<ComfortKind, { available: boolean; reason?: string }>;
   displacedVolume: number;
@@ -244,7 +243,20 @@ export function resolveComfortPlan({
         { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.minX + EDGE_INSET + benchProjection, minZ: -half, maxZ: half }, axis: "x", coordinate: bounds.minX },
         { rect: { minX: bounds.maxX - EDGE_INSET - benchProjection, maxX: bounds.maxX - EDGE_INSET, minZ: -half, maxZ: half }, axis: "x", coordinate: bounds.maxX },
       ];
-  const bench = benchCandidates.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
+  // Preserve the centred design where it fits. Otherwise shorten within seating
+  // limits, then move along the same real wall; never overlap the shelf flight.
+  const benchOptions = [...benchCandidates];
+  for (const length of [benchLength, Math.min(benchLength, 2), 1.5]) {
+    const low = (longX ? bounds.minX : bounds.minZ) + EDGE_INSET + length / 2;
+    const high = (longX ? bounds.maxX : bounds.maxZ) - EDGE_INSET - length / 2;
+    for (const fraction of [0.5, 0.75, 0.25, 1, 0]) {
+      const centre = low + (high - low) * fraction;
+      for (const candidate of benchCandidates) benchOptions.push({ ...candidate,
+        rect: longX ? { ...candidate.rect, minX: centre-length/2, maxX: centre+length/2 }
+          : { ...candidate.rect, minZ: centre-length/2, maxZ: centre+length/2 } });
+    }
+  }
+  const bench = benchOptions.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
   if (!bench) availability.integratedBench = { available: false, reason: "Nessuna parete lunga libera da scala, solarium o bordo Infinity." };
   else if (enabled.includes("integratedBench")) {
     const rect = bench.rect;
@@ -254,7 +266,7 @@ export function resolveComfortPlan({
       topY: waterY - 0.48,
       waterDepth: 0.48,
       width: benchProjection,
-      run: benchLength,
+      run: longX ? rect.maxX - rect.minX : rect.maxZ - rect.minZ,
     };
     elements.push(element);
     selectedRects.push(rect);
@@ -264,6 +276,7 @@ export function resolveComfortPlan({
   // this same plan; only their wall exclusion differs.
   void system;
   return {
+    adjusted: !!bench && enabled.includes("integratedBench") && !benchCandidates.includes(bench),
     elements,
     availability,
     displacedVolume: elements.reduce((sum, element) => sum + elementVolume(element, floorProfile) +
@@ -272,36 +285,5 @@ export function resolveComfortPlan({
 }
 
 export function configuredComfortPlan(config: PoolConfig): ComfortPlan {
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
-  const layout = getPoolVerticalLayout({
-    poolType: config.poolType ?? "in-ground",
-    system: config.system,
-    overflowType: config.overflowType,
-    depth: config.dimensions.depth,
-    copingThickness: 0,
-  });
-  const floorProfile = buildFloorProfile({
-    outline,
-    shape: config.shape,
-    poolType: config.poolType ?? "in-ground",
-    dimensions: config.dimensions,
-    verticalLayout: layout,
-    sunShelf: config.features.includes("sunShelf"),
-    infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
-  });
-  const access = configuredAccessPlan(config);
-  return resolveComfortPlan({
-    outline,
-    shape: config.shape,
-    poolType: config.poolType ?? "in-ground",
-    system: config.system,
-    floorProfile,
-    waterY: layout.waterY,
-    enabled: config.features,
-    accessFootprint: config.features.includes("sunShelf") && config.poolAccess === "internalSteps" ? [] : access.footprint,
-    infinityExcluded:
-      config.system === "infinity" && config.infinityEdge
-        ? infinityExclusion(outline, config.infinityEdge, config.shape)
-        : null,
-  });
+  return configuredPoolLayout(config).comfort;
 }

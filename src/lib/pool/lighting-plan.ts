@@ -1,4 +1,6 @@
+import { configuredPoolLayout } from "./resolved-layout";
 import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
+import type { ComfortPlan } from "./comfort-plan";
 import { accessMounting } from "./access-plan";
 import { planPoolLighting, type LightingExclusion, type PoolLightingPlan } from "./lighting";
 import type {
@@ -10,13 +12,9 @@ import type {
   OverflowType,
 } from "./types";
 import type { SkimmerPlan } from "./engineering";
-import { planSkimmers } from "./engineering";
 import type { InfinityExclusion } from "./walls";
-import { getPoolVerticalLayout, type PoolVerticalLayout } from "./vertical-layout";
-import { buildFloorProfile, type FloorProfileModel } from "./floor-profile";
-import { buildOutline, computeMetrics } from "./geometry";
-import { infinityExclusion } from "./infinity-edge";
-import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
+import type { PoolVerticalLayout } from "./vertical-layout";
+import type { FloorProfileModel } from "./floor-profile";
 export interface SceneLightingPlan {
   accessPlan: ReturnType<typeof resolveAccessPlan>;
   plan: PoolLightingPlan;
@@ -35,6 +33,8 @@ export interface SceneLightingPlan {
  * the viewer.
  */
 export function planSceneLighting({
+  resolvedAccess,
+  comfort,
   outline,
   layout,
   skimmers,
@@ -45,6 +45,8 @@ export function planSceneLighting({
   system,
   overflowType,
 }: {
+  resolvedAccess?: ReturnType<typeof resolveAccessPlan>;
+  comfort?: ComfortPlan;
   outline: Outline;
   layout: PoolVerticalLayout;
   skimmers: SkimmerPlan;
@@ -68,7 +70,7 @@ export function planSceneLighting({
     z: p.z,
     radius: 0.65,
   }));
-  const accessPlan = resolveAccessPlan({
+  const accessPlan = resolvedAccess ?? resolveAccessPlan({
     outline,
     access,
     stairType,
@@ -79,6 +81,12 @@ export function planSceneLighting({
     ...accessMounting(system, overflowType, layout),
   });
   const accessPoint = accessPlan.placement;
+  for (const element of comfort?.elements ?? []) {
+    for (const footprint of [element.footprint, ...(element.steps ?? []).map(step => step.footprint),
+      ...(element.landing ? [element.landing.footprint] : [])]) {
+      exclusions.push({ kind: "access", polygon: footprint, clearance: 0.2 });
+    }
+  }
   if (accessPoint)
     exclusions.push({ kind: "access", polygon: accessPlan.footprint, clearance: 0.2 });
   const plan = planPoolLighting({
@@ -94,9 +102,11 @@ export function planSceneLighting({
   // Non-rectangular outlines retain full occlusion for re-entrant corners.
   let shadowIndex = -1,
     nearest = Infinity;
-  if (accessPoint)
+  const comfortOrigin = comfort?.elements[0]?.footprint[0];
+  const shadowOrigin = accessPoint ?? (comfortOrigin ? { x: comfortOrigin[0], z: comfortOrigin[1] } : null);
+  if (shadowOrigin)
     plan.positions.forEach((p, i) => {
-      const distance = Math.hypot(p.x - accessPoint.x, p.z - accessPoint.z);
+      const distance = Math.hypot(p.x - shadowOrigin.x, p.z - shadowOrigin.z);
       if (distance < nearest) {
         nearest = distance;
         shadowIndex = i;
@@ -113,41 +123,6 @@ export function planSceneLighting({
 }
 
 /** UI, summary and commercial export use the exact same obstacles/elevations as the 3D scene. */
-export function configuredLightingPlan(config: PoolConfig) {
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
-  const layout = getPoolVerticalLayout({
-    poolType: config.poolType ?? "in-ground",
-    system: config.system,
-    overflowType: config.overflowType,
-    depth: config.dimensions.depth,
-    copingThickness: POOL_BORDER_PRESET.thickness,
-  });
-  const floorProfile = buildFloorProfile({
-    outline,
-    shape: config.shape,
-    poolType: config.poolType ?? "in-ground",
-    dimensions: config.dimensions,
-    verticalLayout: layout,
-    sunShelf: config.features.includes("sunShelf"),
-    infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
-  });
-  const skimmers = planSkimmers(
-    outline,
-    computeMetrics(outline, config.dimensions.depth).waterSurface,
-    config.system === "skimmer",
-  );
-  return planSceneLighting({
-    system: config.system,
-    overflowType: config.overflowType,
-    outline,
-    layout,
-    floorProfile,
-    skimmers,
-    access: config.poolAccess,
-    stairType: config.internalStairType ?? "linear",
-    infinityExcluded:
-      config.system === "infinity" && config.infinityEdge
-        ? infinityExclusion(outline, config.infinityEdge, config.shape)
-        : null,
-  }).plan;
+export function configuredLightingPlan(config: PoolConfig): PoolLightingPlan {
+  return configuredPoolLayout(config).lighting.plan;
 }

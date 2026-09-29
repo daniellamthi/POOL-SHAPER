@@ -560,6 +560,7 @@ export function resolveAccessPlan({
   topY,
   infinityExcluded = null,
   obstacles = [],
+  reservedFootprints = [],
   ladderAnchorOffset = 0.2,
   ladderAnchorY = topY,
   ladderDeckAvailable = true,
@@ -571,6 +572,7 @@ export function resolveAccessPlan({
   topY: number;
   infinityExcluded?: InfinityExclusion | null;
   obstacles?: ReadonlyArray<{ x: number; z: number }>;
+  reservedFootprints?: ReadonlyArray<Outline>;
   ladderAnchorOffset?: number;
   ladderAnchorY?: number;
   ladderDeckAvailable?: boolean;
@@ -592,6 +594,17 @@ export function resolveAccessPlan({
   };
   if (!access) return empty;
   const clearOfFittings = (polygon: Outline) =>
+    // Comfort footprints are axis-aligned rectangles. A conservative bounding
+    // clearance also protects curved access nosings and ladder rails.
+    !reservedFootprints.some(reserved => {
+      const bounds = (points: Outline) => ({
+        minX: Math.min(...points.map(p => p[0])), maxX: Math.max(...points.map(p => p[0])),
+        minZ: Math.min(...points.map(p => p[1])), maxZ: Math.max(...points.map(p => p[1])),
+      });
+      const a = bounds(polygon), b = bounds(reserved), gap = 0.2;
+      return a.maxX + gap > b.minX && a.minX - gap < b.maxX
+        && a.maxZ + gap > b.minZ && a.minZ - gap < b.maxZ;
+    }) &&
     !obstacles.some((p) => {
       if (insideOutline(polygon, p.x, p.z)) return true;
       return polygon.some((a, i) => {
@@ -862,6 +875,7 @@ export function stairSolid(
 }
 
 export function PoolAccessModel({
+  resolvedPlan,
   outline,
   access,
   stairType = "linear",
@@ -874,6 +888,7 @@ export function PoolAccessModel({
   ladderAnchorY = topY,
   ladderDeckAvailable = true,
 }: {
+  resolvedPlan?: ReturnType<typeof resolveAccessPlan>;
   outline: Outline;
   access: PoolAccess | null;
   stairType?: InternalStairType;
@@ -888,7 +903,7 @@ export function PoolAccessModel({
 }) {
   const plan = useMemo(
     () =>
-      resolveAccessPlan({
+      resolvedPlan ?? resolveAccessPlan({
         outline,
         access,
         stairType,
@@ -901,6 +916,7 @@ export function PoolAccessModel({
         ladderDeckAvailable,
       }),
     [
+      resolvedPlan,
       outline,
       access,
       stairType,

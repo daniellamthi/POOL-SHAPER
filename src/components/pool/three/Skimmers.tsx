@@ -13,6 +13,9 @@ import {
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { FREEBOARD } from "@/lib/pool/config";
 import { SKIMMER_PROFILES } from "./poolConstruction";
+import { copingOuterOffset } from "./poolConstruction";
+import { skimmerServicePosition, SKIMMER_SERVICE_LID } from "@/lib/pool/skimmer-service";
+import { GROUND_LEVEL } from "@/lib/pool/vertical-layout";
 
 const CAVITY_COLOR = "#202829";
 const THROAT_LIGHT = "#e9ebe8";
@@ -572,6 +575,7 @@ export function Skimmers({
   // housing was already fully hidden -- only the thinner above-ground
   // panel needs its depth clamped (see `wallThickness` on each assembly).
   const wallThickness = poolType === "above-ground" ? ABOVE_GROUND_STRUCTURE_THICKNESS : 1;
+  const service = skimmerServicePosition(copingOuterOffset("skimmer", "hidden"), GROUND_LEVEL - 0.002);
   const normalMap = useMemo(() => {
     const texture = createMaterialMicroNormalMap();
     texture.repeat.set(...MATERIAL_MICRO_DETAIL_PRESET.skimmer.repeat);
@@ -640,11 +644,14 @@ export function Skimmers({
             </mesh>
           ) : null}
           {/* Removable service lid, a recessed pull slot and perimeter seal. */}
+          <group position={poolType === "in-ground"
+            ? [0, service.y - wallTopY + verticalDrop, service.z]
+            : [0, verticalDrop + copingThickness, -0.105]}>
           <RoundedBox
-            args={[0.235, 0.004, 0.16]}
+            args={[SKIMMER_SERVICE_LID.width, SKIMMER_SERVICE_LID.thickness, SKIMMER_SERVICE_LID.depth]}
             radius={0.0015}
             smoothness={2}
-            position={[0, verticalDrop + copingThickness + 0.001, -0.105]}
+            position={[0, poolType === "above-ground" ? 0.001 : 0, 0]}
           >
             <meshStandardMaterial color="#595954" roughness={0.8} />
           </RoundedBox>
@@ -652,17 +659,18 @@ export function Skimmers({
             args={[0.228, 0.004, 0.153]}
             radius={0.0015}
             smoothness={2}
-            position={[0, verticalDrop + copingThickness + 0.003, -0.105]}
+            position={[0, poolType === "above-ground" ? 0.003 : 0.001, 0]}
           >
             <primitive object={frameMaterial} attach="material" />
           </RoundedBox>
           <mesh
-            position={[0, verticalDrop + copingThickness + 0.0051, -0.115]}
+            position={[0, poolType === "above-ground" ? 0.0051 : 0.0031, -0.01]}
             rotation={[-Math.PI / 2, 0, 0]}
           >
             <planeGeometry args={[0.035, 0.003]} />
             <meshStandardMaterial color="#444844" roughness={0.8} />
           </mesh>
+          </group>
         </group>
       ))}
     </group>

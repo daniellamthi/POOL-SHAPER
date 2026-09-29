@@ -181,6 +181,7 @@ function RecessedPoolLight({
       position={[position.x, position.y, position.z]}
       rotation={[0, position.rotation, 0]}
     >
+      <group scale={[POOL_LUMINAIRE.diameter / 0.256, POOL_LUMINAIRE.diameter / 0.256, 1]}>
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.002]} castShadow>
         <cylinderGeometry args={[0.128, 0.118, 0.028, 40]} />
         <meshStandardMaterial color="#69777b" roughness={0.4} metalness={0.8} />
@@ -214,6 +215,7 @@ function RecessedPoolLight({
           <meshStandardMaterial color="#798487" roughness={0.4} metalness={0.9} />
         </mesh>
       ))}
+      </group>
       <primitive object={target} />
       {powered ? (
         // Bright core on the glass itself, at the lens centre -- the same
@@ -227,7 +229,7 @@ function RecessedPoolLight({
           position={[0, 0, LED_OPTICS.lensCenter + 0.0004]}
           renderOrder={LED_OPTICS.glowRenderOrder}
         >
-          <circleGeometry args={[LED_OPTICS.glowRadius, 24]} />
+          <circleGeometry args={[LED_OPTICS.glowRadius * POOL_LUMINAIRE.diameter / 0.256, 24]} />
           <meshBasicMaterial
             map={glow}
             color={colour}
@@ -365,7 +367,7 @@ export function PoolLights({
   const scatterGeometry = useMemo(() => {
     const geometry = new THREE.CylinderGeometry(
       LED_OPTICS.beamEndRadius * LED_OPTICS.beamHullPad,
-      LED_OPTICS.beamStartRadius * LED_OPTICS.beamHullPad,
+      LED_OPTICS.beamStartRadius * (POOL_LUMINAIRE.diameter / 0.256) * LED_OPTICS.beamHullPad,
       LED_OPTICS.beamLength,
       32,
       1,
@@ -386,7 +388,7 @@ export function PoolLights({
           beamColor: { value: new THREE.Color(1, 1, 1) },
           density: { value: 0 },
           beamLength: { value: LED_OPTICS.beamLength },
-          startRadius: { value: LED_OPTICS.beamStartRadius },
+          startRadius: { value: LED_OPTICS.beamStartRadius * (POOL_LUMINAIRE.diameter / 0.256) },
           endRadius: { value: LED_OPTICS.beamEndRadius },
           extinction: { value: LED_OPTICS.beamExtinction },
           gain: { value: LED_OPTICS.beamGain },
