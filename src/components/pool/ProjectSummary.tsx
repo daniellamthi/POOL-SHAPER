@@ -1,4 +1,5 @@
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { useMemo, type ReactNode } from "react";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, STEPS } from "@/lib/pool/config";
@@ -158,9 +159,10 @@ export function ProjectSummary() {
             : POOL_ACCESS_LABEL[config.poolAccess],
         ]
       : []),
-    ...config.features
+    ...normalizeComfortFeatures(config.features)
       .filter(
         (id) =>
+          id === "inoxLadder" ||
           id === "hydromassage" ||
           id === "sunShelf" ||
           id === "integratedBench" ||

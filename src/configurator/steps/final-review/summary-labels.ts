@@ -75,6 +75,7 @@ export const POOL_FEATURE_LABEL: Record<PoolFeatureId, string> = {
   hydromassage: "Idromassaggio integrato",
   sunShelf: "Sun shelf sommerso",
   integratedBench: "Panca sommersa integrata",
+  inoxLadder: "Scaletta inox opzionale",
   externalStaircase: "Scala esterna",
 };
 

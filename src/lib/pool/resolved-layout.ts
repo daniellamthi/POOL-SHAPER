@@ -1,4 +1,4 @@
-import { resolveComfortPlan, type ComfortPlan } from "./comfort-plan";
+import { resolveComfortPlan, normalizeComfortFeatures, type ComfortPlan } from "./comfort-plan";
 import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
 import { accessMounting } from "./access-plan";
 import { planSceneLighting, type SceneLightingPlan } from "./lighting-plan";
@@ -8,7 +8,7 @@ import { getPoolVerticalLayout } from "./vertical-layout";
 import { planSkimmers } from "./engineering";
 import { infinityExclusion } from "./infinity-edge";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
-import type { PoolConfig, PoolFeatureId, PoolShapeId, PoolType, PoolAccess } from "./types";
+import type { Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, PoolAccess } from "./types";
 
 export type LayoutStatus = "VALID" | "AUTO_ADJUSTED" | "UNAVAILABLE";
 export interface ResolvedPoolLayout {
@@ -16,6 +16,11 @@ export interface ResolvedPoolLayout {
   comfort: ComfortPlan;
   access: ReturnType<typeof resolveAccessPlan>;
   effectiveAccess: PoolAccess | null;
+  /** Optional inox ladder added next to internal steps/comfort; null when not requested. */
+  ladder: null | {
+    plan: ReturnType<typeof resolveAccessPlan>;
+    status: "VALID" | "REPOSITION" | "UNAVAILABLE";
+  };
   lighting: SceneLightingPlan;
 }
 type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
@@ -35,48 +40,80 @@ export function comfortFootprints(plan: ComfortPlan) {
 /** User intent -> comfort -> access -> free wall surfaces -> luminaires.
  * No resolved state is persisted; all consumers derive the same deterministic plan. */
 export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
+  // Sun shelf XOR hydromassage: one decision shared by UI, 3D, summary and persistence.
+  const features = normalizeComfortFeatures(input.features);
+  const wantsFlightZone = features.includes("sunShelf") || features.includes("hydromassage");
   const missingShelfLanding =
-    input.features.includes("sunShelf") &&
-    input.floorProfile.sloped &&
-    !input.floorProfile.shelfZone;
+    wantsFlightZone && input.floorProfile.sloped && !input.floorProfile.shelfZone;
   const comfort = resolveComfortPlan({
     ...input,
     waterY: input.layout.waterY,
     enabled: missingShelfLanding
-      ? input.features.filter((feature) => feature !== "sunShelf")
-      : input.features,
+      ? features.filter((feature) => feature !== "sunShelf" && feature !== "hydromassage")
+      : features,
   });
-  if (missingShelfLanding)
-    comfort.availability.sunShelf = {
-      available: false,
-      reason:
-        "Profondità o spazio insufficienti per scala e pianerottolo regolari prima della pendenza.",
-    };
-  const integrated = comfort.elements.some((element) => element.kind === "sunShelf");
+  if (missingShelfLanding) {
+    const reason =
+      "Profondità o spazio insufficienti per scala e pianerottolo regolari prima della pendenza.";
+    if (features.includes("sunShelf")) comfort.availability.sunShelf = { available: false, reason };
+    if (features.includes("hydromassage"))
+      comfort.availability.hydromassage = { available: false, reason };
+  }
+  const integrated = comfort.elements.some(
+    (element) => element.kind === "sunShelf" || element.kind === "hydromassage",
+  );
+  const ladderAsAddon = input.access === "internalSteps" && features.includes("inoxLadder");
   const effectiveAccess = integrated && input.access === "internalSteps" ? null : input.access;
-  const access = resolveAccessPlan({
+  const mounting = accessMounting(input.system, input.overflowType, input.layout);
+  const resolve = (access: PoolAccess | null, reserved: ReadonlyArray<Outline>) =>
+    resolveAccessPlan({
+      ...input,
+      access,
+      topY: input.layout.copingY,
+      obstacles: input.skimmers.positions,
+      reservedFootprints: reserved,
+      ...mounting,
+    });
+  const comfortReserved = comfortFootprints(comfort);
+  const access = resolve(effectiveAccess, comfortReserved);
+  let ladder: ResolvedPoolLayout["ladder"] = null;
+  if (ladderAsAddon) {
+    const plan = resolve("stainlessSteelLadder", [
+      ...comfortReserved,
+      ...(access.placement ? [access.footprint] : []),
+    ]);
+    const free = resolve("stainlessSteelLadder", comfortReserved);
+    const moved =
+      !!plan.placement && !!free.placement &&
+      (Math.abs(plan.placement.x - free.placement.x) > 1e-6 ||
+        Math.abs(plan.placement.z - free.placement.z) > 1e-6);
+    ladder = { plan, status: !plan.placement ? "UNAVAILABLE" : moved ? "REPOSITION" : "VALID" };
+  }
+  const lighting = planSceneLighting({
     ...input,
-    access: effectiveAccess,
-    topY: input.layout.copingY,
-    obstacles: input.skimmers.positions,
-    reservedFootprints: comfortFootprints(comfort),
-    ...accessMounting(input.system, input.overflowType, input.layout),
+    resolvedAccess: access,
+    resolvedLadder: ladder?.plan ?? null,
+    comfort,
   });
-  const lighting = planSceneLighting({ ...input, resolvedAccess: access, comfort });
   const unavailable =
-    (input.features.includes("sunShelf") && !comfort.availability.sunShelf.available) ||
-    (input.features.includes("integratedBench") &&
+    (features.includes("sunShelf") && !comfort.availability.sunShelf.available) ||
+    (features.includes("hydromassage") &&
+      !features.includes("sunShelf") &&
+      !comfort.availability.hydromassage.available) ||
+    (features.includes("integratedBench") &&
       !comfort.availability.integratedBench.available) ||
-    (!!effectiveAccess && !access.placement);
+    (!!effectiveAccess && !access.placement) ||
+    ladder?.status === "UNAVAILABLE";
   return {
     status: unavailable
       ? "UNAVAILABLE"
-      : (integrated && input.access === "internalSteps") || comfort.adjusted
+      : (integrated && input.access === "internalSteps") || comfort.adjusted || ladder?.status === "REPOSITION"
         ? "AUTO_ADJUSTED"
         : "VALID",
     comfort,
     access,
     effectiveAccess,
+    ladder,
     lighting,
   };
 }
@@ -97,7 +134,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     poolType,
     dimensions: config.dimensions,
     verticalLayout: layout,
-    sunShelf: config.features.includes("sunShelf"),
+    sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   return resolvePoolLayout({

@@ -1,3 +1,5 @@
+import { normalizeComfortFeatures } from "./comfort-selection";
+export { normalizeComfortFeatures, activeFlightKind } from "./comfort-selection";
 import { configuredPoolLayout } from "./resolved-layout";
 import { splitFloorOutline } from "./floor-profile";
 import { outlineBounds, outlineArea, outlineCentroid } from "./geometry";
@@ -5,7 +7,7 @@ import type { FloorProfileModel } from "./floor-profile";
 import type { Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, SystemType } from "./types";
 import type { InfinityExclusion } from "./walls";
 
-export type ComfortKind = "sunShelf" | "integratedBench";
+export type ComfortKind = "sunShelf" | "integratedBench" | "hydromassage";
 
 export interface ComfortElementPlan {
   kind: ComfortKind;
@@ -18,7 +20,32 @@ export interface ComfortElementPlan {
   steps?: ReadonlyArray<{ footprint: Outline; topY: number }>;
   riser?: number;
   landing?: { footprint: Outline; topY: number };
+  /** Hydromassage only: non-overlapping levels (rear ledge, seat) that tile `footprint`. */
+  tiers?: ReadonlyArray<{ footprint: Outline; topY: number }>;
+  /** Hydromassage only: nozzle faces; `dir` is the unit outward normal in plan. */
+  jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
 }
+
+/** Real in-pool spa dimensions (metres), read from the reference: a sunken
+ * tub beside the straight flight, closed by a partition wall (top at the water
+ * line) and a lower front lip, with an L bench against the head and outer walls. */
+export const HYDRO_DIMENSIONS = {
+  partitionThickness: 0.2,
+  partitionWaterDepth: 0.03,
+  lipThickness: 0.15,
+  lipWaterDepth: 0.12,
+  benchDepth: 0.45,
+  seatWaterDepth: 0.45,
+  tubWaterDepth: 0.95,
+  minInteriorWidth: 1.2,
+  minLegroom: 0.5,
+  minSeatHeight: 0.35,
+  jetSpacing: 0.5,
+  jetAboveSeat: 0.22,
+  jetDiameter: 0.06,
+  /** Solids run this far into the wall so no seam can open at the tile line. */
+  wallOverlap: 0.01,
+} as const;
 
 export interface ComfortPlan {
   adjusted?: boolean;
@@ -115,6 +142,7 @@ export function resolveComfortPlan({
   const unavailable = {
     sunShelf: { available: false, ...(unsupported ? { reason: unsupported } : {}) },
     integratedBench: { available: false, ...(unsupported ? { reason: unsupported } : {}) },
+    hydromassage: { available: false, ...(unsupported ? { reason: unsupported } : {}) },
   } satisfies ComfortPlan["availability"];
   if (unsupported) return { elements: [], availability: unavailable, displacedVolume: 0 };
 
@@ -131,6 +159,7 @@ export function resolveComfortPlan({
       availability: {
         sunShelf: { available: false, reason },
         integratedBench: { available: false, reason },
+        hydromassage: { available: false, reason },
       },
       displacedVolume: 0,
     };
@@ -142,7 +171,10 @@ export function resolveComfortPlan({
   const availability: ComfortPlan["availability"] = {
     sunShelf: { available: true },
     integratedBench: { available: true },
+    hydromassage: { available: true },
   };
+  const wantsShelf = enabled.includes("sunShelf");
+  const wantsHydro = enabled.includes("hydromassage") && !wantsShelf;
   const valid = (rect: Rect, wallAxis: "x" | "z", wallCoordinate: number) =>
     !excludedWall(infinityExcluded, wallAxis, wallCoordinate) &&
     (!accessRect || !overlaps(expanded(rect, CLEARANCE), accessRect)) &&
@@ -212,7 +244,7 @@ export function resolveComfortPlan({
     .filter(candidate => valid(candidate.rect, candidate.axis, candidate.coordinate))
     .map(withSteps).find(candidate => candidate !== null);
   if (!shelf) availability.sunShelf = { available: false, reason: "Nessuna testata libera da scala, accessi o bordo Infinity." };
-  else if (enabled.includes("sunShelf")) {
+  else if (wantsShelf) {
     const rect = shelf.rect;
     const element: ComfortElementPlan = {
       kind: "sunShelf",
@@ -229,6 +261,89 @@ export function resolveComfortPlan({
     selectedRects.push(rect);
     selectedRects.push(shelf.flight);
     selectedRects.push(boundsOf(shelf.landing.footprint));
+  }
+
+  if (!shelf) availability.hydromassage = { available: false, reason: "Nessuna testata libera per scala rettilinea e vasca idromassaggio." };
+  else {
+    const H = HYDRO_DIMENSIONS;
+    const direction = shelf.coordinate === (longX ? bounds.minX : bounds.minZ) ? 1 : -1;
+    const flightMin = longX ? shelf.flight.minZ : shelf.flight.minX;
+    const flightMax = longX ? shelf.flight.maxZ : shelf.flight.maxX;
+    const wallMin = longX ? bounds.minZ : bounds.minX;
+    const wallMax = longX ? bounds.maxZ : bounds.maxX;
+    // The tub takes the free side of the head wall; `outer` is its long wall.
+    const flightAtMin = Math.abs(flightMin - (wallMin + EDGE_INSET)) < 1e-6;
+    const side = flightAtMin ? 1 : -1;
+    const partition0 = flightAtMin ? flightMax : flightMin;
+    const inner = partition0 + side * H.partitionThickness;
+    const outerWall = flightAtMin ? wallMax : wallMin;
+    const outer = outerWall + side * H.wallOverlap;
+    const end = shelf.totalRun;
+    const lip = end - H.lipThickness;
+    // Local frame: `a` metres from the head wall, `c` across the head wall.
+    const box = (a0: number, a1: number, c0: number, c1: number): Rect => {
+      const p = shelf.coordinate + direction * a0, q = shelf.coordinate + direction * a1;
+      return longX
+        ? { minX: Math.min(p, q), maxX: Math.max(p, q), minZ: Math.min(c0, c1), maxZ: Math.max(c0, c1) }
+        : { minX: Math.min(c0, c1), maxX: Math.max(c0, c1), minZ: Math.min(p, q), maxZ: Math.max(p, q) };
+    };
+    const back = -H.wallOverlap;
+    const benchInner = outerWall - side * H.benchDepth;
+    const interiorWidth = Math.abs(outerWall - inner);
+    const seatTop = waterY - H.seatWaterDepth;
+    const whole = box(back, end, partition0, outer);
+    const corners = rectOutline(whole);
+    const floorUnder = Math.max(...corners.map(([x, z]) => floorProfile.floorYAt(x, z)));
+    const tubFloor = waterY - H.tubWaterDepth;
+    const raisedFloor = tubFloor > floorUnder + 0.05;
+    if (interiorWidth < H.minInteriorWidth || lip - H.benchDepth < H.minLegroom)
+      availability.hydromassage = { available: false, reason: "Spazio insufficiente per vasca, panca e scala rettilinea con misure ergonomiche." };
+    else if (seatTop - Math.max(floorUnder, tubFloor) < H.minSeatHeight)
+      availability.hydromassage = { available: false, reason: "Profondità insufficiente per una seduta sommersa reale." };
+    else if (wantsHydro) {
+      const tiers = [
+        { footprint: rectOutline(box(back, end, partition0, inner)), topY: waterY - H.partitionWaterDepth },
+        { footprint: rectOutline(box(lip, end, inner, outer)), topY: waterY - H.lipWaterDepth },
+        { footprint: rectOutline(box(back, H.benchDepth, inner, outer)), topY: seatTop },
+        { footprint: rectOutline(box(H.benchDepth, lip, benchInner, outer)), topY: seatTop },
+        ...(raisedFloor ? [{ footprint: rectOutline(box(H.benchDepth, lip, inner, benchInner)), topY: tubFloor }] : []),
+      ];
+      // The flight shares the head and long walls: close those seams too.
+      const toWalls = (outline: Outline): Outline => outline.map(([x, z]) => {
+        const snap = (v: number, min: number, max: number) =>
+          Math.abs(v - (min + EDGE_INSET)) < 1e-6 ? min - H.wallOverlap
+            : Math.abs(v - (max - EDGE_INSET)) < 1e-6 ? max + H.wallOverlap : v;
+        return [snap(x, bounds.minX, bounds.maxX), snap(z, bounds.minZ, bounds.maxZ)] as const;
+      });
+      const jetY = seatTop + H.jetAboveSeat;
+      const spaced = (from: number, to: number) => {
+        const count = Math.max(1, Math.floor(Math.abs(to - from) / H.jetSpacing) + 1);
+        const step = count > 1 ? (to - from) / (count - 1) : 0;
+        return Array.from({ length: count }, (_, i) => (count > 1 ? from + i * step : (from + to) / 2));
+      };
+      const point = (a: number, c: number) => (longX ? { x: shelf.coordinate + direction * a, z: c } : { x: c, z: shelf.coordinate + direction * a });
+      const headDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
+      const sideDir = (longX ? [0, -side] : [-side, 0]) as readonly [number, number];
+      const outerIsInfinity = excludedWall(infinityExcluded, longX ? "z" : "x", outerWall);
+      const jets = [
+        ...spaced(inner + side * 0.3, benchInner - side * 0.25).map((c) => ({ ...point(0, c), y: jetY, dir: headDir })),
+        ...(outerIsInfinity ? [] : spaced(H.benchDepth + 0.3, lip - 0.25).map((a) => ({ ...point(a, outerWall), y: jetY, dir: sideDir }))),
+      ];
+      elements.push({
+        kind: "hydromassage",
+        footprint: rectOutline(whole),
+        topY: waterY - H.partitionWaterDepth,
+        waterDepth: H.seatWaterDepth,
+        width: interiorWidth,
+        run: end,
+        steps: shelf.steps.map((step) => ({ ...step, footprint: toWalls(step.footprint) })),
+        riser: shelf.riser,
+        landing: { ...shelf.landing, footprint: toWalls(shelf.landing.footprint) },
+        tiers,
+        jets,
+      });
+      selectedRects.push(whole, shelf.flight, boundsOf(shelf.landing.footprint));
+    }
   }
 
   const benchLength = Math.min(3, Math.max(1.5, longSpan * 0.36));
@@ -279,7 +394,8 @@ export function resolveComfortPlan({
     adjusted: !!bench && enabled.includes("integratedBench") && !benchCandidates.includes(bench),
     elements,
     availability,
-    displacedVolume: elements.reduce((sum, element) => sum + elementVolume(element, floorProfile) +
+    displacedVolume: elements.reduce((sum, element) =>
+      sum + (element.tiers ?? [element]).reduce((v, tier) => v + elementVolume({ ...element, ...tier }, floorProfile), 0) +
       [...(element.steps ?? []), ...(element.landing ? [element.landing] : [])].reduce((volume, step) => volume + elementVolume({ ...element, ...step }, floorProfile), 0), 0),
   };
 }

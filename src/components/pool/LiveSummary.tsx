@@ -8,6 +8,7 @@ import {
   PROJECT_TYPES,
   getShapeDefinition,
 } from "@/lib/pool/config";
+import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
@@ -26,7 +27,9 @@ export function LiveSummary() {
     config.finish === "mosaic"
       ? getMosaicFinish(config.mosaicFinish).name
       : (LINER_COLORS.find((item) => item.id === config.linerColor)?.title ?? config.linerColor);
-  const features = POOL_FEATURES.filter((item) => config.features.includes(item.id));
+  const features = POOL_FEATURES.filter((item) =>
+    normalizeComfortFeatures(config.features).includes(item.id),
+  );
   const equipment = EQUIPMENT.filter((item) => config.equipment.includes(item.id));
   const isSlopedFloor = isSlopedFloorDisplay(config.shape, config.poolType, config.dimensions);
   const depthLabel = isSlopedFloor
@@ -39,6 +42,9 @@ export function LiveSummary() {
       : config.poolAccess === "stainlessSteelLadder"
         ? ["Scaletta esterna in acciaio inox"]
         : []),
+    ...(config.poolAccess === "internalSteps" && config.features.includes("inoxLadder")
+      ? ["Scaletta inox opzionale"]
+      : []),
     ...equipment.map((item) => item.title),
   ];
   const rows = [

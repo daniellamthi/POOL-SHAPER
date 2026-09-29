@@ -969,6 +969,26 @@ export function PoolModel({
   );
 
   const comfortPlan = resolvedLayout.comfort;
+  const accessMaterial = (
+    <meshPhysicalMaterial
+            color={materials.liner.color}
+            map={floorSurfaceMap}
+            normalMap={interiorMicroMaps.floorNormal}
+            normalScale={[
+              materials.surface.microDetail.normalStrength,
+              materials.surface.microDetail.normalStrength,
+            ]}
+            roughness={materials.liner.roughness}
+            metalness={materials.liner.metalness}
+            roughnessMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null}
+            aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
+            aoMapIntensity={0.6}
+            onBeforeCompile={configureCaustics}
+            customProgramCacheKey={() =>
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
+            }
+          />
+  );
 
   return (
     <group>
@@ -1009,25 +1029,22 @@ export function PoolModel({
           obstacles={system === "skimmer" ? skimmers.positions : []}
           {...accessMounting(system, overflowType, verticalLayout)}
         >
-          <meshPhysicalMaterial
-            color={materials.liner.color}
-            map={floorSurfaceMap}
-            normalMap={interiorMicroMaps.floorNormal}
-            normalScale={[
-              materials.surface.microDetail.normalStrength,
-              materials.surface.microDetail.normalStrength,
-            ]}
-            roughness={materials.liner.roughness}
-            metalness={materials.liner.metalness}
-            roughnessMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null}
-            aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
-            aoMapIntensity={0.6}
-            onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
-            }
-          />
+          {accessMaterial}
         </PoolAccessModel>
+        {resolvedLayout.ladder?.plan.placement ? (
+          <PoolAccessModel
+            resolvedPlan={resolvedLayout.ladder.plan}
+            outline={outline}
+            access="stainlessSteelLadder"
+            floorProfile={floorProfile}
+            topY={verticalLayout.copingY}
+            infinityExcluded={infinityExcluded}
+            obstacles={system === "skimmer" ? skimmers.positions : []}
+            {...accessMounting(system, overflowType, verticalLayout)}
+          >
+            {accessMaterial}
+          </PoolAccessModel>
+        ) : null}
         {/* Interior walls */}
         <mesh geometry={walls} renderOrder={0} receiveShadow castShadow>
           <meshPhysicalMaterial

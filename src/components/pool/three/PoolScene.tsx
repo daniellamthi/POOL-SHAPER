@@ -814,7 +814,7 @@ export default function PoolScene({
           ...(slopeReversed !== undefined ? { slopeReversed } : {}),
         },
         verticalLayout,
-        sunShelf: features.includes("sunShelf"),
+        sunShelf: features.includes("sunShelf") || features.includes("hydromassage"),
         infinityEdge: system === "infinity" ? infinityEdge : null,
       }),
     [

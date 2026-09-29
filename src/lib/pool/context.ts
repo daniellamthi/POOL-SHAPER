@@ -82,6 +82,8 @@ export interface ConfiguratorContextValue {
   setLedIntensity: (value: number) => void;
   setInternalStairType: (value: InternalStairType) => void;
   setPoolAccess: (value: PoolAccess) => void;
+  toggleInternalSteps: () => void;
+  toggleInoxLadder: () => void;
   toggleEquipment: (value: EquipmentId) => void;
   updateRenovation: (value: Partial<RenovationConfig>) => void;
   addUploads: (files: UploadedFile[]) => void;

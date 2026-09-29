@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, Info } from "lucide-react";
+import { Check, Info, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StepSection({
@@ -35,6 +35,7 @@ export function OptionCard({
   meta,
   disabled,
   disabledReason,
+  optional,
 }: {
   title: string;
   description?: string;
@@ -47,6 +48,8 @@ export function OptionCard({
   /** Shown in place of `description` while disabled, explaining WHY (e.g.
    * "not available for this shape"), never just hiding the reason. */
   disabledReason?: string;
+  /** Optional add-on: shows a "+" when off and a quiet "Aggiunto" state when on. */
+  optional?: boolean;
 }) {
   return (
     <button
@@ -67,21 +70,33 @@ export function OptionCard({
     >
       <span className="flex items-start justify-between gap-4">
         <span className="text-[15px] font-light tracking-[-0.012em] text-foreground">{title}</span>
-        <span
-          className={cn(
-            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-            selected
-              ? "scale-100 bg-brand text-background shadow-[0_0_0_4px_var(--brand-soft)]"
-              : "scale-75 border border-foreground/25 text-transparent opacity-0 group-hover:scale-100 group-hover:opacity-100",
-          )}
-        >
-          <Check
+        <span className="flex shrink-0 items-center gap-2">
+          {optional && selected ? (
+            <span className="text-[11px] font-light tracking-wide text-brand">Aggiunto</span>
+          ) : null}
+          <span
+            data-optional-state={optional ? (selected ? "added" : "off") : undefined}
             className={cn(
-              "size-3 transition-all duration-300",
-              selected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+              "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              selected
+                ? "scale-100 bg-brand text-background shadow-[0_0_0_4px_var(--brand-soft)]"
+                : optional
+                  ? "scale-100 border border-foreground/30 text-foreground/70"
+                  : "scale-75 border border-foreground/25 text-transparent opacity-0 group-hover:scale-100 group-hover:opacity-100",
             )}
-            strokeWidth={1.75}
-          />
+          >
+            {optional && !selected ? (
+              <Plus className="size-3" strokeWidth={1.75} />
+            ) : (
+              <Check
+                className={cn(
+                  "size-3 transition-all duration-300",
+                  selected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+                )}
+                strokeWidth={1.75}
+              />
+            )}
+          </span>
         </span>
       </span>
       {disabled && disabledReason ? (

@@ -34,6 +34,7 @@ export interface SceneLightingPlan {
  */
 export function planSceneLighting({
   resolvedAccess,
+  resolvedLadder,
   comfort,
   outline,
   layout,
@@ -46,6 +47,7 @@ export function planSceneLighting({
   overflowType,
 }: {
   resolvedAccess?: ReturnType<typeof resolveAccessPlan>;
+  resolvedLadder?: ReturnType<typeof resolveAccessPlan> | null;
   comfort?: ComfortPlan;
   outline: Outline;
   layout: PoolVerticalLayout;
@@ -89,6 +91,8 @@ export function planSceneLighting({
   }
   if (accessPoint)
     exclusions.push({ kind: "access", polygon: accessPlan.footprint, clearance: 0.2 });
+  if (resolvedLadder?.placement)
+    exclusions.push({ kind: "access", polygon: resolvedLadder.footprint, clearance: 0.2 });
   const plan = planPoolLighting({
     outline,
     waterY: layout.waterY,

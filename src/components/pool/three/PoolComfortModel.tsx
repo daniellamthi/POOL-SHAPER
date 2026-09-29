@@ -3,12 +3,13 @@ import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import type { ComfortPlan } from "@/lib/pool/comfort-plan";
 import { stairSolid } from "./PoolAccessModel";
 import { BufferGeometry, Float32BufferAttribute } from "three";
+import { HYDRO_DIMENSIONS } from "@/lib/pool/comfort-plan";
 import type { ComfortElementPlan } from "@/lib/pool/comfort-plan";
 
 /** Union of shelf and treads: emit only exterior faces, never touching box faces.
  * The small rectilinear grid also retains metric UVs and a floor-following base. */
 export function shelfStairGeometry(element: ComfortElementPlan, floor: FloorProfileModel) {
-  const patches = [element, ...(element.landing ? [element.landing] : []), ...(element.steps ?? [])].map(part => ({
+  const patches = [...(element.tiers ?? [element]), ...(element.landing ? [element.landing] : []), ...(element.steps ?? [])].map(part => ({
     minX: Math.min(...part.footprint.map(p => p[0])), maxX: Math.max(...part.footprint.map(p => p[0])),
     minZ: Math.min(...part.footprint.map(p => p[1])), maxZ: Math.max(...part.footprint.map(p => p[1])),
     y: part.topY,
@@ -104,6 +105,30 @@ export function PoolComfortModel({
           {children}
         </mesh>
       ))}
+      {plan.elements.flatMap((element) =>
+        (element.jets ?? []).map((jet, index) => (
+          <HydroJet key={`${element.kind}-jet-${index}`} jet={jet} />
+        )),
+      )}
+    </group>
+  );
+}
+
+/** Flush stainless nozzle set into the seat riser: chrome bezel + dark orifice.
+ * Protrusion is a few mm so it never z-fights with the liner face. */
+function HydroJet({ jet }: { jet: NonNullable<ComfortElementPlan["jets"]>[number] }) {
+  const d = HYDRO_DIMENSIONS.jetDiameter;
+  const rotY = Math.atan2(jet.dir[0], jet.dir[1]);
+  return (
+    <group name="pool-hydro-jet" position={[jet.x, jet.y, jet.z]} rotation={[0, rotY, 0]}>
+      <mesh position={[0, 0, 0.0025]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[d / 2, d / 2, 0.005, 24]} />
+        <meshStandardMaterial color="#c9ced4" metalness={0.9} roughness={0.25} />
+      </mesh>
+      <mesh position={[0, 0, 0.0056]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[d * 0.26, d * 0.26, 0.002, 16]} />
+        <meshStandardMaterial color="#20262b" metalness={0.4} roughness={0.5} />
+      </mesh>
     </group>
   );
 }

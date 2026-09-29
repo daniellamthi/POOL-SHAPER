@@ -1,7 +1,8 @@
 import { Footprints } from "lucide-react";
 import { useMemo } from "react";
 import { configuredAccessPlan } from "@/lib/pool/access-plan";
-import { configuredComfortPlan } from "@/lib/pool/comfort-plan";
+import { configuredComfortPlan, HYDRO_DIMENSIONS, activeFlightKind, normalizeComfortFeatures } from "@/lib/pool/comfort-plan";
+import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 import { OptionCard, StepSection } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 
@@ -10,7 +11,8 @@ import { useConfigurator } from "@/lib/pool/context";
  * bundled "Pool Features" step so lighting and access are each their own
  * clear decision. */
 export function AccessStep() {
-  const { config, togglePoolFeature, setPoolAccess, setInternalStairType } = useConfigurator();
+  const { config, togglePoolFeature, setPoolAccess, setInternalStairType, toggleInternalSteps, toggleInoxLadder } =
+    useConfigurator();
   const stairType = config.internalStairType ?? "linear";
   // Geometry, obstacles and elevations determine availability, not a shape label.
   const plans = useMemo(
@@ -36,6 +38,31 @@ export function AccessStep() {
     ...config, features: shelfEnabled ? config.features : [...config.features, "sunShelf"],
   }), [config, shelfEnabled]);
   const shelf = comfort.elements.find(element => element.kind === "sunShelf");
+  const hydroEnabled = config.features.includes("hydromassage") && !shelfEnabled;
+  const hydro = comfort.elements.find(element => element.kind === "hydromassage");
+  const hydroProposal = useMemo(() => configuredComfortPlan({
+    ...config, features: normalizeComfortFeatures(hydroEnabled ? config.features : [...config.features, "hydromassage"], "hydromassage"),
+  }), [config, hydroEnabled]);
+  const stepsOn = config.poolAccess === "internalSteps";
+  const inoxOn = config.poolAccess === "stainlessSteelLadder" || (stepsOn && config.features.includes("inoxLadder"));
+  // Same engine, asked what happens if the ladder is added next to the current selection.
+  const inoxLayout = useMemo(() => configuredPoolLayout({
+    ...config,
+    poolAccess: stepsOn ? "internalSteps" : "stainlessSteelLadder",
+    features: stepsOn ? [...config.features.filter(id => id !== "inoxLadder"), "inoxLadder"] : config.features,
+  }), [config, stepsOn]);
+  const inoxPlan = stepsOn ? inoxLayout.ladder?.plan : inoxLayout.access;
+  const inoxStatus = !inoxPlan?.placement ? "UNAVAILABLE" : stepsOn ? inoxLayout.ladder?.status : "VALID";
+  const flightKind = activeFlightKind(config.features);
+  const flightActive = flightKind !== null;
+  const selectComfort = (id: "sunShelf" | "hydromassage") => {
+    const on = config.features.includes(id);
+    if (!on && config.poolAccess === null) {
+      setInternalStairType("linear");
+      setPoolAccess("internalSteps");
+    }
+    togglePoolFeature(id);
+  };
   const dimensions = (plan: typeof selected) =>
     plan.reason ? undefined : (
       <span className="text-xs text-muted-foreground">
@@ -49,16 +76,18 @@ export function AccessStep() {
         {comfort.adjusted ? <p className="text-xs text-muted-foreground">Optimized for your pool</p> : null}
         {shelfEnabled && !comfort.availability.sunShelf.available ?
           <p className="text-xs text-muted-foreground">Sun Shelf: {comfort.availability.sunShelf.reason}</p> : null}
-        <h3 className="label-xs">Accesso alla piscina</h3>
+        {hydroEnabled && !comfort.availability.hydromassage.available ?
+          <p className="text-xs text-muted-foreground">Idromassaggio: {comfort.availability.hydromassage.reason}</p> : null}
+        <h3 className="label-xs">Accesso</h3>
         <div className="grid gap-4" role="group" aria-label="Accesso alla piscina">
           <div className="grid gap-3">
             <OptionCard
-              title={shelfEnabled ? "Gradini integrati — inclusi con Sun Shelf" : "Scala interna"}
-              description={shelfEnabled ? "Collegamento rettilineo automatico dalla spiaggetta al fondo. La scaletta inox, se selezionata, resta un accesso separato." : "Scala integrata in cemento, coordinata con la finitura interna selezionata."}
-              selected={config.poolAccess === "internalSteps"}
-              onSelect={() => setPoolAccess("internalSteps")}
+              title={flightActive ? "Scala interna — inclusa nel comfort" : "Scala interna"}
+              description={flightActive ? "Collegamento rettilineo automatico dalla zona comfort al fondo, con la stessa finitura della vasca." : "Scala integrata in cemento, coordinata con la finitura interna selezionata."}
+              selected={stepsOn}
+              onSelect={() => toggleInternalSteps()}
             />
-            {config.poolAccess === "internalSteps" && !shelfEnabled ? (
+            {stepsOn && !flightActive ? (
               <section
                 aria-label="Tipo di scala interna"
                 className="rounded-2xl border border-hairline px-5 py-5"
@@ -88,16 +117,24 @@ export function AccessStep() {
             ) : null}
           </div>
           <OptionCard
+            optional
             title="Scaletta inox"
-            description="Corrimano tubolari e pedate antiscivolo, dimensionati sulla profondità utile."
-            selected={config.poolAccess === "stainlessSteelLadder"}
-            onSelect={() => setPoolAccess("stainlessSteelLadder")}
-            disabled={!!plans.ladder.reason}
-            disabledReason={plans.ladder.reason}
-            meta={dimensions(plans.ladder)}
+            description="Optional. Corrimano tubolari e pedate antiscivolo, dimensionati sulla profondità utile."
+            selected={inoxOn}
+            onSelect={() => toggleInoxLadder()}
+            disabled={!inoxOn && inoxStatus === "UNAVAILABLE"}
+            disabledReason={inoxPlan?.reason ?? "Nessuna posizione valida senza collisioni."}
+            meta={
+              inoxPlan && !inoxPlan.reason ? (
+                <span className="text-xs text-muted-foreground">
+                  {inoxStatus === "REPOSITION" ? "Riposizionata automaticamente · " : ""}
+                  {inoxPlan.steps} gradini · {inoxPlan.width.toFixed(2)} × {inoxPlan.run.toFixed(2)} m
+                </span>
+              ) : undefined
+            }
           />
         </div>
-        {!shelfEnabled && config.poolAccess && selected.reason ? (
+        {!flightActive && config.poolAccess && selected.reason ? (
           <p role="status" className="text-sm text-muted-foreground">
             {selected.reason} Scegli un accesso compatibile.
           </p>
@@ -105,19 +142,15 @@ export function AccessStep() {
       </div>
 
       <div className="flex flex-col gap-5 border-t border-hairline pt-8">
-        <h3 className="label-xs">Comfort in acqua</h3>
+        <h3 className="label-xs">Comfort</h3>
+        <p className="text-xs text-muted-foreground">Sun shelf e idromassaggio sono alternative della stessa zona comfort.</p>
         <div className="grid gap-3" role="group" aria-label="Comfort integrato">
           <OptionCard
+            optional
             title="Sun shelf"
             description="Solarium sommerso a 22 cm, rivestito con la stessa finitura della vasca."
-            selected={config.features.includes("sunShelf")}
-            onSelect={() => {
-              if (!shelfEnabled && config.poolAccess !== "stainlessSteelLadder") {
-                setInternalStairType("linear");
-                setPoolAccess("internalSteps");
-              }
-              togglePoolFeature("sunShelf");
-            }}
+            selected={shelfEnabled}
+            onSelect={() => selectComfort("sunShelf")}
             disabled={!shelfEnabled && !shelfProposal.availability.sunShelf.available}
             {...(shelfProposal.availability.sunShelf.reason
               ? { disabledReason: shelfProposal.availability.sunShelf.reason }
@@ -125,6 +158,19 @@ export function AccessStep() {
             meta={<span className="text-xs text-muted-foreground">Profondità acqua 0,22 m · scala rettilinea inclusa{ shelf?.steps ? ` · ${shelf.steps.length} pedate da 30 cm · alzata ${Math.round((shelf.riser ?? 0) * 100)} cm` : ""}</span>}
           />
           <OptionCard
+            optional
+            title="Idromassaggio"
+            description="Vasca idromassaggio incassata accanto alla scala rettilinea: divisorio a filo acqua, bordo frontale, panca a L e getti nello schienale."
+            selected={hydroEnabled}
+            onSelect={() => selectComfort("hydromassage")}
+            disabled={!hydroEnabled && !hydroProposal.availability.hydromassage.available}
+            {...(hydroProposal.availability.hydromassage.reason
+              ? { disabledReason: hydroProposal.availability.hydromassage.reason }
+              : {})}
+            meta={<span className="text-xs text-muted-foreground">Seduta a L {Math.round(HYDRO_DIMENSIONS.seatWaterDepth * 100)} cm sotto l’acqua · divisorio e bordo frontale integrati{ hydro?.jets ? ` · vasca ${hydro.run.toFixed(2)} × ${(hydro.width + HYDRO_DIMENSIONS.partitionThickness).toFixed(2)} m · ${hydro.jets.length} getti` : ""}</span>}
+          />
+          <OptionCard
+            optional
             title="Panca integrata"
             description="Seduta sommersa lungo parete, chiusa fino al fondo e coordinata al rivestimento."
             selected={config.features.includes("integratedBench")}
@@ -136,12 +182,6 @@ export function AccessStep() {
             meta={<span className="text-xs text-muted-foreground">Seduta a 0,48 m dall’acqua</span>}
           />
         </div>
-        <OptionCard
-          title="Idromassaggio"
-          description="Ugelli idromassaggio integrati."
-          selected={config.features.includes("hydromassage")}
-          onSelect={() => togglePoolFeature("hydromassage")}
-        />
       </div>
 
       {config.poolType === "above-ground" ? (

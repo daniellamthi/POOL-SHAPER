@@ -51,6 +51,7 @@ export type PoolFeatureId =
   | "hydromassage"
   | "sunShelf"
   | "integratedBench"
+  | "inoxLadder"
   | "externalStaircase";
 
 export type PoolAccess = "internalSteps" | "stainlessSteelLadder";

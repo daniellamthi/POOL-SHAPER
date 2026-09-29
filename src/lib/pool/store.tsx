@@ -20,7 +20,7 @@ import {
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
 import { configuredAccessPlan } from "./access-plan";
-import { configuredComfortPlan } from "./comfort-plan";
+import { configuredComfortPlan, activeFlightKind, normalizeComfortFeatures } from "./comfort-plan";
 import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
 import {
   buildFloorProfile,
@@ -91,6 +91,8 @@ type Action =
   | { type: "setLedIntensity"; value: number }
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setPoolAccess"; value: PoolAccess }
+  | { type: "toggleInternalSteps" }
+  | { type: "toggleInoxLadder" }
   | { type: "toggleEquipment"; value: EquipmentId }
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
   | { type: "addUploads"; value: UploadedFile[] }
@@ -198,7 +200,7 @@ function reducer(state: State, action: Action): State {
             ? config.structure
             : null;
       const features = action.value === "above-ground"
-        ? config.features.filter((id) => id !== "sunShelf" && id !== "integratedBench")
+        ? config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench")
         : config.features.filter((id) => id !== "externalStaircase");
       return { ...state, config: { ...config, poolType: action.value, structure, features } };
     }
@@ -267,7 +269,7 @@ function reducer(state: State, action: Action): State {
             features:
               action.value === "rectangle"
                 ? config.features
-                : config.features.filter((id) => id !== "sunShelf" && id !== "integratedBench"),
+                : config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench"),
           },
           action.value !== config.shape,
         ),
@@ -395,8 +397,21 @@ function reducer(state: State, action: Action): State {
       if (action.value === "externalStaircase" && config.poolType !== "above-ground") return state;
       const features = config.features.includes(action.value)
         ? config.features.filter((id) => id !== action.value)
-        : [...config.features, action.value];
+        : normalizeComfortFeatures([...config.features, action.value], action.value);
       return { ...state, config: { ...config, features } };
+    }
+    case "toggleInternalSteps":
+    case "toggleInoxLadder": {
+      // Canonical encoding: steps -> "internalSteps"; ladder only -> "stainlessSteelLadder";
+      // both -> "internalSteps" + feature "inoxLadder". Legacy saves keep loading.
+      const steps = config.poolAccess === "internalSteps";
+      const ladder = config.poolAccess === "stainlessSteelLadder" || (steps && config.features.includes("inoxLadder"));
+      const nextSteps = action.type === "toggleInternalSteps" ? !steps : steps;
+      const nextLadder = action.type === "toggleInoxLadder" ? !ladder : ladder;
+      const rest = config.features.filter((id) => id !== "inoxLadder");
+      return { ...state, config: { ...config,
+        poolAccess: nextSteps ? "internalSteps" : nextLadder ? "stainlessSteelLadder" : null,
+        features: nextSteps && nextLadder ? [...rest, "inoxLadder"] : rest } };
     }
     case "setPoolAccess":
       return { ...state, config: { ...config, poolAccess: action.value } };
@@ -493,8 +508,8 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
     if (stepId === "structure" && config.structure === null) return index;
     if (stepId === "system" && config.system === "infinity" && !config.infinityEdge?.enabled)
       return index;
-    if (stepId === "access" && !(config.features.includes("sunShelf")
-      ? configuredComfortPlan(config).elements.some(element => element.kind === "sunShelf")
+    if (stepId === "access" && !(activeFlightKind(config.features)
+      ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
       : config.poolAccess !== null && !configuredAccessPlan(config).reason)) return index;
   }
   return STEPS.length - 1;
@@ -557,7 +572,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       poolType: config.poolType ?? "in-ground",
       dimensions: config.dimensions,
       verticalLayout,
-      sunShelf: config.features.includes("sunShelf"),
+      sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
       infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
     });
     const baseMetrics = floorProfile.sloped
@@ -612,8 +627,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
             (z) => z.side === config.infinityEdge?.side,
           )
         );
-      if (stepId === "access") return config.features.includes("sunShelf")
-        ? configuredComfortPlan(config).elements.some(element => element.kind === "sunShelf")
+      if (stepId === "access") return activeFlightKind(config.features)
+        ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
         : config.poolAccess !== null && !configuredAccessPlan(config).reason;
       return true;
     },
@@ -659,6 +674,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
+      toggleInternalSteps: () => dispatch({ type: "toggleInternalSteps" }),
+      toggleInoxLadder: () => dispatch({ type: "toggleInoxLadder" }),
       toggleEquipment: (v) => dispatch({ type: "toggleEquipment", value: v }),
       updateRenovation: (v) => dispatch({ type: "updateRenovation", value: v }),
       addUploads: (files) => dispatch({ type: "addUploads", value: files }),
