@@ -23,6 +23,7 @@ import {
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { PoolAccessModel } from "./PoolAccessModel";
 import { PoolComfortModel } from "./PoolComfortModel";
+import { subdivideFloorBoundary } from "@/lib/pool/floor-profile";
 import { accessMounting } from "@/lib/pool/access-plan";
 import { resolveAccessPlan } from "./PoolAccessModel";
 import { resolveComfortPlan } from "@/lib/pool/comfort-plan";
@@ -846,7 +847,7 @@ export function PoolModel({
   const floor = useDisposable(
     () =>
       floorProfile.sloped
-        ? createSlopedFloorGeometry(outline, floorProfile.floorYAt)
+        ? createSlopedFloorGeometry(outline, floorProfile.floorYAt, floorProfile)
         : createSurfaceGeometry(outline),
     [outline, floorProfile],
   );
@@ -854,7 +855,7 @@ export function PoolModel({
   const walls = useDisposable(
     () =>
       createInteriorWallGeometry(
-        outline,
+        subdivideFloorBoundary(outline, floorProfile),
         verticalLayout.wallTopY,
         floorProfile.sloped ? floorProfile.floorYAt : verticalLayout.floorY,
         INTERIOR_FLOOR_COVE_RADIUS,
@@ -1001,7 +1002,7 @@ export function PoolModel({
         floorProfile,
         waterY: verticalLayout.waterY,
         enabled: features,
-        accessFootprint: accessPlan.footprint,
+        accessFootprint: features.includes("sunShelf") && poolAccess === "internalSteps" ? [] : accessPlan.footprint,
         infinityExcluded,
       }),
     [
@@ -1013,6 +1014,7 @@ export function PoolModel({
       verticalLayout.waterY,
       features,
       accessPlan.footprint,
+      poolAccess,
       infinityExcluded,
     ],
   );
@@ -1047,7 +1049,7 @@ export function PoolModel({
         </PoolComfortModel>
         <PoolAccessModel
           outline={outline}
-          access={poolAccess}
+          access={comfortPlan.elements.some(element => element.kind === "sunShelf") && poolAccess === "internalSteps" ? null : poolAccess}
           stairType={internalStairType}
           floorProfile={floorProfile}
           topY={verticalLayout.copingY}

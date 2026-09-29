@@ -683,6 +683,11 @@ export function resolveAccessPlan({
       infinityExcluded,
       (p) => {
         const footprint = footprintAt(p, width, ACCESS_DIMENSIONS.ladderRun);
+        const shelfZone = floorProfile.shelfZone;
+        if (shelfZone && footprint.some(point => {
+          const coordinate = point[floorProfile.axis === "x" ? 0 : 1];
+          return shelfZone.atMin ? coordinate < shelfZone.slopeStart + 0.3 : coordinate > shelfZone.slopeStart - 0.3;
+        })) return false;
         if (!clearOfFittings(footprint)) return false;
         const contacts = ladderWallContacts(outline, p);
         if (contacts.some((contact) => !Number.isFinite(contact.z))) return false;

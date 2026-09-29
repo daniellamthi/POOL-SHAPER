@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+import { toCreasedNormals, mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { splitFloorOutline, type FloorProfileModel } from "@/lib/pool/floor-profile";
 import type { WallOpening } from "./poolConstruction";
 import { offsetOutline } from "../../../lib/pool/geometry";
 import type { Outline } from "../../../lib/pool/types";
@@ -31,7 +32,15 @@ export function createSurfaceGeometry(outline: Outline, hole?: Outline): THREE.B
 export function createSlopedFloorGeometry(
   outline: Outline,
   floorYAt: (x: number, z: number) => number,
+  profile?: FloorProfileModel,
 ): THREE.BufferGeometry {
+  if(profile?.shelfZone) {
+    const parts=splitFloorOutline(outline,profile.axis,profile.shelfZone.slopeStart)
+      .map(piece=>createSlopedFloorGeometry(piece,floorYAt));
+    const result=mergeGeometries(parts);
+    parts.forEach(part=>part.dispose());
+    return result;
+  }
   const geometry = createSurfaceGeometry(outline);
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
   for (let i = 0; i < position.count; i++) {
@@ -347,15 +356,15 @@ export function createInteriorWallGeometry(
         // upper/lower Y at each cut's own midpoint (rather than reusing a
         // single value across the whole opening) is exact for a constant-Y
         // wall and a close approximation for a gently sloped one.
-        const append = (a: number, b: number, y0: number, y1: number) => {
-          if (y0 - y1 < 1e-8) return;
+        const append = (a: number, b: number, upper: (t:number)=>number, lower: (t:number)=>number) => {
+          if (upper((a+b)/2) - lower((a+b)/2) < 1e-8) return;
           for (const [t, y] of [
-            [a, y0],
-            [a, y1],
-            [b, y1],
-            [a, y0],
-            [b, y1],
-            [b, y0],
+            [a, upper(a)],
+            [a, lower(a)],
+            [b, lower(b)],
+            [a, upper(a)],
+            [b, lower(b)],
+            [b, upper(b)],
           ]) {
             positions.push(upperA[0] + dx * t!, y!, upperA[1] + dz * t!);
             uvs.push(THREE.MathUtils.lerp(u1, u2, t!), (y! - referenceBottom) / height);
@@ -365,13 +374,13 @@ export function createInteriorWallGeometry(
           const a = cuts[i]!;
           const b = cuts[i + 1]!;
           const mid = (a + b) / 2;
-          const upperMidY = THREE.MathUtils.lerp(upperAY, upperBY, mid);
-          const lowerMidY = THREE.MathUtils.lerp(lowerAY, lowerBY, mid);
+          const upperAt = (t:number) => THREE.MathUtils.lerp(upperAY, upperBY, t);
+          const lowerAt = (t:number) => THREE.MathUtils.lerp(lowerAY, lowerBY, t);
           const hole = holes.find((h) => mid >= h.a && mid <= h.b);
           if (hole) {
-            append(a, b, upperMidY, Math.min(upperMidY, hole.top));
-            append(a, b, Math.max(lowerMidY, hole.bottom), lowerMidY);
-          } else append(a, b, upperMidY, lowerMidY);
+            append(a, b, upperAt, t=>Math.min(upperAt(t), hole.top));
+            append(a, b, t=>Math.max(lowerAt(t), hole.bottom), lowerAt);
+          } else append(a, b, upperAt, lowerAt);
         }
         continue;
       }

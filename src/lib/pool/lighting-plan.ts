@@ -128,6 +128,8 @@ export function configuredLightingPlan(config: PoolConfig) {
     poolType: config.poolType ?? "in-ground",
     dimensions: config.dimensions,
     verticalLayout: layout,
+    sunShelf: config.features.includes("sunShelf"),
+    infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   const skimmers = planSkimmers(
     outline,

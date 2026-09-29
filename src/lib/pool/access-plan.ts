@@ -38,6 +38,8 @@ export function configuredAccessPlan(config: PoolConfig) {
     poolType: config.poolType ?? "in-ground",
     dimensions: config.dimensions,
     verticalLayout: layout,
+    sunShelf: config.features.includes("sunShelf"),
+    infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   return resolveAccessPlan({
     outline,

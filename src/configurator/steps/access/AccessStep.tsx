@@ -31,6 +31,11 @@ export function AccessStep() {
   );
   const selected = config.poolAccess === "stainlessSteelLadder" ? plans.ladder : plans[stairType];
   const comfort = useMemo(() => configuredComfortPlan(config), [config]);
+  const shelfEnabled = config.features.includes("sunShelf");
+  const shelfProposal = useMemo(() => configuredComfortPlan({
+    ...config, features: shelfEnabled ? config.features : [...config.features, "sunShelf"],
+  }), [config, shelfEnabled]);
+  const shelf = comfort.elements.find(element => element.kind === "sunShelf");
   const dimensions = (plan: typeof selected) =>
     plan.reason ? undefined : (
       <span className="text-xs text-muted-foreground">
@@ -45,12 +50,12 @@ export function AccessStep() {
         <div className="grid gap-4" role="group" aria-label="Accesso alla piscina">
           <div className="grid gap-3">
             <OptionCard
-              title="Scala interna"
-              description="Scala integrata in cemento, coordinata con la finitura interna selezionata."
+              title={shelfEnabled ? "Gradini integrati — inclusi con Sun Shelf" : "Scala interna"}
+              description={shelfEnabled ? "Collegamento rettilineo automatico dalla spiaggetta al fondo. La scaletta inox, se selezionata, resta un accesso separato." : "Scala integrata in cemento, coordinata con la finitura interna selezionata."}
               selected={config.poolAccess === "internalSteps"}
               onSelect={() => setPoolAccess("internalSteps")}
             />
-            {config.poolAccess === "internalSteps" ? (
+            {config.poolAccess === "internalSteps" && !shelfEnabled ? (
               <section
                 aria-label="Tipo di scala interna"
                 className="rounded-2xl border border-hairline px-5 py-5"
@@ -89,7 +94,7 @@ export function AccessStep() {
             meta={dimensions(plans.ladder)}
           />
         </div>
-        {config.poolAccess && selected.reason ? (
+        {!shelfEnabled && config.poolAccess && selected.reason ? (
           <p role="status" className="text-sm text-muted-foreground">
             {selected.reason} Scegli un accesso compatibile.
           </p>
@@ -103,12 +108,18 @@ export function AccessStep() {
             title="Sun shelf"
             description="Solarium sommerso a 22 cm, rivestito con la stessa finitura della vasca."
             selected={config.features.includes("sunShelf")}
-            onSelect={() => togglePoolFeature("sunShelf")}
-            disabled={!comfort.availability.sunShelf.available}
-            {...(comfort.availability.sunShelf.reason
-              ? { disabledReason: comfort.availability.sunShelf.reason }
+            onSelect={() => {
+              if (!shelfEnabled && config.poolAccess !== "stainlessSteelLadder") {
+                setInternalStairType("linear");
+                setPoolAccess("internalSteps");
+              }
+              togglePoolFeature("sunShelf");
+            }}
+            disabled={!shelfEnabled && !shelfProposal.availability.sunShelf.available}
+            {...(shelfProposal.availability.sunShelf.reason
+              ? { disabledReason: shelfProposal.availability.sunShelf.reason }
               : {})}
-            meta={<span className="text-xs text-muted-foreground">Profondità acqua 0,22 m</span>}
+            meta={<span className="text-xs text-muted-foreground">Profondità acqua 0,22 m · scala rettilinea inclusa{ shelf?.steps ? ` · ${shelf.steps.length} pedate da 30 cm · alzata ${Math.round((shelf.riser ?? 0) * 100)} cm` : ""}</span>}
           />
           <OptionCard
             title="Panca integrata"

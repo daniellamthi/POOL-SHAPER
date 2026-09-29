@@ -493,7 +493,9 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
     if (stepId === "structure" && config.structure === null) return index;
     if (stepId === "system" && config.system === "infinity" && !config.infinityEdge?.enabled)
       return index;
-    if (stepId === "access" && (config.poolAccess === null || configuredAccessPlan(config).reason)) return index;
+    if (stepId === "access" && !(config.features.includes("sunShelf")
+      ? configuredComfortPlan(config).elements.some(element => element.kind === "sunShelf")
+      : config.poolAccess !== null && !configuredAccessPlan(config).reason)) return index;
   }
   return STEPS.length - 1;
 }
@@ -555,6 +557,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       poolType: config.poolType ?? "in-ground",
       dimensions: config.dimensions,
       verticalLayout,
+      sunShelf: config.features.includes("sunShelf"),
+      infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
     });
     const baseMetrics = floorProfile.sloped
       ? computeSlopeMetrics(outline, floorProfile, verticalLayout.waterY, verticalLayout.wallTopY)
@@ -608,7 +612,9 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
             (z) => z.side === config.infinityEdge?.side,
           )
         );
-      if (stepId === "access") return config.poolAccess !== null && !configuredAccessPlan(config).reason;
+      if (stepId === "access") return config.features.includes("sunShelf")
+        ? configuredComfortPlan(config).elements.some(element => element.kind === "sunShelf")
+        : config.poolAccess !== null && !configuredAccessPlan(config).reason;
       return true;
     },
     [config, renovation, outline],

@@ -813,6 +813,8 @@ export default function PoolScene({
           ...(slopeReversed !== undefined ? { slopeReversed } : {}),
         },
         verticalLayout,
+        sunShelf: features.includes("sunShelf"),
+        infinityEdge: system === "infinity" ? infinityEdge : null,
       }),
     [
       outline,
@@ -825,6 +827,9 @@ export default function PoolScene({
       shallowDepth,
       slopeReversed,
       verticalLayout,
+      features,
+      system,
+      infinityEdge,
     ],
   );
 

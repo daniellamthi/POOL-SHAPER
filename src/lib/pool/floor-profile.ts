@@ -24,6 +24,21 @@ import { GROUND_LEVEL } from "./vertical-layout";
 import { outlineArea, outlineBounds, outlineCentroid, outlinePerimeter } from "./geometry";
 import type { PoolVerticalLayout } from "./vertical-layout";
 import type { Dimensions, Outline, PoolMetrics, PoolShapeId, PoolType } from "./types";
+import { infinityExclusion, type InfinityEdgeParams } from "./infinity-edge";
+
+/** Shared shelf/flight dimensions; metres, not a pool-size-specific offset. */
+export function shelfStairDimensions(span: number, topY: number, floorY: number) {
+  const tread = 0.3;
+  const shelfRun = Math.min(2.2, Math.max(1.2, span * 0.2), span - 2.4);
+  for (let rises = 2; rises <= 16; rises++) {
+    const riser = (topY - floorY) / rises;
+    const run = (rises - 1) * tread;
+    const totalRun = Math.max(shelfRun, run + 1.5 * tread);
+    if (riser >= 0.15 && riser <= 0.24 && totalRun + 2.4 <= span)
+      return { rises, riser, run, totalRun, tread };
+  }
+  return null;
+}
 
 /** Minimum shallow/deep elevation difference for a slope to be meaningful --
  * guards against a near-zero-gradient "slope" that is really just numerical
@@ -76,6 +91,7 @@ export function suggestShallowDepth(depth: number, minDepth: number): number {
 }
 
 export interface FloorProfileModel {
+  readonly shelfZone?: { end: number; slopeStart: number; atMin: boolean; flight: NonNullable<ReturnType<typeof shelfStairDimensions>> };
   /** False for flat, for any shape other than rectangle, or for above-ground
    * pools -- every one of those renders and measures exactly as before. */
   readonly sloped: boolean;
@@ -130,6 +146,8 @@ export function buildFloorProfile(params: {
   poolType: PoolType;
   dimensions: Dimensions;
   verticalLayout: PoolVerticalLayout;
+  sunShelf?: boolean;
+  infinityEdge?: InfinityEdgeParams | null | undefined;
 }): FloorProfileModel {
   const { outline, shape, poolType, dimensions, verticalLayout } = params;
   const deepFloorY = verticalLayout.floorY;
@@ -170,13 +188,24 @@ export function buildFloorProfile(params: {
   const elevationDrop = shallowFloorY - deepFloorY;
   if (!(elevationDrop > 0)) return flatModel(deepFloorY);
 
-  const shallowAtMin = !dimensions.slopeReversed;
+  let shallowAtMin = !dimensions.slopeReversed;
+  const exclusion = params.infinityEdge ? infinityExclusion(outline, params.infinityEdge, shape) : null;
+  if (params.sunShelf && exclusion?.axis === axis)
+    shallowAtMin = Math.abs(exclusion.coordinate - axisMax) < 0.08;
+  const flight = params.sunShelf && shape === "rectangle" && Math.min(spanX, spanZ) >= 2.4
+    ? shelfStairDimensions(span, verticalLayout.waterY - 0.22, shallowFloorY) : null;
+  const end = (shallowAtMin ? axisMin : axisMax) + (shallowAtMin ? 1 : -1) * (flight?.totalRun ?? 0);
+  // One tread-sized level landing AFTER the final riser; the ramp starts here.
+  const slopeStart = end + (shallowAtMin ? 1 : -1) * (flight?.tread ?? 0);
+  const shelfZone = flight ? { end, slopeStart, atMin: shallowAtMin, flight } : undefined;
   const centreOfOtherAxis =
     outline.reduce((sum, point) => sum + (axis === "x" ? point[1] : point[0]), 0) / outline.length;
 
   const floorYAt = (x: number, z: number): number => {
     const coordinate = axis === "x" ? x : z;
-    const t = Math.min(1, Math.max(0, (coordinate - axisMin) / span));
+    const rampMin = shelfZone && shallowAtMin ? slopeStart : axisMin;
+    const rampMax = shelfZone && !shallowAtMin ? slopeStart : axisMax;
+    const t = Math.min(1, Math.max(0, (coordinate - rampMin) / (rampMax - rampMin)));
     const shallowFraction = shallowAtMin ? 1 - t : t;
     return deepFloorY + shallowFraction * elevationDrop;
   };
@@ -185,6 +214,7 @@ export function buildFloorProfile(params: {
 
   return {
     sloped: true,
+    ...(shelfZone ? { shelfZone } : {}),
     deepFloorY,
     shallowFloorY,
     elevationDrop,
@@ -241,6 +271,27 @@ export function computeSlopeMetrics(
   waterY: number,
   wallTopY: number,
 ): PoolMetrics {
+  if (profile.shelfZone) {
+    const pieces = splitFloorOutline(outline, profile.axis, profile.shelfZone.slopeStart);
+    const metrics = pieces.map(piece => {
+      const area = outlineArea(piece);
+      const [x, z] = outlineCentroid(piece);
+      const levels = piece.map(([px,pz]) => profile.floorYAt(px,pz));
+      const coords = piece.map(p => p[profile.axis === "x" ? 0 : 1]);
+      const run = Math.max(...coords) - Math.min(...coords);
+      return { area, volume: area * (waterY - profile.floorYAt(x,z)),
+        surface: area * Math.hypot(run, Math.max(...levels)-Math.min(...levels)) / run };
+    });
+    const boundary = subdivideFloorBoundary(outline, profile);
+    const wallSurface = boundary.reduce((sum,a,i) => {
+      const b=boundary[(i+1)%boundary.length]!;
+      return sum + Math.hypot(b[0]-a[0],b[1]-a[1]) *
+        (wallTopY-(profile.floorYAt(...a)+profile.floorYAt(...b))/2);
+    },0);
+    const floorSurface=metrics.reduce((sum,m)=>sum+m.surface,0);
+    return { waterSurface:outlineArea(outline), waterVolume:metrics.reduce((sum,m)=>sum+m.volume,0),
+      floorSurface, wallSurface, internalSurface:floorSurface+wallSurface, perimeter:outlinePerimeter(outline) };
+  }
   const waterSurface = outlineArea(outline);
   const perimeter = outlinePerimeter(outline);
   const runLength = Math.max(1e-6, profile.axisMax - profile.axisMin);
@@ -274,4 +325,32 @@ export function computeSlopeMetrics(
     internalSurface: floorSurface + wallSurface,
     perimeter,
   };
+}
+
+/** Clip at the actual profile hinge, so no triangle bridges two floor planes. */
+export function splitFloorOutline(outline: Outline, axis: "x"|"z", cut: number): Outline[] {
+  const k=axis==="x"?0:1;
+  return [-1,1].map(sign => {
+    const result: [number,number][]=[];
+    outline.forEach((a,i)=>{
+      const b=outline[(i+1)%outline.length]!;
+      if(sign*(a[k]-cut)>=-1e-9) result.push([a[0],a[1]]);
+      if((a[k]-cut)*(b[k]-cut)<-1e-12) {
+        const t=(cut-a[k])/(b[k]-a[k]);
+        result.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])]);
+      }
+    });
+    return result;
+  }).filter(piece=>piece.length>=3);
+}
+
+export function subdivideFloorBoundary(outline: Outline, profile: FloorProfileModel): Outline {
+  if(!profile.shelfZone) return outline;
+  const cut=profile.shelfZone.slopeStart, k=profile.axis==="x"?0:1;
+  return outline.flatMap((a,i)=>{
+    const b=outline[(i+1)%outline.length]!;
+    if((a[k]-cut)*(b[k]-cut)>=-1e-12) return [a];
+    const t=(cut-a[k])/(b[k]-a[k]);
+    return [a,[a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])] as [number,number]];
+  });
 }

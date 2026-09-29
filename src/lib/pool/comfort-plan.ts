@@ -1,6 +1,6 @@
 import { configuredAccessPlan } from "./access-plan";
-import { buildFloorProfile } from "./floor-profile";
-import { buildOutline, outlineBounds } from "./geometry";
+import { buildFloorProfile, splitFloorOutline } from "./floor-profile";
+import { buildOutline, outlineBounds, outlineArea, outlineCentroid } from "./geometry";
 import { infinityExclusion } from "./infinity-edge";
 import type { FloorProfileModel } from "./floor-profile";
 import type { Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, SystemType } from "./types";
@@ -16,6 +16,10 @@ export interface ComfortElementPlan {
   waterDepth: number;
   width: number;
   run: number;
+  /** Consecutive, non-overlapping treads, starting exactly at the shelf edge. */
+  steps?: ReadonlyArray<{ footprint: Outline; topY: number }>;
+  riser?: number;
+  landing?: { footprint: Outline; topY: number };
 }
 
 export interface ComfortPlan {
@@ -70,6 +74,11 @@ function excludedWall(
 }
 
 function elementVolume(element: ComfortElementPlan, floor: FloorProfileModel) {
+  if(floor.shelfZone) return splitFloorOutline(element.footprint,floor.axis,floor.shelfZone.slopeStart)
+    .reduce((sum,piece)=>{
+      const [x,z]=outlineCentroid(piece);
+      return sum+outlineArea(piece)*Math.max(0,element.topY-floor.floorYAt(x,z));
+    },0);
   const rect = boundsOf(element.footprint);
   const x = (rect.minX + rect.maxX) / 2;
   const z = (rect.minZ + rect.maxZ) / 2;
@@ -150,7 +159,59 @@ export function resolveComfortPlan({
         { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.maxX - EDGE_INSET, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.minZ + shelfRun }, axis: "z", coordinate: bounds.minZ },
         { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.maxX - EDGE_INSET, minZ: bounds.maxZ - shelfRun, maxZ: bounds.maxZ - EDGE_INSET }, axis: "z", coordinate: bounds.maxZ },
       ];
-  const shelf = shelfCandidates.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
+  const stairWidth = Math.min(1.2, shortSpan - 1.2);
+  const withSteps = (candidate: typeof shelfCandidates[number]) => {
+    const positive = candidate.coordinate === (longX ? bounds.minX : bounds.minZ);
+    const zone = floorProfile.shelfZone;
+    if (zone && positive !== zone.atMin) return null;
+    const direction = positive ? 1 : -1;
+    const crossMin = longX ? candidate.rect.minZ : candidate.rect.minX;
+    const crossMax = longX ? candidate.rect.maxZ : candidate.rect.maxX;
+    const stairAtMin = !excludedWall(infinityExcluded, longX ? "z" : "x", longX ? bounds.minZ : bounds.minX);
+    const center = stairAtMin ? crossMin + stairWidth / 2 : crossMax - stairWidth / 2;
+    const topY = waterY - 0.22;
+    // Solve against the floor at the actual landing, including its slope.
+    for (let rises = 2; rises <= 16; rises++) {
+      if (zone && rises !== zone.flight.rises) continue;
+      const run = (rises - 1) * 0.3;
+      const totalRun = zone?.flight.totalRun ?? Math.max(shelfRun, run + 0.45);
+      if (totalRun + 2.4 > longSpan) continue;
+      const end = candidate.coordinate + direction * totalRun;
+      const start = end - direction * run;
+      const floorY = longX ? floorProfile.floorYAt(end, center) : floorProfile.floorYAt(center, end);
+      const riser = (topY - floorY) / rises;
+      if (riser < 0.15 || riser > 0.24) continue;
+      const steps = Array.from({ length: rises - 1 }, (_, index) => {
+        const a = start + direction * index * 0.3;
+        const b = start + direction * (index + 1) * 0.3;
+        return {
+          footprint: rectOutline(longX
+            ? { minX: Math.min(a, b), maxX: Math.max(a, b), minZ: center - stairWidth / 2, maxZ: center + stairWidth / 2 }
+            : { minX: center - stairWidth / 2, maxX: center + stairWidth / 2, minZ: Math.min(a, b), maxZ: Math.max(a, b) }),
+          topY: topY - (index + 1) * riser,
+        };
+      });
+      if (steps.some(step => step.footprint.some(([x,z]) => step.topY <= floorProfile.floorYAt(x,z) + 0.01))) continue;
+      const flight = boundsOf(steps.flatMap(step => [...step.footprint]));
+      if (!valid(flight, candidate.axis, candidate.coordinate)) continue;
+      const back = candidate.coordinate + direction * EDGE_INSET;
+      const whole = longX
+        ? { ...candidate.rect, minX: Math.min(back,end), maxX: Math.max(back,end) }
+        : { ...candidate.rect, minZ: Math.min(back,end), maxZ: Math.max(back,end) };
+      if (!valid(whole, candidate.axis, candidate.coordinate)) continue;
+      const rect = longX
+        ? { ...whole, minZ: stairAtMin ? flight.maxZ : whole.minZ, maxZ: stairAtMin ? whole.maxZ : flight.minZ }
+        : { ...whole, minX: stairAtMin ? flight.maxX : whole.minX, maxX: stairAtMin ? whole.maxX : flight.minX };
+      const landing = { topY, footprint: rectOutline(longX
+        ? { minX: Math.min(back,start), maxX: Math.max(back,start), minZ: flight.minZ, maxZ: flight.maxZ }
+        : { minX: flight.minX, maxX: flight.maxX, minZ: Math.min(back,start), maxZ: Math.max(back,start) }) };
+      return { ...candidate, rect, steps, riser, flight, landing, totalRun };
+    }
+    return null;
+  };
+  const shelf = shelfCandidates
+    .filter(candidate => valid(candidate.rect, candidate.axis, candidate.coordinate))
+    .map(withSteps).find(candidate => candidate !== null);
   if (!shelf) availability.sunShelf = { available: false, reason: "Nessuna testata libera da scala, accessi o bordo Infinity." };
   else if (enabled.includes("sunShelf")) {
     const rect = shelf.rect;
@@ -160,10 +221,15 @@ export function resolveComfortPlan({
       topY: waterY - 0.22,
       waterDepth: 0.22,
       width: longX ? rect.maxZ - rect.minZ : rect.maxX - rect.minX,
-      run: shelfRun,
+      run: shelf.totalRun,
+      steps: shelf.steps,
+      riser: shelf.riser,
+      landing: shelf.landing,
     };
     elements.push(element);
     selectedRects.push(rect);
+    selectedRects.push(shelf.flight);
+    selectedRects.push(boundsOf(shelf.landing.footprint));
   }
 
   const benchLength = Math.min(3, Math.max(1.5, longSpan * 0.36));
@@ -200,7 +266,8 @@ export function resolveComfortPlan({
   return {
     elements,
     availability,
-    displacedVolume: elements.reduce((sum, element) => sum + elementVolume(element, floorProfile), 0),
+    displacedVolume: elements.reduce((sum, element) => sum + elementVolume(element, floorProfile) +
+      [...(element.steps ?? []), ...(element.landing ? [element.landing] : [])].reduce((volume, step) => volume + elementVolume({ ...element, ...step }, floorProfile), 0), 0),
   };
 }
 
@@ -219,6 +286,8 @@ export function configuredComfortPlan(config: PoolConfig): ComfortPlan {
     poolType: config.poolType ?? "in-ground",
     dimensions: config.dimensions,
     verticalLayout: layout,
+    sunShelf: config.features.includes("sunShelf"),
+    infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   const access = configuredAccessPlan(config);
   return resolveComfortPlan({
@@ -229,7 +298,7 @@ export function configuredComfortPlan(config: PoolConfig): ComfortPlan {
     floorProfile,
     waterY: layout.waterY,
     enabled: config.features,
-    accessFootprint: access.footprint,
+    accessFootprint: config.features.includes("sunShelf") && config.poolAccess === "internalSteps" ? [] : access.footprint,
     infinityExcluded:
       config.system === "infinity" && config.infinityEdge
         ? infinityExclusion(outline, config.infinityEdge, config.shape)
