@@ -58,6 +58,8 @@ export type PoolAccess = "internalSteps" | "stainlessSteelLadder";
 /** Which internal staircase is built: a straight flight down an end wall, or
  *  a radial flight wrapped around a corner. */
 export type InternalStairType = "linear" | "corner";
+/** Hydromassage architecture: same tub, with or without the low front wall. */
+export type HydromassageVariant = "closed" | "open";
 
 export type EquipmentId = "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing";
 
@@ -195,6 +197,8 @@ export interface PoolConfig {
   /** Only meaningful while `poolAccess` is "internalSteps". Absent on projects
    *  saved before the corner staircase existed; readers substitute "linear". */
   internalStairType?: InternalStairType;
+  /** Only meaningful while "hydromassage" is enabled; absent means "closed". */
+  hydromassageVariant?: HydromassageVariant;
   equipment: ReadonlyArray<EquipmentId>;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;

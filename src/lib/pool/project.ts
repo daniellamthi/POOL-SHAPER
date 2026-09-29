@@ -207,6 +207,10 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
+      // Unknown values restore as the default closed tub; absent stays absent.
+      ...(restored.hydromassageVariant !== undefined
+        ? { hydromassageVariant: restored.hydromassageVariant === "open" ? "open" : "closed" }
+        : {}),
       dimensions,
       system,
       ...(infinityEdge !== undefined ? { infinityEdge } : {}),

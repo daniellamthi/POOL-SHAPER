@@ -9,6 +9,7 @@ import type {
   FinishMaterial,
   FloorProfile,
   InternalStairType,
+  HydromassageVariant,
   PoolType,
   LinerColor,
   MosaicFinishId,
@@ -81,6 +82,7 @@ export interface ConfiguratorContextValue {
   setLedColor: (value: string) => void;
   setLedIntensity: (value: number) => void;
   setInternalStairType: (value: InternalStairType) => void;
+  setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;
   toggleInternalSteps: () => void;
   toggleInoxLadder: () => void;

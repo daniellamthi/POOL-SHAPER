@@ -36,7 +36,11 @@ export function LiveSummary() {
     ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
     : `${formatNumber(config.dimensions.depth, 2)} m`;
   const featureLabels = [
-    ...features.map((item) => item.title),
+    ...features.map((item) =>
+      item.id === "hydromassage"
+        ? `${item.title} ${config.hydromassageVariant === "open" ? "aperto" : "chiuso"}`
+        : item.title,
+    ),
     ...(config.poolAccess === "internalSteps"
       ? ["Scala interna"]
       : config.poolAccess === "stainlessSteelLadder"

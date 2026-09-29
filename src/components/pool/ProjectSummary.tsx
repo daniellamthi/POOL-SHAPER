@@ -168,7 +168,11 @@ export function ProjectSummary() {
           id === "integratedBench" ||
           id === "externalStaircase",
       )
-      .map((id) => POOL_FEATURE_LABEL[id]),
+      .map((id) =>
+        id === "hydromassage"
+          ? `${POOL_FEATURE_LABEL[id]} — ${config.hydromassageVariant === "open" ? "aperto" : "chiuso"}`
+          : POOL_FEATURE_LABEL[id],
+      ),
   ];
 
   const hasLed = config.features.includes("ledLighting");

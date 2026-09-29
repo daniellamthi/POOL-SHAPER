@@ -8,7 +8,15 @@ import { getPoolVerticalLayout } from "./vertical-layout";
 import { planSkimmers } from "./engineering";
 import { infinityExclusion } from "./infinity-edge";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
-import type { Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, PoolAccess } from "./types";
+import type {
+  HydromassageVariant,
+  Outline,
+  PoolConfig,
+  PoolFeatureId,
+  PoolShapeId,
+  PoolType,
+  PoolAccess,
+} from "./types";
 
 export type LayoutStatus = "VALID" | "AUTO_ADJUSTED" | "UNAVAILABLE";
 export interface ResolvedPoolLayout {
@@ -27,6 +35,7 @@ type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   shape: PoolShapeId;
   poolType: PoolType;
   features: ReadonlyArray<PoolFeatureId>;
+  hydromassageVariant?: HydromassageVariant | undefined;
 };
 
 export function comfortFootprints(plan: ComfortPlan) {
@@ -146,6 +155,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     system: config.system,
     overflowType: config.overflowType,
     features: config.features,
+    hydromassageVariant: config.hydromassageVariant,
     access: config.poolAccess,
     stairType: config.internalStairType ?? "linear",
     skimmers: planSkimmers(

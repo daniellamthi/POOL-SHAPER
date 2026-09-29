@@ -409,6 +409,9 @@ function ConfiguratorLayout() {
             ledColor={config.ledColor ?? "#ffffff"}
             ledIntensity={normalisedLedIntensity(config.ledIntensity)}
             internalStairType={config.internalStairType ?? "linear"}
+            {...(config.hydromassageVariant
+              ? { hydromassageVariant: config.hydromassageVariant }
+              : {})}
             poolAccess={config.poolAccess}
             skimmers={skimmers}
             {...(config.infinityEdge ? { infinityEdge: config.infinityEdge } : {})}

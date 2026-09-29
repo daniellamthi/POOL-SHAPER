@@ -11,8 +11,16 @@ import { useConfigurator } from "@/lib/pool/context";
  * bundled "Pool Features" step so lighting and access are each their own
  * clear decision. */
 export function AccessStep() {
-  const { config, togglePoolFeature, setPoolAccess, setInternalStairType, toggleInternalSteps, toggleInoxLadder } =
-    useConfigurator();
+  const {
+    config,
+    togglePoolFeature,
+    setPoolAccess,
+    setInternalStairType,
+    setHydromassageVariant,
+    toggleInternalSteps,
+    toggleInoxLadder,
+  } = useConfigurator();
+  const hydroVariant = config.hydromassageVariant ?? "closed";
   const stairType = config.internalStairType ?? "linear";
   // Geometry, obstacles and elevations determine availability, not a shape label.
   const plans = useMemo(
@@ -160,15 +168,37 @@ export function AccessStep() {
           <OptionCard
             optional
             title="Idromassaggio"
-            description="Vasca idromassaggio incassata accanto alla scala rettilinea: divisorio a filo acqua, bordo frontale, panca a L e getti nello schienale."
+            description="Zona idromassaggio accanto alla scala rettilinea: divisorio verso la scala, panca a L e getti nello schienale."
             selected={hydroEnabled}
             onSelect={() => selectComfort("hydromassage")}
             disabled={!hydroEnabled && !hydroProposal.availability.hydromassage.available}
             {...(hydroProposal.availability.hydromassage.reason
               ? { disabledReason: hydroProposal.availability.hydromassage.reason }
               : {})}
-            meta={<span className="text-xs text-muted-foreground">Seduta a L {Math.round(HYDRO_DIMENSIONS.seatWaterDepth * 100)} cm sotto l’acqua · divisorio e bordo frontale integrati{ hydro?.jets ? ` · vasca ${hydro.run.toFixed(2)} × ${(hydro.width + HYDRO_DIMENSIONS.partitionThickness).toFixed(2)} m · ${hydro.jets.length} getti` : ""}</span>}
+            meta={<span className="text-xs text-muted-foreground">Seduta a L {Math.round(HYDRO_DIMENSIONS.seatWaterDepth * 100)} cm sotto l’acqua{ hydro?.jets ? ` · ${hydro.run.toFixed(2)} × ${(hydro.width + HYDRO_DIMENSIONS.partitionThickness).toFixed(2)} m · ${hydro.jets.length} getti` : ""}</span>}
           />
+          {hydroEnabled ? (
+            <section
+              aria-label="Stile idromassaggio"
+              className="rounded-2xl border border-hairline px-5 py-5"
+            >
+              <h4 className="label-xs mb-4">Stile idromassaggio</h4>
+              <div className="grid gap-3" role="group" aria-label="Stile idromassaggio">
+                <OptionCard
+                  title="Chiuso"
+                  description="Muretto frontale alla stessa quota del divisorio: zona delimitata."
+                  selected={hydroVariant === "closed"}
+                  onSelect={() => setHydromassageVariant("closed")}
+                />
+                <OptionCard
+                  title="Aperto"
+                  description="Nessun muretto frontale: la zona si apre sulla vasca principale."
+                  selected={hydroVariant === "open"}
+                  onSelect={() => setHydromassageVariant("open")}
+                />
+              </div>
+            </section>
+          ) : null}
           <OptionCard
             optional
             title="Panca integrata"

@@ -41,6 +41,7 @@ import type {
   FinishMaterial,
   FloorProfile,
   InternalStairType,
+  HydromassageVariant,
   PoolType,
   LinerColor,
   MosaicFinishId,
@@ -90,6 +91,7 @@ type Action =
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
   | { type: "setInternalStairType"; value: InternalStairType }
+  | { type: "setHydromassageVariant"; value: HydromassageVariant }
   | { type: "setPoolAccess"; value: PoolAccess }
   | { type: "toggleInternalSteps" }
   | { type: "toggleInoxLadder" }
@@ -183,6 +185,8 @@ function reducer(state: State, action: Action): State {
         : state;
     case "setInternalStairType":
       return { ...state, config: { ...config, internalStairType: action.value } };
+    case "setHydromassageVariant":
+      return { ...state, config: { ...config, hydromassageVariant: action.value } };
     case "setLedIntensity":
       return {
         ...state,
@@ -593,6 +597,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     config.features,
     config.poolAccess,
     config.internalStairType,
+    config.hydromassageVariant,
     config.infinityEdge,
   ]);
 
@@ -673,6 +678,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
+      setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
       toggleInternalSteps: () => dispatch({ type: "toggleInternalSteps" }),
       toggleInoxLadder: () => dispatch({ type: "toggleInoxLadder" }),

@@ -123,11 +123,11 @@ function HydroJet({ jet }: { jet: NonNullable<ComfortElementPlan["jets"]>[number
     <group name="pool-hydro-jet" position={[jet.x, jet.y, jet.z]} rotation={[0, rotY, 0]}>
       <mesh position={[0, 0, 0.0025]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[d / 2, d / 2, 0.005, 24]} />
-        <meshStandardMaterial color="#c9ced4" metalness={0.9} roughness={0.25} />
+        <meshStandardMaterial color="#ffffff" metalness={0} roughness={0.45} />
       </mesh>
       <mesh position={[0, 0, 0.0056]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[d * 0.26, d * 0.26, 0.002, 16]} />
-        <meshStandardMaterial color="#20262b" metalness={0.4} roughness={0.5} />
+        <meshStandardMaterial color="#c4c9ce" metalness={0} roughness={0.55} />
       </mesh>
     </group>
   );

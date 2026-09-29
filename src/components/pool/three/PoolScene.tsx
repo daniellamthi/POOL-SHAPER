@@ -53,7 +53,7 @@ import { getCameraPose } from "@/lib/pool/camera";
 import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
 import type { PoolLightPosition } from "@/lib/pool/lighting";
-import type { InternalStairType } from "@/lib/pool/types";
+import type { HydromassageVariant, InternalStairType } from "@/lib/pool/types";
 import {
   infinityExclusion,
   clampInfinityEdgeParams,
@@ -92,6 +92,7 @@ export interface SceneProps {
   ledIntensity: number;
   /** Which internal staircase is built; resolved upstream. */
   internalStairType: InternalStairType;
+  hydromassageVariant?: HydromassageVariant;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
   /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
@@ -744,6 +745,7 @@ export default function PoolScene({
   ledColor = "#ffffff",
   ledIntensity,
   internalStairType,
+  hydromassageVariant,
   poolAccess,
   skimmers,
   infinityEdge,
@@ -867,6 +869,7 @@ export default function PoolScene({
         shape,
         poolType,
         features,
+        hydromassageVariant,
         system,
         overflowType,
         outline,
@@ -884,6 +887,7 @@ export default function PoolScene({
       shape,
       poolType,
       features,
+      hydromassageVariant,
       system,
       poolAccess,
       internalStairType,
@@ -930,6 +934,7 @@ export default function PoolScene({
     visualTheme,
     sceneTime,
     features.join(","),
+    hydromassageVariant,
     ledColor,
     ledIntensity,
     poolAccess,
