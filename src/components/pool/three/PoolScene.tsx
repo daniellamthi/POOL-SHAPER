@@ -19,7 +19,6 @@ import { PoolLights, planSceneLighting } from "./PoolLights";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
 import { createInfinityLandscape, createInfinityDeck, infinityGroundHeight } from "./infinityLandscape";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { CoastalVista } from "./CoastalVista";
 import { coastalCamera, coastalGrade, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
 import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
@@ -77,6 +76,7 @@ const PhotoModeRenderer = lazy(() =>
 );
 
 export type SceneFocus = CameraIntent;
+export type SceneTimeOfDay = "day" | "night";
 
 export interface SceneProps {
   outline: Outline;
@@ -113,6 +113,7 @@ export interface SceneProps {
   cameraLocked: boolean;
   showWater: boolean;
   theme: Theme;
+  sceneTime: SceneTimeOfDay;
   photoMode: boolean;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
@@ -506,7 +507,7 @@ function StudioFloor({
 }) {
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const premiumInfinity = poolType === "in-ground" && system === "infinity" && !!infinityZone;
-  const photographicCoast = premiumInfinity && theme === "light";
+  const photographicCoast = premiumInfinity;
   const pavingGeometry = useMemo(
     () =>
       premiumInfinity && infinityZone
@@ -758,17 +759,25 @@ export default function PoolScene({
   cameraLocked,
   showWater,
   theme,
+  sceneTime,
   photoMode,
   photoModeQuality,
   onPhotoModeUnsupported,
 }: SceneProps) {
   const controls = useRef<OrbitControlsImpl | null>(null);
   const radius = Math.hypot(length, width) / 2;
-  const palette = PALETTE[theme];
-  const background = system === "infinity" && theme === "light" ? "#cee0ec" : palette.background;
+  const visualTheme: Theme =
+    system === "infinity" ? (sceneTime === "night" ? "dark" : "light") : theme;
+  const palette = PALETTE[visualTheme];
+  const background =
+    system === "infinity"
+      ? sceneTime === "night"
+        ? "#101b28"
+        : "#cee0ec"
+      : palette.background;
   const copingThickness = POOL_BORDER_PRESET.thickness;
   // The lighting step drops the scene to blue hour so the LEDs are visible.
-  const dusk = focus === "features";
+  const dusk = system === "infinity" ? sceneTime === "night" : focus === "features";
   const skyLight = useRef<HemisphereLight | null>(null);
   const sunLight = useRef<DirectionalLight | null>(null);
   const auxiliaryLight = useRef<SpotLight | null>(null);
@@ -881,7 +890,7 @@ export default function PoolScene({
     () => outline.map(([x, z]) => `${x.toFixed(4)},${z.toFixed(4)}`).join(";"),
     [outline],
   );
-  const sunPosition: [number, number, number] = system === "infinity" && theme === "light" && infinityZone
+  const sunPosition: [number, number, number] = system === "infinity" && infinityZone
     ? coastalPhotoSun(infinityZone,radius*4+25)
     : [radius * 2 + 6, radius * 2.4 + 12, radius + 6];
   // Remount PhotoModeRenderer (fresh WebGLPathTracer + setScene) whenever the
@@ -905,7 +914,8 @@ export default function PoolScene({
     materials.coping.color,
     materials.skimmer.color,
     materials.skimmer.type,
-    theme,
+    visualTheme,
+    sceneTime,
     features.join(","),
     ledColor,
     ledIntensity,
@@ -933,7 +943,7 @@ export default function PoolScene({
         toneMapping: ACTIVE_RENDERING_QUALITY.postProcessing.enabled
           ? NoToneMapping
           : AgXToneMapping,
-        toneMappingExposure: SCENE_VISUAL_PRESET.exposure[theme],
+        toneMappingExposure: SCENE_VISUAL_PRESET.exposure[visualTheme],
       }}
       onCreated={({ gl }) => {
         gl.outputColorSpace = SRGBColorSpace;
@@ -961,14 +971,14 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={theme} sunDirection={sunPosition} outdoor={system === "infinity"} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={system === "infinity"} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} /> : null}
 
       <SceneMood
         dusk={dusk}
         baseBackground={background}
-        baseExposure={SCENE_VISUAL_PRESET.exposure[theme]}
-        baseEnvironment={system === "infinity" && theme === "light" ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]}
-        coastalDaylight={system === "infinity" && theme === "light"}
+        baseExposure={SCENE_VISUAL_PRESET.exposure[visualTheme]}
+        baseEnvironment={system === "infinity" ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[visualTheme]}
+        coastalDaylight={system === "infinity"}
         sky={skyLight}
         sun={sunLight}
         auxiliary={auxiliaryLight}
@@ -976,14 +986,14 @@ export default function PoolScene({
 
       <hemisphereLight
         ref={skyLight}
-        intensity={SCENE_VISUAL_PRESET.lighting.sky.intensity[theme]}
+        intensity={SCENE_VISUAL_PRESET.lighting.sky.intensity[visualTheme]}
         color={SCENE_VISUAL_PRESET.lighting.sky.color}
-        groundColor={SCENE_VISUAL_PRESET.lighting.sky.groundColor[theme]}
+        groundColor={SCENE_VISUAL_PRESET.lighting.sky.groundColor[visualTheme]}
       />
       <directionalLight
         ref={sunLight}
         position={sunPosition}
-        intensity={SCENE_VISUAL_PRESET.lighting.sun.intensity[theme]}
+        intensity={SCENE_VISUAL_PRESET.lighting.sun.intensity[visualTheme]}
         color={SCENE_VISUAL_PRESET.lighting.sun.color}
         castShadow
         shadow-autoUpdate={false}
@@ -1007,17 +1017,17 @@ export default function PoolScene({
       <spotLight
         ref={auxiliaryLight}
         position={[-radius * 1.4, radius * 1.6 + 5, -radius * 0.8]}
-        intensity={SCENE_VISUAL_PRESET.lighting.auxiliary.intensity[theme]}
+        intensity={SCENE_VISUAL_PRESET.lighting.auxiliary.intensity[visualTheme]}
         angle={0.65}
         penumbra={0.9}
         decay={2}
         distance={radius * 8}
-        color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[theme]}
+        color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[visualTheme]}
       />
       <StudioFloor
         outline={outline}
         size={deckSize}
-        theme={theme}
+        theme={visualTheme}
         poolType={poolType}
         system={system}
         overflowType={overflowType}
@@ -1025,8 +1035,8 @@ export default function PoolScene({
         waterY={verticalLayout.waterY}
       />
 
-      {system === "infinity" && theme === "dark" && poolType === "in-ground" && infinityZone ? <CoastalVista zone={infinityZone} theme={theme}/> : null}
       <PoolModel
+        features={features}
         poolAccess={poolAccess}
         internalStairType={internalStairType}
         skimmers={skimmers}

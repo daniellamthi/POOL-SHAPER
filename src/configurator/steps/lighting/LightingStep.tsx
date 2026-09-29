@@ -4,11 +4,19 @@ import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { useConfigurator } from "@/lib/pool/context";
 import { LedColorWheel } from "@/configurator/steps/pool-features/LedColorWheel";
 import { LedIntensityControl } from "@/configurator/steps/pool-features/LedIntensityControl";
+import { Button } from "@/components/ui/button";
+import type { SceneTimeOfDay } from "@/components/pool/three/PoolScene";
 
 /** Step 7 (Luce) — underwater LED lighting: on/off, colour and intensity.
  * Split out of the old, bundled "Pool Features" step so this is its own
  * dedicated decision instead of being buried under access/comfort. */
-export function LightingStep() {
+export function LightingStep({
+  sceneTime = "day",
+  onSceneTimeChange,
+}: {
+  sceneTime?: SceneTimeOfDay;
+  onSceneTimeChange?: (value: SceneTimeOfDay) => void;
+}) {
   const { config, togglePoolFeature, setLedColor, setLedIntensity } = useConfigurator();
   const hasLed = config.features.includes("ledLighting");
   const plan = useMemo(() => (hasLed ? configuredLightingPlan(config) : null), [config, hasLed]);
@@ -18,6 +26,32 @@ export function LightingStep() {
       title="Illuminazione"
       subtitle="Illuminazione subacquea a LED: colore e intensità."
     >
+      {config.system === "infinity" && onSceneTimeChange ? (
+        <div className="flex flex-col gap-3 border-b border-hairline pb-6">
+          <h3 className="label-xs">Atmosfera Infinity</h3>
+          <div className="grid grid-cols-2 gap-2" role="group" aria-label="Atmosfera Infinity">
+            <Button
+              type="button"
+              variant={sceneTime === "day" ? "default" : "outline"}
+              onClick={() => onSceneTimeChange("day")}
+              aria-pressed={sceneTime === "day"}
+            >
+              Giorno
+            </Button>
+            <Button
+              type="button"
+              variant={sceneTime === "night" ? "default" : "outline"}
+              onClick={() => onSceneTimeChange("night")}
+              aria-pressed={sceneTime === "night"}
+            >
+              Notte
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Stesso panorama, orientamento e camera; cambia soltanto la luce della scena.
+          </p>
+        </div>
+      ) : null}
       <div className="grid gap-3" role="group" aria-label="Illuminazione subacquea">
         <OptionCard
           title="Illuminazione LED"

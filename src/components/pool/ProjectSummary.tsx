@@ -159,7 +159,13 @@ export function ProjectSummary() {
         ]
       : []),
     ...config.features
-      .filter((id) => id === "hydromassage" || id === "externalStaircase")
+      .filter(
+        (id) =>
+          id === "hydromassage" ||
+          id === "sunShelf" ||
+          id === "integratedBench" ||
+          id === "externalStaircase",
+      )
       .map((id) => POOL_FEATURE_LABEL[id]),
   ];
 

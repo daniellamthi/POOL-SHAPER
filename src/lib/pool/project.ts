@@ -195,8 +195,13 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // External access is only built above ground. Restore the same valid
       // selection in the scene, summary and render export.
       features: restored.poolType === "above-ground"
-        ? restored.features
-        : restored.features.filter((id) => id !== "externalStaircase"),
+        ? restored.features.filter((id) => id !== "sunShelf" && id !== "integratedBench")
+        : restored.features.filter(
+            (id) =>
+              id !== "externalStaircase" &&
+              (restored.shape === "rectangle" ||
+                (id !== "sunShelf" && id !== "integratedBench")),
+          ),
       ledIntensity: normalisedLedIntensity(restored.ledIntensity),
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.

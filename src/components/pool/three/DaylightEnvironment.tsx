@@ -9,6 +9,7 @@ import {
   SCENE_VISUAL_PRESET,
 } from "@/configurator/3d/scene/visual-preset";
 import type { Theme } from "@/lib/theme";
+import type { SceneTimeOfDay } from "./PoolScene";
 
 // Coastal capture: let the broad sky illuminate metal and shadowed stone;
 // the studio's low IBL / strong key-light ratio crushed steel reflections.
@@ -19,11 +20,13 @@ export const COASTAL_DAYLIGHT = { environment: 0.85, sun: 1.8, sky: 0.12 } as co
  * Studio/night retain their established procedural presentation. */
 export function DaylightEnvironment({
   theme,
+  timeOfDay = "day",
   sunDirection,
   outdoor = false,
   coastalRotation = 0,
 }: {
   theme: Theme;
+  timeOfDay?: SceneTimeOfDay;
   sunDirection: [number, number, number];
   outdoor?: boolean;
   coastalRotation?: number;
@@ -32,7 +35,7 @@ export function DaylightEnvironment({
   const [panorama,setPanorama] = useState<Texture|null>(null);
   // Separate background detail from IBL resolution without mixing locations.
   // Studio/night retain their existing resources.
-  const photographicSky = outdoor && theme === "light";
+  const photographicSky = outdoor;
   const assetUrl = photographicSky ? "/hdri/simons-town-rocks-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
   useEffect(()=>{
     if(!photographicSky)return;
@@ -87,7 +90,7 @@ export function DaylightEnvironment({
         </Environment>
       )}
       {photographicSky && panorama
-        ? <CoastalPhotoBackdrop map={panorama} rotation={coastalRotation}/>
+        ? <CoastalPhotoBackdrop map={panorama} rotation={coastalRotation} timeOfDay={timeOfDay}/>
         : <SkyDome {...skyProps}/>}
     </>
   );

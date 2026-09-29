@@ -22,7 +22,10 @@ import {
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { PoolAccessModel } from "./PoolAccessModel";
+import { PoolComfortModel } from "./PoolComfortModel";
 import { accessMounting } from "@/lib/pool/access-plan";
+import { resolveAccessPlan } from "./PoolAccessModel";
+import { resolveComfortPlan } from "@/lib/pool/comfort-plan";
 import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
 import {
   createAnthraciteMaps,
@@ -53,7 +56,7 @@ import { photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
 import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
-import type { Outline, OverflowType, PoolShapeId, PoolType, SystemType } from "@/lib/pool/types";
+import type { Outline, OverflowType, PoolFeatureId, PoolShapeId, PoolType, SystemType } from "@/lib/pool/types";
 import {
   ABOVE_GROUND_STRUCTURE_THICKNESS,
   getPoolVerticalLayout,
@@ -76,6 +79,7 @@ import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 
 interface PoolModelProps {
+  features: ReadonlyArray<PoolFeatureId>;
   poolAccess: import("@/lib/pool/types").PoolAccess | null;
   internalStairType: import("@/lib/pool/types").InternalStairType;
   shape: PoolShapeId;
@@ -390,6 +394,7 @@ function cloneDataTexture(
  * concealed perimeter gutter used by residential overflow-edge systems.
  */
 export function PoolModel({
+  features,
   outline,
   shape,
   depth,
@@ -962,6 +967,56 @@ export function PoolModel({
     [overflowChannelOuter, verticalLayout.wallTopY],
   );
 
+  const accessPlan = useMemo(
+    () =>
+      resolveAccessPlan({
+        outline,
+        access: poolAccess,
+        stairType: internalStairType,
+        floorProfile,
+        topY: verticalLayout.copingY,
+        infinityExcluded,
+        obstacles: system === "skimmer" ? skimmers.positions : [],
+        ...accessMounting(system, overflowType, verticalLayout),
+      }),
+    [
+      outline,
+      poolAccess,
+      internalStairType,
+      floorProfile,
+      verticalLayout,
+      infinityExcluded,
+      system,
+      skimmers.positions,
+      overflowType,
+    ],
+  );
+  const comfortPlan = useMemo(
+    () =>
+      resolveComfortPlan({
+        outline,
+        shape,
+        poolType,
+        system,
+        floorProfile,
+        waterY: verticalLayout.waterY,
+        enabled: features,
+        accessFootprint: accessPlan.footprint,
+        infinityExcluded,
+      }),
+    [
+      outline,
+      shape,
+      poolType,
+      system,
+      floorProfile,
+      verticalLayout.waterY,
+      features,
+      accessPlan.footprint,
+      infinityExcluded,
+    ],
+  );
+
   return (
     <group>
       {/* Interior walls, floor, water and overflow channel: everything that
@@ -970,6 +1025,26 @@ export function PoolModel({
           waterline these surfaces would otherwise render nonsensical
           close-up backfaces instead of a clean sky/coping reflection. */}
       <group name="pool-basin">
+        <PoolComfortModel plan={comfortPlan} floorProfile={floorProfile}>
+          <meshPhysicalMaterial
+            color={materials.liner.color}
+            map={floorSurfaceMap}
+            normalMap={interiorMicroMaps.floorNormal}
+            normalScale={[
+              materials.surface.microDetail.normalStrength,
+              materials.surface.microDetail.normalStrength,
+            ]}
+            roughness={materials.liner.roughness}
+            metalness={materials.liner.metalness}
+            roughnessMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null}
+            aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
+            aoMapIntensity={0.6}
+            onBeforeCompile={configureCaustics}
+            customProgramCacheKey={() =>
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
+            }
+          />
+        </PoolComfortModel>
         <PoolAccessModel
           outline={outline}
           access={poolAccess}

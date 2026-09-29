@@ -86,8 +86,8 @@ if (!process.argv.includes("--measure")) {
   assert.match(source, /reflectedLight\.directDiffuse \* causticLight/);
   assert.match(source, /mix\(outgoingLight, submergedLight, underwaterMask\)/);
   assert.match(source, /const time = clock\.getElapsedTime\(\)/, "No fixed-time capture left in runtime");
-  assert.equal((source.match(/onBeforeCompile=\{configureCaustics\}/g) ?? []).length, 3,
-    "Caustics attach only to internal stairs, walls and floor, not deck/exterior");
+  assert.equal((source.match(/onBeforeCompile=\{configureCaustics\}/g) ?? []).length, 4,
+    "Caustics attach only to comfort solids, internal stairs, walls and floor, not deck/exterior");
   console.log("PASS: caustics texture, six-liner transfer/distribution/motion and receiver contracts");
 }
 texture.dispose();

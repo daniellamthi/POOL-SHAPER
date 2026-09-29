@@ -41,7 +41,7 @@ import { PoolViewport } from "./PoolViewport";
 import { ThemeToggle } from "./ThemeToggle";
 import { StepIndicator } from "./StepIndicator";
 import { LiveSummary } from "./LiveSummary";
-import type { SceneFocus, PhotoModeQuality } from "./three/PoolScene";
+import type { SceneFocus, PhotoModeQuality, SceneTimeOfDay } from "./three/PoolScene";
 
 const STEP_COMPONENTS = [
   ProjectTypeStep,
@@ -155,6 +155,7 @@ function ConfiguratorLayout() {
   );
 
   const [showMeasurements, setShowMeasurements] = useState(true);
+  const [sceneTime, setSceneTime] = useState<SceneTimeOfDay>("day");
   const [frameToken, setFrameToken] = useState(0);
   // P5: mobile-only fullscreen presentation of the SAME live viewport --
   // never a second Canvas/renderer, just a CSS repositioning of the
@@ -305,15 +306,21 @@ function ConfiguratorLayout() {
       : activeStepId === "style"
         ? "liner"
         : activeStepId === "access"
-          ? "access"
+          ? config.features.includes("sunShelf") || config.features.includes("integratedBench")
+            ? "overview"
+            : "access"
         : activeStepId === "lighting"
-          ? "features"
+          ? config.system === "infinity"
+            ? "infinity"
+            : "features"
           : activeStepId === "review"
             ? "review"
             : "overview";
   const stepContent =
     !renovationWorkflow && activeStepId === "system" ? (
       <PoolSystemStep onSkimmerSelect={reframe} />
+    ) : !renovationWorkflow && activeStepId === "lighting" ? (
+      <LightingStep sceneTime={sceneTime} onSceneTimeChange={setSceneTime} />
     ) : (
       <StepComponent />
     );
@@ -424,6 +431,7 @@ function ConfiguratorLayout() {
             cameraLocked={cameraLocked}
             showWater={true}
             theme={theme}
+            sceneTime={sceneTime}
             photoMode={photoMode}
             onTogglePhotoMode={togglePhotoMode}
             photoModeQuality={photoModeQuality}

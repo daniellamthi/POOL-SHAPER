@@ -379,6 +379,16 @@ export const POOL_FEATURES: ReadonlyArray<{
     title: "Idromassaggio",
     description: "Ugelli idromassaggio integrati.",
   },
+  {
+    id: "sunShelf",
+    title: "Sun shelf",
+    description: "Solarium sommerso integrato.",
+  },
+  {
+    id: "integratedBench",
+    title: "Panca integrata",
+    description: "Seduta sommersa lungo parete.",
+  },
 ];
 
 export const EQUIPMENT: ReadonlyArray<{

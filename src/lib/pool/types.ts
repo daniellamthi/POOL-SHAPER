@@ -46,7 +46,12 @@ export type SkimmerFinishId = "white" | "graphite" | "sand" | "steel";
  * See `SKIMMER_TYPES` (src/lib/pool/config.ts) and `Skimmers.tsx`. */
 export type SkimmerTypeId = "standard" | "slim" | "highWaterline" | "flush";
 
-export type PoolFeatureId = "ledLighting" | "hydromassage" | "externalStaircase";
+export type PoolFeatureId =
+  | "ledLighting"
+  | "hydromassage"
+  | "sunShelf"
+  | "integratedBench"
+  | "externalStaircase";
 
 export type PoolAccess = "internalSteps" | "stainlessSteelLadder";
 /** Which internal staircase is built: a straight flight down an end wall, or

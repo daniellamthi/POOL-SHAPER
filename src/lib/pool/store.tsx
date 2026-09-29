@@ -20,6 +20,7 @@ import {
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
 import { planSkimmers } from "./engineering";
 import { configuredAccessPlan } from "./access-plan";
+import { configuredComfortPlan } from "./comfort-plan";
 import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
 import {
   buildFloorProfile,
@@ -197,7 +198,7 @@ function reducer(state: State, action: Action): State {
             ? config.structure
             : null;
       const features = action.value === "above-ground"
-        ? config.features
+        ? config.features.filter((id) => id !== "sunShelf" && id !== "integratedBench")
         : config.features.filter((id) => id !== "externalStaircase");
       return { ...state, config: { ...config, poolType: action.value, structure, features } };
     }
@@ -257,7 +258,17 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         config: validateInfinity(
-          { ...config, shape: action.value, shapeSelected: true, dimensions, system },
+          {
+            ...config,
+            shape: action.value,
+            shapeSelected: true,
+            dimensions,
+            system,
+            features:
+              action.value === "rectangle"
+                ? config.features
+                : config.features.filter((id) => id !== "sunShelf" && id !== "integratedBench"),
+          },
           action.value !== config.shape,
         ),
       };
@@ -545,9 +556,14 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       dimensions: config.dimensions,
       verticalLayout,
     });
-    return floorProfile.sloped
+    const baseMetrics = floorProfile.sloped
       ? computeSlopeMetrics(outline, floorProfile, verticalLayout.waterY, verticalLayout.wallTopY)
       : computeMetrics(outline, config.dimensions.depth);
+    const comfort = configuredComfortPlan(config);
+    return {
+      ...baseMetrics,
+      waterVolume: Math.max(0, baseMetrics.waterVolume - comfort.displacedVolume),
+    };
   }, [
     outline,
     config.shape,
@@ -555,6 +571,10 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     config.system,
     config.overflowType,
     config.dimensions,
+    config.features,
+    config.poolAccess,
+    config.internalStairType,
+    config.infinityEdge,
   ]);
 
   const skimmers = useMemo(

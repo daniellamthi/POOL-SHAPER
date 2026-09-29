@@ -73,6 +73,8 @@ export const INTERNAL_STAIR_LABEL: Record<InternalStairType, string> = {
 export const POOL_FEATURE_LABEL: Record<PoolFeatureId, string> = {
   ledLighting: "Illuminazione subacquea a LED",
   hydromassage: "Idromassaggio integrato",
+  sunShelf: "Sun shelf sommerso",
+  integratedBench: "Panca sommersa integrata",
   externalStaircase: "Scala esterna",
 };
 

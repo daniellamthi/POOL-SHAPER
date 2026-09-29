@@ -1,6 +1,7 @@
 import { Footprints } from "lucide-react";
 import { useMemo } from "react";
 import { configuredAccessPlan } from "@/lib/pool/access-plan";
+import { configuredComfortPlan } from "@/lib/pool/comfort-plan";
 import { OptionCard, StepSection } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 
@@ -29,6 +30,7 @@ export function AccessStep() {
     [config],
   );
   const selected = config.poolAccess === "stainlessSteelLadder" ? plans.ladder : plans[stairType];
+  const comfort = useMemo(() => configuredComfortPlan(config), [config]);
   const dimensions = (plan: typeof selected) =>
     plan.reason ? undefined : (
       <span className="text-xs text-muted-foreground">
@@ -96,6 +98,30 @@ export function AccessStep() {
 
       <div className="flex flex-col gap-5 border-t border-hairline pt-8">
         <h3 className="label-xs">Comfort in acqua</h3>
+        <div className="grid gap-3" role="group" aria-label="Comfort integrato">
+          <OptionCard
+            title="Sun shelf"
+            description="Solarium sommerso a 22 cm, rivestito con la stessa finitura della vasca."
+            selected={config.features.includes("sunShelf")}
+            onSelect={() => togglePoolFeature("sunShelf")}
+            disabled={!comfort.availability.sunShelf.available}
+            {...(comfort.availability.sunShelf.reason
+              ? { disabledReason: comfort.availability.sunShelf.reason }
+              : {})}
+            meta={<span className="text-xs text-muted-foreground">Profondità acqua 0,22 m</span>}
+          />
+          <OptionCard
+            title="Panca integrata"
+            description="Seduta sommersa lungo parete, chiusa fino al fondo e coordinata al rivestimento."
+            selected={config.features.includes("integratedBench")}
+            onSelect={() => togglePoolFeature("integratedBench")}
+            disabled={!comfort.availability.integratedBench.available}
+            {...(comfort.availability.integratedBench.reason
+              ? { disabledReason: comfort.availability.integratedBench.reason }
+              : {})}
+            meta={<span className="text-xs text-muted-foreground">Seduta a 0,48 m dall’acqua</span>}
+          />
+        </div>
         <OptionCard
           title="Idromassaggio"
           description="Ugelli idromassaggio integrati."
