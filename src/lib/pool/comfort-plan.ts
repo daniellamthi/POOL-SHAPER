@@ -26,11 +26,12 @@ export interface ComfortElementPlan {
   jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
 }
 
-export type HydroTierRole = "divider" | "frontWall" | "backSeat" | "sideSeat" | "tubFloor";
+export type HydroTierRole = "divider" | "frontWall" | "backSeat" | "sideSeat" | "innerSideSeat" | "tubFloor";
 
 /** Real in-pool spa dimensions (metres), read from the reference: a sunken
  * tub beside the straight flight, a divider wall towards the stairs and, in the
- * closed variant, a front wall; an L bench runs along the head and outer walls. */
+ * closed variant, a front wall. The open variant adds the opposite short seat,
+ * forming a U while leaving the volume visually open to the main pool. */
 export const HYDRO_DIMENSIONS = {
   partitionThickness: 0.2,
   lipThickness: 0.15,
@@ -309,6 +310,8 @@ export function resolveComfortPlan({
       // the tub's front edge, which is the wall's inner face when it exists.
       const frontWall = hydromassageVariant === "closed";
       const front = frontWall ? lip : end;
+      const innerBenchEdge = inner + side * H.benchDepth;
+      const tubInner = frontWall ? inner : innerBenchEdge;
       const wallTop = waterY - H.wallWaterDepth;
       const tiers: Array<{ footprint: Outline; topY: number; role: HydroTierRole }> = [
         { role: "divider", footprint: rectOutline(box(back, end, partition0, inner)), topY: wallTop },
@@ -317,8 +320,11 @@ export function resolveComfortPlan({
           : []),
         { role: "backSeat", footprint: rectOutline(box(back, H.benchDepth, inner, outer)), topY: seatTop },
         { role: "sideSeat", footprint: rectOutline(box(H.benchDepth, front, benchInner, outer)), topY: seatTop },
+        ...(!frontWall
+          ? [{ role: "innerSideSeat" as const, footprint: rectOutline(box(H.benchDepth, front, inner, innerBenchEdge)), topY: seatTop }]
+          : []),
         ...(raisedFloor
-          ? [{ role: "tubFloor" as const, footprint: rectOutline(box(H.benchDepth, front, inner, benchInner)), topY: tubFloor }]
+          ? [{ role: "tubFloor" as const, footprint: rectOutline(box(H.benchDepth, front, tubInner, benchInner)), topY: tubFloor }]
           : []),
       ];
       // The flight shares the head and long walls: close those seams too.
@@ -337,10 +343,14 @@ export function resolveComfortPlan({
       const point = (a: number, c: number) => (longX ? { x: shelf.coordinate + direction * a, z: c } : { x: c, z: shelf.coordinate + direction * a });
       const headDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
       const sideDir = (longX ? [0, -side] : [-side, 0]) as readonly [number, number];
+      const innerSideDir = (longX ? [0, side] : [side, 0]) as readonly [number, number];
       const outerIsInfinity = excludedWall(infinityExcluded, longX ? "z" : "x", outerWall);
       const jets = [
         ...spaced(inner + side * 0.3, benchInner - side * 0.25).map((c) => ({ ...point(0, c), y: jetY, dir: headDir })),
         ...(outerIsInfinity ? [] : spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, outerWall), y: jetY, dir: sideDir }))),
+        ...(!frontWall
+          ? spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, inner), y: jetY, dir: innerSideDir }))
+          : []),
       ];
       elements.push({
         kind: "hydromassage",

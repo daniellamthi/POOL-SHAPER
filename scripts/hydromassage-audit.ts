@@ -204,6 +204,8 @@ for (const length of [6, 8, 10, 12])
           check(Math.abs(thin(frontC!.footprint) - H.lipThickness) < 1e-6, `${tag}: front wall 15 cm`);
           // OPEN: no front wall, nothing left where it stood.
           check(!tier(ho, "frontWall"), `${tag}: OPEN front wall absent`);
+          check(!!tier(ho, "innerSideSeat"), `${tag}: OPEN has the opposite short-side seat for a U bench`);
+          check(!tier(hc, "innerSideSeat"), `${tag}: CLOSED keeps the L bench clear of its open side`);
           check(
             !ho.tiers!.some((t) => overlap(t.footprint, frontC!.footprint) && t.topY > tier(ho, "backSeat")!.topY),
             `${tag}: OPEN no residual front-wall geometry`,
@@ -225,6 +227,10 @@ for (const length of [6, 8, 10, 12])
           const headJets = (h: ComfortElementPlan) =>
             h.jets!.filter((j) => same(j.dir, hc.jets![0]!.dir));
           check(same(headJets(hc), headJets(ho)), `${tag}: same backrest jet layout`);
+          check(
+            new Set(ho.jets!.map((j) => j.dir.join(","))).size === 3,
+            `${tag}: OPEN has jets on all three sides of the U bench`,
+          );
           check(
             ho.jets!.length >= hc.jets!.length && ho.jets!.every((j) => j.y === hc.jets![0]!.y),
             `${tag}: same jet height rule, open side runs to its front edge`,
@@ -256,12 +262,19 @@ for (const length of [6, 8, 10, 12])
             const divider = tier(hydro, "divider")!,
               back = tier(hydro, "backSeat")!,
               side = tier(hydro, "sideSeat")!,
+              innerSideSeat = tier(hydro, "innerSideSeat"),
               tub = tier(hydro, "tubFloor");
             check(Math.abs(thin(divider.footprint) - H.partitionThickness) < 1e-6, `${vtag}: divider 20 cm`);
             check(
               Math.abs(thin(back.footprint) - H.benchDepth - H.wallOverlap) < 1e-6 &&
                 Math.abs(thin(side.footprint) - H.benchDepth - H.wallOverlap) < 1e-6,
-              `${vtag}: L seat 45 cm deep`,
+              `${vtag}: primary seats 45 cm deep`,
+            );
+            check(
+              variant === "open"
+                ? !!innerSideSeat && Math.abs(thin(innerSideSeat.footprint) - H.benchDepth) < 1e-6 && innerSideSeat.topY === back.topY
+                : !innerSideSeat,
+              `${vtag}: ${variant === "open" ? "U bench has opposite short-side seat" : "L bench has no opposite short-side seat"}`,
             );
             check(
               divider.topY > back.topY && back.topY === side.topY && (!tub || tub.topY < back.topY),

@@ -168,14 +168,14 @@ export function AccessStep() {
           <OptionCard
             optional
             title="Idromassaggio"
-            description="Zona idromassaggio accanto alla scala rettilinea: divisorio verso la scala, panca a L e getti nello schienale."
+            description={`Zona idromassaggio accanto alla scala rettilinea: divisorio verso la scala, panca a ${hydroVariant === "open" ? "U" : "L"} e getti nello schienale.`}
             selected={hydroEnabled}
             onSelect={() => selectComfort("hydromassage")}
             disabled={!hydroEnabled && !hydroProposal.availability.hydromassage.available}
             {...(hydroProposal.availability.hydromassage.reason
               ? { disabledReason: hydroProposal.availability.hydromassage.reason }
               : {})}
-            meta={<span className="text-xs text-muted-foreground">Seduta a L {Math.round(HYDRO_DIMENSIONS.seatWaterDepth * 100)} cm sotto l’acqua{ hydro?.jets ? ` · ${hydro.run.toFixed(2)} × ${(hydro.width + HYDRO_DIMENSIONS.partitionThickness).toFixed(2)} m · ${hydro.jets.length} getti` : ""}</span>}
+            meta={<span className="text-xs text-muted-foreground">Seduta a {hydroVariant === "open" ? "U" : "L"} {Math.round(HYDRO_DIMENSIONS.seatWaterDepth * 100)} cm sotto l’acqua{ hydro?.jets ? ` · ${hydro.run.toFixed(2)} × ${(hydro.width + HYDRO_DIMENSIONS.partitionThickness).toFixed(2)} m · ${hydro.jets.length} getti` : ""}</span>}
           />
           {hydroEnabled ? (
             <section
