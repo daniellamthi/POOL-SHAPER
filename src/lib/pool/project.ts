@@ -18,9 +18,9 @@ import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
 import { clampLShapeDimensions } from "./l-shape";
-import { clampOrganicShapeParams } from "./organic-shape";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem } from "./infinity-edge";
 import { buildOutline } from "./geometry";
+import { pavingId, premiumEnvironment } from "./presentation";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -56,10 +56,12 @@ export function toProjectConfiguration(
   config: PoolConfig,
   renovation: RenovationConfig,
 ): ProjectConfiguration {
+  if (config.shape === "organic") throw new Error("La forma organica non è più disponibile.");
   return { schemaVersion: PROJECT_SCHEMA_VERSION, projectId, config, renovation };
 }
 
 export function serializeProjectConfiguration(project: ProjectConfiguration): string {
+  if (project.config.shape === "organic") throw new Error("La forma organica non è più disponibile.");
   return JSON.stringify(project);
 }
 
@@ -96,6 +98,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // commercial email, quotation -- sees a real number instead of each having
   // to guess a fallback of its own.
   const restored = config as PoolConfig;
+  // Do not silently redesign a retired product on restore.
+  if (restored.shape === "organic") throw new Error("Progetto con forma organica non più supportato. Il file originale resta invariato.");
   const slopeNormalisedDimensions =
     restored.dimensions?.floorProfile === "slope" &&
     Number.isFinite(restored.dimensions.shallowDepth) &&
@@ -137,28 +141,6 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
         lShapeOrientation: clamped.orientation,
       };
     }
-    // Geometry pass C (Organic): same "always restore to safe, real
-    // dimensions" contract as the L-shape branch above -- a project saved
-    // before Organic existed, or one carrying malformed/legacy/missing
-    // curvature/mirror data (NaN, out-of-range, non-boolean), always
-    // restores through `clampOrganicShapeParams` so every OTHER reader (the
-    // character slider, the mirror toggle, ProjectSummary) sees the same
-    // clean numbers the 3D geometry itself is built from.
-    if (restored.shape === "organic") {
-      const clamped = clampOrganicShapeParams({
-        length: slopeNormalisedDimensions.length,
-        width: slopeNormalisedDimensions.width,
-        curvature: slopeNormalisedDimensions.organicCurvature,
-        mirror: slopeNormalisedDimensions.organicMirror,
-      });
-      return {
-        ...slopeNormalisedDimensions,
-        length: clamped.length,
-        width: clamped.width,
-        organicCurvature: clamped.curvature,
-        organicMirror: clamped.mirror,
-      };
-    }
     return slopeNormalisedDimensions;
   })();
   // Geometry pass D (Infinity, Rectangle + L-shape + Organic): a project
@@ -191,6 +173,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     projectId,
     config: {
       ...restoredWithoutEdge,
+      ...(restored.paving !== undefined ? { paving: pavingId(restored.paving) } : {}),
+      ...(restored.premiumEnvironment !== undefined ? { premiumEnvironment: premiumEnvironment(restored.premiumEnvironment) } : {}),
       // External access is only built above ground. Restore the same valid
       // selection in the scene, summary and render export.
       features: normalizeComfortFeatures(restored.poolType === "above-ground"

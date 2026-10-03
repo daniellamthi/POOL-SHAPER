@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { RENOVATION_STEPS, STEPS, STEP_GROUPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
+import { contextualIntent, focusForAction } from "@/lib/pool/contextual-camera";
 import { resolveMaterials } from "@/lib/pool/materials";
 import { ThemeProvider, useTheme } from "@/lib/theme";
 import {
@@ -109,6 +110,7 @@ function ConfiguratorLayout() {
     outline,
     skimmers,
     step,
+    visualFocus,
     next,
     previous,
     goToStep,
@@ -155,9 +157,13 @@ function ConfiguratorLayout() {
     ],
   );
 
-  const [showMeasurements, setShowMeasurements] = useState(true);
+  // Dimension/depth editing always shows live guides; optional detail views
+  // start uncluttered. Customers can still toggle Guides explicitly.
+  const [showMeasurements, setShowMeasurements] = useState(false);
   const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
   const [frameToken, setFrameToken] = useState(0);
+  const [inspectionView, setInspectionView] = useState<SceneFocus | null>(null);
+  useEffect(() => setInspectionView(null), [step, visualFocus]);
   const stepContentRef = useRef<HTMLDivElement>(null);
   // P5: mobile-only fullscreen presentation of the SAME live viewport --
   // never a second Canvas/renderer, just a CSS repositioning of the
@@ -174,6 +180,11 @@ function ConfiguratorLayout() {
   const [photoModeUnsupported, setPhotoModeUnsupported] = useState(false);
   const toggleMeasurements = useCallback(() => setShowMeasurements((value) => !value), []);
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
+  const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
+  const openPremiumPresentation = useCallback(() => {
+    if (!premiumPresentationAvailable) return;
+    document.getElementById("premium-presentation")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [premiumPresentationAvailable]);
   useEffect(() => {
     stepContentRef.current?.scrollTo({ top: 0 });
     if (window.innerWidth < 1024) window.scrollTo({ top: 0 });
@@ -297,21 +308,16 @@ function ConfiguratorLayout() {
   const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
-  const dimensionsStep = activeSteps.findIndex(
-    ({ id }) => id === (renovationWorkflow ? "renovation-pool" : "shape-dimensions"),
-  );
   // System details frame automatically, but remain inspectable by orbit/touch.
-  const cameraLocked = dimensionsStep >= 0 && step > dimensionsStep && !["system", "style", "access"].includes(activeStepId ?? "");
+  const cameraLocked = false;
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
     : activeStepId === "system"
-      ? config.system === "infinity" ? "infinity" : "review"
+      ? contextualIntent(focusForAction({type:"setSystem"},config) ?? "POOL_OVERVIEW",config)
       : activeStepId === "style"
         ? "liner"
         : activeStepId === "access"
-          ? config.features.includes("sunShelf") || config.features.includes("integratedBench")
-            ? "overview"
-            : "access"
+          ? contextualIntent(focusForAction({type:"setPoolAccess"},config) ?? "STAIRS",config)
         : activeStepId === "lighting"
           ? config.system === "infinity"
             ? "infinity"
@@ -329,7 +335,7 @@ function ConfiguratorLayout() {
     );
 
   return (
-    <div className="flex min-h-screen flex-col bg-background lg:h-screen lg:overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
       <IntroVeil />
       <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/95 px-6 py-4 backdrop-blur-sm sm:px-9 lg:static">
         <div className="flex min-w-0 items-center">
@@ -351,8 +357,8 @@ function ConfiguratorLayout() {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col-reverse gap-3 p-3 lg:min-h-0 lg:flex-row lg:p-4">
-        <aside className="relative z-10 flex w-full flex-col rounded-[1.75rem] border border-hairline bg-background/95 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.85)] lg:w-[452px] xl:w-[512px]">
+      <div className="flex min-h-0 flex-1 flex-col-reverse gap-3 p-3 lg:flex-row lg:p-4">
+        <aside className="relative z-10 flex min-h-0 w-full flex-1 flex-col rounded-[1.75rem] border border-hairline bg-background/95 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.85)] lg:w-[452px] lg:flex-none xl:w-[512px]">
           <div className="border-b border-hairline/80 px-5 pb-4 pt-4 sm:px-8 lg:pb-6 lg:pt-6">
             <StepIndicator
               current={step}
@@ -363,7 +369,7 @@ function ConfiguratorLayout() {
             />
           </div>
 
-          <div ref={stepContentRef} className="scroll-slim flex-1 overflow-y-auto px-5 pb-8 pt-5 sm:px-8 lg:min-h-0 lg:pb-18 lg:pt-8">
+          <div ref={stepContentRef} className="scroll-slim min-h-0 flex-1 overflow-y-auto px-5 pb-8 pt-5 sm:px-8 lg:pb-18 lg:pt-8">
             {stepContent}
           </div>
 
@@ -398,7 +404,7 @@ function ConfiguratorLayout() {
             "relative w-full overflow-hidden bg-viewport",
             mobileExpanded
               ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
-              : "h-[42dvh] min-h-[260px] scroll-mt-20 rounded-[1.75rem] border border-hairline sm:h-[54vh] lg:h-auto lg:flex-1",
+              : "h-[36dvh] min-h-[220px] shrink-0 scroll-mt-20 rounded-[1.75rem] border border-hairline lg:h-auto lg:shrink lg:flex-1",
           )}
         >
           <PoolViewport
@@ -429,26 +435,29 @@ function ConfiguratorLayout() {
             floorProfile={config.dimensions.floorProfile}
             shallowDepth={config.dimensions.shallowDepth}
             slopeReversed={config.dimensions.slopeReversed}
-            showMeasurements={showMeasurements}
+            showMeasurements={showMeasurements || visualFocus?.focus === "DIMENSIONS_TOP" || visualFocus?.focus === "DEPTH"}
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}
-            frameToken={frameToken}
-            focus={cameraFocus}
+            frameToken={frameToken + (visualFocus?.revision ?? 0)}
+            focus={inspectionView ?? (visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus)}
             cameraLocked={cameraLocked}
             showWater={true}
             theme={theme}
             sceneTime={sceneTime}
+            paving={config.paving ?? "gres"}
             photoMode={photoMode}
-            onTogglePhotoMode={togglePhotoMode}
+            onTogglePhotoMode={openPremiumPresentation}
             photoModeQuality={photoModeQuality}
             onSetPhotoModeQuality={setPhotoModeQuality}
             photoModeUnsupported={photoModeUnsupported}
             onPhotoModeUnsupported={handlePhotoModeUnsupported}
-            onGeneratePhotorealisticRender={handleGeneratePhotorealisticRender}
+            onGeneratePhotorealisticRender={openPremiumPresentation}
+            premiumPresentationAvailable={premiumPresentationAvailable}
             renderPhase={renderPhase}
             renderProgress={renderProgress}
             mobileExpanded={mobileExpanded}
             onToggleMobileExpanded={toggleMobileExpanded}
+            onInspectionView={(view) => { setInspectionView(view); reframe(); }}
           />
           <LiveSummary />
         </main>

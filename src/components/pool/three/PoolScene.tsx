@@ -11,10 +11,12 @@ import {
   MathUtils,
   NoToneMapping,
   PCFShadowMap,
+  OrthographicCamera,
   SRGBColorSpace,
 } from "three";
 import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
+import { StudioPaving } from "./StudioPaving";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
@@ -49,7 +51,8 @@ import {
 } from "@/configurator/3d/scene/visual-preset";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { outlineBounds } from "@/lib/pool/geometry";
-import { getCameraPose } from "@/lib/pool/camera";
+import { getCameraPose, dimensionFrustum, contextualAccessCamera } from "@/lib/pool/camera";
+import type { ResolvedPoolLayout } from "@/lib/pool/resolved-layout";
 import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
 import type { PoolLightPosition } from "@/lib/pool/lighting";
@@ -116,6 +119,7 @@ export interface SceneProps {
   showWater: boolean;
   theme: Theme;
   sceneTime: SceneTimeOfDay;
+  paving?: import("@/lib/pool/presentation").PavingId;
   photoMode: boolean;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
@@ -280,8 +284,24 @@ function AdaptiveQuality() {
 }
 
 /** Smoothly restores a stable product view when dimensions or framing change. */
+function PlanCamera({ enabled }: { enabled: boolean }) {
+  const set = useThree(s => s.set);
+  const get = useThree(s => s.get);
+  const plan = useMemo(() => new OrthographicCamera(-10,10,10,-10,0.1,1000), []);
+  useLayoutEffect(() => {
+    if (!enabled) return;
+    const previous = get().camera;
+    (plan as OrthographicCamera & { manual: boolean }).manual = true;
+    plan.up.set(0,0,-1);
+    set({ camera: plan });
+    return () => { set({ camera: previous }); };
+  }, [enabled, get, set, plan]);
+  return null;
+}
+
 function CameraRig({
   accessPlan,
+  resolvedLayout,
   cameraLocked,
   radius,
   controls,
@@ -298,6 +318,7 @@ function CameraRig({
   infinityZone,
 }: {
   accessPlan: SceneLightingPlan["accessPlan"];
+  resolvedLayout: ResolvedPoolLayout;
   cameraLocked: boolean;
   radius: number;
   controls: React.RefObject<OrbitControlsImpl | null>;
@@ -331,6 +352,8 @@ function CameraRig({
   // useWaterReflection) needs to stay in "moving" mode for either.
   const interacting = useRef(false);
   const idleElapsed = useRef(0);
+  const editingPose = useRef<{ key: string; pose: import("@/lib/pool/camera").CameraPose } | null>(null);
+  const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
 
   useEffect(() => {
     const control = controls.current;
@@ -348,7 +371,7 @@ function CameraRig({
       control.removeEventListener("start", handleStart);
       control.removeEventListener("end", handleEnd);
     };
-  }, [controls]);
+  }, [controls, camera]);
 
   // Stationary-quality bookkeeping, independent of the flight-animation
   // useFrame below: runs every frame (not just mid-flight) so it can notice
@@ -373,10 +396,10 @@ function CameraRig({
     }
   });
 
-  const detail = focus === "access" || focus === "liner" || focus === "mosaic";
+  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping"].includes(focus);
   const summaryRect = detail ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
   const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  const pose = focus === "infinity" && infinityZone
+  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, SCENE_VISUAL_PRESET.camera.fov, (viewportSize.width - reservedRight) / Math.max(1,viewportSize.height)) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
     ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov)
     : getCameraPose({
       accessPlan,
@@ -390,7 +413,22 @@ function CameraRig({
       viewportAspect: (viewportSize.width - reservedRight) / Math.max(1, viewportSize.height),
       includeExternalStaircase,
       infinityZone,
-    });
+    }));
+  const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${frameToken}`;
+  if (focus === "depth") {
+    if (editingPose.current?.key !== editKey) editingPose.current = { key: editKey, pose };
+    pose = editingPose.current.pose;
+  } else editingPose.current = null;
+  if (focus === "top") {
+    const next = dimensionFrustum(outline, viewportSize.width / Math.max(1, viewportSize.height));
+    if (planFit.current?.key !== editKey) planFit.current = { key: editKey, ...next };
+    // Keep world scale while editing; expand only when geometry would clip.
+    const bounds = outlineBounds(outline);
+    if (bounds.spanX + 2.2 > planFit.current.width || bounds.spanZ + 2.2 > planFit.current.height)
+      planFit.current = { key: editKey, ...next };
+    const [x,z] = planFit.current.centre;
+    pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
+  } else planFit.current = null;
   if (reservedRight) {
     const eye = new Vector3(...pose.position), target = new Vector3(...pose.target);
     const right = target.clone().sub(eye).cross(new Vector3(0, 1, 0)).normalize();
@@ -403,6 +441,19 @@ function CameraRig({
   // Only a different pose/intent or explicit reframe starts a new flight.
   const poseKey = JSON.stringify(pose);
   useLayoutEffect(() => {
+    canvas.dataset["cameraProjection"] = camera instanceof OrthographicCamera ? "orthographic" : "perspective";
+    canvas.dataset["cameraFocus"] = focus;
+    if (camera instanceof OrthographicCamera && planFit.current) {
+      const fit = planFit.current;
+      camera.left = -fit.width/2; camera.right = fit.width/2;
+      camera.top = fit.height/2; camera.bottom = -fit.height/2;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+    }
+    if ("fov" in camera) {
+      camera.fov = "fov" in pose ? Number(pose.fov) : SCENE_VISUAL_PRESET.camera.fov;
+      camera.updateProjectionMatrix();
+    }
     goal.current.set(...pose.position);
     lookAt.current.set(...pose.target);
     startPosition.current.copy(camera.position);
@@ -410,11 +461,13 @@ function CameraRig({
     // Drain any orbit inertia without changing the visible starting pose.
     const control = controls.current;
     renderQualityState.locked = cameraLocked;
-    if (cameraLocked) {
+    if (cameraLocked || infinityZone || focus === "top" || focus === "depth") {
       if (control) {
+        const damping = control.enableDamping;
         control.enableDamping = false;
         control.update();
         control.target.copy(lookAt.current);
+        control.enableDamping = damping;
       }
       camera.position.copy(goal.current);
       camera.lookAt(lookAt.current);
@@ -438,17 +491,21 @@ function CameraRig({
     // (styles.css's global reduced-motion rule only collapses CSS
     // animations/transitions -- it doesn't reach this Three.js-driven lerp.)
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    duration.current = reducedMotion ? 0 : focus === "overview" || focus === "review" ? 0.88 : 0.78;
+    const largeMove = startPosition.current.distanceTo(goal.current) > Math.max(2, radius * 0.65);
+    duration.current = reducedMotion || largeMove ? 0 : 0.24;
     flying.current =
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;
   }, [
     cameraLocked,
+    Boolean(infinityZone),
     camera,
     controls,
     frameToken,
     focus,
     poseKey,
+    planFit.current?.width,
+    planFit.current?.height,
   ]);
 
   useFrame((_, delta) => {
@@ -763,6 +820,7 @@ export default function PoolScene({
   showWater,
   theme,
   sceneTime,
+  paving,
   photoMode,
   photoModeQuality,
   onPhotoModeUnsupported,
@@ -770,7 +828,7 @@ export default function PoolScene({
   const controls = useRef<OrbitControlsImpl | null>(null);
   const radius = Math.hypot(length, width) / 2;
   const visualTheme: Theme =
-    system === "infinity" ? (sceneTime === "night" ? "dark" : "light") : theme;
+    sceneTime === "night" ? "dark" : "light";
   const palette = PALETTE[visualTheme];
   const background =
     system === "infinity"
@@ -780,7 +838,7 @@ export default function PoolScene({
       : palette.background;
   const copingThickness = POOL_BORDER_PRESET.thickness;
   // The lighting step drops the scene to blue hour so the LEDs are visible.
-  const dusk = system === "infinity" ? sceneTime === "night" : focus === "features";
+  const dusk = sceneTime === "night";
   const skyLight = useRef<HemisphereLight | null>(null);
   const sunLight = useRef<DirectionalLight | null>(null);
   const auxiliaryLight = useRef<SpotLight | null>(null);
@@ -1042,7 +1100,7 @@ export default function PoolScene({
         distance={radius * 8}
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[visualTheme]}
       />
-      <StudioFloor
+      {system === "infinity" ? <StudioFloor
         outline={outline}
         size={deckSize}
         theme={visualTheme}
@@ -1051,7 +1109,7 @@ export default function PoolScene({
         overflowType={overflowType}
         infinityZone={infinityZone}
         waterY={verticalLayout.waterY}
-      />
+      /> : <Suspense fallback={null}><StudioPaving outline={outline} poolType={poolType} system={system} overflowType={overflowType} paving={paving ?? "gres"} /></Suspense>}
 
       <PoolModel
         resolvedLayout={resolvedLayout}
@@ -1160,6 +1218,7 @@ export default function PoolScene({
       {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
       {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
 
+      <PlanCamera enabled={focus === "top"} />
       <OrbitControls
         ref={controls}
         makeDefault
@@ -1172,7 +1231,7 @@ export default function PoolScene({
         enabled={!photoMode && !cameraLocked}
         enablePan
         enableZoom
-        enableRotate
+        enableRotate={focus !== "top"}
         enableDamping={!cameraLocked && !photoMode}
         dampingFactor={0.06}
         rotateSpeed={0.55}
@@ -1180,10 +1239,12 @@ export default function PoolScene({
         panSpeed={0.6}
         minDistance={2}
         maxDistance={160}
-        maxPolarAngle={Math.PI / 2.05}
+        minPolarAngle={focus === "top" ? Math.PI / 2 : 0}
+        maxPolarAngle={focus === "top" ? Math.PI / 2 : Math.PI / 2.05}
       />
       <CameraRig
         accessPlan={lighting.accessPlan}
+        resolvedLayout={resolvedLayout}
         cameraLocked={cameraLocked}
         radius={radius}
         controls={controls}

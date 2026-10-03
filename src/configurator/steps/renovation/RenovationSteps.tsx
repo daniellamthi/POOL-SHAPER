@@ -1,4 +1,5 @@
 import { OptionCard, StepSection, SwatchOption, ToggleChip } from "@/components/pool/StepSection";
+import { PremiumPresentation, PavingOptions } from "@/components/pool/PresentationOptions";
 import { DimensionControl } from "@/components/pool/DimensionControl";
 import { TextField } from "@/components/pool/TextField";
 import { Label } from "@/components/ui/label";
@@ -422,6 +423,8 @@ export function RenovationReviewStep() {
         ))}
       </dl>
 
+      <PavingOptions />
+      <PremiumPresentation />
       <section className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-card/40 p-8 text-center">
         <h3 className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">
           Vuoi valutare questo intervento con un nostro consulente?

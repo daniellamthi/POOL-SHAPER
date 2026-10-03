@@ -1,4 +1,5 @@
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
+import { PremiumPresentation, PavingOptions } from "@/components/pool/PresentationOptions";
 import { StepSection } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
 import { LeadRequestDialog } from "./LeadRequestDialog";
@@ -19,6 +20,8 @@ export function FinalReviewStep() {
       subtitle="Ecco la sintesi della piscina che hai progettato, pronta per essere valutata con un consulente."
     >
       <ProjectSummary />
+      <PavingOptions />
+      <PremiumPresentation />
 
       <section className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-card/40 p-8 text-center">
         <h3 className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">

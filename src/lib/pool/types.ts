@@ -171,6 +171,8 @@ export interface PoolConfig {
   shape: PoolShapeId;
   shapeSelected?: boolean;
   copingMaterial?: import("./coping-materials").CopingMaterialId;
+  paving?: import("./presentation").PavingId;
+  premiumEnvironment?: import("./presentation").PremiumEnvironment;
   customMode: CustomMode;
   controlPoints: ReadonlyArray<ControlPoint>;
   dimensions: Dimensions;

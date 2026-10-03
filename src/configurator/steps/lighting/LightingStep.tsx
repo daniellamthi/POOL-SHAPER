@@ -26,10 +26,10 @@ export function LightingStep({
       title="Illuminazione"
       subtitle="Illuminazione subacquea a LED: colore e intensità."
     >
-      {config.system === "infinity" && onSceneTimeChange ? (
+      {onSceneTimeChange ? (
         <div className="flex flex-col gap-3 border-b border-hairline pb-6">
-          <h3 className="label-xs">Atmosfera Infinity</h3>
-          <div className="grid grid-cols-2 gap-2" role="group" aria-label="Atmosfera Infinity">
+          <h3 className="label-xs">Atmosfera</h3>
+          <div className="grid grid-cols-2 gap-2" role="group" aria-label="Atmosfera">
             <Button
               type="button"
               variant={sceneTime === "day" ? "default" : "outline"}

@@ -18,15 +18,18 @@ export function coastFrame(zone: RectangleInfinityZone) {
   return { x: (zone.start[0]+zone.end[0])/2, z: (zone.start[1]+zone.end[1])/2,
     nx: zone.normal[0], nz: zone.normal[1] };
 }
-export function coastalCamera(outline: Outline, zone: RectangleInfinityZone, waterY: number, aspect: number, fov: number): CameraPose {
+export function coastalCamera(outline: Outline, zone: RectangleInfinityZone, waterY: number, aspect: number, fov: number): CameraPose & { fov: number } {
   const f=coastFrame(zone);
   const local=outline.map(([x,z])=>({u:(x-f.x)*f.nz-(z-f.z)*f.nx,v:(x-f.x)*f.nx+(z-f.z)*f.nz}));
   const width=Math.max(...local.map(p=>p.u))-Math.min(...local.map(p=>p.u));
   const length=-Math.min(...local.map(p=>p.v));
   const halfHorizontal=Math.atan(Math.tan(fov*Math.PI/360)*Math.max(.25,aspect));
-  const distance=Math.max(length+2.8,(width+2.6)/2/Math.tan(halfHorizontal));
+  // Stay inside the existing seven-metre photographic-site apron. Backing
+  // away indefinitely in portrait view exposes the underside of the site.
+  const distance=Math.min(length+6.5,Math.max(length+2.8,(width+2.6)/2/Math.tan(halfHorizontal)));
+  const fittedFov=Math.min(78,Math.max(fov,2*Math.atan((width+2.6)/(2*distance*Math.max(.25,aspect)))*180/Math.PI));
   const y=waterY+Math.max(2.1,distance*.145);
-  return {position:[f.x-f.nx*distance,y,f.z-f.nz*distance],
+  return {fov:fittedFov,position:[f.x-f.nx*distance,y,f.z-f.nz*distance],
     target:[f.x,y-distance*.055,f.z]};
 }
 export function coastNoise(x:number,z:number) {

@@ -157,13 +157,6 @@ export const POOL_SHAPES: ReadonlyArray<ShapeDefinition> = [
       "Disegna il perimetro con punti di controllo modificabili, o carica una planimetria.",
     supportsCornerRadius: false,
   },
-  {
-    id: "organic",
-    title: "Organica",
-    description:
-      "Una sagoma fluida a forma di fagiolo, con un'unica insenatura morbida su un lato.",
-    supportsCornerRadius: false,
-  },
 ];
 
 export const getShapeDefinition = (id: PoolShapeId): ShapeDefinition =>

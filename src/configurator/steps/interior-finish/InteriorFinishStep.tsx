@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PavingOptions } from "@/components/pool/PresentationOptions";
 import {
   MaterialSwatch,
   OptionCard,
@@ -157,6 +158,7 @@ export function InteriorFinishStep() {
           ) : null}
         </DialogContent>
       </Dialog>
+      <PavingOptions />
     </StepSection>
   );
 }

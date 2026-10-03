@@ -1,4 +1,5 @@
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { PAVING, pavingId } from "@/lib/pool/presentation";
 import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { useMemo, type ReactNode } from "react";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
@@ -216,6 +217,7 @@ export function ProjectSummary() {
 
       <Section title="La tua piscina" onEdit={editStep(dimensionsStepIndex)}>
         <Row label="Tipologia" value={poolType} />
+        <Row label="Pavimentazione" value={PAVING.find(p => p.id === pavingId(config.paving))!.label} />
         <Row label="Dimensioni" value={dimensionsSentence} />
         {isSlopedFloor ? (
           <>

@@ -9,6 +9,7 @@ import type { PoolVerticalLayout } from "./vertical-layout";
 import { clampInfinityEdgeDimensions } from "./infinity-edge";
 import type { RectangleInfinityZone } from "./infinity-edge";
 import type { SceneLightingPlan } from "./lighting-plan";
+import type { ResolvedPoolLayout } from "./resolved-layout";
 
 /** The fixed three-quarter angle every overview pose used before this shape
  * awareness was added -- kept as the direction for any outline with no
@@ -49,6 +50,9 @@ function overviewDirection(
 }
 
 export type CameraIntent =
+  | "depth" | "inox" | "shelf" | "hydromassage" | "bench" | "coping"
+  | "top"
+  | "waterline"
   | "overview"
   | "skimmer"
   | "skimmer-detail"
@@ -71,6 +75,44 @@ export type CameraPoint = readonly [number, number, number];
 export interface CameraPose {
   position: CameraPoint;
   target: CameraPoint;
+}
+
+/** World-space orthographic frustum: the actual plan plus paving and labels. */
+export function dimensionFrustum(outline: Outline, aspect: number) {
+  const b = outlineBounds(outline);
+  const safeAspect = Math.max(0.2, aspect);
+  const height = Math.max(b.spanZ + 3.8, (b.spanX + 3.8) / safeAspect);
+  return { width: height * safeAspect, height, centre: [(b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2] as const };
+}
+
+/** Frames the SAME resolved comfort/ladder geometry used by PoolModel. */
+export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedPoolLayout, layout: PoolVerticalLayout, outline: Outline, fov: number, aspect: number): CameraPose | null {
+  if (intent === "inox") {
+    const plan = resolved.ladder?.plan ?? (resolved.access.ladderDepths.length ? resolved.access : null);
+    const pose = plan?.placement ? getAccessDetailCamera(plan, layout, fov, aspect) : null;
+    if (!pose) return null;
+    const dx = pose.position[0]-pose.target[0], dz = pose.position[2]-pose.target[2];
+    const yaw = Math.PI/9, c = Math.cos(yaw), s = Math.sin(yaw);
+    return { target: pose.target, position: [pose.target[0]+(dx*c-dz*s)*1.14, pose.target[1]+(pose.position[1]-pose.target[1])*1.14, pose.target[2]+(dx*s+dz*c)*1.14] };
+  }
+  const kind = intent === "shelf" ? "sunShelf" : intent === "bench" ? "integratedBench" : "hydromassage";
+  if (!["shelf", "bench", "hydromassage"].includes(intent)) return null;
+  const element = resolved.comfort.elements.find(e => e.kind === kind);
+  if (!element) return null;
+  const points = [...element.footprint, ...(element.steps ?? []).flatMap(s => s.footprint), ...(element.landing?.footprint ?? [])];
+  const b = outlineBounds(points), pool = outlineBounds(outline);
+  const x = (b.minX + b.maxX) / 2, z = (b.minZ + b.maxZ) / 2;
+  // Observe from the main basin, towards the occupied end. Open/Closed share
+  // footprint and pose: divider height changes never move the camera.
+  let nx = (pool.minX + pool.maxX) / 2 - x, nz = (pool.minZ + pool.maxZ) / 2 - z;
+  const n = Math.hypot(nx,nz); if (n < 0.1) { nx = 1; nz = 0; } else { nx /= n; nz /= n; }
+  const target: CameraPoint = [x, layout.waterY - 0.55, z];
+  const radius = Math.hypot(b.spanX + 0.7, b.spanZ + 0.7, 1.7) / 2;
+  const half = Math.atan(Math.tan(fov * Math.PI / 360) * Math.min(1, Math.max(0.2, aspect)));
+  const distance = radius / Math.sin(half) * 1.08;
+  const direction = [nx + nz * 0.25, 1.35, nz - nx * 0.25];
+  const norm = Math.hypot(...direction);
+  return { target, position: [x + direction[0]! / norm * distance, target[1] + direction[1]! / norm * distance, z + direction[2]! / norm * distance] };
 }
 
 interface BoundaryFocus {
@@ -546,6 +588,19 @@ export function getCameraPose({
   const safeDepth = Math.max(0.01, depth);
   const radius = Math.max(1, Math.hypot(bounds.spanX, bounds.spanZ, safeDepth) / 2);
   const verticalCentre = (layout.floorY + layout.wallTopY) / 2;
+  if (intent === "top") {
+    const extent = Math.max(bounds.spanZ + 4, (bounds.spanX + 4) / Math.max(0.25, viewportAspect));
+    const height = extent / (2 * Math.tan(verticalFov * Math.PI / 360));
+    return { position: [centre[0], layout.wallTopY + height, centre[1] + 0.001], target: [centre[0], layout.waterY, centre[1]] };
+  }
+  if (intent === "waterline") {
+    const distance = Math.max(bounds.spanX, bounds.spanZ / Math.max(0.25, viewportAspect)) * 1.1;
+    return { position: [bounds.maxX + distance, layout.waterY + 0.85, centre[1] + bounds.spanZ * 0.4], target: [centre[0], layout.waterY - 0.15, centre[1]] };
+  }
+  if (intent === "coping") {
+    const reference = getFrontWallReference(outline, skimmers);
+    return detailPose({ focus: reference, targetY: layout.copingY, cameraY: layout.copingY + 3.1, distance: 3.8 / Math.min(1, Math.max(0.4, viewportAspect)), tangentAmount: 1.3 });
+  }
   if (intent === "access" && accessPlan) {
     const pose = getAccessDetailCamera(accessPlan, layout, verticalFov, viewportAspect);
     if (pose) return pose;
@@ -630,10 +685,23 @@ export function getCameraPose({
 
   // Photographic overview only: clear the full coping and view along the
   // basin at a lower elevation. Interaction and all detail poses are unchanged.
-  const distance = radius * 3.4;
   const [overviewDx, overviewDz] = overviewDirection(outline, centre);
-  const direction: CameraPoint = [overviewDx, 0.9, overviewDz];
+  const direction: CameraPoint = intent === "depth" ? [0.45, 1.05, 1.7] : [overviewDx, 0.9, overviewDz];
   const directionLength = Math.hypot(...direction);
+  // Fit the actual pool + local paving to the canvas, including portrait.
+  const eye = direction.map(v => v / directionLength);
+  const h = Math.hypot(eye[0]!, eye[2]!);
+  const right = [eye[2]! / h, 0, -eye[0]! / h];
+  const up = [-eye[0]! * eye[1]! / h, h, -eye[2]! * eye[1]! / h];
+  const tanY = Math.tan(verticalFov * Math.PI / 360), tanX = tanY * Math.max(0.25, viewportAspect);
+  let distance = radius * 2;
+  for (const x of [bounds.minX - 1.6, bounds.maxX + 1.6])
+    for (const z of [bounds.minZ - 1.6, bounds.maxZ + 1.6])
+      for (const y of [layout.floorY, layout.copingY]) {
+        const v = [x - centre[0], y - verticalCentre, z - centre[1]];
+        const dot = (a: number[]) => v.reduce((sum, value, i) => sum + value * a[i]!, 0);
+        distance = Math.max(distance, dot(eye) + 1.05 * Math.max(Math.abs(dot(right)) / tanX, Math.abs(dot(up)) / tanY));
+      }
   return {
     target: [centre[0], verticalCentre, centre[1]],
     position: [

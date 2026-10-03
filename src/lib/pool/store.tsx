@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
+import { focusForAction, nextFocusRequest, type FocusRequest } from "./contextual-camera";
 import {
   DEFAULT_CONTROL_POINTS,
   DEFAULT_CUSTOMER,
@@ -62,6 +63,7 @@ import type {
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
+import { pavingId, premiumEnvironment, type PavingId, type PremiumEnvironment } from "./presentation";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline } from "./infinity-edge";
 
 type Action =
@@ -91,6 +93,8 @@ type Action =
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
   | { type: "setSceneTime"; value: "day" | "night" }
+  | { type: "setPaving"; value: PavingId }
+  | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
   | { type: "setPoolAccess"; value: PoolAccess }
@@ -114,6 +118,7 @@ type Action =
   | { type: "restoreProject"; value: ProjectConfiguration };
 
 interface State {
+  visualFocus?: FocusRequest | null;
   config: PoolConfig;
   renovation: RenovationConfig;
   step: number;
@@ -186,7 +191,7 @@ function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
   return valid ? config : { ...config, infinityEdge: clampInfinityEdgeParams(undefined) };
 }
 
-function reducer(state: State, action: Action): State {
+function configurationReducer(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
     case "setLedColor":
@@ -204,6 +209,10 @@ function reducer(state: State, action: Action): State {
       };
     case "setSceneTime":
       return { ...state, config: { ...config, sceneTime: action.value } };
+    case "setPaving":
+      return { ...state, config: { ...config, paving: pavingId(action.value) } };
+    case "setPremiumEnvironment":
+      return { ...state, config: { ...config, premiumEnvironment: premiumEnvironment(action.value) } };
     case "setProjectType": {
       if (config.projectType === action.value) return state;
       // A renovation describes an existing pool; do not inherit the new-pool
@@ -245,6 +254,7 @@ function reducer(state: State, action: Action): State {
         config: { ...config, customer: { ...config.customer, [action.key]: action.value } },
       };
     case "setShape": {
+      if (action.value === "organic") return state;
       // First activation of L-shape: seed sensible recess dimensions (rather
       // than leaving them undefined, which `clampLShapeDimensions` would
       // otherwise have to default blindly) from whatever length/width the
@@ -266,21 +276,7 @@ function reducer(state: State, action: Action): State {
                 lShapeOrientation: seeded.orientation,
               };
             })()
-          : action.value === "organic" && config.dimensions.organicCurvature === undefined
-            ? (() => {
-                const seeded = clampOrganicShapeParams({
-                  length: config.dimensions.length,
-                  width: config.dimensions.width,
-                });
-                return {
-                  ...config.dimensions,
-                  length: seeded.length,
-                  width: seeded.width,
-                  organicCurvature: seeded.curvature,
-                  organicMirror: seeded.mirror,
-                };
-              })()
-            : config.dimensions;
+          : config.dimensions;
       // Geometry Pass D (Infinity, Rectangle + L-shape): switching to a shape
       // Infinity has no real zones for (Organic) while Infinity is selected
       // falls back to skimmer live, in-session -- the same rule project.ts's
@@ -516,6 +512,7 @@ function reducer(state: State, action: Action): State {
     case "reset":
       return createInitialState();
     case "restoreProject":
+      if (action.value.config.shape === "organic") return state;
       // Keeps `step` at its current value -- which step to land on after a
       // restore is view/navigation UX, decided by the provider effect
       // below, not project data.
@@ -558,6 +555,11 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
       : config.poolAccess !== null && !configuredAccessPlan(config).reason)) return index;
   }
   return STEPS.length - 1;
+}
+
+function reducer(state: State, action: Action): State {
+  const next = configurationReducer(state, action);
+  return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config)) };
 }
 
 export function ConfiguratorProvider({ children }: { children: ReactNode }) {
@@ -685,6 +687,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     () => ({
       config,
       step,
+      visualFocus: state.visualFocus ?? null,
       outline,
       metrics,
       skimmers,
@@ -719,6 +722,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
       setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
+      setPaving: (v) => dispatch({ type: "setPaving", value: v }),
+      setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
@@ -768,6 +773,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       skimmers,
       isStepComplete,
       justRestoredProject,
+      state.visualFocus,
     ],
   );
 

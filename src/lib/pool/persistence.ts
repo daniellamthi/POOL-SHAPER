@@ -15,6 +15,16 @@ import {
 
 const STORAGE_KEY = "pool-shaper:project-draft:v1";
 
+function archiveRetiredDraft(raw: string): void {
+  const legacy = JSON.parse(raw);
+  if (legacy?.config?.shape !== "organic") return;
+  const archiveKey = `${STORAGE_KEY}:retired-organic:${legacy.projectId ?? "unknown"}`;
+  // Never overwrite an older archive with different customer data.
+  const target = window.localStorage.getItem(archiveKey);
+  const key = target && target !== raw ? `${archiveKey}:${Date.now()}` : archiveKey;
+  if (window.localStorage.getItem(key) !== raw) window.localStorage.setItem(key, raw);
+}
+
 function hasLocalStorage(): boolean {
   try {
     return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -45,6 +55,13 @@ function sanitizeForStorage(project: ProjectConfiguration): ProjectConfiguration
 export function saveProjectDraft(project: ProjectConfiguration): void {
   if (!hasLocalStorage()) return;
   try {
+    const previous = window.localStorage.getItem(STORAGE_KEY);
+    if (previous) {
+      // If archiving fails (e.g. quota), abort rather than replace the old draft.
+      let legacy: { config?: { shape?: string } } | null = null;
+      try { legacy = JSON.parse(previous); } catch { /* Corrupt drafts are replaceable. */ }
+      if (legacy?.config?.shape === "organic") archiveRetiredDraft(previous);
+    }
     window.localStorage.setItem(
       STORAGE_KEY,
       serializeProjectConfiguration(sanitizeForStorage(project)),
@@ -65,6 +82,13 @@ export function loadProjectDraft(): ProjectConfiguration | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
+    const legacy = JSON.parse(raw);
+    if (legacy?.config?.shape === "organic") {
+      // Retire from the product without destroying the customer's old draft
+      // when the provider subsequently autosaves its fresh configuration.
+      archiveRetiredDraft(raw);
+      return null;
+    }
     return parseProjectConfiguration(raw);
   } catch (error) {
     console.warn("[pool-shaper] discarding unreadable project draft", error);

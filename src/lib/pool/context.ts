@@ -33,6 +33,7 @@ import type { LShapeOrientation } from "./l-shape";
 import type { OrganicShapeParams } from "./organic-shape";
 
 export interface ConfiguratorContextValue {
+  visualFocus: import("./contextual-camera").FocusRequest | null;
   config: PoolConfig;
   step: number;
   outline: Outline;
@@ -82,6 +83,8 @@ export interface ConfiguratorContextValue {
   setLedColor: (value: string) => void;
   setLedIntensity: (value: number) => void;
   setSceneTime: (value: "day" | "night") => void;
+  setPaving: (value: import("./presentation").PavingId) => void;
+  setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
   setInternalStairType: (value: InternalStairType) => void;
   setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;

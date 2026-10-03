@@ -53,6 +53,7 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   const config = configValue as Record<string, unknown>;
   if (!PROJECT_TYPE_IDS.has(config["projectType"] as string | null)) return false;
   if (!POOL_TYPE_IDS.has(config["poolType"] as string | null)) return false;
+  if (!["rectangle", "l-shape", "custom"].includes(config["shape"] as string)) return false;
   if (!SYSTEM_IDS.has(config["system"] as string)) return false;
   if (!OVERFLOW_IDS.has(config["overflowType"] as string)) return false;
   if (!FINISH_IDS.has(config["finish"] as string)) return false;
@@ -72,7 +73,7 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (typeof cornerRadius !== "number" || cornerRadius < 0 || cornerRadius > 1) return false;
   if (config["system"] === "infinity") {
     const shape = config["shape"];
-    if (typeof shape !== "string" || !["rectangle", "l-shape", "organic", "custom"].includes(shape)) return false;
+    if (typeof shape !== "string" || !["rectangle", "l-shape", "custom"].includes(shape)) return false;
     if (!Array.isArray(config["controlPoints"])) return false;
     const edge = config["infinityEdge"] as Record<string, unknown> | undefined;
     if (!edge || edge["enabled"] !== true || !Number.isInteger(edge["side"])) return false;

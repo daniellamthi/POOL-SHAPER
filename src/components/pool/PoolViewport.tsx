@@ -30,8 +30,9 @@ type ViewportProps = SceneProps & {
   onTogglePhotoMode: () => void;
   onSetPhotoModeQuality: (quality: PhotoModeQuality) => void;
   photoModeUnsupported: boolean;
-  /** Starts/cancels/downloads the Blender/Cycles render -- see src/lib/render-pipeline/. */
+  /** Opens final presentation choices; no renderer is invoked. */
   onGeneratePhotorealisticRender: () => void;
+  premiumPresentationAvailable: boolean;
   renderPhase: "idle" | "rendering" | "complete" | "error";
   renderProgress: RenderJobStatus["progress"];
   /** P5: on narrow viewports the live pool can otherwise read as cropped
@@ -41,6 +42,7 @@ type ViewportProps = SceneProps & {
    * repositioned by the parent layout, never remounted). */
   mobileExpanded: boolean;
   onToggleMobileExpanded: () => void;
+  onInspectionView: (view: "review" | "waterline" | "access" | "top" | "infinity") => void;
 };
 
 function ViewportFallback() {
@@ -125,10 +127,12 @@ export const PoolViewport = memo(function PoolViewport({
   onSetPhotoModeQuality,
   photoModeUnsupported,
   onGeneratePhotorealisticRender,
+  premiumPresentationAvailable,
   renderPhase,
   renderProgress,
   mobileExpanded,
   onToggleMobileExpanded,
+  onInspectionView,
   ...scene
 }: ViewportProps) {
   const samples = usePhotoModeSamples();
@@ -152,11 +156,14 @@ export const PoolViewport = memo(function PoolViewport({
         </Suspense>
       </ClientOnly>
 
-      {/* Vignette for depth — purely decorative */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 [background:radial-gradient(120%_92%_at_50%_40%,transparent_52%,color-mix(in_oklab,var(--viewport)_74%,transparent)_100%)]"
-      />
+      <div className="absolute left-3 top-3 z-10">
+        <label className="sr-only" htmlFor="inspection-camera">Vista della piscina</label>
+        <select id="inspection-camera" aria-label="Vista della piscina" value="" onChange={e => onInspectionView(e.target.value as "review" | "waterline" | "access" | "top" | "infinity")}
+          className="min-h-11 max-w-40 rounded-xl border border-hairline bg-card/95 px-3 text-xs text-foreground shadow-sm">
+          <option value="" disabled>Viste piscina</option><option value="review">Hero</option><option value="waterline">Waterline</option><option value="access">Accesso</option><option value="top">Dall’alto</option>
+          {scene.system === "infinity" ? <option value="infinity">Infinity</option> : null}
+        </select>
+      </div>
 
       {scene.photoMode ? <PhotoModeStatus samples={samples} /> : null}
 
@@ -223,12 +230,9 @@ export const PoolViewport = memo(function PoolViewport({
                   <DropdownMenuItem onSelect={onToggleMeasurements}>
                     {scene.showMeasurements ? "Nascondi guide" : "Mostra guide"}
                   </DropdownMenuItem>
-                  <DropdownMenuItem disabled={photoModeUnsupported} onSelect={onTogglePhotoMode}>
-                    Modalità foto {photoModeUnsupported ? "(non supportata)" : ""}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={onGeneratePhotorealisticRender}>
-                    {renderButtonLabel}
-                  </DropdownMenuItem>
+                  {premiumPresentationAvailable ? <DropdownMenuItem onSelect={onGeneratePhotorealisticRender}>
+                    Premium Visualization · prepara
+                  </DropdownMenuItem> : null}
                 </>
               )}
             </DropdownMenuContent>
@@ -272,19 +276,13 @@ export const PoolViewport = memo(function PoolViewport({
             <Expand />
             Reframe
           </Button>
-          {scene.photoMode ? null : (
+          {scene.photoMode || !premiumPresentationAvailable ? null : (
             <Button
               type="button"
               variant={renderPhase === "complete" ? "viewportActive" : "viewport"}
               size="sm"
               onClick={onGeneratePhotorealisticRender}
-              title={
-                renderPhase === "rendering"
-                  ? "Cancel the render"
-                  : renderPhase === "complete"
-                    ? "Download the finished PNG"
-                    : "Renders this configuration through the Blender/Cycles pipeline -- see rendering/blender/"
-              }
+              title="Prepara l’ambiente della futura vista fotografica; rendering non ancora disponibile"
             >
               {renderPhase === "rendering" ? (
                 <>
@@ -304,22 +302,11 @@ export const PoolViewport = memo(function PoolViewport({
                   <Aperture />
                   {renderPhase === "error"
                     ? "Retry Photorealistic Render"
-                    : "Generate Photorealistic Render"}
+                    : "Premium Visualization"}
                 </>
               )}
             </Button>
           )}
-          <Button
-            type="button"
-            variant={scene.photoMode ? "viewportActive" : "viewport"}
-            size="sm"
-            onClick={onTogglePhotoMode}
-            disabled={photoModeUnsupported}
-            title={photoModeUnsupported ? "Not supported on this device" : undefined}
-          >
-            <Camera />
-            {scene.photoMode ? "Back to Live" : "Photo Mode"}
-          </Button>
         </div>
       </div>
     </div>
