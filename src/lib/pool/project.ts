@@ -19,7 +19,7 @@ import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
 import { clampLShapeDimensions } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
-import { clampInfinityEdgeParams, infinityZonesForOutline } from "./infinity-edge";
+import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem } from "./infinity-edge";
 import { buildOutline } from "./geometry";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
@@ -169,30 +169,28 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // "custom" free-draw outline has none, so a project that somehow saved
   // `system: "infinity"` against "custom" falls back to skimmer rather than
   // rendering a system that was never built for that shape.
-  const systemIsInfinityCapable = infinityZonesForOutline(buildOutline(restored.shape, dimensions, restored.controlPoints), restored.shape).length > 0;
-  const system: PoolConfig["system"] =
-    restored.system === "infinity" && !systemIsInfinityCapable ? "skimmer" : restored.system;
+  const outline = buildOutline(restored.shape, dimensions, restored.controlPoints);
+  const system = compatiblePoolSystem(restored.system, outline, restored.shape, restored.poolType);
+  const infinityZones = compatibleInfinityZones(outline, restored.shape, restored.poolType);
   // Only ever attach an `infinityEdge` field when the project actually has
   // one to normalise (already carried the field, or is genuinely on
   // "infinity") -- a project that never touched Infinity must round-trip
   // byte-for-byte identical, never gain a new field it didn't have before.
   let infinityEdge =
-    restored.infinityEdge !== undefined || system === "infinity"
-      ? clampInfinityEdgeParams(systemIsInfinityCapable ? restored.infinityEdge : undefined)
+    system === "infinity"
+      ? clampInfinityEdgeParams(restored.infinityEdge)
       : undefined;
   if (
     infinityEdge?.enabled &&
-    !infinityZonesForOutline(
-      buildOutline(restored.shape, dimensions, restored.controlPoints),
-      restored.shape,
-    ).some((z) => z.side === infinityEdge?.side)
+    !infinityZones.some((z) => z.side === infinityEdge?.side)
   )
     infinityEdge = clampInfinityEdgeParams(undefined);
+  const { infinityEdge: _savedInfinityEdge, ...restoredWithoutEdge } = restored;
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
     config: {
-      ...restored,
+      ...restoredWithoutEdge,
       // External access is only built above ground. Restore the same valid
       // selection in the scene, summary and render export.
       features: normalizeComfortFeatures(restored.poolType === "above-ground"
@@ -204,6 +202,9 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
                 (id !== "sunShelf" && id !== "integratedBench")),
           )),
       ledIntensity: normalisedLedIntensity(restored.ledIntensity),
+      ...(restored.sceneTime !== undefined
+        ? { sceneTime: restored.sceneTime === "night" ? "night" as const : "day" as const }
+        : {}),
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",

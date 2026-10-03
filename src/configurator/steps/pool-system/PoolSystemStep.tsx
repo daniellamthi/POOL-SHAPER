@@ -3,7 +3,7 @@ import { useConfigurator } from "@/lib/pool/context";
 import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
 import { InfinitySideSelector } from "./InfinitySideSelector";
-import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
+import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 
 /**
  * Step 4 — selects the hydraulic system (Acqua / Linea d'acqua).
@@ -33,7 +33,10 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
   // all and stays gated off, mirroring the same gate `infinityZonesForOutline`
   // itself applies, so the UI never offers a selection the 3D view/export
   // guard would then have to silently reject.
-  const infinityAvailable = infinityZonesForOutline(outline, config.shape).length > 0;
+  const infinityAvailable = compatibleInfinityZones(outline, config.shape, config.poolType).length > 0;
+  const infinityUnavailableReason = config.poolType === "above-ground"
+    ? "Infinity non disponibile per piscine fuori terra."
+    : "Infinity non ancora disponibile per questa forma.";
 
   return (
     <StepSection
@@ -118,7 +121,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
           selected={config.system === "infinity"}
           onSelect={() => setSystem("infinity")}
           disabled={!infinityAvailable}
-          disabledReason="Infinity non ancora disponibile per questa forma."
+          disabledReason={infinityUnavailableReason}
         />
         <div
           inert={config.system !== "infinity"}
@@ -138,8 +141,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
             ) : (
               <div className="rounded-2xl border border-hairline p-5">
                 <p className="text-[13px] font-light text-muted-foreground">
-                  Infinity non ancora disponibile per questa forma. Torna allo step Forma e
-                  seleziona Rettangolare per attivarlo.
+                  {infinityUnavailableReason}
                 </p>
               </div>
             )}

@@ -13,6 +13,7 @@ import type {
 } from "@/lib/pool/types";
 import { formatNumber } from "@/lib/pool/format";
 import { LeadRequestDialog } from "@/configurator/steps/final-review/LeadRequestDialog";
+import { MOSAIC_FINISHES, getMosaicFinish } from "@/configurator/materials/interior-textures";
 
 const AREAS: ReadonlyArray<{ id: RenovationArea; title: string; description: string }> = [
   { id: "interiorFinish", title: "Interior Finish", description: "Replace liner or mosaic." },
@@ -126,7 +127,7 @@ const EQUIPMENT: ReadonlyArray<{ id: EquipmentUpgrade; title: string }> = [
 ];
 
 export function RenovationDetailsStep() {
-  const { config, renovation, metrics, skimmers, setFinish, setLinerColor, updateRenovation } =
+  const { config, renovation, metrics, skimmers, setFinish, setLinerColor, setMosaicFinish, updateRenovation } =
     useConfigurator();
   const selected = (area: RenovationArea) =>
     renovation.areas.includes(area) || renovation.areas.includes("complete");
@@ -159,19 +160,38 @@ export function RenovationDetailsStep() {
               />
             ))}
           </div>
-          <p className="label-xs">Finish colour</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {LINER_COLORS.map((item) => (
-              <SwatchOption
-                key={item.id}
-                title={item.title}
-                hex={item.hex}
-                texture={item.texture}
-                selected={config.linerColor === item.id}
-                onSelect={() => setLinerColor(item.id)}
-              />
-            ))}
-          </div>
+          {config.finish === "liner" ? (
+            <>
+              <p className="label-xs">PVC liner finish</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="group" aria-label="PVC liner finishes">
+                {LINER_COLORS.map((item) => (
+                  <SwatchOption
+                    key={item.id}
+                    title={item.title}
+                    hex={item.hex}
+                    texture={item.texture}
+                    selected={config.linerColor === item.id}
+                    onSelect={() => setLinerColor(item.id)}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="label-xs">Mosaic finish</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" role="group" aria-label="Mosaic finishes">
+                {MOSAIC_FINISHES.map((item) => (
+                  <OptionCard
+                    key={item.id}
+                    title={item.name}
+                    selected={config.mosaicFinish === item.id}
+                    onSelect={() => setMosaicFinish(item.id)}
+                    meta={<img src={item.preview} alt="" className="aspect-square w-full rounded-xl object-cover" />}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </DetailSection>
       ) : null}
       {selected("filtration") ? (
@@ -340,7 +360,9 @@ export function RenovationReviewStep() {
   const areaNames = AREAS.filter((item) => renovation.areas.includes(item.id)).map(
     (item) => item.title,
   );
-  const color = LINER_COLORS.find((item) => item.id === config.linerColor)?.title;
+  const finishName = config.finish === "mosaic"
+    ? getMosaicFinish(config.mosaicFinish).name
+    : LINER_COLORS.find((item) => item.id === config.linerColor)?.title;
   const filtration = FILTRATION.filter((item) => renovation.filtrationWorks.includes(item.id)).map(
     (item) => item.title,
   );
@@ -360,7 +382,7 @@ export function RenovationReviewStep() {
     ["Customer", `${config.customer.name} ${config.customer.surname}`],
     ["Location", `${config.customer.city}, ${config.customer.country}`],
     ...(renovation.areas.includes("interiorFinish") || renovation.areas.includes("complete")
-      ? [["Interior finish", `${renovation.currentFinish} → ${config.finish} · ${color}`]]
+      ? [["Interior finish", `${renovation.currentFinish} → ${config.finish} · ${finishName}`]]
       : []),
     ...(renovation.areas.includes("filtration") || renovation.areas.includes("complete")
       ? [["Filtration work", filtration.length ? filtration.join(", ") : "Consultation required"]]

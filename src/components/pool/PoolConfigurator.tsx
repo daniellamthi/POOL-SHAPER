@@ -116,6 +116,7 @@ function ConfiguratorLayout() {
     canContinue,
     isStepComplete,
     setInfinitySide,
+    setSceneTime,
     justRestoredProject,
     dismissRestoredProjectNotice,
   } = useConfigurator();
@@ -155,8 +156,9 @@ function ConfiguratorLayout() {
   );
 
   const [showMeasurements, setShowMeasurements] = useState(true);
-  const [sceneTime, setSceneTime] = useState<SceneTimeOfDay>("day");
+  const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
   const [frameToken, setFrameToken] = useState(0);
+  const stepContentRef = useRef<HTMLDivElement>(null);
   // P5: mobile-only fullscreen presentation of the SAME live viewport --
   // never a second Canvas/renderer, just a CSS repositioning of the
   // existing <main>, so camera/orbit state carries over untouched.
@@ -172,6 +174,13 @@ function ConfiguratorLayout() {
   const [photoModeUnsupported, setPhotoModeUnsupported] = useState(false);
   const toggleMeasurements = useCallback(() => setShowMeasurements((value) => !value), []);
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
+  useEffect(() => {
+    stepContentRef.current?.scrollTo({ top: 0 });
+    if (window.innerWidth < 1024) window.scrollTo({ top: 0 });
+  }, [step]);
+  useEffect(() => {
+    if (config.projectType !== "renovation" && STEPS[step]?.id === "system") reframe();
+  }, [config.projectType, config.system, config.overflowType, step, reframe]);
   const togglePhotoMode = useCallback(() => {
     if (photoModeUnsupported) return;
     setPhotoMode((value) => !value);
@@ -296,13 +305,7 @@ function ConfiguratorLayout() {
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
     : activeStepId === "system"
-      ? config.system === "overflow"
-        ? config.overflowType === "visible"
-          ? "overflow-visible"
-          : "overflow-hidden"
-        : config.system === "infinity"
-          ? "infinity"
-          : "skimmer-detail"
+      ? config.system === "infinity" ? "infinity" : "review"
       : activeStepId === "style"
         ? "liner"
         : activeStepId === "access"
@@ -318,7 +321,7 @@ function ConfiguratorLayout() {
             : "overview";
   const stepContent =
     !renovationWorkflow && activeStepId === "system" ? (
-      <PoolSystemStep onSkimmerSelect={reframe} />
+      <PoolSystemStep />
     ) : !renovationWorkflow && activeStepId === "lighting" ? (
       <LightingStep sceneTime={sceneTime} onSceneTimeChange={setSceneTime} />
     ) : (
@@ -328,7 +331,7 @@ function ConfiguratorLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-background lg:h-screen lg:overflow-hidden">
       <IntroVeil />
-      <header className="z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/90 px-6 py-4 backdrop-blur-sm sm:px-9">
+      <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/95 px-6 py-4 backdrop-blur-sm sm:px-9 lg:static">
         <div className="flex min-w-0 items-center">
           <BrandLogo className="h-8 max-w-[112px]" />
         </div>
@@ -350,7 +353,7 @@ function ConfiguratorLayout() {
 
       <div className="flex flex-1 flex-col-reverse gap-3 p-3 lg:min-h-0 lg:flex-row lg:p-4">
         <aside className="relative z-10 flex w-full flex-col rounded-[1.75rem] border border-hairline bg-background/95 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.85)] lg:w-[452px] xl:w-[512px]">
-          <div className="border-b border-hairline/80 px-5 pb-6 pt-6 sm:px-8">
+          <div className="border-b border-hairline/80 px-5 pb-4 pt-4 sm:px-8 lg:pb-6 lg:pt-6">
             <StepIndicator
               current={step}
               steps={activeSteps}
@@ -360,7 +363,7 @@ function ConfiguratorLayout() {
             />
           </div>
 
-          <div className="scroll-slim flex-1 overflow-y-auto px-5 pb-18 pt-8 sm:px-8 lg:min-h-0">
+          <div ref={stepContentRef} className="scroll-slim flex-1 overflow-y-auto px-5 pb-8 pt-5 sm:px-8 lg:min-h-0 lg:pb-18 lg:pt-8">
             {stepContent}
           </div>
 
@@ -395,7 +398,7 @@ function ConfiguratorLayout() {
             "relative w-full overflow-hidden bg-viewport",
             mobileExpanded
               ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
-              : "h-[46vh] min-h-[320px] scroll-mt-20 rounded-[1.75rem] border border-hairline sm:h-[54vh] lg:h-auto lg:flex-1",
+              : "h-[42dvh] min-h-[260px] scroll-mt-20 rounded-[1.75rem] border border-hairline sm:h-[54vh] lg:h-auto lg:flex-1",
           )}
         >
           <PoolViewport

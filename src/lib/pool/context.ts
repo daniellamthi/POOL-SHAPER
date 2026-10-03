@@ -81,6 +81,7 @@ export interface ConfiguratorContextValue {
   togglePoolFeature: (value: PoolFeatureId) => void;
   setLedColor: (value: string) => void;
   setLedIntensity: (value: number) => void;
+  setSceneTime: (value: "day" | "night") => void;
   setInternalStairType: (value: InternalStairType) => void;
   setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;

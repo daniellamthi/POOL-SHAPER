@@ -12,7 +12,7 @@ export function StepSection({
   children: ReactNode;
 }) {
   return (
-    <section key={title} className="animate-rise flex flex-col gap-14">
+    <section key={title} className="animate-rise flex flex-col gap-4 lg:gap-14">
       <header className="flex flex-col gap-5">
         <span aria-hidden className="h-px w-8 bg-foreground/35" />
         <h2 className="text-[38px] leading-[1.02] font-extralight tracking-[-0.045em] text-foreground sm:text-[42px]">
@@ -60,7 +60,7 @@ export function OptionCard({
       disabled={disabled}
       title={disabled ? disabledReason : undefined}
       className={cn(
-        "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-7 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992]",
+        "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-4 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992] sm:py-7",
         disabled
           ? "cursor-not-allowed border-hairline bg-transparent opacity-40"
           : selected

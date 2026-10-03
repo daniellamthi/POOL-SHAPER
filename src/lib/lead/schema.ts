@@ -9,6 +9,9 @@
  */
 import { z } from "zod";
 import type { ProjectConfiguration } from "@/lib/pool/project";
+import type { PoolShapeId, PoolType } from "@/lib/pool/types";
+import { buildOutline } from "@/lib/pool/geometry";
+import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "./types";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -23,7 +26,7 @@ const TIMING_IDS = [
   "evaluating",
 ] as const satisfies readonly LeadTimingId[];
 
-const SYSTEM_IDS = new Set(["skimmer", "overflow"]);
+const SYSTEM_IDS = new Set(["skimmer", "overflow", "infinity"]);
 const OVERFLOW_IDS = new Set(["hidden", "visible"]);
 const FINISH_IDS = new Set(["liner", "mosaic"]);
 const PROJECT_TYPE_IDS = new Set([null, "new", "renovation"]);
@@ -67,6 +70,26 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (!isFiniteNumberInRange(dimensions["depth"], 0, 10)) return false;
   const cornerRadius = dimensions["cornerRadius"];
   if (typeof cornerRadius !== "number" || cornerRadius < 0 || cornerRadius > 1) return false;
+  if (config["system"] === "infinity") {
+    const shape = config["shape"];
+    if (typeof shape !== "string" || !["rectangle", "l-shape", "organic", "custom"].includes(shape)) return false;
+    if (!Array.isArray(config["controlPoints"])) return false;
+    const edge = config["infinityEdge"] as Record<string, unknown> | undefined;
+    if (!edge || edge["enabled"] !== true || !Number.isInteger(edge["side"])) return false;
+    try {
+      const outline = buildOutline(
+        shape as PoolShapeId,
+        dimensions as unknown as ProjectConfiguration["config"]["dimensions"],
+        config["controlPoints"] as ProjectConfiguration["config"]["controlPoints"],
+      );
+      if (!compatibleInfinityZones(outline, shape as PoolShapeId, config["poolType"] as PoolType | null)
+        .some((zone) => zone.side === edge["side"])) return false;
+    } catch {
+      return false;
+    }
+  } else if ((config["infinityEdge"] as { enabled?: unknown } | undefined)?.enabled === true) {
+    return false;
+  }
   return true;
 }, "Configurazione progetto non valida");
 

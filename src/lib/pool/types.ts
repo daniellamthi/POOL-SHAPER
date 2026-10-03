@@ -186,6 +186,8 @@ export interface PoolConfig {
   /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before
    * the control existed; readers substitute LED_OPTICS.defaultIntensity. */
   ledIntensity?: number;
+  /** Infinity presentation choice; absent legacy drafts display Day. */
+  sceneTime?: "day" | "night";
   /** Only meaningful while `system === "infinity"` (Rectangle and L-shape,
    * this pass). Always normalised through `clampInfinityEdgeParams`
    * (infinity-edge.ts) before reaching geometry, the same contract every

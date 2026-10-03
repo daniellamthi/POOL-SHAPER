@@ -13,6 +13,7 @@ import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
 import { leadSubmissionInputSchema } from "../src/lib/lead/schema";
 import { formatLeadEmail } from "../src/lib/lead/formatLeadEmail";
 import type { LeadSubmission } from "../src/lib/lead/types";
+import { clampInfinityEdgeParams } from "../src/lib/pool/infinity-edge";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -138,6 +139,48 @@ let validParsed: ReturnType<typeof leadSubmissionInputSchema.safeParse>;
   );
   validParsed = result;
   console.log("PASS — E) valid payload accepted by server-side schema");
+}
+
+// --- Infinity uses the same canonical lead payload as the other systems. ---
+{
+  const infinityProject: ProjectConfiguration = {
+    ...project,
+    config: {
+      ...fullConfig,
+      system: "infinity",
+      infinityEdge: clampInfinityEdgeParams({ enabled: true, side: 0 }),
+    },
+  };
+  for (const system of ["skimmer", "overflow", "infinity"] as const) {
+    const candidate = system === "infinity" ? infinityProject : {
+      ...project, config: { ...fullConfig, system },
+    };
+    assert(leadSubmissionInputSchema.safeParse(validLeadInput({ project: candidate })).success,
+      `valid ${system} quote must pass server validation`);
+  }
+  const invalidAboveGround = {
+    ...infinityProject,
+    config: { ...infinityProject.config, poolType: "above-ground" },
+  };
+  assert(!leadSubmissionInputSchema.safeParse(validLeadInput({ project: invalidAboveGround })).success,
+    "above-ground Infinity must be rejected, not quoted as a stale system");
+  const invalidSide = {
+    ...infinityProject,
+    config: { ...infinityProject.config, infinityEdge: clampInfinityEdgeParams({ enabled: true, side: 99 }) },
+  };
+  assert(!leadSubmissionInputSchema.safeParse(validLeadInput({ project: invalidSide })).success,
+    "Infinity with no valid edge must not be quoted");
+  const submission: LeadSubmission = {
+    requestId: crypto.randomUUID(), projectId: infinityProject.projectId,
+    schemaVersion: infinityProject.schemaVersion, createdAt: new Date().toISOString(),
+    customer: validLeadInput().customer as LeadSubmission["customer"],
+    commercial: validLeadInput().commercial as LeadSubmission["commercial"],
+    project: infinityProject, privacy: { accepted: true, marketingConsent: false }, attachments: [],
+  };
+  const email = formatLeadEmail(submission).text;
+  assert(email.includes("Infinity") && email.includes("Lato Infinity: Lato 1"),
+    "Infinity side must survive into the commercial email");
+  console.log("PASS — Skimmer/Overflow/Infinity quotes; invalid above-ground/side rejected");
 }
 
 // --- Payload survives with every canonical field intact ---

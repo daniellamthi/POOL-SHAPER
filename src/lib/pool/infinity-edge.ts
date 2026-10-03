@@ -22,7 +22,7 @@
  * below retain the configurator's compact parametric assembly; they are
  * design defaults, NOT measurements copied from that larger reference.
  */
-import type { Outline, PoolShapeId } from "./types";
+import type { Outline, PoolShapeId, PoolType, SystemType } from "./types";
 import { outlineBounds, outlinePerimeter, pointAtPerimeter } from "./geometry";
 import { classifyOutlineCorners } from "./l-shape";
 import { ORGANIC_SHAPE_GUARDRAILS } from "./organic-shape";
@@ -358,6 +358,26 @@ export function infinityZonesForOutline(
   if (outline.length === 4) return rectangleInfinityZones(outline);
   if (outline.length === 6) return lShapeInfinityZones(outline);
   return [];
+}
+
+/** One compatibility rule shared by state, restore, the selector and lead validation. */
+export function compatibleInfinityZones(
+  outline: Outline,
+  shape: PoolShapeId,
+  poolType: PoolType | null,
+): readonly RectangleInfinityZone[] {
+  return poolType === "above-ground" ? [] : infinityZonesForOutline(outline, shape);
+}
+
+export function compatiblePoolSystem(
+  system: SystemType,
+  outline: Outline,
+  shape: PoolShapeId,
+  poolType: PoolType | null,
+): SystemType {
+  return system === "infinity" && compatibleInfinityZones(outline, shape, poolType).length === 0
+    ? "skimmer"
+    : system;
 }
 
 /** Custom candidates are real supporting edges of the outline, not bounds.

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Html, Line } from "@react-three/drei";
+import { Vector3 } from "three";
 import { formatNumber } from "@/lib/pool/format";
 import type { Outline } from "@/lib/pool/types";
 
@@ -20,6 +21,19 @@ interface Props {
 
 const LABEL_CLASS =
   "pointer-events-none whitespace-nowrap select-none rounded-full border border-hairline bg-panel px-3 py-1 font-mono text-[10px] font-light tracking-[0.08em] text-foreground";
+
+const labelPosition: NonNullable<React.ComponentProps<typeof Html>["calculatePosition"]> = (object, camera, size) => {
+  const projected = object.getWorldPosition(new Vector3()).project(camera);
+  const x = (projected.x * 0.5 + 0.5) * size.width;
+  const y = (-projected.y * 0.5 + 0.5) * size.height;
+  const mobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const side = mobile ? 62 : 55;
+  const bottom = mobile ? 112 : 38;
+  return [
+    Math.min(Math.max(x, side), Math.max(side, size.width - side)),
+    Math.min(Math.max(y, 24), Math.max(24, size.height - bottom)),
+  ];
+};
 
 /** Dimension guides drawn around the live geometry. */
 export function PoolMeasurements({
@@ -61,7 +75,7 @@ export function PoolMeasurements({
         color={color}
         lineWidth={1}
       />
-      <Html position={[0, y, zLine]} center zIndexRange={[10, 0]}>
+      <Html position={[0, y, zLine]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>L {formatNumber(length, 2)} m</span>
       </Html>
 
@@ -73,7 +87,7 @@ export function PoolMeasurements({
         color={color}
         lineWidth={1}
       />
-      <Html position={[xLine, y, 0]} center zIndexRange={[10, 0]}>
+      <Html position={[xLine, y, 0]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>W {formatNumber(width, 2)} m</span>
       </Html>
 
@@ -85,7 +99,7 @@ export function PoolMeasurements({
         color={color}
         lineWidth={1}
       />
-      <Html position={[-xLine, (wallTopY + floorY) / 2, zLine]} center zIndexRange={[10, 0]}>
+      <Html position={[-xLine, (wallTopY + floorY) / 2, zLine]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>{depthLabel}</span>
       </Html>
     </group>

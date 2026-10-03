@@ -62,7 +62,7 @@ import type {
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
-import { clampInfinityEdgeParams, infinityZonesForOutline } from "./infinity-edge";
+import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline } from "./infinity-edge";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -90,6 +90,7 @@ type Action =
   | { type: "togglePoolFeature"; value: PoolFeatureId }
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
+  | { type: "setSceneTime"; value: "day" | "night" }
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
   | { type: "setPoolAccess"; value: PoolAccess }
@@ -154,6 +155,7 @@ function createInitialState(): State {
       features: [],
       ledColor: "#ffffff",
       ledIntensity: LED_OPTICS.defaultIntensity,
+      sceneTime: "day",
       poolAccess: null,
       internalStairType: "linear",
       equipment: [],
@@ -165,7 +167,15 @@ function createInitialState(): State {
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+function withoutInfinityEdge(config: PoolConfig): PoolConfig {
+  if (config.infinityEdge === undefined) return config;
+  const next = { ...config };
+  delete next.infinityEdge;
+  return next;
+}
+
 function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
+  if (config.system !== "infinity") return withoutInfinityEdge(config);
   if (!config.infinityEdge) return config;
   const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
   const valid =
@@ -192,8 +202,20 @@ function reducer(state: State, action: Action): State {
         ...state,
         config: { ...config, ledIntensity: normalisedLedIntensity(action.value) },
       };
-    case "setProjectType":
-      return { ...state, config: { ...config, projectType: action.value } };
+    case "setSceneTime":
+      return { ...state, config: { ...config, sceneTime: action.value } };
+    case "setProjectType": {
+      if (config.projectType === action.value) return state;
+      // A renovation describes an existing pool; do not inherit the new-pool
+      // system, finish, geometry or accessories from the previous mode.
+      const fresh = createInitialState();
+      return {
+        ...state,
+        step: 0,
+        config: { ...fresh.config, projectType: action.value, customer: config.customer },
+        renovation: fresh.renovation,
+      };
+    }
     case "setPoolType": {
       const structure =
         action.value === "in-ground"
@@ -206,7 +228,14 @@ function reducer(state: State, action: Action): State {
       const features = action.value === "above-ground"
         ? config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench")
         : config.features.filter((id) => id !== "externalStaircase");
-      return { ...state, config: { ...config, poolType: action.value, structure, features } };
+      const system = compatiblePoolSystem(
+        config.system,
+        buildOutline(config.shape, config.dimensions, config.controlPoints),
+        config.shape,
+        action.value,
+      );
+      const nextConfig = { ...config, poolType: action.value, structure, features, system };
+      return { ...state, config: system === "infinity" ? nextConfig : withoutInfinityEdge(nextConfig) };
     }
     case "setPoolStructure":
       return { ...state, config: { ...config, structure: action.value } };
@@ -258,9 +287,12 @@ function reducer(state: State, action: Action): State {
       // normalisation already applies on load/save, so the UI and the 3D
       // view are never left showing a system that has no zones for the new
       // shape until a reload happens to correct it.
-      const infinityCapableShape = infinityZonesForOutline(buildOutline(action.value, dimensions, config.controlPoints), action.value).length > 0;
-      const system =
-        config.system === "infinity" && !infinityCapableShape ? "skimmer" : config.system;
+      const system = compatiblePoolSystem(
+        config.system,
+        buildOutline(action.value, dimensions, config.controlPoints),
+        action.value,
+        config.poolType,
+      );
       return {
         ...state,
         config: validateInfinity(
@@ -367,11 +399,20 @@ function reducer(state: State, action: Action): State {
           action.value !== config.dimensions.organicMirror,
         ),
       };
-    case "setSystem":
-      return { ...state, config: { ...config, system: action.value } };
+    case "setSystem": {
+      const system = compatiblePoolSystem(
+        action.value,
+        buildOutline(config.shape, config.dimensions, config.controlPoints),
+        config.shape,
+        config.poolType,
+      );
+      const nextConfig = { ...config, system };
+      return { ...state, config: system === "infinity" ? nextConfig : withoutInfinityEdge(nextConfig) };
+    }
     case "setOverflowType":
       return { ...state, config: { ...config, overflowType: action.value } };
     case "setInfinitySide":
+      if (!compatibleInfinityZones(buildOutline(config.shape, config.dimensions, config.controlPoints), config.shape, config.poolType).some((zone) => zone.side === action.value)) return state;
       // Rectangle and L-shape, this pass -- the Acqua step never dispatches
       // this for any other shape (see the mini-plan's own gating), but the
       // reducer itself never trusts that and re-normalises through the one
@@ -677,6 +718,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
+      setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),

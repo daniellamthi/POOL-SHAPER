@@ -9,6 +9,8 @@ import {
 import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
 import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
 import { LED_OPTICS } from "../src/lib/pool/led-optics";
+import { buildOutline } from "../src/lib/pool/geometry";
+import { clampInfinityEdgeParams, compatiblePoolSystem } from "../src/lib/pool/infinity-edge";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -115,6 +117,34 @@ assert(
   JSON.stringify(roundTripped.renovation) === JSON.stringify(fullRenovation),
   "renovation must be byte-for-byte identical after round trip",
 );
+
+// The compatibility rule is shared by live state, UI and project restoration.
+const rectangleConfig: PoolConfig = { ...fullConfig, shape: "rectangle", dimensions: { ...fullConfig.dimensions, cornerRadius: 0 } };
+const rectangleOutline = buildOutline(rectangleConfig.shape, rectangleConfig.dimensions, rectangleConfig.controlPoints);
+assert(compatiblePoolSystem("infinity", rectangleOutline, "rectangle", "in-ground") === "infinity",
+  "in-ground rectangular Infinity must remain available");
+assert(compatiblePoolSystem("infinity", rectangleOutline, "rectangle", "above-ground") === "skimmer",
+  "above-ground must resolve Infinity to Skimmer immediately");
+for (const sceneTime of ["day", "night"] as const) {
+  const restored = parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration(
+    createProjectId(), { ...rectangleConfig, sceneTime }, fullRenovation,
+  )));
+  assert(restored.config.sceneTime === sceneTime, `${sceneTime} must survive save/refresh`);
+}
+assert(roundTripped.config.sceneTime === undefined,
+  "a legacy draft without a Day/Night choice must still display Day by default");
+const invalidTime = parseProjectConfiguration(JSON.stringify(toProjectConfiguration(
+  createProjectId(), { ...rectangleConfig, sceneTime: "sunset" as "day" }, fullRenovation,
+)));
+assert(invalidTime.config.sceneTime === "day", "invalid saved presentation choice must normalize to Day");
+const restoredAboveGround = parseProjectConfiguration(JSON.stringify(toProjectConfiguration(
+  createProjectId(), {
+    ...rectangleConfig, poolType: "above-ground", system: "infinity",
+    infinityEdge: clampInfinityEdgeParams({ enabled: true, side: 0 }),
+  }, fullRenovation,
+)));
+assert(restoredAboveGround.config.system === "skimmer" && restoredAboveGround.config.infinityEdge === undefined,
+  "saved above-ground Infinity must restore as Skimmer without a stale edge");
 
 // 4. Hidden/Visible Overflow survives.
 assert(roundTripped.config.system === "overflow", "system must survive");

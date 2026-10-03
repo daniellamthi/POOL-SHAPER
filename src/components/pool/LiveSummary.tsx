@@ -75,11 +75,11 @@ export function LiveSummary() {
   ] as const;
 
   return (
-    <aside
-      className="pointer-events-none absolute right-6 top-6 z-10 hidden w-56 border-l border-hairline/80 bg-card/88 px-4 py-3.5 text-foreground backdrop-blur-sm xl:block"
+    <details
+      className="absolute right-6 top-6 z-10 hidden w-56 border border-hairline/80 bg-card/92 px-4 py-2.5 text-foreground shadow-sm backdrop-blur-sm xl:block"
       aria-label="Riepilogo configurazione"
     >
-      <p className="label-xs mb-2.5">Specifica live</p>
+      <summary className="label-xs cursor-pointer select-none">Specifica live</summary>
       <dl>
         {rows.map(([label, value]) => (
           <div
@@ -93,6 +93,6 @@ export function LiveSummary() {
           </div>
         ))}
       </dl>
-    </aside>
+    </details>
   );
 }

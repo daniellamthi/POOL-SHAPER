@@ -18,7 +18,8 @@ import {
   PROJECT_SCHEMA_VERSION,
   type ProjectConfiguration,
 } from "../src/lib/pool/project";
-import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
+import { DEFAULT_MOSAIC_FINISH_ID, MOSAIC_FINISHES, getMosaicFinish } from "../src/configurator/materials/interior-textures";
+import { resolveMaterials } from "../src/lib/pool/materials";
 import type { PoolConfig, RenovationConfig, UploadedFile } from "../src/lib/pool/types";
 import { leadSubmissionInputSchema } from "../src/lib/lead/schema";
 import { formatLeadEmail } from "../src/lib/lead/formatLeadEmail";
@@ -324,6 +325,7 @@ const renovationConfig: PoolConfig = {
   ...fullConfig,
   projectType: "renovation",
   finish: "mosaic",
+  mosaicFinish: MOSAIC_FINISHES[1]!.id,
   uploads: [],
 };
 
@@ -416,6 +418,17 @@ function validRenovationInput(overrides: Record<string, unknown> = {}) {
     !text.includes("Illuminazione LED"),
     "irrelevant new-pool-only fields (LED) must not appear in a renovation email",
   );
+  const selectedMosaic = getMosaicFinish(renovationConfig.mosaicFinish);
+  assert(resolveMaterials(renovationConfig).surface.textureUrl === selectedMosaic.texture,
+    "Renovation preview must render the selected actual mosaic, not PVC");
+  assert(text.includes(selectedMosaic.name),
+    "Renovation quote must name the same mosaic as the preview and Review");
+  const pvcConfig: PoolConfig = { ...renovationConfig, finish: "liner", linerColor: "motionSandBeach179" };
+  assert(resolveMaterials(pvcConfig).surface.textureUrl.includes("motion-sand-beach-179"),
+    "Renovation PVC preview must use the selected liner texture");
+  const pvcEmail = formatLeadEmail({ ...submission, project: { ...renovationProject, config: pvcConfig } }).text;
+  assert(pvcEmail.includes("Motion Sand Beach"),
+    "Renovation PVC quote must name the selected liner, not the stored mosaic");
   console.log(
     "PASS — B) renovation commercial email adapts content (current situation, interventions, problems) instead of reusing new-pool fields",
   );
