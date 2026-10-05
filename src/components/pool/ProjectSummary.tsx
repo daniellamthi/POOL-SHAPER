@@ -25,6 +25,7 @@ import {
   STRUCTURE_LABEL,
   systemHeadline,
 } from "@/configurator/steps/final-review/summary-labels";
+import { finishDescription } from "@/lib/pool/structure-finish";
 
 const stepIndex = (id: string) => STEPS.findIndex((step) => step.id === id);
 
@@ -151,8 +152,17 @@ export function ProjectSummary() {
   const isMosaic = config.finish === "mosaic";
   const mosaicFinish = isMosaic ? getMosaicFinish(config.mosaicFinish) : null;
   const linerColor = LINER_COLORS.find((option) => option.id === config.linerColor);
-  const finishTitle = isMosaic ? (mosaicFinish?.name ?? "Mosaico") : (linerColor?.title ?? "Liner");
-  const finishHint = isMosaic ? MOSAIC_WATER_CHARACTER : linerWaterCharacter(config.linerColor);
+  const noAdditionalFinish = config.finish === "none";
+  const finishTitle = noAdditionalFinish
+    ? finishDescription(config.structure, config.finish)
+    : isMosaic
+      ? (mosaicFinish?.name ?? "Mosaico")
+      : (linerColor?.title ?? "Liner");
+  const finishHint = noAdditionalFinish
+    ? "Pareti, fondo e superfici integrate in acciaio inox satinato a vista"
+    : isMosaic
+      ? MOSAIC_WATER_CHARACTER
+      : linerWaterCharacter(config.linerColor);
 
   const comfortItems = [
     ...(config.poolAccess
@@ -219,6 +229,7 @@ export function ProjectSummary() {
 
       <Section title="La tua piscina" onEdit={editStep(dimensionsStepIndex)}>
         <Row label="Tipologia" value={poolType} />
+        {config.structure ? <Row label="Struttura" value={STRUCTURE_LABEL[config.structure]} /> : null}
         <Row label="Pavimentazione" value={PAVING.find(p => p.id === pavingId(config.paving))!.label} />
         <Row label="Dimensioni" value={dimensionsSentence} />
         {isSlopedFloor ? (
@@ -244,7 +255,9 @@ export function ProjectSummary() {
           value={finishTitle}
           hint={finishHint}
           swatch={
-            isMosaic ? (
+            noAdditionalFinish ? (
+              <Swatch hex="#bfc6c8" />
+            ) : isMosaic ? (
               <Swatch hex="#c9c2b4" texture={mosaicFinish?.preview} />
             ) : (
               <Swatch hex={linerColor?.hex ?? "#dfe9ec"} texture={linerColor?.texture} />
@@ -315,9 +328,6 @@ export function ProjectSummary() {
           Scopri i dettagli tecnici
         </summary>
         <dl className="mt-5 flex flex-col gap-3.5">
-          {config.structure ? (
-            <Row label="Struttura" value={STRUCTURE_LABEL[config.structure]} />
-          ) : null}
           {config.system === "skimmer" ? (
             <Row
               label="Skimmer"

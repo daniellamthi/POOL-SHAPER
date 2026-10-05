@@ -80,6 +80,17 @@ function resolveFinishDescriptor(
   config: PoolConfig,
   materials: ReturnType<typeof resolveMaterials>,
 ) {
+  if (config.finish === "none") {
+    return {
+      material: "visible-stainless-steel" as const,
+      colorId: "visible-stainless-steel",
+      title: "Acciaio inox satinato a vista",
+      baseColorHex: "#bfc6c8",
+      textureUrl: null,
+      roughness: 0.32,
+      metalness: 1,
+    };
+  }
   if (config.finish === "mosaic") {
     const mosaic = getMosaicFinish(config.mosaicFinish);
     const finishDefinition = FINISHES.find((item) => item.id === "mosaic");
@@ -214,6 +225,7 @@ export function serializePoolRenderConfig(
     },
     structure: {
       installation,
+      construction: config.structure,
       system: config.system,
       overflowType: config.system === "overflow" ? config.overflowType : null,
     },

@@ -3,7 +3,7 @@ import type {
   CustomerInfo,
   Dimensions,
   EquipmentId,
-  FinishMaterial,
+  SelectableFinishMaterial,
   LinerColor,
   PoolFeatureId,
   PoolStructure,
@@ -105,13 +105,25 @@ export const POOL_STRUCTURES: ReadonlyArray<{
   id: PoolStructure;
   poolTypes: ReadonlyArray<PoolType>;
   title: string;
+  description: string;
 }> = [
-  { id: "reinforced-concrete", poolTypes: ["in-ground"], title: "Cemento armato" },
-  { id: "modular-steel-panels", poolTypes: ["in-ground"], title: "Pannelli modulari in acciaio" },
   {
-    id: "modular-steel-structure",
-    poolTypes: ["above-ground"],
-    title: "Struttura modulare in acciaio",
+    id: "reinforced-concrete",
+    poolTypes: ["in-ground"],
+    title: "Cemento armato",
+    description: "Vasca strutturale monolitica in CLS, pronta per liner o mosaico.",
+  },
+  {
+    id: "modular-steel-panels",
+    poolTypes: ["in-ground", "above-ground"],
+    title: "Pannelli in acciaio",
+    description: "Pannelli metallici modulari zincati, completati con liner/PVC.",
+  },
+  {
+    id: "visible-stainless-steel",
+    poolTypes: ["in-ground", "above-ground"],
+    title: "Acciaio inox a vista",
+    description: "Vasca finita in acciaio inox satinato, senza rivestimenti aggiuntivi.",
   },
 ];
 
@@ -163,7 +175,7 @@ export const getShapeDefinition = (id: PoolShapeId): ShapeDefinition =>
   POOL_SHAPES.find((shape) => shape.id === id) ?? POOL_SHAPES[0]!;
 
 export const FINISHES: ReadonlyArray<{
-  id: FinishMaterial;
+  id: SelectableFinishMaterial;
   title: string;
   description: string;
   color: string;
@@ -460,18 +472,18 @@ export const STEPS: ReadonlyArray<StepDefinition> = [
     short: "Acqua",
   },
   {
-    id: "style",
-    index: 5,
-    title: "Materiali e stile",
-    subtitle: "Il materiale che definisce carattere e colore dell'acqua, e il bordo vasca.",
-    short: "Stile",
-  },
-  {
     id: "access",
-    index: 6,
+    index: 5,
     title: "Accesso e comfort",
     subtitle: "Scale, scaletta e comfort in acqua.",
     short: "Comfort",
+  },
+  {
+    id: "style",
+    index: 6,
+    title: "Materiali e stile",
+    subtitle: "Il materiale che definisce carattere e colore dell'acqua, e il bordo vasca.",
+    short: "Stile",
   },
   {
     id: "lighting",
@@ -514,8 +526,8 @@ export const STEP_GROUPS: ReadonlyArray<StepGroup> = [
     stepIds: ["project", "pool-type", "structure", "shape-dimensions"],
   },
   { id: "acqua", label: "Acqua", stepIds: ["system"] },
-  { id: "stile", label: "Stile", stepIds: ["style"] },
   { id: "comfort", label: "Comfort", stepIds: ["access"] },
+  { id: "stile", label: "Stile", stepIds: ["style"] },
   { id: "luce", label: "Luce", stepIds: ["lighting"] },
   { id: "tecnologia", label: "Tecnologia", stepIds: ["technology"] },
   { id: "progetto", label: "Progetto", stepIds: ["review"] },

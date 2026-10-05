@@ -66,6 +66,11 @@ import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
 import { pavingId, premiumEnvironment, type PavingId, type PremiumEnvironment } from "./presentation";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline } from "./infinity-edge";
+import {
+  allowedFinishesForStructure,
+  normaliseFinishForStructure,
+  structureSupportsPoolType,
+} from "./structure-finish";
 
 type Action =
   | { type: "setProjectType"; value: ProjectType }
@@ -228,14 +233,9 @@ function configurationReducer(state: State, action: Action): State {
       };
     }
     case "setPoolType": {
-      const structure =
-        action.value === "in-ground"
-          ? config.structure === "modular-steel-structure"
-            ? null
-            : config.structure
-          : config.structure === "modular-steel-structure"
-            ? config.structure
-            : null;
+      const structure = structureSupportsPoolType(config.structure, action.value)
+        ? config.structure
+        : null;
       const features = action.value === "above-ground"
         ? config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench")
         : config.features.filter((id) => id !== "externalStaircase");
@@ -245,11 +245,27 @@ function configurationReducer(state: State, action: Action): State {
         config.shape,
         action.value,
       );
-      const nextConfig = { ...config, poolType: action.value, structure, features, system };
+      const nextConfig = {
+        ...config,
+        poolType: action.value,
+        structure,
+        finish: normaliseFinishForStructure(structure, config.finish),
+        features,
+        system,
+      };
       return { ...state, config: system === "infinity" ? nextConfig : withoutInfinityEdge(nextConfig) };
     }
-    case "setPoolStructure":
-      return { ...state, config: { ...config, structure: action.value } };
+    case "setPoolStructure": {
+      if (!structureSupportsPoolType(action.value, config.poolType)) return state;
+      return {
+        ...state,
+        config: {
+          ...config,
+          structure: action.value,
+          finish: normaliseFinishForStructure(action.value, config.finish),
+        },
+      };
+    }
     case "setCustomerField":
       return {
         ...state,
@@ -431,7 +447,9 @@ function configurationReducer(state: State, action: Action): State {
     case "setSkimmerType":
       return { ...state, config: { ...config, skimmerType: action.value } };
     case "setFinish":
-      return { ...state, config: { ...config, finish: action.value } };
+      return allowedFinishesForStructure(config.structure).includes(action.value as "liner" | "mosaic")
+        ? { ...state, config: { ...config, finish: action.value } }
+        : state;
     case "setLinerColor":
       return { ...state, config: { ...config, linerColor: action.value } };
     case "setMosaicFinish":

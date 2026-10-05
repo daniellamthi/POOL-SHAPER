@@ -16,7 +16,7 @@ export type PoolRenderShapeKind = "rectangle" | "custom";
 export type PoolRenderInstallation = "in-ground" | "above-ground";
 export type PoolRenderSystem = "skimmer" | "overflow";
 export type PoolRenderOverflowType = "hidden" | "visible";
-export type PoolRenderFinishMaterial = "liner" | "mosaic";
+export type PoolRenderFinishMaterial = "liner" | "mosaic" | "visible-stainless-steel";
 export type PoolRenderStaircaseKind = "external" | "internal-steps" | "stainless-ladder";
 export type PoolRenderAccessoryCategory = "feature" | "equipment";
 
@@ -59,6 +59,7 @@ export interface PoolRenderDimensions {
 
 export interface PoolRenderStructure {
   installation: PoolRenderInstallation;
+  construction: "reinforced-concrete" | "modular-steel-panels" | "visible-stainless-steel" | null;
   system: PoolRenderSystem;
   /** Only meaningful when `system === "overflow"`. */
   overflowType: PoolRenderOverflowType | null;

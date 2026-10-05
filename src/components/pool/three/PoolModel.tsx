@@ -23,6 +23,8 @@ import {
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { PoolAccessModel } from "./PoolAccessModel";
 import { PoolComfortModel } from "./PoolComfortModel";
+import { RawShellMaterial, type RawShellKind } from "./RawShellMaterial";
+import type { StructureFamily } from "@/lib/pool/construction-presentation";
 import { subdivideFloorBoundary } from "@/lib/pool/floor-profile";
 import { accessMounting } from "@/lib/pool/access-plan";
 import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
@@ -92,6 +94,9 @@ interface PoolModelProps {
   poolType: PoolType;
   copingThickness: number;
   showWater: boolean;
+  rawStructure?: StructureFamily | null;
+  structureFamily?: StructureFamily | null;
+  showAccessories?: boolean;
   skimmers: SkimmerPlan;
   /** Geometry Pass D (Infinity, Rectangle + L-shape). Only meaningful
    * while `system === "infinity"`. */
@@ -406,6 +411,9 @@ export function PoolModel({
   poolType,
   copingThickness,
   showWater,
+  rawStructure = null,
+  structureFamily = null,
+  showAccessories = true,
   skimmers,
   poolAccess,
   internalStairType,
@@ -670,6 +678,8 @@ export function PoolModel({
   useEffect(() => () => causticMap.dispose(), [causticMap]);
   const configureCaustics = useCallback(
     (shader: UnderwaterShader) => {
+      // Dry finish is a presentation stage, never a second underwater calibration.
+      if (!showWater) return;
       shader.uniforms.causticTime = { value: 0 };
       shader.uniforms["causticMap"] = { value: causticMap };
       shader.uniforms.causticStrength = {
@@ -969,8 +979,22 @@ export function PoolModel({
   );
 
   const comfortPlan = resolvedLayout.comfort;
-  const accessMaterial = (
+  const shellKind = (family: StructureFamily): RawShellKind =>
+    family === "REINFORCED_CONCRETE"
+      ? "concrete"
+      : family === "VISIBLE_STAINLESS_STEEL"
+        ? "stainless"
+        : "steel";
+  const interiorShellKind: RawShellKind | null = structureFamily === "VISIBLE_STAINLESS_STEEL"
+    ? "stainless"
+    : rawStructure
+      ? shellKind(rawStructure)
+      : null;
+  const rawShellKind = rawStructure ? shellKind(rawStructure) : null;
+  const wallSize = [perimeter, depth] as const;
+  const accessMaterial = interiorShellKind ? <RawShellMaterial kind={interiorShellKind} /> : (
     <meshPhysicalMaterial
+            key={showWater ? "wet" : "dry"}
             color={materials.liner.color}
             map={floorSurfaceMap}
             normalMap={interiorMicroMaps.floorNormal}
@@ -985,7 +1009,7 @@ export function PoolModel({
             aoMapIntensity={0.6}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
             }
           />
   );
@@ -998,8 +1022,9 @@ export function PoolModel({
           waterline these surfaces would otherwise render nonsensical
           close-up backfaces instead of a clean sky/coping reflection. */}
       <group name="pool-basin">
-        <PoolComfortModel plan={comfortPlan} floorProfile={floorProfile}>
-          <meshPhysicalMaterial
+        <PoolComfortModel plan={comfortPlan} floorProfile={floorProfile} showJets={showAccessories}>
+          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} /> : <meshPhysicalMaterial
+            key={showWater ? "wet" : "dry"}
             color={materials.liner.color}
             map={floorSurfaceMap}
             normalMap={interiorMicroMaps.floorNormal}
@@ -1014,11 +1039,11 @@ export function PoolModel({
             aoMapIntensity={0.6}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
             }
-          />
+          />}
         </PoolComfortModel>
-        <PoolAccessModel
+        {resolvedLayout.effectiveAccess !== "stainlessSteelLadder" || showAccessories ? <PoolAccessModel
           resolvedPlan={resolvedLayout.access}
           outline={outline}
           access={resolvedLayout.effectiveAccess}
@@ -1030,8 +1055,8 @@ export function PoolModel({
           {...accessMounting(system, overflowType, verticalLayout)}
         >
           {accessMaterial}
-        </PoolAccessModel>
-        {resolvedLayout.ladder?.plan.placement ? (
+        </PoolAccessModel> : null}
+        {showAccessories && resolvedLayout.ladder?.plan.placement ? (
           <PoolAccessModel
             resolvedPlan={resolvedLayout.ladder.plan}
             outline={outline}
@@ -1047,7 +1072,8 @@ export function PoolModel({
         ) : null}
         {/* Interior walls */}
         <mesh geometry={walls} renderOrder={0} receiveShadow castShadow>
-          <meshPhysicalMaterial
+          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} /> : <meshPhysicalMaterial
+            key={showWater ? "wet" : "dry"}
             color={materials.liner.color}
             map={wallSurfaceMap}
             normalMap={interiorMicroMaps.wallNormal}
@@ -1068,10 +1094,10 @@ export function PoolModel({
             specularIntensity={0.58}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
             }
             side={DoubleSide}
-          />
+          />}
         </mesh>
 
         {/* Floor with animated caustics. Sloped floors bake their absolute
@@ -1083,7 +1109,8 @@ export function PoolModel({
           position={floorProfile.sloped ? [0, 0, 0] : [0, verticalLayout.floorY, 0]}
           receiveShadow
         >
-          <meshPhysicalMaterial
+          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} /> : <meshPhysicalMaterial
+            key={showWater ? "wet" : "dry"}
             color={materials.floor.color}
             map={floorSurfaceMap}
             normalMap={interiorMicroMaps.floorNormal}
@@ -1103,10 +1130,10 @@ export function PoolModel({
             envMapIntensity={0.95}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
             }
             side={DoubleSide}
-          />
+          />}
         </mesh>
 
         {/* Water body — animated ripples, refraction, real planar reflection */}
@@ -1129,10 +1156,10 @@ export function PoolModel({
               position={[0, verticalLayout.wallTopY - OVERFLOW_GEOMETRY.channelDepth, 0]}
               receiveShadow
             >
-              <meshStandardMaterial color="#394340" roughness={0.54} side={DoubleSide} />
+              {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#394340" roughness={0.54} side={DoubleSide} />}
             </mesh>
             <mesh geometry={channelInnerWall} receiveShadow>
-              <meshStandardMaterial color="#4b5350" roughness={0.45} side={DoubleSide} />
+              {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#4b5350" roughness={0.45} side={DoubleSide} />}
             </mesh>
             {!isVisibleOverflow && (
               <mesh
@@ -1141,7 +1168,7 @@ export function PoolModel({
                 position={[0, waterLevel - 0.001, 0]}
                 receiveShadow
               >
-                <meshPhysicalMaterial
+                {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshPhysicalMaterial
                   key={materials.coping.moduleSize}
                   color={materials.coping.color}
                   normalMap={copingDetail.normalMap}
@@ -1153,7 +1180,7 @@ export function PoolModel({
                   clearcoat={0}
                   clearcoatRoughness={0.12}
                   side={DoubleSide}
-                />
+                />}
               </mesh>
             )}
             {isVisibleOverflow ? (
@@ -1190,13 +1217,13 @@ export function PoolModel({
                   receiveShadow
                   castShadow
                 >
-                  <meshStandardMaterial color="#eceae3" roughness={0.62} side={DoubleSide} />
+                  {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#eceae3" roughness={0.62} side={DoubleSide} />}
                 </mesh>
                 <mesh geometry={overflowKerbInnerFace} receiveShadow castShadow>
-                  <meshStandardMaterial color="#e6e4dd" roughness={0.66} side={DoubleSide} />
+                  {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#e6e4dd" roughness={0.66} side={DoubleSide} />}
                 </mesh>
                 <mesh geometry={overflowKerbOuterFace} receiveShadow castShadow>
-                  <meshStandardMaterial color="#e6e4dd" roughness={0.66} side={DoubleSide} />
+                  {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#e6e4dd" roughness={0.66} side={DoubleSide} />}
                 </mesh>
                 <mesh
                   name="overflow-grille"
@@ -1235,7 +1262,7 @@ export function PoolModel({
 
       {poolType === "above-ground" ? (
         <mesh geometry={exteriorWalls} receiveShadow castShadow>
-          <meshStandardMaterial
+          {rawShellKind ? <RawShellMaterial kind={rawShellKind} wallSize={wallSize} /> : <meshStandardMaterial
             color="#ffffff"
             map={aboveGroundPanelMap}
             bumpMap={aboveGroundPanelBumpMap}
@@ -1251,7 +1278,7 @@ export function PoolModel({
             onBeforeCompile={configurePanelTriplanar}
             customProgramCacheKey={() => "triplanar-panel-detail-v2"}
             side={DoubleSide}
-          />
+          />}
         </mesh>
       ) : null}
 
@@ -1262,10 +1289,10 @@ export function PoolModel({
       {!isVisibleOverflow && (
         <group name="pool-perimeter-finish">
           <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.006, 0]} receiveShadow>
-            <meshStandardMaterial color="#938b7b" roughness={0.96} side={DoubleSide} />
+            {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#938b7b" roughness={0.96} side={DoubleSide} />}
           </mesh>
           <mesh geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
-            <meshPhysicalMaterial
+            {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshPhysicalMaterial
               key={materials.coping.moduleSize}
               color={materials.coping.color}
               vertexColors
@@ -1279,13 +1306,15 @@ export function PoolModel({
               onBeforeCompile={configureCopingTriplanar}
               customProgramCacheKey={() => "coping-triplanar-v4"}
               side={DoubleSide}
-            />
+            />}
           </mesh>
         </group>
       )}
 
       {isInfinity && infinitySection !== null ? (
         <InfinityEdge
+          rawStructure={rawStructure}
+          showWater={showWater}
           outline={outline}
           shape={shape}
           infinityEdge={infinityEdge}

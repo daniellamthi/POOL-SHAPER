@@ -85,6 +85,7 @@ export type SceneFocus = CameraIntent;
 export type SceneTimeOfDay = "day" | "night";
 
 export interface SceneProps {
+  construction?: import("@/lib/pool/construction-presentation").ConstructionPresentation;
   outline: Outline;
   shape: PoolShapeId;
   system: SystemType;
@@ -802,6 +803,7 @@ export default function PoolScene({
   overflowType,
   poolType,
   materials,
+  construction,
   features,
   ledColor = "#ffffff",
   ledIntensity,
@@ -991,6 +993,8 @@ export default function PoolScene({
     poolType,
     depth,
     showWater,
+    construction?.stage,
+    construction?.structure,
     materials.surface.textureUrl,
     materials.coping.color,
     materials.skimmer.color,
@@ -1133,10 +1137,13 @@ export default function PoolScene({
         poolType={poolType}
         copingThickness={copingThickness}
         showWater={showWater}
+        rawStructure={construction?.raw ? construction.structure ?? "REINFORCED_CONCRETE" : null}
+        structureFamily={construction?.structure ?? null}
+        showAccessories={construction?.showAccessories ?? true}
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />
-      {coverPlan.geometry && !photoMode ? <AutomaticCover plan={coverPlan} /> : null}
+      {coverPlan.geometry && !photoMode && (construction?.showWater ?? true) ? <AutomaticCover plan={coverPlan} /> : null}
       {technicalView && !photoMode && system === "skimmer" ? skimmers.positions.map((point, index) => (
         <mesh key={`technical-skimmer-${index}`} name="technical-skimmer-marker" position={[point.x, verticalLayout.waterY + 0.075, point.z]}>
           <sphereGeometry args={[0.055, 10, 8]} />
@@ -1163,7 +1170,7 @@ export default function PoolScene({
           onSelect={onSelectInfinitySide}
         />
       ) : null}
-      {features.includes("ledLighting") ? (
+      {features.includes("ledLighting") && (construction?.showLighting ?? true) ? (
         <PoolLights
           lighting={lighting}
           layout={verticalLayout}
@@ -1175,7 +1182,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {poolType === "above-ground" && features.includes("externalStaircase") ? (
+      {poolType === "above-ground" && features.includes("externalStaircase") && (construction?.showAccessories ?? true) ? (
         <ExternalStaircase
           outline={outline}
           copingOffset={copingOuterOffset(system, overflowType)}
@@ -1185,7 +1192,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {system === "skimmer" ? (
+      {system === "skimmer" && (construction?.showSystemComponents ?? true) ? (
         <Skimmers
           showWater={showWater}
           plan={skimmers}
@@ -1272,7 +1279,7 @@ export default function PoolScene({
         radius={radius}
         controls={controls}
         frameToken={frameToken}
-        focus={infinityZone && focus === "overview" ? "infinity" : focus}
+        focus={construction?.raw && (focus === "overview" || focus === "review") ? "structure" : infinityZone && focus === "overview" ? "infinity" : focus}
         shape={shape}
         depth={depth}
         outline={outline}

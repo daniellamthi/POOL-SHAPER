@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { STRUCTURE_LABEL } from "@/configurator/steps/final-review/summary-labels";
 import { useConfigurator } from "@/lib/pool/context";
 import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 import { buildTechnicalPlan, type TechnicalPlan } from "@/lib/pool/technical-plan";
@@ -40,6 +41,7 @@ export function TechnicalDataPanel({ technical, cover, compact = false }: {
   return <div className="rounded-2xl border border-hairline bg-card/95 p-4 text-xs shadow-sm" data-testid="technical-data-panel">
     <h3 className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Scheda tecnica indicativa</h3>
     <Row label="Sistema" value={systemName} />
+    <Row label="Struttura" value={technical.structure ? STRUCTURE_LABEL[technical.structure] : "Da definire"} />
     <Row label="Volume acqua" value={`${technical.waterVolume.value?.toFixed(1) ?? "—"} m³`} note={provenance[technical.waterVolume.provenance]} />
     <Row label="Superficie acqua" value={`${technical.waterSurface.value?.toFixed(1) ?? "—"} m²`} note={provenance[technical.waterSurface.provenance]} />
     {!compact ? <>

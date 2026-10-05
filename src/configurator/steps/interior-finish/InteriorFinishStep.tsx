@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PavingOptions } from "@/components/pool/PresentationOptions";
 import {
   MaterialSwatch,
@@ -8,7 +8,7 @@ import {
 } from "@/components/pool/StepSection";
 import { FINISHES, LINER_COLORS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
-import type { FinishMaterial } from "@/lib/pool/types";
+import type { SelectableFinishMaterial } from "@/lib/pool/types";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
 import { getCopingSwatchDataUrl } from "@/components/pool/copingSwatchPreview";
@@ -19,6 +19,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  allowedFinishesForStructure,
+  isVisibleStainlessStructure,
+} from "@/lib/pool/structure-finish";
 
 /**
  * Step 5 (Stile) — the interior finish/colour that defines the water, plus
@@ -31,11 +35,19 @@ import {
 export function InteriorFinishStep() {
   const { config, setFinish, setLinerColor, setMosaicFinish, setCopingMaterial } =
     useConfigurator();
-  const [expandedFinish, setExpandedFinish] = useState<FinishMaterial | null>(config.finish);
+  const visibleInox = isVisibleStainlessStructure(config.structure);
+  const allowedFinishes = allowedFinishesForStructure(config.structure);
+  const [expandedFinish, setExpandedFinish] = useState<SelectableFinishMaterial | null>(
+    config.finish === "none" ? null : config.finish,
+  );
   const [detailMaterial, setDetailMaterial] = useState<CopingMaterialId | null>(null);
   const detail = COPING_MATERIALS.find((item) => item.id === detailMaterial) ?? null;
 
-  const toggleFinish = (finish: FinishMaterial) => {
+  useEffect(() => {
+    setExpandedFinish(config.finish === "none" ? null : config.finish);
+  }, [config.finish, config.structure]);
+
+  const toggleFinish = (finish: SelectableFinishMaterial) => {
     setExpandedFinish((current) => (current === finish ? null : finish));
     if (config.finish !== finish) setFinish(finish);
   };
@@ -45,8 +57,16 @@ export function InteriorFinishStep() {
       title="Materiali e stile"
       subtitle="Il materiale che definisce carattere e colore dell'acqua, e il bordo vasca."
     >
-      <div className="grid gap-4" role="group" aria-label="Rivestimento interno">
-        {FINISHES.map((finish) => {
+      {visibleInox ? (
+        <div className="rounded-2xl border border-hairline bg-card/55 p-5" role="status">
+          <p className="label-xs">Rivestimento interno</p>
+          <h3 className="mt-3 text-base font-light text-foreground">Nessun rivestimento aggiuntivo</h3>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Pareti, fondo, scale e comfort integrati restano in acciaio inox satinato a vista.
+          </p>
+        </div>
+      ) : <div className="grid gap-4" role="group" aria-label="Rivestimento interno">
+        {FINISHES.filter((finish) => allowedFinishes.includes(finish.id)).map((finish) => {
           const expanded = expandedFinish === finish.id;
           return (
             <div key={finish.id} className="flex flex-col">
@@ -116,7 +136,13 @@ export function InteriorFinishStep() {
             </div>
           );
         })}
-      </div>
+      </div>}
+
+      {config.structure === "modular-steel-panels" ? (
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          I pannelli strutturali vengono completamente rivestiti: per questa soluzione è disponibile solo il liner/PVC.
+        </p>
+      ) : null}
 
       {!(config.system === "overflow" && config.overflowType === "visible") && (
         <div className="flex flex-col gap-3 border-t border-hairline pt-8">

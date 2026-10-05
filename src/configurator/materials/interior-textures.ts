@@ -1,4 +1,4 @@
-import type { FinishMaterial, LinerColor, MosaicFinishId } from "@/lib/pool/types";
+import type { LinerColor, MosaicFinishId, SelectableFinishMaterial } from "@/lib/pool/types";
 import { MOSAIC_ASSETS } from "./mosaic-assets.generated";
 
 const mosaicTextureUrl = (filename: string) => `/textures/mosaico/${encodeURIComponent(filename)}`;
@@ -76,7 +76,7 @@ export const getMosaicFinish = (id: MosaicFinishId) =>
  * or point an individual colour to a new asset without touching the 3D scene.
  */
 export const INTERIOR_TEXTURES: Readonly<
-  Record<FinishMaterial, Readonly<Record<LinerColor, string>>>
+  Record<SelectableFinishMaterial, Readonly<Record<LinerColor, string>>>
 > = {
   liner: {
     motionDeepSea603: "/textures/pvc-liner/motion-deep-sea-603.png",
@@ -97,7 +97,7 @@ export const INTERIOR_TEXTURES: Readonly<
 };
 
 /** P0 metadata only: the 0.7 m PVC module preserves the current visual scale. */
-export const INTERIOR_TEXTURE_METADATA: Readonly<Record<FinishMaterial, InteriorTextureMetadata>> =
+export const INTERIOR_TEXTURE_METADATA: Readonly<Record<SelectableFinishMaterial, InteriorTextureMetadata>> =
   {
     liner: {
       physicalWidth: PVC_TEXTURE_MODULE_SIZE_METERS,
@@ -117,7 +117,7 @@ export const INTERIOR_TEXTURE_METADATA: Readonly<Record<FinishMaterial, Interior
   };
 
 export const getInteriorTexture = (
-  finish: FinishMaterial,
+  finish: SelectableFinishMaterial,
   color: LinerColor,
   mosaicFinish: MosaicFinishId,
 ) =>

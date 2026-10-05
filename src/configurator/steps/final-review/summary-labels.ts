@@ -89,8 +89,8 @@ export const EQUIPMENT_LABEL: Record<EquipmentId, string> = {
 /** Only surfaced inside the summary's "Scopri i dettagli tecnici" panel. */
 export const STRUCTURE_LABEL: Record<PoolStructure, string> = {
   "reinforced-concrete": "Cemento armato",
-  "modular-steel-panels": "Pannelli modulari in acciaio",
-  "modular-steel-structure": "Struttura modulare in acciaio",
+  "modular-steel-panels": "Pannelli in acciaio",
+  "visible-stainless-steel": "Acciaio inox a vista",
 };
 
 export const SKIMMER_TYPE_LABEL: Record<SkimmerTypeId, string> = {

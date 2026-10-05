@@ -9,6 +9,7 @@ import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
 import { contextualIntent, focusForAction } from "@/lib/pool/contextual-camera";
 import { resolveMaterials } from "@/lib/pool/materials";
+import { constructionPresentation } from "@/lib/pool/construction-presentation";
 import { ThemeProvider, useTheme } from "@/lib/theme";
 import {
   cancelRenderJob,
@@ -52,8 +53,8 @@ const STEP_COMPONENTS = [
   PoolStructureStep,
   PoolShapeStep,
   PoolSystemStep,
-  InteriorFinishStep,
   AccessStep,
+  InteriorFinishStep,
   LightingStep,
   EquipmentStep,
   FinalReviewStep,
@@ -312,11 +313,14 @@ function ConfiguratorLayout() {
   const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
+  const construction = constructionPresentation(config, activeStepId, technicalView);
   // System details frame automatically, but remain inspectable by orbit/touch.
   const cameraLocked = false;
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
-    : activeStepId === "system"
+    : activeStepId === "structure"
+      ? "structure"
+      : activeStepId === "system"
       ? contextualIntent(focusForAction({type:"setSystem"},config) ?? "POOL_OVERVIEW",config)
       : activeStepId === "style"
         ? "liner"
@@ -418,6 +422,7 @@ function ConfiguratorLayout() {
             overflowType={config.overflowType}
             poolType={config.poolType ?? "in-ground"}
             materials={materials}
+            construction={construction}
             features={config.features}
             ledColor={config.ledColor ?? "#ffffff"}
             ledIntensity={normalisedLedIntensity(config.ledIntensity)}
@@ -450,9 +455,9 @@ function ConfiguratorLayout() {
             frameToken={frameToken + (visualFocus?.revision ?? 0)}
             focus={inspectionView ?? (technicalView ? "review" : visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus)}
             cameraLocked={cameraLocked}
-            showWater={true}
+            showWater={construction.showWater}
             theme={theme}
-            sceneTime={sceneTime}
+            sceneTime={construction.showWater ? sceneTime : "day"}
             paving={config.paving ?? "gres"}
             photoMode={photoMode}
             onTogglePhotoMode={openPremiumPresentation}

@@ -50,6 +50,7 @@ function overviewDirection(
 }
 
 export type CameraIntent =
+  | "structure"
   | "depth" | "inox" | "shelf" | "hydromassage" | "bench" | "coping"
   | "top"
   | "waterline"
@@ -687,7 +688,7 @@ export function getCameraPose({
   // Photographic overview only: clear the full coping and view along the
   // basin at a lower elevation. Interaction and all detail poses are unchanged.
   const [overviewDx, overviewDz] = overviewDirection(outline, centre);
-  const direction: CameraPoint = intent === "depth" ? [0.45, 1.05, 1.7] : intent === "cover" ? [1.35, 1.35, 0.75] : [overviewDx, 0.9, overviewDz];
+  const direction: CameraPoint = intent === "structure" ? [overviewDx, 1.6, overviewDz] : intent === "depth" ? [0.45, 1.05, 1.7] : intent === "cover" ? [1.35, 1.35, 0.75] : [overviewDx, 0.9, overviewDz];
   const directionLength = Math.hypot(...direction);
   // Fit the actual pool + local paving to the canvas, including portrait.
   const eye = direction.map(v => v / directionLength);

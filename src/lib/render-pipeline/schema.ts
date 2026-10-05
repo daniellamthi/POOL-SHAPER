@@ -26,6 +26,7 @@ const dimensionsSchema = z.object({
 
 const structureSchema = z.object({
   installation: z.enum(["in-ground", "above-ground"]),
+  construction: z.enum(["reinforced-concrete", "modular-steel-panels", "visible-stainless-steel"]).nullable(),
   system: z.enum(["skimmer", "overflow"]),
   overflowType: z.enum(["hidden", "visible"]).nullable(),
 });
@@ -41,7 +42,7 @@ const verticalLayoutSchema = z.object({
 });
 
 const finishSchema = z.object({
-  material: z.enum(["liner", "mosaic"]),
+  material: z.enum(["liner", "mosaic", "visible-stainless-steel"]),
   colorId: z.string().min(1),
   title: z.string().min(1),
   baseColorHex: hexColor,

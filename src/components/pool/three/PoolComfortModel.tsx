@@ -72,10 +72,12 @@ export function PoolComfortModel({
   plan,
   floorProfile,
   children,
+  showJets = true,
 }: {
   plan: ComfortPlan;
   floorProfile: FloorProfileModel;
   children: ReactNode;
+  showJets?: boolean;
 }) {
   const geometries = useMemo(
     () =>
@@ -105,7 +107,7 @@ export function PoolComfortModel({
           {children}
         </mesh>
       ))}
-      {plan.elements.flatMap((element) =>
+      {showJets && plan.elements.flatMap((element) =>
         (element.jets ?? []).map((jet, index) => (
           <HydroJet key={`${element.kind}-jet-${index}`} jet={jet} />
         )),

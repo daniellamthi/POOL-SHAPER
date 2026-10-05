@@ -12,6 +12,7 @@ import { computeInfinityEdgeGeometry, infinityExclusion } from "./infinity-edge"
 import { resolveAutomaticCover } from "./cover-plan";
 import { oppositeInfinityCoordinate } from "./infinity-access";
 import { resolvedAccessAnchors } from "./technical-plan";
+import { structureFamily } from "./construction-presentation";
 
 /** Data contract only. No renderer, generative redesign, UI theme, or customer PII.
  * The future renderer must build product geometry from these same versioned
@@ -33,6 +34,7 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
   });
   const bounds = outlineBounds(outline);
   const layout = configuredPoolLayout(config);
+  const resolvedMaterials = resolveMaterials(config);
   const excluded = config.system === "infinity" && config.infinityEdge
     ? infinityExclusion(outline, config.infinityEdge, config.shape) : null;
   const spec = {
@@ -41,13 +43,30 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     units: "metres", axes: { up: "+Y", footprint: "XZ" },
     rendering: { status: "not-implemented", productRedesignAllowed: false },
     selection,
+    structureType: structureFamily(config.structure),
     pool: { outline, elevations, floor, layout,
       skimmers: planSkimmers(outline, computeMetrics(outline, config.dimensions.depth).waterSurface, config.system === "skimmer"),
       infinity: config.system === "infinity" && config.infinityEdge ? {
         requested: config.infinityEdge,
         resolved: computeInfinityEdgeGeometry(outline, config.infinityEdge, config.shape),
       } : null,
-      materials: resolveMaterials(config), water: WATER_VISUAL_PRESET,
+      materials: resolvedMaterials,
+      interiorFinish: config.finish === "none"
+        ? {
+            material: "visible-stainless-steel",
+            label: "Nessun rivestimento aggiuntivo — vasca inox a vista",
+            textureUrl: null,
+            metalness: 1,
+            roughness: 0.32,
+          }
+        : {
+            material: config.finish,
+            label: config.finish === "mosaic" ? "Mosaico" : "Liner / PVC",
+            textureUrl: resolvedMaterials.surface.textureUrl,
+            metalness: resolvedMaterials.liner.metalness,
+            roughness: resolvedMaterials.liner.roughness,
+          },
+      water: WATER_VISUAL_PRESET,
       cover: (() => {
         const plan = resolveAutomaticCover(config);
         return {

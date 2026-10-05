@@ -21,6 +21,11 @@ import { clampLShapeDimensions } from "./l-shape";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem } from "./infinity-edge";
 import { buildOutline } from "./geometry";
 import { pavingId, premiumEnvironment } from "./presentation";
+import {
+  normaliseFinishForStructure,
+  normalisePoolStructure,
+  structureSupportsPoolType,
+} from "./structure-finish";
 
 /** Bump when a shape change to `PoolConfig`/`RenovationConfig` requires a
  * migration for previously saved projects. Keep the migration itself minimal
@@ -57,7 +62,18 @@ export function toProjectConfiguration(
   renovation: RenovationConfig,
 ): ProjectConfiguration {
   if (config.shape === "organic") throw new Error("La forma organica non è più disponibile.");
-  return { schemaVersion: PROJECT_SCHEMA_VERSION, projectId, config, renovation };
+  const candidate = normalisePoolStructure(config.structure);
+  const structure = structureSupportsPoolType(candidate, config.poolType) ? candidate : null;
+  return {
+    schemaVersion: PROJECT_SCHEMA_VERSION,
+    projectId,
+    config: {
+      ...config,
+      structure,
+      finish: normaliseFinishForStructure(structure, config.finish),
+    },
+    renovation,
+  };
 }
 
 export function serializeProjectConfiguration(project: ProjectConfiguration): string {
@@ -153,6 +169,11 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // rendering a system that was never built for that shape.
   const outline = buildOutline(restored.shape, dimensions, restored.controlPoints);
   const system = compatiblePoolSystem(restored.system, outline, restored.shape, restored.poolType);
+  const restoredStructure = normalisePoolStructure((config as Record<string, unknown>)["structure"]);
+  const structure = structureSupportsPoolType(restoredStructure, restored.poolType)
+    ? restoredStructure
+    : null;
+  const finish = normaliseFinishForStructure(structure, restored.finish);
   const infinityZones = compatibleInfinityZones(outline, restored.shape, restored.poolType);
   // Only ever attach an `infinityEdge` field when the project actually has
   // one to normalise (already carried the field, or is genuinely on
@@ -201,6 +222,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
         ? { coverPosition: restored.coverPosition === "closed" ? "closed" as const : "open" as const }
         : {}),
       dimensions,
+      structure,
+      finish,
       system,
       ...(infinityEdge !== undefined ? { infinityEdge } : {}),
     },

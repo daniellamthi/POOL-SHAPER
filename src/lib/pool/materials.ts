@@ -55,12 +55,15 @@ export function resolveMaterials(
     "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish" | "skimmerType" | "copingMaterial"
   >,
 ): ResolvedMaterials {
-  const finish = FINISHES.find((item) => item.id === config.finish) ?? FINISHES[0]!;
+  // Visible-inox pools do not use these finish maps in the scene, but the
+  // common water pipeline still requires a stable fallback descriptor.
+  const surfaceFinish = config.finish === "mosaic" ? "mosaic" : "liner";
+  const finish = FINISHES.find((item) => item.id === surfaceFinish) ?? FINISHES[0]!;
   const liner = LINER_COLORS.find((item) => item.id === config.linerColor) ?? LINER_COLORS[0]!;
   const skimmerFinish =
     SKIMMER_FINISHES.find((item) => item.id === config.skimmerFinish) ?? SKIMMER_FINISHES[0]!;
   const mosaic = getMosaicFinish(config.mosaicFinish);
-  const textureUrl = getInteriorTexture(config.finish, config.linerColor, config.mosaicFinish);
+  const textureUrl = getInteriorTexture(surfaceFinish, config.linerColor, config.mosaicFinish);
   // Indicative PVC calibration using the existing sample, not a measured scan.
   const sandSample = config.finish === "liner" && config.linerColor === "motionSandBeach179";
   const linerModule = sandSample ? PVC_TEXTURE_MODULE_SIZE_METERS * 4 : PVC_TEXTURE_MODULE_SIZE_METERS;

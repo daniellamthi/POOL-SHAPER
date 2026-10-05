@@ -13,18 +13,22 @@ import { useConfigurator } from "@/lib/pool/context";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
+import { finishDescription } from "@/lib/pool/structure-finish";
 
 export function LiveSummary() {
   const { config, metrics } = useConfigurator();
   const project =
     PROJECT_TYPES.find((item) => item.id === config.projectType)?.title ?? "Non selezionato";
-  const finish = FINISHES.find((item) => item.id === config.finish)?.title ?? config.finish;
+  const finish = config.finish === "none"
+    ? finishDescription(config.structure, config.finish)
+    : FINISHES.find((item) => item.id === config.finish)?.title ?? config.finish;
   const poolType =
     POOL_TYPES.find((item) => item.id === config.poolType)?.title ?? "Non selezionato";
   const structure =
     POOL_STRUCTURES.find((item) => item.id === config.structure)?.title ?? "Non selezionata";
-  const color =
-    config.finish === "mosaic"
+  const color = config.finish === "none"
+    ? "Acciaio inox satinato"
+    : config.finish === "mosaic"
       ? getMosaicFinish(config.mosaicFinish).name
       : (LINER_COLORS.find((item) => item.id === config.linerColor)?.title ?? config.linerColor);
   const features = POOL_FEATURES.filter((item) =>

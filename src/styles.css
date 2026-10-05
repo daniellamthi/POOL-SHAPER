@@ -291,3 +291,7 @@
     transition-duration: 0.001ms !important;
   }
 }
+@keyframes construction-reveal {
+  from { opacity: 0.16; }
+  to { opacity: 0; }
+}

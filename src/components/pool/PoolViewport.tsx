@@ -164,6 +164,8 @@ export const PoolViewport = memo(function PoolViewport({
           <PoolScene {...scene} />
         </Suspense>
       </ClientOnly>
+      {scene.construction && <div key={`${scene.construction.stage}-${scene.construction.structure}`}
+        aria-hidden className="pointer-events-none absolute inset-0 z-[1] bg-viewport animate-[construction-reveal_240ms_ease-out_both] motion-reduce:hidden" />}
 
       <div className="absolute left-3 top-3 z-10">
         <label className="sr-only" htmlFor="inspection-camera">Vista della piscina</label>
@@ -173,6 +175,11 @@ export const PoolViewport = memo(function PoolViewport({
           {scene.system === "infinity" ? <option value="infinity">Infinity</option> : null}
         </select>
       </div>
+      {scene.construction?.label && !scene.technicalView ? <div key={scene.construction.label}
+        className="pointer-events-none absolute right-3 top-16 z-10 max-w-[75%] animate-veil rounded-xl border border-hairline bg-card/95 px-3 py-2 text-[11px] text-foreground"
+        role="status" data-testid="construction-stage">
+        {scene.construction.label}
+      </div> : null}
       {scene.technicalView && !scene.photoMode ? <div className="pointer-events-auto absolute right-3 top-3 z-10 w-36 sm:max-h-[58%] sm:w-[260px] sm:overflow-y-auto sm:rounded-2xl sm:shadow-lg">
         <div className="hidden sm:block"><TechnicalDataPanel technical={technicalPlan} cover={scene.coverPlan} compact /></div>
         <label className="sr-only" htmlFor="technical-focus">Dettaglio tecnico</label>

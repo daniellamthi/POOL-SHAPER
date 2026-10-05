@@ -18,11 +18,13 @@ export function PoolStructureStep() {
           <OptionCard
             key={structure.id}
             title={structure.title}
+            description={structure.description}
             selected={config.structure === structure.id}
             onSelect={() => setPoolStructure(structure.id)}
           />
         ))}
       </div>
+      <p className="text-xs leading-relaxed text-muted-foreground">Anteprima costruttiva indicativa: giunti e finitura grezza non costituiscono un dettaglio esecutivo.</p>
     </StepSection>
   );
 }

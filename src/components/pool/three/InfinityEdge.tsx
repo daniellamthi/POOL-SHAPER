@@ -3,6 +3,8 @@ import * as THREE from "three";
 import { createInfinityCascadeGeometry, createInfinityWaterFilmGeometry } from "./infinityEdgeGeometry";
 import { createInfinityContainmentGeometry, infinityContainmentLevels, insetInfinityWaterZone } from "./infinityContainment";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { RawShellMaterial } from "./RawShellMaterial";
+import type { StructureFamily } from "@/lib/pool/construction-presentation";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import { clampInfinityEdgeDimensions, computeInfinityEdgeGeometry, infinityZonesForOutline } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
@@ -11,6 +13,8 @@ import type { ResolvedMaterials } from "@/lib/pool/materials";
 import type { StoneMaps } from "./stoneTextures";
 
 interface InfinityEdgeProps {
+  rawStructure?: StructureFamily | null;
+  showWater?: boolean;
   outline: Outline;
   shape: PoolShapeId;
   infinityEdge: InfinityEdgeParams | undefined;
@@ -22,7 +26,7 @@ interface InfinityEdgeProps {
   configureCopingTriplanar: (shader: THREE.WebGLProgramParametersWithUniforms) => void;
 }
 
-export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingSurfaceY, copingOuterOffsetDistance, copingDetail }: InfinityEdgeProps) {
+export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingSurfaceY, copingOuterOffsetDistance, copingDetail, rawStructure = null, showWater = true }: InfinityEdgeProps) {
   const assembly = useMemo(() => {
     const geometry = infinityEdge ? computeInfinityEdgeGeometry(outline, infinityEdge, shape) : null;
     const zone = geometry ? infinityZonesForOutline(outline, shape).find(z => z.side === geometry.side) : null;
@@ -45,11 +49,17 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
     if (assembly) for (const g of [assembly.structure, assembly.film, assembly.cascade, assembly.receiver]) g.dispose();
   }, [assembly]);
   if (!assembly) return null;
+  const rawKind = rawStructure === "REINFORCED_CONCRETE"
+    ? "concrete"
+    : rawStructure === "VISIBLE_STAINLESS_STEEL"
+      ? "stainless"
+      : "steel";
   return <group name="infinity-edge">
     <mesh name="infinity-closed-grey-containment" geometry={assembly.structure} receiveShadow castShadow>
-      <meshPhysicalMaterial color="#a6a6a6" map={copingDetail.colorMap} normalMap={copingDetail.normalMap} normalScale={[0.22, 0.22]}
+      {rawStructure ? <RawShellMaterial kind={rawKind} /> : <meshPhysicalMaterial key={showWater ? "wet" : "dry"} color="#a6a6a6" map={copingDetail.colorMap} normalMap={copingDetail.normalMap} normalScale={[0.22, 0.22]}
         roughnessMap={copingDetail.roughnessMap} roughness={0.68} metalness={0} side={THREE.DoubleSide}
         onBeforeCompile={(shader) => {
+          if (!showWater) return;
           excludeSubmergedDirectLights(shader, waterLevel);
           shader.uniforms["receiverY"] = { value: assembly.levels.receiverY };
           shader.vertexShader = "attribute float wetRole; varying float vWetRole; varying float vStructureY;\n" + shader.vertexShader;
@@ -63,9 +73,9 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
             float wetted = vWetRole > 1.5 ? 1.0 - smoothstep(receiverY - 0.01, receiverY + 0.01, vStructureY) : vWetRole;
             diffuseColor.rgb *= mix(1.0, 0.62, wetted);
           `).replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, max(0.14, roughnessFactor * 0.32), wetted);");
-        }} customProgramCacheKey={() => `infinity-grey-wet-containment-v5-${assembly.levels.receiverY}`} />
+        }} customProgramCacheKey={() => `infinity-grey-wet-containment-v5-${assembly.levels.receiverY}-${showWater}`} />}
     </mesh>
-    <mesh name="infinity-crest-water" geometry={assembly.film} renderOrder={2}>
+    {showWater ? <><mesh name="infinity-crest-water" geometry={assembly.film} renderOrder={2}>
       <WaterSurfaceMaterial waterLevel={waterLevel} reflections={false} depth={0.006} flowing />
     </mesh>
     <mesh name="infinity-attached-film" geometry={assembly.cascade} renderOrder={2}>
@@ -74,5 +84,6 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
     <mesh name="infinity-contained-receiver-water" geometry={assembly.receiver} renderOrder={2}>
       <WaterSurfaceMaterial waterLevel={assembly.levels.receiverY} reflections={false} depth={assembly.dims.catchBasinDepth} flowing />
     </mesh>
+    </> : null}
   </group>;
 }

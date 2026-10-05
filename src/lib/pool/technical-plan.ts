@@ -82,6 +82,7 @@ export function resolvedAccessAnchors(
 }
 
 export interface TechnicalPlan {
+  structure: PoolConfig["structure"];
   system: PoolConfig["system"];
   waterVolume: TechnicalField<number>;
   waterSurface: TechnicalField<number>;
@@ -174,6 +175,7 @@ export function buildTechnicalPlan({
 
   return {
     system: config.system,
+    structure: config.structure,
     waterVolume: measured(metrics.waterVolume),
     waterSurface: measured(metrics.waterSurface),
     internalSurface: measured(metrics.internalSurface),

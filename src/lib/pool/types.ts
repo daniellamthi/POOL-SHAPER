@@ -3,7 +3,7 @@ export type ProjectType = "new" | "renovation";
 export type PoolType = "in-ground" | "above-ground";
 
 export type PoolStructure =
-  "reinforced-concrete" | "modular-steel-panels" | "modular-steel-structure";
+  "reinforced-concrete" | "modular-steel-panels" | "visible-stainless-steel";
 
 export type PoolShapeId = "rectangle" | "l-shape" | "custom" | "organic";
 /** Historical alias kept so any code still importing it keeps compiling --
@@ -27,7 +27,8 @@ export type OverflowType = "hidden" | "visible";
 /** Historical alias kept so any code still importing it keeps compiling. */
 export type FutureOverflowType = OverflowType | "infinity";
 
-export type FinishMaterial = "liner" | "mosaic";
+export type SelectableFinishMaterial = "liner" | "mosaic";
+export type FinishMaterial = SelectableFinishMaterial | "none";
 export type LinerColor =
   | "motionDeepSea603"
   | "motionBlueSky602"
@@ -84,7 +85,7 @@ export type EquipmentUpgrade = "salt" | "dosing" | "heatPump" | "automation";
 
 export interface RenovationConfig {
   areas: ReadonlyArray<RenovationArea>;
-  currentFinish: FinishMaterial;
+  currentFinish: SelectableFinishMaterial;
   filtrationWorks: ReadonlyArray<FiltrationWork>;
   replaceCoping: boolean | null;
   copingMaterial: string;

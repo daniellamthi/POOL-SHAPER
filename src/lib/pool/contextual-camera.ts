@@ -2,7 +2,7 @@ import type { PoolConfig } from "./types";
 import type { CameraIntent } from "./camera";
 
 /** Ephemeral presentation intent, never part of ProjectConfiguration. */
-export type VisualFocus = "POOL_OVERVIEW" | "DIMENSIONS_TOP" | "DEPTH" | "STAIRS" | "INOX" |
+export type VisualFocus = "STRUCTURE_OVERVIEW" | "POOL_OVERVIEW" | "DIMENSIONS_TOP" | "DEPTH" | "STAIRS" | "INOX" |
   "SUN_SHELF" | "HYDROMASSAGE" | "BENCH" | "SKIMMER" | "OVERFLOW" | "INFINITY" |
   "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "COVER" | "TECHNICAL" |
   "TECHNICAL_SKIMMER" | "TECHNICAL_RETURNS" | "TECHNICAL_DRAINS" |
@@ -23,7 +23,8 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
     case "setShape": case "setControlPoint": case "setLShapeOrientation": return "DIMENSIONS_TOP";
     case "setSystem": case "setOverflowType": case "setInfinitySide": case "setSkimmerType": case "setSkimmerFinish":
       return c.system === "infinity" ? "INFINITY" : c.system === "overflow" ? "OVERFLOW" : "SKIMMER";
-    case "setPoolType": case "setPoolStructure": return "POOL_OVERVIEW";
+    case "setPoolType": return "POOL_OVERVIEW";
+    case "setPoolStructure": return "STRUCTURE_OVERVIEW";
     case "setFinish": case "setLinerColor": case "setMosaicFinish": return "INTERIOR_FINISH";
     case "setCopingMaterial": return "COPING";
     case "setPaving": return "PAVING";
@@ -55,6 +56,7 @@ export function nextFocusRequest(previous: FocusRequest | null, focus: VisualFoc
 
 export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraIntent {
   switch (focus) {
+    case "STRUCTURE_OVERVIEW": return "structure";
     case "DIMENSIONS_TOP": return "top";
     case "DEPTH": return "depth";
     case "STAIRS": return "access";

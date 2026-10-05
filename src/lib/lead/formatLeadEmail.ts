@@ -26,7 +26,9 @@ import {
   POOL_FEATURE_LABEL,
   SKIMMER_TYPE_LABEL,
   systemHeadline,
+  STRUCTURE_LABEL,
 } from "@/configurator/steps/final-review/summary-labels";
+import { finishDescription } from "@/lib/pool/structure-finish";
 import {
   EQUIPMENT_UPGRADE_LABEL,
   FILTRATION_WORK_LABEL,
@@ -48,9 +50,11 @@ function deferredItems(config: LeadSubmission["project"]["config"]): string[] {
 function newPoolLines(submission: LeadSubmission): string[] {
   const config = submission.project.config;
   const isMosaic = config.finish === "mosaic";
-  const finishTitle = isMosaic
-    ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
-    : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
+  const finishTitle = config.finish === "none"
+    ? finishDescription(config.structure, config.finish)
+    : isMosaic
+      ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
+      : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
   const copingTitle =
     COPING_MATERIALS.find((c) => c.id === config.copingMaterial)?.title ?? "Non selezionato";
   const skimmerDetail =
@@ -75,6 +79,7 @@ function newPoolLines(submission: LeadSubmission): string[] {
   return [
     `--- PISCINA ---`,
     `Tipologia: ${poolTypeLabel(config.poolType)}`,
+    `Struttura: ${config.structure ? STRUCTURE_LABEL[config.structure] : "Da definire"}`,
     `Forma: ${getShapeDefinition(config.shape).title}`,
     ...(config.system === "infinity" &&
     config.infinityEdge?.enabled &&
