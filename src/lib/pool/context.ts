@@ -6,6 +6,7 @@ import type {
   CustomMode,
   CustomerInfo,
   EquipmentId,
+  CoverPosition,
   FinishMaterial,
   FloorProfile,
   InternalStairType,
@@ -91,6 +92,7 @@ export interface ConfiguratorContextValue {
   toggleInternalSteps: () => void;
   toggleInoxLadder: () => void;
   toggleEquipment: (value: EquipmentId) => void;
+  setCoverPosition: (value: CoverPosition) => void;
   updateRenovation: (value: Partial<RenovationConfig>) => void;
   addUploads: (files: UploadedFile[]) => void;
   removeUpload: (id: string) => void;

@@ -5,6 +5,7 @@ import { skimmerWall } from "@/lib/pool/walls.ts";
 import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 import { mergedWallChords } from "@/lib/pool/lighting";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
+import { clearOfInfinityEdge, oppositeInfinityCoordinate } from "@/lib/pool/infinity-access";
 
 /** Metres. Internal design criteria, not certified regulatory limits. */
 export const ACCESS_DIMENSIONS = {
@@ -112,6 +113,8 @@ export function ladderRailCurve(anchorOffset: number, lastDepth: number, wallZ: 
  * placement philosophy is unrelated to the floor profile. The preference
  * reads live off the canonical `FloorProfileModel` (never a cached wall
  * index), so reversing the slope re-derives it automatically.
+ * With Infinity, the opposite wall takes priority; a lateral wall is used
+ * only when the opposite one cannot fit a clear access footprint.
  */
 export function accessPlacement(
   outline: Outline,
@@ -170,11 +173,24 @@ export function accessPlacement(
     Math.abs(a[shallowAxisIndex] - shallowCoordinate) < wallProximity &&
     Math.abs(b[shallowAxisIndex] - shallowCoordinate) < wallProximity;
   const infinityAxisIndex = infinityExcluded ? (infinityExcluded.axis === "x" ? 0 : 1) : null;
+  const oppositeCoordinate = infinityExcluded
+    ? oppositeInfinityCoordinate(outline, infinityExcluded)
+    : null;
+  const oppositeBand = oppositeCoordinate === null || !infinityExcluded
+    ? wallProximity
+    : Math.max(wallProximity, Math.abs(oppositeCoordinate - infinityExcluded.coordinate) * 0.12);
   const onInfinityWall = (a: readonly [number, number], b: readonly [number, number]) =>
     infinityAxisIndex !== null &&
     infinityExcluded !== null &&
     Math.abs(a[infinityAxisIndex] - infinityExcluded.coordinate) < wallProximity &&
     Math.abs(b[infinityAxisIndex] - infinityExcluded.coordinate) < wallProximity;
+  const onOppositeWall = (a: readonly [number, number], b: readonly [number, number]) =>
+    infinityAxisIndex !== null && oppositeCoordinate !== null &&
+    Math.abs(a[infinityAxisIndex] - oppositeCoordinate) < oppositeBand &&
+    Math.abs(b[infinityAxisIndex] - oppositeCoordinate) < oppositeBand;
+  const lateralWall = (a: readonly [number, number], b: readonly [number, number], length: number) =>
+    infinityAxisIndex !== null &&
+    Math.abs(b[infinityAxisIndex] - a[infinityAxisIndex]) >= length * 0.5;
   // Candidate walls come from merged wall CHORDS, not raw per-vertex edges:
   // for a rectangle/L-shape (a handful of true corners) the very first,
   // tightest tolerance is already a no-op -- byte-identical to the old raw
@@ -194,9 +210,14 @@ export function accessPlacement(
         length,
         skimmerWall: onSkimmerWall(a, b),
         shallowWall: preferShallow && onShallowWall(a, b),
+        oppositeWall: onOppositeWall(a, b),
       }))
-      .filter(({ a, b }) => !onInfinityWall(a, b))
+      .filter(({ a, b, length }) =>
+        !onInfinityWall(a, b) &&
+        (!infinityExcluded || onOppositeWall(a, b) || lateralWall(a, b, length)))
       .sort((first, second) => {
+        if (first.oppositeWall !== second.oppositeWall)
+          return first.oppositeWall ? -1 : 1;
         // The ladder shares its wall with nothing: push the skimmer run's
         // wall to the back of the queue before length is even considered.
         if (!shortWallAccess && first.skimmerWall !== second.skimmerWall) {
@@ -335,6 +356,9 @@ export function cornerStairPlan(
   if (outline.length < 3) return null;
   const skimmers = skimmerWall(outline, infinityExcluded);
   const infinityAxisIndex = infinityExcluded ? (infinityExcluded.axis === "x" ? 0 : 1) : null;
+  const oppositeCoordinate = infinityExcluded
+    ? oppositeInfinityCoordinate(outline, infinityExcluded)
+    : null;
   const axis = skimmers.axis === "x" ? 0 : 1;
   const centre: readonly [number, number] = [
     outline.reduce((sum, [x]) => sum + x, 0) / outline.length,
@@ -377,10 +401,10 @@ export function cornerStairPlan(
   const isShallowCorner = (point: Flank) =>
     preferShallow && Math.abs(point[shallowAxisIndex] - shallowCoordinate) < 1e-6;
   let best: { point: Flank; into: readonly [Flank, Flank] } | null = null;
-  // Two-tier comparison: a shallow-end corner always beats a deep one
-  // (bestTier 0 < 1); within the same tier, the existing "closest to the
-  // straight-flight placement" distance tiebreak is unchanged.
+  // An opposite-side corner wins first. Among corners in that tier, keep the
+  // shallow-end preference and then the straight-flight distance tiebreak.
   let bestTier = Infinity;
+  let bestOppositeTier = Infinity;
   let bestDistance = Infinity;
   for (let i = 0; i < outline.length; i++) {
     const point = outline[i]!;
@@ -465,7 +489,14 @@ export function cornerStairPlan(
     if (!contained || (accept && !accept(footprint))) continue;
     const distance = straight ? Math.hypot(point[0] - straight.x, point[1] - straight.z) : i;
     const tier = isShallowCorner(point) ? 0 : 1;
-    if (tier > bestTier || (tier === bestTier && distance >= bestDistance)) continue;
+    const oppositeTier = infinityAxisIndex !== null && oppositeCoordinate !== null &&
+      Math.abs(point[infinityAxisIndex] - oppositeCoordinate) < 1e-6 &&
+      (Math.abs(previous[infinityAxisIndex] - oppositeCoordinate) < 1e-6 ||
+        Math.abs(next[infinityAxisIndex] - oppositeCoordinate) < 1e-6) ? 0 : 1;
+    if (oppositeTier > bestOppositeTier ||
+      (oppositeTier === bestOppositeTier &&
+        (tier > bestTier || (tier === bestTier && distance >= bestDistance)))) continue;
+    bestOppositeTier = oppositeTier;
     bestTier = tier;
     bestDistance = distance;
     best = { point, into: [first, second] as const };
@@ -594,6 +625,7 @@ export function resolveAccessPlan({
   };
   if (!access) return empty;
   const clearOfFittings = (polygon: Outline) =>
+    clearOfInfinityEdge(outline, infinityExcluded, polygon) &&
     // Comfort footprints are axis-aligned rectangles. A conservative bounding
     // clearance also protects curved access nosings and ladder rails.
     !reservedFootprints.some(reserved => {

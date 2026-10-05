@@ -62,6 +62,7 @@ export type InternalStairType = "linear" | "corner";
 export type HydromassageVariant = "closed" | "open";
 
 export type EquipmentId = "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing";
+export type CoverPosition = "open" | "closed";
 
 export interface CustomerInfo {
   name: string;
@@ -204,6 +205,9 @@ export interface PoolConfig {
   /** Only meaningful while "hydromassage" is enabled; absent means "closed". */
   hydromassageVariant?: HydromassageVariant;
   equipment: ReadonlyArray<EquipmentId>;
+  /** Position requested for an automatic cover. Absent in legacy projects means open.
+   * The cover is enabled only through `equipment.includes("automaticCover")`. */
+  coverPosition?: CoverPosition;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;
 }

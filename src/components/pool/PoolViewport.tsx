@@ -21,10 +21,16 @@ import {
 import { photoModeState, PHOTO_MODE_EXPORT_READY_SAMPLES } from "@/lib/pool/photoModeState";
 import type { RenderJobStatus } from "@/lib/render-pipeline";
 import type { SceneProps, PhotoModeQuality } from "./three/PoolScene";
+import { TechnicalDataPanel } from "./TechnicalDataPanel";
+import type { TechnicalPlan } from "@/lib/pool/technical-plan";
+import type { VisualFocus } from "@/lib/pool/contextual-camera";
 
 const PoolScene = lazy(() => import("./three/PoolScene"));
 
 type ViewportProps = SceneProps & {
+  technicalPlan: TechnicalPlan;
+  onToggleTechnicalView: () => void;
+  onTechnicalFocus: (focus: VisualFocus) => void;
   onToggleMeasurements: () => void;
   onReframe: () => void;
   onTogglePhotoMode: () => void;
@@ -121,6 +127,9 @@ function QualityPicker({
 }
 
 export const PoolViewport = memo(function PoolViewport({
+  technicalPlan,
+  onToggleTechnicalView,
+  onTechnicalFocus,
   onToggleMeasurements,
   onReframe,
   onTogglePhotoMode,
@@ -164,6 +173,17 @@ export const PoolViewport = memo(function PoolViewport({
           {scene.system === "infinity" ? <option value="infinity">Infinity</option> : null}
         </select>
       </div>
+      {scene.technicalView && !scene.photoMode ? <div className="pointer-events-auto absolute right-3 top-3 z-10 w-36 sm:max-h-[58%] sm:w-[260px] sm:overflow-y-auto sm:rounded-2xl sm:shadow-lg">
+        <div className="hidden sm:block"><TechnicalDataPanel technical={technicalPlan} cover={scene.coverPlan} compact /></div>
+        <label className="sr-only" htmlFor="technical-focus">Dettaglio tecnico</label>
+        <select id="technical-focus" aria-label="Dettaglio tecnico" defaultValue="" onChange={(event) => onTechnicalFocus(event.target.value as VisualFocus)} className="mt-1 min-h-11 w-full rounded-xl border border-hairline bg-card px-3 text-xs text-foreground">
+          <option value="" disabled>Esamina componente</option>
+          {scene.system === "skimmer" ? <option value="TECHNICAL_SKIMMER">Skimmer</option> : <option value="TECHNICAL_OVERFLOW">Bordo e raccolta</option>}
+          <option value="TECHNICAL_RETURNS" disabled>Mandate · da progettare</option>
+          <option value="TECHNICAL_DRAINS" disabled>Scarichi · da progettare</option>
+          {scene.coverPlan.enabled && scene.coverPlan.geometry ? <option value="TECHNICAL_COVER">Copertura</option> : null}
+        </select>
+      </div> : null}
 
       {scene.photoMode ? <PhotoModeStatus samples={samples} /> : null}
 
@@ -230,6 +250,9 @@ export const PoolViewport = memo(function PoolViewport({
                   <DropdownMenuItem onSelect={onToggleMeasurements}>
                     {scene.showMeasurements ? "Nascondi guide" : "Mostra guide"}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={onToggleTechnicalView}>
+                    {scene.technicalView ? "Chiudi vista tecnica" : "Vista tecnica"}
+                  </DropdownMenuItem>
                   {premiumPresentationAvailable ? <DropdownMenuItem onSelect={onGeneratePhotorealisticRender}>
                     Premium Visualization · prepara
                   </DropdownMenuItem> : null}
@@ -271,6 +294,9 @@ export const PoolViewport = memo(function PoolViewport({
           >
             <Ruler />
             Guides
+          </Button>
+          <Button type="button" variant={scene.technicalView ? "viewportActive" : "viewport"} size="sm" onClick={onToggleTechnicalView} disabled={scene.photoMode}>
+            Vista tecnica
           </Button>
           <Button type="button" variant="viewport" size="sm" onClick={onReframe}>
             <Expand />

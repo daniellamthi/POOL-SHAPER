@@ -13,6 +13,7 @@ import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
 import { saveProjectDraft, loadProjectDraft, clearProjectDraft } from "../src/lib/pool/persistence";
 import { parseProjectConfiguration, serializeProjectConfiguration } from "../src/lib/pool/project";
 import { L_SHAPE_GUARDRAILS } from "../src/lib/pool/l-shape";
+import { resolveAutomaticCover } from "../src/lib/pool/cover-plan";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -119,6 +120,22 @@ console.log("PASS — B) projectId survives");
 // --- C. schemaVersion survives. ---
 assert(restored!.schemaVersion === PROJECT_SCHEMA_VERSION, "schemaVersion must survive");
 console.log("PASS — C) schemaVersion survives");
+
+// Optional Build06 cover state preserves old drafts and explicit positions.
+const legacyCover = parseProjectConfiguration(serializeProjectConfiguration({
+  ...project,
+  config: { ...fullConfig, equipment: [...fullConfig.equipment, "automaticCover"] },
+}));
+assert(!("coverPosition" in legacyCover.config), "legacy cover position must remain absent");
+assert(resolveAutomaticCover(legacyCover.config).position === "open", "legacy selected cover defaults open");
+const closedCover = parseProjectConfiguration(serializeProjectConfiguration({
+  ...project,
+  config: { ...fullConfig, equipment: [...fullConfig.equipment, "automaticCover"], coverPosition: "closed" },
+}));
+assert(closedCover.config.coverPosition === "closed", "explicit closed cover must survive round trip");
+const noCover = parseProjectConfiguration(serializeProjectConfiguration(project));
+assert(!("coverPosition" in noCover.config), "legacy no-cover project must not acquire cover state");
+console.log("PASS — C2) optional cover position and legacy defaults survive");
 
 // --- D. Overflow variant survives. ---
 assert(

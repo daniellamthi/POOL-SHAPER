@@ -8,7 +8,10 @@ import { resolveMaterials } from "./materials";
 import { POOL_BORDER_PRESET, WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
 import { pavingId, premiumEnvironment, PAVING } from "./presentation";
 import { normalisedLedIntensity } from "./led-optics";
-import { computeInfinityEdgeGeometry } from "./infinity-edge";
+import { computeInfinityEdgeGeometry, infinityExclusion } from "./infinity-edge";
+import { resolveAutomaticCover } from "./cover-plan";
+import { oppositeInfinityCoordinate } from "./infinity-access";
+import { resolvedAccessAnchors } from "./technical-plan";
 
 /** Data contract only. No renderer, generative redesign, UI theme, or customer PII.
  * The future renderer must build product geometry from these same versioned
@@ -29,20 +32,46 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   const bounds = outlineBounds(outline);
+  const layout = configuredPoolLayout(config);
+  const excluded = config.system === "infinity" && config.infinityEdge
+    ? infinityExclusion(outline, config.infinityEdge, config.shape) : null;
   const spec = {
     schema: "POOL_SHAPER_PHOTO_SCENE_SPEC", version: 1, projectId: project.projectId,
     sourceSchemaVersion: project.schemaVersion, renovation: project.renovation,
     units: "metres", axes: { up: "+Y", footprint: "XZ" },
     rendering: { status: "not-implemented", productRedesignAllowed: false },
     selection,
-    pool: { outline, elevations, floor, layout: configuredPoolLayout(config),
+    pool: { outline, elevations, floor, layout,
       skimmers: planSkimmers(outline, computeMetrics(outline, config.dimensions.depth).waterSurface, config.system === "skimmer"),
       infinity: config.system === "infinity" && config.infinityEdge ? {
         requested: config.infinityEdge,
         resolved: computeInfinityEdgeGeometry(outline, config.infinityEdge, config.shape),
       } : null,
       materials: resolveMaterials(config), water: WATER_VISUAL_PRESET,
-      cover: { requested: config.equipment.includes("automaticCover"), geometryAvailable: false },
+      cover: (() => {
+        const plan = resolveAutomaticCover(config);
+        return {
+          requested: plan.enabled,
+          position: plan.position,
+          status: plan.status,
+          reason: plan.reason,
+          geometryAvailable: plan.geometry !== null,
+          geometry: plan.geometry,
+        };
+      })(),
+      technicalConfiguration: {
+        systemId: config.system,
+        overflowId: config.system === "overflow" ? config.overflowType : null,
+        skimmerTypeId: config.system === "skimmer" ? config.skimmerType : null,
+        compensation: config.system === "skimmer" ? "not-applicable" : "requires-technical-validation",
+        infinityAccess: excluded ? {
+          selectedOverflowSide: config.infinityEdge?.side ?? null,
+          preferredOppositeSide: { axis: excluded.axis,
+            coordinate: oppositeInfinityCoordinate(outline, excluded) },
+          resolvedStatus: layout.status,
+          resolvedAnchors: resolvedAccessAnchors(outline, layout, excluded),
+        } : null,
+      },
     },
     paving: PAVING.find(p => p.id === pavingId(config.paving))!,
     lighting: { time: config.sceneTime === "night" ? "night" : "day",

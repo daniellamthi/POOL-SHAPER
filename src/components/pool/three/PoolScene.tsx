@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
+import { OrbitControls, ContactShadows, Line } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   Vector3,
@@ -16,6 +16,8 @@ import {
 } from "three";
 import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
+import { AutomaticCover } from "./AutomaticCover";
+import type { CoverPlan } from "@/lib/pool/cover-plan";
 import { StudioPaving } from "./StudioPaving";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
@@ -98,6 +100,8 @@ export interface SceneProps {
   hydromassageVariant?: HydromassageVariant;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
+  coverPlan: CoverPlan;
+  technicalView: boolean;
   /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
    * while `system === "infinity"`; absent/undefined renders and excludes
    * exactly as before Infinity existed. */
@@ -805,6 +809,8 @@ export default function PoolScene({
   hydromassageVariant,
   poolAccess,
   skimmers,
+  coverPlan,
+  technicalView,
   infinityEdge,
   onSelectInfinitySide,
   length,
@@ -1130,6 +1136,23 @@ export default function PoolScene({
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />
+      {coverPlan.geometry && !photoMode ? <AutomaticCover plan={coverPlan} /> : null}
+      {technicalView && !photoMode && system === "skimmer" ? skimmers.positions.map((point, index) => (
+        <mesh key={`technical-skimmer-${index}`} name="technical-skimmer-marker" position={[point.x, verticalLayout.waterY + 0.075, point.z]}>
+          <sphereGeometry args={[0.055, 10, 8]} />
+          <meshBasicMaterial color="#d9ba77" />
+        </mesh>
+      )) : null}
+      {technicalView && !photoMode && infinityZone ? <Line
+        name="technical-infinity-edge"
+        points={infinityZone.points.map(([x, z]) => [x, verticalLayout.waterY + 0.035, z])}
+        color="#d9ba77" lineWidth={2}
+      /> : null}
+      {technicalView && !photoMode && system === "overflow" ? <Line
+        name="technical-overflow-perimeter"
+        points={[...outline, outline[0]!].map(([x, z]) => [x, verticalLayout.waterY + 0.035, z])}
+        color="#d9ba77" lineWidth={2}
+      /> : null}
 
       {system === "infinity" && !photoMode && onSelectInfinitySide ? (
         <InfinityEdgePicker

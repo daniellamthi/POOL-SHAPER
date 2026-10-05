@@ -6,6 +6,7 @@ import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, STEPS } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { useConfigurator } from "@/lib/pool/context";
+import { TechnicalDataPanel, useTechnicalData } from "./TechnicalDataPanel";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
@@ -107,6 +108,7 @@ function Row({
  * is re-collected or re-derived into a second summary model. */
 export function ProjectSummary() {
   const { config, metrics, projectId, goToStep, outline } = useConfigurator();
+  const { technical, cover } = useTechnicalData();
 
   const dimensionsStepIndex = stepIndex("shape-dimensions");
   const systemStepIndex = stepIndex("system");
@@ -327,6 +329,7 @@ export function ProjectSummary() {
             <Row label="Allegati" value={config.uploads.map((file) => file.name).join(", ")} />
           ) : null}
         </dl>
+        <div className="mt-5"><TechnicalDataPanel technical={technical} cover={cover} /></div>
       </details>
     </section>
   );

@@ -39,6 +39,8 @@ import {
 } from "@/configurator/steps/renovation";
 import { BrandLogo } from "./BrandLogo";
 import { PoolViewport } from "./PoolViewport";
+import { useTechnicalData } from "./TechnicalDataPanel";
+import type { VisualFocus } from "@/lib/pool/contextual-camera";
 import { ThemeToggle } from "./ThemeToggle";
 import { StepIndicator } from "./StepIndicator";
 import { LiveSummary } from "./LiveSummary";
@@ -105,6 +107,7 @@ const RENOVATION_COMPONENTS = [
 ] as const;
 
 function ConfiguratorLayout() {
+  const { technical, cover } = useTechnicalData();
   const {
     config,
     outline,
@@ -163,6 +166,7 @@ function ConfiguratorLayout() {
   const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
   const [frameToken, setFrameToken] = useState(0);
   const [inspectionView, setInspectionView] = useState<SceneFocus | null>(null);
+  const [technicalView, setTechnicalView] = useState(false);
   useEffect(() => setInspectionView(null), [step, visualFocus]);
   const stepContentRef = useRef<HTMLDivElement>(null);
   // P5: mobile-only fullscreen presentation of the SAME live viewport --
@@ -423,6 +427,11 @@ function ConfiguratorLayout() {
               : {})}
             poolAccess={config.poolAccess}
             skimmers={skimmers}
+            coverPlan={cover}
+            technicalView={technicalView}
+            technicalPlan={technical}
+            onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}
+            onTechnicalFocus={(focus: VisualFocus) => { setInspectionView(contextualIntent(focus, config)); reframe(); }}
             {...(config.infinityEdge ? { infinityEdge: config.infinityEdge } : {})}
             onSelectInfinitySide={
               activeStepId === "system" && config.system === "infinity"
@@ -439,7 +448,7 @@ function ConfiguratorLayout() {
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}
             frameToken={frameToken + (visualFocus?.revision ?? 0)}
-            focus={inspectionView ?? (visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus)}
+            focus={inspectionView ?? (technicalView ? "review" : visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus)}
             cameraLocked={cameraLocked}
             showWater={true}
             theme={theme}
@@ -459,7 +468,7 @@ function ConfiguratorLayout() {
             onToggleMobileExpanded={toggleMobileExpanded}
             onInspectionView={(view) => { setInspectionView(view); reframe(); }}
           />
-          <LiveSummary />
+          {!technicalView ? <LiveSummary /> : null}
         </main>
       </div>
     </div>

@@ -11,6 +11,7 @@ import { createPavingModules } from "../src/components/pool/three/StudioPaving";
 import { copingOuterOffset } from "../src/components/pool/three/poolConstruction";
 import { coastalCamera, coastFrame } from "../src/components/pool/three/coastalLayout";
 import { infinityZonesForOutline } from "../src/lib/pool/infinity-edge";
+import { resolveAutomaticCover } from "../src/lib/pool/cover-plan";
 import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
 
 const base: PoolConfig = {
@@ -23,6 +24,16 @@ const base: PoolConfig = {
   equipment: [], customer: DEFAULT_CUSTOMER, uploads: [], sceneTime: "day",
 };
 const renovation: RenovationConfig = { areas: [], currentFinish: "liner", filtrationWorks: [], replaceCoping: null, copingMaterial: "", structureIssues: [], equipmentUpgrades: [] };
+for (const position of ["open", "closed"] as const) {
+  const config: PoolConfig = { ...base, equipment: ["automaticCover"], coverPosition: position };
+  const plan = resolveAutomaticCover(config);
+  const spec = createPhotoSceneSpec(toProjectConfiguration("cover-audit", config, renovation));
+  assert.equal(spec.pool.cover.requested, true);
+  assert.equal(spec.pool.cover.position, plan.position);
+  assert.equal(spec.pool.cover.status, plan.status);
+  assert.equal(spec.pool.cover.reason, plan.reason);
+  assert.deepEqual(spec.pool.cover.geometry, plan.geometry);
+}
 let checks = 0;
 for (const length of [6, 8, 10, 12]) for (const width of [3, 4.5, 5])
 for (const system of ["skimmer", "overflow", "infinity"] as const)
@@ -45,6 +56,13 @@ for (const comfort of [null, "sunShelf", "hydromassage"] as const) {
   assert.deepEqual(spec.renovation, renovation);
   assert.equal(spec.sourceSchemaVersion, project.schemaVersion);
   assert.equal(!!spec.pool.infinity?.resolved, system === "infinity");
+  if (system === "infinity") {
+    const access = spec.pool.technicalConfiguration.infinityAccess;
+    assert.ok(access, "Infinity technical configuration retains the selected edge and resolved access");
+    assert.ok(access.resolvedAnchors.length > 0, "Infinity access anchors come from the resolved layout");
+    assert.ok(access.resolvedAnchors.every(anchor => !anchor.onInfinityEdge),
+      `No resolved access or comfort anchor occupies the Infinity overflow edge: ${JSON.stringify({ length, width, floorProfile, comfort, access })}`);
+  }
   assert.ok(!("customer" in spec.selection) && !("uploads" in spec.selection));
   for (const environment of PREMIUM_ENVIRONMENTS) {
     const next = createPhotoSceneSpec({ ...project, config: { ...config, premiumEnvironment: environment.id } });

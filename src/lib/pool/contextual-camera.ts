@@ -4,7 +4,9 @@ import type { CameraIntent } from "./camera";
 /** Ephemeral presentation intent, never part of ProjectConfiguration. */
 export type VisualFocus = "POOL_OVERVIEW" | "DIMENSIONS_TOP" | "DEPTH" | "STAIRS" | "INOX" |
   "SUN_SHELF" | "HYDROMASSAGE" | "BENCH" | "SKIMMER" | "OVERFLOW" | "INFINITY" |
-  "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "COVER" | "TECHNICAL";
+  "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "COVER" | "TECHNICAL" |
+  "TECHNICAL_SKIMMER" | "TECHNICAL_RETURNS" | "TECHNICAL_DRAINS" |
+  "TECHNICAL_OVERFLOW" | "TECHNICAL_COMPENSATION" | "TECHNICAL_COVER";
 export interface FocusRequest { focus: VisualFocus; revision: number }
 
 const accessFocus = (c: PoolConfig): VisualFocus => c.features.includes("sunShelf") ? "SUN_SHELF"
@@ -33,7 +35,8 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
       if (action.value === "ledLighting") return "LIGHTING";
       if (action.value === "integratedBench" && c.features.includes("integratedBench")) return "BENCH";
       return accessFocus(c);
-    case "toggleEquipment": return "TECHNICAL"; // No cover geometry exists yet: never imply it is visible.
+    case "toggleEquipment": return action.value === "automaticCover" ? "COVER" : "TECHNICAL";
+    case "setCoverPosition": return "COVER";
     case "updateRenovation":
       if (action.value && typeof action.value === "object" && ("targetFinish" in action.value || "linerColor" in action.value || "mosaicFinish" in action.value)) return "INTERIOR_FINISH";
       return undefined;
@@ -65,6 +68,10 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
     case "INTERIOR_FINISH": return c.finish === "mosaic" ? "mosaic" : "liner";
     case "COPING": return "coping";
     case "LIGHTING": return c.system === "infinity" ? "infinity" : "features";
+    case "COVER": case "TECHNICAL_COVER": return "cover";
+    case "TECHNICAL_SKIMMER": return "skimmer-detail";
+    case "TECHNICAL_OVERFLOW": return c.system === "infinity" ? "infinity" : c.overflowType === "visible" ? "overflow-visible" : "overflow-hidden";
+    case "TECHNICAL_RETURNS": case "TECHNICAL_DRAINS": case "TECHNICAL_COMPENSATION": return "top";
     default: return "review";
   }
 }

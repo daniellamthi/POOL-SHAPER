@@ -39,6 +39,7 @@ import type {
   CustomMode,
   CustomerInfo,
   EquipmentId,
+  CoverPosition,
   FinishMaterial,
   FloorProfile,
   InternalStairType,
@@ -101,6 +102,7 @@ type Action =
   | { type: "toggleInternalSteps" }
   | { type: "toggleInoxLadder" }
   | { type: "toggleEquipment"; value: EquipmentId }
+  | { type: "setCoverPosition"; value: CoverPosition }
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
   | { type: "addUploads"; value: UploadedFile[] }
   | { type: "removeUpload"; id: string }
@@ -462,6 +464,10 @@ function configurationReducer(state: State, action: Action): State {
         : [...config.equipment, action.value];
       return { ...state, config: { ...config, equipment } };
     }
+    case "setCoverPosition":
+      return config.equipment.includes("automaticCover")
+        ? { ...state, config: { ...config, coverPosition: action.value } }
+        : state;
     case "updateRenovation":
       return { ...state, renovation: { ...state.renovation, ...action.value } };
     case "addUploads": {
@@ -730,6 +736,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       toggleInternalSteps: () => dispatch({ type: "toggleInternalSteps" }),
       toggleInoxLadder: () => dispatch({ type: "toggleInoxLadder" }),
       toggleEquipment: (v) => dispatch({ type: "toggleEquipment", value: v }),
+      setCoverPosition: (v) => dispatch({ type: "setCoverPosition", value: v }),
       updateRenovation: (v) => dispatch({ type: "updateRenovation", value: v }),
       addUploads: (files) => dispatch({ type: "addUploads", value: files }),
       removeUpload: (id) => {

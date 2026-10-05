@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "test:geometry": "node scripts/run-geometry-audit.mjs",
     "test:hydromassage": "node scripts/run-hydromassage-audit.mjs",
+    "test:infinity-access": "node scripts/run-infinity-access-safety-audit.mjs",
     "test:layout": "node scripts/run-component-layout-audit.mjs",
     "test:project-config": "node scripts/run-project-config-audit.mjs",
     "test:lead-pipeline": "node scripts/run-lead-pipeline-audit.mjs",

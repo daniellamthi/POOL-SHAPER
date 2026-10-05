@@ -392,7 +392,7 @@ export const EQUIPMENT: ReadonlyArray<{
   {
     id: "automaticCover",
     title: "Copertura automatica",
-    description: "Copertura di sicurezza e termica.",
+    description: "Copertura a doghe; fattibilità e prestazioni da verificare in progetto.",
   },
   { id: "heatPump", title: "Pompa di calore", description: "Riscaldamento efficiente dell'acqua." },
   {

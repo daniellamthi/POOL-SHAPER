@@ -196,6 +196,10 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       ...(restored.hydromassageVariant !== undefined
         ? { hydromassageVariant: restored.hydromassageVariant === "open" ? "open" : "closed" }
         : {}),
+      // Keep absent legacy cover state absent through restore and save.
+      ...(restored.coverPosition !== undefined
+        ? { coverPosition: restored.coverPosition === "closed" ? "closed" as const : "open" as const }
+        : {}),
       dimensions,
       system,
       ...(infinityEdge !== undefined ? { infinityEdge } : {}),

@@ -6,6 +6,7 @@ import { outlineBounds, outlineArea, outlineCentroid } from "./geometry";
 import type { FloorProfileModel } from "./floor-profile";
 import type { HydromassageVariant, Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, SystemType } from "./types";
 import type { InfinityExclusion } from "./walls";
+import { clearOfInfinityEdge, INFINITY_ACCESS_CLEARANCE } from "./infinity-access";
 
 export type ComfortKind = "sunShelf" | "integratedBench" | "hydromassage";
 
@@ -180,6 +181,19 @@ export function resolveComfortPlan({
   };
   const wantsShelf = enabled.includes("sunShelf");
   const wantsHydro = enabled.includes("hydromassage") && !wantsShelf;
+  const crossAxis = longX ? "z" : "x";
+  const crossMin = longX ? bounds.minZ : bounds.minX;
+  const crossMax = longX ? bounds.maxZ : bounds.maxX;
+  // A head-wall fallback beside an Infinity long side must leave an interior
+  // buffer for the entire shelf/tub, including the hydro wall overlap.
+  const infinityAtCrossMin = excludedWall(infinityExcluded, crossAxis, crossMin);
+  const infinityAtCrossMax = excludedWall(infinityExcluded, crossAxis, crossMax);
+  const safeCrossMin = infinityAtCrossMin
+    ? crossMin + INFINITY_ACCESS_CLEARANCE + HYDRO_DIMENSIONS.wallOverlap
+    : crossMin + EDGE_INSET;
+  const safeCrossMax = infinityAtCrossMax
+    ? crossMax - INFINITY_ACCESS_CLEARANCE - HYDRO_DIMENSIONS.wallOverlap
+    : crossMax - EDGE_INSET;
   const valid = (rect: Rect, wallAxis: "x" | "z", wallCoordinate: number) =>
     !excludedWall(infinityExcluded, wallAxis, wallCoordinate) &&
     (!accessRect || !overlaps(expanded(rect, CLEARANCE), accessRect)) &&
@@ -188,15 +202,17 @@ export function resolveComfortPlan({
   const shelfRun = Math.min(2.2, Math.max(1.2, longSpan * 0.2), longSpan - 2.4);
   const shelfCandidates: Array<{ rect: Rect; axis: "x" | "z"; coordinate: number }> = longX
     ? [
-        { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.minX + shelfRun, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.maxZ - EDGE_INSET }, axis: "x", coordinate: bounds.minX },
-        { rect: { minX: bounds.maxX - shelfRun, maxX: bounds.maxX - EDGE_INSET, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.maxZ - EDGE_INSET }, axis: "x", coordinate: bounds.maxX },
+        { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.minX + shelfRun, minZ: safeCrossMin, maxZ: safeCrossMax }, axis: "x", coordinate: bounds.minX },
+        { rect: { minX: bounds.maxX - shelfRun, maxX: bounds.maxX - EDGE_INSET, minZ: safeCrossMin, maxZ: safeCrossMax }, axis: "x", coordinate: bounds.maxX },
       ]
     : [
-        { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.maxX - EDGE_INSET, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.minZ + shelfRun }, axis: "z", coordinate: bounds.minZ },
-        { rect: { minX: bounds.minX + EDGE_INSET, maxX: bounds.maxX - EDGE_INSET, minZ: bounds.maxZ - shelfRun, maxZ: bounds.maxZ - EDGE_INSET }, axis: "z", coordinate: bounds.maxZ },
+        { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.minZ + shelfRun }, axis: "z", coordinate: bounds.minZ },
+        { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.maxZ - shelfRun, maxZ: bounds.maxZ - EDGE_INSET }, axis: "z", coordinate: bounds.maxZ },
       ];
   const stairWidth = Math.min(1.2, shortSpan - 1.2);
   const withSteps = (candidate: typeof shelfCandidates[number]) => {
+    if ((infinityAtCrossMin || infinityAtCrossMax) && safeCrossMax - safeCrossMin < stairWidth + 1.2)
+      return null;
     const positive = candidate.coordinate === (longX ? bounds.minX : bounds.minZ);
     const zone = floorProfile.shelfZone;
     if (zone && positive !== zone.atMin) return null;
@@ -229,12 +245,14 @@ export function resolveComfortPlan({
       });
       if (steps.some(step => step.footprint.some(([x,z]) => step.topY <= floorProfile.floorYAt(x,z) + 0.01))) continue;
       const flight = boundsOf(steps.flatMap(step => [...step.footprint]));
-      if (!valid(flight, candidate.axis, candidate.coordinate)) continue;
+      if (!valid(flight, candidate.axis, candidate.coordinate) ||
+        !clearOfInfinityEdge(outline, infinityExcluded, rectOutline(flight))) continue;
       const back = candidate.coordinate + direction * EDGE_INSET;
       const whole = longX
         ? { ...candidate.rect, minX: Math.min(back,end), maxX: Math.max(back,end) }
         : { ...candidate.rect, minZ: Math.min(back,end), maxZ: Math.max(back,end) };
-      if (!valid(whole, candidate.axis, candidate.coordinate)) continue;
+      if (!valid(whole, candidate.axis, candidate.coordinate) ||
+        !clearOfInfinityEdge(outline, infinityExcluded, rectOutline(whole))) continue;
       const rect = longX
         ? { ...whole, minZ: stairAtMin ? flight.maxZ : whole.minZ, maxZ: stairAtMin ? whole.maxZ : flight.minZ }
         : { ...whole, minX: stairAtMin ? flight.maxX : whole.minX, maxX: stairAtMin ? whole.maxX : flight.minX };
@@ -246,7 +264,8 @@ export function resolveComfortPlan({
     return null;
   };
   const shelf = shelfCandidates
-    .filter(candidate => valid(candidate.rect, candidate.axis, candidate.coordinate))
+    .filter(candidate => valid(candidate.rect, candidate.axis, candidate.coordinate) &&
+      clearOfInfinityEdge(outline, infinityExcluded, rectOutline(candidate.rect)))
     .map(withSteps).find(candidate => candidate !== null);
   if (!shelf) availability.sunShelf = { available: false, reason: "Nessuna testata libera da scala, accessi o bordo Infinity." };
   else if (wantsShelf) {
@@ -281,7 +300,13 @@ export function resolveComfortPlan({
     const side = flightAtMin ? 1 : -1;
     const partition0 = flightAtMin ? flightMax : flightMin;
     const inner = partition0 + side * H.partitionThickness;
-    const outerWall = flightAtMin ? wallMax : wallMin;
+    const outerPoolWall = flightAtMin ? wallMax : wallMin;
+    const outerIsInfinity = excludedWall(infinityExcluded, crossAxis, outerPoolWall);
+    const outerWall = outerIsInfinity
+      ? flightAtMin
+        ? (longX ? shelf.rect.maxZ : shelf.rect.maxX)
+        : (longX ? shelf.rect.minZ : shelf.rect.minX)
+      : outerPoolWall;
     const outer = outerWall + side * H.wallOverlap;
     const end = shelf.totalRun;
     const lip = end - H.lipThickness;
@@ -301,7 +326,9 @@ export function resolveComfortPlan({
     const floorUnder = Math.max(...corners.map(([x, z]) => floorProfile.floorYAt(x, z)));
     const tubFloor = waterY - H.tubWaterDepth;
     const raisedFloor = tubFloor > floorUnder + 0.05;
-    if (interiorWidth < H.minInteriorWidth || lip - H.benchDepth < H.minLegroom)
+    if (!clearOfInfinityEdge(outline, infinityExcluded, rectOutline(whole)))
+      availability.hydromassage = { available: false, reason: "Spazio insufficiente per tenere la vasca lontana dal bordo Infinity." };
+    else if (interiorWidth < H.minInteriorWidth || lip - H.benchDepth < H.minLegroom)
       availability.hydromassage = { available: false, reason: "Spazio insufficiente per vasca, panca e scala rettilinea con misure ergonomiche." };
     else if (seatTop - Math.max(floorUnder, tubFloor) < H.minSeatHeight)
       availability.hydromassage = { available: false, reason: "Profondità insufficiente per una seduta sommersa reale." };
@@ -344,7 +371,6 @@ export function resolveComfortPlan({
       const headDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
       const sideDir = (longX ? [0, -side] : [-side, 0]) as readonly [number, number];
       const innerSideDir = (longX ? [0, side] : [side, 0]) as readonly [number, number];
-      const outerIsInfinity = excludedWall(infinityExcluded, longX ? "z" : "x", outerWall);
       const jets = [
         ...spaced(inner + side * 0.3, benchInner - side * 0.25).map((c) => ({ ...point(0, c), y: jetY, dir: headDir })),
         ...(outerIsInfinity ? [] : spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, outerWall), y: jetY, dir: sideDir }))),
