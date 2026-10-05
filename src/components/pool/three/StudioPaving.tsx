@@ -1,12 +1,14 @@
 import { useEffect, useMemo } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
 import { BufferGeometry, DirectionalLight, SpotLight, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
+import type { WebGLProgramParametersWithUniforms } from "three";
 import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
-import { offsetOutline } from "@/lib/pool/geometry";
+import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { PAVING, pavingId, type PavingId } from "@/lib/pool/presentation";
 import { createSurfaceGeometry } from "./poolGeometry";
 import { copingOuterOffset } from "./poolConstruction";
 import { createLimestoneMaps } from "./stoneTextures";
+import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 
 type Point = [number, number];
 // Clip each existing ring triangle against one module. This keeps concave
@@ -65,7 +67,21 @@ export function createPavingModules(inner: Outline, outer: Outline, module: read
   return geometry;
 }
 
-function PavingMaterial({ id }: { id: PavingId }) {
+/** Width of the paved band around the basin, metres. Scales gently with the
+ * pool so a 6 m basin is not swallowed by its own terrace while a 12 m one
+ * still reads as a real deck rather than a kerb (was a fixed 1.2 m). */
+export function studioDeckBand(outline: Outline) {
+  const bounds = outlineBounds(outline);
+  return Math.min(3.6, Math.max(2.6, Math.hypot(bounds.spanX, bounds.spanZ) * 0.3));
+}
+
+/** Distance from the water edge to the first slab: the coping, or the
+ * above-ground shell's standoff. Shared with the deck furniture. */
+export function studioDeckInnerOffset(poolType: PoolType, system: SystemType, overflowType: OverflowType) {
+  return poolType === "in-ground" ? copingOuterOffset(system, overflowType) : 0.17;
+}
+
+function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
   const definition = PAVING.find(p => p.id === id)!;
   const maxAnisotropy = useThree(s => s.gl.capabilities.getMaxAnisotropy());
   // Cached source maps are never mutated: each presentation owns its clones.
@@ -92,18 +108,23 @@ function PavingMaterial({ id }: { id: PavingId }) {
   }, [maps, id, maxAnisotropy]);
   return <meshStandardMaterial vertexColors color={id === "istria" ? "#deddd1" : "#ffffff"}
     map={maps[0] ?? null} normalMap={maps[1] ?? null} roughnessMap={maps[2] ?? null}
-    normalScale={[0.22, 0.22]} roughness={id === "istria" ? 0.9 : 1} metalness={0} />;
+    normalScale={[0.22, 0.22]} roughness={id === "istria" ? 0.9 : 1} metalness={0}
+    onBeforeCompile={(shader) => excludeSubmergedDirectLights(shader, waterY)}
+    customProgramCacheKey={() => `studio-paving-dry-${waterY}`} />;
 }
 
-export function StudioPaving({ outline, poolType, system, overflowType, paving = "gres" }: {
+export function StudioPaving({ outline, poolType, system, overflowType, paving = "gres", waterY }: {
   outline: Outline; poolType: PoolType; system: SystemType; overflowType: OverflowType; paving?: PavingId;
+  /** Submerged LEDs are linked out of every dry deck material (they cannot
+   * shine through the shell), so the beam stays inside the basin. */
+  waterY: number;
 }) {
   const gl = useThree(s => s.gl);
   const scene = useThree(s => s.scene);
   const id = pavingId(paving), module = PAVING.find(p => p.id === id)!.module;
   const geometry = useMemo(() => {
-    const inner = offsetOutline(outline, poolType === "in-ground" ? copingOuterOffset(system, overflowType) : 0.17);
-    const outer = offsetOutline(inner, 1.2);
+    const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
+    const outer = offsetOutline(inner, studioDeckBand(outline));
     const far: Outline = [[-150,-150],[150,-150],[150,150],[-150,150]];
     return { slabs: createPavingModules(inner, outer, module), grout: createSurfaceGeometry(outer, inner),
       ground: createSurfaceGeometry(far, outer) };
@@ -117,9 +138,11 @@ export function StudioPaving({ outline, poolType, system, overflowType, paving =
     gl.shadowMap.needsUpdate = true;
   }, [gl, scene, geometry]);
   useEffect(() => () => Object.values(geometry).forEach(g => g.dispose()), [geometry]);
+  const dry = (shader: WebGLProgramParametersWithUniforms) => excludeSubmergedDirectLights(shader, waterY);
+  const dryKey = () => `studio-ground-dry-${waterY}`;
   return <group name="premium-configuration-studio">
-    <mesh geometry={geometry.ground} position={[0,-0.012,0]} receiveShadow><meshStandardMaterial color="#ddd9d2" roughness={0.95} /></mesh>
-    <mesh geometry={geometry.grout} position={[0,-0.006,0]} receiveShadow><meshStandardMaterial color={id === "wood" ? "#706457" : "#ada69a"} roughness={1} /></mesh>
-    <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow><PavingMaterial key={id} id={id} /></mesh>
+    <mesh geometry={geometry.ground} position={[0,-0.012,0]} receiveShadow><meshStandardMaterial color="#ddd9d2" roughness={0.95} onBeforeCompile={dry} customProgramCacheKey={dryKey} /></mesh>
+    <mesh geometry={geometry.grout} position={[0,-0.006,0]} receiveShadow><meshStandardMaterial color={id === "wood" ? "#706457" : "#ada69a"} roughness={1} onBeforeCompile={dry} customProgramCacheKey={dryKey} /></mesh>
+    <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow><PavingMaterial key={id} id={id} waterY={waterY} /></mesh>
   </group>;
 }

@@ -37,7 +37,7 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
       if (action.value === "integratedBench" && c.features.includes("integratedBench")) return "BENCH";
       return accessFocus(c);
     case "toggleEquipment": return action.value === "automaticCover" ? "COVER" : "TECHNICAL";
-    case "setCoverPosition": return "COVER";
+    case "setCoverPosition": case "setCoverExtension": return "COVER";
     case "updateRenovation":
       if (action.value && typeof action.value === "object" && ("targetFinish" in action.value || "linerColor" in action.value || "mosaicFinish" in action.value)) return "INTERIOR_FINISH";
       return undefined;

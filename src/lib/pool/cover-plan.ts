@@ -12,6 +12,9 @@ export interface CoverPlan {
   reason: string | null;
   enabled: boolean;
   position: "open" | "closed";
+  /** Progressive deployment of the slat mat, 0 = open .. 1 = closed. Scene
+   * only: `position` stays the quoted state and `geometry` never carries it. */
+  extension: number;
   footprint: { minX: number; maxX: number; minZ: number; maxZ: number };
   waterY: number;
   housingSide: "minX" | "maxX";
@@ -28,10 +31,18 @@ export interface CoverPlan {
   };
 }
 
+/** Clamp a stored slider value; anything else falls back to the two-state position. */
+export function normalisedCoverExtension(value: unknown, position: "open" | "closed"): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(1, Math.max(0, value))
+    : position === "closed" ? 1 : 0;
+}
+
 /** Resolves the requested cover against the actual basin, without changing the saved quote. */
 export function resolveAutomaticCover(config: PoolConfig): CoverPlan {
   const enabled = config.equipment.includes("automaticCover");
   const position = enabled && config.coverPosition === "closed" ? "closed" : "open";
+  const extension = enabled ? normalisedCoverExtension(config.coverExtension, position) : 0;
   const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
   const bounds = outlineBounds(outline);
   const footprint = { minX: bounds.minX, maxX: bounds.maxX, minZ: bounds.minZ, maxZ: bounds.maxZ };
@@ -86,6 +97,6 @@ export function resolveAutomaticCover(config: PoolConfig): CoverPlan {
   return {
     status: reason ? "UNAVAILABLE" : adjusted ? "AUTO_ADJUSTED" : "VALID",
     reason: adjusted ? "Rullo spostato sulla testata libera da accesso e componenti." : reason,
-    enabled, position, footprint, waterY, housingSide, housingX, housingY, slatRun, geometry,
+    enabled, position, extension, footprint, waterY, housingSide, housingX, housingY, slatRun, geometry,
   };
 }

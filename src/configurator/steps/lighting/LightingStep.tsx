@@ -71,7 +71,7 @@ export function LightingStep({
               <p>
                 Preset provvisorio: apparecchio generico da 1500 lm, circa{" "}
                 {plan?.coveragePerFixture.toFixed(1)} m² per punto luce. Ipotesi: 45 lx, utilizzo
-                65%, manutenzione 85%, immersione nominale 60 cm e fascio simulato 155°. Finiture
+                65%, manutenzione 85%, immersione nominale 60 cm e fascio simulato 144°. Finiture
                 scure e ostacoli richiedono verifica fotometrica. Non è una certificazione elettrica
                 né una specifica LumiPlus Flexi.
               </p>

@@ -37,7 +37,9 @@ export function TechnicalDataPanel({ technical, cover, compact = false }: {
       : technical.overflow?.kind === "VISIBLE_CHANNEL" ? "Sfioro visibile" : "Sfioro nascosto";
   const coverName = !cover.enabled ? "Non selezionata"
     : cover.status === "UNAVAILABLE" ? "Richiesta · da verificare"
-      : cover.position === "closed" ? "Automatica · chiusa" : "Automatica · aperta";
+      : cover.extension > 0.02 && cover.extension < 0.98
+        ? `Automatica · chiusa al ${Math.round(cover.extension * 100)}%`
+        : cover.position === "closed" ? "Automatica · chiusa" : "Automatica · aperta";
   return <div className="rounded-2xl border border-hairline bg-card/95 p-4 text-xs shadow-sm" data-testid="technical-data-panel">
     <h3 className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Scheda tecnica indicativa</h3>
     <Row label="Sistema" value={systemName} />

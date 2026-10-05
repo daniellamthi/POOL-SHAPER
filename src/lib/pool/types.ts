@@ -209,6 +209,10 @@ export interface PoolConfig {
   /** Position requested for an automatic cover. Absent in legacy projects means open.
    * The cover is enabled only through `equipment.includes("automaticCover")`. */
   coverPosition?: CoverPosition;
+  /** Progressive position of the automatic cover, 0 = fully open (stored on
+   * the roller) .. 1 = fully closed. Absent on projects saved before the
+   * slider existed; readers derive it from `coverPosition`. */
+  coverExtension?: number;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;
 }

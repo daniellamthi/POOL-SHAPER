@@ -1,3 +1,4 @@
+import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 import { useEffect, useMemo } from "react";
 import type { Outline } from "@/lib/pool/types";
 import { boundaryRuns, sampleWall, pointInBasin } from "@/lib/pool/boundary-placement";
@@ -126,7 +127,7 @@ export function ExternalStaircase({
             return (
               <mesh key={index} position={[0, stepY + railHeight / 2, z]} castShadow>
                 <cylinderGeometry args={[0.016, 0.016, railHeight, 10]} />
-                <meshStandardMaterial color="#c8ced1" roughness={0.2} metalness={0.9} />
+                <StainlessSteelMaterial finish="polished" />
               </mesh>
             );
           })}
@@ -136,7 +137,7 @@ export function ExternalStaircase({
             castShadow
           >
             <cylinderGeometry args={[0.018, 0.018, railLength, 10]} />
-            <meshStandardMaterial color="#c8ced1" roughness={0.18} metalness={0.92} />
+            <StainlessSteelMaterial finish="polished" />
           </mesh>
         </group>
       ))}

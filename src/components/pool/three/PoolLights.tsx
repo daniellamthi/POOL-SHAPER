@@ -1,3 +1,4 @@
+import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { type SceneLightingPlan } from "@/lib/pool/lighting-plan";
@@ -171,6 +172,12 @@ function RecessedPoolLight({
     );
     return object;
   }, [position.y, position.throwDistance, floorY]);
+  // The scattering volume is aimed exactly like the spotlight: both tilt
+  // from the wall normal by the same small angle, into the basin.
+  const beamTilt = Math.atan2(
+    (position.y - floorY) * LED_OPTICS.targetFloorFraction,
+    Math.max(0.1, position.throwDistance * LED_OPTICS.targetThrowFraction),
+  );
   useLayoutEffect(() => {
     if (light.current) light.current.shadow.needsUpdate = true;
   }, [revision, target, occlusion]);
@@ -184,15 +191,15 @@ function RecessedPoolLight({
       <group scale={[POOL_LUMINAIRE.diameter / 0.256, POOL_LUMINAIRE.diameter / 0.256, 1]}>
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.002]} castShadow>
         <cylinderGeometry args={[0.128, 0.118, 0.028, 40]} />
-        <meshStandardMaterial color="#69777b" roughness={0.4} metalness={0.8} />
+        <StainlessSteelMaterial finish="brushed" color="#9aa3a6" />
       </mesh>
       <mesh position={[0, 0, 0.022]} castShadow>
         <torusGeometry args={[0.116, 0.009, 10, 48]} />
-        <meshStandardMaterial
-          color={POOL_LUMINAIRE.trim === "steel" ? "#cbd1d2" : "#e9e9e3"}
-          metalness={POOL_LUMINAIRE.trim === "steel" ? 1 : 0}
-          roughness={0.34}
-        />
+        {POOL_LUMINAIRE.trim === "steel" ? (
+          <StainlessSteelMaterial finish="satin" />
+        ) : (
+          <meshStandardMaterial color="#e9e9e3" metalness={0} roughness={0.34} />
+        )}
       </mesh>
       <mesh position={[0, 0, 0.019]}>
         <ringGeometry args={[0.1, 0.108, 40]} />
@@ -212,7 +219,7 @@ function RecessedPoolLight({
       {[-1, 1].map((sign) => (
         <mesh key={sign} position={[sign * 0.116, 0, 0.032]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.003, 0.003, 0.0015, 10]} />
-          <meshStandardMaterial color="#798487" roughness={0.4} metalness={0.9} />
+          <StainlessSteelMaterial finish="satin" />
         </mesh>
       ))}
       </group>
@@ -247,14 +254,15 @@ function RecessedPoolLight({
         // lens centre so the beam is visually continuous from the glass
         // outward -- this is what closes the gap between the fixture and the
         // surfaces it illuminates.
-        <mesh
-          name="led-beam-scatter"
-          position={[0, 0, LED_OPTICS.lensCenter]}
-          geometry={scatterGeometry}
-          renderOrder={LED_OPTICS.beamRenderOrder}
-        >
-          <primitive object={scatterMaterial} attach="material" />
-        </mesh>
+        <group position={[0, 0, LED_OPTICS.lensCenter]} rotation={[beamTilt, 0, 0]}>
+          <mesh
+            name="led-beam-scatter"
+            geometry={scatterGeometry}
+            renderOrder={LED_OPTICS.beamRenderOrder}
+          >
+            <primitive object={scatterMaterial} attach="material" />
+          </mesh>
+        </group>
       ) : null}
       {powered ? (
         <spotLight

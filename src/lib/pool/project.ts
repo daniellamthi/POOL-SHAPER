@@ -188,7 +188,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     !infinityZones.some((z) => z.side === infinityEdge?.side)
   )
     infinityEdge = clampInfinityEdgeParams(undefined);
-  const { infinityEdge: _savedInfinityEdge, ...restoredWithoutEdge } = restored;
+  const { infinityEdge: _savedInfinityEdge, coverExtension: savedCoverExtension, ...restoredWithoutEdge } = restored;
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
@@ -220,6 +220,11 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // Keep absent legacy cover state absent through restore and save.
       ...(restored.coverPosition !== undefined
         ? { coverPosition: restored.coverPosition === "closed" ? "closed" as const : "open" as const }
+        : {}),
+      // Same contract for the progressive slider position: clamp a saved
+      // number, drop anything else, never invent it for a legacy project.
+      ...(typeof savedCoverExtension === "number" && Number.isFinite(savedCoverExtension)
+        ? { coverExtension: Math.min(1, Math.max(0, savedCoverExtension)) }
         : {}),
       dimensions,
       structure,

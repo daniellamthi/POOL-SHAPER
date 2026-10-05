@@ -1,3 +1,4 @@
+import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 import { useEffect, useMemo, type ReactNode } from "react";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import type { ComfortPlan } from "@/lib/pool/comfort-plan";
@@ -125,11 +126,11 @@ function HydroJet({ jet }: { jet: NonNullable<ComfortElementPlan["jets"]>[number
     <group name="pool-hydro-jet" position={[jet.x, jet.y, jet.z]} rotation={[0, rotY, 0]}>
       <mesh position={[0, 0, 0.0025]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[d / 2, d / 2, 0.005, 24]} />
-        <meshStandardMaterial color="#ffffff" metalness={0} roughness={0.45} />
+        <StainlessSteelMaterial finish="satin" />
       </mesh>
       <mesh position={[0, 0, 0.0056]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[d * 0.26, d * 0.26, 0.002, 16]} />
-        <meshStandardMaterial color="#c4c9ce" metalness={0} roughness={0.55} />
+        <meshStandardMaterial color="#2a2f31" metalness={0} roughness={0.6} />
       </mesh>
     </group>
   );

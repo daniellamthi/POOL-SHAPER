@@ -1,3 +1,4 @@
+import { boostMetalEnvironment, STAINLESS_IBL_CACHE_KEY } from "./StainlessSteelMaterial";
 import { useEffect, useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
@@ -57,7 +58,15 @@ function createFrameMaterial(
     clearcoat: isMetal ? 0 : 0.18,
     clearcoatRoughness: 0.24,
     ior: isMetal ? 2.5 : 1.45,
+    // Drawn satin steel: anisotropic highlights along the brushing.
+    anisotropy: isMetal ? 0.55 : 0,
   });
+  if (isMetal) {
+    // Metal is only its environment reflection; see StainlessSteelMaterial
+    // for why the scene's 0.24 IBL alone renders it as grey plastic.
+    material.onBeforeCompile = (shader) => boostMetalEnvironment(shader);
+    material.customProgramCacheKey = () => STAINLESS_IBL_CACHE_KEY;
+  }
   material.normalScale.set(
     MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,
     MATERIAL_MICRO_DETAIL_PRESET.skimmer.normalStrength,

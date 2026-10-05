@@ -108,6 +108,7 @@ type Action =
   | { type: "toggleInoxLadder" }
   | { type: "toggleEquipment"; value: EquipmentId }
   | { type: "setCoverPosition"; value: CoverPosition }
+  | { type: "setCoverExtension"; value: number }
   | { type: "updateRenovation"; value: Partial<RenovationConfig> }
   | { type: "addUploads"; value: UploadedFile[] }
   | { type: "removeUpload"; id: string }
@@ -484,8 +485,15 @@ function configurationReducer(state: State, action: Action): State {
     }
     case "setCoverPosition":
       return config.equipment.includes("automaticCover")
-        ? { ...state, config: { ...config, coverPosition: action.value } }
+        ? { ...state, config: { ...config, coverPosition: action.value, coverExtension: action.value === "closed" ? 1 : 0 } }
         : state;
+    case "setCoverExtension": {
+      // The slider is the live position; the two-state `coverPosition` the
+      // quote/technical plan read is derived from it, never the other way.
+      if (!config.equipment.includes("automaticCover")) return state;
+      const coverExtension = Number.isFinite(action.value) ? Math.min(1, Math.max(0, action.value)) : 0;
+      return { ...state, config: { ...config, coverExtension, coverPosition: coverExtension >= 0.5 ? "closed" : "open" } };
+    }
     case "updateRenovation":
       return { ...state, renovation: { ...state.renovation, ...action.value } };
     case "addUploads": {
@@ -755,6 +763,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       toggleInoxLadder: () => dispatch({ type: "toggleInoxLadder" }),
       toggleEquipment: (v) => dispatch({ type: "toggleEquipment", value: v }),
       setCoverPosition: (v) => dispatch({ type: "setCoverPosition", value: v }),
+      setCoverExtension: (v) => dispatch({ type: "setCoverExtension", value: v }),
       updateRenovation: (v) => dispatch({ type: "updateRenovation", value: v }),
       addUploads: (files) => dispatch({ type: "addUploads", value: files }),
       removeUpload: (id) => {

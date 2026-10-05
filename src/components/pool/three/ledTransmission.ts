@@ -1,6 +1,6 @@
 import { ShaderChunk, type WebGLProgramParametersWithUniforms } from "three";
 import { LED_OPTICS } from "@/lib/pool/led-optics";
-export const LED_TRANSPORT_CACHE_KEY = `led-transport-v2-${LED_OPTICS.nearField}-${LED_OPTICS.absorption.join("-")}`;
+export const LED_TRANSPORT_CACHE_KEY = `led-transport-v3-${LED_OPTICS.nearField}-${LED_OPTICS.absorption.join("-")}-${LED_OPTICS.irradianceKnee}`;
 
 /** Only the LED incident-light path is changed. Albedo/BRDF, sun, environment,
  * existing caustics and receiver-to-camera water optics remain untouched. */
@@ -14,6 +14,9 @@ export function applyLedTransmission(shader: WebGLProgramParametersWithUniforms)
       float ledDistance = sqrt(lightDistance * lightDistance + ${LED_OPTICS.nearField ** 2});
       light.color *= getDistanceAttenuation(ledDistance, spotLight.distance, spotLight.decay);
       light.color *= exp(-vec3(${LED_OPTICS.absorption.join(",")}) * lightDistance);
+      // Luminance soft knee: keeps the lamp's hue on the lit liner instead of
+      // letting the near field clip to white (see LED_OPTICS.irradianceKnee).
+      light.color /= 1.0 + dot(light.color, vec3(0.2126, 0.7152, 0.0722)) * ${LED_OPTICS.irradianceKnee.toFixed(3)};
       // A submerged luminaire cannot directly illuminate the dry wall band.
       light.color *= 1.0 - smoothstep(waterLevel - 0.015, waterLevel, vCausticWorldPosition.y);
     } else {

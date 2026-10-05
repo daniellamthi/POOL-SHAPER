@@ -1,3 +1,4 @@
+import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 import { useEffect, useMemo, type ReactNode } from "react";
 import * as THREE from "three";
 import type { InternalStairType, Outline, PoolAccess } from "@/lib/pool/types";
@@ -1033,11 +1034,11 @@ export function PoolAccessModel({
             <group key={x} position={[x, 0, 0]}>
               <mesh castShadow>
                 <tubeGeometry args={[curve, 64, ACCESS_DIMENSIONS.ladderTubeRadius, 12, false]} />
-                <meshStandardMaterial color="#e5e8e9" metalness={1} roughness={0.22} />
+                <StainlessSteelMaterial finish="polished" />
               </mesh>
               <mesh position={[0, 0.012, -ladderAnchorOffset]}>
                 <cylinderGeometry args={[0.06, 0.06, 0.024, 24]} />
-                <meshStandardMaterial color="#d5dadd" metalness={1} roughness={0.24} />
+                <StainlessSteelMaterial finish="satin" />
               </mesh>
               <mesh
                 position={[
@@ -1056,7 +1057,7 @@ export function PoolAccessModel({
             <group key={d} position={[0, -d, 0.32]}>
               <mesh castShadow>
                 <boxGeometry args={[ACCESS_DIMENSIONS.ladderWidth, 0.035, 0.13]} />
-                <meshStandardMaterial color="#bbc3c6" metalness={1} roughness={0.32} />
+                <StainlessSteelMaterial finish="brushed" />
               </mesh>
               <mesh position={[0, 0.019, 0]}>
                 <boxGeometry args={[0.4, 0.004, 0.105]} />

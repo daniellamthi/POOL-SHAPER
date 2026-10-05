@@ -2,7 +2,9 @@ import { Color } from "three";
 
 /** Display calibration for the existing luminaires; does not alter their layout. */
 export const LED_OPTICS = {
-  angle: Math.PI * 0.43,
+  // 144 degree flood (was 155): a tighter cone keeps the light in the
+  // basin and gives the beam a readable centre instead of a uniform wash.
+  angle: Math.PI * 0.4,
   penumbra: 1,
   decay: 2,
   rangeMultiplier: 2.8,
@@ -18,7 +20,7 @@ export const LED_OPTICS = {
   /** Beam axis follows the wall normal, with only a slight downward bias:
    * a real recessed luminaire is aimed very marginally down, not raked at
    * the floor. */
-  targetFloorFraction: 0.05,
+  targetFloorFraction: 0.22,
   targetThrowFraction: 1,
   // Soft core glow rendered on the lens glass itself. Slightly smaller than
   // the lens radius (0.1) so it reads as the glass lighting up.
@@ -58,16 +60,27 @@ export const LED_OPTICS = {
   beamRenderOrder: 10,
   // Diffuser near-field regularisation prevents point-source singularities.
   nearField: 1.4,
-  absorption: [0.18, 0.045, 0.023] as const,
-  maxLumensPerSquareMetre: 90,
+  /** Soft knee on each submerged lamp's direct irradiance, applied per
+   * fragment before shading (ledTransmission.ts). The liner right in front
+   * of a lamp receives tens of times the dusk scene's exposure; left alone
+   * the tone mapper clips that patch to white and the chosen colour is lost
+   * -- an orange lamp on a sand liner read as pale yellow. Luminance-based,
+   * so hue is preserved exactly; the far field (small values) is barely
+   * touched, which keeps the beam's reach. */
+  irradianceKnee: 0.06,
+  // Red is absorbed first in clear water; kept a little below the textbook
+  // value so a warm lamp still reads warm on the far side of a 4 m basin.
+  absorption: [0.14, 0.045, 0.023] as const,
+  maxLumensPerSquareMetre: 110,
   /**
    * A real underwater LED is never spectrally pure: its phosphor and its
-   * diffuser both wash the primary. Mixing 12% neutral is what lets a deep
-   * blue or red reach the same luminance as green without a grotesque gain,
-   * and it is why the lens core reads as a bright lamp rather than as a
-   * saturated gel.
+   * diffuser both wash the primary. A small neutral mix lets a deep blue or
+   * red reach the same luminance as green without a grotesque gain, and is
+   * why the lens core reads as a bright lamp rather than as a saturated gel.
+   * Kept low (5%): at 12% an orange lamp drifted to amber and vanished
+   * against a sand liner.
    */
-  neutralMix: 0.12,
+  neutralMix: 0.05,
   /**
    * Every hue is normalised to one luminance, so the colour wheel changes the
    * colour of the pool and not its brightness. Without it green landed twice
@@ -75,7 +88,15 @@ export const LED_OPTICS = {
    * reason a naive RGB lamp looks like a nightclub.
    */
   targetLuminance: 0.62,
-  maxChromaGain: 3.5,
+  maxChromaGain: 4,
+  /**
+   * Saturation pushed around the luminance axis before normalising. A lit
+   * liner multiplies the lamp by its own albedo and then mixes with the
+   * dusk ambient: on a sand liner a textbook orange came out as amber. The
+   * boost keeps every hue legible on every finish; neutral white is a fixed
+   * point and is untouched.
+   */
+  chromaBoost: 1.5,
   /**
    * Perceptual curve on the intensity control. Straight linear scaling makes
    * the bottom half of the slider do almost nothing visible, because both the
@@ -99,8 +120,8 @@ export const LED_OPTICS = {
   // that starts on the floor. Now only the topmost part of the cone is
   // attenuated, and it fades over a wide feather, so the wall, the water
   // volume and the floor are lit continuously outward from the lens.
-  upperCutoff: 0.78,
-  upperFeather: 0.3,
+  upperCutoff: 0.72,
+  upperFeather: 0.26,
   presentations: {
     // `emission` lights the glass itself, `glow` its bright core, `scatter`
     // the water volume in front of it. All three scale together so the lens
@@ -110,9 +131,12 @@ export const LED_OPTICS = {
     // orders of magnitude brighter than the surfaces around it and clips to
     // white in any photograph of it. Anything at or below 1 renders as pale
     // grey glass and never reads as switched on.
-    day: { output: 0.24, emission: 3, glow: 0.6, scatter: 0.3 },
-    evening: { output: 0.5, emission: 9, glow: 0.85, scatter: 0.55 },
-    night: { output: 0.85, emission: 16, glow: 1, scatter: 0.8 },
+    // `output` is kept moderate on purpose: a hotter lamp only clips the
+    // lit liner to white under the tone mapper and the colour is lost. The
+    // visible intensity comes from the tighter cone and the brighter beam.
+    day: { output: 0.26, emission: 3.5, glow: 0.65, scatter: 0.4 },
+    evening: { output: 0.5, emission: 9, glow: 0.9, scatter: 0.75 },
+    night: { output: 0.7, emission: 16, glow: 1, scatter: 1 },
   },
 } as const;
 
@@ -132,9 +156,24 @@ export function calibratedLedColor(value = "#ffffff") {
   const color = new Color(isLedColor(value) ? value : "#ffffff");
   const neutral = new Color().setRGB(0.96, 0.98, 1);
   color.lerp(neutral, LED_OPTICS.neutralMix);
+  const grey = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+  // Never fully black in a channel: a real phosphor LED always leaks a little.
+  const floor = grey * 0.02;
+  color.setRGB(
+    Math.max(floor, grey + (color.r - grey) * LED_OPTICS.chromaBoost),
+    Math.max(floor, grey + (color.g - grey) * LED_OPTICS.chromaBoost),
+    Math.max(floor, grey + (color.b - grey) * LED_OPTICS.chromaBoost),
+  );
   const luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
-  return color.multiplyScalar(
+  color.multiplyScalar(
     Math.min(LED_OPTICS.maxChromaGain, LED_OPTICS.targetLuminance / Math.max(luminance, 0.01)),
+  );
+  // `maxChromaGain` is also the ceiling of any single channel, so a deep
+  // blue cannot run away past what the tone mapper can still show as blue.
+  return color.setRGB(
+    Math.min(LED_OPTICS.maxChromaGain, color.r),
+    Math.min(LED_OPTICS.maxChromaGain, color.g),
+    Math.min(LED_OPTICS.maxChromaGain, color.b),
   );
 }
 

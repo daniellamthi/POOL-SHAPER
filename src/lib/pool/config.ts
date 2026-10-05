@@ -215,7 +215,7 @@ export const SKIMMER_FINISHES: ReadonlyArray<{
   { id: "sand", title: "Sabbia ABS", hex: "#d8cdb8", roughness: 0.3, metalness: 0 },
   // Satin AISI-316-style stainless steel -- brushed, not mirror-polished, so
   // no fake chrome: roughness is high enough to keep specular highlights soft.
-  { id: "steel", title: "Acciaio satinato", hex: "#c7cbca", roughness: 0.4, metalness: 0.9 },
+  { id: "steel", title: "Acciaio satinato", hex: "#c9cdd0", roughness: 0.34, metalness: 1 },
 ];
 
 /** Skimmer housing family. Each id maps to a real geometry variant in

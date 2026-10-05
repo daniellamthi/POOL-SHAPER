@@ -6,6 +6,7 @@ const PRESETS = [
   { name: "Ciano", hue: 180 },
   { name: "Verde", hue: 125 },
   { name: "Rosso", hue: 0 },
+  { name: "Arancio", hue: 30 },
   { name: "Viola", hue: 280 },
 ] as const;
 

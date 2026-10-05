@@ -93,6 +93,8 @@ export interface ConfiguratorContextValue {
   toggleInoxLadder: () => void;
   toggleEquipment: (value: EquipmentId) => void;
   setCoverPosition: (value: CoverPosition) => void;
+  /** Progressive cover deployment, 0..1; also keeps `coverPosition` in step. */
+  setCoverExtension: (value: number) => void;
   updateRenovation: (value: Partial<RenovationConfig>) => void;
   addUploads: (files: UploadedFile[]) => void;
   removeUpload: (id: string) => void;

@@ -18,7 +18,8 @@ import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
-import { StudioPaving } from "./StudioPaving";
+import { StudioPaving, studioDeckBand, studioDeckInnerOffset } from "./StudioPaving";
+import { DeckLoungers } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
@@ -965,6 +966,15 @@ export default function PoolScene({
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
   const lighting = resolvedLayout.lighting;
+  // Deck positions the loungers must keep clear of: the inox ladder (deck
+  // anchored) and the access placement itself.
+  const deckObstacles = useMemo(
+    () =>
+      [resolvedLayout.ladder?.plan.placement, lighting.accessPlan.placement].filter(
+        (p): p is { x: number; z: number; rotation: number } => !!p,
+      ),
+    [resolvedLayout.ladder, lighting.accessPlan],
+  );
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
@@ -1119,7 +1129,18 @@ export default function PoolScene({
         overflowType={overflowType}
         infinityZone={infinityZone}
         waterY={verticalLayout.waterY}
-      /> : <Suspense fallback={null}><StudioPaving outline={outline} poolType={poolType} system={system} overflowType={overflowType} paving={paving ?? "gres"} /></Suspense>}
+      /> : <Suspense fallback={null}><StudioPaving outline={outline} poolType={poolType} system={system} overflowType={overflowType} paving={paving ?? "gres"} waterY={verticalLayout.waterY} /></Suspense>}
+      {/* Presentation furniture on the studio deck: hidden in the raw
+          construction stages and never part of the configuration. */}
+      {system !== "infinity" && !construction?.raw && (construction?.showAccessories ?? true) ? (
+        <DeckLoungers
+          outline={outline}
+          innerOffset={studioDeckInnerOffset(poolType, system, overflowType)}
+          band={studioDeckBand(outline)}
+          waterY={verticalLayout.waterY}
+          avoid={deckObstacles}
+        />
+      ) : null}
 
       <PoolModel
         resolvedLayout={resolvedLayout}
