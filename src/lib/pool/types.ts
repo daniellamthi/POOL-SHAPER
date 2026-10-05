@@ -62,7 +62,8 @@ export type InternalStairType = "linear" | "corner";
 /** Hydromassage architecture: same tub, with or without the low front wall. */
 export type HydromassageVariant = "closed" | "open";
 
-export type EquipmentId = "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing";
+export type EquipmentId =
+  "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing" | "solarShower";
 export type CoverPosition = "open" | "closed";
 
 export interface CustomerInfo {

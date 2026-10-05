@@ -44,7 +44,10 @@ export function EquipmentStep() {
             <div className="flex flex-col gap-3 border-l border-hairline pl-3">
               <div className="flex items-baseline justify-between gap-4">
                 <p className="text-xs text-muted-foreground">Apertura della copertura</p>
-                <output aria-live="off" className="font-mono text-xs tabular-nums text-muted-foreground">
+                <output
+                  aria-live="off"
+                  className="font-mono text-xs tabular-nums text-muted-foreground"
+                >
                   {coverPercent}% chiusa
                 </output>
               </div>

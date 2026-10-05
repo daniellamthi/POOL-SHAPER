@@ -35,7 +35,9 @@ export interface CoverPlan {
 export function normalisedCoverExtension(value: unknown, position: "open" | "closed"): number {
   return typeof value === "number" && Number.isFinite(value)
     ? Math.min(1, Math.max(0, value))
-    : position === "closed" ? 1 : 0;
+    : position === "closed"
+      ? 1
+      : 0;
 }
 
 /** Resolves the requested cover against the actual basin, without changing the saved quote. */
@@ -97,6 +99,15 @@ export function resolveAutomaticCover(config: PoolConfig): CoverPlan {
   return {
     status: reason ? "UNAVAILABLE" : adjusted ? "AUTO_ADJUSTED" : "VALID",
     reason: adjusted ? "Rullo spostato sulla testata libera da accesso e componenti." : reason,
-    enabled, position, extension, footprint, waterY, housingSide, housingX, housingY, slatRun, geometry,
+    enabled,
+    position,
+    extension,
+    footprint,
+    waterY,
+    housingSide,
+    housingX,
+    housingY,
+    slatRun,
+    geometry,
   };
 }

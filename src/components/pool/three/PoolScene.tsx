@@ -18,7 +18,8 @@ import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
 import { PoolModel } from "./PoolModel";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
-import { StudioPaving, studioDeckBand, studioDeckInnerOffset } from "./StudioPaving";
+import { StudioPaving } from "./StudioPaving";
+import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
 import { DeckLoungers } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
@@ -32,6 +33,7 @@ import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
 import { ExternalStaircase } from "./ExternalStaircase";
+import { planExternalStaircase } from "./externalStaircasePlan";
 import { createSurfaceGeometry } from "./poolGeometry";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
@@ -103,6 +105,8 @@ export interface SceneProps {
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
   coverPlan: CoverPlan;
+  /** Optional solar shower on the studio deck (equipment option). */
+  solarShower?: boolean;
   technicalView: boolean;
   /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
    * while `system === "infinity"`; absent/undefined renders and excludes
@@ -813,6 +817,7 @@ export default function PoolScene({
   poolAccess,
   skimmers,
   coverPlan,
+  solarShower = false,
   technicalView,
   infinityEdge,
   onSelectInfinitySide,
@@ -966,14 +971,57 @@ export default function PoolScene({
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
   const lighting = resolvedLayout.lighting;
-  // Deck positions the loungers must keep clear of: the inox ladder (deck
-  // anchored) and the access placement itself.
-  const deckObstacles = useMemo(
+  // Deck positions the furniture must keep clear of: the inox ladder (deck
+  // anchored), the access placement itself and, above ground, both ends of
+  // the external staircase.
+  const externalStairs = poolType === "above-ground" && features.includes("externalStaircase");
+  const deckObstacles = useMemo(() => {
+    const points: { x: number; z: number }[] = [
+      resolvedLayout.ladder?.plan.placement,
+      lighting.accessPlan.placement,
+    ].filter((p): p is { x: number; z: number; rotation: number } => !!p);
+    if (externalStairs) {
+      const stairs = planExternalStaircase({
+        outline,
+        copingOffset: copingOuterOffset(system, overflowType),
+        infinityExcluded,
+        groundY: verticalLayout.groundY,
+        topY: system === "overflow" ? verticalLayout.waterY - 0.001 : verticalLayout.copingY,
+      });
+      if (stairs) {
+        const run = stairs.stepCount * stairs.treadDepth;
+        points.push(
+          { x: stairs.x, z: stairs.z },
+          {
+            x: stairs.x + Math.sin(stairs.rotation) * run,
+            z: stairs.z + Math.cos(stairs.rotation) * run,
+          },
+        );
+      }
+    }
+    return points;
+  }, [
+    resolvedLayout.ladder,
+    lighting.accessPlan,
+    externalStairs,
+    outline,
+    system,
+    overflowType,
+    infinityExcluded,
+    verticalLayout,
+  ]);
+  // The automatic-cover roller sits on the deck at one short end.
+  const coverHousing = useMemo(
     () =>
-      [resolvedLayout.ladder?.plan.placement, lighting.accessPlan.placement].filter(
-        (p): p is { x: number; z: number; rotation: number } => !!p,
-      ),
-    [resolvedLayout.ladder, lighting.accessPlan],
+      coverPlan.geometry
+        ? {
+            x: coverPlan.geometry.housingX,
+            z: (coverPlan.geometry.footprint.minZ + coverPlan.geometry.footprint.maxZ) / 2,
+            halfSpan:
+              (coverPlan.geometry.footprint.maxZ - coverPlan.geometry.footprint.minZ) / 2 + 0.15,
+          }
+        : null,
+    [coverPlan.geometry],
   );
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
   const shadowExtent =
@@ -1120,16 +1168,29 @@ export default function PoolScene({
         distance={radius * 8}
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[visualTheme]}
       />
-      {system === "infinity" ? <StudioFloor
-        outline={outline}
-        size={deckSize}
-        theme={visualTheme}
-        poolType={poolType}
-        system={system}
-        overflowType={overflowType}
-        infinityZone={infinityZone}
-        waterY={verticalLayout.waterY}
-      /> : <Suspense fallback={null}><StudioPaving outline={outline} poolType={poolType} system={system} overflowType={overflowType} paving={paving ?? "gres"} waterY={verticalLayout.waterY} /></Suspense>}
+      {system === "infinity" ? (
+        <StudioFloor
+          outline={outline}
+          size={deckSize}
+          theme={visualTheme}
+          poolType={poolType}
+          system={system}
+          overflowType={overflowType}
+          infinityZone={infinityZone}
+          waterY={verticalLayout.waterY}
+        />
+      ) : (
+        <Suspense fallback={null}>
+          <StudioPaving
+            outline={outline}
+            poolType={poolType}
+            system={system}
+            overflowType={overflowType}
+            paving={paving ?? "gres"}
+            waterY={verticalLayout.waterY}
+          />
+        </Suspense>
+      )}
       {/* Presentation furniture on the studio deck: hidden in the raw
           construction stages and never part of the configuration. */}
       {system !== "infinity" && !construction?.raw && (construction?.showAccessories ?? true) ? (
@@ -1139,6 +1200,8 @@ export default function PoolScene({
           band={studioDeckBand(outline)}
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
+          shower={solarShower}
+          coverHousing={coverHousing}
         />
       ) : null}
 
@@ -1249,10 +1312,14 @@ export default function PoolScene({
       {ACTIVE_RENDERING_QUALITY.contactShadows.enabled && system !== "infinity" ? (
         <ContactShadows
           name="pool-contact-shadows"
-          key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}`}
+          key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}-${solarShower}-${features.join(",")}-${Boolean(coverPlan.geometry)}`}
           position={[
             0,
-            poolType === "above-ground" ? verticalLayout.groundY + 0.002 : -0.35 + copingThickness,
+            // In-ground: just above the paving (y = 0), the surface that
+            // actually receives it. It used to sit at -0.295, under the
+            // opaque deck, where it could never be seen. Over the open basin
+            // nothing casts, so the plane stays transparent there.
+            poolType === "above-ground" ? verticalLayout.groundY + 0.002 : 0.004,
             0,
           ]}
           opacity={palette.contact}

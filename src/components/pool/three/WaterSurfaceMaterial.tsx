@@ -2,11 +2,15 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
-import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
+import {
+  ACTIVE_RENDERING_QUALITY,
+  SCENE_VISUAL_PRESET,
+} from "@/configurator/3d/scene/visual-preset";
 import { photoModeState } from "@/lib/pool/photoModeState";
 import { renderQualityState } from "@/lib/pool/renderQualityState";
 import { createRippleNormalMap } from "./textures";
 import { createShorelineField } from "./waterDepth";
+import { boostMetalEnvironment } from "./metalEnvironment";
 import type { Outline } from "@/lib/pool/types";
 
 interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
@@ -531,6 +535,17 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
           boundedTransmission,
         );
       }
+      // three.js replaces envMapIntensity with scene.environmentIntensity for
+      // materials without their own envMap, so the studio's 0.24 IBL left the
+      // water reflecting a quarter of its calibrated sky (0.83). Restore that
+      // ratio on the indirect specular lobe only, capped so the coastal scene
+      // (already at 0.85) is untouched. With the planar mirror (Experience)
+      // this lobe is replaced by the mirror above the waterline anyway.
+      boostMetalEnvironment(
+        shader,
+        WATER_VISUAL_PRESET.environmentIntensity.day / SCENE_VISUAL_PRESET.environment.light,
+        WATER_VISUAL_PRESET.environmentIntensity.day,
+      );
       if (!shaders.current.includes(shader)) shaders.current.push(shader);
     },
     [
@@ -600,7 +615,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       side={THREE.DoubleSide}
       onBeforeCompile={configureWaterSurface}
       customProgramCacheKey={() =>
-        `p1c-dual-normal-physical-water-v14-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}-${outline ? 1 : 0}-${fallingFilm ? 1 : 0}`
+        `p1c-dual-normal-physical-water-v15-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}-${outline ? 1 : 0}-${fallingFilm ? 1 : 0}`
       }
     />
   );

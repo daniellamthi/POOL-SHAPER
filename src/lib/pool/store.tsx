@@ -485,14 +485,30 @@ function configurationReducer(state: State, action: Action): State {
     }
     case "setCoverPosition":
       return config.equipment.includes("automaticCover")
-        ? { ...state, config: { ...config, coverPosition: action.value, coverExtension: action.value === "closed" ? 1 : 0 } }
+        ? {
+            ...state,
+            config: {
+              ...config,
+              coverPosition: action.value,
+              coverExtension: action.value === "closed" ? 1 : 0,
+            },
+          }
         : state;
     case "setCoverExtension": {
       // The slider is the live position; the two-state `coverPosition` the
       // quote/technical plan read is derived from it, never the other way.
       if (!config.equipment.includes("automaticCover")) return state;
-      const coverExtension = Number.isFinite(action.value) ? Math.min(1, Math.max(0, action.value)) : 0;
-      return { ...state, config: { ...config, coverExtension, coverPosition: coverExtension >= 0.5 ? "closed" : "open" } };
+      const coverExtension = Number.isFinite(action.value)
+        ? Math.min(1, Math.max(0, action.value))
+        : 0;
+      return {
+        ...state,
+        config: {
+          ...config,
+          coverExtension,
+          coverPosition: coverExtension >= 0.5 ? "closed" : "open",
+        },
+      };
     }
     case "updateRenovation":
       return { ...state, renovation: { ...state.renovation, ...action.value } };

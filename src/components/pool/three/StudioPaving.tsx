@@ -6,7 +6,7 @@ import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/typ
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { PAVING, pavingId, type PavingId } from "@/lib/pool/presentation";
 import { createSurfaceGeometry } from "./poolGeometry";
-import { copingOuterOffset } from "./poolConstruction";
+import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
 import { createLimestoneMaps } from "./stoneTextures";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 
@@ -67,20 +67,6 @@ export function createPavingModules(inner: Outline, outer: Outline, module: read
   return geometry;
 }
 
-/** Width of the paved band around the basin, metres. Scales gently with the
- * pool so a 6 m basin is not swallowed by its own terrace while a 12 m one
- * still reads as a real deck rather than a kerb (was a fixed 1.2 m). */
-export function studioDeckBand(outline: Outline) {
-  const bounds = outlineBounds(outline);
-  return Math.min(3.6, Math.max(2.6, Math.hypot(bounds.spanX, bounds.spanZ) * 0.3));
-}
-
-/** Distance from the water edge to the first slab: the coping, or the
- * above-ground shell's standoff. Shared with the deck furniture. */
-export function studioDeckInnerOffset(poolType: PoolType, system: SystemType, overflowType: OverflowType) {
-  return poolType === "in-ground" ? copingOuterOffset(system, overflowType) : 0.17;
-}
-
 function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
   const definition = PAVING.find(p => p.id === id)!;
   const maxAnisotropy = useThree(s => s.gl.capabilities.getMaxAnisotropy());
@@ -106,15 +92,35 @@ function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
     });
     return () => maps.forEach(t => t?.dispose());
   }, [maps, id, maxAnisotropy]);
-  return <meshStandardMaterial vertexColors color={id === "istria" ? "#deddd1" : "#ffffff"}
-    map={maps[0] ?? null} normalMap={maps[1] ?? null} roughnessMap={maps[2] ?? null}
-    normalScale={[0.22, 0.22]} roughness={id === "istria" ? 0.9 : 1} metalness={0}
-    onBeforeCompile={(shader) => excludeSubmergedDirectLights(shader, waterY)}
-    customProgramCacheKey={() => `studio-paving-dry-${waterY}`} />;
+  return (
+    <meshStandardMaterial
+      vertexColors
+      color={id === "istria" ? "#deddd1" : "#ffffff"}
+      map={maps[0] ?? null}
+      normalMap={maps[1] ?? null}
+      roughnessMap={maps[2] ?? null}
+      normalScale={[0.22, 0.22]}
+      roughness={id === "istria" ? 0.9 : 1}
+      metalness={0}
+      onBeforeCompile={(shader) => excludeSubmergedDirectLights(shader, waterY)}
+      customProgramCacheKey={() => `studio-paving-dry-${waterY}`}
+    />
+  );
 }
 
-export function StudioPaving({ outline, poolType, system, overflowType, paving = "gres", waterY }: {
-  outline: Outline; poolType: PoolType; system: SystemType; overflowType: OverflowType; paving?: PavingId;
+export function StudioPaving({
+  outline,
+  poolType,
+  system,
+  overflowType,
+  paving = "gres",
+  waterY,
+}: {
+  outline: Outline;
+  poolType: PoolType;
+  system: SystemType;
+  overflowType: OverflowType;
+  paving?: PavingId;
   /** Submerged LEDs are linked out of every dry deck material (they cannot
    * shine through the shell), so the beam stays inside the basin. */
   waterY: number;
@@ -127,7 +133,11 @@ export function StudioPaving({ outline, poolType, system, overflowType, paving =
     const outer = offsetOutline(inner, studioDeckBand(outline));
     const far: Outline = [[-150,-150],[150,-150],[150,150],[-150,150]];
     return { slabs: createPavingModules(inner, outer, module), grout: createSurfaceGeometry(outer, inner),
-      ground: createSurfaceGeometry(far, outer) };
+      // The lawn's opening is 4 cm smaller than the paving so its edge always
+      // sits under the slabs: an exactly matching edge left a hairline crack
+      // that showed the basin shell at low cameras.
+      ground: createSurfaceGeometry(far, offsetOutline(inner, studioDeckBand(outline) - 0.04)),
+    };
   }, [outline, poolType, system, overflowType, module]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
@@ -137,12 +147,67 @@ export function StudioPaving({ outline, poolType, system, overflowType, paving =
     });
     gl.shadowMap.needsUpdate = true;
   }, [gl, scene, geometry]);
-  useEffect(() => () => Object.values(geometry).forEach(g => g.dispose()), [geometry]);
-  const dry = (shader: WebGLProgramParametersWithUniforms) => excludeSubmergedDirectLights(shader, waterY);
+  useEffect(() => () => Object.values(geometry).forEach((g) => g.dispose()), [geometry]);
+  const dry = (shader: WebGLProgramParametersWithUniforms) =>
+    excludeSubmergedDirectLights(shader, waterY);
   const dryKey = () => `studio-ground-dry-${waterY}`;
-  return <group name="premium-configuration-studio">
-    <mesh geometry={geometry.ground} position={[0,-0.012,0]} receiveShadow><meshStandardMaterial color="#ddd9d2" roughness={0.95} onBeforeCompile={dry} customProgramCacheKey={dryKey} /></mesh>
-    <mesh geometry={geometry.grout} position={[0,-0.006,0]} receiveShadow><meshStandardMaterial color={id === "wood" ? "#706457" : "#ada69a"} roughness={1} onBeforeCompile={dry} customProgramCacheKey={dryKey} /></mesh>
-    <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow><PavingMaterial key={id} id={id} waterY={waterY} /></mesh>
-  </group>;
+  // Garden lawn around the terrace instead of a flat grey plane running to
+  // the horizon: the single biggest "CG void" cue in the studio. Procedural
+  // (two value-noise octaves plus a fine grain that fades out with distance
+  // so it never shimmers), no texture, no extra sampler; the scene fog
+  // already dissolves it into the background at the horizon.
+  const lawn = (shader: WebGLProgramParametersWithUniforms) => {
+    excludeSubmergedDirectLights(shader, waterY);
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec2 vLawnPlan;")
+      .replace(
+        "#include <worldpos_vertex>",
+        "#include <worldpos_vertex>\nvLawnPlan = (modelMatrix * vec4(transformed, 1.0)).xz;",
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        `#include <common>
+        varying vec2 vLawnPlan;
+        float lawnHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float lawnNoise(vec2 p) {
+          vec2 i = floor(p), f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(lawnHash(i), lawnHash(i + vec2(1.0, 0.0)), f.x),
+            mix(lawnHash(i + vec2(0.0, 1.0)), lawnHash(i + vec2(1.0)), f.x), f.y);
+        }`,
+      )
+      .replace(
+        "#include <color_fragment>",
+        `#include <color_fragment>
+        float lawnBroad = 0.65 * lawnNoise(vLawnPlan * 0.21) + 0.35 * lawnNoise(vLawnPlan * 0.83);
+        float lawnGrain = lawnHash(floor(vLawnPlan * 70.0));
+        float lawnNear = 1.0 - smoothstep(0.01, 0.06, max(fwidth(vLawnPlan.x), fwidth(vLawnPlan.y)));
+        vec3 lawnColor = mix(vec3(0.075, 0.105, 0.048), vec3(0.135, 0.16, 0.078), lawnBroad);
+        diffuseColor.rgb *= lawnColor * (1.0 + (lawnGrain - 0.5) * 0.3 * lawnNear);`,
+      );
+  };
+  return (
+    <group name="premium-configuration-studio">
+      <mesh name="studio-lawn" geometry={geometry.ground} position={[0, -0.012, 0]} receiveShadow>
+        <meshStandardMaterial
+          color="#ffffff"
+          roughness={0.97}
+          onBeforeCompile={lawn}
+          customProgramCacheKey={() => `studio-lawn-v1-${waterY}`}
+        />
+      </mesh>
+      <mesh geometry={geometry.grout} position={[0, -0.006, 0]} receiveShadow>
+        <meshStandardMaterial
+          color={id === "wood" ? "#706457" : "#ada69a"}
+          roughness={1}
+          onBeforeCompile={dry}
+          customProgramCacheKey={dryKey}
+        />
+      </mesh>
+      <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
+        <PavingMaterial key={id} id={id} waterY={waterY} />
+      </mesh>
+    </group>
+  );
 }

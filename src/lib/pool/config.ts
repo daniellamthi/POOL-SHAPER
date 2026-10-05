@@ -417,6 +417,11 @@ export const EQUIPMENT: ReadonlyArray<{
     title: "Dosaggio automatico cloro / pH",
     description: "Controllo automatico del trattamento dell'acqua.",
   },
+  {
+    id: "solarShower",
+    title: "Doccia solare",
+    description: "Doccia da esterno a riscaldamento solare, alluminio antracite e acciaio inox.",
+  },
 ];
 
 /** Customer-facing subgroups for the Technology step -- purely a display
@@ -433,6 +438,7 @@ export const EQUIPMENT_GROUPS: ReadonlyArray<{
   },
   { id: "temperature", title: "Temperatura", equipmentIds: ["heatPump"] },
   { id: "protection", title: "Protezione", equipmentIds: ["automaticCover"] },
+  { id: "poolside", title: "Bordo piscina", equipmentIds: ["solarShower"] },
 ];
 
 export const STEPS: ReadonlyArray<StepDefinition> = [

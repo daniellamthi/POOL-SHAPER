@@ -188,7 +188,11 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     !infinityZones.some((z) => z.side === infinityEdge?.side)
   )
     infinityEdge = clampInfinityEdgeParams(undefined);
-  const { infinityEdge: _savedInfinityEdge, coverExtension: savedCoverExtension, ...restoredWithoutEdge } = restored;
+  const {
+    infinityEdge: _savedInfinityEdge,
+    coverExtension: savedCoverExtension,
+    ...restoredWithoutEdge
+  } = restored;
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,

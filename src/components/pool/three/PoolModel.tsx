@@ -28,6 +28,7 @@ import type { StructureFamily } from "@/lib/pool/construction-presentation";
 import { subdivideFloorBoundary } from "@/lib/pool/floor-profile";
 import { accessMounting } from "@/lib/pool/access-plan";
 import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
+import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import {
   createAnthraciteMaps,
   createLimestoneMaps,
@@ -1168,19 +1169,26 @@ export function PoolModel({
                 position={[0, waterLevel - 0.001, 0]}
                 receiveShadow
               >
-                {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshPhysicalMaterial
-                  key={materials.coping.moduleSize}
-                  color={materials.coping.color}
-                  normalMap={copingDetail.normalMap}
-                  normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
-                  roughnessMap={copingDetail.roughnessMap}
-                  roughness={materials.coping.roughness * 0.8}
-                  onBeforeCompile={configureCopingTriplanar}
-                  customProgramCacheKey={() => "overflow-stone-continuity-v3"}
-                  clearcoat={0}
-                  clearcoatRoughness={0.12}
-                  side={DoubleSide}
-                />}
+                {rawShellKind ? (
+                  <RawShellMaterial kind={rawShellKind} />
+                ) : (
+                  <meshPhysicalMaterial
+                    key={materials.coping.moduleSize}
+                    color={materials.coping.color}
+                    normalMap={copingDetail.normalMap}
+                    normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
+                    roughnessMap={copingDetail.roughnessMap}
+                    roughness={materials.coping.roughness * 0.8}
+                    onBeforeCompile={(shader) => {
+                      configureCopingTriplanar(shader);
+                      excludeSubmergedDirectLights(shader, waterLevel);
+                    }}
+                    customProgramCacheKey={() => `overflow-stone-continuity-v4-dry-${waterLevel}`}
+                    clearcoat={0}
+                    clearcoatRoughness={0.12}
+                    side={DoubleSide}
+                  />
+                )}
               </mesh>
             )}
             {isVisibleOverflow ? (
@@ -1289,24 +1297,42 @@ export function PoolModel({
       {!isVisibleOverflow && (
         <group name="pool-perimeter-finish">
           <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.006, 0]} receiveShadow>
-            {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#938b7b" roughness={0.96} side={DoubleSide} />}
+            {rawShellKind ? (
+              <RawShellMaterial kind={rawShellKind} />
+            ) : (
+              <meshStandardMaterial
+                color="#938b7b"
+                roughness={0.96}
+                side={DoubleSide}
+                onBeforeCompile={(shader) => excludeSubmergedDirectLights(shader, waterLevel)}
+                customProgramCacheKey={() => `coping-bed-dry-${waterLevel}`}
+              />
+            )}
           </mesh>
           <mesh geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
-            {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshPhysicalMaterial
-              key={materials.coping.moduleSize}
-              color={materials.coping.color}
-              vertexColors
-              normalMap={copingDetail.normalMap}
-              normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
-              roughnessMap={copingDetail.roughnessMap}
-              roughness={materials.coping.roughness}
-              metalness={0}
-              clearcoat={0}
-              clearcoatRoughness={0.45}
-              onBeforeCompile={configureCopingTriplanar}
-              customProgramCacheKey={() => "coping-triplanar-v4"}
-              side={DoubleSide}
-            />}
+            {rawShellKind ? (
+              <RawShellMaterial kind={rawShellKind} />
+            ) : (
+              <meshPhysicalMaterial
+                key={materials.coping.moduleSize}
+                color={materials.coping.color}
+                vertexColors
+                normalMap={copingDetail.normalMap}
+                normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
+                roughnessMap={copingDetail.roughnessMap}
+                roughness={materials.coping.roughness}
+                metalness={0}
+                clearcoat={0}
+                clearcoatRoughness={0.45}
+                onBeforeCompile={(shader) => {
+                  configureCopingTriplanar(shader);
+                  // Dry stone: a submerged LED cannot light it through the shell.
+                  excludeSubmergedDirectLights(shader, waterLevel);
+                }}
+                customProgramCacheKey={() => `coping-triplanar-v5-dry-${waterLevel}`}
+                side={DoubleSide}
+              />
+            )}
           </mesh>
         </group>
       )}

@@ -1,4 +1,4 @@
-import { boostMetalEnvironment, STAINLESS_IBL_CACHE_KEY } from "./StainlessSteelMaterial";
+import { boostMetalEnvironment, STAINLESS_IBL_CACHE_KEY } from "./metalEnvironment";
 import { useEffect, useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";

@@ -433,6 +433,7 @@ function ConfiguratorLayout() {
             poolAccess={config.poolAccess}
             skimmers={skimmers}
             coverPlan={cover}
+            solarShower={config.equipment.includes("solarShower")}
             technicalView={technicalView}
             technicalPlan={technical}
             onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}

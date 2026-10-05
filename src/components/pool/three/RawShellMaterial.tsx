@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { boostMetalEnvironment } from "./StainlessSteelMaterial";
+import { boostMetalEnvironment } from "./metalEnvironment";
 
 export type RawShellKind = "steel" | "concrete" | "stainless";
 // Indicative construction finish, not a manufacturer's scan or structural spec.
@@ -76,22 +76,35 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
   const module = kind === "steel" ? RAW_PANEL_MODULE_METRES : 1;
   const scale = wallSize ? [wallSize[0] / module, wallSize[1] / module] : [1 / module, 1 / module];
   const stainless = kind === "stainless";
-  return <meshPhysicalMaterial name={`raw-${kind}`} color="#ffffff" map={maps.color}
-    normalMap={maps.normal} normalScale={stainless ? [0.12, 0.12] : [0.5, 0.5]}
-    roughnessMap={maps.roughness} roughness={kind === "concrete" ? 1 : stainless ? 0.36 : 0.62}
-    metalness={kind === "concrete" ? 0 : stainless ? 1 : 0.76}
-    anisotropy={stainless ? 0.7 : 0}
-    envMapIntensity={kind === "concrete" ? 0.72 : stainless ? 1.85 : 1.2}
-    side={THREE.DoubleSide}
-    onBeforeCompile={(shader) => {
-      // Bare metal reads only its environment: lift the IBL radiance for the
-      // steel shells (see StainlessSteelMaterial), never for concrete.
-      if (kind !== "concrete") boostMetalEnvironment(shader, stainless ? 7 : 4, stainless ? 1.9 : 1.1);
-      shader.vertexShader = shader.vertexShader.replace("#include <uv_vertex>", `
+  return (
+    <meshPhysicalMaterial
+      name={`raw-${kind}`}
+      color="#ffffff"
+      map={maps.color}
+      normalMap={maps.normal}
+      normalScale={stainless ? [0.12, 0.12] : [0.5, 0.5]}
+      roughnessMap={maps.roughness}
+      roughness={kind === "concrete" ? 1 : stainless ? 0.36 : 0.62}
+      metalness={kind === "concrete" ? 0 : stainless ? 1 : 0.76}
+      anisotropy={stainless ? 0.7 : 0}
+      envMapIntensity={kind === "concrete" ? 0.72 : stainless ? 1.85 : 1.2}
+      side={THREE.DoubleSide}
+      onBeforeCompile={(shader) => {
+        // Bare metal reads only its environment: lift the IBL radiance for the
+        // steel shells (see StainlessSteelMaterial), never for concrete.
+        if (kind !== "concrete")
+          boostMetalEnvironment(shader, stainless ? 7 : 4, stainless ? 1.9 : 1.1);
+        shader.vertexShader = shader.vertexShader.replace(
+          "#include <uv_vertex>",
+          `
         #include <uv_vertex>
         vMapUv *= vec2(${scale[0]}, ${scale[1]});
         vNormalMapUv *= vec2(${scale[0]}, ${scale[1]});
         vRoughnessMapUv *= vec2(${scale[0]}, ${scale[1]});
-      `);
-    }} customProgramCacheKey={() => `raw-shell-v2-${kind}-${scale.join("-")}`} />;
+      `,
+        );
+      }}
+      customProgramCacheKey={() => `raw-shell-v2-${kind}-${scale.join("-")}`}
+    />
+  );
 }

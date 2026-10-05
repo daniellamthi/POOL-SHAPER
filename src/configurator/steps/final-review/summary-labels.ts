@@ -84,6 +84,7 @@ export const EQUIPMENT_LABEL: Record<EquipmentId, string> = {
   heatPump: "Pompa di calore",
   saltElectrolysis: "Elettrolisi al sale",
   automaticDosing: "Dosaggio automatico cloro / pH",
+  solarShower: "Doccia solare",
 };
 
 /** Only surfaced inside the summary's "Scopri i dettagli tecnici" panel. */
