@@ -1,6 +1,14 @@
 import { useEffect, useMemo } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
-import { BufferGeometry, DirectionalLight, SpotLight, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
+import {
+  BufferGeometry,
+  DirectionalLight,
+  SpotLight,
+  Float32BufferAttribute,
+  RepeatWrapping,
+  SRGBColorSpace,
+  TextureLoader,
+} from "three";
 import type { WebGLProgramParametersWithUniforms } from "three";
 import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
@@ -16,7 +24,8 @@ type Point = [number, number];
 function clip(poly: Point[], axis: 0 | 1, limit: number, greater: boolean): Point[] {
   const result: Point[] = [];
   for (let i = 0; i < poly.length; i++) {
-    const a = poly[i]!, b = poly[(i + 1) % poly.length]!;
+    const a = poly[i]!,
+      b = poly[(i + 1) % poly.length]!;
     const insideA = greater ? a[axis] >= limit : a[axis] <= limit;
     const insideB = greater ? b[axis] >= limit : b[axis] <= limit;
     if (insideA) result.push(a);
@@ -28,30 +37,48 @@ function clip(poly: Point[], axis: 0 | 1, limit: number, greater: boolean): Poin
   return result;
 }
 
-export function createPavingModules(inner: Outline, outer: Outline, module: readonly [number, number]) {
+export function createPavingModules(
+  inner: Outline,
+  outer: Outline,
+  module: readonly [number, number],
+) {
   const indexed = createSurfaceGeometry(outer, inner);
   const ring = indexed.toNonIndexed();
   indexed.dispose();
   const p = ring.getAttribute("position");
-  const positions: number[] = [], colors: number[] = [], uv: number[] = [];
-  const [sx, sz] = module, gap = 0.004;
+  const positions: number[] = [],
+    colors: number[] = [],
+    uv: number[] = [];
+  const [sx, sz] = module,
+    gap = 0.004;
   for (let i = 0; i < p.count; i += 3) {
-    const tri: Point[] = [0, 1, 2].map(j => [p.getX(i + j), p.getZ(i + j)]);
-    const xs = tri.map(v => v[0]), zs = tri.map(v => v[1]);
+    const tri: Point[] = [0, 1, 2].map((j) => [p.getX(i + j), p.getZ(i + j)]);
+    const xs = tri.map((v) => v[0]),
+      zs = tri.map((v) => v[1]);
     for (let z = Math.floor(Math.min(...zs) / sz); z <= Math.floor(Math.max(...zs) / sz); z++) {
-      const stagger = (z & 1) * sx / 2;
-      for (let x = Math.floor((Math.min(...xs) - stagger) / sx); x <= Math.floor((Math.max(...xs) - stagger) / sx); x++) {
-        const minX = x * sx + stagger + gap / 2, minZ = z * sz + gap / 2;
+      const stagger = ((z & 1) * sx) / 2;
+      for (
+        let x = Math.floor((Math.min(...xs) - stagger) / sx);
+        x <= Math.floor((Math.max(...xs) - stagger) / sx);
+        x++
+      ) {
+        const minX = x * sx + stagger + gap / 2,
+          minZ = z * sz + gap / 2;
         let polygon = clip(tri, 0, minX, true);
         polygon = clip(polygon, 0, minX + sx - gap, false);
         polygon = clip(polygon, 1, minZ, true);
         polygon = clip(polygon, 1, minZ + sz - gap, false);
         const seed = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
-        const variation = 0.965 + (seed - Math.floor(seed)) * 0.035;
+        const rnd = seed - Math.floor(seed);
+        const variation = 0.94 + rnd * 0.06;
+        // Each slab samples a different window of the (seamless) texture, so
+        // the same stain never repeats on neighbouring slabs.
+        const offU = Math.floor(rnd * 997) * 0.37,
+          offV = Math.floor(((rnd * 7919) % 1) * 991) * 0.41;
         for (let k = 1; k + 1 < polygon.length; k++) {
           for (const v of [polygon[0]!, polygon[k]!, polygon[k + 1]!]) {
             positions.push(v[0], 0, v[1]);
-            uv.push(v[0], -v[1]);
+            uv.push(v[0] + offU, -v[1] + offV);
             colors.push(variation, variation, variation);
           }
         }
@@ -68,17 +95,22 @@ export function createPavingModules(inner: Outline, outer: Outline, module: read
 }
 
 function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
-  const definition = PAVING.find(p => p.id === id)!;
-  const maxAnisotropy = useThree(s => s.gl.capabilities.getMaxAnisotropy());
+  const definition = PAVING.find((p) => p.id === id)!;
+  const maxAnisotropy = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
   // Cached source maps are never mutated: each presentation owns its clones.
-  const sources = useLoader(TextureLoader, ["basecolor", "normal", "roughness"].map(m => `/textures/coping/${definition.maps ?? "gres"}/${m}.png`));
+  const sources = useLoader(
+    TextureLoader,
+    ["basecolor", "normal", "roughness"].map(
+      (m) => `/textures/coping/${definition.maps ?? "gres"}/${m}.png`,
+    ),
+  );
   const maps = useMemo(() => {
     if (id === "istria") {
       // Authored visual approximation, explicitly labelled in UI/metadata.
       const stone = createLimestoneMaps();
       return [stone.colorMap, stone.normalMap, stone.roughnessMap];
     }
-    return sources.map(t => t.clone());
+    return sources.map((t) => t.clone());
   }, [id, sources]);
   useEffect(() => {
     maps.forEach((t, i) => {
@@ -90,7 +122,7 @@ function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
       t.anisotropy = Math.min(8, maxAnisotropy);
       t.needsUpdate = true;
     });
-    return () => maps.forEach(t => t?.dispose());
+    return () => maps.forEach((t) => t?.dispose());
   }, [maps, id, maxAnisotropy]);
   return (
     <meshStandardMaterial
@@ -114,6 +146,8 @@ export function StudioPaving({
   system,
   overflowType,
   paving = "gres",
+  environment = true,
+  decking = true,
   waterY,
 }: {
   outline: Outline;
@@ -121,29 +155,46 @@ export function StudioPaving({
   system: SystemType;
   overflowType: OverflowType;
   paving?: PavingId;
+  /** Late-stage context: wide terrace and lawn instead of the compact band. */
+  environment?: boolean;
+  /** Progressive reveal: before Bordo e decking the basin sits in a plain
+   * ground plane, with no paving around the coping yet. */
+  decking?: boolean;
   /** Submerged LEDs are linked out of every dry deck material (they cannot
    * shine through the shell), so the beam stays inside the basin. */
   waterY: number;
 }) {
-  const gl = useThree(s => s.gl);
-  const scene = useThree(s => s.scene);
-  const id = pavingId(paving), module = PAVING.find(p => p.id === id)!.module;
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const id = pavingId(paving),
+    module = PAVING.find((p) => p.id === id)!.module;
   const geometry = useMemo(() => {
     const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
-    const outer = offsetOutline(inner, studioDeckBand(outline));
-    const far: Outline = [[-150,-150],[150,-150],[150,150],[-150,150]];
-    return { slabs: createPavingModules(inner, outer, module), grout: createSurfaceGeometry(outer, inner),
+    const outer = offsetOutline(inner, studioDeckBand(outline, environment));
+    const far: Outline = [
+      [-150, -150],
+      [150, -150],
+      [150, 150],
+      [-150, 150],
+    ];
+    return {
+      slabs: createPavingModules(inner, outer, module),
+      grout: createSurfaceGeometry(outer, inner),
       // The lawn's opening is 4 cm smaller than the paving so its edge always
       // sits under the slabs: an exactly matching edge left a hairline crack
       // that showed the basin shell at low cameras.
-      ground: createSurfaceGeometry(far, offsetOutline(inner, studioDeckBand(outline) - 0.04)),
+      ground: createSurfaceGeometry(
+        far,
+        decking ? offsetOutline(inner, studioDeckBand(outline, environment) - 0.04) : inner,
+      ),
     };
-  }, [outline, poolType, system, overflowType, module]);
+  }, [outline, poolType, system, overflowType, module, environment, decking]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
-    scene.traverse(object => {
-      if ((object instanceof DirectionalLight || object instanceof SpotLight) && object.castShadow) object.shadow.needsUpdate = true;
+    scene.traverse((object) => {
+      if ((object instanceof DirectionalLight || object instanceof SpotLight) && object.castShadow)
+        object.shadow.needsUpdate = true;
     });
     gl.shadowMap.needsUpdate = true;
   }, [gl, scene, geometry]);
@@ -189,25 +240,43 @@ export function StudioPaving({
   };
   return (
     <group name="premium-configuration-studio">
-      <mesh name="studio-lawn" geometry={geometry.ground} position={[0, -0.012, 0]} receiveShadow>
-        <meshStandardMaterial
-          color="#ffffff"
-          roughness={0.97}
-          onBeforeCompile={lawn}
-          customProgramCacheKey={() => `studio-lawn-v1-${waterY}`}
-        />
+      <mesh
+        name={environment ? "studio-lawn" : "studio-ground"}
+        geometry={geometry.ground}
+        position={[0, -0.012, 0]}
+        receiveShadow
+      >
+        {environment ? (
+          <meshStandardMaterial
+            color="#ffffff"
+            roughness={0.97}
+            onBeforeCompile={lawn}
+            customProgramCacheKey={() => `studio-lawn-v1-${waterY}`}
+          />
+        ) : (
+          <meshStandardMaterial
+            color="#ddd9d2"
+            roughness={0.95}
+            onBeforeCompile={dry}
+            customProgramCacheKey={dryKey}
+          />
+        )}
       </mesh>
-      <mesh geometry={geometry.grout} position={[0, -0.006, 0]} receiveShadow>
-        <meshStandardMaterial
-          color={id === "wood" ? "#706457" : "#ada69a"}
-          roughness={1}
-          onBeforeCompile={dry}
-          customProgramCacheKey={dryKey}
-        />
-      </mesh>
-      <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
-        <PavingMaterial key={id} id={id} waterY={waterY} />
-      </mesh>
+      {decking ? (
+        <>
+          <mesh geometry={geometry.grout} position={[0, -0.006, 0]} receiveShadow>
+            <meshStandardMaterial
+              color={id === "wood" ? "#706457" : "#ada69a"}
+              roughness={1}
+              onBeforeCompile={dry}
+              customProgramCacheKey={dryKey}
+            />
+          </mesh>
+          <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
+            <PavingMaterial key={id} id={id} waterY={waterY} />
+          </mesh>
+        </>
+      ) : null}
     </group>
   );
 }

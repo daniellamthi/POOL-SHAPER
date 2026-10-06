@@ -29,7 +29,7 @@ const base: PoolConfig = {
   copingMaterial: "travertine", features: [], poolAccess: "internalSteps", internalStairType: "linear",
   equipment: [], customer: DEFAULT_CUSTOMER, uploads: [], sceneTime: "night",
 };
-equal(STEP_GROUPS.length, 7);
+equal(STEP_GROUPS.length, 9);
 ok(STEPS.findIndex(s => s.id === "structure") < STEPS.findIndex(s => s.id === "shape-dimensions"), "Structure before shape");
 ok(STEPS.findIndex(s => s.id === "access") < STEPS.findIndex(s => s.id === "style"), "Built-ins before finish");
 equal(focusForAction({ type: "setPoolStructure" }, base), "STRUCTURE_OVERVIEW");
@@ -98,6 +98,25 @@ for (const [structure, requested, expected] of [
 }
 equal(constructionPresentation(base, "review", true).raw, true, "Technical View reveals the selected structure");
 for (const id of STEPS.map(s => s.id)) equal(constructionPresentation({ ...base, projectType: "renovation" }, id).stage, "water", "Renovation unchanged");
+// Progressive reveal: decking from Bordo e decking, lifestyle context only late.
+for (const id of STEPS.map((s) => s.id)) {
+  const late = STEPS.findIndex((s) => s.id === id) >= STEPS.findIndex((s) => s.id === "deck");
+  equal(
+    constructionPresentation(base, id).showDecking,
+    late,
+    `${id}: decking appears only from Bordo e decking`,
+  );
+  equal(
+    constructionPresentation(base, id).showEnvironment,
+    ["technology", "review"].includes(id),
+    `${id}: lifestyle context only late`,
+  );
+  equal(
+    constructionPresentation({ ...base, projectType: null } as never, id).showEnvironment,
+    false,
+    `${id}: no context before a project type`,
+  );
+}
 const model = readFileSync("src/components/pool/three/PoolModel.tsx", "utf8");
 ok(model.includes('structureFamily === "VISIBLE_STAINLESS_STEEL"'), "Visible inox remains the final interior material");
 ok(model.includes("interiorShellKind"), "Shell, floor, stairs and comfort share one structure material resolver");

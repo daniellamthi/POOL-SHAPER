@@ -499,15 +499,22 @@ export const STEPS: ReadonlyArray<StepDefinition> = [
     short: "Luce",
   },
   {
-    id: "technology",
+    id: "deck",
     index: 8,
+    title: "Bordo e decking",
+    subtitle: "Il bordo della vasca e la pavimentazione attorno.",
+    short: "Bordo",
+  },
+  {
+    id: "technology",
+    index: 9,
     title: "Tecnologia",
     subtitle: "Seleziona la tecnologia da includere nel preventivo.",
     short: "Tecnologia",
   },
   {
     id: "review",
-    index: 9,
+    index: 10,
     title: "Revisione finale",
     subtitle: "Rivedi la configurazione della piscina prima di richiedere un preventivo.",
     short: "Riepilogo",
@@ -526,17 +533,15 @@ export interface StepGroup {
 }
 
 export const STEP_GROUPS: ReadonlyArray<StepGroup> = [
-  {
-    id: "vasca",
-    label: "Vasca",
-    stepIds: ["project", "pool-type", "structure", "shape-dimensions"],
-  },
-  { id: "acqua", label: "Acqua", stepIds: ["system"] },
-  { id: "comfort", label: "Comfort", stepIds: ["access"] },
-  { id: "stile", label: "Stile", stepIds: ["style"] },
-  { id: "luce", label: "Luce", stepIds: ["lighting"] },
-  { id: "tecnologia", label: "Tecnologia", stepIds: ["technology"] },
-  { id: "progetto", label: "Progetto", stepIds: ["review"] },
+  { id: "struttura", label: "Struttura", stepIds: ["project", "pool-type", "structure"] },
+  { id: "forma", label: "Forma e dimensioni", stepIds: ["shape-dimensions"] },
+  { id: "sistema", label: "Sistema piscina", stepIds: ["system"] },
+  { id: "accesso", label: "Accesso e comfort", stepIds: ["access"] },
+  { id: "rivestimento", label: "Rivestimento", stepIds: ["style"] },
+  { id: "luce", label: "Acqua e luci", stepIds: ["lighting"] },
+  { id: "bordo", label: "Bordo e decking", stepIds: ["deck"] },
+  { id: "optional", label: "Optional esterni", stepIds: ["technology"] },
+  { id: "presentazione", label: "Presentazione", stepIds: ["review"] },
 ];
 
 export const RENOVATION_STEPS: ReadonlyArray<StepDefinition> = [

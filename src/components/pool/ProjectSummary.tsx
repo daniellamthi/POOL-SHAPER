@@ -117,6 +117,7 @@ export function ProjectSummary() {
   const accessStepIndex = stepIndex("access");
   const lightingStepIndex = stepIndex("lighting");
   const technologyStepIndex = stepIndex("technology");
+  const deckStepIndex = stepIndex("deck");
   const editStep = (index: number) => (index >= 0 ? () => goToStep(index) : undefined);
 
   const poolType = poolTypeLabel(config.poolType);
@@ -268,7 +269,7 @@ export function ProjectSummary() {
           label="Bordo"
           value={copingMaterial?.title ?? "Da selezionare"}
           swatch={copingMaterial ? <Swatch hex={copingMaterial.color} /> : undefined}
-          onEdit={editStep(styleStepIndex)}
+          onEdit={editStep(deckStepIndex)}
         />
       </Section>
 

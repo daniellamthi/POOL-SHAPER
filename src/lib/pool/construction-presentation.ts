@@ -15,6 +15,12 @@ export interface ConstructionPresentation {
   showSystemComponents: boolean;
   showAccessories: boolean;
   showLighting: boolean;
+  /** Late-stage poolside context (wide terrace, lawn, loungers, optional
+   * solar shower). Never shown while the customer is still choosing the
+   * structure, system, access or finish. */
+  showEnvironment: boolean;
+  /** Coping-level paving around the basin: from Bordo e decking on. */
+  showDecking: boolean;
   label: string | null;
 }
 
@@ -35,6 +41,8 @@ export function constructionPresentation(
       showSystemComponents: true,
       showAccessories: false,
       showLighting: false,
+      showEnvironment: false,
+      showDecking: false,
       label: structure === "STEEL_PANELS"
         ? "Vista tecnica · pannelli strutturali in acciaio"
         : structure === "VISIBLE_STAINLESS_STEEL"
@@ -44,17 +52,32 @@ export function constructionPresentation(
             : "Vista tecnica · scegli la struttura",
     };
   }
-  const stage = config.projectType !== "new" ? "water"
-    : stepId === "system" ? "system"
-      : stepId === "access" ? "access"
-        : stepId === "style" ? "finish"
-          : ["lighting", "technology", "review"].includes(stepId ?? "") ? "water" : "structure";
+  const stage =
+    config.projectType !== "new"
+      ? "water"
+      : stepId === "system"
+        ? "system"
+        : stepId === "access"
+          ? "access"
+          : stepId === "style"
+            ? "finish"
+            : ["lighting", "deck", "technology", "review"].includes(stepId ?? "")
+              ? "water"
+              : "structure";
   const raw = stage !== "finish" && stage !== "water";
   return {
     stage, raw, structure, showWater: stage === "water",
     showSystemComponents: stage !== "structure",
     showAccessories: stage === "access" || stage === "finish" || stage === "water",
     showLighting: stage === "water",
+    // Progressive reveal: decking first appears at Bordo e decking, the
+    // lifestyle context (wide terrace, lawn, loungers, shower) only with the
+    // exterior optionals and the final presentation.
+    showDecking:
+      config.projectType === "renovation" ||
+      ["deck", "technology", "review"].includes(stepId ?? ""),
+    showEnvironment:
+      config.projectType === "new" && ["technology", "review"].includes(stepId ?? ""),
     label: raw
       ? structure === "STEEL_PANELS"
         ? "Struttura · Pannelli in acciaio"

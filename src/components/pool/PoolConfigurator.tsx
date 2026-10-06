@@ -1,10 +1,11 @@
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RENOVATION_STEPS, STEPS, STEP_GROUPS } from "@/lib/pool/config";
+import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
+import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
 import { contextualIntent, focusForAction } from "@/lib/pool/contextual-camera";
@@ -22,15 +23,6 @@ import {
   type RenderJobStatus,
 } from "@/lib/render-pipeline";
 import { ProjectTypeStep } from "@/configurator/steps/project-type";
-import { PoolTypeStep } from "@/configurator/steps/pool-type";
-import { PoolStructureStep } from "@/configurator/steps/pool-structure";
-import { PoolShapeStep } from "@/configurator/steps/pool-shape";
-import { PoolSystemStep } from "@/configurator/steps/pool-system";
-import { InteriorFinishStep } from "@/configurator/steps/interior-finish";
-import { AccessStep } from "@/configurator/steps/access";
-import { LightingStep } from "@/configurator/steps/lighting";
-import { EquipmentStep } from "@/configurator/steps/equipment";
-import { FinalReviewStep } from "@/configurator/steps/final-review";
 import {
   RenovationCustomerStep,
   RenovationDetailsStep,
@@ -43,22 +35,24 @@ import { PoolViewport } from "./PoolViewport";
 import { useTechnicalData } from "./TechnicalDataPanel";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
 import { ThemeToggle } from "./ThemeToggle";
-import { StepIndicator } from "./StepIndicator";
-import { LiveSummary } from "./LiveSummary";
+import { ConfiguratorTray, WizardNav } from "./wizard/WizardChrome";
+import { buildMacros, describeSelection, isStepSkipped, STEP_COPY } from "./wizard/wizard-model";
+import {
+  AccessTray,
+  DeckTray,
+  FinishTray,
+  LightTray,
+  OptionalTray,
+  PoolTypeTray,
+  PresentationTray,
+  ProjectTray,
+  ShapeTray,
+  StructureTray,
+  SystemTray,
+  type TrayContext,
+} from "./wizard/StepTrays";
 import type { SceneFocus, PhotoModeQuality, SceneTimeOfDay } from "./three/PoolScene";
 
-const STEP_COMPONENTS = [
-  ProjectTypeStep,
-  PoolTypeStep,
-  PoolStructureStep,
-  PoolShapeStep,
-  PoolSystemStep,
-  AccessStep,
-  InteriorFinishStep,
-  LightingStep,
-  EquipmentStep,
-  FinalReviewStep,
-] as const;
 
 /**
  * Brief automotive/architectural-style entrance -- logo + wordmark settle in,
@@ -309,8 +303,6 @@ function ConfiguratorLayout() {
 
   const renovationWorkflow = config.projectType === "renovation";
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
-  const components = renovationWorkflow ? RENOVATION_COMPONENTS : STEP_COMPONENTS;
-  const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
   const construction = constructionPresentation(config, activeStepId, technicalView);
@@ -318,38 +310,139 @@ function ConfiguratorLayout() {
   const cameraLocked = false;
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
-    : activeStepId === "structure"
+    : activeStepId === "structure" || activeStepId === "project" || activeStepId === "pool-type"
       ? "structure"
-      : activeStepId === "system"
-      ? contextualIntent(focusForAction({type:"setSystem"},config) ?? "POOL_OVERVIEW",config)
-      : activeStepId === "style"
-        ? "liner"
-        : activeStepId === "access"
-          ? contextualIntent(focusForAction({type:"setPoolAccess"},config) ?? "STAIRS",config)
-        : activeStepId === "lighting"
-          ? config.system === "infinity"
-            ? "infinity"
-            : "features"
-          : activeStepId === "review"
-            ? "review"
-            : "overview";
-  const stepContent =
-    !renovationWorkflow && activeStepId === "system" ? (
-      <PoolSystemStep />
-    ) : !renovationWorkflow && activeStepId === "lighting" ? (
-      <LightingStep sceneTime={sceneTime} onSceneTimeChange={setSceneTime} />
+      : activeStepId === "shape-dimensions"
+        ? "top"
+        : activeStepId === "system"
+          ? contextualIntent(
+              focusForAction({ type: "setSystem" }, config) ?? "POOL_OVERVIEW",
+              config,
+            )
+          : activeStepId === "style"
+            ? "liner"
+            : activeStepId === "access"
+              ? contextualIntent(
+                  focusForAction({ type: "setPoolAccess" }, config) ?? "STAIRS",
+                  config,
+                )
+              : activeStepId === "lighting"
+                ? config.system === "infinity"
+                  ? "infinity"
+                  : "features"
+                : "review";
+
+  // ---- New wizard navigation: nine macro steps, skipped empty steps ----
+  const macros = useMemo(
+    () =>
+      renovationWorkflow
+        ? RENOVATION_STEPS.map((s, index) => ({
+            id: s.id,
+            label: s.short,
+            indices: [index],
+            complete: index < step && isStepComplete(index),
+            reachable: index <= step || isStepComplete(Math.max(0, index - 1)),
+          }))
+        : buildMacros(config, step, isStepComplete),
+    [renovationWorkflow, config, step, isStepComplete],
+  );
+  const macroIndex = Math.max(
+    0,
+    macros.findIndex((m) => m.indices.includes(step)),
+  );
+  const macro = macros[macroIndex];
+  const skipped = (index: number) =>
+    !renovationWorkflow && isStepSkipped(activeSteps[index]?.id, config);
+  const goNext = useCallback(() => {
+    let target = step + 1;
+    while (target < activeSteps.length - 1 && skipped(target)) target += 1;
+    goToStep(Math.min(target, activeSteps.length - 1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, activeSteps.length, config, goToStep]);
+  const goBack = useCallback(() => {
+    let target = step - 1;
+    while (target > 0 && skipped(target)) target -= 1;
+    goToStep(Math.max(0, target));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, config, goToStep]);
+  const selectMacro = (index: number) => {
+    const indices = macros[index]?.indices ?? [];
+    const target = indices.find((i) => !skipped(i)) ?? indices[0];
+    if (target !== undefined) goToStep(target);
+  };
+  // If the configuration makes the current step empty (e.g. visible inox on
+  // the finish step), move on instead of showing an empty decision.
+  useEffect(() => {
+    if (skipped(step)) goNext();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, config.structure]);
+  // Phones: a step that still needs a decision opens with its cards; a step
+  // revisited after it was completed opens collapsed, so the pool stays visible.
+  const [trayExpanded, setTrayExpanded] = useState(true);
+  useEffect(() => setTrayExpanded(!isStepComplete(step)), [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The final step's primary action opens the proposal request.
+  const [requestToken, setRequestToken] = useState(0);
+  const finalRequest = !renovationWorkflow && activeStepId === "review";
+  const trayContext: TrayContext = {
+    requestToken,
+    focus: (intent) => {
+      setInspectionView(intent);
+      reframe();
+    },
+    photoMode: {
+      available: ACTIVE_RENDERING_QUALITY.id === "experience" && !photoModeUnsupported,
+      reason: photoModeUnsupported
+        ? "Il rendering fotografico non è supportato da questo dispositivo."
+        : "Disponibile su computer desktop.",
+      enter: () => {
+        if (!photoMode) togglePhotoMode();
+      },
+    },
+  };
+  const RenovationComponent = RENOVATION_COMPONENTS[step] ?? ProjectTypeStep;
+  const trayContent = renovationWorkflow ? (
+    step === 0 ? (
+      <ProjectTray />
     ) : (
-      <StepComponent />
-    );
+      <RenovationComponent />
+    )
+  ) : activeStepId === "project" ? (
+    <ProjectTray />
+  ) : activeStepId === "pool-type" ? (
+    <PoolTypeTray />
+  ) : activeStepId === "structure" ? (
+    <StructureTray />
+  ) : activeStepId === "shape-dimensions" ? (
+    <ShapeTray ctx={trayContext} />
+  ) : activeStepId === "system" ? (
+    <SystemTray />
+  ) : activeStepId === "access" ? (
+    <AccessTray />
+  ) : activeStepId === "style" ? (
+    <FinishTray />
+  ) : activeStepId === "lighting" ? (
+    <LightTray />
+  ) : activeStepId === "deck" ? (
+    <DeckTray />
+  ) : activeStepId === "technology" ? (
+    <OptionalTray ctx={trayContext} />
+  ) : (
+    <PresentationTray ctx={trayContext} />
+  );
+  const copy = renovationWorkflow
+    ? { title: activeSteps[step]?.title ?? "", subtitle: activeSteps[step]?.subtitle ?? "" }
+    : (STEP_COPY[activeStepId ?? "project"] ?? { title: "", subtitle: "" });
+  const substepPosition = macro && macro.indices.length > 1 ? macro.indices.indexOf(step) + 1 : 0;
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
       <IntroVeil />
-      <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/95 px-6 py-4 backdrop-blur-sm sm:px-9 lg:static">
-        <div className="flex min-w-0 items-center">
-          <BrandLogo className="h-8 max-w-[112px]" />
+      <header className="z-30 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-hairline bg-background px-4 py-3 sm:px-6 lg:gap-8">
+        <BrandLogo className="h-7 max-w-[100px]" />
+        <div className="flex min-w-0 justify-center">
+          <WizardNav macros={macros} current={macroIndex} onSelect={selectMacro} />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           <ThemeToggle />
           <Button
             type="button"
@@ -357,62 +450,22 @@ function ConfiguratorLayout() {
             size="sm"
             onClick={reset}
             aria-label="Ricomincia"
-            className="rounded-full px-3"
+            className="rounded-full px-2.5"
           >
             <RotateCcw />
-            <span className="hidden sm:inline">Ricomincia</span>
+            <span className="hidden xl:inline">Ricomincia</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col-reverse gap-3 p-3 lg:flex-row lg:p-4">
-        <aside className="relative z-10 flex min-h-0 w-full flex-1 flex-col rounded-[1.75rem] border border-hairline bg-background/95 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.85)] lg:w-[452px] lg:flex-none xl:w-[512px]">
-          <div className="border-b border-hairline/80 px-5 pb-4 pt-4 sm:px-8 lg:pb-6 lg:pt-6">
-            <StepIndicator
-              current={step}
-              steps={activeSteps}
-              groups={renovationWorkflow ? undefined : STEP_GROUPS}
-              isStepComplete={isStepComplete}
-              onSelect={goToStep}
-            />
-          </div>
-
-          <div ref={stepContentRef} className="scroll-slim min-h-0 flex-1 overflow-y-auto px-5 pb-8 pt-5 sm:px-8 lg:pb-18 lg:pt-8">
-            {stepContent}
-          </div>
-
-          <div className="flex items-center justify-between gap-6 border-t border-hairline bg-background/60 px-5 py-5 sm:px-8">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={previous}
-              disabled={step === 0}
-              aria-label="Indietro"
-              className="px-0 hover:bg-transparent"
-            >
-              <ArrowLeft />
-              <span className="hidden sm:inline">Indietro</span>
-            </Button>
-            <Button
-              type="button"
-              onClick={next}
-              disabled={isLast || !canContinue}
-              title={canContinue ? undefined : "Completa questo passaggio per continuare"}
-              className="px-6"
-            >
-              Continua
-              <ArrowRight className="size-3.5" strokeWidth={1.5} />
-            </Button>
-          </div>
-        </aside>
-
+      <div className="flex min-h-0 flex-1 flex-col gap-3 p-2 sm:p-3 lg:p-4">
         <main
           id="pool-viewport"
           className={cn(
             "relative w-full overflow-hidden bg-viewport",
             mobileExpanded
               ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
-              : "h-[36dvh] min-h-[220px] shrink-0 scroll-mt-20 rounded-[1.75rem] border border-hairline lg:h-auto lg:shrink lg:flex-1",
+              : "min-h-[200px] flex-1 rounded-[20px] border border-hairline lg:rounded-[24px]",
           )}
         >
           <PoolViewport
@@ -450,7 +503,12 @@ function ConfiguratorLayout() {
             floorProfile={config.dimensions.floorProfile}
             shallowDepth={config.dimensions.shallowDepth}
             slopeReversed={config.dimensions.slopeReversed}
-            showMeasurements={showMeasurements || visualFocus?.focus === "DIMENSIONS_TOP" || visualFocus?.focus === "DEPTH"}
+            showMeasurements={
+              showMeasurements ||
+              visualFocus?.focus === "DIMENSIONS_TOP" ||
+              visualFocus?.focus === "DEPTH" ||
+              activeStepId === "shape-dimensions"
+            }
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}
             frameToken={frameToken + (visualFocus?.revision ?? 0)}
@@ -461,7 +519,7 @@ function ConfiguratorLayout() {
             sceneTime={construction.showWater ? sceneTime : "day"}
             paving={config.paving ?? "gres"}
             photoMode={photoMode}
-            onTogglePhotoMode={openPremiumPresentation}
+            onTogglePhotoMode={togglePhotoMode}
             photoModeQuality={photoModeQuality}
             onSetPhotoModeQuality={setPhotoModeQuality}
             photoModeUnsupported={photoModeUnsupported}
@@ -474,8 +532,46 @@ function ConfiguratorLayout() {
             onToggleMobileExpanded={toggleMobileExpanded}
             onInspectionView={(view) => { setInspectionView(view); reframe(); }}
           />
-          {!technicalView ? <LiveSummary /> : null}
         </main>
+
+        {/* Phones: reserve the collapsed sheet's height so the pool is never
+            hidden behind it while the options are folded away. */}
+        <div aria-hidden className="h-[136px] shrink-0 lg:hidden" />
+
+        <ConfiguratorTray
+          number={macroIndex + 1}
+          title={renovationWorkflow ? copy.title : (macro?.label ?? copy.title)}
+          subtitle={copy.subtitle}
+          {...(substepPosition
+            ? { substep: `${substepPosition}/${macro!.indices.length} · ${copy.title}` }
+            : {})}
+          selection={
+            renovationWorkflow
+              ? (activeSteps[step]?.short ?? "")
+              : describeSelection(activeStepId, config)
+          }
+          canBack={step > 0}
+          canContinue={finalRequest || (!isLast && canContinue)}
+          continueLabel={
+            finalRequest ? "Richiedi proposta" : isLast ? "Configurazione completa" : "Continua"
+          }
+          continueHint={isLast ? undefined : "Completa la scelta per continuare"}
+          onBack={goBack}
+          onContinue={
+            finalRequest
+              ? () => {
+                  setRequestToken((n) => n + 1);
+                  setTrayExpanded(true);
+                }
+              : goNext
+          }
+          expanded={trayExpanded}
+          onExpandedChange={setTrayExpanded}
+        >
+          <div key={step} className="animate-rise">
+            {trayContent}
+          </div>
+        </ConfiguratorTray>
       </div>
     </div>
   );

@@ -1021,7 +1021,7 @@ assert(isValidControlPolygon(constrained), "custom point constraint produced an 
 
 assert(
   STEPS.map(({ id }) => id).join(",") ===
-    "project,pool-type,structure,shape-dimensions,system,style,access,lighting,technology,review",
+    "project,pool-type,structure,shape-dimensions,system,access,style,lighting,deck,technology,review",
   "workflow order does not match the approved Nuova Piscina flow",
 );
 assert(PROJECT_TYPES.map(({ id }) => id).join(",") === "new,renovation", "invalid project types");

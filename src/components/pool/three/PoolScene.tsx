@@ -1187,17 +1187,19 @@ export default function PoolScene({
             system={system}
             overflowType={overflowType}
             paving={paving ?? "gres"}
+            environment={construction?.showEnvironment ?? true}
+            decking={construction?.showDecking ?? true}
             waterY={verticalLayout.waterY}
           />
         </Suspense>
       )}
       {/* Presentation furniture on the studio deck: hidden in the raw
           construction stages and never part of the configuration. */}
-      {system !== "infinity" && !construction?.raw && (construction?.showAccessories ?? true) ? (
+      {system !== "infinity" && (construction?.showEnvironment ?? true) ? (
         <DeckLoungers
           outline={outline}
           innerOffset={studioDeckInnerOffset(poolType, system, overflowType)}
-          band={studioDeckBand(outline)}
+          band={studioDeckBand(outline, true)}
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
           shower={solarShower}

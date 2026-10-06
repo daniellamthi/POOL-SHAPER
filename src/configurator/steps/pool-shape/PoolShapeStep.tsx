@@ -205,7 +205,7 @@ function LShapeOrientationIcon({ orientation }: { orientation: LShapeOrientation
  * `dimensions.lShapeOrientation` live), which cascades through camera,
  * floor, walls, stairs, systems and lights exactly like any other dimension
  * edit -- no separate "rebuild" step. */
-function LShapeOrientationSelector({ disabled }: { disabled: boolean }) {
+export function LShapeOrientationSelector({ disabled }: { disabled: boolean }) {
   const { config, setLShapeOrientation } = useConfigurator();
   const current = config.dimensions.lShapeOrientation ?? "se";
   return (
@@ -243,7 +243,7 @@ function LShapeOrientationSelector({ disabled }: { disabled: boolean }) {
  * rientro" -- kept as its own compact group, visually distinct from the
  * overall length/width above it (`planDimensions`) so the two never blur
  * into one long, undifferentiated list of sliders. */
-function LShapeRecessControls({ disabled }: { disabled: boolean }) {
+export function LShapeRecessControls({ disabled }: { disabled: boolean }) {
   const { config, setDimension } = useConfigurator();
   return (
     <fieldset disabled={disabled} className="flex flex-col gap-7 border-0 p-0">
@@ -280,7 +280,7 @@ function LShapeRecessControls({ disabled }: { disabled: boolean }) {
  * (`buildOutline` reads `dimensions.organicCurvature`/`organicMirror` live),
  * cascading through the same pipeline any other dimension edit does.
  */
-function OrganicShapeControls({ disabled }: { disabled: boolean }) {
+export function OrganicShapeControls({ disabled }: { disabled: boolean }) {
   const { config, setDimension, setOrganicMirror } = useConfigurator();
   const limits = DIMENSION_LIMITS.organicCurvature;
   const curvature = config.dimensions.organicCurvature ?? 0.5;
@@ -335,7 +335,7 @@ function OrganicShapeControls({ disabled }: { disabled: boolean }) {
  * Only ever rendered for a rectangle, L-shape or Organic, in-ground pool --
  * see `supportsFloorProfile` above and `buildFloorProfile` (floor-profile.ts).
  */
-function FloorProfileSection({ disabled }: { disabled: boolean }) {
+export function FloorProfileSection({ disabled }: { disabled: boolean }) {
   const { config, setDimension, setFloorProfile, toggleSlopeReversed } = useConfigurator();
   const depth = config.dimensions.depth;
   const eligible = slopeEligibleForDepth(depth, DIMENSION_LIMITS.depth.min);
