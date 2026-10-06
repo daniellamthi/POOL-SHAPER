@@ -1226,6 +1226,7 @@ export default function PoolScene({
         rawStructure={construction?.raw ? construction.structure ?? "REINFORCED_CONCRETE" : null}
         structureFamily={construction?.structure ?? null}
         showAccessories={construction?.showAccessories ?? true}
+        night={dusk}
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />

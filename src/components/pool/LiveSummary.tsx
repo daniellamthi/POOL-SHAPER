@@ -42,7 +42,7 @@ export function LiveSummary() {
   const featureLabels = [
     ...features.map((item) =>
       item.id === "hydromassage"
-        ? `${item.title} ${config.hydromassageVariant === "open" ? "aperto" : "chiuso"}`
+        ? `${item.title} ${config.hydromassageVariant === "open" ? "B" : "A"}`
         : item.title,
     ),
     ...(config.poolAccess === "internalSteps"

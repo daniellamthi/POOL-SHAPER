@@ -184,7 +184,9 @@ export function ProjectSummary() {
       )
       .map((id) =>
         id === "hydromassage"
-          ? `${POOL_FEATURE_LABEL[id]} — ${config.hydromassageVariant === "open" ? "aperto" : "chiuso"}`
+          ? config.hydromassageVariant === "open"
+            ? "Idromassaggio B"
+            : "Idromassaggio A"
           : POOL_FEATURE_LABEL[id],
       ),
   ];

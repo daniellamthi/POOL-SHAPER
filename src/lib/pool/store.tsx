@@ -458,7 +458,7 @@ function configurationReducer(state: State, action: Action): State {
     case "togglePoolFeature": {
       if (action.value === "externalStaircase" && config.poolType !== "above-ground") return state;
       const features = config.features.includes(action.value)
-        ? config.features.filter((id) => id !== action.value)
+        ? normalizeComfortFeatures(config.features.filter((id) => id !== action.value))
         : normalizeComfortFeatures([...config.features, action.value], action.value);
       return { ...state, config: { ...config, features } };
     }

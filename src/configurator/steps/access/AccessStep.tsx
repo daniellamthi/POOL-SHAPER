@@ -185,13 +185,13 @@ export function AccessStep() {
               <h4 className="label-xs mb-4">Stile idromassaggio</h4>
               <div className="grid gap-3" role="group" aria-label="Stile idromassaggio">
                 <OptionCard
-                  title="Chiuso"
+                  title="Idromassaggio A"
                   description="Muretto frontale alla stessa quota del divisorio: zona delimitata."
                   selected={hydroVariant === "closed"}
                   onSelect={() => setHydromassageVariant("closed")}
                 />
                 <OptionCard
-                  title="Aperto"
+                  title="Idromassaggio B"
                   description="Nessun muretto frontale: la zona si apre sulla vasca principale."
                   selected={hydroVariant === "open"}
                   onSelect={() => setHydromassageVariant("open")}

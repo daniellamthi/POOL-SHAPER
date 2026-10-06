@@ -3,7 +3,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import type { ComfortPlan } from "@/lib/pool/comfort-plan";
 import { stairSolid } from "./PoolAccessModel";
-import { BufferGeometry, Float32BufferAttribute } from "three";
+import { AdditiveBlending, BufferGeometry, Float32BufferAttribute } from "three";
 import { HYDRO_DIMENSIONS } from "@/lib/pool/comfort-plan";
 import type { ComfortElementPlan } from "@/lib/pool/comfort-plan";
 
@@ -74,11 +74,14 @@ export function PoolComfortModel({
   floorProfile,
   children,
   showJets = true,
+  night = false,
 }: {
   plan: ComfortPlan;
   floorProfile: FloorProfileModel;
   children: ReactNode;
   showJets?: boolean;
+  /** Night scene: the hydromassage micro-spots glow softly. */
+  night?: boolean;
 }) {
   const geometries = useMemo(
     () =>
@@ -108,11 +111,62 @@ export function PoolComfortModel({
           {children}
         </mesh>
       ))}
-      {showJets && plan.elements.flatMap((element) =>
-        (element.jets ?? []).map((jet, index) => (
-          <HydroJet key={`${element.kind}-jet-${index}`} jet={jet} />
-        )),
-      )}
+      {showJets &&
+        plan.elements.flatMap((element) =>
+          (element.jets ?? []).map((jet, index) => (
+            <HydroJet key={`${element.kind}-jet-${index}`} jet={jet} />
+          )),
+        )}
+      {showJets &&
+        plan.elements.flatMap((element) =>
+          (element.spots ?? []).map((spot, index) => (
+            <HydroSpot key={`${element.kind}-spot-${index}`} spot={spot} night={night} />
+          )),
+        )}
+    </group>
+  );
+}
+
+/** LED micro-spot flush in the seat front face: satin bezel and a warm lens.
+ * By day the lens reads as a small fitting; at night it glows softly, with a
+ * faint halo on the face instead of a real light (no extra shadow/light cost). */
+function HydroSpot({
+  spot,
+  night,
+}: {
+  spot: NonNullable<ComfortElementPlan["spots"]>[number];
+  night: boolean;
+}) {
+  const d = HYDRO_DIMENSIONS.spotDiameter;
+  const rotY = Math.atan2(spot.dir[0], spot.dir[1]);
+  return (
+    <group name="pool-hydro-spot" position={[spot.x, spot.y, spot.z]} rotation={[0, rotY, 0]}>
+      <mesh position={[0, 0, 0.002]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[d / 2, d / 2, 0.004, 20]} />
+        <StainlessSteelMaterial finish="satin" />
+      </mesh>
+      <mesh position={[0, 0, 0.0045]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[d * 0.34, d * 0.34, 0.002, 16]} />
+        <meshStandardMaterial
+          color="#f3ead8"
+          emissive="#ffd9a0"
+          emissiveIntensity={night ? 2.2 : 0.08}
+          roughness={0.2}
+          toneMapped
+        />
+      </mesh>
+      {night ? (
+        <mesh position={[0, 0, 0.006]}>
+          <circleGeometry args={[d * 2.4, 24]} />
+          <meshBasicMaterial
+            color="#ffcf8a"
+            transparent
+            opacity={0.16}
+            depthWrite={false}
+            blending={AdditiveBlending}
+          />
+        </mesh>
+      ) : null}
     </group>
   );
 }

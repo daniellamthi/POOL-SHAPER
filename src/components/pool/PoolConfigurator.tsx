@@ -314,23 +314,21 @@ function ConfiguratorLayout() {
       ? "structure"
       : activeStepId === "shape-dimensions"
         ? "top"
-        : activeStepId === "system"
-          ? contextualIntent(
-              focusForAction({ type: "setSystem" }, config) ?? "POOL_OVERVIEW",
-              config,
-            )
-          : activeStepId === "style"
-            ? "liner"
-            : activeStepId === "access"
-              ? contextualIntent(
-                  focusForAction({ type: "setPoolAccess" }, config) ?? "STAIRS",
-                  config,
-                )
-              : activeStepId === "lighting"
-                ? config.system === "infinity"
-                  ? "infinity"
-                  : "features"
-                : "review";
+        : // System and finish open on the whole basin: the choice is about
+          // the waterline and the colour of the pool, which a detail close-up
+          // crops away. Clicking an option still frames its detail.
+          activeStepId === "system" || activeStepId === "style"
+          ? "review"
+          : activeStepId === "access"
+            ? contextualIntent(
+                focusForAction({ type: "setPoolAccess" }, config) ?? "STAIRS",
+                config,
+              )
+            : activeStepId === "lighting"
+              ? config.system === "infinity"
+                ? "infinity"
+                : "features"
+              : "review";
 
   // ---- New wizard navigation: nine macro steps, skipped empty steps ----
   const macros = useMemo(

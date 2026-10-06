@@ -58,6 +58,23 @@ export interface TrayContext {
 
 const ill = (name: string) => <Illustration name={name} />;
 
+/** Customer-facing one-liners for option families whose catalogue entries
+ * carry no description of their own. */
+const SKIMMER_FINISH_COPY: Record<string, string> = {
+  white: "Frontalino bianco, discreto sul liner chiaro.",
+  graphite: "Antracite, si fonde con i rivestimenti scuri.",
+  sand: "Tono sabbia per liner e mosaici caldi.",
+  steel: "Acciaio satinato, coordinato con scalette inox.",
+};
+const LINER_COPY: Record<string, string> = {
+  motionDeepSea603: "Acqua blu intenso e profondo.",
+  motionBlueSky602: "Acqua azzurra luminosa, classica.",
+  motionArcticWhite180: "Acqua chiarissima, turchese tenue.",
+  motionSandBeach179: "Acqua verde-turchese caraibica.",
+  motionGreyRock798: "Acqua verde-grigia, naturale.",
+  motionBlackStone799: "Acqua scura a specchio, effetto lago.",
+};
+
 /** Customer-facing Italian lines for the coping catalogue cards. */
 const COPING_COPY: Record<string, string> = {
   limestone: "Pietra calcarea chiara, grana fine e contemporanea.",
@@ -359,6 +376,7 @@ export function SystemTray() {
                   compact
                   key={item.id}
                   title={item.title}
+                  description={SKIMMER_FINISH_COPY[item.id] ?? "Finitura del frontalino."}
                   image={
                     <span
                       className="block h-full w-full rounded-xl"
@@ -593,14 +611,14 @@ export function AccessTray() {
             {hydroOn || hydroProposal.availability.hydromassage.available ? (
               <>
                 <ChoiceCard
-                  title="Idromassaggio A · chiuso"
+                  title="Idromassaggio A"
                   description="Zona delimitata da un muretto, panca a L con getti."
                   image={ill("comfort-hydro-closed")}
                   selected={comfortChoice === "closed"}
                   onSelect={() => chooseComfort("closed")}
                 />
                 <ChoiceCard
-                  title="Idromassaggio B · aperto"
+                  title="Idromassaggio B"
                   description="Panca a U con getti, aperta sulla vasca."
                   image={ill("comfort-hydro-open")}
                   selected={comfortChoice === "open"}
@@ -657,6 +675,7 @@ export function FinishTray() {
               compact
               key={color.id}
               title={color.title.replace("Motion ", "")}
+              description={LINER_COPY[color.id] ?? "Liner PVC armato."}
               image={color.texture}
               selected={config.linerColor === color.id}
               onSelect={() => setLinerColor(color.id)}
@@ -670,6 +689,7 @@ export function FinishTray() {
               compact
               key={mosaic.id}
               title={mosaic.name}
+              description="Tessere in vetro, posa a mano."
               image={mosaic.preview}
               selected={config.mosaicFinish === mosaic.id}
               onSelect={() => setMosaicFinish(mosaic.id)}

@@ -322,6 +322,19 @@ for (const length of [6, 8, 10, 12])
                 ),
               `${vtag}: jets in the backrest above the seat`,
             );
+            check(
+              hydro.spots!.length >= 2 &&
+                hydro.spots!.every(
+                  (s) =>
+                    s.x >= hr.minX - 0.02 &&
+                    s.x <= hr.maxX + 0.02 &&
+                    s.z >= hr.minZ - 0.02 &&
+                    s.z <= hr.maxZ + 0.02 &&
+                    s.y < back.topY &&
+                    s.y > floor.floorYAt(s.x, s.z),
+                ),
+              `${vtag}: micro-spots in the seat front face, under the seat edge`,
+            );
             const solid = shelfStairGeometry(hydro, floor);
             check(watertight(solid), `${vtag}: watertight`);
             solid.dispose();
@@ -381,6 +394,15 @@ check(
 check(
   normalizeComfortFeatures(["hydromassage", "sunShelf"], "sunShelf").join() === "sunShelf",
   "selecting shelf turns hydro off",
+);
+check(
+  normalizeComfortFeatures(
+    ["sunShelf", "integratedBench", "hydromassage"],
+    "hydromassage",
+  ).join() === "hydromassage" &&
+    normalizeComfortFeatures(["integratedBench"]).length === 0 &&
+    normalizeComfortFeatures(["sunShelf", "integratedBench"]).join() === "sunShelf,integratedBench",
+  "the bench exists only with the sun shelf: never alone, never with hydromassage",
 );
 const shelfLayout = configuredPoolLayout(
   config({ length: 8, width: 4, sloped: true, system: "skimmer", features: ["sunShelf"], variant: "open" }),

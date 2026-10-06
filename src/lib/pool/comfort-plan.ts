@@ -25,6 +25,9 @@ export interface ComfortElementPlan {
   tiers?: ReadonlyArray<{ footprint: Outline; topY: number; role: HydroTierRole }>;
   /** Hydromassage only: nozzle faces; `dir` is the unit outward normal in plan. */
   jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
+  /** Hydromassage only: LED micro-spots set into the seat's front vertical
+   * face, under the seat edge; `dir` is the unit outward normal in plan. */
+  spots?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
 }
 
 export type HydroTierRole = "divider" | "frontWall" | "backSeat" | "sideSeat" | "innerSideSeat" | "tubFloor";
@@ -47,6 +50,10 @@ export const HYDRO_DIMENSIONS = {
   jetSpacing: 0.5,
   jetAboveSeat: 0.22,
   jetDiameter: 0.06,
+  /** LED micro-spots in the seat front face, this far below the seat edge. */
+  spotBelowSeat: 0.12,
+  spotSpacing: 0.6,
+  spotDiameter: 0.035,
   /** Solids run this far into the wall so no seam can open at the tile line. */
   wallOverlap: 0.01,
 } as const;
@@ -378,6 +385,33 @@ export function resolveComfortPlan({
           ? spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, inner), y: jetY, dir: innerSideDir }))
           : []),
       ];
+      // Micro-spots light the tub from the seat's front face: below the seat
+      // edge, facing the legroom, never in the backrest beside the jets.
+      const spotY = seatTop - H.spotBelowSeat;
+      const spotsAlong = (from: number, to: number) => {
+        const count = Math.max(1, Math.floor(Math.abs(to - from) / H.spotSpacing));
+        return Array.from({ length: count }, (_, i) => from + ((i + 0.5) * (to - from)) / count);
+      };
+      const backFrontDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
+      const spots = [
+        ...spotsAlong(inner + side * 0.25, benchInner - side * 0.25).map((c) => ({
+          ...point(H.benchDepth, c),
+          y: spotY,
+          dir: backFrontDir,
+        })),
+        ...spotsAlong(H.benchDepth + 0.25, front - 0.25).map((a) => ({
+          ...point(a, benchInner),
+          y: spotY,
+          dir: sideDir,
+        })),
+        ...(!frontWall
+          ? spotsAlong(H.benchDepth + 0.25, front - 0.25).map((a) => ({
+              ...point(a, innerBenchEdge),
+              y: spotY,
+              dir: innerSideDir,
+            }))
+          : []),
+      ];
       elements.push({
         kind: "hydromassage",
         footprint: rectOutline(whole),
@@ -390,6 +424,7 @@ export function resolveComfortPlan({
         landing: { ...shelf.landing, footprint: toWalls(shelf.landing.footprint) },
         tiers,
         jets,
+        spots,
       });
       selectedRects.push(whole, shelf.flight, boundsOf(shelf.landing.footprint));
     }

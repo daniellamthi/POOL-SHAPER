@@ -98,6 +98,8 @@ interface PoolModelProps {
   rawStructure?: StructureFamily | null;
   structureFamily?: StructureFamily | null;
   showAccessories?: boolean;
+  /** Night scene: hydromassage micro-spots glow. */
+  night?: boolean;
   skimmers: SkimmerPlan;
   /** Geometry Pass D (Infinity, Rectangle + L-shape). Only meaningful
    * while `system === "infinity"`. */
@@ -415,6 +417,7 @@ export function PoolModel({
   rawStructure = null,
   structureFamily = null,
   showAccessories = true,
+  night = false,
   skimmers,
   poolAccess,
   internalStairType,
@@ -1023,26 +1026,37 @@ export function PoolModel({
           waterline these surfaces would otherwise render nonsensical
           close-up backfaces instead of a clean sky/coping reflection. */}
       <group name="pool-basin">
-        <PoolComfortModel plan={comfortPlan} floorProfile={floorProfile} showJets={showAccessories}>
-          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} /> : <meshPhysicalMaterial
-            key={showWater ? "wet" : "dry"}
-            color={materials.liner.color}
-            map={floorSurfaceMap}
-            normalMap={interiorMicroMaps.floorNormal}
-            normalScale={[
-              materials.surface.microDetail.normalStrength,
-              materials.surface.microDetail.normalStrength,
-            ]}
-            roughness={materials.liner.roughness}
-            metalness={materials.liner.metalness}
-            roughnessMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null}
-            aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
-            aoMapIntensity={0.6}
-            onBeforeCompile={configureCaustics}
-            customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
-            }
-          />}
+        <PoolComfortModel
+          plan={comfortPlan}
+          floorProfile={floorProfile}
+          showJets={showAccessories}
+          night={night && showWater}
+        >
+          {interiorShellKind ? (
+            <RawShellMaterial kind={interiorShellKind} />
+          ) : (
+            <meshPhysicalMaterial
+              key={showWater ? "wet" : "dry"}
+              color={materials.liner.color}
+              map={floorSurfaceMap}
+              normalMap={interiorMicroMaps.floorNormal}
+              normalScale={[
+                materials.surface.microDetail.normalStrength,
+                materials.surface.microDetail.normalStrength,
+              ]}
+              roughness={materials.liner.roughness}
+              metalness={materials.liner.metalness}
+              roughnessMap={
+                materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null
+              }
+              aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
+              aoMapIntensity={0.6}
+              onBeforeCompile={configureCaustics}
+              customProgramCacheKey={() =>
+                `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
+              }
+            />
+          )}
         </PoolComfortModel>
         {resolvedLayout.effectiveAccess !== "stainlessSteelLadder" || showAccessories ? <PoolAccessModel
           resolvedPlan={resolvedLayout.access}
