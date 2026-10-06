@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows, Line } from "@react-three/drei";
+import { OrbitControls, ContactShadows, Line, useProgress } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   Vector3,
@@ -225,20 +225,68 @@ function SceneMood({
  * after R3F's own loop callback (which requested its next frame first). */
 function HeroCaptureListener() {
   const gl = useThree((state) => state.gl);
-  useFrame(() => {
+  const settledSince = useRef<number | null>(null);
+  useFrame((state) => {
     const pending = heroCaptureState.pending;
-    if (!pending || !renderQualityState.idle) return;
+    // Wait for a settled frame with every texture (e.g. the coastal
+    // panorama, loaded asynchronously) in place, not just the first idle one.
+    if (!pending || !renderQualityState.idle || useProgress.getState().active) {
+      settledSince.current = null;
+      return;
+    }
+    const now = performance.now();
+    settledSince.current ??= now;
+    if (now - settledSince.current < HERO_SETTLE_MS) return;
+    settledSince.current = null;
     heroCaptureState.pending = null;
-    requestAnimationFrame(() => {
-      try {
-        pending(gl.domElement.toDataURL("image/jpeg", 0.92));
-      } catch (error) {
-        console.error("[hero] canvas capture failed", error);
-        pending(null);
-      }
-    });
+    // Render the settled frame ourselves and read it back in the same task:
+    // with preserveDrawingBuffer off, a later read can return an offscreen
+    // pre-pass instead of the composed scene. A higher pixel ratio for this
+    // one frame gives the Project Book a print-worthy cover.
+    const previousRatio = gl.getPixelRatio();
+    const height = gl.domElement.clientHeight || 1;
+    try {
+      gl.setPixelRatio(Math.min(3, Math.max(previousRatio, HERO_CAPTURE_HEIGHT / height)));
+      gl.setRenderTarget(null);
+      gl.render(state.scene, state.camera);
+      pending(cropHero(gl.domElement));
+    } catch (error) {
+      console.error("[hero] canvas capture failed", error);
+      pending(null);
+    } finally {
+      gl.setPixelRatio(previousRatio);
+    }
   });
   return null;
+}
+
+const HERO_CAPTURE_HEIGHT = 1100;
+const HERO_SETTLE_MS = 1500;
+/** Project Book cover box (297 x 150 mm). */
+const HERO_ASPECT = 297 / 150;
+
+/** Centre crop to the cover aspect, so the PDF never letterboxes. */
+function cropHero(source: HTMLCanvasElement): string {
+  const { width, height } = source;
+  const cropW = Math.min(width, Math.round(height * HERO_ASPECT));
+  const cropH = Math.min(height, Math.round(cropW / HERO_ASPECT));
+  const canvas = document.createElement("canvas");
+  canvas.width = cropW;
+  canvas.height = cropH;
+  canvas
+    .getContext("2d")
+    ?.drawImage(
+      source,
+      (width - cropW) / 2,
+      (height - cropH) / 2,
+      cropW,
+      cropH,
+      0,
+      0,
+      cropW,
+      cropH,
+    );
+  return canvas.toDataURL("image/jpeg", 0.9);
 }
 
 function DevelopmentRendererMetrics() {
