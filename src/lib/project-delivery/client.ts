@@ -14,6 +14,9 @@ export interface ProjectLink {
   /** Present only when this browser owns the project. */
   editToken?: string | undefined;
   savedAt?: string | undefined;
+  /** The snapshot as last saved from this browser, so "unsaved changes"
+   * survives a reload. Owner-only; never sent anywhere. */
+  savedSnapshot?: string | undefined;
 }
 
 function readAll(): Record<string, ProjectLink> {
@@ -33,6 +36,7 @@ export function getProjectLink(projectId: string): ProjectLink | null {
     publicRef: link.publicRef,
     editToken: isEditToken(link.editToken) ? link.editToken : undefined,
     savedAt: link.savedAt,
+    savedSnapshot: typeof link.savedSnapshot === "string" ? link.savedSnapshot : undefined,
   };
 }
 

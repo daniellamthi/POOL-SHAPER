@@ -32,7 +32,18 @@ import {
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { projectMetrics } from "./project-metrics";
 import { getCustomerValidation } from "./validation";
-import { createProjectId, toProjectConfiguration, type ProjectConfiguration } from "./project";
+import {
+  createProjectId,
+  parseProjectConfiguration,
+  toProjectConfiguration,
+  type ProjectConfiguration,
+} from "./project";
+import { loadSharedProjectFn } from "@/lib/project-delivery/projectDelivery.server";
+import {
+  getProjectLink,
+  setProjectLink,
+  sharedRefFromLocation,
+} from "@/lib/project-delivery/client";
 import { clearProjectDraft, loadProjectDraft, saveProjectDraft } from "./persistence";
 import { DEFAULT_MOSAIC_FINISH_ID } from "@/configurator/materials/interior-textures";
 import type {
@@ -625,7 +636,54 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
   // server/client hydration mismatch to worry about; this effect only ever
   // runs in the browser, after hydration.
   const [justRestoredProject, setJustRestoredProject] = useState(false);
+  const [sharedProject, setSharedProject] = useState<ConfiguratorContextValue["sharedProject"]>(null);
   useEffect(() => {
+    // Build 2: a share link restores that exact saved snapshot and lands on
+    // the presentation; it takes precedence over this browser's local draft.
+    const sharedRef = sharedRefFromLocation();
+    if (sharedRef) {
+      setSharedProject({ publicRef: sharedRef, status: "loading" });
+      void loadSharedProjectFn({ data: { publicRef: sharedRef } })
+        .then((result) => {
+          if (!result.ok) {
+            setSharedProject({ publicRef: sharedRef, status: "error", message: result.message });
+            return;
+          }
+          const shared = parseProjectConfiguration(result.snapshot);
+          // Shared snapshots carry no contact details; keep this visitor's
+          // own (from their local draft) for a later quote request.
+          const project = {
+            ...shared,
+            config: {
+              ...shared.config,
+              customer: loadProjectDraft()?.config.customer ?? shared.config.customer,
+            },
+          };
+          const known = getProjectLink(project.projectId);
+          setProjectLink(project.projectId, {
+            publicRef: sharedRef,
+            editToken: known?.publicRef === sharedRef ? known.editToken : undefined,
+            savedAt: result.updatedAt,
+          });
+          dispatch({ type: "restoreProject", value: project });
+          dispatch({
+            type: "goToStep",
+            value:
+              project.config.projectType === "renovation"
+                ? RENOVATION_STEPS.length - 1
+                : STEPS.length - 1,
+          });
+          setSharedProject({ publicRef: sharedRef, status: "ready" });
+        })
+        .catch(() =>
+          setSharedProject({
+            publicRef: sharedRef,
+            status: "error",
+            message: "Progetto non disponibile in questo momento.",
+          }),
+        );
+      return;
+    }
     const draft = loadProjectDraft();
     if (!draft) return;
     dispatch({ type: "restoreProject", value: draft });
@@ -650,19 +708,23 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     [config.shape, config.dimensions, config.controlPoints],
   );
 
-  const metrics = useMemo(() => projectMetrics(config, outline), [
-    outline,
-    config.shape,
-    config.poolType,
-    config.system,
-    config.overflowType,
-    config.dimensions,
-    config.features,
-    config.poolAccess,
-    config.internalStairType,
-    config.hydromassageVariant,
-    config.infinityEdge,
-  ]);
+  const metrics = useMemo(
+    () => projectMetrics(config, outline),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the fields projectMetrics reads
+    [
+      outline,
+      config.shape,
+      config.poolType,
+      config.system,
+      config.overflowType,
+      config.dimensions,
+      config.features,
+      config.poolAccess,
+      config.internalStairType,
+      config.hydromassageVariant,
+      config.infinityEdge,
+    ],
+  );
 
   const skimmers = useMemo(
     () => planSkimmers(outline, metrics.waterSurface, config.system === "skimmer"),
@@ -783,6 +845,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       },
       justRestoredProject,
       dismissRestoredProjectNotice: () => setJustRestoredProject(false),
+      restoreProject: (project) => dispatch({ type: "restoreProject", value: project }),
+      sharedProject,
     }),
     [
       config,
@@ -795,6 +859,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       skimmers,
       isStepComplete,
       justRestoredProject,
+      sharedProject,
       state.visualFocus,
     ],
   );

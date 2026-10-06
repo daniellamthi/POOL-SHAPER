@@ -117,6 +117,16 @@ export interface ConfiguratorContextValue {
    * tuo progetto" notice. */
   justRestoredProject: boolean;
   dismissRestoredProjectNotice: () => void;
+  /** Replaces the whole configuration with a canonical snapshot (Build 2:
+   * shared links, "save as my copy"). */
+  restoreProject: (project: ProjectConfiguration) => void;
+  /** Public reference the page was opened with (`?p=`), once restored;
+   * "loading" while the shared project is being fetched. */
+  sharedProject: {
+    publicRef: string;
+    status: "loading" | "ready" | "error";
+    message?: string;
+  } | null;
 }
 
 export const ConfiguratorContext = createContext<ConfiguratorContextValue | null>(null);

@@ -126,6 +126,7 @@ equal((model.match(/depth-aware-underwater-optics-v8-\$\{LED_TRANSPORT_CACHE_KEY
 const infinity = readFileSync("src/components/pool/three/InfinityEdge.tsx", "utf8");
 ok(infinity.includes('{showWater ? <>'), "Infinity sheet, crest and receiver dry-stage gate");
 ok(infinity.includes('rawStructure ? <RawShellMaterial kind={rawKind}'), "Raw Infinity containment uses the selected construction finish");
-for (const file of ["src/components/pool/ProjectSummary.tsx", "src/components/pool/TechnicalDataPanel.tsx", "src/lib/lead/formatLeadEmail.ts"])
+// Summary, technical panel and Project Book PDF all render summary-model.ts (Build 2).
+for (const file of ["src/lib/project-delivery/summary-model.ts", "src/lib/lead/formatLeadEmail.ts"])
   ok(readFileSync(file, "utf8").includes("STRUCTURE_LABEL["), `${file} presents canonical structure`);
 console.log(`PASS: ${checks} structural progression checks — stage, snapshot, dry/wet, shape/resize, comfort, technical, photo and downstream identity.`);

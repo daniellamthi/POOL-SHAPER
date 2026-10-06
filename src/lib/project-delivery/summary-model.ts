@@ -284,7 +284,9 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
       stepId: "system",
       rows: [
         { label: "Sistema idraulico", value: systemLine },
-        ...(infinityZone ? [{ label: "Lato Infinity", value: `Lato ${infinityZone.side + 1}` }] : []),
+        ...(infinityZone
+          ? [{ label: "Lato Infinity", value: `Lato ${infinityZone.side + 1}` }]
+          : []),
         ...(config.system === "skimmer"
           ? [
               {

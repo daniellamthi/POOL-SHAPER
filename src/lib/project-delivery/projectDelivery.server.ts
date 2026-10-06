@@ -17,7 +17,8 @@ import {
 } from "./service";
 import { getProjectStore, ProjectStorageError } from "./store";
 
-type Outcome<T> = ({ ok: true } & T) | { ok: false; code: ProjectDeliveryErrorCode; message: string };
+type Outcome<T> =
+  ({ ok: true } & T) | { ok: false; code: ProjectDeliveryErrorCode; message: string };
 
 async function run<T>(work: () => Promise<T>): Promise<Outcome<T>> {
   try {
@@ -26,7 +27,10 @@ async function run<T>(work: () => Promise<T>): Promise<Outcome<T>> {
     if (error instanceof ProjectDeliveryError) {
       return { ok: false, code: error.code, message: error.message };
     }
-    console.error("[project] storage failure", error instanceof ProjectStorageError ? error.message : error);
+    console.error(
+      "[project] storage failure",
+      error instanceof ProjectStorageError ? error.message : error,
+    );
     return {
       ok: false,
       code: "storage_unavailable",
@@ -43,14 +47,12 @@ const saveInput = z.object({
 
 export const saveProjectFn = createServerFn({ method: "POST" })
   .validator(saveInput)
-  .handler(
-    async ({ data }): Promise<Outcome<SaveProjectResult>> =>
-      run(() => saveProject(getProjectStore(), data)),
+  .handler(async ({ data }): Promise<Outcome<SaveProjectResult>> =>
+    run(() => saveProject(getProjectStore(), data)),
   );
 
 export const loadSharedProjectFn = createServerFn({ method: "POST" })
   .validator(z.object({ publicRef: z.string().max(32) }))
-  .handler(
-    async ({ data }): Promise<Outcome<SharedProjectResult>> =>
-      run(() => loadSharedProject(getProjectStore(), data.publicRef)),
+  .handler(async ({ data }): Promise<Outcome<SharedProjectResult>> =>
+    run(() => loadSharedProject(getProjectStore(), data.publicRef)),
   );

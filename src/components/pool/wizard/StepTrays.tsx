@@ -27,6 +27,8 @@ import { LedColorWheel } from "@/configurator/steps/pool-features/LedColorWheel"
 import { LedIntensityControl } from "@/configurator/steps/pool-features/LedIntensityControl";
 import { LeadRequestDialog } from "@/configurator/steps/final-review/LeadRequestDialog";
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
+import { ProjectDeliveryPanel } from "@/components/pool/delivery/ProjectDelivery";
+import { useProjectDelivery } from "@/components/pool/delivery/useProjectDelivery";
 import { MetricsPanel } from "@/components/pool/MetricsPanel";
 import { ShapeEditor } from "@/components/pool/ShapeEditor";
 import { FileDrop } from "@/components/pool/FileDrop";
@@ -49,6 +51,8 @@ export interface TrayContext {
   /** Bumped by the final step's primary action: opens the proposal request. */
   requestToken?: number;
   photoMode?: { available: boolean; reason?: string; enter: () => void };
+  /** Clean hero capture of the configured pool (Build 2). */
+  captureHero?: () => Promise<string | null>;
 }
 
 const ill = (name: string) => <Illustration name={name} />;
@@ -923,8 +927,26 @@ export function OptionalTray({ ctx }: { ctx: TrayContext }) {
 /* ---------------------------------------------------------------- 09 */
 
 export function PresentationTray({ ctx }: { ctx: TrayContext }) {
-  const { config, setSceneTime, projectConfiguration } = useConfigurator();
+  const { config, setSceneTime, projectConfiguration, sharedProject } = useConfigurator();
   const [tab, setTab] = useState<"scene" | "summary" | "request">("scene");
+  const delivery = useProjectDelivery();
+  // A shared link lands on the project recap.
+  useEffect(() => {
+    if (sharedProject?.status === "ready") setTab("summary");
+  }, [sharedProject?.status]);
+  // The recap opens with a clean capture of the configured pool.
+  const { heroUrl, setHeroUrl } = delivery;
+  const capture = ctx.captureHero;
+  useEffect(() => {
+    if (tab !== "summary" || heroUrl || !capture) return;
+    let active = true;
+    void capture().then((url) => {
+      if (active && url) setHeroUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [tab, heroUrl, capture, setHeroUrl]);
   useEffect(() => {
     if (ctx.requestToken) setTab("request");
   }, [ctx.requestToken]);
@@ -985,8 +1007,9 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
           </ChoiceGrid>
         </div>
       ) : tab === "summary" ? (
-        <div className="max-w-3xl">
-          <ProjectSummary />
+        <div className="flex max-w-3xl flex-col gap-4">
+          <ProjectDeliveryPanel delivery={delivery} captureHero={ctx.captureHero} />
+          <ProjectSummary publicRef={delivery.link?.publicRef} heroUrl={delivery.heroUrl} />
         </div>
       ) : (
         <section className="flex max-w-xl flex-col items-start gap-4">
@@ -996,7 +1019,10 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
           <p className="text-[13px] leading-[1.7] font-light text-muted-foreground">
             Un consulente verifica configurazione, fattibilità e investimento.
           </p>
-          <LeadRequestDialog projectConfiguration={projectConfiguration} />
+          <LeadRequestDialog
+            projectConfiguration={projectConfiguration}
+            projectReference={delivery.link?.publicRef}
+          />
         </section>
       )}
     </TabBody>

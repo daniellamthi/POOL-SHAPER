@@ -18,6 +18,7 @@ import {
   isPublicRef,
 } from "./reference";
 import type { ProjectStore } from "./store";
+import { DEFAULT_CUSTOMER } from "@/lib/pool/config";
 
 /** A full configuration serializes to ~1-2 KB; 64 KB leaves ample room and
  * still refuses abuse (uploads are metadata only, never file content). */
@@ -82,11 +83,18 @@ export function canonicalSnapshot(snapshot: string): ProjectConfiguration {
   }
 }
 
+/** What a share link may reveal: the pool, never the person. Contact
+ * details and upload metadata stay in the owner's browser and in the quote
+ * request; they are stripped before storage and again on every shared read. */
+export function shareableProject(project: ProjectConfiguration): ProjectConfiguration {
+  return { ...project, config: { ...project.config, customer: DEFAULT_CUSTOMER, uploads: [] } };
+}
+
 export async function saveProject(
   store: ProjectStore,
   input: SaveProjectInput,
 ): Promise<SaveProjectResult> {
-  const project = canonicalSnapshot(input.snapshot);
+  const project = shareableProject(canonicalSnapshot(input.snapshot));
   if (input.publicRef !== undefined || input.editToken !== undefined) {
     if (!isPublicRef(input.publicRef) || !isEditToken(input.editToken)) {
       throw new ProjectDeliveryError("invalid_reference", "Riferimento progetto non valido.");
@@ -144,7 +152,7 @@ export async function loadSharedProject(
   if (!row) throw new ProjectDeliveryError("not_found", "Progetto non trovato.");
   // Legacy/older rows go through the same parser (and its migrations) as
   // every other restore; an unsupported snapshot is refused, not guessed.
-  const project = canonicalSnapshot(JSON.stringify(row.snapshot));
+  const project = shareableProject(canonicalSnapshot(JSON.stringify(row.snapshot)));
   return {
     publicRef: row.publicRef,
     snapshot: serializeProjectConfiguration(project),

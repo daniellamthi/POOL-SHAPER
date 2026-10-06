@@ -1,31 +1,11 @@
-import { normalisedLedIntensity } from "@/lib/pool/led-optics";
-import { PAVING, pavingId } from "@/lib/pool/presentation";
-import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { useMemo, type ReactNode } from "react";
-import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
-import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, STEPS } from "@/lib/pool/config";
-import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
+import { STEPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
-import { TechnicalDataPanel, useTechnicalData } from "./TechnicalDataPanel";
-import { formatNumber } from "@/lib/pool/format";
-import { getMosaicFinish } from "@/configurator/materials/interior-textures";
-import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
-import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
-import { sideLabel } from "@/configurator/steps/pool-system/InfinitySideSelector";
 import {
-  EQUIPMENT_LABEL,
-  linerWaterCharacter,
-  MOSAIC_WATER_CHARACTER,
-  POOL_ACCESS_LABEL,
-  INTERNAL_STAIR_LABEL,
-  POOL_FEATURE_LABEL,
-  poolTypeLabel,
-  shapeLabel,
-  SKIMMER_TYPE_LABEL,
-  STRUCTURE_LABEL,
-  systemHeadline,
-} from "@/configurator/steps/final-review/summary-labels";
-import { finishDescription } from "@/lib/pool/structure-finish";
+  buildProjectSummary,
+  type SummaryRow,
+  type SummarySwatch,
+} from "@/lib/project-delivery/summary-model";
 
 const stepIndex = (id: string) => STEPS.findIndex((step) => step.id === id);
 
@@ -63,7 +43,7 @@ function Section({
   );
 }
 
-function Swatch({ hex, texture }: { hex: string; texture?: string | undefined }) {
+function Swatch({ hex, texture }: SummarySwatch) {
   return (
     <span
       aria-hidden
@@ -73,154 +53,73 @@ function Swatch({ hex, texture }: { hex: string; texture?: string | undefined })
   );
 }
 
-function Row({
-  label,
-  value,
-  hint,
-  swatch,
-  onEdit,
-}: {
-  label: string;
-  value: string;
-  hint?: string | undefined;
-  swatch?: ReactNode;
-  onEdit?: (() => void) | undefined;
-}) {
+function Row({ row }: { row: SummaryRow }) {
   return (
-    <div className="flex items-start justify-between gap-6">
-      <dt className="pt-0.5 text-[11px] font-light text-muted-foreground">{label}</dt>
+    <div className="flex items-start justify-between gap-6" data-summary-row={row.label}>
+      <dt className="pt-0.5 text-[11px] font-light text-muted-foreground">{row.label}</dt>
       <dd className="flex max-w-[64%] flex-col items-end gap-1 text-right">
         <span className="flex items-center gap-2 text-[13px] font-light text-foreground">
-          {swatch}
-          {value}
-          {onEdit ? <EditLink label="Modifica" onEdit={onEdit} /> : null}
+          {row.swatch ? <Swatch {...row.swatch} /> : null}
+          {row.value}
         </span>
-        {hint ? (
-          <span className="text-[11px] font-light text-muted-foreground/85 italic">{hint}</span>
+        {row.hint ? (
+          <span className="text-[11px] font-light text-muted-foreground/85 italic">{row.hint}</span>
         ) : null}
       </dd>
     </div>
   );
 }
 
-/** The premium, Italian, customer-facing recap of the canonical
- * `ProjectConfiguration` (see `src/lib/pool/project.ts`) -- every value
- * shown here is read directly off `config`/`metrics`/`projectId`, nothing
- * is re-collected or re-derived into a second summary model. */
-export function ProjectSummary() {
-  const { config, metrics, projectId, goToStep, outline } = useConfigurator();
-  const { technical, cover } = useTechnicalData();
-
-  const dimensionsStepIndex = stepIndex("shape-dimensions");
-  const systemStepIndex = stepIndex("system");
-  const styleStepIndex = stepIndex("style");
-  const accessStepIndex = stepIndex("access");
-  const lightingStepIndex = stepIndex("lighting");
-  const technologyStepIndex = stepIndex("technology");
-  const deckStepIndex = stepIndex("deck");
-  const editStep = (index: number) => (index >= 0 ? () => goToStep(index) : undefined);
-
-  const poolType = poolTypeLabel(config.poolType);
-  const isSlopedFloor = isSlopedFloorDisplay(config.shape, config.poolType, config.dimensions);
-  const depthLabel = isSlopedFloor
-    ? `${formatNumber(config.dimensions.shallowDepth!, 2)} → ${formatNumber(config.dimensions.depth, 2)} m`
-    : `${formatNumber(config.dimensions.depth, 2)} m`;
-  const lShapeRecessSentence =
-    config.shape === "l-shape"
-      ? `, rientro ${formatNumber(config.dimensions.lShapeRecessLength ?? 0, 2)} × ${formatNumber(config.dimensions.lShapeRecessWidth ?? 0, 2)} m`
-      : "";
-  const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m${lShapeRecessSentence}, profondità ${depthLabel}`;
-  const systemLine = systemHeadline(config.system, config.overflowType);
-  // Customer-facing Infinity zone/side -- never a raw vertex index. Mirrors
-  // the same `infinityZonesForOutline` + `sideLabel` pair the Acqua step's
-  // own `InfinitySideSelector` uses, so the summary always agrees with
-  // whatever the customer actually picked there.
-  const infinityZone =
-    config.system === "infinity" &&
-    config.infinityEdge?.enabled &&
-    config.infinityEdge.side !== null
-      ? infinityZonesForOutline(outline, config.shape).find(
-          (zone) => zone.side === config.infinityEdge!.side,
-        )
-      : null;
-  const infinitySideLine = infinityZone ? sideLabel(infinityZone.side) : null;
-  const lightingPlan = useMemo(
-    () => (config.features.includes("ledLighting") ? configuredLightingPlan(config) : null),
-    [config],
-  );
-
-  const copingMaterial = COPING_MATERIALS.find((option) => option.id === config.copingMaterial);
-  const isMosaic = config.finish === "mosaic";
-  const mosaicFinish = isMosaic ? getMosaicFinish(config.mosaicFinish) : null;
-  const linerColor = LINER_COLORS.find((option) => option.id === config.linerColor);
-  const noAdditionalFinish = config.finish === "none";
-  const finishTitle = noAdditionalFinish
-    ? finishDescription(config.structure, config.finish)
-    : isMosaic
-      ? (mosaicFinish?.name ?? "Mosaico")
-      : (linerColor?.title ?? "Liner");
-  const finishHint = noAdditionalFinish
-    ? "Pareti, fondo e superfici integrate in acciaio inox satinato a vista"
-    : isMosaic
-      ? MOSAIC_WATER_CHARACTER
-      : linerWaterCharacter(config.linerColor);
-
-  const comfortItems = [
-    ...(config.poolAccess
-      ? [
-          config.poolAccess === "internalSteps"
-            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}`
-            : POOL_ACCESS_LABEL[config.poolAccess],
-        ]
-      : []),
-    ...normalizeComfortFeatures(config.features)
-      .filter(
-        (id) =>
-          id === "inoxLadder" ||
-          id === "hydromassage" ||
-          id === "sunShelf" ||
-          id === "integratedBench" ||
-          id === "externalStaircase",
-      )
-      .map((id) =>
-        id === "hydromassage"
-          ? config.hydromassageVariant === "open"
-            ? "Idromassaggio B"
-            : "Idromassaggio A"
-          : POOL_FEATURE_LABEL[id],
-      ),
-  ];
-
-  const hasLed = config.features.includes("ledLighting");
-  const ledColor = config.ledColor ?? "#ffffff";
-  const ledIntensity = Math.round(normalisedLedIntensity(config.ledIntensity) * 100);
-
-  const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
-
-  const deferredItems = [
-    ...(config.structure === null ? ["Verifica della soluzione strutturale"] : []),
-    ...(config.equipment.includes("heatPump")
-      ? ["Dimensionamento della potenza di riscaldamento"]
-      : []),
-    ...(config.equipment.length > 0 ? ["Dimensionamento definitivo dell'impianto tecnico"] : []),
-  ];
-
-  const shortProjectId = projectId.replace(/-/g, "").slice(0, 8).toUpperCase();
+/** The Premium Summary: renders `buildProjectSummary` -- the same model the
+ * Project Book PDF renders -- computed only from the canonical
+ * `ProjectConfiguration`. Nothing here keeps a second copy of a choice. */
+export function ProjectSummary({
+  publicRef,
+  heroUrl,
+}: {
+  /** Public project reference (PW-XXXX-XXXXXX) once the project is saved. */
+  publicRef?: string | null | undefined;
+  /** Clean hero capture of the configured pool, when taken. */
+  heroUrl?: string | null | undefined;
+} = {}) {
+  const { projectConfiguration, goToStep } = useConfigurator();
+  const model = useMemo(() => buildProjectSummary(projectConfiguration), [projectConfiguration]);
+  const editStep = (id: string) => {
+    const index = stepIndex(id);
+    return index >= 0 ? () => goToStep(index) : undefined;
+  };
 
   return (
-    <section className="animate-rise flex flex-col gap-9 rounded-2xl border border-hairline bg-card/40 p-7">
+    <section
+      className="animate-rise flex flex-col gap-9 rounded-2xl border border-hairline bg-card/40 p-7"
+      data-testid="project-summary"
+    >
+      {heroUrl ? (
+        <img
+          src={heroUrl}
+          alt="La tua piscina configurata"
+          className="-mx-7 -mt-7 aspect-[16/9] w-[calc(100%+3.5rem)] max-w-none rounded-t-2xl bg-viewport object-cover"
+        />
+      ) : null}
       <header className="flex flex-col gap-3">
         <p className="text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
           Il tuo progetto
         </p>
         <h2 className="text-[26px] leading-[1.08] font-extralight tracking-[-0.02em] text-foreground sm:text-[30px]">
-          {dimensionsSentence}
+          {model.headline}
         </h2>
-        <p className="text-[12px] font-light text-muted-foreground">
-          {poolType} · {systemLine} · circa {formatNumber(metrics.waterVolume, 0)} m³ d&apos;acqua
-        </p>
-        <p className="text-[10px] font-light tracking-[0.08em] text-muted-foreground/60">
-          Rif. progetto {shortProjectId}
+        <p className="text-[12px] font-light text-muted-foreground">{model.subline}</p>
+        <p className="text-[11px] font-light tracking-[0.08em] text-muted-foreground">
+          {publicRef ? (
+            <>
+              Project ID{" "}
+              <span className="font-normal text-brand" data-testid="summary-project-ref">
+                {publicRef}
+              </span>
+            </>
+          ) : (
+            "Project ID assegnato al salvataggio"
+          )}
         </p>
         <a
           href="#pool-viewport"
@@ -230,90 +129,21 @@ export function ProjectSummary() {
         </a>
       </header>
 
-      <Section title="La tua piscina" onEdit={editStep(dimensionsStepIndex)}>
-        <Row label="Tipologia" value={poolType} />
-        {config.structure ? <Row label="Struttura" value={STRUCTURE_LABEL[config.structure]} /> : null}
-        <Row label="Pavimentazione" value={PAVING.find(p => p.id === pavingId(config.paving))!.label} />
-        <Row label="Dimensioni" value={dimensionsSentence} />
-        {isSlopedFloor ? (
-          <>
-            <Row label="Fondo" value="In pendenza" />
-            <Row label="Profondità" value={depthLabel} />
-            <Row
-              label="Dislivello"
-              value={`${Math.round((config.dimensions.depth - config.dimensions.shallowDepth!) * 100)} cm`}
-            />
-          </>
-        ) : null}
-      </Section>
-
-      <Section title="Linea d'acqua" onEdit={editStep(systemStepIndex)}>
-        <Row label="Sistema idraulico" value={systemLine} />
-        {infinitySideLine ? <Row label="Lato Infinity" value={infinitySideLine} /> : null}
-      </Section>
-
-      <Section title="Materiali" onEdit={editStep(styleStepIndex)}>
-        <Row
-          label="Rivestimento"
-          value={finishTitle}
-          hint={finishHint}
-          swatch={
-            noAdditionalFinish ? (
-              <Swatch hex="#bfc6c8" />
-            ) : isMosaic ? (
-              <Swatch hex="#c9c2b4" texture={mosaicFinish?.preview} />
-            ) : (
-              <Swatch hex={linerColor?.hex ?? "#dfe9ec"} texture={linerColor?.texture} />
-            )
-          }
-        />
-        <Row
-          label="Bordo"
-          value={copingMaterial?.title ?? "Da selezionare"}
-          swatch={copingMaterial ? <Swatch hex={copingMaterial.color} /> : undefined}
-          onEdit={editStep(deckStepIndex)}
-        />
-      </Section>
-
-      {comfortItems.length > 0 ? (
-        <Section title="Accesso e comfort" onEdit={editStep(accessStepIndex)}>
-          {comfortItems.map((item) => (
-            <Row key={item} label="Incluso" value={item} />
+      {model.sections.map((section) => (
+        <Section key={section.id} title={section.title} onEdit={editStep(section.stepId)}>
+          {section.rows.map((row, index) => (
+            <Row key={`${row.label}-${index}`} row={row} />
           ))}
         </Section>
-      ) : null}
+      ))}
 
-      {hasLed ? (
-        <Section title="Illuminazione" onEdit={editStep(lightingStepIndex)}>
-          <Row label="Impianto" value="Illuminazione subacquea a LED" />
-          <Row
-            label="Punti luce"
-            value={`${lightingPlan?.count ?? 0} · automatici, dimensionamento indicativo`}
-          />
-          <Row
-            label="Colore selezionato"
-            value={ledColor.toUpperCase()}
-            swatch={<Swatch hex={ledColor} />}
-          />
-          <Row label="Intensità luce" value={`${ledIntensity}%`} />
-        </Section>
-      ) : null}
-
-      {selectedEquipment.length > 0 ? (
-        <Section title="Tecnologia" onEdit={editStep(technologyStepIndex)}>
-          {selectedEquipment.map((option) => (
-            <Row key={option.id} label="Incluso" value={EQUIPMENT_LABEL[option.id]} />
-          ))}
-        </Section>
-      ) : null}
-
-      {deferredItems.length > 0 ? (
+      {model.deferred.length > 0 ? (
         <section className="flex flex-col gap-4 border-t border-hairline pt-7">
           <h3 className="text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
             Da definire con il consulente
           </h3>
           <ul className="flex flex-col gap-2.5">
-            {deferredItems.map((item) => (
+            {model.deferred.map((item) => (
               <li
                 key={item}
                 className="flex items-start gap-2.5 text-[12px] font-light text-muted-foreground"
@@ -331,18 +161,14 @@ export function ProjectSummary() {
           Scopri i dettagli tecnici
         </summary>
         <dl className="mt-5 flex flex-col gap-3.5">
-          {config.system === "skimmer" ? (
-            <Row
-              label="Skimmer"
-              value={`${SKIMMER_TYPE_LABEL[config.skimmerType]} · ${SKIMMER_FINISHES.find((option) => option.id === config.skimmerFinish)?.title ?? config.skimmerFinish}`}
-            />
-          ) : null}
-          <Row label="Codice progetto" value={projectId} />
-          {config.uploads.length > 0 ? (
-            <Row label="Allegati" value={config.uploads.map((file) => file.name).join(", ")} />
-          ) : null}
+          {model.technical.map((row) => (
+            <Row key={row.label} row={row} />
+          ))}
+          <Row row={{ label: "Codice configurazione", value: model.projectId }} />
         </dl>
-        <div className="mt-5"><TechnicalDataPanel technical={technical} cover={cover} /></div>
+        <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
+          {model.technicalNote}
+        </p>
       </details>
     </section>
   );

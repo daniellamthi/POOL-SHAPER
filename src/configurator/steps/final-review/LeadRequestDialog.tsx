@@ -50,9 +50,12 @@ function validate(form: FormState): Partial<Record<keyof FormState, string>> {
 
 export function LeadRequestDialog({
   projectConfiguration,
+  projectReference,
   defaultCustomer = { name: "", email: "", phone: "" },
 }: {
   projectConfiguration: ProjectConfiguration;
+  /** Public Project ID (PW-XXXX-XXXXXX) of the saved project, when saved. */
+  projectReference?: string | null | undefined;
   /** Optional -- with Customer Details no longer a mandatory earlier step,
    * this dialog is normally the first and only place contact details are
    * collected, so it starts blank unless a caller has something to prefill. */
@@ -108,6 +111,7 @@ export function LeadRequestDialog({
           privacy: { accepted: true, marketingConsent: form.marketingConsent },
           website: form.website,
           idempotencyKey,
+          ...(projectReference ? { projectReference } : {}),
           project: projectConfiguration,
         },
       });

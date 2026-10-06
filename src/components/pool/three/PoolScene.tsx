@@ -72,6 +72,7 @@ import { getPoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
 import { renderQualityState, RENDER_QUALITY_IDLE_DELAY } from "@/lib/pool/renderQualityState";
+import { heroCaptureState } from "@/lib/project-delivery/heroCapture";
 
 export type { PhotoModeQuality };
 
@@ -213,6 +214,29 @@ function SceneMood({
     if (auxiliary.current) {
       auxiliary.current.intensity = MathUtils.lerp(baseAux.current, preset.auxiliaryIntensity, t);
     }
+  });
+  return null;
+}
+
+/** Answers `requestHeroCapture`: once the camera has settled, reads the
+ * canvas right after R3F's next draw. The canvas is created with
+ * `preserveDrawingBuffer: false`, so the read must happen in the same
+ * animation frame as that draw: a rAF queued from inside `useFrame` runs
+ * after R3F's own loop callback (which requested its next frame first). */
+function HeroCaptureListener() {
+  const gl = useThree((state) => state.gl);
+  useFrame(() => {
+    const pending = heroCaptureState.pending;
+    if (!pending || !renderQualityState.idle) return;
+    heroCaptureState.pending = null;
+    requestAnimationFrame(() => {
+      try {
+        pending(gl.domElement.toDataURL("image/jpeg", 0.92));
+      } catch (error) {
+        console.error("[hero] canvas capture failed", error);
+        pending(null);
+      }
+    });
   });
   return null;
 }
@@ -1341,6 +1365,7 @@ export default function PoolScene({
       ) : null}
 
       {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
+      {!photoMode ? <HeroCaptureListener /> : null}
       {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
 
       <PlanCamera enabled={focus === "top"} />

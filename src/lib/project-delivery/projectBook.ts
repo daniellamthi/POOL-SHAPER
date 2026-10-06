@@ -27,7 +27,10 @@ const VIOLET: [number, number, number] = [95, 92, 201];
 
 /** The standard PDF fonts are WinAnsi: map the few symbols outside it. */
 export function pdfText(value: string): string {
-  return value.replace(/→/g, "–").replace(/≈\s?/g, "ca. ").replace(/[^\x20-\x7E -ÿ–—·’“”…€]/g, "");
+  return value
+    .replace(/→/g, "–")
+    .replace(/≈\s?/g, "ca. ")
+    .replace(/[^\x20-\x7E\u00A0-\u00FF–—·’“”…€]/g, "");
 }
 
 function header(doc: jsPDF, title: string, publicRef: string, page: number) {
@@ -82,7 +85,14 @@ function sectionBlock(doc: jsPDF, section: SummarySection, x: number, y: number,
   return rows(doc, section.rows, x, y + 8, width);
 }
 
-function drawPlan(doc: jsPDF, model: ProjectSummaryModel, x: number, y: number, w: number, h: number) {
+function drawPlan(
+  doc: jsPDF,
+  model: ProjectSummaryModel,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
   const pts = model.plan.outline;
   const xs = pts.map((p) => p[0]);
   const zs = pts.map((p) => p[1]);
@@ -104,7 +114,7 @@ function drawPlan(doc: jsPDF, model: ProjectSummaryModel, x: number, y: number, 
   const [first, ...rest] = mapped;
   if (first) {
     doc.lines(
-      rest.map((p, i) => [p[0] - (mapped[i]![0]), p[1] - (mapped[i]![1])]),
+      rest.map((p, i) => [p[0] - mapped[i]![0], p[1] - mapped[i]![1]]),
       first[0],
       first[1],
       [1, 1],
@@ -143,7 +153,11 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
     subject: model.headline,
     creator: "POOL-SHAPER · Piscine Wellness",
   });
-  const date = issuedAt.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" });
+  const date = issuedAt.toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 
   // 1 · Cover
   if (heroDataUrl) {
@@ -217,10 +231,17 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
   const techY = rows(doc, model.technical, W / 2 + 6, 50, 120);
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTE);
-  doc.text(doc.splitTextToSize(pdfText(model.technicalNote), 120) as string[], W / 2 + 6, techY + 4);
+  doc.text(
+    doc.splitTextToSize(pdfText(model.technicalNote), 120) as string[],
+    W / 2 + 6,
+    techY + 4,
+  );
   if (model.deferred.length) {
     doc.text(
-      doc.splitTextToSize(pdfText(`Da definire con il consulente: ${model.deferred.join(" · ")}`), 120) as string[],
+      doc.splitTextToSize(
+        pdfText(`Da definire con il consulente: ${model.deferred.join(" · ")}`),
+        120,
+      ) as string[],
       W / 2 + 6,
       techY + 16,
     );

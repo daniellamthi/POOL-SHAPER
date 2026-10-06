@@ -52,6 +52,8 @@ import {
   type TrayContext,
 } from "./wizard/StepTrays";
 import type { SceneFocus, PhotoModeQuality, SceneTimeOfDay } from "./three/PoolScene";
+import { renderQualityState } from "@/lib/pool/renderQualityState";
+import { requestHeroCapture } from "@/lib/project-delivery/heroCapture";
 
 
 /**
@@ -179,6 +181,17 @@ function ConfiguratorLayout() {
   const [photoModeUnsupported, setPhotoModeUnsupported] = useState(false);
   const toggleMeasurements = useCallback(() => setShowMeasurements((value) => !value), []);
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
+  // Build 2 · clean hero: reframe to the whole-pool hero, let the scripted
+  // flight start (the camera leaves its idle state) and settle, then capture.
+  const captureHero = useCallback(async () => {
+    setInspectionView("review");
+    reframe();
+    const started = Date.now();
+    while (renderQualityState.idle && Date.now() - started < 3000) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return requestHeroCapture();
+  }, [reframe]);
   const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
   const openPremiumPresentation = useCallback(() => {
     if (!premiumPresentationAvailable) return;
@@ -387,6 +400,7 @@ function ConfiguratorLayout() {
       setInspectionView(intent);
       reframe();
     },
+    captureHero,
     photoMode: {
       available: ACTIVE_RENDERING_QUALITY.id === "experience" && !photoModeUnsupported,
       reason: photoModeUnsupported

@@ -196,7 +196,9 @@ export function formatLeadEmail(submission: LeadSubmission): {
     ``,
     `Richiesta: ${submission.requestId}`,
     `Progetto: ${submission.projectId}`,
-    ...(submission.projectReference ? [`Riferimento progetto: ${submission.projectReference}`] : []),
+    ...(submission.projectReference
+      ? [`Riferimento progetto: ${submission.projectReference}`]
+      : []),
     `Ricevuta: ${submission.createdAt}`,
     ``,
     `--- CLIENTE ---`,
