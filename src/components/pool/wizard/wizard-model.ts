@@ -23,6 +23,9 @@ export interface MacroStep {
   indices: number[];
   complete: boolean;
   reachable: boolean;
+  /** One-line value under the phase name: the chosen value once the phase
+   * is complete, "In corso" while it is current, empty ahead. */
+  value?: string;
 }
 
 /** Customer-facing title and one-line explanation per internal step. */
@@ -93,14 +96,40 @@ export function buildMacros(
       .map((id) => STEPS.findIndex((step) => step.id === id))
       .filter((index) => index >= 0);
     const first = indices[0] ?? 0;
+    const complete = indices.every((index) => index < current && isStepComplete(index));
     return {
       id: group.id,
       label: group.label,
       indices,
-      complete: indices.every((index) => index < current && isStepComplete(index)),
+      complete,
       reachable: first <= Math.max(current, firstIncomplete),
+      value: indices.includes(current)
+        ? "In corso"
+        : complete
+          ? describePhase(group.id, config)
+          : "",
     };
   });
+}
+
+/** The completed value shown under a phase name in the header. */
+function describePhase(groupId: string, config: PoolConfig): string {
+  if (groupId === "piscina") {
+    const d = config.dimensions;
+    const structure = title(POOL_STRUCTURES, config.structure);
+    const size = `${d.length.toFixed(1).replace(".", ",")} × ${d.width.toFixed(1).replace(".", ",")} m`;
+    return structure ? `${structure} · ${size}` : size;
+  }
+  const stepId = (
+    {
+      sistema: "system",
+      accesso: "access",
+      finiture: "style",
+      esterno: "deck",
+      optional: "technology",
+    } as Record<string, string>
+  )[groupId];
+  return stepId ? describeSelection(stepId, config) : "";
 }
 
 const title = <T extends { id: string; title: string }>(list: ReadonlyArray<T>, id: unknown) =>

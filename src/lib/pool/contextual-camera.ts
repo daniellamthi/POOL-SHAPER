@@ -77,3 +77,33 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
     default: return "review";
   }
 }
+
+/** Wizard steps where the whole pool must stay readable (Sistema acqua
+ * through Presentazione): an option choice there reframes the whole basin
+ * with breathing room instead of cutting to a detail close-up. Close-ups
+ * stay available on request from the viewport's view menu. */
+export const WHOLE_POOL_STEP_IDS: ReadonlySet<string> = new Set([
+  "system",
+  "access",
+  "style",
+  "lighting",
+  "deck",
+  "technology",
+  "review",
+]);
+/** Intents whose pose already fits the whole basin (bounding-box overview,
+ * plan, depth section, cover overview, curated Infinity composition). */
+const WHOLE_POOL_INTENTS: ReadonlySet<CameraIntent> = new Set<CameraIntent>([
+  "review",
+  "overview",
+  "top",
+  "structure",
+  "depth",
+  "cover",
+  "infinity",
+]);
+export function wholePoolIntent(intent: CameraIntent, stepId: string | undefined): CameraIntent {
+  return stepId !== undefined && WHOLE_POOL_STEP_IDS.has(stepId) && !WHOLE_POOL_INTENTS.has(intent)
+    ? "review"
+    : intent;
+}

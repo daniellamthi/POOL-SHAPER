@@ -4,84 +4,164 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MacroStep } from "./wizard-model";
 
+/** Phase icons of the frozen icon family: 24px grid, 1.5px round stroke. */
+const PHASE_ICON_PATHS: Record<string, ReactNode> = {
+  piscina: (
+    <>
+      <rect x="3.5" y="6" width="17" height="12" rx="1.5" />
+      <path d="M6.5 12.5c1.2-.9 2.3-.9 3.5 0s2.3.9 3.5 0 2.3-.9 3.5 0" />
+    </>
+  ),
+  sistema: (
+    <>
+      <path d="M3.5 9.5c1.4-1.1 2.9-1.1 4.3 0s2.9 1.1 4.2 0 2.9-1.1 4.2 0 2.9 1.1 4.3 0" />
+      <path d="M3.5 14.5c1.4-1.1 2.9-1.1 4.3 0s2.9 1.1 4.2 0 2.9-1.1 4.2 0 2.9 1.1 4.3 0" />
+    </>
+  ),
+  accesso: (
+    <>
+      <path d="M3 7.5h3V18h12V7.5h3" />
+      <path d="M6 11.5h5V18" />
+      <circle cx="14.5" cy="14" r=".9" />
+      <circle cx="15.6" cy="11.2" r=".7" />
+    </>
+  ),
+  finiture: (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="2.5" />
+      <path d="M4 12h16M12 4v16" />
+    </>
+  ),
+  esterno: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="M3 9.7h18M3 14.3h18M9 5v4.7M15 9.7v4.6M8.5 14.3V19" />
+    </>
+  ),
+  optional: (
+    <>
+      <path d="M3.5 15h10l5-6.5" />
+      <path d="M5.5 15v3.5M12.5 15v3.5M18.5 8.5l2-1" />
+    </>
+  ),
+  presentazione: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="M3 15.5l5-4.5 4 3.5 3-2.5 6 4.5" />
+      <circle cx="15.5" cy="9" r="1.3" />
+    </>
+  ),
+};
+
+function PhaseIcon({ id }: { id: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className="size-4 shrink-0 fill-none stroke-current [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:1.5]"
+    >
+      {PHASE_ICON_PATHS[id] ?? <circle cx="12" cy="12" r="4" />}
+    </svg>
+  );
+}
+
 /**
- * Numbered primary navigation: the nine macro steps of the configurator in
- * one line. The current step is filled, completed steps carry a check, and
- * future steps that are not reachable yet are inert. On phones it collapses
- * to "03 / 09 · Sistema piscina" with a thin progress bar.
+ * Primary navigation: the seven phases of the frozen wizard in one line.
+ * Each phase shows its icon (a check once done), its name, the chosen value
+ * underneath and a thin progress bar -- ink when done, violet while
+ * current. On phones it collapses to "03 / 07 · Accesso & comfort" with a
+ * segmented bar.
  */
 export function WizardNav({
   macros,
   current,
   onSelect,
+  progress = 0.5,
 }: {
   macros: ReadonlyArray<MacroStep>;
   current: number;
   onSelect: (index: number) => void;
+  /** 0..1 progress inside the current phase (its internal steps). */
+  progress?: number;
 }) {
   const active = macros[current];
   return (
     <nav aria-label="Fasi della configurazione" className="min-w-0">
-      <ol className="hidden items-center gap-1 lg:flex">
+      <ol className="hidden items-stretch gap-1.5 xl:flex 2xl:gap-3">
         {macros.map((macro, index) => {
           const isCurrent = index === current;
+          const done = macro.complete && !isCurrent;
           return (
-            <li key={macro.id} className="flex min-w-0 items-center gap-1">
+            <li key={macro.id} className="min-w-0">
               <button
                 type="button"
                 onClick={() => onSelect(index)}
                 disabled={!macro.reachable}
                 aria-current={isCurrent ? "step" : undefined}
-                aria-label={macro.label}
-                title={macro.label}
-                className={cn(
-                  "flex min-h-10 items-center gap-2 rounded-full px-3 text-[12px] tracking-tight transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-35",
-                  isCurrent
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
+                title={macro.value ? `${macro.label} · ${macro.value}` : macro.label}
+                className="flex w-auto min-w-[92px] max-w-[160px] flex-col gap-1.5 rounded-lg px-1.5 pt-1.5 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-foreground/40 disabled:cursor-not-allowed"
               >
                 <span
                   className={cn(
-                    "flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] tabular-nums",
+                    "flex items-center gap-2 text-[12.5px] leading-4 tracking-tight whitespace-nowrap",
                     isCurrent
-                      ? "bg-background text-foreground"
-                      : macro.complete
-                        ? "bg-foreground/85 text-background"
-                        : "border border-foreground/30",
+                      ? "font-normal text-foreground"
+                      : done
+                        ? "text-foreground"
+                        : "text-muted-foreground/70",
                   )}
                 >
-                  {macro.complete && !isCurrent ? (
-                    <Check className="size-3" strokeWidth={2.2} />
-                  ) : (
-                    index + 1
-                  )}
+                  <span className={cn(isCurrent ? "text-brand" : done ? "text-foreground" : "")}>
+                    {done ? (
+                      <Check className="size-4" strokeWidth={1.75} />
+                    ) : (
+                      <PhaseIcon id={macro.id} />
+                    )}
+                  </span>
+                  <span>{macro.label}</span>
                 </span>
-                <span className={cn("whitespace-nowrap", isCurrent ? "" : "hidden 2xl:inline")}>
-                  {macro.label}
+                <span
+                  className={cn(
+                    "block h-3.5 truncate text-[11px] leading-[14px]",
+                    isCurrent ? "text-brand" : "text-muted-foreground",
+                  )}
+                >
+                  {macro.value ?? ""}
+                </span>
+                <span aria-hidden className="block h-0.5 overflow-hidden rounded-full bg-hairline">
+                  <span
+                    className={cn(
+                      "block h-full rounded-full transition-[width] duration-300",
+                      isCurrent ? "bg-brand" : "bg-foreground/80",
+                    )}
+                    style={{
+                      width: done
+                        ? "100%"
+                        : isCurrent
+                          ? `${Math.round(Math.max(0.15, progress) * 100)}%`
+                          : "0%",
+                    }}
+                  />
                 </span>
               </button>
-              {index < macros.length - 1 ? (
-                <span aria-hidden className="h-px w-3 bg-hairline xl:w-5" />
-              ) : null}
             </li>
           );
         })}
       </ol>
-      <div className="flex min-w-0 flex-col gap-1.5 lg:hidden">
+      <div className="flex min-w-0 flex-col gap-1.5 xl:hidden">
         <p className="truncate text-[12px] tracking-tight text-foreground">
-          <span className="tabular-nums text-muted-foreground">
-            {String(current + 1).padStart(2, "0")} / {String(macros.length).padStart(2, "0")}
+          <span className="tabular-nums text-brand">
+            {String(current + 1).padStart(2, "0")}/{String(macros.length).padStart(2, "0")}
           </span>{" "}
-          · {active?.label}
+          {active?.label}
         </p>
         <div className="flex gap-1" aria-hidden>
           {macros.map((macro, index) => (
             <span
               key={macro.id}
               className={cn(
-                "h-[3px] flex-1 rounded-full",
-                index <= current ? "bg-foreground" : "bg-hairline",
+                "h-0.5 flex-1 rounded-full",
+                index < current ? "bg-foreground" : index === current ? "bg-brand" : "bg-hairline",
               )}
             />
           ))}
@@ -100,6 +180,8 @@ export function WizardNav({
  */
 export function ConfiguratorTray({
   number,
+  total,
+  nextLabel,
   title,
   subtitle,
   substep,
@@ -115,6 +197,10 @@ export function ConfiguratorTray({
   onExpandedChange,
 }: {
   number: number;
+  /** Phase count: shows "Fase 03 di 07" when set. */
+  total?: number | undefined;
+  /** Name of the next phase, shown inside Continua on desktop. */
+  nextLabel?: string | undefined;
   title: string;
   subtitle: string;
   substep?: string | undefined;
@@ -193,7 +279,9 @@ export function ConfiguratorTray({
         <header className="flex shrink-0 items-start justify-between gap-4 px-5 pb-3 lg:w-[290px] lg:flex-col lg:justify-start lg:border-r lg:border-hairline lg:px-7 lg:py-6 xl:w-[320px]">
           <div className="flex min-w-0 flex-col gap-1.5 lg:gap-3">
             <p className="label-xs tabular-nums">
-              {String(number).padStart(2, "0")}
+              {total
+                ? `Fase ${String(number).padStart(2, "0")} di ${String(total).padStart(2, "0")}`
+                : String(number).padStart(2, "0")}
               {substep ? (
                 <span className="ml-2 normal-case tracking-normal">· {substep}</span>
               ) : null}
@@ -253,6 +341,9 @@ export function ConfiguratorTray({
             className="min-w-40 rounded-full px-6"
           >
             {continueLabel}
+            {nextLabel && canContinue ? (
+              <span className="text-[11.5px] font-light opacity-80">· {nextLabel}</span>
+            ) : null}
             <ArrowRight className="size-3.5" strokeWidth={1.5} />
           </Button>
         </div>

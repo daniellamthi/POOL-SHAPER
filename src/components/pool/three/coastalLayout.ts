@@ -18,19 +18,45 @@ export function coastFrame(zone: RectangleInfinityZone) {
   return { x: (zone.start[0]+zone.end[0])/2, z: (zone.start[1]+zone.end[1])/2,
     nx: zone.normal[0], nz: zone.normal[1] };
 }
-export function coastalCamera(outline: Outline, zone: RectangleInfinityZone, waterY: number, aspect: number, fov: number): CameraPose & { fov: number } {
-  const f=coastFrame(zone);
-  const local=outline.map(([x,z])=>({u:(x-f.x)*f.nz-(z-f.z)*f.nx,v:(x-f.x)*f.nx+(z-f.z)*f.nz}));
-  const width=Math.max(...local.map(p=>p.u))-Math.min(...local.map(p=>p.u));
-  const length=-Math.min(...local.map(p=>p.v));
-  const halfHorizontal=Math.atan(Math.tan(fov*Math.PI/360)*Math.max(.25,aspect));
-  // Stay inside the existing seven-metre photographic-site apron. Backing
-  // away indefinitely in portrait view exposes the underside of the site.
-  const distance=Math.min(length+6.5,Math.max(length+2.8,(width+2.6)/2/Math.tan(halfHorizontal)));
-  const fittedFov=Math.min(78,Math.max(fov,2*Math.atan((width+2.6)/(2*distance*Math.max(.25,aspect)))*180/Math.PI));
-  const y=waterY+Math.max(2.1,distance*.145);
-  return {fov:fittedFov,position:[f.x-f.nx*distance,y,f.z-f.nz*distance],
-    target:[f.x,y-distance*.055,f.z]};
+export function coastalCamera(
+  outline: Outline,
+  zone: RectangleInfinityZone,
+  waterY: number,
+  aspect: number,
+  fov: number,
+): CameraPose & { fov: number } {
+  const f = coastFrame(zone);
+  const local = outline.map(([x, z]) => ({
+    u: (x - f.x) * f.nz - (z - f.z) * f.nx,
+    v: (x - f.x) * f.nx + (z - f.z) * f.nz,
+  }));
+  const width = Math.max(...local.map((p) => p.u)) - Math.min(...local.map((p) => p.u));
+  const length = -Math.min(...local.map((p) => p.v));
+  const safeAspect = Math.max(0.25, aspect);
+  const halfHorizontal = Math.atan(Math.tan((fov * Math.PI) / 360) * safeAspect);
+  // POOL -> INFINITY EDGE -> LANDSCAPE. The pool must read whole, so fit its
+  // NEAR wall (where it appears widest) with 0.8m either side, from a
+  // standoff behind it that stays inside the seven-metre photographic-site
+  // apron -- backing away further exposes the underside of the site.
+  const standoff = MathUtils.clamp((width + 1.6) / 2 / Math.tan(halfHorizontal), 2.8, 6.5);
+  const neededHorizontal = 2 * Math.atan((width + 1.6) / (2 * standoff));
+  const fittedFov = Math.min(
+    78,
+    Math.max(fov, (2 * Math.atan(Math.tan(neededHorizontal / 2) / safeAspect) * 180) / Math.PI),
+  );
+  const halfVertical = (fittedFov * Math.PI) / 360;
+  // Near coping in the lower frame, the vanishing edge mid-frame, horizon and
+  // landscape in the upper third: the eye sits high enough to see into the
+  // basin and pitches down by a fixed share of the vertical field of view.
+  const height = Math.max(1.6, standoff * Math.tan(Math.min(1.45 * halfVertical, 1.2)));
+  const pitch = 0.62 * halfVertical;
+  const distance = length + standoff;
+  const y = waterY + height;
+  return {
+    fov: fittedFov,
+    position: [f.x - f.nx * distance, y, f.z - f.nz * distance],
+    target: [f.x, y - Math.tan(pitch) * distance, f.z],
+  };
 }
 export function coastNoise(x:number,z:number) {
   const hash=(a:number,b:number)=>{const h=Math.sin(a*127.1+b*311.7)*43758.5453;return h-Math.floor(h);};

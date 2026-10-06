@@ -12,12 +12,7 @@ import {
   SKIMMER_TYPES,
 } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
-import {
-  PAVING,
-  PREMIUM_ENVIRONMENTS,
-  pavingId,
-  premiumEnvironment,
-} from "@/lib/pool/presentation";
+import { PAVING, pavingId } from "@/lib/pool/presentation";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { allowedFinishesForStructure } from "@/lib/pool/structure-finish";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
@@ -629,7 +624,19 @@ export function AccessTray() {
           </ChoiceGrid>
           {benchAvailable ? (
             <div className="flex flex-col gap-3">
-              <GroupLabel>Compatibile con il sun shelf</GroupLabel>
+              <p className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                  className="size-[18px] fill-none stroke-brand [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:1.25]"
+                >
+                  <path d="M6 3v7.5A3.5 3.5 0 0 0 9.5 14H18M14.5 10.5L18 14l-3.5 3.5" />
+                </svg>
+                <span>
+                  <span className="font-normal text-foreground">Per il tuo Sun shelf</span> ·
+                  compare solo con questa scelta
+                </span>
+              </p>
               <ChoiceGrid label="Panca integrata" dense>
                 <ChoiceCard
                   compact
@@ -916,15 +923,12 @@ export function OptionalTray({ ctx }: { ctx: TrayContext }) {
 /* ---------------------------------------------------------------- 09 */
 
 export function PresentationTray({ ctx }: { ctx: TrayContext }) {
-  const { config, setSceneTime, setPremiumEnvironment, projectConfiguration } = useConfigurator();
+  const { config, setSceneTime, projectConfiguration } = useConfigurator();
   const [tab, setTab] = useState<"scene" | "summary" | "request">("scene");
   useEffect(() => {
     if (ctx.requestToken) setTab("request");
   }, [ctx.requestToken]);
   const night = config.sceneTime === "night";
-  const environments = PREMIUM_ENVIRONMENTS.filter(
-    (e) => e.id !== "panorama-infinity" || config.system === "infinity",
-  );
   return (
     <TabBody>
       <StepTabs
@@ -958,19 +962,11 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
               onSelect={() => setSceneTime("night")}
             />
           </ChoiceGrid>
-          <GroupLabel>Ambientazione</GroupLabel>
-          <ChoiceGrid label="Ambientazione">
-            {environments.map((e) => (
-              <ChoiceCard
-                compact
-                key={e.id}
-                title={e.label}
-                description={e.description}
-                image={ill(`env-${e.id}`)}
-                selected={premiumEnvironment(config.premiumEnvironment) === e.id}
-                onSelect={() => setPremiumEnvironment(e.id)}
-              />
-            ))}
+          {/* Outdoor Villa / Indoor Wellness are Photo Mode environments
+              (Build 08), not realtime scenes: they are not offered here, so
+              the live preview never shows a choice that changes nothing. */}
+          {ctx.photoMode ? <GroupLabel>Immagine fotografica</GroupLabel> : null}
+          <ChoiceGrid label="Immagine fotografica" dense>
             {ctx.photoMode ? (
               <ChoiceCard
                 compact

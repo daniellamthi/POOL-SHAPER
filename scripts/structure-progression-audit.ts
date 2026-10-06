@@ -29,7 +29,7 @@ const base: PoolConfig = {
   copingMaterial: "travertine", features: [], poolAccess: "internalSteps", internalStairType: "linear",
   equipment: [], customer: DEFAULT_CUSTOMER, uploads: [], sceneTime: "night",
 };
-equal(STEP_GROUPS.length, 9);
+equal(STEP_GROUPS.length, 7);
 ok(STEPS.findIndex(s => s.id === "structure") < STEPS.findIndex(s => s.id === "shape-dimensions"), "Structure before shape");
 ok(STEPS.findIndex(s => s.id === "access") < STEPS.findIndex(s => s.id === "style"), "Built-ins before finish");
 equal(focusForAction({ type: "setPoolStructure" }, base), "STRUCTURE_OVERVIEW");

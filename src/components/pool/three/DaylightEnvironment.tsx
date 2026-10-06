@@ -100,6 +100,9 @@ export function DaylightEnvironment({
   // Separate background detail from IBL resolution without mixing locations.
   // Studio/night retain their existing resources.
   const photographicSky = outdoor;
+  // Night must never light or reflect the daytime capture (its clouds and
+  // sun showed up in the night water): it uses the procedural night sky.
+  const night = timeOfDay === "night";
   const assetUrl = photographicSky ? "/hdri/simons-town-rocks-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
   useEffect(()=>{
     if(!photographicSky)return;
@@ -115,6 +118,7 @@ export function DaylightEnvironment({
     let active = true;
     let owned: DataTexture | null = null;
     setSky(null);
+    if (night) return;
     new HDRLoader().load(
       assetUrl,
       (texture) => {
@@ -134,22 +138,24 @@ export function DaylightEnvironment({
       active = false;
       owned?.dispose();
     };
-  }, [assetUrl, photographicSky]);
+  }, [assetUrl, photographicSky, night]);
   const skyProps = {
     theme,
     sunDirection,
     sunColor: SCENE_VISUAL_PRESET.lighting.sun.color,
-    sunVisibility: 1,
+    sunVisibility: night ? 0 : 1,
     outdoor,
   };
   return (
     <>
-      {sky ? (
+      {sky && !night ? (
         <Environment map={sky} environmentRotation={[0,photographicSky ? coastalRotation : 0,0]} environmentIntensity={photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
       ) : (
         <Environment
           resolution={ACTIVE_RENDERING_QUALITY.environmentResolution}
-          environmentIntensity={SCENE_VISUAL_PRESET.environment[theme]}
+          environmentIntensity={
+            night ? SCENE_VISUAL_PRESET.environment.night : SCENE_VISUAL_PRESET.environment[theme]
+          }
         >
           <SkyDome {...skyProps} radius={50} />
         </Environment>

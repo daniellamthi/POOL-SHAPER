@@ -786,37 +786,48 @@ for (const testCase of verticalGeometryCases) {
       if (intent === "liner") {
         assert(frontMasterPose, `${testCase.name}/${poolType}: missing Skimmer master`);
         interiorWidePose = pose;
-        const referenceSkimmer =
-          cameraSkimmers.positions[Math.floor(cameraSkimmers.positions.length / 2)];
-        assert(referenceSkimmer, `${testCase.name}/${poolType}: missing reference skimmer`);
-        const inwardX = Math.sin(referenceSkimmer.rotation);
-        const inwardZ = Math.cos(referenceSkimmer.rotation);
-        const tangentX = inwardZ;
-        const tangentZ = -inwardX;
-        // The Interior Finish camera intentionally targets a point ON the
-        // reference wall -- a close, perpendicular material view -- rather
-        // than the Skimmer master's pool-centre target (see
-        // `getInteriorFinishCamera` in `camera.ts`). What must still hold:
-        // the target sits at the same inward coordinate as the reference
-        // skimmer (i.e. actually on that wall, not floating mid-pool) and
-        // stays tangentially centred, matching the master view.
-        const onWallOffset =
-          (pose.target[0] - referenceSkimmer.x) * inwardX +
-          (pose.target[2] - referenceSkimmer.z) * inwardZ;
+        // The Interior Finish camera intentionally frames a patch of the
+        // LONGEST lined wall (see `getCameraPose`/`getInteriorFinishCamera`
+        // in `camera.ts`): a real wall, never a bounding-box centre that can
+        // fall inside an L-shaped recess. What must hold: the target sits on
+        // that wall's inward normal at no more than the camera's bounded
+        // 0.7m inset (never floating mid-pool), tangentially centred on the
+        // wall, and the camera looks at the wall from inside the pool.
+        const winding =
+          Math.sign(
+            outline.reduce((sum, a, i) => {
+              const b = outline[(i + 1) % outline.length]!;
+              return sum + a[0] * b[1] - b[0] * a[1];
+            }, 0),
+          ) || 1;
+        const longest = outline
+          .map((a, i) => {
+            const b = outline[(i + 1) % outline.length]!;
+            return { a, b, length: Math.hypot(b[0] - a[0], b[1] - a[1]) };
+          })
+          .filter((edge) => edge.length > 0.01)
+          .sort((x, y) => y.length - x.length)[0];
+        assert(longest, `${testCase.name}/${poolType}: missing reference wall`);
+        const tangentX = (longest.b[0] - longest.a[0]) / longest.length;
+        const tangentZ = (longest.b[1] - longest.a[1]) / longest.length;
+        const inwardX = -tangentZ * winding;
+        const inwardZ = tangentX * winding;
+        const midX = (longest.a[0] + longest.b[0]) / 2;
+        const midZ = (longest.a[1] + longest.b[1]) / 2;
+        const onWallOffset = (pose.target[0] - midX) * inwardX + (pose.target[2] - midZ) * inwardZ;
         const tangentialOffset =
-          (pose.target[0] - frontMasterPose.target[0]) * tangentX +
-          (pose.target[2] - frontMasterPose.target[2]) * tangentZ;
+          (pose.target[0] - midX) * tangentX + (pose.target[2] - midZ) * tangentZ;
         assert(
-          Math.abs(onWallOffset) < 1e-9 && Math.abs(tangentialOffset) < 1e-9,
+          onWallOffset > -1e-9 && onWallOffset < 0.7 + 1e-9 && Math.abs(tangentialOffset) < 1e-6,
           `${testCase.name}/${poolType}: Interior Finish changed the reference wall target`,
         );
         const viewX = pose.position[0] - pose.target[0];
         const viewZ = pose.position[2] - pose.target[2];
         const horizontalLength = Math.hypot(viewX, viewZ);
+        // Oblique material view: within ~37 degrees of the wall normal.
         assert(
-          Math.abs(viewX / horizontalLength - inwardX) < 1e-10 &&
-            Math.abs(viewZ / horizontalLength - inwardZ) < 1e-10,
-          `${testCase.name}/${poolType}: Interior Finish camera is not frontal`,
+          (viewX * inwardX + viewZ * inwardZ) / horizontalLength > 0.8,
+          `${testCase.name}/${poolType}: Interior Finish camera does not face the reference wall`,
         );
       }
       if (intent === "mosaic") {
@@ -1029,13 +1040,13 @@ assert(POOL_TYPES.map(({ id }) => id).join(",") === "in-ground,above-ground", "i
 assert(
   POOL_STRUCTURES.filter(({ poolTypes }) => poolTypes.includes("in-ground"))
     .map(({ id }) => id)
-    .join(",") === "reinforced-concrete,modular-steel-panels",
+    .join(",") === "reinforced-concrete,modular-steel-panels,visible-stainless-steel",
   "invalid in-ground structures",
 );
 assert(
   POOL_STRUCTURES.filter(({ poolTypes }) => poolTypes.includes("above-ground"))
     .map(({ id }) => id)
-    .join(",") === "modular-steel-structure",
+    .join(",") === "modular-steel-panels,visible-stainless-steel",
   "invalid above-ground structures",
 );
 
@@ -1136,7 +1147,7 @@ for (const [length, width, depth] of [
 }
 
 assert(
-  POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,l-shape,custom,organic",
+  POOL_SHAPES.map(({ id }) => id).join(",") === "rectangle,l-shape,custom",
   "invalid pool shapes",
 );
 assert(FINISHES.map(({ id }) => id).join(",") === "liner,mosaic", "invalid finishes");
@@ -1171,7 +1182,8 @@ assert(
   "overflow grille width or channel depth is not a real section",
 );
 assert(
-  POOL_FEATURES.map(({ id }) => id).join(",") === "ledLighting,hydromassage",
+  POOL_FEATURES.map(({ id }) => id).join(",") ===
+    "ledLighting,hydromassage,sunShelf,integratedBench",
   "invalid pool features",
 );
 assert(
@@ -4884,8 +4896,13 @@ console.log("Curved stair backfill and horizontal Infinity-film regressions PASS
           candidate,
           mid[0]! + candidate.normal[0] * 0.65,
           mid[1]! + candidate.normal[1] * 0.65,
-        ) < -0.9,
-        "Receiver grade stays beneath construction",
+        ) <
+          -(
+            clampInfinityEdgeDimensions(undefined).dropHeight +
+            clampInfinityEdgeDimensions(undefined).catchBasinDepth +
+            0.05
+          ),
+        "Receiver grade stays beneath construction (catch-basin floor + 5cm)",
       );
       for (let i = 0; i < shape.length; i++) {
         if (i === candidate.side) continue;

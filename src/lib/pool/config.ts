@@ -533,14 +533,16 @@ export interface StepGroup {
 }
 
 export const STEP_GROUPS: ReadonlyArray<StepGroup> = [
-  { id: "struttura", label: "Struttura", stepIds: ["project", "pool-type", "structure"] },
-  { id: "forma", label: "Forma e dimensioni", stepIds: ["shape-dimensions"] },
-  { id: "sistema", label: "Sistema piscina", stepIds: ["system"] },
-  { id: "accesso", label: "Accesso e comfort", stepIds: ["access"] },
-  { id: "rivestimento", label: "Rivestimento", stepIds: ["style"] },
-  { id: "luce", label: "Acqua e luci", stepIds: ["lighting"] },
-  { id: "bordo", label: "Bordo e decking", stepIds: ["deck"] },
-  { id: "optional", label: "Optional esterni", stepIds: ["technology"] },
+  {
+    id: "piscina",
+    label: "Piscina",
+    stepIds: ["project", "pool-type", "structure", "shape-dimensions"],
+  },
+  { id: "sistema", label: "Sistema acqua", stepIds: ["system"] },
+  { id: "accesso", label: "Accesso & comfort", stepIds: ["access"] },
+  { id: "finiture", label: "Finiture", stepIds: ["style", "lighting"] },
+  { id: "esterno", label: "Esterno", stepIds: ["deck"] },
+  { id: "optional", label: "Optional", stepIds: ["technology"] },
   { id: "presentazione", label: "Presentazione", stepIds: ["review"] },
 ];
 

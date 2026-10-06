@@ -8,7 +8,7 @@ import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
 import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
-import { contextualIntent, focusForAction } from "@/lib/pool/contextual-camera";
+import { contextualIntent, focusForAction, wholePoolIntent } from "@/lib/pool/contextual-camera";
 import { resolveMaterials } from "@/lib/pool/materials";
 import { constructionPresentation } from "@/lib/pool/construction-presentation";
 import { ThemeProvider, useTheme } from "@/lib/theme";
@@ -438,7 +438,16 @@ function ConfiguratorLayout() {
       <header className="z-30 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-hairline bg-background px-4 py-3 sm:px-6 lg:gap-8">
         <BrandLogo className="h-7 max-w-[100px]" />
         <div className="flex min-w-0 justify-center">
-          <WizardNav macros={macros} current={macroIndex} onSelect={selectMacro} />
+          <WizardNav
+            macros={macros}
+            current={macroIndex}
+            onSelect={selectMacro}
+            progress={
+              macro && macro.indices.length > 1
+                ? (macro.indices.indexOf(step) + 1) / macro.indices.length
+                : 0.5
+            }
+          />
         </div>
         <div className="flex items-center gap-1 sm:gap-3">
           <ThemeToggle />
@@ -510,7 +519,15 @@ function ConfiguratorLayout() {
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}
             frameToken={frameToken + (visualFocus?.revision ?? 0)}
-            focus={inspectionView ?? (technicalView ? "review" : visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus)}
+            focus={
+              inspectionView ??
+              (technicalView
+                ? "review"
+                : wholePoolIntent(
+                    visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus,
+                    renovationWorkflow ? undefined : activeStepId,
+                  ))
+            }
             cameraLocked={cameraLocked}
             showWater={construction.showWater}
             theme={theme}
@@ -544,6 +561,14 @@ function ConfiguratorLayout() {
 
         <ConfiguratorTray
           number={macroIndex + 1}
+          total={renovationWorkflow ? undefined : macros.length}
+          nextLabel={
+            !renovationWorkflow &&
+            macro &&
+            macro.indices[macro.indices.length - 1] === step
+              ? macros[macroIndex + 1]?.label
+              : undefined
+          }
           title={renovationWorkflow ? copy.title : (macro?.label ?? copy.title)}
           subtitle={copy.subtitle}
           {...(substepPosition

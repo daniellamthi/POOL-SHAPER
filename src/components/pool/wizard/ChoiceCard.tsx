@@ -38,6 +38,70 @@ export function ChoiceCard({
   /** Smaller card for secondary choices (finishes, variants). */
   compact?: boolean;
 }) {
+  if (optional) {
+    // Frozen choice system: an add-on is never a card. It is a full-width
+    // row -- dashed while available, solid violet once added -- with an
+    // explicit "+ Aggiungi" / "Aggiunto" command, so it can never be read as
+    // a replacement for the cards above it.
+    return (
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={selected}
+        className={cn(
+          "col-span-full flex min-h-[64px] w-full items-center gap-3 rounded-[14px] border p-2 pr-2.5 text-left outline-none transition-[border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-foreground/40",
+          selected
+            ? "border-solid border-brand bg-card"
+            : "border-dashed border-foreground/25 bg-transparent hover:border-solid hover:border-foreground/40",
+        )}
+      >
+        <span className="relative flex h-12 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground/75">
+          {typeof image === "string" ? (
+            <img
+              src={image}
+              alt=""
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : image ? (
+            <span className="flex h-full w-full items-center justify-center p-1">{image}</span>
+          ) : null}
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-[13.5px] tracking-[-0.01em] text-foreground">{title}</span>
+          {description ? (
+            <span className="truncate text-[12px] font-light text-muted-foreground">
+              {description}
+            </span>
+          ) : null}
+          {footer ? (
+            <span className="text-[11px] font-light text-muted-foreground">{footer}</span>
+          ) : null}
+        </span>
+        {badge ? (
+          <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] tracking-wide text-muted-foreground sm:inline">
+            {badge}
+          </span>
+        ) : null}
+        <span
+          aria-hidden
+          className={cn(
+            "flex h-[34px] shrink-0 items-center gap-1.5 rounded-[9px] border px-3 text-[12.5px] whitespace-nowrap",
+            selected
+              ? "border-brand/35 bg-brand-soft text-brand"
+              : "border-foreground/20 bg-card text-foreground",
+          )}
+        >
+          {selected ? (
+            <Check className="size-3.5" strokeWidth={2} />
+          ) : (
+            <Plus className="size-3.5" strokeWidth={1.75} />
+          )}
+          {selected ? "Aggiunto" : "Aggiungi"}
+        </span>
+      </button>
+    );
+  }
   return (
     <button
       type="button"
@@ -46,7 +110,7 @@ export function ChoiceCard({
       className={cn(
         "group relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border bg-card text-left outline-none transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-foreground/40 active:scale-[0.985]",
         selected
-          ? "border-foreground shadow-[0_0_0_1px_var(--foreground)]"
+          ? "border-brand shadow-[0_0_0_1px_var(--brand)]"
           : "border-hairline hover:border-foreground/40",
       )}
     >
@@ -85,17 +149,11 @@ export function ChoiceCard({
           className={cn(
             "absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-full transition-all duration-300",
             selected
-              ? "bg-foreground text-background"
-              : optional
-                ? "bg-background/90 text-foreground"
-                : "bg-background/70 text-transparent",
+              ? "bg-brand text-white"
+              : "border border-foreground/20 bg-background/90 text-transparent",
           )}
         >
-          {optional && !selected ? (
-            <Plus className="size-3.5" strokeWidth={1.75} />
-          ) : (
-            <Check className="size-3.5" strokeWidth={2} />
-          )}
+          <Check className="size-3.5" strokeWidth={2} />
         </span>
       </span>
       <span className={cn("flex flex-1 flex-col gap-1", compact ? "p-3" : "p-4 lg:p-3.5")}>
@@ -108,9 +166,6 @@ export function ChoiceCard({
           >
             {title}
           </span>
-          {optional && selected ? (
-            <span className="shrink-0 text-[10.5px] tracking-wide text-brand">Aggiunto</span>
-          ) : null}
         </span>
         {description ? (
           <span className="line-clamp-2 text-[12px] leading-[1.5] font-light text-muted-foreground">
