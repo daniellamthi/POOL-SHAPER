@@ -121,6 +121,7 @@ function ConfiguratorLayout() {
     setSceneTime,
     justRestoredProject,
     dismissRestoredProjectNotice,
+    sharedProject,
   } = useConfigurator();
   const { theme } = useTheme();
 
@@ -391,6 +392,11 @@ function ConfiguratorLayout() {
   // revisited after it was completed opens collapsed, so the pool stays visible.
   const [trayExpanded, setTrayExpanded] = useState(true);
   useEffect(() => setTrayExpanded(!isStepComplete(step)), [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A share link lands on the Summary: open the mobile sheet so the
+  // visitor sees the project, its ID and the save/share/PDF actions.
+  useEffect(() => {
+    if (sharedProject?.status === "ready") setTrayExpanded(true);
+  }, [sharedProject?.status]);
   // The final step's primary action opens the proposal request.
   const [requestToken, setRequestToken] = useState(0);
   const finalRequest = !renovationWorkflow && activeStepId === "review";
