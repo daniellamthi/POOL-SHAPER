@@ -22,6 +22,7 @@
     "test:attachments": "node scripts/run-attachment-renovation-audit.mjs",
     "test:persistence": "node scripts/run-persistence-audit.mjs",
     "test:export-guard": "node scripts/run-export-guard-audit.mjs",
+    "test:project-delivery": "node scripts/run-project-delivery-audit.mjs",
     "test:visual": "node scripts/visual-audit.mjs",
     "test:visual:update": "node scripts/visual-audit.mjs --update",
     "render-bridge": "node scripts/render-bridge.mjs",
