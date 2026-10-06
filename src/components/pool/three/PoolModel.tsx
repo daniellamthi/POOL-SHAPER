@@ -284,6 +284,27 @@ vTriWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
 vTriWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
 `;
 
+/** Coping only: per-slab stone frame (see `createCopingSlabGeometry`).
+ * Meshes without the attribute read WebGL's default (0,0,0,1): world space,
+ * no swap, a constant offset -- i.e. the plain triplanar mapping. */
+const COPING_SLAB_VERTEX_HEADER = `
+varying vec3 vTriWorldPosition;
+varying vec3 vTriWorldNormal;
+varying float vTriSwap;
+attribute vec4 slabFrame;
+`;
+const COPING_SLAB_VERTEX_POSITION = `
+#include <worldpos_vertex>
+vec3 triWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;
+vec3 triNormal = normalize(mat3(modelMatrix) * objectNormal);
+vec2 triLocal = triWorld.xz - slabFrame.xy;
+if (slabFrame.z > 0.5) { triLocal = triLocal.yx; triNormal = triNormal.zyx; }
+vec2 triShift = vec2(slabFrame.w * 37.0, fract(slabFrame.w * 7.31) * 23.0);
+vTriWorldPosition = vec3(triLocal.x + triShift.x, triWorld.y, triLocal.y + triShift.y);
+vTriWorldNormal = triNormal;
+vTriSwap = slabFrame.z;
+`;
+
 const TRIPLANAR_FRAGMENT_HEADER = `
 uniform float triplanarScale;
 // Width/height of the source map. A scanned set is not always square (the
@@ -814,13 +835,13 @@ export function PoolModel({
       };
       shader.uniforms["triplanarAspect"] = { value: copingAssetAspect };
       shader.vertexShader = shader.vertexShader
-        .replace("#include <common>", `#include <common>${TRIPLANAR_VERTEX_HEADER}`)
-        .replace("#include <worldpos_vertex>", TRIPLANAR_VERTEX_POSITION);
+        .replace("#include <common>", `#include <common>${COPING_SLAB_VERTEX_HEADER}`)
+        .replace("#include <worldpos_vertex>", COPING_SLAB_VERTEX_POSITION);
       shader.uniforms["stoneColorMap"] = { value: copingDetail.colorMap };
       shader.fragmentShader = shader.fragmentShader
         .replace(
           "#include <common>",
-          `#include <common>${TRIPLANAR_FRAGMENT_HEADER}\nuniform sampler2D stoneColorMap;`,
+          `#include <common>${TRIPLANAR_FRAGMENT_HEADER}\nuniform sampler2D stoneColorMap;\nvarying float vTriSwap;`,
         )
         .replace(
           "#include <color_fragment>",
@@ -834,7 +855,14 @@ export function PoolModel({
       `,
         )
         .replace("#include <roughnessmap_fragment>", TRIPLANAR_ROUGHNESS_FRAGMENT)
-        .replace("#include <normal_fragment_maps>", TRIPLANAR_NORMAL_FRAGMENT);
+        .replace(
+          "#include <normal_fragment_maps>",
+          // Back from the slab's (possibly X/Z-swapped) frame to world space.
+          TRIPLANAR_NORMAL_FRAGMENT.replace(
+            "normal = normalize(mat3(viewMatrix) * triBlendedWorldNormal);",
+            "if (vTriSwap > 0.5) triBlendedWorldNormal = triBlendedWorldNormal.zyx;\nnormal = normalize(mat3(viewMatrix) * triBlendedWorldNormal);",
+          ),
+        );
     },
     [copingDetail, materials.coping.moduleSize, copingAssetAspect],
   );
@@ -1333,7 +1361,7 @@ export function PoolModel({
                   configureCopingTriplanar(shader);
                   excludeSubmergedDirectLights(shader, waterLevel);
                 }}
-                customProgramCacheKey={() => `coping-bed-triplanar-v1-dry-${waterLevel}`}
+                customProgramCacheKey={() => `coping-bed-triplanar-v2-dry-${waterLevel}`}
                 side={DoubleSide}
               />
             )}
@@ -1358,7 +1386,7 @@ export function PoolModel({
                   // Dry stone: a submerged LED cannot light it through the shell.
                   excludeSubmergedDirectLights(shader, waterLevel);
                 }}
-                customProgramCacheKey={() => `coping-triplanar-v5-dry-${waterLevel}`}
+                customProgramCacheKey={() => `coping-triplanar-v6-slab-dry-${waterLevel}`}
                 side={DoubleSide}
               />
             )}

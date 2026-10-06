@@ -228,6 +228,22 @@ export function createCopingSlabGeometry(
       const shade = 0.975 + (seed - Math.floor(seed)) * 0.025;
       const colors = new Float32Array(geometry.getAttribute("position").count * 3).fill(shade);
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      // Each slab is cut from its own piece of stone: its own window of the
+      // scan (origin + seed) with the vein running along the slab's length
+      // (swap when the side runs along Z). Without this the world-space
+      // texture flowed straight through every joint, so a side read as one
+      // painted strip with lines drawn on it.
+      const a = pointAt(inner, from),
+        b = pointAt(inner, to);
+      const frame = new Float32Array(geometry.getAttribute("position").count * 4);
+      const swap = Math.abs(b[1] - a[1]) > Math.abs(b[0] - a[0]) ? 1 : 0;
+      for (let i = 0; i < frame.length; i += 4) {
+        frame[i] = (a[0] + b[0]) / 2;
+        frame[i + 1] = (a[1] + b[1]) / 2;
+        frame[i + 2] = swap;
+        frame[i + 3] = 0.05 + (seed - Math.floor(seed)) * 0.9;
+      }
+      geometry.setAttribute("slabFrame", new THREE.BufferAttribute(frame, 4));
       parts.push(geometry);
     }
   }
