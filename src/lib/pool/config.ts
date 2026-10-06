@@ -45,6 +45,9 @@ export const DEFAULT_DIMENSIONS: Dimensions = {
   width: 4.5,
   depth: 1.5,
   cornerRadius: 0.25,
+  // Explicit, so a fresh project is already in the canonical form that
+  // `parseProjectConfiguration` restores (a save/reload is byte-identical).
+  floorProfile: "flat",
 };
 
 export const DEFAULT_CUSTOMER: CustomerInfo = {

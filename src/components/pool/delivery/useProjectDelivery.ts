@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConfigurator } from "@/lib/pool/context";
-import { createProjectId, serializeProjectConfiguration } from "@/lib/pool/project";
+import {
+  createProjectId,
+  parseProjectConfiguration,
+  serializeProjectConfiguration,
+  type ProjectConfiguration,
+} from "@/lib/pool/project";
 import { saveProjectFn } from "@/lib/project-delivery/projectDelivery.server";
 import { getProjectLink, setProjectLink, type ProjectLink } from "@/lib/project-delivery/client";
 import { projectShareUrl } from "@/lib/project-delivery/reference";
@@ -20,16 +25,24 @@ export interface ProjectDeliveryState {
   setHeroUrl: (url: string | null) => void;
 }
 
+/** The snapshot exactly as the server stores and every restore yields it,
+ * so "unsaved changes" compares like with like. */
+function canonical(project: ProjectConfiguration): string {
+  const json = serializeProjectConfiguration(project);
+  try {
+    return serializeProjectConfiguration(parseProjectConfiguration(json));
+  } catch {
+    return json;
+  }
+}
+
 /** Save / share state for the current configuration. The snapshot sent is
  * always `serializeProjectConfiguration(projectConfiguration)` -- the same
  * object the scene, Summary, PDF and quote read. */
 export function useProjectDelivery(): ProjectDeliveryState {
   const { projectConfiguration, restoreProject } = useConfigurator();
   const projectId = projectConfiguration.projectId;
-  const snapshot = useMemo(
-    () => serializeProjectConfiguration(projectConfiguration),
-    [projectConfiguration],
-  );
+  const snapshot = useMemo(() => canonical(projectConfiguration), [projectConfiguration]);
   const [link, setLink] = useState<ProjectLink | null>(null);
   const [durable, setDurable] = useState<boolean | null>(null);
   const [status, setStatus] = useState<ProjectDeliveryState["status"]>("idle");
@@ -71,7 +84,7 @@ export function useProjectDelivery(): ProjectDeliveryState {
         publicRef: result.publicRef,
         editToken: result.editToken ?? current?.editToken,
         savedAt: result.savedAt,
-        savedSnapshot: serializeProjectConfiguration(project),
+        savedSnapshot: canonical(project),
       };
       setProjectLink(project.projectId, next);
       setLink(next);
