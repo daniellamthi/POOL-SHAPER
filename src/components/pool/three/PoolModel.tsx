@@ -803,6 +803,10 @@ export function PoolModel({
     }
   });
 
+  const copingJointColor = useMemo(
+    () => new THREE.Color(materials.coping.color).multiplyScalar(0.8),
+    [materials.coping.color],
+  );
   const configureCopingTriplanar = useCallback(
     (shader: TriplanarShader) => {
       shader.uniforms.triplanarScale = {
@@ -1310,16 +1314,27 @@ export function PoolModel({
           UV projected flat from the ring's XZ footprint would. */}
       {!isVisibleOverflow && (
         <group name="pool-perimeter-finish">
-          <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.006, 0]} receiveShadow>
+          {/* Joint bedding seen through the slab joints: the same stone,
+              a shade darker and only 3.5mm down, so a joint reads as a fine
+              integrated line -- never a black trench in a foreign colour. */}
+          <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.0035, 0]} receiveShadow>
             {rawShellKind ? (
               <RawShellMaterial kind={rawShellKind} />
             ) : (
-              <meshStandardMaterial
-                color="#938b7b"
-                roughness={0.96}
+              <meshPhysicalMaterial
+                key={`bed-${materials.coping.moduleSize}`}
+                color={copingJointColor}
+                normalMap={copingDetail.normalMap}
+                normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
+                roughnessMap={copingDetail.roughnessMap}
+                roughness={Math.min(1, materials.coping.roughness + 0.08)}
+                metalness={0}
+                onBeforeCompile={(shader) => {
+                  configureCopingTriplanar(shader);
+                  excludeSubmergedDirectLights(shader, waterLevel);
+                }}
+                customProgramCacheKey={() => `coping-bed-triplanar-v1-dry-${waterLevel}`}
                 side={DoubleSide}
-                onBeforeCompile={(shader) => excludeSubmergedDirectLights(shader, waterLevel)}
-                customProgramCacheKey={() => `coping-bed-dry-${waterLevel}`}
               />
             )}
           </mesh>

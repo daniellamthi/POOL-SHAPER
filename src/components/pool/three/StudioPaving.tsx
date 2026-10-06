@@ -94,7 +94,17 @@ export function createPavingModules(
   return geometry;
 }
 
-function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
+function PavingMaterial({
+  id,
+  waterY,
+  joint = false,
+}: {
+  id: PavingId;
+  waterY: number;
+  /** The joint bedding: the slab's own material a shade darker, so joints
+   * read in the stone's tone instead of a light graphic grid. */
+  joint?: boolean;
+}) {
   const definition = PAVING.find((p) => p.id === id)!;
   const maxAnisotropy = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
   // Cached source maps are never mutated: each presentation owns its clones.
@@ -126,8 +136,10 @@ function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
   }, [maps, id, maxAnisotropy]);
   return (
     <meshStandardMaterial
-      vertexColors
-      color={id === "istria" ? "#deddd1" : "#ffffff"}
+      vertexColors={!joint}
+      color={
+        joint ? (id === "istria" ? "#b1b0a7" : "#bdbdbd") : id === "istria" ? "#deddd1" : "#ffffff"
+      }
       map={maps[0] ?? null}
       normalMap={maps[1] ?? null}
       roughnessMap={maps[2] ?? null}
@@ -135,7 +147,7 @@ function PavingMaterial({ id, waterY }: { id: PavingId; waterY: number }) {
       roughness={id === "istria" ? 0.9 : 1}
       metalness={0}
       onBeforeCompile={(shader) => excludeSubmergedDirectLights(shader, waterY)}
-      customProgramCacheKey={() => `studio-paving-dry-${waterY}`}
+      customProgramCacheKey={() => `studio-paving${joint ? "-joint" : ""}-dry-${waterY}`}
     />
   );
 }
@@ -264,13 +276,8 @@ export function StudioPaving({
       </mesh>
       {decking ? (
         <>
-          <mesh geometry={geometry.grout} position={[0, -0.006, 0]} receiveShadow>
-            <meshStandardMaterial
-              color={id === "wood" ? "#706457" : "#ada69a"}
-              roughness={1}
-              onBeforeCompile={dry}
-              customProgramCacheKey={dryKey}
-            />
+          <mesh geometry={geometry.grout} position={[0, -0.004, 0]} receiveShadow>
+            <PavingMaterial key={`${id}-joint`} id={id} waterY={waterY} joint />
           </mesh>
           <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
             <PavingMaterial key={id} id={id} waterY={waterY} />

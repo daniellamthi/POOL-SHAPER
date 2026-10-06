@@ -844,12 +844,6 @@ export default function PoolScene({
   const visualTheme: Theme =
     sceneTime === "night" ? "dark" : "light";
   const palette = PALETTE[visualTheme];
-  const background =
-    system === "infinity"
-      ? sceneTime === "night"
-        ? "#101b28"
-        : "#cee0ec"
-      : palette.background;
   const copingThickness = POOL_BORDER_PRESET.thickness;
   // The lighting step drops the scene to blue hour so the LEDs are visible.
   const dusk = sceneTime === "night";
@@ -932,6 +926,16 @@ export default function PoolScene({
     const zones = infinityZonesForOutline(outline, shape);
     return zones.find((zone) => zone.side === normalisedInfinityEdge.side) ?? null;
   }, [outline, shape, normalisedInfinityEdge]);
+
+  // Infinity's coastal stage exists only once its side is chosen: before
+  // that the pool sits in the same studio context as every other system,
+  // never a vast empty tiled plane with a stray panorama.
+  const infinityStage = system === "infinity" && !!infinityZone;
+  const background = infinityStage
+    ? sceneTime === "night"
+      ? "#101b28"
+      : "#cee0ec"
+    : palette.background;
 
   // Computed once here so the luminaires and the camera that frames them are
   // driven by the same row.
@@ -1115,7 +1119,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={system === "infinity"} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} /> : null}
 
       <SceneMood
         dusk={dusk}
@@ -1168,7 +1172,7 @@ export default function PoolScene({
         distance={radius * 8}
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[visualTheme]}
       />
-      {system === "infinity" ? (
+      {infinityStage ? (
         <StudioFloor
           outline={outline}
           size={deckSize}

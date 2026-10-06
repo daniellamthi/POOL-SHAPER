@@ -195,15 +195,18 @@ export function createCopingSlabGeometry(
         ...stations.map((d) => pointAt(inner, d)),
         ...[...stations].reverse().map((d) => pointAt(outer, d)),
       ];
-      // 3mm recessed grout + 3mm eased arris. Insetting before extrusion
-      // keeps the final stone inside its surveyed perimeter.
-      const inset = offsetOutline(polygon, -0.0045);
+      // Real coping joint: ~2.5mm at the slab sides, opening to ~6mm at the
+      // honed face through a 1.8mm eased arris that catches a soft highlight.
+      // (A 9mm rounded opening over a deep bed read as a black graphic line.)
+      // Insetting before extrusion keeps the stone inside its surveyed perimeter.
+      const arris = 0.0018;
+      const inset = offsetOutline(polygon, -0.003);
       const shape = new THREE.Shape(inset.map(([x, z]) => new THREE.Vector2(x, -z)));
       const raw = new THREE.ExtrudeGeometry(shape, {
-        depth: thickness - 0.006,
+        depth: thickness - 0.003 - arris,
         bevelEnabled: true,
-        bevelSize: 0.003,
-        bevelThickness: 0.003,
+        bevelSize: arris,
+        bevelThickness: arris,
         bevelSegments: 3,
         steps: 1,
         curveSegments: 1,
@@ -219,7 +222,10 @@ export function createCopingSlabGeometry(
       for (let i = 0; i < positions.count; i++) {
         if (Math.abs(positions.getY(i)) < 1e-6) normals.setXYZ(i, 0, 1, 0);
       }
-      const shade = 0.94 + (((Math.sin(parts.length * 127.1 + 19.7) * 43758.5453) % 1) + 1) * 0.045;
+      // Quarried stone varies slab to slab, but only within a narrow band:
+      // a wider spread made every slab read as a separate tile.
+      const seed = Math.sin(parts.length * 127.1 + 19.7) * 43758.5453;
+      const shade = 0.975 + (seed - Math.floor(seed)) * 0.025;
       const colors = new Float32Array(geometry.getAttribute("position").count * 3).fill(shade);
       geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       parts.push(geometry);
