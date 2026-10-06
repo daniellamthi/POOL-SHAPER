@@ -23,3 +23,9 @@ export function requestHeroCapture(timeoutMs = 120_000): Promise<string | null> 
     heroCaptureState.pending = done;
   });
 }
+
+/** The same settled view by day and by night, for the Project Book. */
+export interface DayNightCapture {
+  day: string | null;
+  night: string | null;
+}

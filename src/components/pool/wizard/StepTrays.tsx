@@ -28,6 +28,7 @@ import { LedIntensityControl } from "@/configurator/steps/pool-features/LedInten
 import { LeadRequestDialog } from "@/configurator/steps/final-review/LeadRequestDialog";
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
 import { ProjectDeliveryPanel } from "@/components/pool/delivery/ProjectDelivery";
+import type { DayNightCapture } from "@/lib/project-delivery/heroCapture";
 import { useProjectDelivery } from "@/components/pool/delivery/useProjectDelivery";
 import { MetricsPanel } from "@/components/pool/MetricsPanel";
 import { ShapeEditor } from "@/components/pool/ShapeEditor";
@@ -53,6 +54,7 @@ export interface TrayContext {
   photoMode?: { available: boolean; reason?: string; enter: () => void };
   /** Clean hero capture of the configured pool (Build 2). */
   captureHero?: () => Promise<string | null>;
+  captureDayNight?: () => Promise<DayNightCapture>;
 }
 
 const ill = (name: string) => <Illustration name={name} />;
@@ -1008,7 +1010,11 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
         </div>
       ) : tab === "summary" ? (
         <div className="flex max-w-3xl flex-col gap-4">
-          <ProjectDeliveryPanel delivery={delivery} captureHero={ctx.captureHero} />
+          <ProjectDeliveryPanel
+            delivery={delivery}
+            captureHero={ctx.captureHero}
+            captureDayNight={ctx.captureDayNight}
+          />
           <ProjectSummary publicRef={delivery.link?.publicRef} heroUrl={delivery.heroUrl} />
         </div>
       ) : (

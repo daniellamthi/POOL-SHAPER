@@ -38,6 +38,7 @@ import {
   ProjectDeliveryError,
   saveProject,
 } from "../src/lib/project-delivery/service";
+import QRCode from "qrcode";
 import { buildProjectSummary } from "../src/lib/project-delivery/summary-model";
 import { buildProjectBook, pdfText } from "../src/lib/project-delivery/projectBook";
 import { leadSubmissionInputSchema } from "../src/lib/lead/schema";
@@ -175,6 +176,10 @@ function pdfMissing(pdf: string, values: ReadonlyArray<string>): string[] {
   return missing;
 }
 
+// Stand-in captures (valid PNGs) for the Day/Night page.
+const dayImage = await QRCode.toDataURL("day", { width: 64 });
+const nightImage = await QRCode.toDataURL("night", { width: 64 });
+
 let mismatches = 0;
 
 async function contract(store: ProjectStore, label: string) {
@@ -216,11 +221,20 @@ async function contract(store: ProjectStore, label: string) {
       model: summary,
       publicRef: created.publicRef,
       shareUrl,
-      heroDataUrl: null,
+      heroDataUrl: dayImage,
+      presentation: { day: dayImage, night: nightImage },
       issuedAt: new Date("2026-10-06T10:00:00Z"),
     });
     const pdf = doc.output();
-    assert(doc.getNumberOfPages() === 6, `${label} ${name}: Project Book has 6 pages`);
+    assert(doc.getNumberOfPages() === 7, `${label} ${name}: Project Book has 7 pages`);
+    assert(
+      ["Presentazione", "GIORNO", "NOTTE"].every((word) => pdf.includes(word)),
+      `${label} ${name}: Day/Night presentation page`,
+    );
+    assert(
+      (pdf.match(/\/Subtype \/Image/g) ?? []).length >= 3,
+      `${label} ${name}: hero, day/night and QR images embedded`,
+    );
     assert(pdf.includes(created.publicRef), `${label} ${name}: PDF carries the Project ID`);
     assert(pdf.includes(shareUrl), `${label} ${name}: PDF carries the share link`);
     assert(/\/Subtype \/Image/.test(pdf), `${label} ${name}: PDF embeds the QR image`);

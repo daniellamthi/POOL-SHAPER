@@ -14,6 +14,8 @@ export interface ProjectBookInput {
   shareUrl: string;
   /** JPEG/PNG data URL of the clean hero capture, when available. */
   heroDataUrl?: string | null;
+  /** The same view by day and by night ("Presentazione" page). */
+  presentation?: { day: string | null; night: string | null } | null;
   issuedAt: Date;
 }
 
@@ -85,6 +87,21 @@ function sectionBlock(doc: jsPDF, section: SummarySection, x: number, y: number,
   return rows(doc, section.rows, x, y + 8, width);
 }
 
+/** Draws an image filling the box (centre crop via a clip path). */
+function coverImage(doc: jsPDF, dataUrl: string, x: number, y: number, w: number, h: number) {
+  const format = dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
+  const props = doc.getImageProperties(dataUrl);
+  const ratio = props.width / props.height;
+  const drawW = ratio > w / h ? h * ratio : w;
+  const drawH = ratio > w / h ? h : w / ratio;
+  doc.saveGraphicsState();
+  doc.rect(x, y, w, h, null);
+  doc.clip();
+  doc.discardPath();
+  doc.addImage(dataUrl, format, x + (w - drawW) / 2, y + (h - drawH) / 2, drawW, drawH);
+  doc.restoreGraphicsState();
+}
+
 function drawPlan(
   doc: jsPDF,
   model: ProjectSummaryModel,
@@ -146,7 +163,7 @@ function drawPlan(
 }
 
 export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> {
-  const { model, publicRef, shareUrl, heroDataUrl, issuedAt } = input;
+  const { model, publicRef, shareUrl, heroDataUrl, presentation, issuedAt } = input;
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: false });
   doc.setProperties({
     title: `Project Book ${publicRef}`,
@@ -161,16 +178,7 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
 
   // 1 · Cover
   if (heroDataUrl) {
-    const format = heroDataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
-    const props = doc.getImageProperties(heroDataUrl);
-    const ratio = props.width / props.height;
-    const boxW = W,
-      boxH = 150;
-    const drawW = ratio > boxW / boxH ? boxW : boxH * ratio;
-    const drawH = ratio > boxW / boxH ? boxW / ratio : boxH;
-    doc.setFillColor(192, 192, 194);
-    doc.rect(0, 0, W, boxH, "F");
-    doc.addImage(heroDataUrl, format, (W - drawW) / 2, (boxH - drawH) / 2, drawW, drawH);
+    coverImage(doc, heroDataUrl, 0, 0, W, 150);
   } else {
     doc.setFillColor(238, 238, 241);
     doc.rect(0, 0, W, 150, "F");
@@ -247,9 +255,39 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
     );
   }
 
-  // 6 · Riferimento, QR e proposta
+  // 6 · Presentazione: the same configuration and view, day and night.
+  let page = 6;
+  if (presentation?.day && presentation.night) {
+    doc.addPage();
+    header(doc, "Presentazione", publicRef, page++);
+    const gap = 8;
+    const boxW = (W - 2 * M - gap) / 2;
+    const boxH = 118;
+    const top = 44;
+    for (const [index, [label, url]] of (
+      [
+        ["Giorno", presentation.day],
+        ["Notte", presentation.night],
+      ] as const
+    ).entries()) {
+      const x = M + index * (boxW + gap);
+      coverImage(doc, url, x, top, boxW, boxH);
+      doc.setFontSize(8);
+      doc.setTextColor(...VIOLET);
+      doc.text(label.toUpperCase(), x, top + boxH + 8);
+    }
+    doc.setFontSize(9);
+    doc.setTextColor(...MUTE);
+    doc.text(
+      "Stessa piscina, stessa vista: la luce del giorno e l'atmosfera della sera.",
+      M,
+      top + boxH + 18,
+    );
+  }
+
+  // 7 · Riferimento, QR e proposta
   doc.addPage();
-  header(doc, "Il tuo progetto, sempre con te", publicRef, 6);
+  header(doc, "Il tuo progetto, sempre con te", publicRef, page);
   const qr = await QRCode.toDataURL(shareUrl, { margin: 1, width: 512, errorCorrectionLevel: "M" });
   doc.addImage(qr, "PNG", M, 48, 62, 62);
   doc.setFontSize(8);

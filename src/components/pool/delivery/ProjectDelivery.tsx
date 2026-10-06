@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { useConfigurator } from "@/lib/pool/context";
 import { projectShareUrl } from "@/lib/project-delivery/reference";
 import { buildProjectSummary } from "@/lib/project-delivery/summary-model";
+import type { DayNightCapture } from "@/lib/project-delivery/heroCapture";
 import type { ProjectDeliveryState } from "./useProjectDelivery";
 
 /** Save · Share · Project Book. Sits above the Premium Summary. */
 export function ProjectDeliveryPanel({
   delivery,
   captureHero,
+  captureDayNight,
 }: {
   delivery: ProjectDeliveryState;
   captureHero?: (() => Promise<string | null>) | undefined;
+  captureDayNight?: (() => Promise<DayNightCapture>) | undefined;
 }) {
   const { projectConfiguration, sharedProject } = useConfigurator();
   const [qr, setQr] = useState<string | null>(null);
@@ -53,7 +56,11 @@ export function ProjectDeliveryPanel({
     try {
       const saved = delivery.dirty || !link ? await delivery.save() : link;
       if (!saved) throw new Error("not saved");
-      const hero = delivery.heroUrl ?? (captureHero ? await captureHero() : null);
+      // Same view by day and by night; the cover is the chosen time of day.
+      const presentation = captureDayNight ? await captureDayNight() : null;
+      const chosen =
+        projectConfiguration.config.sceneTime === "night" ? presentation?.night : presentation?.day;
+      const hero = chosen ?? delivery.heroUrl ?? (captureHero ? await captureHero() : null);
       if (hero) delivery.setHeroUrl(hero);
       const { buildProjectBook } = await import("@/lib/project-delivery/projectBook");
       const doc = await buildProjectBook({
@@ -61,6 +68,7 @@ export function ProjectDeliveryPanel({
         publicRef: saved.publicRef,
         shareUrl: projectShareUrl(window.location.origin, saved.publicRef),
         heroDataUrl: hero,
+        presentation,
         issuedAt: new Date(),
       });
       doc.save(`Project-Book-${saved.publicRef}.pdf`);

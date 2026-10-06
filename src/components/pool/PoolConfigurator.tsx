@@ -1,4 +1,5 @@
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -193,6 +194,27 @@ function ConfiguratorLayout() {
     }
     return requestHeroCapture();
   }, [reframe]);
+  /** Project Book "Presentazione": the same configuration and view, by day
+   * and by night. Only the presentation time changes, and it is restored. */
+  const captureDayNight = useCallback(async () => {
+    const original = config.sceneTime === "night" ? "night" : "day";
+    const other = original === "day" ? "night" : "day";
+    const current = await captureHero();
+    let alternate: string | null = null;
+    try {
+      setSceneTime(other);
+      // Let the lighting transition finish before the settled capture.
+      await new Promise((resolve) =>
+        setTimeout(resolve, SCENE_VISUAL_PRESET.dusk.transitionSeconds * 1000 + 600),
+      );
+      alternate = await requestHeroCapture();
+    } finally {
+      setSceneTime(original);
+    }
+    return original === "day"
+      ? { day: current, night: alternate }
+      : { day: alternate, night: current };
+  }, [captureHero, config.sceneTime, setSceneTime]);
   const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
   const openPremiumPresentation = useCallback(() => {
     if (!premiumPresentationAvailable) return;
@@ -407,6 +429,7 @@ function ConfiguratorLayout() {
       reframe();
     },
     captureHero,
+    captureDayNight,
     photoMode: {
       available: ACTIVE_RENDERING_QUALITY.id === "experience" && !photoModeUnsupported,
       reason: photoModeUnsupported
