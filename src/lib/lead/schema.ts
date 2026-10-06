@@ -114,6 +114,11 @@ export const leadSubmissionInputSchema = z.object({
   // Anti-spam honeypot: real users never see or fill this field.
   website: z.string().max(0).optional().default(""),
   idempotencyKey: z.string().trim().min(8).max(100),
+  /** Public reference of the saved project (Build 2), when it was saved. */
+  projectReference: z
+    .string()
+    .regex(/^PW-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{6}$/)
+    .optional(),
   project: projectConfigurationSchema,
 });
 

@@ -30,6 +30,7 @@ import {
   suggestShallowDepth,
 } from "./floor-profile";
 import { getPoolVerticalLayout } from "./vertical-layout";
+import { projectMetrics } from "./project-metrics";
 import { getCustomerValidation } from "./validation";
 import { createProjectId, toProjectConfiguration, type ProjectConfiguration } from "./project";
 import { clearProjectDraft, loadProjectDraft, saveProjectDraft } from "./persistence";
@@ -649,36 +650,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     [config.shape, config.dimensions, config.controlPoints],
   );
 
-  const metrics = useMemo(() => {
-    // `copingThickness` only ever feeds `copingY`, never floor/water/wall
-    // elevations -- passing 0 here keeps the store decoupled from the
-    // configurator's material/visual-preset layer for a value metrics never
-    // reads.
-    const verticalLayout = getPoolVerticalLayout({
-      poolType: config.poolType ?? "in-ground",
-      system: config.system,
-      overflowType: config.overflowType,
-      depth: config.dimensions.depth,
-      copingThickness: 0,
-    });
-    const floorProfile = buildFloorProfile({
-      outline,
-      shape: config.shape,
-      poolType: config.poolType ?? "in-ground",
-      dimensions: config.dimensions,
-      verticalLayout,
-      sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
-      infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
-    });
-    const baseMetrics = floorProfile.sloped
-      ? computeSlopeMetrics(outline, floorProfile, verticalLayout.waterY, verticalLayout.wallTopY)
-      : computeMetrics(outline, config.dimensions.depth);
-    const comfort = configuredComfortPlan(config);
-    return {
-      ...baseMetrics,
-      waterVolume: Math.max(0, baseMetrics.waterVolume - comfort.displacedVolume),
-    };
-  }, [
+  const metrics = useMemo(() => projectMetrics(config, outline), [
     outline,
     config.shape,
     config.poolType,

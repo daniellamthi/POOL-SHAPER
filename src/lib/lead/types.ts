@@ -33,6 +33,8 @@ export interface LeadFormInput {
   /** Client-generated once per form session so a retried/duplicated request
    * reuses the same key -- lets the server de-duplicate best-effort. */
   idempotencyKey: string;
+  /** Public reference (PW-XXXX-XXXXXX) of the saved project, if saved. */
+  projectReference?: string | undefined;
   project: ProjectConfiguration;
 }
 
@@ -52,6 +54,8 @@ export interface LeadAttachment {
 export interface LeadSubmission {
   requestId: string;
   projectId: string;
+  /** Public reference (PW-XXXX-XXXXXX) of the saved project, if saved. */
+  projectReference?: string | undefined;
   schemaVersion: number;
   createdAt: string;
   customer: LeadFormInput["customer"];

@@ -126,6 +126,7 @@ export const submitLead = createServerFn({ method: "POST" })
     const submission: LeadSubmission = {
       requestId,
       projectId: data.project.projectId,
+      ...(data.projectReference ? { projectReference: data.projectReference } : {}),
       schemaVersion: data.project.schemaVersion,
       createdAt: new Date().toISOString(),
       customer: data.customer,

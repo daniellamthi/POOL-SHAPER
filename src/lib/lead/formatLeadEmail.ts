@@ -185,7 +185,7 @@ export function formatLeadEmail(submission: LeadSubmission): {
     LEAD_TIMING_OPTIONS.find((option) => option.id === commercial.timing)?.label ??
     commercial.timing;
 
-  const subject = `${isRenovation ? "Ristrutturazione piscina" : "Nuovo progetto piscina"} — ${customer.name} — Rif. ${submission.projectId.slice(0, 8).toUpperCase()}`;
+  const subject = `${isRenovation ? "Ristrutturazione piscina" : "Nuovo progetto piscina"} — ${customer.name} — Rif. ${submission.projectReference ?? submission.projectId.slice(0, 8).toUpperCase()}`;
 
   const localOnlyUploads = Array.isArray(config.uploads)
     ? config.uploads.filter((upload) => upload.uploadStatus !== "uploaded").length
@@ -196,6 +196,7 @@ export function formatLeadEmail(submission: LeadSubmission): {
     ``,
     `Richiesta: ${submission.requestId}`,
     `Progetto: ${submission.projectId}`,
+    ...(submission.projectReference ? [`Riferimento progetto: ${submission.projectReference}`] : []),
     `Ricevuta: ${submission.createdAt}`,
     ``,
     `--- CLIENTE ---`,
