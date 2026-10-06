@@ -58,6 +58,17 @@ export interface TrayContext {
 
 const ill = (name: string) => <Illustration name={name} />;
 
+/** Customer-facing Italian lines for the coping catalogue cards. */
+const COPING_COPY: Record<string, string> = {
+  limestone: "Pietra calcarea chiara, grana fine e contemporanea.",
+  prun: "Pietra grigia con inclusioni minerali.",
+  travertine: "Pietra italiana calda, venatura naturale.",
+  "anthracite-gres": "Gres porcellanato opaco, resistente e uniforme.",
+  ardesia: "Ardesia naturale, scura e materica.",
+  "deck-marrone": "Doghe in legno dal tono bruno.",
+  wpc: "Composito legno-polimero, senza manutenzione.",
+};
+
 function useTab<T extends string>(initial: T, reset: unknown) {
   const [tab, setTab] = useState<T>(initial);
   useEffect(() => setTab(initial), [reset]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -768,7 +779,7 @@ export function DeckTray() {
               compact
               key={option.id}
               title={option.title}
-              description={option.subtitle}
+              description={COPING_COPY[option.id] ?? option.subtitle}
               image={getCopingSwatchDataUrl(option.id)}
               selected={(config.copingMaterial ?? "travertine") === option.id}
               onSelect={() => setCopingMaterial(option.id)}

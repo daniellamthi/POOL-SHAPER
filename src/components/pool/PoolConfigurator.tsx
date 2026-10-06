@@ -534,9 +534,15 @@ function ConfiguratorLayout() {
           />
         </main>
 
-        {/* Phones: reserve the collapsed sheet's height so the pool is never
-            hidden behind it while the options are folded away. */}
-        <div aria-hidden className="h-[136px] shrink-0 lg:hidden" />
+        {/* Phones: reserve the sheet's height so the 3D viewport reframes the
+            pool above it, collapsed or half open, instead of hiding behind it. */}
+        <div
+          aria-hidden
+          className={cn(
+            "shrink-0 transition-[height] duration-300 lg:hidden",
+            trayExpanded ? "h-[52dvh]" : "h-[136px]",
+          )}
+        />
 
         <ConfiguratorTray
           number={macroIndex + 1}

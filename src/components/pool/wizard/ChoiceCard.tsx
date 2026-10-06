@@ -53,7 +53,7 @@ export function ChoiceCard({
       <span
         className={cn(
           "relative block w-full overflow-hidden bg-muted",
-          compact ? "aspect-[16/10] lg:aspect-[2/1]" : "aspect-[4/3] lg:aspect-[16/9]",
+          compact ? "aspect-[16/10] lg:aspect-[2/1]" : "aspect-[4/3] lg:aspect-[2/1]",
         )}
       >
         {typeof image === "string" ? (
@@ -98,7 +98,7 @@ export function ChoiceCard({
           )}
         </span>
       </span>
-      <span className={cn("flex flex-1 flex-col gap-1", compact ? "p-3" : "p-4")}>
+      <span className={cn("flex flex-1 flex-col gap-1", compact ? "p-3" : "p-4 lg:p-3.5")}>
         <span className="flex items-baseline justify-between gap-2">
           <span
             className={cn(

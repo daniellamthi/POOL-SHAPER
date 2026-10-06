@@ -131,10 +131,23 @@ export function ConfiguratorTray({
 }) {
   const drag = useRef<{ y: number; id: number } | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
+  // Phones snap between three heights: collapsed, half (cards beside a
+  // still-visible pool) and full (long lists). `expanded` covers both open
+  // heights so the shell only needs to know whether options are showing.
+  const [full, setFull] = useState(false);
+  const open = (value: boolean) => {
+    if (!value) setFull(false);
+    onExpandedChange(value);
+  };
   const endDrag = () => {
     if (!drag.current) return;
-    if (dragOffset < -40) onExpandedChange(true);
-    else if (dragOffset > 40) onExpandedChange(false);
+    if (dragOffset < -40) {
+      if (expanded) setFull(true);
+      else open(true);
+    } else if (dragOffset > 40) {
+      if (full) setFull(false);
+      else open(false);
+    }
     drag.current = null;
     setDragOffset(0);
   };
@@ -145,7 +158,11 @@ export function ConfiguratorTray({
         "relative z-20 flex min-h-0 flex-col border-hairline bg-background",
         // phones: bottom sheet over the viewport
         "fixed inset-x-0 bottom-0 rounded-t-[24px] border-t shadow-[0_-24px_60px_-36px_rgba(0,0,0,0.55)] transition-[max-height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:static lg:rounded-[24px] lg:border lg:shadow-none",
-        expanded ? "max-h-[68dvh] lg:max-h-[40dvh]" : "max-h-[23dvh] lg:max-h-[40dvh]",
+        expanded
+          ? full
+            ? "max-h-[82dvh] lg:max-h-[40dvh]"
+            : "max-h-[54dvh] lg:max-h-[40dvh]"
+          : "max-h-[23dvh] lg:max-h-[40dvh]",
       )}
       style={
         dragOffset
@@ -157,7 +174,7 @@ export function ConfiguratorTray({
         type="button"
         aria-label={expanded ? "Riduci opzioni" : "Mostra opzioni"}
         aria-expanded={expanded}
-        onClick={() => onExpandedChange(!expanded)}
+        onClick={() => open(!expanded)}
         onPointerDown={(event) => {
           drag.current = { y: event.clientY, id: event.pointerId };
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -257,7 +274,7 @@ export function ConfiguratorTray({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => onExpandedChange(false)}
+            onClick={() => open(false)}
             className="px-1"
           >
             <ChevronDown />
@@ -267,7 +284,7 @@ export function ConfiguratorTray({
       ) : (
         <button
           type="button"
-          onClick={() => onExpandedChange(true)}
+          onClick={() => open(true)}
           className="flex shrink-0 items-center justify-center gap-1.5 pb-[max(10px,env(safe-area-inset-bottom))] pt-0.5 text-[12px] text-muted-foreground lg:hidden"
         >
           <ChevronUp className="size-3.5" />
