@@ -3,10 +3,14 @@
  * that ONE canonical snapshot drives save, share restore, Summary, Project
  * Book PDF and quote payload, and that the store contract holds.
  *
- * Always runs against the in-memory store. When PROJECT_AUDIT_SUPABASE_URL
- * (a PostgREST `/rest/v1` endpoint with migrations 0001-0003 applied) and
- * the service/anon/authenticated JWTs are provided, it also runs the same
- * contract against the real database and proves RLS from the outside.
+ * Always runs against the in-memory store. With PROJECT_AUDIT_LIVE=1 it also
+ * runs the same contract against the real Supabase project (migration 0003
+ * applied) and proves RLS from the outside. Live mode requires
+ * PROJECT_AUDIT_SUPABASE_URL, PROJECT_AUDIT_EXPECTED_REF,
+ * PROJECT_AUDIT_SERVICE_KEY and PROJECT_AUDIT_ANON_KEY (public key) and fails
+ * if any is missing; PROJECT_AUDIT_AUTHENTICATED_KEY is a real test-user
+ * session token -- without it that one check is reported NOT RUN and the
+ * run exits non-zero.
  */
 import {
   createProjectId,
@@ -417,18 +421,48 @@ console.log("PASS — legacy snapshot restores with defaults; Summary renders");
 
 await contract(new MemoryProjectStore(), "memory");
 
-// --- Real PostgREST + Postgres (Supabase-equivalent) ---
-const url = process.env["PROJECT_AUDIT_SUPABASE_URL"];
-const serviceKey = process.env["PROJECT_AUDIT_SERVICE_KEY"];
-const anonKey = process.env["PROJECT_AUDIT_ANON_KEY"];
-const userKey = process.env["PROJECT_AUDIT_AUTHENTICATED_KEY"];
-if (url && serviceKey && anonKey && userKey) {
-  const store = new SupabaseProjectStore(url, serviceKey);
+// --- Real PostgREST + Postgres (Supabase) ---
+// Live mode is explicit: PROJECT_AUDIT_LIVE=1 (or any PROJECT_AUDIT_* variable)
+// turns it on, and then every required credential must be present -- a
+// missing one FAILS the run instead of silently skipping. Without live mode
+// the run is LOCAL ONLY and says so; it is never a live PASS.
+const env = (name: string) => {
+  const value = process.env[name];
+  return value && value.trim().length > 0 ? value.trim() : undefined;
+};
+const url = env("PROJECT_AUDIT_SUPABASE_URL");
+const expectedRef = env("PROJECT_AUDIT_EXPECTED_REF");
+const serviceKey = env("PROJECT_AUDIT_SERVICE_KEY");
+const anonKey = env("PROJECT_AUDIT_ANON_KEY");
+const userToken = env("PROJECT_AUDIT_AUTHENTICATED_KEY");
+const liveRequested =
+  env("PROJECT_AUDIT_LIVE") === "1" ||
+  Object.keys(process.env).some((name) => name.startsWith("PROJECT_AUDIT_") && env(name));
+let liveIncomplete = false;
+
+if (liveRequested) {
+  const missing = Object.entries({
+    PROJECT_AUDIT_SUPABASE_URL: url,
+    PROJECT_AUDIT_EXPECTED_REF: expectedRef,
+    PROJECT_AUDIT_SERVICE_KEY: serviceKey,
+    PROJECT_AUDIT_ANON_KEY: anonKey,
+  })
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+  assert(missing.length === 0, `LIVE: missing required credentials: ${missing.join(", ")}`);
+  const base = url!.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+  assert(
+    new URL(base).hostname.split(".")[0] === expectedRef,
+    "LIVE: PROJECT_AUDIT_SUPABASE_URL does not belong to PROJECT_AUDIT_EXPECTED_REF",
+  );
+  assert(anonKey !== serviceKey, "LIVE: anon key must not be the service-role key");
+
+  const store = new SupabaseProjectStore(base, serviceKey!);
   await contract(store, "postgrest");
 
   const owned = await saveProject(store, { snapshot: serializeProjectConfiguration(projectA) });
-  const endpoint = `${url.replace(/\/+$/, "")}/rest/v1/projects`;
-  const service = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+  const endpoint = `${base}/rest/v1/projects`;
+  const service = { apikey: serviceKey!, Authorization: `Bearer ${serviceKey}` };
   const stored = (await (
     await fetch(`${endpoint}?public_ref=eq.${owned.publicRef}&select=edit_token_hash,snapshot`, {
       headers: service,
@@ -438,58 +472,94 @@ if (url && serviceKey && anonKey && userKey) {
   assert(!JSON.stringify(stored).includes(owned.editToken!), "raw token never stored");
   assert(!JSON.stringify(stored).includes(customer.email), "contact details never stored");
 
-  for (const [role, key] of [
-    ["anon", anonKey],
-    ["authenticated", userKey],
-  ] as const) {
-    const headers = {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    };
-    const attempts: Array<[string, Promise<Response>]> = [
-      ["list", fetch(`${endpoint}?select=*`, { headers })],
+  // A denial only counts as RLS/privilege proof when Postgres itself refused
+  // (SQLSTATE 42501). Gateway/JWT errors (invalid key, expired token,
+  // PGRST30x) prove nothing about the table and fail the audit instead.
+  const expectDenied = async (role: string, headers: Record<string, string>) => {
+    const json = { ...headers, "Content-Type": "application/json" };
+    const attempts: Array<[string, () => Promise<Response>]> = [
+      ["list", () => fetch(`${endpoint}?select=*`, { headers: json })],
       [
         "read by ref",
-        fetch(`${endpoint}?public_ref=eq.${owned.publicRef}&select=snapshot`, { headers }),
+        () =>
+          fetch(`${endpoint}?public_ref=eq.${owned.publicRef}&select=snapshot`, { headers: json }),
       ],
       [
         "insert",
-        fetch(endpoint, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            public_ref: createPublicRef(),
-            project_id: "x",
-            edit_token_hash: "0".repeat(64),
-            snapshot_version: 1,
-            snapshot: {},
+        () =>
+          fetch(endpoint, {
+            method: "POST",
+            headers: json,
+            body: JSON.stringify({
+              public_ref: createPublicRef(),
+              project_id: "x",
+              edit_token_hash: "0".repeat(64),
+              snapshot_version: 1,
+              snapshot: {},
+            }),
           }),
-        }),
       ],
       [
         "update",
-        fetch(`${endpoint}?public_ref=eq.${owned.publicRef}`, {
-          method: "PATCH",
-          headers,
-          body: JSON.stringify({ snapshot: {} }),
-        }),
+        () =>
+          fetch(`${endpoint}?public_ref=eq.${owned.publicRef}`, {
+            method: "PATCH",
+            headers: json,
+            body: JSON.stringify({ snapshot: {} }),
+          }),
       ],
       [
         "delete",
-        fetch(`${endpoint}?public_ref=eq.${owned.publicRef}`, { method: "DELETE", headers }),
+        () =>
+          fetch(`${endpoint}?public_ref=eq.${owned.publicRef}`, {
+            method: "DELETE",
+            headers: json,
+          }),
       ],
     ];
     for (const [what, request] of attempts) {
-      const response = await request;
-      const text = await response.text();
+      const response = await request();
+      let code: unknown;
+      try {
+        code = ((await response.json()) as { code?: unknown }).code;
+      } catch {
+        code = undefined;
+      }
       assert(
-        response.status === 401 || response.status === 403,
-        `RLS: ${role} ${what} must be denied, got ${response.status} ${text}`,
+        (response.status === 401 || response.status === 403) && code === "42501",
+        `RLS: ${role} ${what} must be refused by Postgres (42501), got ${response.status} ${String(code)}`,
       );
     }
-    console.log(`PASS — RLS: ${role} key denied list/read/insert/update/delete (401/403)`);
+    console.log(`PASS — RLS: ${role} denied list/read/insert/update/delete (Postgres 42501)`);
+  };
+
+  // anon: the project's public key only, validated by the gateway first.
+  const settings = await fetch(`${base}/auth/v1/settings`, { headers: { apikey: anonKey! } });
+  assert(settings.ok, `LIVE: public (anon) key rejected by the gateway (${settings.status})`);
+  await expectDenied("anon", { apikey: anonKey! });
+
+  // authenticated: public key as apikey + a real user session token. The
+  // session is validated against Auth before its denials are counted.
+  if (!userToken) {
+    liveIncomplete = true;
+    console.log(
+      "NOT RUN — RLS authenticated: PROJECT_AUDIT_AUTHENTICATED_KEY (test session) not provided",
+    );
+  } else {
+    assert(
+      userToken !== serviceKey && userToken !== anonKey,
+      "LIVE: authenticated token must be a user session, not a project key",
+    );
+    const userHeaders = { apikey: anonKey!, Authorization: `Bearer ${userToken}` };
+    const who = await fetch(`${base}/auth/v1/user`, { headers: userHeaders });
+    const user = who.ok ? ((await who.json()) as { id?: string; role?: string }) : undefined;
+    assert(
+      user?.id && user.role === "authenticated",
+      `LIVE: test session is not a valid authenticated user (${who.status}); not counted as RLS proof`,
+    );
+    await expectDenied("authenticated", userHeaders);
   }
+
   const intact = parseProjectConfiguration(
     (await loadSharedProject(store, owned.publicRef)).snapshot,
   );
@@ -501,8 +571,17 @@ if (url && serviceKey && anonKey && userKey) {
     "PASS — postgrest: token stored as SHA-256 only, no contact data, row intact after attacks",
   );
 } else {
-  console.log("SKIP — postgrest/RLS: PROJECT_AUDIT_SUPABASE_URL and keys not provided");
+  console.log(
+    "LOCAL ONLY — live PostgREST/RLS not executed (set PROJECT_AUDIT_LIVE=1); not a live PASS",
+  );
 }
 
 assert(mismatches === 0, `${mismatches} mismatches`);
-console.log("PASS — project delivery: 0 mismatches");
+if (liveIncomplete) {
+  console.log("INCOMPLETE — live gate has a NOT RUN check; Build 2 cannot be closed on this run");
+  process.exitCode = 2;
+} else {
+  console.log(
+    `PASS — project delivery: 0 mismatches${liveRequested ? " (live)" : " (local only)"}`,
+  );
+}
