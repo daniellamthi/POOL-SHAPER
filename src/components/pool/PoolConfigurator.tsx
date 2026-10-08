@@ -542,6 +542,7 @@ function ConfiguratorLayout() {
             skimmers={skimmers}
             coverPlan={cover}
             solarShower={config.equipment.includes("solarShower")}
+            loungers={config.equipment.includes("loungers")}
             technicalView={technicalView}
             technicalPlan={technical}
             onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}

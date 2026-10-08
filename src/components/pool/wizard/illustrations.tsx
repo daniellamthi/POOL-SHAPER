@@ -400,6 +400,17 @@ const sections: Record<string, ReactNode> = {
       </text>
     </Frame>
   ),
+  "equipment-loungers": (
+    <Frame>
+      {[22, 48, 82, 108].map((x) => (
+        <g key={x}>
+          <rect x={x} y="34" width="20" height="44" rx="2" />
+          <path d={`M${x + 2} 46 h16`} strokeWidth={0.8} />
+        </g>
+      ))}
+      <rect x="68" y="58" width="8" height="8" rx="1" />
+    </Frame>
+  ),
   "equipment-solarShower": (
     <Frame>
       <rect

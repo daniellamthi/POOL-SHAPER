@@ -825,7 +825,7 @@ export function PoolModel({
   });
 
   const copingJointColor = useMemo(
-    () => new THREE.Color(materials.coping.color).multiplyScalar(0.8),
+    () => new THREE.Color(materials.coping.color).multiplyScalar(0.9),
     [materials.coping.color],
   );
   const configureCopingTriplanar = useCallback(
@@ -1396,7 +1396,12 @@ export function PoolModel({
 
       {isInfinity && infinitySection !== null ? (
         <InfinityEdge
-          rawStructure={rawStructure}
+          // Visible stainless is the finished basin, not a construction
+          // stage: the Infinity containment keeps the same satin steel in
+          // the finish step and the final presentation.
+          rawStructure={
+            structureFamily === "VISIBLE_STAINLESS_STEEL" ? "VISIBLE_STAINLESS_STEEL" : rawStructure
+          }
           showWater={showWater}
           outline={outline}
           shape={shape}

@@ -8,8 +8,9 @@ import { SolarShower } from "./SolarShower";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
 /**
- * Poolside furniture on the studio deck: four contemporary loungers in two
- * pairs with a side table between them, plus the optional solar shower.
+ * Poolside furniture on the studio deck: the optional four contemporary
+ * loungers (two pairs with a side table between them) and the optional
+ * solar shower. Both are equipment options, off by default.
  *
  * Presentation only: nothing here enters the configuration geometry, the
  * quote or the technical plan (the shower is an equipment option, but its
@@ -113,7 +114,11 @@ function planDeckFurniture(
   innerOffset: number,
   band: number,
   avoid: ReadonlyArray<Point>,
-  options: { shower: boolean; coverHousing?: { x: number; halfSpan: number; z: number } | null },
+  options: {
+    loungers: boolean;
+    shower: boolean;
+    coverHousing?: { x: number; halfSpan: number; z: number } | null;
+  },
 ): DeckFurniturePlan {
   const inner = offsetOutline(outline, innerOffset);
   const outer = offsetOutline(inner, band);
@@ -146,14 +151,15 @@ function planDeckFurniture(
   };
 
   let rows: (RowPlacement & { half: number })[] = [];
-  for (const side of long) {
+  // Chaise longues are an optional, off by default: no row unless chosen.
+  for (const side of options.loungers ? long : []) {
     const row = rowFits(side, ROW_OF_FOUR);
     if (row) {
       rows = [row];
       break;
     }
   }
-  if (rows.length === 0) {
+  if (rows.length === 0 && options.loungers) {
     const pairs = long.map((side) => rowFits(side, PAIR));
     if (pairs.every(Boolean)) rows = pairs as (RowPlacement & { half: number })[];
     else if (pairs.some(Boolean)) rows = [pairs.find(Boolean)!];
@@ -307,6 +313,7 @@ export function DeckLoungers({
   waterY,
   avoid = [],
   shower = false,
+  loungers = false,
   coverHousing = null,
 }: {
   outline: Outline;
@@ -319,12 +326,14 @@ export function DeckLoungers({
   avoid?: ReadonlyArray<Point>;
   /** Optional solar shower (equipment option, default off). */
   shower?: boolean;
+  /** Optional row of four chaise longues (equipment option, default off). */
+  loungers?: boolean;
   /** Automatic-cover roller housing on the deck, when present. */
   coverHousing?: { x: number; halfSpan: number; z: number } | null;
 }) {
   const plan = useMemo(
-    () => planDeckFurniture(outline, innerOffset, band, avoid, { shower, coverHousing }),
-    [outline, innerOffset, band, avoid, shower, coverHousing],
+    () => planDeckFurniture(outline, innerOffset, band, avoid, { loungers, shower, coverHousing }),
+    [outline, innerOffset, band, avoid, loungers, shower, coverHousing],
   );
   const geometry = useMemo(() => buildFurnitureGeometry(plan.rows), [plan.rows]);
   useEffect(() => () => Object.values(geometry).forEach((part) => part?.dispose()), [geometry]);

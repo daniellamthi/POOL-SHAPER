@@ -108,6 +108,8 @@ export interface SceneProps {
   coverPlan: CoverPlan;
   /** Optional solar shower on the studio deck (equipment option). */
   solarShower?: boolean;
+  /** Optional chaise longues on the studio deck (equipment option). */
+  loungers?: boolean;
   technicalView: boolean;
   /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
    * while `system === "infinity"`; absent/undefined renders and excludes
@@ -890,6 +892,7 @@ export default function PoolScene({
   skimmers,
   coverPlan,
   solarShower = false,
+  loungers = false,
   technicalView,
   infinityEdge,
   onSelectInfinitySide,
@@ -1279,6 +1282,7 @@ export default function PoolScene({
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
           shower={solarShower}
+          loungers={loungers}
           coverHousing={coverHousing}
         />
       ) : null}
@@ -1391,7 +1395,7 @@ export default function PoolScene({
       {ACTIVE_RENDERING_QUALITY.contactShadows.enabled && system !== "infinity" ? (
         <ContactShadows
           name="pool-contact-shadows"
-          key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}-${solarShower}-${features.join(",")}-${Boolean(coverPlan.geometry)}`}
+          key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}-${solarShower}-${loungers}-${features.join(",")}-${Boolean(coverPlan.geometry)}`}
           position={[
             0,
             // In-ground: just above the paving (y = 0), the surface that

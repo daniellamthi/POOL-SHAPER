@@ -11,7 +11,9 @@ import { buildTechnicalPlan } from "../src/lib/pool/technical-plan";
 import { planSkimmers } from "../src/lib/pool/engineering";
 import { focusForAction, contextualIntent } from "../src/lib/pool/contextual-camera";
 import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
-import { CUSTOMER_STRUCTURES, customerStructureOf } from "../src/lib/pool/config";
+import { CUSTOMER_STRUCTURES, customerStructureOf, EQUIPMENT, EQUIPMENT_GROUPS } from "../src/lib/pool/config";
+import { createCopingSlabGeometry } from "../src/components/pool/three/poolConstruction";
+import { offsetOutline } from "../src/lib/pool/geometry";
 import { isStepSkipped } from "../src/components/pool/wizard/wizard-model";
 import {
   finishDescription,
@@ -174,5 +176,38 @@ const linedSpec = createPhotoSceneSpec(toProjectConfiguration("steel-b", { ...ba
 ok(JSON.stringify(steelSpec) !== JSON.stringify(linedSpec), "photo scene spec follows steel finish");
 const shell = readFileSync("src/components/pool/three/RawShellMaterial.tsx", "utf8");
 ok(shell.includes('kind === "stainless" ? 150'), "visible steel is satin grey, not near-white");
+
+// --- Coping joints: square to the edge, mitred only at the corners ---
+for (const [L, W] of [[8, 4], [6, 3], [12, 5]] as const) {
+  const inner: [number, number][] = [[-L / 2, -W / 2], [L / 2, -W / 2], [L / 2, W / 2], [-L / 2, W / 2]];
+  const band = 0.32;
+  const outer = offsetOutline(inner, band);
+  const geometry = createCopingSlabGeometry(inner, outer, 0.04);
+  const position = geometry.getAttribute("position");
+  const near = (a: number, b: number) => Math.abs(a - b) < 0.012;
+  const innerX = new Set<number>();
+  const outerX: number[] = [];
+  for (let i = 0; i < position.count; i++) {
+    if (Math.abs(position.getY(i)) > 1e-5) continue;
+    const x = position.getX(i), z = Math.abs(position.getZ(i));
+    if (near(z, W / 2)) innerX.add(Math.round(x * 200));
+    else if (near(z, W / 2 + band) && Math.abs(x) < L / 2 - 0.02) outerX.push(Math.round(x * 200));
+  }
+  ok(outerX.length > 0, `${L}x${W}: coping joints sampled`);
+  for (const x of outerX)
+    ok([x - 1, x, x + 1].some((v) => innerX.has(v)), `${L}x${W}: joint at x=${x / 200} runs square to the edge`);
+  const slabs = Math.round(L / 0.62);
+  ok(L / slabs > 0.5 && L / slabs < 0.75, `${L}x${W}: no undersized end slab (${(L / slabs).toFixed(2)} m)`);
+  geometry.dispose();
+}
+
+// --- Exterior optionals: chaise longues and solar shower, both off by default ---
+ok(EQUIPMENT.some((e) => e.id === "loungers") && EQUIPMENT.some((e) => e.id === "solarShower"), "loungers and shower are optionals");
+equal(EQUIPMENT_GROUPS.find((g) => g.id === "poolside")?.equipmentIds, ["loungers", "solarShower"]);
+equal(base.equipment, [], "fixture starts with no optionals");
+const deck = readFileSync("src/components/pool/three/DeckLoungers.tsx", "utf8");
+ok(deck.includes("options.loungers ? long : []"), "no lounger row unless chosen");
+ok(readFileSync("src/components/pool/PoolConfigurator.tsx", "utf8").includes('loungers={config.equipment.includes("loungers")}'), "loungers follow the option");
+ok(readFileSync("src/lib/pool/store.tsx", "utf8").includes("equipment: [],"), "new projects start with loungers and shower off");
 
 console.log(`PASS: ${checks} structural progression checks — stage, snapshot, dry/wet, shape/resize, comfort, technical, photo and downstream identity.`);

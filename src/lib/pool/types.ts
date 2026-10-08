@@ -63,7 +63,12 @@ export type InternalStairType = "linear" | "corner";
 export type HydromassageVariant = "closed" | "open";
 
 export type EquipmentId =
-  "automaticCover" | "heatPump" | "saltElectrolysis" | "automaticDosing" | "solarShower";
+  | "automaticCover"
+  | "heatPump"
+  | "saltElectrolysis"
+  | "automaticDosing"
+  | "solarShower"
+  | "loungers";
 export type CoverPosition = "open" | "closed";
 
 export interface CustomerInfo {

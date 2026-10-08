@@ -1010,8 +1010,15 @@ export function OptionalTray({ ctx }: { ctx: TrayContext }) {
                   ctx.focus(null);
                 })
               : null}
+            {config.system === "infinity" ? null : card("loungers")}
             {card("solarShower")}
           </ChoiceGrid>
+          {config.system === "infinity" ? (
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              Con il bordo Infinity l’esterno è il paesaggio: niente lettini sul bordo a sfioro. La
+              doccia solare resta nella proposta, posizionata in fase di progetto.
+            </p>
+          ) : null}
           {coverOn && coverPlan.status !== "UNAVAILABLE" ? (
             <div className="flex max-w-xl flex-col gap-2 rounded-2xl border border-hairline p-4">
               <div className="flex items-baseline justify-between">

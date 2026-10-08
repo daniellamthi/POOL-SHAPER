@@ -462,6 +462,11 @@ export const EQUIPMENT: ReadonlyArray<{
     title: "Doccia solare",
     description: "Doccia da esterno a riscaldamento solare, alluminio antracite e acciaio inox.",
   },
+  {
+    id: "loungers",
+    title: "Chaise longue",
+    description: "Quattro lettini minimal sul lato lungo, lontani da scale e accessi.",
+  },
 ];
 
 /** Customer-facing subgroups for the Technology step -- purely a display
@@ -478,7 +483,7 @@ export const EQUIPMENT_GROUPS: ReadonlyArray<{
   },
   { id: "temperature", title: "Temperatura", equipmentIds: ["heatPump"] },
   { id: "protection", title: "Protezione", equipmentIds: ["automaticCover"] },
-  { id: "poolside", title: "Bordo piscina", equipmentIds: ["solarShower"] },
+  { id: "poolside", title: "Bordo piscina", equipmentIds: ["loungers", "solarShower"] },
 ];
 
 export const STEPS: ReadonlyArray<StepDefinition> = [

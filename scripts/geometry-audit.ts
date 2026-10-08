@@ -1188,7 +1188,7 @@ assert(
 );
 assert(
   EQUIPMENT.map(({ id }) => id).join(",") ===
-    "automaticCover,heatPump,saltElectrolysis,automaticDosing,solarShower",
+    "automaticCover,heatPump,saltElectrolysis,automaticDosing,solarShower,loungers",
   "invalid quotation equipment",
 );
 assert(MOSAIC_FINISHES.length > 0, "at least one mosaic finish must be configured");

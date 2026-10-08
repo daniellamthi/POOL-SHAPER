@@ -85,6 +85,7 @@ export const EQUIPMENT_LABEL: Record<EquipmentId, string> = {
   saltElectrolysis: "Elettrolisi al sale",
   automaticDosing: "Dosaggio automatico cloro / pH",
   solarShower: "Doccia solare",
+  loungers: "Chaise longue · 4 lettini",
 };
 
 /** Only surfaced inside the summary's "Scopri i dettagli tecnici" panel. */

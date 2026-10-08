@@ -40,8 +40,11 @@ function structuralMaps(kind: RawShellKind) {
       + (n - 0.5) * (kind === "stainless" ? 5 : 14) - pore * 58;
     const i = (y * SIZE + x) * 4;
     color[i] = value;
-    color[i + 1] = value + (kind === "steel" ? 5 : kind === "stainless" ? 3 : 0);
-    color[i + 2] = value + (kind === "steel" ? 8 : kind === "stainless" ? 5 : -3);
+    // Stainless is a neutral, very slightly warm grey: upward faces already
+    // pick up the blue sky, so a cool base read as artificially blue.
+    if (kind === "stainless") color[i] = value + 2;
+    color[i + 1] = value + (kind === "steel" ? 5 : kind === "stainless" ? 1 : 0);
+    color[i + 2] = value + (kind === "steel" ? 8 : kind === "stainless" ? -3 : -3);
     color[i + 3] = 255;
     const roughnessBase = kind === "steel" ? 170 : kind === "stainless" ? 166 : 229;
     roughness[i] = roughness[i + 1] = roughness[i + 2] = roughnessBase + cloud * 7;
@@ -87,8 +90,11 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
       roughnessMap={maps.roughness}
       // Satin: ~0.5 effective roughness after the map -- soft, controlled highlights;
       // upward faces (floor, treads, shelf) must not mirror the sky into white.
-      roughness={kind === "concrete" ? 1 : stainless ? 0.78 : 0.62}
-      metalness={kind === "concrete" ? 0 : stainless ? 1 : 0.76}
+      roughness={kind === "concrete" ? 1 : stainless ? 0.84 : 0.62}
+      // A small diffuse share keeps brushed stainless reading grey from every
+      // side; pure metal turned walls facing away from the sun into a dark
+      // mirror of the ground.
+      metalness={kind === "concrete" ? 0 : stainless ? 0.85 : 0.76}
       anisotropy={stainless ? 0.45 : 0}
       envMapIntensity={kind === "concrete" ? 0.72 : stainless ? 0.95 : 1.2}
       side={THREE.DoubleSide}
@@ -97,6 +103,17 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
         // steel shells (see StainlessSteelMaterial), never for concrete.
         if (kind !== "concrete")
           boostMetalEnvironment(shader, stainless ? 3 : 4, stainless ? 0.95 : 1.1);
+        // Brushed stainless reads as a neutral grey: keep the reflections'
+        // brightness but drain most of their colour, so the sky does not
+        // tint the floor blue and the sand does not turn walls brown.
+        if (stainless)
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "#include <lights_fragment_maps>",
+            `#include <lights_fragment_maps>
+            #if defined( RE_IndirectSpecular )
+              radiance = mix( radiance, vec3( dot( radiance, vec3( 0.2126, 0.7152, 0.0722 ) ) ), 0.7 );
+            #endif`,
+          );
         shader.vertexShader = shader.vertexShader.replace(
           "#include <uv_vertex>",
           `
@@ -107,7 +124,7 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
       `,
         );
       }}
-      customProgramCacheKey={() => `raw-shell-v4-${kind}-${scale.join("-")}`}
+      customProgramCacheKey={() => `raw-shell-v8-${kind}-${scale.join("-")}`}
     />
   );
 }

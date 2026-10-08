@@ -177,6 +177,23 @@ export function createCopingSlabGeometry(
       b = ring[(i + 1) % ring.length]!;
     return [THREE.MathUtils.lerp(a[0], b[0], t), THREE.MathUtils.lerp(a[1], b[1], t)];
   };
+  /** Inner point at arc distance `d`, projected square onto the matching
+   * outer edge (clamped to that edge). */
+  const squareToEdge = (d: number): [number, number] => {
+    let i = 0;
+    while (i < inner.length - 1 && distances[i + 1]! < d - 1e-8) i++;
+    const [px, pz] = pointAt(inner, d);
+    const a = outer[i]!,
+      b = outer[(i + 1) % outer.length]!;
+    const ex = b[0] - a[0],
+      ez = b[1] - a[1];
+    const t = THREE.MathUtils.clamp(
+      ((px - a[0]) * ex + (pz - a[1]) * ez) / Math.max(1e-10, ex * ex + ez * ez),
+      0,
+      1,
+    );
+    return [a[0] + ex * t, a[1] + ez * t];
+  };
   const parts: THREE.BufferGeometry[] = [];
   for (let section = 0; section < corners.length - 1; section++) {
     const rawEdge = distances.findIndex((d) => Math.abs(d - corners[section]!) < 1e-7);
@@ -191,16 +208,28 @@ export function createCopingSlabGeometry(
       const from = start + (length * slab) / count,
         to = start + (length * (slab + 1)) / count;
       const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5), to];
+      // Joints are laid square to the pool edge: a joint between two slabs
+      // runs straight out across the coping (the outer point is the inner
+      // point projected onto the outer edge), and only a true corner keeps
+      // its mitre (inner vertex to outer vertex). Mapping the joint by the
+      // same parametric fraction along the longer outer edge fanned every
+      // intermediate joint into a diagonal.
+      const outerAt = (d: number): [number, number] => {
+        const atCorner = Math.abs(d - start) < 1e-6 || Math.abs(d - (start + length)) < 1e-6;
+        const atVertex = distances.some((v) => Math.abs(v - d) < 1e-6);
+        if (atCorner || atVertex) return pointAt(outer, d);
+        return squareToEdge(d);
+      };
       const polygon: Outline = [
         ...stations.map((d) => pointAt(inner, d)),
-        ...[...stations].reverse().map((d) => pointAt(outer, d)),
+        ...[...stations].reverse().map(outerAt),
       ];
-      // Real coping joint: ~2.5mm at the slab sides, opening to ~6mm at the
+      // Real coping joint: ~2mm at the slab sides, opening to ~4.5mm at the
       // honed face through a 1.8mm eased arris that catches a soft highlight.
       // (A 9mm rounded opening over a deep bed read as a black graphic line.)
       // Insetting before extrusion keeps the stone inside its surveyed perimeter.
       const arris = 0.0018;
-      const inset = offsetOutline(polygon, -0.003);
+      const inset = offsetOutline(polygon, -0.0022);
       const shape = new THREE.Shape(inset.map(([x, z]) => new THREE.Vector2(x, -z)));
       const raw = new THREE.ExtrudeGeometry(shape, {
         depth: thickness - 0.003 - arris,
