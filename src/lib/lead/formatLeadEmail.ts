@@ -12,6 +12,7 @@
  * problems/needs) instead of the new-pool-specific ones (skimmer detail,
  * LED, etc.) that may not even be meaningfully set for a renovation.
  */
+import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, getShapeDefinition } from "@/lib/pool/config";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
@@ -90,6 +91,9 @@ function newPoolLines(submission: LeadSubmission): string[] {
     `Sistema idraulico: ${systemHeadline(config.system, config.overflowType)}${skimmerDetail ? ` (${skimmerDetail})` : ""}`,
     `Rivestimento: ${finishTitle}`,
     `Bordo/coping: ${copingTitle}`,
+    ...(config.poolType === "above-ground"
+      ? [`Pannelli esterni: ${exteriorPanelFinishTitle(config)}`]
+      : []),
     `Accesso: ${accessLabel}`,
     ...(featureLabels.length ? [`Comfort: ${featureLabels.join(", ")}`] : []),
     ...(hasLed

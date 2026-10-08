@@ -1,3 +1,4 @@
+import { exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -543,6 +544,12 @@ function ConfiguratorLayout() {
             coverPlan={cover}
             solarShower={config.equipment.includes("solarShower")}
             loungers={config.equipment.includes("loungers")}
+            {...(config.poolType === "above-ground"
+              ? {
+                  exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
+                  pellicano: config.equipment.includes("pellicano"),
+                }
+              : {})}
             technicalView={technicalView}
             technicalPlan={technical}
             onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}

@@ -53,7 +53,7 @@ type ViewportProps = SceneProps & {
    * repositioned by the parent layout, never remounted). */
   mobileExpanded: boolean;
   onToggleMobileExpanded: () => void;
-  onInspectionView: (view: "review" | "waterline" | "access" | "top" | "infinity") => void;
+  onInspectionView: (view: InspectionView) => void;
 };
 
 /** Shared surface for the floating viewport controls: solid white pill,
@@ -63,11 +63,14 @@ const CONTROL_SURFACE =
 
 const INSPECTION_VIEWS = [
   { id: "review", label: "Vista d’insieme" },
+  { id: "elevation-long", label: "Prospetto lato lungo" },
+  { id: "elevation-short", label: "Prospetto lato corto" },
   { id: "waterline", label: "Linea d’acqua" },
   { id: "access", label: "Accesso" },
   { id: "top", label: "Dall’alto" },
   { id: "infinity", label: "Bordo Infinity" },
 ] as const;
+export type InspectionView = (typeof INSPECTION_VIEWS)[number]["id"];
 
 function ToolButton({
   active = false,
@@ -231,7 +234,11 @@ export const PoolViewport = memo(function PoolViewport({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" sideOffset={6} className="min-w-44 rounded-2xl p-1.5">
-            {INSPECTION_VIEWS.filter((view) => view.id !== "infinity" || scene.system === "infinity").map((view) => (
+            {INSPECTION_VIEWS.filter(
+              (view) =>
+                (view.id !== "infinity" || scene.system === "infinity") &&
+                (!view.id.startsWith("elevation") || scene.poolType === "above-ground"),
+            ).map((view) => (
               <DropdownMenuItem
                 key={view.id}
                 onSelect={() => onInspectionView(view.id)}

@@ -400,6 +400,15 @@ const sections: Record<string, ReactNode> = {
       </text>
     </Frame>
   ),
+  "equipment-pellicano": (
+    <Frame>
+      <rect x="14" y="62" width="132" height="26" rx="2" />
+      <path d="M58 62 V40 Q58 26 74 26 H84 Q96 26 98 36" strokeWidth={3} />
+      <path d="M98 38 Q104 52 106 62" strokeWidth={0.8} strokeDasharray="2 2" />
+      <path d="M92 38 Q98 52 100 62" strokeWidth={0.8} strokeDasharray="2 2" />
+      <ellipse cx="103" cy="64" rx="10" ry="2" strokeWidth={0.8} />
+    </Frame>
+  ),
   "equipment-loungers": (
     <Frame>
       {[22, 48, 82, 108].map((x) => (

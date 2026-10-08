@@ -2,14 +2,44 @@ import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 import { useEffect, useMemo } from "react";
 import { planExternalStaircase, type ExternalStaircaseProps } from "./externalStaircasePlan";
 import { createContactAOGradientMap } from "./textures";
+import { CladdingMaterial } from "./AboveGroundCladding";
+import { loadCopingTextureMaps } from "./stoneTextures";
+import { DEFAULT_EXTERIOR_PANEL_FINISH, type ExteriorPanelFinishId } from "@/lib/pool/above-ground";
 
+/** Tread slab thickness and its front nosing, metres. */
+const TREAD = { thickness: 0.03, nosing: 0.02 } as const;
+
+/**
+ * Above-ground external access: a solid stepped block standing against the
+ * pool, its sides and risers clad in the pool's own exterior panels, every
+ * tread a stone/gres slab in the coping finish, the top tread flush with the
+ * coping as the landing. A slim satin stainless handrail runs on both sides.
+ * Removed entirely (block, treads, rails) when the option is off.
+ */
 export function ExternalStaircase({
   outline,
   groundY,
   topY,
   copingOffset,
   infinityExcluded = null,
-}: ExternalStaircaseProps) {
+  finish = DEFAULT_EXTERIOR_PANEL_FINISH,
+  tread,
+}: ExternalStaircaseProps & {
+  finish?: ExteriorPanelFinishId;
+  /** Coping finish for the treads: a colour and, when the coping is a
+   * scanned asset, its maps directory. */
+  tread: { color: string; roughness: number; assetDir: string | null };
+}) {
+  const treadMaps = useMemo(
+    () => (tread.assetDir ? loadCopingTextureMaps(tread.assetDir) : null),
+    [tread.assetDir],
+  );
+  useEffect(
+    () => () => {
+      if (treadMaps) Object.values(treadMaps).forEach((map) => map?.dispose());
+    },
+    [treadMaps],
+  );
   const layout = useMemo(
     () => planExternalStaircase({ outline, groundY, topY, copingOffset, infinityExcluded }),
     [groundY, outline, topY, copingOffset, infinityExcluded],
@@ -45,26 +75,49 @@ export function ExternalStaircase({
 
       {Array.from({ length: layout.stepCount }, (_, index) => {
         const level = index + 1;
-        const blockHeight = layout.rise * level;
+        // Block top sits one tread below the step level, so the top tread
+        // lands exactly at the coping: a flush landing, never a lip above it.
+        const blockHeight = layout.rise * level - TREAD.thickness;
         const z = (layout.stepCount - index - 0.5) * layout.treadDepth;
-        // The top step's own riser top already sits exactly at `topY` (its
-        // block height is defined as the full `height`), so it's already
-        // flush with the pool's top edge -- the proud nosing cap every other
-        // tread gets would push *this* one above that edge instead of
-        // landing flush with it, so the top step skips it.
-        const isTopStep = level === layout.stepCount;
         return (
           <group key={level}>
             <mesh position={[0, groundY + blockHeight / 2, z]} castShadow receiveShadow>
               <boxGeometry args={[layout.width, blockHeight, layout.treadDepth]} />
-              <meshStandardMaterial color="#f1f2f2" roughness={0.48} metalness={0.02} />
+              <CladdingMaterial finish={finish} />
             </mesh>
-            {!isTopStep ? (
-              <mesh position={[0, groundY + blockHeight + 0.018, z]} castShadow receiveShadow>
-                <boxGeometry args={[layout.width + 0.04, 0.036, layout.treadDepth + 0.025]} />
-                <meshStandardMaterial color="#34383c" roughness={0.34} metalness={0.08} />
-              </mesh>
-            ) : null}
+            <mesh
+              position={[
+                0,
+                groundY + blockHeight + TREAD.thickness / 2,
+                z + (level === layout.stepCount ? 0 : TREAD.nosing / 2),
+              ]}
+              castShadow
+              receiveShadow
+            >
+              <boxGeometry
+                args={[
+                  layout.width + 0.02,
+                  TREAD.thickness,
+                  layout.treadDepth + (level === layout.stepCount ? 0 : TREAD.nosing),
+                ]}
+              />
+              {treadMaps ? (
+                <meshStandardMaterial
+                  color="#ffffff"
+                  map={treadMaps.colorMap}
+                  normalMap={treadMaps.normalMap}
+                  roughnessMap={treadMaps.roughnessMap}
+                  roughness={treadMaps.roughnessMap ? 1 : tread.roughness}
+                  metalness={0}
+                />
+              ) : (
+                <meshStandardMaterial
+                  color={tread.color}
+                  roughness={tread.roughness}
+                  metalness={0}
+                />
+              )}
+            </mesh>
           </group>
         );
       })}
@@ -77,7 +130,7 @@ export function ExternalStaircase({
             return (
               <mesh key={index} position={[0, stepY + railHeight / 2, z]} castShadow>
                 <cylinderGeometry args={[0.016, 0.016, railHeight, 10]} />
-                <StainlessSteelMaterial finish="polished" />
+                <StainlessSteelMaterial finish="brushed" />
               </mesh>
             );
           })}
@@ -87,7 +140,7 @@ export function ExternalStaircase({
             castShadow
           >
             <cylinderGeometry args={[0.018, 0.018, railLength, 10]} />
-            <StainlessSteelMaterial finish="polished" />
+            <StainlessSteelMaterial finish="brushed" />
           </mesh>
         </group>
       ))}

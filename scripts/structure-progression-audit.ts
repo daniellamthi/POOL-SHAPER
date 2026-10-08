@@ -203,7 +203,7 @@ for (const [L, W] of [[8, 4], [6, 3], [12, 5]] as const) {
 
 // --- Exterior optionals: chaise longues and solar shower, both off by default ---
 ok(EQUIPMENT.some((e) => e.id === "loungers") && EQUIPMENT.some((e) => e.id === "solarShower"), "loungers and shower are optionals");
-equal(EQUIPMENT_GROUPS.find((g) => g.id === "poolside")?.equipmentIds, ["loungers", "solarShower"]);
+equal(EQUIPMENT_GROUPS.find((g) => g.id === "poolside")?.equipmentIds, ["pellicano", "loungers", "solarShower"]);
 equal(base.equipment, [], "fixture starts with no optionals");
 const deck = readFileSync("src/components/pool/three/DeckLoungers.tsx", "utf8");
 ok(deck.includes("options.loungers ? long : []"), "no lounger row unless chosen");

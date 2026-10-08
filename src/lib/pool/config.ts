@@ -463,6 +463,12 @@ export const EQUIPMENT: ReadonlyArray<{
     description: "Doccia da esterno a riscaldamento solare, alluminio antracite e acciaio inox.",
   },
   {
+    id: "pellicano",
+    title: "Pellicano — Cascata a lama d’acqua",
+    description:
+      "Bocchetta in acciaio inox a lama sul bordo: allacciamento e pompa da verificare in progetto.",
+  },
+  {
     id: "loungers",
     title: "Chaise longue",
     description: "Quattro lettini minimal sul lato lungo, lontani da scale e accessi.",
@@ -483,7 +489,11 @@ export const EQUIPMENT_GROUPS: ReadonlyArray<{
   },
   { id: "temperature", title: "Temperatura", equipmentIds: ["heatPump"] },
   { id: "protection", title: "Protezione", equipmentIds: ["automaticCover"] },
-  { id: "poolside", title: "Bordo piscina", equipmentIds: ["loungers", "solarShower"] },
+  {
+    id: "poolside",
+    title: "Bordo piscina",
+    equipmentIds: ["pellicano", "loungers", "solarShower"],
+  },
 ];
 
 export const STEPS: ReadonlyArray<StepDefinition> = [

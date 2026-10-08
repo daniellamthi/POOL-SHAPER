@@ -33,6 +33,8 @@ import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
 import { ExternalStaircase } from "./ExternalStaircase";
+import { Pellicano } from "./Pellicano";
+import { planPellicano } from "@/lib/pool/above-ground";
 import { planExternalStaircase } from "./externalStaircasePlan";
 import { createSurfaceGeometry } from "./poolGeometry";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
@@ -110,6 +112,10 @@ export interface SceneProps {
   solarShower?: boolean;
   /** Optional chaise longues on the studio deck (equipment option). */
   loungers?: boolean;
+  /** Above-ground: exterior cladding finish. */
+  exteriorPanelFinish?: import("@/lib/pool/above-ground").ExteriorPanelFinishId;
+  /** Above-ground: stainless water-blade spout (equipment option). */
+  pellicano?: boolean;
   technicalView: boolean;
   /** Geometry Pass D (Infinity, Rectangle-only first slice). Only meaningful
    * while `system === "infinity"`; absent/undefined renders and excludes
@@ -893,6 +899,8 @@ export default function PoolScene({
   coverPlan,
   solarShower = false,
   loungers = false,
+  exteriorPanelFinish,
+  pellicano = false,
   technicalView,
   infinityEdge,
   onSelectInfinitySide,
@@ -1089,6 +1097,11 @@ export default function PoolScene({
     infinityExcluded,
     verticalLayout,
   ]);
+  // Pellicano on the short side farthest from every access point.
+  const pellicanoPlacement = useMemo(
+    () => (poolType === "above-ground" && pellicano ? planPellicano(outline, deckObstacles) : null),
+    [poolType, pellicano, outline, deckObstacles],
+  );
   // The automatic-cover roller sits on the deck at one short end.
   const coverHousing = useMemo(
     () =>
@@ -1267,7 +1280,8 @@ export default function PoolScene({
             overflowType={overflowType}
             paving={paving ?? "gres"}
             environment={construction?.showEnvironment ?? true}
-            decking={construction?.showDecking ?? true}
+            // An above-ground pool stands on the lawn: no arbitrary terrace.
+            decking={poolType !== "above-ground" && (construction?.showDecking ?? true)}
             waterY={verticalLayout.waterY}
           />
         </Suspense>
@@ -1288,6 +1302,7 @@ export default function PoolScene({
       ) : null}
 
       <PoolModel
+        {...(exteriorPanelFinish ? { exteriorPanelFinish } : {})}
         resolvedLayout={resolvedLayout}
         features={features}
         poolAccess={poolAccess}
@@ -1356,6 +1371,21 @@ export default function PoolScene({
           infinityExcluded={infinityExcluded}
           groundY={verticalLayout.groundY}
           topY={system === "overflow" ? verticalLayout.waterY - 0.001 : verticalLayout.copingY}
+          {...(exteriorPanelFinish ? { finish: exteriorPanelFinish } : {})}
+          tread={{
+            color: materials.coping.color,
+            roughness: materials.coping.roughness,
+            assetDir: "asset" in materials.coping ? materials.coping.asset.dir : null,
+          }}
+        />
+      ) : null}
+
+      {poolType === "above-ground" && pellicano && pellicanoPlacement && showWater && (construction?.showAccessories ?? true) ? (
+        <Pellicano
+          position={[pellicanoPlacement.x, pellicanoPlacement.z]}
+          rotation={Math.atan2(pellicanoPlacement.inward[0], pellicanoPlacement.inward[1])}
+          copingY={verticalLayout.copingY}
+          waterY={verticalLayout.waterY}
         />
       ) : null}
 

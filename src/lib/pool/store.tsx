@@ -1,3 +1,4 @@
+import { exteriorPanelFinish, withoutAboveGroundOnly, type ExteriorPanelFinishId } from "./above-ground";
 import {
   useCallback,
   useEffect,
@@ -112,6 +113,7 @@ type Action =
   | { type: "setLedIntensity"; value: number }
   | { type: "setSceneTime"; value: "day" | "night" }
   | { type: "setPaving"; value: PavingId }
+  | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
   | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
@@ -231,6 +233,10 @@ function configurationReducer(state: State, action: Action): State {
       return { ...state, config: { ...config, sceneTime: action.value } };
     case "setPaving":
       return { ...state, config: { ...config, paving: pavingId(action.value) } };
+    case "setExteriorPanelFinish":
+      return config.poolType === "above-ground"
+        ? { ...state, config: { ...config, exteriorPanelFinish: exteriorPanelFinish(action.value) } }
+        : state;
     case "setPremiumEnvironment":
       return { ...state, config: { ...config, premiumEnvironment: premiumEnvironment(action.value) } };
     case "setProjectType": {
@@ -258,13 +264,19 @@ function configurationReducer(state: State, action: Action): State {
         config.shape,
         action.value,
       );
+      const aboveGround = action.value === "above-ground";
       const nextConfig = {
-        ...config,
+        ...(aboveGround ? config : withoutAboveGroundOnly(config)),
         poolType: action.value,
         structure,
         finish: normaliseFinishForStructure(structure, config.finish),
         features,
         system,
+        // Above ground the internal entry steps are included by default; the
+        // customer can still remove them in Accesso & comfort.
+        ...(aboveGround && config.poolAccess === null
+          ? { poolAccess: "internalSteps" as const, internalStairType: "linear" as const }
+          : {}),
       };
       return { ...state, config: system === "infinity" ? nextConfig : withoutInfinityEdge(nextConfig) };
     }
@@ -490,6 +502,7 @@ function configurationReducer(state: State, action: Action): State {
     case "setPoolAccess":
       return { ...state, config: { ...config, poolAccess: action.value } };
     case "toggleEquipment": {
+      if (action.value === "pellicano" && config.poolType !== "above-ground") return state;
       const equipment = config.equipment.includes(action.value)
         ? config.equipment.filter((id) => id !== action.value)
         : [...config.equipment, action.value];
@@ -612,7 +625,9 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
       return index;
     if (stepId === "access" && !(activeFlightKind(config.features)
       ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
-      : config.poolAccess !== null && !configuredAccessPlan(config).reason)) return index;
+      : (config.poolAccess === null
+          ? config.poolType === "above-ground" // internal stairs OFF is a valid choice above ground
+          : !configuredAccessPlan(config).reason))) return index;
   }
   return STEPS.length - 1;
 }
@@ -759,7 +774,9 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         );
       if (stepId === "access") return activeFlightKind(config.features)
         ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
-        : config.poolAccess !== null && !configuredAccessPlan(config).reason;
+        : (config.poolAccess === null
+          ? config.poolType === "above-ground" // internal stairs OFF is a valid choice above ground
+          : !configuredAccessPlan(config).reason);
       return true;
     },
     [config, renovation, outline],
@@ -805,6 +822,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
       setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
+      setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),
       setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
@@ -866,3 +884,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
 
   return <ConfiguratorContext.Provider value={value}>{children}</ConfiguratorContext.Provider>;
 }
+
+/** The pure configuration reducer and initial state, for the node audits
+ * (scripts/above-ground-audit.ts). Not used by the app. */
+export const configuratorTesting = { reducer: configurationReducer, createInitialState };

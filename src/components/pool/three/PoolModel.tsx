@@ -1,3 +1,9 @@
+import { AboveGroundCladding } from "./AboveGroundCladding";
+import {
+  claddingFaceOffset,
+  DEFAULT_EXTERIOR_PANEL_FINISH,
+  type ExteriorPanelFinishId,
+} from "@/lib/pool/above-ground";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -95,6 +101,8 @@ interface PoolModelProps {
   poolType: PoolType;
   copingThickness: number;
   showWater: boolean;
+  /** Above-ground exterior cladding finish. */
+  exteriorPanelFinish?: ExteriorPanelFinishId;
   rawStructure?: StructureFamily | null;
   structureFamily?: StructureFamily | null;
   showAccessories?: boolean;
@@ -435,6 +443,7 @@ export function PoolModel({
   poolType,
   copingThickness,
   showWater,
+  exteriorPanelFinish = DEFAULT_EXTERIOR_PANEL_FINISH,
   rawStructure = null,
   structureFamily = null,
   showAccessories = true,
@@ -1320,7 +1329,15 @@ export function PoolModel({
         ) : null}
       </group>
 
-      {poolType === "above-ground" ? (
+      {poolType === "above-ground" && !rawShellKind ? (
+        <AboveGroundCladding
+          outline={outline}
+          faceOffset={claddingFaceOffset(copingOuterOffset(system, overflowType))}
+          groundY={verticalLayout.groundY}
+          topY={verticalLayout.wallTopY}
+          finish={exteriorPanelFinish}
+        />
+      ) : poolType === "above-ground" ? (
         <mesh geometry={exteriorWalls} receiveShadow castShadow>
           {rawShellKind ? <RawShellMaterial kind={rawShellKind} wallSize={wallSize} /> : <meshStandardMaterial
             color="#ffffff"

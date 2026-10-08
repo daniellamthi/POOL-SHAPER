@@ -53,6 +53,10 @@ export type CameraIntent =
   | "structure"
   | "depth" | "inox" | "shelf" | "hydromassage" | "bench" | "coping"
   | "top"
+  /** Above-ground elevations: the full exterior volume, square to a side,
+   * from the ground contact to the coping. */
+  | "elevation-long"
+  | "elevation-short"
   | "waterline"
   | "overview"
   | "skimmer"
@@ -594,6 +598,22 @@ export function getCameraPose({
     const extent = Math.max(bounds.spanZ + 4, (bounds.spanX + 4) / Math.max(0.25, viewportAspect));
     const height = extent / (2 * Math.tan(verticalFov * Math.PI / 360));
     return { position: [centre[0], layout.wallTopY + height, centre[1] + 0.001], target: [centre[0], layout.waterY, centre[1]] };
+  }
+  if (intent === "elevation-long" || intent === "elevation-short") {
+    const alongX = bounds.spanX >= bounds.spanZ;
+    // Face the long side (looking across the short axis) or the short side.
+    const faceZ = intent === "elevation-long" ? alongX : !alongX;
+    const across = faceZ ? bounds.spanX : bounds.spanZ;
+    const tanY = Math.tan((verticalFov * Math.PI) / 360);
+    const tanX = tanY * Math.max(0.25, viewportAspect);
+    const height = layout.copingY - layout.groundY;
+    const fit = Math.max((across + 3) / 2 / tanX, (height + 2.2) / 2 / tanY);
+    const eyeY = layout.groundY + height * 0.55 + 0.35;
+    const targetY = layout.groundY + height * 0.45;
+    const depthOffset = (faceZ ? bounds.spanZ : bounds.spanX) / 2 + fit;
+    return faceZ
+      ? { position: [centre[0], eyeY, centre[1] + depthOffset], target: [centre[0], targetY, centre[1]] }
+      : { position: [centre[0] + depthOffset, eyeY, centre[1]], target: [centre[0], targetY, centre[1]] };
   }
   if (intent === "waterline") {
     const distance = Math.max(bounds.spanX, bounds.spanZ / Math.max(0.25, viewportAspect)) * 1.1;

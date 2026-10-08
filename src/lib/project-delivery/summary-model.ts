@@ -4,6 +4,7 @@
  * ProjectConfiguration. The in-app Summary and the Project Book PDF both
  * render this object, so the two can never disagree.
  */
+import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import type { ProjectConfiguration } from "@/lib/pool/project";
 import { projectGeometry } from "@/lib/pool/project-metrics";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
@@ -308,7 +309,10 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
           value: copingMaterial?.title ?? "Da selezionare",
           swatch: copingMaterial ? { hex: copingMaterial.color } : undefined,
         },
-        { label: "Pavimentazione", value: paving.label, swatch: { hex: paving.color } },
+        // Above ground: the exterior cladding replaces the terrace.
+        ...(config.poolType === "above-ground"
+          ? [{ label: "Pannelli esterni", value: exteriorPanelFinishTitle(config) }]
+          : [{ label: "Pavimentazione", value: paving.label, swatch: { hex: paving.color } }]),
       ],
     },
   ];

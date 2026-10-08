@@ -68,7 +68,8 @@ export type EquipmentId =
   | "saltElectrolysis"
   | "automaticDosing"
   | "solarShower"
-  | "loungers";
+  | "loungers"
+  | "pellicano";
 export type CoverPosition = "open" | "closed";
 
 export interface CustomerInfo {
@@ -219,6 +220,9 @@ export interface PoolConfig {
    * the roller) .. 1 = fully closed. Absent on projects saved before the
    * slider existed; readers derive it from `coverPosition`. */
   coverExtension?: number;
+  /** Above-ground only: finish of the exterior cladding panels. Absent on
+   * legacy projects; readers substitute the satin steel default. */
+  exteriorPanelFinish?: import("./above-ground").ExteriorPanelFinishId;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;
 }

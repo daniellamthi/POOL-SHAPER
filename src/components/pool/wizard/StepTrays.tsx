@@ -45,6 +45,7 @@ import {
 } from "@/configurator/steps/pool-shape/PoolShapeStep";
 import type { SceneFocus } from "@/components/pool/three/PoolScene";
 import { ChoiceCard, ChoiceGrid, GroupLabel, RevealSection, StepTabs } from "./ChoiceCard";
+import { EXTERIOR_PANEL_FINISHES, exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { Illustration } from "./illustrations";
 
 /** What a tray may ask of the shell: point the camera at what is being edited,
@@ -536,10 +537,13 @@ export function AccessTray() {
         onChange={setTab}
         tabs={[
           { id: "access", label: "Accesso" },
-          { id: "comfort", label: "Comfort in acqua" },
+          // Above ground there is no shelf, bench or hydromassage to choose.
+          ...(config.poolType === "above-ground"
+            ? []
+            : [{ id: "comfort" as const, label: "Comfort in acqua" }]),
         ]}
       />
-      {tab === "access" ? (
+      {tab === "access" || config.poolType === "above-ground" ? (
         <div className="flex flex-col gap-5">
           <ChoiceGrid label="Accesso alla piscina">
             <ChoiceCard
@@ -569,8 +573,8 @@ export function AccessTray() {
             {config.poolType === "above-ground" ? (
               <ChoiceCard
                 optional
-                title="Scala esterna"
-                description="Gradini esterni fino al bordo vasca."
+                title="Scala esterna di accesso"
+                description="Blocco a gradini rivestito come la piscina, pedate nel materiale del bordo."
                 image={ill("access-external")}
                 selected={config.features.includes("externalStaircase")}
                 onSelect={() => togglePoolFeature("externalStaircase")}
@@ -623,14 +627,16 @@ export function AccessTray() {
               ) : null}
             </RevealSection>
           ) : null}
-          <button
-            type="button"
-            onClick={() => setTab("comfort")}
-            className="inline-flex w-fit items-center gap-1.5 self-start rounded-full px-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Prosegui con <span className="text-foreground">Comfort in acqua</span>
-            <ArrowRight className="size-3.5 text-brand" strokeWidth={1.5} aria-hidden />
-          </button>
+          {config.poolType === "above-ground" ? null : (
+            <button
+              type="button"
+              onClick={() => setTab("comfort")}
+              className="inline-flex w-fit items-center gap-1.5 self-start rounded-full px-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Prosegui con <span className="text-foreground">Comfort in acqua</span>
+              <ArrowRight className="size-3.5 text-brand" strokeWidth={1.5} aria-hidden />
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-5">
@@ -707,7 +713,15 @@ export function AccessTray() {
 /* ---------------------------------------------------------------- 05 */
 
 export function FinishTray() {
-  const { config, setFinish, setLinerColor, setMosaicFinish, setPoolStructure } = useConfigurator();
+  const {
+    config,
+    setFinish,
+    setLinerColor,
+    setMosaicFinish,
+    setPoolStructure,
+    setExteriorPanelFinish,
+  } = useConfigurator();
+  const [finishTab, setFinishTab] = useState<"interior" | "exterior">("interior");
   const steel = customerStructureOf(config.structure) === "steel";
   const visibleSteel = isVisibleStainlessStructure(config.structure);
   const active: "steel" | "liner" | "mosaic" = visibleSteel
@@ -751,58 +765,101 @@ export function FinishTray() {
           select: () => setFinish("mosaic"),
         },
       ];
+  const aboveGround = config.poolType === "above-ground";
   return (
     <TabBody>
-      <ChoiceGrid label="Rivestimento interno">
-        {options.map((option) => (
-          <ChoiceCard
-            key={option.id}
-            title={option.title}
-            description={option.description}
-            image={option.image}
-            selected={active === option.id}
-            onSelect={option.select}
-          />
-        ))}
-      </ChoiceGrid>
-      {active === "liner" ? (
-        <div className="flex flex-col gap-3">
-          <GroupLabel>Colore del liner</GroupLabel>
-          <ChoiceGrid label="Colore liner PVC" dense>
-            {LINER_COLORS.map((color) => (
-              <ChoiceCard
-                compact
-                key={color.id}
-                title={color.title.replace("Motion ", "")}
-                description={LINER_COPY[color.id] ?? "Liner PVC armato."}
-                image={color.texture}
-                selected={config.linerColor === color.id}
-                onSelect={() => setLinerColor(color.id)}
-              />
-            ))}
-          </ChoiceGrid>
-        </div>
-      ) : active === "mosaic" ? (
-        <div className="flex flex-col gap-3">
-          <GroupLabel>Finitura mosaico</GroupLabel>
-          <ChoiceGrid label="Finitura mosaico" dense>
-            {MOSAIC_FINISHES.map((mosaic) => (
-              <ChoiceCard
-                compact
-                key={mosaic.id}
-                title={mosaic.name}
-                description="Tessere in vetro, posa a mano."
-                image={mosaic.preview}
-                selected={config.mosaicFinish === mosaic.id}
-                onSelect={() => setMosaicFinish(mosaic.id)}
-              />
-            ))}
-          </ChoiceGrid>
-        </div>
+      {aboveGround ? (
+        <StepTabs
+          label="Finiture"
+          value={finishTab}
+          onChange={setFinishTab}
+          tabs={[
+            { id: "interior", label: "Rivestimento interno" },
+            { id: "exterior", label: "Pannelli esterni" },
+          ]}
+        />
       ) : null}
+      {aboveGround && finishTab === "exterior" ? (
+        <ChoiceGrid label="Pannelli esterni">
+          {EXTERIOR_PANEL_FINISHES.map((panel) => (
+            <ChoiceCard
+              key={panel.id}
+              title={panel.title}
+              description={panel.description}
+              image={PANEL_SWATCH[panel.id]}
+              selected={exteriorPanelFinish(config.exteriorPanelFinish) === panel.id}
+              onSelect={() => setExteriorPanelFinish(panel.id)}
+            />
+          ))}
+        </ChoiceGrid>
+      ) : (
+        <>
+          <ChoiceGrid label="Rivestimento interno">
+            {options.map((option) => (
+              <ChoiceCard
+                key={option.id}
+                title={option.title}
+                description={option.description}
+                image={option.image}
+                selected={active === option.id}
+                onSelect={option.select}
+              />
+            ))}
+          </ChoiceGrid>
+          {active === "liner" ? (
+            <div className="flex flex-col gap-3">
+              <GroupLabel>Colore del liner</GroupLabel>
+              <ChoiceGrid label="Colore liner PVC" dense>
+                {LINER_COLORS.map((color) => (
+                  <ChoiceCard
+                    compact
+                    key={color.id}
+                    title={color.title.replace("Motion ", "")}
+                    description={LINER_COPY[color.id] ?? "Liner PVC armato."}
+                    image={color.texture}
+                    selected={config.linerColor === color.id}
+                    onSelect={() => setLinerColor(color.id)}
+                  />
+                ))}
+              </ChoiceGrid>
+            </div>
+          ) : active === "mosaic" ? (
+            <div className="flex flex-col gap-3">
+              <GroupLabel>Finitura mosaico</GroupLabel>
+              <ChoiceGrid label="Finitura mosaico" dense>
+                {MOSAIC_FINISHES.map((mosaic) => (
+                  <ChoiceCard
+                    compact
+                    key={mosaic.id}
+                    title={mosaic.name}
+                    description="Tessere in vetro, posa a mano."
+                    image={mosaic.preview}
+                    selected={config.mosaicFinish === mosaic.id}
+                    onSelect={() => setMosaicFinish(mosaic.id)}
+                  />
+                ))}
+              </ChoiceGrid>
+            </div>
+          ) : null}
+        </>
+      )}
     </TabBody>
   );
 }
+
+/** Card images for the exterior panels: a steel swatch drawn as boards,
+ * and the real textures for gres and composite. */
+const PANEL_SWATCH: Record<string, string> = {
+  "steel-satin": `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#9a9da1"/><stop offset=".5" stop-color="#b9bcc0"/><stop offset="1" stop-color="#8e9195"/></linearGradient></defs><rect width="160" height="100" fill="url(#g)"/><g stroke="#6f7276" stroke-width="1.2"><line x1="40" y1="0" x2="40" y2="100"/><line x1="80" y1="0" x2="80" y2="100"/><line x1="120" y1="0" x2="120" y2="100"/></g></svg>',
+  )}`,
+  "composite-light": `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><rect width="160" height="100" fill="#e2e0da"/><g stroke="#b7b4ad" stroke-width="1.2"><line x1="40" y1="0" x2="40" y2="100"/><line x1="80" y1="0" x2="80" y2="100"/><line x1="120" y1="0" x2="120" y2="100"/></g></svg>',
+  )}`,
+  gres: `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><rect width="160" height="100" fill="#b9afa2"/><g stroke="#8f867a" stroke-width="1.2"><line x1="40" y1="0" x2="40" y2="100"/><line x1="80" y1="0" x2="80" y2="100"/><line x1="120" y1="0" x2="120" y2="100"/></g></svg>',
+  )}`,
+};
 
 /* ---------------------------------------------------------------- 06 */
 
@@ -909,13 +966,17 @@ export function LightTray() {
 /* ---------------------------------------------------------------- 07 */
 
 const PAVING_IMAGES: Record<string, string | undefined> = {
-  gres: "/textures/coping/gres/basecolor.png",
+  gres: `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><rect width="160" height="100" fill="#b9afa2"/><g stroke="#8f867a" stroke-width="1.2"><line x1="40" y1="0" x2="40" y2="100"/><line x1="80" y1="0" x2="80" y2="100"/><line x1="120" y1="0" x2="120" y2="100"/></g></svg>',
+  )}`,
   wood: "/textures/coping/deck/basecolor.png",
 };
 
 export function DeckTray() {
   const { config, setCopingMaterial, setPaving } = useConfigurator();
   const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
+  // Above ground the pool stands on the lawn: the coping is the only finish.
+  const pavingOffered = config.poolType !== "above-ground";
   const [tab, setTab] = useState<"coping" | "paving">(copingVisible ? "coping" : "paving");
   return (
     <TabBody>
@@ -925,7 +986,7 @@ export function DeckTray() {
         onChange={setTab}
         tabs={[
           ...(copingVisible ? [{ id: "coping" as const, label: "Bordo vasca" }] : []),
-          { id: "paving", label: "Pavimentazione" },
+          ...(pavingOffered ? [{ id: "paving" as const, label: "Pavimentazione" }] : []),
         ]}
       />
       {tab === "coping" && copingVisible ? (
@@ -1010,6 +1071,7 @@ export function OptionalTray({ ctx }: { ctx: TrayContext }) {
                   ctx.focus(null);
                 })
               : null}
+            {config.poolType === "above-ground" ? card("pellicano") : null}
             {config.system === "infinity" ? null : card("loungers")}
             {card("solarShower")}
           </ChoiceGrid>

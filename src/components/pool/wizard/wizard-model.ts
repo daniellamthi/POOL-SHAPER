@@ -1,3 +1,4 @@
+import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import {
   EQUIPMENT,
   FINISHES,
@@ -182,6 +183,12 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       return parts.join(" · ");
     }
     case "style":
+      if (config.poolType === "above-ground") {
+        const interior = isVisibleStainlessStructure(config.structure)
+          ? "Acciaio a vista"
+          : `Liner ${(title(LINER_COLORS, config.linerColor) ?? "").replace("Motion ", "")}`;
+        return `${interior} · pannelli ${exteriorPanelFinishTitle(config).toLowerCase()}`;
+      }
       if (isVisibleStainlessStructure(config.structure)) return "Acciaio a vista · inox satinato";
       return config.finish === "mosaic"
         ? `Mosaico · ${MOSAIC_FINISHES.find((m) => m.id === config.mosaicFinish)?.name ?? ""}`
