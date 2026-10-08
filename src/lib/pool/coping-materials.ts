@@ -14,9 +14,10 @@ export const COPING_MATERIALS = [
     subtitle: "Soft contemporary limestone",
     category: "Natural stone",
     description: "A soft, homogeneous limestone with a fine, quietly contemporary grain.",
-    color: "#e5dfd0",
-    roughness: 0.75,
-    normalStrength: 0.1,
+    color: "#ece0c8",
+    // Honed stone: matte with a readable grain (0.1 read as smooth plastic).
+    roughness: 0.82,
+    normalStrength: 0.3,
     moduleSize: 0.45,
   },
   {
@@ -27,8 +28,8 @@ export const COPING_MATERIALS = [
     description:
       "A grey natural-stone finish with pale mineral inclusions, following the selected reference.",
     color: "#91938e",
-    roughness: 0.8,
-    normalStrength: 0.2,
+    roughness: 0.82,
+    normalStrength: 0.32,
     moduleSize: 0.4,
   },
   {

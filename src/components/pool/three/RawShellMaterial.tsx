@@ -112,6 +112,11 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
             `#include <lights_fragment_maps>
             #if defined( RE_IndirectSpecular )
               radiance = mix( radiance, vec3( dot( radiance, vec3( 0.2126, 0.7152, 0.0722 ) ) ), 0.7 );
+              // Real-time IBL cannot see the basin reflecting itself: at grazing
+              // angles walls and floor mirrored the dark ground instead of the
+              // lit stainless around them. Keep a floor tied to the light the
+              // surface actually receives.
+              radiance = max( radiance, vec3( dot( iblIrradiance, vec3( 0.2126, 0.7152, 0.0722 ) ) ) * 0.55 );
             #endif`,
           );
         shader.vertexShader = shader.vertexShader.replace(
@@ -124,7 +129,7 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
       `,
         );
       }}
-      customProgramCacheKey={() => `raw-shell-v8-${kind}-${scale.join("-")}`}
+      customProgramCacheKey={() => `raw-shell-v9-${kind}-${scale.join("-")}`}
     />
   );
 }

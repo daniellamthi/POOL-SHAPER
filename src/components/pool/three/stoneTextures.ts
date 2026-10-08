@@ -199,8 +199,13 @@ export function createLimestoneMaps(size = 512): StoneMaps {
         const dy = py - iy - 0.5 - (hash(ix, iy + 9) - 0.5) * 0.4;
         const fleck =
           seed > 0.85 ? 1 - THREE.MathUtils.smoothstep(Math.hypot(dx, dy), 0.02, 0.06) : 0;
-        height[y * size + x] = cloud * 0.018 + fineGrain * 0.006 - fleck * 0.05;
-        const value = 0.92 + (cloud - 0.5) * 0.09 + fineGrain * 0.016 - fleck * 0.05;
+        // Faint sedimentary bedding: very soft, low-contrast streaks along
+        // one axis, so the honed face reads as quarried stone, not plaster.
+        const bedding =
+          (valueNoise(u, v, 23) - 0.5) * 0.5 + Math.sin(Math.PI * 2 * 10 * v + cloud * 3) * 0.5; // whole periods: tiles seamlessly
+        height[y * size + x] = cloud * 0.026 + fineGrain * 0.01 - fleck * 0.06;
+        const value =
+          0.88 + (cloud - 0.5) * 0.26 + bedding * 0.02 + fineGrain * 0.04 - fleck * 0.09;
         const o = (y * size + x) * 4;
         color[o] = value * 255;
         color[o + 1] = (value - fleck * 0.006) * 255;
