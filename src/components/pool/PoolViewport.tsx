@@ -3,14 +3,19 @@ import { ClientOnly } from "@tanstack/react-router";
 import {
   Aperture,
   Camera,
+  ChevronDown,
   Download,
   Expand,
+  Eye,
+  Focus,
+  Layers,
   Loader2,
   MoreHorizontal,
   Ruler,
   Shrink,
   X,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -50,6 +55,51 @@ type ViewportProps = SceneProps & {
   onToggleMobileExpanded: () => void;
   onInspectionView: (view: "review" | "waterline" | "access" | "top" | "infinity") => void;
 };
+
+/** Shared surface for the floating viewport controls: solid white pill,
+ * hairline outline, soft shadow -- one system for every control. */
+const CONTROL_SURFACE =
+  "pointer-events-auto inline-flex items-center rounded-full border border-hairline bg-card/95 shadow-[0_1px_2px_rgb(16_16_24/0.05),0_8px_24px_-12px_rgb(16_16_24/0.18)] transition-colors duration-200";
+
+const INSPECTION_VIEWS = [
+  { id: "review", label: "Vista d’insieme" },
+  { id: "waterline", label: "Linea d’acqua" },
+  { id: "access", label: "Accesso" },
+  { id: "top", label: "Dall’alto" },
+  { id: "infinity", label: "Bordo Infinity" },
+] as const;
+
+function ToolButton({
+  active = false,
+  disabled = false,
+  onClick,
+  icon,
+  label,
+}: {
+  active?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] transition-colors duration-200 disabled:pointer-events-none disabled:opacity-35 [&_svg]:size-3.5 [&_svg]:stroke-[1.4]",
+        active
+          ? "bg-brand-soft text-brand"
+          : "text-foreground/70 hover:bg-foreground/[0.04] hover:text-foreground",
+      )}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
 
 function ViewportFallback() {
   return (
@@ -167,13 +217,31 @@ export const PoolViewport = memo(function PoolViewport({
       {scene.construction && <div key={`${scene.construction.stage}-${scene.construction.structure}`}
         aria-hidden className="pointer-events-none absolute inset-0 z-[1] bg-viewport animate-[construction-reveal_240ms_ease-out_both] motion-reduce:hidden" />}
 
-      <div className="absolute left-3 top-3 z-10">
-        <label className="sr-only" htmlFor="inspection-camera">Vista della piscina</label>
-        <select id="inspection-camera" aria-label="Vista della piscina" value="" onChange={e => onInspectionView(e.target.value as "review" | "waterline" | "access" | "top" | "infinity")}
-          className="min-h-11 max-w-40 rounded-xl border border-hairline bg-card/95 px-3 text-xs text-foreground shadow-sm">
-          <option value="" disabled>Viste piscina</option><option value="review">Hero</option><option value="waterline">Waterline</option><option value="access">Accesso</option><option value="top">Dall’alto</option>
-          {scene.system === "infinity" ? <option value="infinity">Infinity</option> : null}
-        </select>
+      <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Vista della piscina"
+              className={cn(CONTROL_SURFACE, "h-9 gap-1.5 pl-3 pr-2.5 text-[12px] text-foreground/85 hover:text-foreground")}
+            >
+              <Eye className="size-3.5 text-muted-foreground" strokeWidth={1.4} aria-hidden />
+              Vista piscina
+              <ChevronDown className="size-3.5 text-muted-foreground" strokeWidth={1.4} aria-hidden />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" sideOffset={6} className="min-w-44 rounded-2xl p-1.5">
+            {INSPECTION_VIEWS.filter((view) => view.id !== "infinity" || scene.system === "infinity").map((view) => (
+              <DropdownMenuItem
+                key={view.id}
+                onSelect={() => onInspectionView(view.id)}
+                className="rounded-xl px-3 py-2 text-[12.5px]"
+              >
+                {view.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       {scene.construction?.label && !scene.technicalView ? <div key={scene.construction.label}
         className="pointer-events-none absolute right-3 top-16 z-10 max-w-[75%] animate-veil rounded-xl border border-hairline bg-card/95 px-3 py-2 text-[11px] text-foreground"
@@ -194,33 +262,32 @@ export const PoolViewport = memo(function PoolViewport({
 
       {scene.photoMode ? <PhotoModeStatus samples={samples} /> : null}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-6 sm:p-8">
-        <p className="hidden text-[10px] uppercase tracking-[0.24em] text-muted-foreground/70 sm:block">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-4 sm:p-5">
+        <p className="hidden pb-2 text-[10px] tracking-[0.02em] text-muted-foreground/55 sm:block">
           {scene.photoMode
             ? "Path-traced preview — camera locked while refining"
             : scene.cameraLocked
               ? "Camera locked · Live 3D"
-              : "Drag to orbit · Scroll to zoom · Right-drag to pan"}
+              : "Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare"}
         </p>
         {/* Compact mobile row: only the actions a customer needs on every
             visit stay directly on screen (reframe, expand); Guides, Photo
             Mode and the Blender render are advanced/rare here, so they move
             into the "More" menu instead of eating the small viewport. */}
         <div className="pointer-events-auto ml-auto flex items-center justify-end gap-2 sm:hidden">
-          <Button type="button" variant="viewport" size="sm" onClick={onReframe}>
-            <Expand />
-            Reframe
-          </Button>
-          <Button
-            type="button"
-            variant={mobileExpanded ? "viewportActive" : "viewport"}
-            size="icon"
-            onClick={onToggleMobileExpanded}
-            aria-label={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
-            title={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
-          >
-            {mobileExpanded ? <Shrink /> : <Expand />}
-          </Button>
+          <div className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>
+            <ToolButton onClick={onReframe} icon={<Focus />} label="Riquadra" />
+            <span aria-hidden className="mx-0.5 h-4 w-px bg-hairline" />
+            <button
+              type="button"
+              onClick={onToggleMobileExpanded}
+              aria-label={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
+              title={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
+              className="inline-flex size-8 items-center justify-center rounded-full text-foreground/70 hover:text-foreground [&_svg]:size-3.5 [&_svg]:stroke-[1.4]"
+            >
+              {mobileExpanded ? <Shrink /> : <Expand />}
+            </button>
+          </div>
           {scene.photoMode ? (
             <Button type="button" variant="viewportActive" size="sm" onClick={onTogglePhotoMode}>
               <Camera />
@@ -229,9 +296,13 @@ export const PoolViewport = memo(function PoolViewport({
           ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button type="button" variant="viewport" size="icon" aria-label="Altri strumenti">
+              <button
+                type="button"
+                aria-label="Altri strumenti"
+                className={cn(CONTROL_SURFACE, "size-10 justify-center text-foreground/70 hover:text-foreground [&_svg]:size-4 [&_svg]:stroke-[1.4]")}
+              >
                 <MoreHorizontal />
-              </Button>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               {scene.photoMode ? (
@@ -292,23 +363,24 @@ export const PoolViewport = memo(function PoolViewport({
               </Button>
             </>
           ) : null}
-          <Button
-            type="button"
-            variant={scene.showMeasurements ? "viewportActive" : "viewport"}
-            size="sm"
-            onClick={onToggleMeasurements}
-            disabled={scene.photoMode}
-          >
-            <Ruler />
-            Guides
-          </Button>
-          <Button type="button" variant={scene.technicalView ? "viewportActive" : "viewport"} size="sm" onClick={onToggleTechnicalView} disabled={scene.photoMode}>
-            Vista tecnica
-          </Button>
-          <Button type="button" variant="viewport" size="sm" onClick={onReframe}>
-            <Expand />
-            Reframe
-          </Button>
+          <div role="toolbar" aria-label="Strumenti vista" className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>
+            <ToolButton
+              active={scene.showMeasurements}
+              onClick={onToggleMeasurements}
+              disabled={scene.photoMode}
+              icon={<Ruler />}
+              label="Guide"
+            />
+            <ToolButton
+              active={scene.technicalView ?? false}
+              onClick={onToggleTechnicalView}
+              disabled={scene.photoMode}
+              icon={<Layers />}
+              label="Vista tecnica"
+            />
+            <span aria-hidden className="mx-0.5 h-4 w-px bg-hairline" />
+            <ToolButton onClick={onReframe} icon={<Focus />} label="Riquadra" />
+          </div>
           {scene.photoMode || !premiumPresentationAvailable ? null : (
             <Button
               type="button"

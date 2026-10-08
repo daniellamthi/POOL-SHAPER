@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -309,14 +309,7 @@ export function ConfiguratorTray({
           </Button>
         </header>
 
-        <div
-          className={cn(
-            "scroll-slim min-h-0 flex-1 overflow-y-auto px-5 pb-5 lg:px-7 lg:py-6",
-            expanded ? "block" : "hidden lg:block",
-          )}
-        >
-          {children}
-        </div>
+        <ScrollCueArea className={expanded ? "flex" : "hidden lg:flex"}>{children}</ScrollCueArea>
       </div>
 
       <footer className="hidden shrink-0 items-center justify-between gap-6 border-t border-hairline px-7 py-3.5 lg:flex">
@@ -383,5 +376,67 @@ export function ConfiguratorTray({
         </button>
       )}
     </section>
+  );
+}
+
+/**
+ * The tray's scrolling body. When more options continue below the fold it
+ * shows a soft fade and a small "Altre opzioni" cue (a quiet two-beat nudge,
+ * then still) that scrolls the next options into view -- so content that
+ * appears after a choice (e.g. the stair shape, the inox ladder) is never
+ * silently hidden under the edge.
+ */
+function ScrollCueArea({ className, children }: { className: string; children: ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const content = contentRef.current;
+    if (!scroller || !content) return;
+    const update = () =>
+      setMoreBelow(scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight > 24);
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(scroller);
+    observer.observe(content);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, []);
+  const reveal = () => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scroller.scrollBy({ top: scroller.clientHeight * 0.7, behavior: reduced ? "auto" : "smooth" });
+  };
+  return (
+    <div className={cn("relative min-h-0 flex-1 flex-col", className)}>
+      <div
+        ref={scrollRef}
+        className="scroll-slim min-h-0 flex-1 overflow-y-auto px-5 pb-5 lg:px-7 lg:py-6"
+      >
+        <div ref={contentRef}>{children}</div>
+      </div>
+      <div
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent transition-opacity duration-300",
+          moreBelow ? "opacity-100" : "opacity-0",
+        )}
+      />
+      {moreBelow ? (
+        <button
+          type="button"
+          onClick={reveal}
+          className="absolute right-4 bottom-2.5 inline-flex animate-[cue_1.6s_cubic-bezier(0.2,0,0,1)_2] items-center gap-1 rounded-full border border-hairline bg-card px-3 py-1 text-[11px] text-foreground/75 shadow-[0_6px_18px_-10px_rgb(16_16_24/0.35)] transition-colors hover:text-foreground"
+        >
+          Altre opzioni
+          <ChevronDown className="size-3.5 text-brand" strokeWidth={1.6} aria-hidden />
+        </button>
+      ) : null}
+    </div>
   );
 }

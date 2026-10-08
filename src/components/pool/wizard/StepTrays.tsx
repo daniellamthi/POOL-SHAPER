@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { ArrowRight, Check, Moon, Plus, Sun } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useConfigurator } from "@/lib/pool/context";
 import {
   EQUIPMENT,
@@ -42,7 +44,7 @@ import {
   OrganicShapeControls,
 } from "@/configurator/steps/pool-shape/PoolShapeStep";
 import type { SceneFocus } from "@/components/pool/three/PoolScene";
-import { ChoiceCard, ChoiceGrid, GroupLabel, StepTabs } from "./ChoiceCard";
+import { ChoiceCard, ChoiceGrid, GroupLabel, RevealSection, StepTabs } from "./ChoiceCard";
 import { Illustration } from "./illustrations";
 
 /** What a tray may ask of the shell: point the camera at what is being edited,
@@ -435,6 +437,9 @@ export function AccessTray() {
     toggleInoxLadder,
   } = useConfigurator();
   const [tab, setTab] = useState<"access" | "comfort">("access");
+  // Set when the customer turns the internal stair on in this visit, so the
+  // follow-up options (stair shape, optional inox ladder) are brought into view.
+  const [stairsJustChosen, setStairsJustChosen] = useState(false);
   const stairType = config.internalStairType ?? "linear";
   const plans = useMemo(
     () => ({
@@ -536,7 +541,10 @@ export function AccessTray() {
               description="Gradini in muratura, rivestiti come la vasca."
               image={ill("access-steps")}
               selected={stepsOn}
-              onSelect={() => toggleInternalSteps()}
+              onSelect={() => {
+                setStairsJustChosen(!stepsOn);
+                toggleInternalSteps();
+              }}
             />
             {inoxAvailable ? (
               <ChoiceCard
@@ -565,7 +573,7 @@ export function AccessTray() {
           </ChoiceGrid>
           {stepsOn &&
           !comfort.elements.some((e) => e.kind === "sunShelf" || e.kind === "hydromassage") ? (
-            <div className="flex flex-col gap-3">
+            <RevealSection reveal={stairsJustChosen}>
               <GroupLabel>Forma della scala</GroupLabel>
               <ChoiceGrid label="Tipo di scala interna" dense>
                 {(["linear", "corner"] as const)
@@ -587,8 +595,36 @@ export function AccessTray() {
                     />
                   ))}
               </ChoiceGrid>
-            </div>
+              {inoxAvailable ? (
+                <button
+                  type="button"
+                  aria-pressed={inoxOn}
+                  onClick={() => toggleInoxLadder()}
+                  className={cn(
+                    "inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] transition-colors duration-200",
+                    inoxOn
+                      ? "border-brand/30 bg-brand-soft text-foreground"
+                      : "border-hairline bg-card text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {inoxOn ? (
+                    <Check className="size-3.5 text-brand" strokeWidth={1.8} aria-hidden />
+                  ) : (
+                    <Plus className="size-3.5 text-brand" strokeWidth={1.6} aria-hidden />
+                  )}
+                  {inoxOn ? "Scaletta inox aggiunta" : "Aggiungi anche la scaletta inox"}
+                </button>
+              ) : null}
+            </RevealSection>
           ) : null}
+          <button
+            type="button"
+            onClick={() => setTab("comfort")}
+            className="inline-flex w-fit items-center gap-1.5 self-start rounded-full px-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Prosegui con <span className="text-foreground">Comfort in acqua</span>
+            <ArrowRight className="size-3.5 text-brand" strokeWidth={1.5} aria-hidden />
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
@@ -721,54 +757,87 @@ export function LightTray() {
     useConfigurator();
   const hasLed = config.features.includes("ledLighting");
   const plan = useMemo(() => (hasLed ? configuredLightingPlan(config) : null), [config, hasLed]);
-  const [tab, setTab] = useState<"atmosphere" | "lighting" | "color">("atmosphere");
+  const [tab, setTab] = useState<"lighting" | "color">(hasLed ? "color" : "lighting");
   const night = config.sceneTime === "night";
+  // Night exists only to judge the LEDs: no LEDs, no night.
+  useEffect(() => {
+    if (!hasLed && night) setSceneTime("day");
+  }, [hasLed, night, setSceneTime]);
   return (
     <TabBody>
-      <StepTabs
-        label="Acqua e luci"
-        value={tab}
-        onChange={setTab}
-        tabs={[
-          { id: "atmosphere", label: "Acqua · giorno e notte" },
-          { id: "lighting", label: "Illuminazione" },
-          ...(hasLed ? [{ id: "color" as const, label: "Colore LED" }] : []),
-        ]}
-      />
-      {tab === "atmosphere" ? (
-        <ChoiceGrid label="Atmosfera">
-          <ChoiceCard
-            title="Giorno"
-            description="Luce naturale: colore reale di acqua e rivestimento."
-            image={ill("time-day")}
-            selected={!night}
-            onSelect={() => setSceneTime("day")}
-          />
-          <ChoiceCard
-            title="Notte"
-            description="Scena serale per vedere l’illuminazione subacquea."
-            image={ill("time-night")}
-            selected={night}
-            onSelect={() => setSceneTime("night")}
-          />
-        </ChoiceGrid>
-      ) : tab === "lighting" ? (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <StepTabs
+          label="Acqua e luci"
+          value={tab}
+          onChange={(next) => {
+            setTab(next);
+            // Choosing a colour is judged in the dark.
+            if (next === "color" && hasLed) setSceneTime("night");
+          }}
+          tabs={[
+            { id: "lighting", label: "Illuminazione" },
+            ...(hasLed ? [{ id: "color" as const, label: "Colore LED" }] : []),
+          ]}
+        />
+        {hasLed ? (
+          <div
+            role="radiogroup"
+            aria-label="Anteprima luce"
+            className="inline-flex items-center gap-0.5 rounded-full border border-hairline bg-card p-0.5"
+          >
+            <span className="px-2.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Anteprima
+            </span>
+            {(
+              [
+                { id: "day", label: "Giorno", Icon: Sun },
+                { id: "night", label: "Notte", Icon: Moon },
+              ] as const
+            ).map(({ id, label, Icon }) => {
+              const active = (id === "night") === night;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setSceneTime(id)}
+                  className={cn(
+                    "inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[12px] transition-colors duration-200",
+                    active
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon className="size-3.5" strokeWidth={1.4} aria-hidden />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+      {tab === "lighting" ? (
         <ChoiceGrid label="Illuminazione subacquea">
           <ChoiceCard
             title="Senza illuminazione"
-            description="Nessun faro subacqueo."
+            description="Nessun faro subacqueo: la piscina resta in luce diurna."
             image={ill("led-off")}
             selected={!hasLed}
-            onSelect={() => hasLed && togglePoolFeature("ledLighting")}
+            onSelect={() => {
+              if (hasLed) togglePoolFeature("ledLighting");
+              setSceneTime("day");
+            }}
           />
           <ChoiceCard
             title="LED subacquei"
-            description="Fari RGB a parete, disposti automaticamente."
+            description="Fari RGB a parete, disposti automaticamente. Anteprima notturna."
             image={ill("led-on")}
             selected={hasLed}
             onSelect={() => {
               if (!hasLed) togglePoolFeature("ledLighting");
               setSceneTime("night");
+              setTab("color");
             }}
             footer={plan ? `${plan.count} fari · ${plan.surfaceArea.toFixed(1)} m²` : undefined}
           />
@@ -952,7 +1021,8 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
   useEffect(() => {
     if (ctx.requestToken) setTab("request");
   }, [ctx.requestToken]);
-  const night = config.sceneTime === "night";
+  // Without LEDs the presentation is always the daylight one.
+  const night = config.sceneTime === "night" && config.features.includes("ledLighting");
   return (
     <TabBody>
       <StepTabs
@@ -977,14 +1047,16 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
               selected={!night}
               onSelect={() => setSceneTime("day")}
             />
-            <ChoiceCard
-              compact
-              title="Notte"
-              description="Il bagliore dei fari LED nell’acqua."
-              image={ill("time-night")}
-              selected={night}
-              onSelect={() => setSceneTime("night")}
-            />
+            {config.features.includes("ledLighting") ? (
+              <ChoiceCard
+                compact
+                title="Notte"
+                description="Il bagliore dei fari LED nell’acqua."
+                image={ill("time-night")}
+                selected={night}
+                onSelect={() => setSceneTime("night")}
+              />
+            ) : null}
           </ChoiceGrid>
           {/* Outdoor Villa / Indoor Wellness are Photo Mode environments
               (Build 08), not realtime scenes: they are not offered here, so

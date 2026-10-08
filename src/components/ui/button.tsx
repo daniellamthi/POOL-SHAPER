@@ -18,8 +18,9 @@ const buttonVariants = cva(
         ghost:
           "text-muted-foreground hover:border-hairline hover:bg-accent/70 hover:text-foreground",
         link: "text-foreground underline-offset-4 hover:underline",
-        viewport: "bg-panel/78 text-foreground/75 hover:bg-panel/95 hover:text-foreground",
-        viewportActive: "bg-foreground/92 text-background hover:bg-foreground",
+        viewport:
+          "border-hairline bg-card/95 text-foreground/75 shadow-[0_1px_2px_rgb(16_16_24/0.05),0_8px_24px_-12px_rgb(16_16_24/0.18)] hover:text-foreground",
+        viewportActive: "border-brand/20 bg-brand-soft text-brand hover:bg-brand-soft",
       },
       size: {
         default: "h-11 px-6",

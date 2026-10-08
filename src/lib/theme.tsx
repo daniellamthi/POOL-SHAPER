@@ -12,7 +12,10 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  // The configurator shell is always the white daytime interface. Night is
+  // no longer a global theme: it is previewed only inside the scene, in the
+  // lighting step, where LED colours are evaluated (see PoolConfigurator).
+  const [theme, setTheme] = useState<Theme>("light");
 
   // Read the resolved theme after hydration (the inline boot script already
   // applied the class, so there is no flash).
@@ -43,5 +46,7 @@ export function useTheme(): ThemeContextValue {
   return context;
 }
 
-/** Runs before paint to avoid a theme flash. Injected in the document head. */
-export const THEME_BOOT_SCRIPT = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(!t){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}var d=document.documentElement;d.classList.toggle("dark",t==="dark");d.style.colorScheme=t;}catch(e){document.documentElement.classList.add("dark");}})();`;
+/** Runs before paint to avoid a theme flash. Injected in the document head.
+ * Always starts in the light (day) shell -- neither the OS preference nor a
+ * previously stored dark choice turns the whole configurator into night. */
+export const THEME_BOOT_SCRIPT = `(function(){try{localStorage.removeItem("${STORAGE_KEY}");}catch(e){}var d=document.documentElement;d.classList.remove("dark");d.style.colorScheme="light";})();`;

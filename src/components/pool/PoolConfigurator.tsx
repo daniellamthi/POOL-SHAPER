@@ -35,7 +35,6 @@ import { BrandLogo } from "./BrandLogo";
 import { PoolViewport } from "./PoolViewport";
 import { useTechnicalData } from "./TechnicalDataPanel";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
-import { ThemeToggle } from "./ThemeToggle";
 import { ConfiguratorTray, WizardNav } from "./wizard/WizardChrome";
 import { buildMacros, describeSelection, isStepSkipped, STEP_COPY } from "./wizard/wizard-model";
 import {
@@ -163,6 +162,10 @@ function ConfiguratorLayout() {
   // start uncluttered. Customers can still toggle Guides explicitly.
   const [showMeasurements, setShowMeasurements] = useState(false);
   const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
+  // Night is contextual: the live scene shows it only while LED colours are
+  // being evaluated (lighting step) or while the Project Book captures its
+  // day/night pair. Everywhere else the journey stays in daylight.
+  const [dayNightCapture, setDayNightCapture] = useState(false);
   const [frameToken, setFrameToken] = useState(0);
   const [inspectionView, setInspectionView] = useState<SceneFocus | null>(null);
   const [technicalView, setTechnicalView] = useState(false);
@@ -199,9 +202,11 @@ function ConfiguratorLayout() {
   const captureDayNight = useCallback(async () => {
     const original = config.sceneTime === "night" ? "night" : "day";
     const other = original === "day" ? "night" : "day";
-    const current = await captureHero();
+    setDayNightCapture(true);
+    let current: string | null = null;
     let alternate: string | null = null;
     try {
+      current = await captureHero();
       setSceneTime(other);
       // Let the lighting transition finish before the settled capture.
       await new Promise((resolve) =>
@@ -210,6 +215,7 @@ function ConfiguratorLayout() {
       alternate = await requestHeroCapture();
     } finally {
       setSceneTime(original);
+      setDayNightCapture(false);
     }
     return original === "day"
       ? { day: current, night: alternate }
@@ -493,7 +499,6 @@ function ConfiguratorLayout() {
           />
         </div>
         <div className="flex items-center gap-1 sm:gap-3">
-          <ThemeToggle />
           <Button
             type="button"
             variant="ghost"
@@ -574,7 +579,16 @@ function ConfiguratorLayout() {
             cameraLocked={cameraLocked}
             showWater={construction.showWater}
             theme={theme}
-            sceneTime={construction.showWater ? sceneTime : "day"}
+            sceneTime={
+              construction.showWater &&
+              (activeStepId === "lighting" ||
+                dayNightCapture ||
+                // The final presentation may be shown at night, but only
+                // for a pool that actually has LEDs to show.
+                (activeStepId === "review" && config.features.includes("ledLighting")))
+                ? sceneTime
+                : "day"
+            }
             paving={config.paving ?? "gres"}
             photoMode={photoMode}
             onTogglePhotoMode={togglePhotoMode}

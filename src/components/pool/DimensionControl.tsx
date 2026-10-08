@@ -17,7 +17,7 @@ export function DimensionControl({ label, hint, value, min, max, step, unit, onC
   const decimals = step < 0.1 ? 2 : step < 1 ? 1 : 0;
 
   return (
-    <div className="group flex flex-col gap-4 border-b border-hairline pb-6 last:border-0 last:pb-0">
+    <div className="group flex flex-col gap-3.5 border-b border-hairline pb-6 last:border-0 last:pb-0">
       <div className="flex items-baseline justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
           <label htmlFor={id} className="label-xs">
@@ -40,7 +40,7 @@ export function DimensionControl({ label, hint, value, min, max, step, unit, onC
               const next = Number.parseFloat(event.target.value);
               if (Number.isFinite(next)) onChange(next);
             }}
-            className="numeric w-[5.5rem] border-0 bg-transparent p-0 text-right text-[26px] leading-none text-foreground outline-none [appearance:textfield] focus:text-foreground [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="numeric w-[5.5rem] border-0 bg-transparent p-0 text-right text-[22px] leading-none text-foreground outline-none [appearance:textfield] focus:text-foreground [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <span className="text-[11px] font-light text-muted-foreground">{unit}</span>
         </div>

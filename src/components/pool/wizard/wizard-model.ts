@@ -55,7 +55,7 @@ export const STEP_COPY: Record<string, { title: string; subtitle: string }> = {
   style: { title: "Rivestimento", subtitle: "Il materiale interno che dà colore all’acqua." },
   lighting: {
     title: "Acqua e luci",
-    subtitle: "La piscina con l’acqua, di giorno e di notte, e i fari subacquei.",
+    subtitle: "I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.",
   },
   deck: {
     title: "Bordo e decking",

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -252,4 +252,38 @@ export function StepTabs<T extends string>({
 /** Small heading for a secondary choice row inside a tab. */
 export function GroupLabel({ children }: { children: ReactNode }) {
   return <p className="label-xs">{children}</p>;
+}
+
+/**
+ * Wraps options that appear as a consequence of a choice. When `reveal` is
+ * set at mount (the user just made that choice) it glides into view inside
+ * the tray and glows once in the brand violet, so follow-up options are
+ * noticed instead of appearing silently below the fold.
+ */
+export function RevealSection({ reveal, children }: { reveal: boolean; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!reveal) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const id = window.setTimeout(
+      () =>
+        ref.current?.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" }),
+      120,
+    );
+    return () => window.clearTimeout(id);
+    // Runs once: the section is (re)mounted each time it appears.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex scroll-mb-14 flex-col gap-3 rounded-2xl",
+        reveal &&
+          "animate-[rise_0.45s_cubic-bezier(0.2,0,0,1)_both,reveal-glow_1.4s_ease-out_0.35s_1]",
+      )}
+    >
+      {children}
+    </div>
+  );
 }

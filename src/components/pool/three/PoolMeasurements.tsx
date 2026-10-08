@@ -19,8 +19,15 @@ interface Props {
   shallowDepth?: number | undefined;
 }
 
+// Calm technical annotation: small tabular figures on a soft card chip, no
+// outline -- the guide supports reading the pool, it never competes with it.
 const LABEL_CLASS =
-  "pointer-events-none whitespace-nowrap select-none rounded-full border border-hairline bg-panel px-3 py-1 font-mono text-[10px] font-light tracking-[0.08em] text-foreground";
+  "pointer-events-none whitespace-nowrap select-none rounded-full bg-card/85 px-2 py-0.5 font-mono text-[9.5px] font-normal tabular-nums tracking-[0.06em] text-foreground/80 shadow-[0_1px_2px_rgb(0_0_0/0.06)]";
+
+/** Line styling shared by every guide: hairline weight, partly transparent. */
+const LINE = { lineWidth: 0.75, transparent: true, opacity: 0.55 } as const;
+/** Half-length of the perpendicular end ticks, metres. */
+const TICK = 0.12;
 
 const labelPosition: NonNullable<React.ComponentProps<typeof Html>["calculatePosition"]> = (object, camera, size) => {
   const projected = object.getWorldPosition(new Vector3()).project(camera);
@@ -60,7 +67,9 @@ export function PoolMeasurements({
     return { maxX, maxZ };
   }, [outline]);
 
-  const offset = 0.9;
+  // Guides sit a little closer to the basin than before so they read as part
+  // of the drawing, with short end ticks instead of long free-floating rules.
+  const offset = 0.6;
   const y = wallTopY + 0.02;
   const zLine = bounds.maxZ + offset;
   const xLine = bounds.maxX + offset;
@@ -73,8 +82,10 @@ export function PoolMeasurements({
           [bounds.maxX, y, zLine],
         ]}
         color={color}
-        lineWidth={1}
+        {...LINE}
       />
+      <Line points={[[-bounds.maxX, y, zLine - TICK], [-bounds.maxX, y, zLine + TICK]]} color={color} {...LINE} />
+      <Line points={[[bounds.maxX, y, zLine - TICK], [bounds.maxX, y, zLine + TICK]]} color={color} {...LINE} />
       <Html position={[0, y, zLine]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>L {formatNumber(length, 2)} m</span>
       </Html>
@@ -85,8 +96,10 @@ export function PoolMeasurements({
           [xLine, y, bounds.maxZ],
         ]}
         color={color}
-        lineWidth={1}
+        {...LINE}
       />
+      <Line points={[[xLine - TICK, y, -bounds.maxZ], [xLine + TICK, y, -bounds.maxZ]]} color={color} {...LINE} />
+      <Line points={[[xLine - TICK, y, bounds.maxZ], [xLine + TICK, y, bounds.maxZ]]} color={color} {...LINE} />
       <Html position={[xLine, y, 0]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>W {formatNumber(width, 2)} m</span>
       </Html>
@@ -97,8 +110,9 @@ export function PoolMeasurements({
           [-xLine, floorY, zLine],
         ]}
         color={color}
-        lineWidth={1}
+        {...LINE}
       />
+      <Line points={[[-xLine - TICK, floorY, zLine], [-xLine + TICK, floorY, zLine]]} color={color} {...LINE} />
       <Html position={[-xLine, (wallTopY + floorY) / 2, zLine]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>{depthLabel}</span>
       </Html>
