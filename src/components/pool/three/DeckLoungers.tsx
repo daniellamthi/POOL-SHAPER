@@ -168,12 +168,14 @@ function planDeckFurniture(
   let shower: DeckFurniturePlan["shower"] = null;
   if (options.shower) {
     const distance = innerOffset + SHOWER.standoff;
-    // Beside the sunbathing area first (rinse, then swim), then the corners
-    // of the other long side, then the short ends.
+    // Corners of the long side free of loungers first, then the lounger
+    // side, then the short ends.
     const rowSide = rows[0]
       ? long.find((side) => Math.abs(facing(side) - rows[0]!.rotation) < 1e-6)
       : undefined;
-    const ordered = rowSide ? [rowSide, ...long.filter((side) => side !== rowSide)] : long;
+    // With loungers, the shower stands on the opposite long side: its arm
+    // never reaches over a sunbed and wet feet do not cross the sunbathing.
+    const ordered = rowSide ? [...long.filter((side) => side !== rowSide), rowSide] : long;
     const candidates: { side: Side; u: number }[] = [];
     for (const side of ordered) {
       const end = side.half - 0.35;

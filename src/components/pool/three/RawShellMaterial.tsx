@@ -75,7 +75,17 @@ function structuralMaps(kind: RawShellKind) {
 }
 
 /** Material only. Existing floor/shell/comfort geometries remain identical. */
-export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawShellKind; wallSize?: readonly [number, number] }) {
+export function RawShellMaterial({
+  kind = "concrete",
+  wallSize,
+  underwater,
+}: {
+  kind?: RawShellKind;
+  wallSize?: readonly [number, number];
+  /** Wet stainless basin: the pool's own underwater shader patch (absorption,
+   * scattering, caustics) plus a cache key for it. */
+  underwater?: { configure: (shader: THREE.WebGLProgramParametersWithUniforms) => void; key: string } | undefined;
+}) {
   const maps = structuralMaps(kind);
   const module = kind === "steel" ? RAW_PANEL_MODULE_METRES : 1;
   const scale = wallSize ? [wallSize[0] / module, wallSize[1] / module] : [1 / module, 1 / module];
@@ -128,8 +138,9 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
         vRoughnessMapUv *= vec2(${scale[0]}, ${scale[1]});
       `,
         );
+        underwater?.configure(shader);
       }}
-      customProgramCacheKey={() => `raw-shell-v9-${kind}-${scale.join("-")}`}
+      customProgramCacheKey={() => `raw-shell-v9-${kind}-${scale.join("-")}-${underwater?.key ?? "dry"}`}
     />
   );
 }

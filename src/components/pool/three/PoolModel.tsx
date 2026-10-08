@@ -1028,7 +1028,13 @@ export function PoolModel({
       : null;
   const rawShellKind = rawStructure ? shellKind(rawStructure) : null;
   const wallSize = [perimeter, depth] as const;
-  const accessMaterial = interiorShellKind ? <RawShellMaterial kind={interiorShellKind} /> : (
+  // A finished stainless basin is seen through the water exactly like a
+  // liner: same absorption, scattering and caustics, only once filled.
+  const interiorUnderwater =
+    showWater && structureFamily === "VISIBLE_STAINLESS_STEEL"
+      ? { configure: configureCaustics, key: `wet-${waterLevel}-${materials.surface.underwaterScatteringContribution}` }
+      : undefined;
+  const accessMaterial = interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : (
     <meshPhysicalMaterial
             key={showWater ? "wet" : "dry"}
             color={materials.liner.color}
@@ -1065,7 +1071,7 @@ export function PoolModel({
           night={night && showWater}
         >
           {interiorShellKind ? (
-            <RawShellMaterial kind={interiorShellKind} />
+            <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} />
           ) : (
             <meshPhysicalMaterial
               key={showWater ? "wet" : "dry"}
@@ -1119,7 +1125,7 @@ export function PoolModel({
         ) : null}
         {/* Interior walls */}
         <mesh geometry={walls} renderOrder={0} receiveShadow castShadow>
-          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} /> : <meshPhysicalMaterial
+          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
             key={showWater ? "wet" : "dry"}
             color={materials.liner.color}
             map={wallSurfaceMap}
@@ -1156,7 +1162,7 @@ export function PoolModel({
           position={floorProfile.sloped ? [0, 0, 0] : [0, verticalLayout.floorY, 0]}
           receiveShadow
         >
-          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} /> : <meshPhysicalMaterial
+          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
             key={showWater ? "wet" : "dry"}
             color={materials.floor.color}
             map={floorSurfaceMap}
