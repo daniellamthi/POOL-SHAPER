@@ -58,7 +58,7 @@ export function ExternalStaircase({
   const railAngle = Math.atan2(highestZ - lowestZ, upperRailY - lowerRailY);
 
   return (
-    <group position={groupPosition} rotation={[0, layout.rotation, 0]}>
+    <group name="external-staircase" position={groupPosition} rotation={[0, layout.rotation, 0]}>
       {/* Soft ground contact shadow under the whole footprint: the global,
           heavily-blurred pool ContactShadows bake is sized for the pool
           itself and reads too faint at this small a footprint to anchor it

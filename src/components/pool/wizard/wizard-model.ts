@@ -174,8 +174,12 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
           ? "Scala interna"
           : config.poolAccess === "stainlessSteelLadder"
             ? "Scaletta inox"
-            : "Accesso da scegliere",
+            : config.poolType === "above-ground"
+              ? "Scala interna disattivata"
+              : "Accesso da scegliere",
       ];
+      if (config.poolType === "above-ground" && config.features.includes("externalStaircase"))
+        parts.push("Scala esterna");
       if (config.features.includes("sunShelf")) parts.push("Sun shelf");
       else if (config.features.includes("hydromassage"))
         parts.push(config.hydromassageVariant === "open" ? "Idromassaggio B" : "Idromassaggio A");
@@ -195,8 +199,13 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
         : `${title(FINISHES, "liner")} · ${(title(LINER_COLORS, config.linerColor) ?? "").replace("Motion ", "")}`;
     case "lighting":
       return `${config.sceneTime === "night" ? "Notte" : "Giorno"} · ${config.features.includes("ledLighting") ? "LED subacquei" : "senza luci"}`;
-    case "deck":
-      return `${COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? ""} · ${PAVING.find((p) => p.id === pavingId(config.paving))?.label ?? ""}`;
+    case "deck": {
+      const coping =
+        COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? "";
+      return config.poolType === "above-ground"
+        ? coping
+        : `${coping} · ${PAVING.find((p) => p.id === pavingId(config.paving))?.label ?? ""}`;
+    }
     case "technology": {
       const chosen = EQUIPMENT.filter((e) => config.equipment.includes(e.id)).map((e) => e.title);
       return chosen.length ? chosen.join(" · ") : "Nessun optional";

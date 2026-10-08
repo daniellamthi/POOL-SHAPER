@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
+import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 
 /** Spout centre line in the local frame: x across the blade, y up from the
  * coping top, z inward over the water (0 = the water's edge). A post rises
@@ -13,7 +14,7 @@ const SPOUT_PATH = [
   new THREE.Vector3(0, 0.53, 0.23),
 ];
 /** Satin AISI 316: mid grey with soft highlights (not the white polished look). */
-const SATIN_STAINLESS = { color: "#aeb2b6", metalness: 0.82, roughness: 0.3 } as const;
+const SATIN_STAINLESS_COLOR = "#aeb2b6";
 const BLADE = { width: 0.3, thickness: 0.022, sheetWidth: 0.27 } as const;
 
 /**
@@ -96,10 +97,10 @@ export function Pellicano({
     >
       <mesh name="pellicano-base" position={[0, 0.006, -0.16]} castShadow receiveShadow>
         <boxGeometry args={[BLADE.width + 0.06, 0.012, 0.16]} />
-        <meshStandardMaterial {...SATIN_STAINLESS} />
+        <StainlessSteelMaterial finish="satin" color={SATIN_STAINLESS_COLOR} />
       </mesh>
       <mesh name="pellicano-spout" geometry={spout} castShadow receiveShadow>
-        <meshStandardMaterial {...SATIN_STAINLESS} />
+        <StainlessSteelMaterial finish="satin" color={SATIN_STAINLESS_COLOR} />
       </mesh>
       <mesh name="pellicano-water-sheet" geometry={sheet.geometry} renderOrder={3}>
         <meshPhysicalMaterial

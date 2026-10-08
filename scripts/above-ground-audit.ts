@@ -27,6 +27,7 @@ import { copingOuterOffset } from "../src/components/pool/three/poolConstruction
 import { getPoolVerticalLayout } from "../src/lib/pool/vertical-layout";
 import { EQUIPMENT } from "../src/lib/pool/config";
 import type { PoolConfig } from "../src/lib/pool/types";
+import { describeSelection } from "../src/components/pool/wizard/wizard-model";
 
 let checks = 0;
 const ok = (value: unknown, message: string) => {
@@ -146,6 +147,16 @@ equal(
 const noSteps = reducer(above, { type: "toggleInternalSteps" } as Action);
 equal(noSteps.config.poolAccess, null, "internal stairs OFF");
 equal(
+  describeSelection("access", noSteps.config),
+  "Scala interna disattivata",
+  "valid above-ground stairs OFF is not described as an incomplete selection",
+);
+equal(
+  describeSelection("deck", finished.config),
+  "Limestone Ivory",
+  "above-ground navigation does not advertise a nonexistent paving finish",
+);
+equal(
   reducer(noSteps, { type: "toggleInternalSteps" } as Action).config.poolAccess,
   "internalSteps",
   "internal stairs ON again",
@@ -156,6 +167,11 @@ const withOptions = [
   { type: "togglePoolFeature", value: "externalStaircase" },
   { type: "toggleEquipment", value: "pellicano" },
 ].reduce((state, action) => reducer(state, action as Action), finished);
+equal(
+  describeSelection("access", withOptions.config),
+  "Scala interna · Scala esterna",
+  "navigation includes the selected external access",
+);
 ok(withOptions.config.features.includes("externalStaircase"), "external stair ON");
 ok(withOptions.config.equipment.includes("pellicano"), "pellicano ON");
 const optionsOff = [
