@@ -3,7 +3,8 @@ import {
   FINISHES,
   LINER_COLORS,
   POOL_SHAPES,
-  POOL_STRUCTURES,
+  CUSTOMER_STRUCTURES,
+  customerStructureOf,
   POOL_TYPES,
   SKIMMER_TYPES,
   STEP_GROUPS,
@@ -71,11 +72,11 @@ export const STEP_COPY: Record<string, { title: string; subtitle: string }> = {
   },
 };
 
-/** A step with no real decision for this configuration is resolved by the
- * compatibility engine and skipped by navigation (e.g. visible stainless
- * steel has no interior finish to choose). */
-export function isStepSkipped(stepId: string | undefined, config: PoolConfig) {
-  return stepId === "style" && isVisibleStainlessStructure(config.structure);
+/** A step with no real decision for this configuration would be skipped by
+ * navigation. None today: the finish step always offers a choice (steel:
+ * "Acciaio a vista" or "Liner"; concrete: "Liner" or "Mosaico"). */
+export function isStepSkipped(_stepId: string | undefined, _config: PoolConfig) {
+  return false;
 }
 
 export function buildMacros(
@@ -116,7 +117,9 @@ export function buildMacros(
 function describePhase(groupId: string, config: PoolConfig): string {
   if (groupId === "piscina") {
     const d = config.dimensions;
-    const structure = title(POOL_STRUCTURES, config.structure);
+    const structure = CUSTOMER_STRUCTURES.find(
+      (s) => s.id === customerStructureOf(config.structure),
+    )?.title;
     const size = `${d.length.toFixed(1).replace(".", ",")} × ${d.width.toFixed(1).replace(".", ",")} m`;
     return structure ? `${structure} · ${size}` : size;
   }
@@ -148,7 +151,10 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
     case "pool-type":
       return title(POOL_TYPES, config.poolType) ?? "Da scegliere";
     case "structure":
-      return title(POOL_STRUCTURES, config.structure) ?? "Da scegliere";
+      return (
+        CUSTOMER_STRUCTURES.find((s) => s.id === customerStructureOf(config.structure))?.title ??
+        "Da scegliere"
+      );
     case "shape-dimensions":
       return config.shapeSelected
         ? `${title(POOL_SHAPES, config.shape) ?? ""} · ${d.length.toFixed(2)} × ${d.width.toFixed(2)} m · prof. ${d.depth.toFixed(2)} m`
@@ -176,7 +182,7 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       return parts.join(" · ");
     }
     case "style":
-      if (isVisibleStainlessStructure(config.structure)) return "Acciaio inox a vista";
+      if (isVisibleStainlessStructure(config.structure)) return "Acciaio a vista · inox satinato";
       return config.finish === "mosaic"
         ? `Mosaico · ${MOSAIC_FINISHES.find((m) => m.id === config.mosaicFinish)?.name ?? ""}`
         : `${title(FINISHES, "liner")} · ${(title(LINER_COLORS, config.linerColor) ?? "").replace("Motion ", "")}`;

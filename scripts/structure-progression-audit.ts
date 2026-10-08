@@ -11,7 +11,10 @@ import { buildTechnicalPlan } from "../src/lib/pool/technical-plan";
 import { planSkimmers } from "../src/lib/pool/engineering";
 import { focusForAction, contextualIntent } from "../src/lib/pool/contextual-camera";
 import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
+import { CUSTOMER_STRUCTURES, customerStructureOf } from "../src/lib/pool/config";
+import { isStepSkipped } from "../src/components/pool/wizard/wizard-model";
 import {
+  finishDescription,
   allowedFinishesForStructure,
   normaliseFinishForStructure,
   normalisePoolStructure,
@@ -129,4 +132,47 @@ ok(infinity.includes('rawStructure ? <RawShellMaterial kind={rawKind}'), "Raw In
 // Summary, technical panel and Project Book PDF all render summary-model.ts (Build 2).
 for (const file of ["src/lib/project-delivery/summary-model.ts", "src/lib/lead/formatLeadEmail.ts"])
   ok(readFileSync(file, "utf8").includes("STRUCTURE_LABEL["), `${file} presents canonical structure`);
+// --- Customer-facing Structure -> Interior Finish (steel finish selection) ---
+equal(CUSTOMER_STRUCTURES.map((s) => s.title), ["Cemento armato", "Acciaio"], "two customer structures only");
+equal(CUSTOMER_STRUCTURES.filter((s) => s.poolTypes.includes("above-ground")).map((s) => s.id), ["steel"]);
+equal(customerStructureOf("reinforced-concrete"), "concrete");
+equal(customerStructureOf("modular-steel-panels"), "steel");
+equal(customerStructureOf("visible-stainless-steel"), "steel");
+for (const structure of ["reinforced-concrete", "modular-steel-panels", "visible-stainless-steel"] as const)
+  equal(isStepSkipped("style", { ...base, structure }), false, `finish step offered for ${structure}`);
+// Transitions never keep an invalid finish.
+const transitions: Array<[PoolConfig["structure"], PoolConfig["finish"], PoolConfig["finish"]]> = [
+  ["visible-stainless-steel", "mosaic", "none"], // concrete+mosaic -> steel a vista
+  ["modular-steel-panels", "none", "liner"], // steel a vista -> steel + liner
+  ["visible-stainless-steel", "liner", "none"], // steel + liner -> steel a vista
+  ["reinforced-concrete", "none", "liner"], // steel a vista -> concrete
+  ["modular-steel-panels", "mosaic", "liner"], // concrete+mosaic -> steel (lined)
+];
+for (const [structure, from, to] of transitions)
+  equal(normaliseFinishForStructure(structure, from), to, `${from} -> ${structure}`);
+equal(finishDescription("visible-stainless-steel", "none"), "Acciaio a vista · inox satinato");
+equal(finishDescription("modular-steel-panels", "liner"), "Liner / PVC");
+// Snapshot identity and downstream: same geometry, only structure/finish differ.
+for (const variant of [
+  { structure: "visible-stainless-steel" as const, finish: "none" as const },
+  { structure: "modular-steel-panels" as const, finish: "liner" as const },
+]) {
+  const cfg: PoolConfig = { ...base, ...variant, features: ["sunShelf"] };
+  const restored = parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("steel-audit", cfg, renovation)));
+  equal(restored.config.structure, variant.structure, "snapshot keeps steel variant");
+  equal(restored.config.finish, variant.finish, "snapshot keeps steel finish");
+  const { length, width, depth } = restored.config.dimensions;
+  equal({ length, width, depth }, { length: 8, width: 4, depth: 1.5 }, "steel finish switch preserves geometry");
+}
+{
+  const shelf = (structure: PoolConfig["structure"]) =>
+    JSON.stringify(configuredPoolLayout({ ...base, structure, features: ["sunShelf"] }).comfort);
+  equal(shelf("visible-stainless-steel"), shelf("modular-steel-panels"), "Sun Shelf geometry identical across steel finishes");
+}
+const steelSpec = createPhotoSceneSpec(toProjectConfiguration("steel-a", { ...base, structure: "visible-stainless-steel", finish: "none" }, renovation));
+const linedSpec = createPhotoSceneSpec(toProjectConfiguration("steel-b", { ...base, structure: "modular-steel-panels", finish: "liner" }, renovation));
+ok(JSON.stringify(steelSpec) !== JSON.stringify(linedSpec), "photo scene spec follows steel finish");
+const shell = readFileSync("src/components/pool/three/RawShellMaterial.tsx", "utf8");
+ok(shell.includes('kind === "stainless" ? 150'), "visible steel is satin grey, not near-white");
+
 console.log(`PASS: ${checks} structural progression checks — stage, snapshot, dry/wet, shape/resize, comfort, technical, photo and downstream identity.`);

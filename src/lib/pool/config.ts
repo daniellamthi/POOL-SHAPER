@@ -130,6 +130,43 @@ export const POOL_STRUCTURES: ReadonlyArray<{
   },
 ];
 
+/**
+ * What the customer chooses in the Structure step: two materials only.
+ * "Acciaio" is then resolved in the Interior Finish step into one of the two
+ * canonical steel structures above -- visible watertight stainless basin
+ * ("Acciaio a vista") or galvanised steel panels lined with PVC ("Liner").
+ * Galvanised structural panels are never shown as a finished bare basin.
+ */
+export type CustomerStructure = "concrete" | "steel";
+
+export const CUSTOMER_STRUCTURES: ReadonlyArray<{
+  id: CustomerStructure;
+  poolTypes: ReadonlyArray<PoolType>;
+  title: string;
+  description: string;
+  illustration: PoolStructure;
+}> = [
+  {
+    id: "concrete",
+    poolTypes: ["in-ground"],
+    title: "Cemento armato",
+    description: "Vasca monolitica in calcestruzzo armato, rifinita con liner o mosaico.",
+    illustration: "reinforced-concrete",
+  },
+  {
+    id: "steel",
+    poolTypes: ["in-ground", "above-ground"],
+    title: "Acciaio",
+    description: "Vasca in acciaio: inox a vista satinato oppure rivestita in liner.",
+    illustration: "visible-stainless-steel",
+  },
+];
+
+export function customerStructureOf(structure: PoolStructure | null): CustomerStructure | null {
+  if (structure === null) return null;
+  return structure === "reinforced-concrete" ? "concrete" : "steel";
+}
+
 export const CUSTOMER_FIELDS: ReadonlyArray<{
   key: keyof CustomerInfo;
   label: string;

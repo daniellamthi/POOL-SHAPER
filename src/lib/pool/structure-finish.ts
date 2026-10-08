@@ -53,7 +53,7 @@ export function finishDescription(
   finish: FinishMaterial,
 ): string {
   if (structure === VISIBLE_STAINLESS_STRUCTURE || finish === "none") {
-    return "Nessuno — vasca inox a vista";
+    return "Acciaio a vista · inox satinato";
   }
   return finish === "mosaic" ? "Mosaico" : "Liner / PVC";
 }

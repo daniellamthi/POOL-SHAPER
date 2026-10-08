@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 import { useConfigurator } from "@/lib/pool/context";
 import {
   EQUIPMENT,
-  FINISHES,
   LINER_COLORS,
   POOL_SHAPES,
-  POOL_STRUCTURES,
+  CUSTOMER_STRUCTURES,
+  customerStructureOf,
   POOL_TYPES,
   PROJECT_TYPES,
   SKIMMER_FINISHES,
@@ -16,7 +16,7 @@ import {
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { PAVING, pavingId } from "@/lib/pool/presentation";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
-import { allowedFinishesForStructure } from "@/lib/pool/structure-finish";
+import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { configuredAccessPlan } from "@/lib/pool/access-plan";
 import { configuredComfortPlan, normalizeComfortFeatures } from "@/lib/pool/comfort-plan";
@@ -139,9 +139,10 @@ export function PoolTypeTray() {
 
 export function StructureTray() {
   const { config, setPoolStructure } = useConfigurator();
-  const structures = POOL_STRUCTURES.filter((s) =>
+  const structures = CUSTOMER_STRUCTURES.filter((s) =>
     config.poolType ? s.poolTypes.includes(config.poolType) : false,
   );
+  const current = customerStructureOf(config.structure);
   return (
     <ChoiceGrid label="Struttura della piscina">
       {structures.map((item) => (
@@ -149,9 +150,14 @@ export function StructureTray() {
           key={item.id}
           title={item.title}
           description={item.description}
-          image={ill(`structure-${item.id}`)}
-          selected={config.structure === item.id}
-          onSelect={() => setPoolStructure(item.id)}
+          image={ill(`structure-${item.illustration}`)}
+          selected={current === item.id}
+          onSelect={() => {
+            if (item.id === "concrete") setPoolStructure("reinforced-concrete");
+            // Steel keeps an already chosen steel finish; otherwise it starts
+            // lined, and the finish step offers the visible stainless basin.
+            else if (current !== "steel") setPoolStructure("modular-steel-panels");
+          }}
         />
       ))}
     </ChoiceGrid>
@@ -701,51 +707,99 @@ export function AccessTray() {
 /* ---------------------------------------------------------------- 05 */
 
 export function FinishTray() {
-  const { config, setFinish, setLinerColor, setMosaicFinish } = useConfigurator();
-  const allowed = allowedFinishesForStructure(config.structure);
-  const finishes = FINISHES.filter((f) => allowed.includes(f.id));
-  const active = config.finish === "mosaic" ? "mosaic" : "liner";
+  const { config, setFinish, setLinerColor, setMosaicFinish, setPoolStructure } = useConfigurator();
+  const steel = customerStructureOf(config.structure) === "steel";
+  const visibleSteel = isVisibleStainlessStructure(config.structure);
+  const active: "steel" | "liner" | "mosaic" = visibleSteel
+    ? "steel"
+    : config.finish === "mosaic"
+      ? "mosaic"
+      : "liner";
   const linerTexture = LINER_COLORS.find((c) => c.id === config.linerColor)?.texture;
   const mosaicPreview = MOSAIC_FINISHES.find((m) => m.id === config.mosaicFinish)?.preview;
+  // Steel: the two canonical steel structures; concrete: liner or mosaic.
+  const options = steel
+    ? [
+        {
+          id: "steel" as const,
+          title: "Acciaio a vista",
+          description: "Vasca stagna in inox satinato grigio, senza rivestimento.",
+          image: ill("structure-visible-stainless-steel"),
+          select: () => setPoolStructure("visible-stainless-steel"),
+        },
+        {
+          id: "liner" as const,
+          title: "Liner / PVC",
+          description: "Membrana armata che riveste tutte le superfici bagnate.",
+          image: linerTexture ?? ill("structure-modular-steel-panels"),
+          select: () => setPoolStructure("modular-steel-panels"),
+        },
+      ]
+    : [
+        {
+          id: "liner" as const,
+          title: "Liner / PVC",
+          description: "Membrana armata, continua e impermeabile.",
+          image: linerTexture ?? ill("structure-reinforced-concrete"),
+          select: () => setFinish("liner"),
+        },
+        {
+          id: "mosaic" as const,
+          title: "Mosaico",
+          description: "Tessere in vetro posate a mano.",
+          image: mosaicPreview ?? ill("structure-reinforced-concrete"),
+          select: () => setFinish("mosaic"),
+        },
+      ];
   return (
     <TabBody>
-      {finishes.length > 1 ? (
-        <StepTabs
-          label="Rivestimento interno"
-          value={active}
-          onChange={(id) => setFinish(id)}
-          tabs={finishes.map((f) => ({ id: f.id as "liner" | "mosaic", label: f.title }))}
-        />
-      ) : null}
+      <ChoiceGrid label="Rivestimento interno">
+        {options.map((option) => (
+          <ChoiceCard
+            key={option.id}
+            title={option.title}
+            description={option.description}
+            image={option.image}
+            selected={active === option.id}
+            onSelect={option.select}
+          />
+        ))}
+      </ChoiceGrid>
       {active === "liner" ? (
-        <ChoiceGrid label="Colore liner PVC" dense>
-          {LINER_COLORS.map((color) => (
-            <ChoiceCard
-              compact
-              key={color.id}
-              title={color.title.replace("Motion ", "")}
-              description={LINER_COPY[color.id] ?? "Liner PVC armato."}
-              image={color.texture}
-              selected={config.linerColor === color.id}
-              onSelect={() => setLinerColor(color.id)}
-            />
-          ))}
-        </ChoiceGrid>
-      ) : (
-        <ChoiceGrid label="Finitura mosaico" dense>
-          {MOSAIC_FINISHES.map((mosaic) => (
-            <ChoiceCard
-              compact
-              key={mosaic.id}
-              title={mosaic.name}
-              description="Tessere in vetro, posa a mano."
-              image={mosaic.preview}
-              selected={config.mosaicFinish === mosaic.id}
-              onSelect={() => setMosaicFinish(mosaic.id)}
-            />
-          ))}
-        </ChoiceGrid>
-      )}
+        <div className="flex flex-col gap-3">
+          <GroupLabel>Colore del liner</GroupLabel>
+          <ChoiceGrid label="Colore liner PVC" dense>
+            {LINER_COLORS.map((color) => (
+              <ChoiceCard
+                compact
+                key={color.id}
+                title={color.title.replace("Motion ", "")}
+                description={LINER_COPY[color.id] ?? "Liner PVC armato."}
+                image={color.texture}
+                selected={config.linerColor === color.id}
+                onSelect={() => setLinerColor(color.id)}
+              />
+            ))}
+          </ChoiceGrid>
+        </div>
+      ) : active === "mosaic" ? (
+        <div className="flex flex-col gap-3">
+          <GroupLabel>Finitura mosaico</GroupLabel>
+          <ChoiceGrid label="Finitura mosaico" dense>
+            {MOSAIC_FINISHES.map((mosaic) => (
+              <ChoiceCard
+                compact
+                key={mosaic.id}
+                title={mosaic.name}
+                description="Tessere in vetro, posa a mano."
+                image={mosaic.preview}
+                selected={config.mosaicFinish === mosaic.id}
+                onSelect={() => setMosaicFinish(mosaic.id)}
+              />
+            ))}
+          </ChoiceGrid>
+        </div>
+      ) : null}
     </TabBody>
   );
 }

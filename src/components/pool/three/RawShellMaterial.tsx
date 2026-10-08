@@ -34,7 +34,8 @@ function structuralMaps(kind: RawShellKind) {
     const pore = kind === "concrete" && n > 0.987 ? 0.22 : 0;
     const brush = kind === "stainless" ? (Math.sin(y * 2.73) + Math.sin(y * 8.17)) * 0.0035 : 0;
     heights[y * SIZE + x] = joint ? -0.7 : n * 0.025 + cloud * 0.025 - pore + brush;
-    const base = kind === "steel" ? 181 : kind === "stainless" ? 226 : 146;
+    // Stainless: a mid satin grey (AISI 316 brushed), not near-white chrome.
+    const base = kind === "steel" ? 181 : kind === "stainless" ? 150 : 146;
     const value = joint ? 82 : base + cloud * (kind === "stainless" ? 2 : 5)
       + (n - 0.5) * (kind === "stainless" ? 5 : 14) - pore * 58;
     const i = (y * SIZE + x) * 4;
@@ -84,16 +85,18 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
       normalMap={maps.normal}
       normalScale={stainless ? [0.12, 0.12] : [0.5, 0.5]}
       roughnessMap={maps.roughness}
-      roughness={kind === "concrete" ? 1 : stainless ? 0.36 : 0.62}
+      // Satin: ~0.5 effective roughness after the map -- soft, controlled highlights;
+      // upward faces (floor, treads, shelf) must not mirror the sky into white.
+      roughness={kind === "concrete" ? 1 : stainless ? 0.78 : 0.62}
       metalness={kind === "concrete" ? 0 : stainless ? 1 : 0.76}
-      anisotropy={stainless ? 0.7 : 0}
-      envMapIntensity={kind === "concrete" ? 0.72 : stainless ? 1.85 : 1.2}
+      anisotropy={stainless ? 0.45 : 0}
+      envMapIntensity={kind === "concrete" ? 0.72 : stainless ? 0.95 : 1.2}
       side={THREE.DoubleSide}
       onBeforeCompile={(shader) => {
         // Bare metal reads only its environment: lift the IBL radiance for the
         // steel shells (see StainlessSteelMaterial), never for concrete.
         if (kind !== "concrete")
-          boostMetalEnvironment(shader, stainless ? 7 : 4, stainless ? 1.9 : 1.1);
+          boostMetalEnvironment(shader, stainless ? 3 : 4, stainless ? 0.95 : 1.1);
         shader.vertexShader = shader.vertexShader.replace(
           "#include <uv_vertex>",
           `
@@ -104,7 +107,7 @@ export function RawShellMaterial({ kind = "concrete", wallSize }: { kind?: RawSh
       `,
         );
       }}
-      customProgramCacheKey={() => `raw-shell-v2-${kind}-${scale.join("-")}`}
+      customProgramCacheKey={() => `raw-shell-v4-${kind}-${scale.join("-")}`}
     />
   );
 }
