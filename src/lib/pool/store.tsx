@@ -78,7 +78,7 @@ import type {
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
 import { pavingId, premiumEnvironment, type PavingId, type PremiumEnvironment } from "./presentation";
-import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline } from "./infinity-edge";
+import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline, resolveInfinitySelection } from "./infinity-edge";
 import {
   allowedFinishesForStructure,
   normaliseFinishForStructure,
@@ -141,6 +141,8 @@ type Action =
 
 interface State {
   visualFocus?: FocusRequest | null;
+  /** Session preference; inactive Infinity never leaks into saved configuration. */
+  lastInfinitySide?: number | undefined;
   config: PoolConfig;
   renovation: RenovationConfig;
   step: number;
@@ -203,14 +205,11 @@ function withoutInfinityEdge(config: PoolConfig): PoolConfig {
 
 function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
   if (config.system !== "infinity") return withoutInfinityEdge(config);
-  if (!config.infinityEdge) return config;
   const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
-  const valid =
-    !invalidate &&
-    infinityZonesForOutline(outline, config.shape).some(
-      (z) => z.side === config.infinityEdge?.side,
-    );
-  return valid ? config : { ...config, infinityEdge: clampInfinityEdgeParams(undefined) };
+  const edge = resolveInfinitySelection(
+    outline, config.shape, config.poolType, invalidate ? undefined : config.infinityEdge?.side,
+  );
+  return edge ? { ...config, infinityEdge: edge } : withoutInfinityEdge({ ...config, system: "skimmer" });
 }
 
 function configurationReducer(state: State, action: Action): State {
@@ -445,8 +444,15 @@ function configurationReducer(state: State, action: Action): State {
         config.shape,
         config.poolType,
       );
+      const lastInfinitySide = config.infinityEdge?.side ?? state.lastInfinitySide;
       const nextConfig = { ...config, system };
-      return { ...state, config: system === "infinity" ? nextConfig : withoutInfinityEdge(nextConfig) };
+      return { ...state, lastInfinitySide,
+        config: system === "infinity"
+          ? validateInfinity({ ...nextConfig, ...(typeof lastInfinitySide === "number" ? {
+              infinityEdge: clampInfinityEdgeParams({ enabled: true, side: lastInfinitySide }),
+            } : {}) })
+          : withoutInfinityEdge(nextConfig),
+      };
     }
     case "setOverflowType":
       return { ...state, config: { ...config, overflowType: action.value } };
@@ -458,6 +464,7 @@ function configurationReducer(state: State, action: Action): State {
       // canonical clamp regardless.
       return {
         ...state,
+        lastInfinitySide: action.value,
         config: {
           ...config,
           infinityEdge: clampInfinityEdgeParams({
@@ -592,7 +599,8 @@ function configurationReducer(state: State, action: Action): State {
       return {
         ...state,
         projectId: action.value.projectId,
-        config: action.value.config,
+        config: validateInfinity(action.value.config),
+        lastInfinitySide: action.value.config.infinityEdge?.side ?? undefined,
         renovation: action.value.renovation,
       };
     default:
@@ -632,7 +640,7 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
   return STEPS.length - 1;
 }
 
-function reducer(state: State, action: Action): State {
+export function reducer(state: State, action: Action): State {
   const next = configurationReducer(state, action);
   return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config)) };
 }

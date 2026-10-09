@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Environment } from "@react-three/drei";
 import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
 import {
@@ -88,15 +88,19 @@ export function DaylightEnvironment({
   sunDirection,
   outdoor = false,
   coastalRotation = 0,
+  onCoastalStatus,
 }: {
   theme: Theme;
   timeOfDay?: SceneTimeOfDay;
   sunDirection: [number, number, number];
   outdoor?: boolean;
   coastalRotation?: number;
+  onCoastalStatus?: (status: "loading" | "ready" | "error") => void;
 }) {
   const [sky, setSky] = useState<DataTexture | null>(null);
   const [panorama,setPanorama] = useState<Texture|null>(null);
+  const [panoramaError, setPanoramaError] = useState(false);
+  const [skyError, setSkyError] = useState(false);
   // Separate background detail from IBL resolution without mixing locations.
   // Studio/night retain their existing resources.
   const photographicSky = outdoor;
@@ -104,20 +108,26 @@ export function DaylightEnvironment({
   // sun showed up in the night water): it uses the procedural night sky.
   const night = timeOfDay === "night";
   const assetUrl = photographicSky ? "/hdri/simons-town-rocks-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
+  useLayoutEffect(() => {
+    onCoastalStatus?.(!photographicSky ? "loading" : panoramaError || (!night && skyError) ? "error"
+      : panorama && (night || sky) ? "ready" : "loading");
+  }, [photographicSky, panorama, sky, night, panoramaError, skyError, onCoastalStatus]);
   useEffect(()=>{
+    setPanoramaError(false);
     if(!photographicSky)return;
     let active=true,owned:Texture|null=null;
     new TextureLoader().load("/hdri/simons-town-rocks-background.jpg",texture=>{
       if(!active){texture.dispose();return;}
       texture.colorSpace=SRGBColorSpace;
       owned=texture;setPanorama(texture);
-    },undefined,()=>console.warn("[Pool3D] Coastal panorama unavailable; using procedural sky."));
+    },undefined,()=>{ if (active) setPanoramaError(true); console.warn("[Pool3D] Coastal panorama unavailable."); });
     return()=>{active=false;owned?.dispose();setPanorama(null);};
   },[photographicSky]);
   useEffect(() => {
     let active = true;
     let owned: DataTexture | null = null;
     setSky(null);
+    setSkyError(false);
     if (night) return;
     new HDRLoader().load(
       assetUrl,
@@ -132,7 +142,7 @@ export function DaylightEnvironment({
         setSky(texture);
       },
       undefined,
-      () => console.warn("[Pool3D] Local daylight HDR unavailable; using procedural daylight."),
+      () => { if (active && photographicSky) setSkyError(true); console.warn("[Pool3D] Local daylight HDR unavailable."); },
     );
     return () => {
       active = false;

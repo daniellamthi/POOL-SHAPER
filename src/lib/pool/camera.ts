@@ -1,4 +1,5 @@
 import { planSkimmers } from "./engineering";
+import { Vector3 } from "three";
 import type { SkimmerPlan } from "./engineering";
 import { outlineArea, outlineBounds } from "./geometry";
 import { POOL_LIGHTING_DESIGN } from "./lighting";
@@ -92,7 +93,7 @@ export function dimensionFrustum(outline: Outline, aspect: number) {
 }
 
 /** Frames the SAME resolved comfort/ladder geometry used by PoolModel. */
-export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedPoolLayout, layout: PoolVerticalLayout, outline: Outline, fov: number, aspect: number): CameraPose | null {
+export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedPoolLayout, layout: PoolVerticalLayout, outline: Outline, fov: number, aspect: number, infinityZone?: RectangleInfinityZone | null): CameraPose | null {
   if (intent === "inox") {
     const plan = resolved.ladder?.plan ?? (resolved.access.ladderDepths.length ? resolved.access : null);
     const pose = plan?.placement ? getAccessDetailCamera(plan, layout, fov, aspect) : null;
@@ -112,13 +113,84 @@ export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedP
   // footprint and pose: divider height changes never move the camera.
   let nx = (pool.minX + pool.maxX) / 2 - x, nz = (pool.minZ + pool.maxZ) / 2 - z;
   const n = Math.hypot(nx,nz); if (n < 0.1) { nx = 1; nz = 0; } else { nx /= n; nz /= n; }
-  const target: CameraPoint = [x, layout.waterY - 0.55, z];
-  const radius = Math.hypot(b.spanX + 0.7, b.spanZ + 0.7, 1.7) / 2;
+  const levels = [element.topY, ...(element.tiers ?? []).map(t => t.topY),
+    ...(element.steps ?? []).map(s => s.topY), ...(element.landing ? [element.landing.topY] : [])];
+  const floor = (element.steps?.at(-1)?.topY ?? layout.floorY) - (element.riser ?? 0);
+  const low = Math.min(floor, ...levels), high = Math.max(...levels);
+  const target: CameraPoint = [x, infinityZone ? (low + high) / 2 : layout.waterY - 0.55, z];
+  const radius = Math.hypot(b.spanX + 0.7, b.spanZ + 0.7, infinityZone ? high - low + 0.3 : 1.7) / 2;
   const half = Math.atan(Math.tan(fov * Math.PI / 360) * Math.min(1, Math.max(0.2, aspect)));
-  const distance = radius / Math.sin(half) * 1.08;
+  let distance = radius / Math.sin(half) * 1.08;
   const direction = [nx + nz * 0.25, 1.35, nz - nx * 0.25];
   const norm = Math.hypot(...direction);
+  if (infinityZone) {
+    const eyeDirection = new Vector3(direction[0],direction[1],direction[2]).normalize();
+    const right = eyeDirection.clone().negate().cross(new Vector3(0,1,0)).normalize();
+    const up = eyeDirection.clone().cross(right).normalize();
+    const tanY = Math.tan(fov * Math.PI / 360) * 0.9, tanX = tanY * aspect;
+    // Fit the projected bounding corners, not a sphere that unnecessarily
+    // backs away from wide comfort zones in a short mobile viewport.
+    distance = Math.max(1.5, ...[b.minX,b.maxX].flatMap(px => [low,high].flatMap(py => [b.minZ,b.maxZ].map(pz => {
+      const p = new Vector3(px-x,py-target[1],pz-z);
+      return p.dot(eyeDirection) + Math.max(Math.abs(p.dot(right))/tanX,Math.abs(p.dot(up))/tanY);
+    }))));
+  }
   return { target, position: [x + direction[0]! / norm * distance, target[1] + direction[1]! / norm * distance, z + direction[2]! / norm * distance] };
+}
+
+/** Only subtract UI that really overlaps the canvas; trays below it cost no area. */
+export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>) {
+  let candidates = [{ left: 0, top: 0, right: canvas.width, bottom: canvas.height }];
+  for (const overlay of overlays) {
+    const fullWidth = overlay.width >= canvas.width * 0.55;
+    const padding = fullWidth ? 0 : 8;
+    const x0 = Math.max(0, overlay.left - canvas.left - padding), y0 = Math.max(0, overlay.top - canvas.top - padding);
+    const x1 = Math.min(canvas.width, overlay.left + overlay.width - canvas.left + padding);
+    const y1 = Math.min(canvas.height, overlay.top + overlay.height - canvas.top + padding);
+    if (x1 <= x0 || y1 <= y0) continue;
+    const next = candidates.flatMap(r => x1 <= r.left || x0 >= r.right || y1 <= r.top || y0 >= r.bottom ? [r] : [
+      {...r, right: Math.min(r.right,x0)}, {...r, left: Math.max(r.left,x1)},
+      {...r, bottom: Math.min(r.bottom,y0)}, {...r, top: Math.max(r.top,y1)},
+    ]).filter(r => r.right > r.left && r.bottom > r.top);
+    // Retain maximal free rectangles, including beside a badge. Removing an
+    // entire HUD row can collapse a short mobile viewport and clip the camera.
+    candidates = next.filter((r,i) => !next.some((other,j) => j !== i &&
+      other.left <= r.left && other.right >= r.right && other.top <= r.top && other.bottom >= r.bottom &&
+      (j < i || other.left < r.left || other.right > r.right || other.top < r.top || other.bottom > r.bottom)));
+  }
+  const best = candidates.reduce((a,b) => (b.right-b.left)*(b.bottom-b.top) > (a.right-a.left)*(a.bottom-a.top) ? b : a,
+    {left:0,top:0,right:1,bottom:1});
+  return { left:best.left, top:best.top, width:best.right-best.left, height:best.bottom-best.top };
+}
+
+export function cameraFrameFit(fov: number, canvasHeight: number, frame: ReturnType<typeof visibleCameraFrame>) {
+  return { verticalFov: 2 * Math.atan(Math.tan(fov * Math.PI / 360) * frame.height / canvasHeight) * 180 / Math.PI,
+    aspect: frame.width / frame.height };
+}
+
+export function offsetCameraToFrame(pose: CameraPose, fov: number, width: number, height: number, frame: ReturnType<typeof visibleCameraFrame>): CameraPose {
+  const eye = new Vector3(...pose.position), target = new Vector3(...pose.target);
+  const forward = target.clone().sub(eye).normalize();
+  const right = forward.clone().cross(new Vector3(0, 1, 0)).normalize();
+  const up = right.clone().cross(forward).normalize();
+  const scale = 2 * eye.distanceTo(target) * Math.tan(fov * Math.PI / 360) / height;
+  const offset = right.multiplyScalar(-(frame.left + frame.width / 2 - width / 2) * scale)
+    .add(up.multiplyScalar((frame.top + frame.height / 2 - height / 2) * scale));
+  return { ...pose, position: eye.add(offset).toArray() as [number,number,number], target: target.add(offset).toArray() as [number,number,number] };
+}
+
+/** Infinity's photographic ground is a limited capture, not a navigable site. */
+export function infinityNavigationLimits(pose: CameraPose, detail: boolean, waterY: number) {
+  const dx = pose.position[0] - pose.target[0], dy = pose.position[1] - pose.target[1], dz = pose.position[2] - pose.target[2];
+  const distance = Math.hypot(dx, dy, dz), azimuth = Math.atan2(dx, dz);
+  const polar = Math.acos(dy / distance), yaw = detail ? 0.32 : 0.18;
+  const eyeClearance = waterY + 0.4 - pose.target[1];
+  const maxPolarAngle = Math.min(Math.PI / 2.05, polar + 0.1,
+    Math.acos(Math.max(-1, Math.min(1, eyeClearance / distance))) - 0.01);
+  return { minAzimuthAngle: azimuth - yaw, maxAzimuthAngle: azimuth + yaw,
+    minPolarAngle: Math.max(0.12, polar - 0.14), maxPolarAngle,
+    minDistance: Math.max(1.2, distance * 0.6, eyeClearance / Math.cos(maxPolarAngle)), maxDistance: distance * (detail ? 1.08 : 1),
+  };
 }
 
 interface BoundaryFocus {

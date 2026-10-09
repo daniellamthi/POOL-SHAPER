@@ -582,6 +582,7 @@ function ConfiguratorLayout() {
                 : wholePoolIntent(
                     visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus,
                     renovationWorkflow ? undefined : activeStepId,
+                    config.system,
                   ))
             }
             cameraLocked={cameraLocked}

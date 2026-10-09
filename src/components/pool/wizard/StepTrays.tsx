@@ -308,7 +308,7 @@ export function SystemTray() {
   } = useConfigurator();
   const infinityAvailable =
     compatibleInfinityZones(outline, config.shape, config.poolType).length > 0;
-  const [tab, setTab] = useTab<"system" | "detail">("system", config.system);
+  const [tab, setTab] = useTab<"system" | "detail">(config.system === "infinity" ? "detail" : "system", config.system);
   const detailLabel =
     config.system === "skimmer"
       ? "Modello skimmer"
@@ -356,7 +356,7 @@ export function SystemTray() {
               description={item.description}
               image={ill(`system-${item.id}`)}
               selected={config.system === item.id}
-              onSelect={() => setSystem(item.id)}
+              onSelect={() => { setSystem(item.id); if (item.id === "infinity") setTab("detail"); }}
             />
           ))}
         </ChoiceGrid>

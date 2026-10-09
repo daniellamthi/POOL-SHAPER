@@ -72,6 +72,20 @@ export function defaultInfinityEdgeParams(): InfinityEdgeParams {
   return { enabled: false, side: null, startT: 0, endT: 1, dropDirection: "outward" };
 }
 
+/** Active Infinity always has a real edge, including legacy restored projects. */
+export function resolveInfinitySelection(
+  outline: Outline,
+  shape: PoolShapeId,
+  poolType: PoolType | null,
+  preferredSide: number | null | undefined,
+): InfinityEdgeParams | undefined {
+  const zones = compatibleInfinityZones(outline, shape, poolType);
+  const selected = zones.find(zone => zone.side === preferredSide) ??
+    zones.reduce<RectangleInfinityZone | undefined>((best, zone) =>
+      !best || zone.length >= best.length ? zone : best, undefined);
+  return selected ? clampInfinityEdgeParams({ enabled: true, side: selected.side }) : undefined;
+}
+
 /**
  * Normalise arbitrary (possibly malformed, legacy, or hand-edited) input
  * into valid `InfinityEdgeParams`. Every other function in this module, and

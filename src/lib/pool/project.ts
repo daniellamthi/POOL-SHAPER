@@ -19,7 +19,7 @@ import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
 import { clampLShapeDimensions } from "./l-shape";
-import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem } from "./infinity-edge";
+import { compatiblePoolSystem, resolveInfinitySelection } from "./infinity-edge";
 import { buildOutline } from "./geometry";
 import { pavingId, premiumEnvironment } from "./presentation";
 import {
@@ -175,20 +175,13 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     ? restoredStructure
     : null;
   const finish = normaliseFinishForStructure(structure, restored.finish);
-  const infinityZones = compatibleInfinityZones(outline, restored.shape, restored.poolType);
   // Only ever attach an `infinityEdge` field when the project actually has
   // one to normalise (already carried the field, or is genuinely on
   // "infinity") -- a project that never touched Infinity must round-trip
   // byte-for-byte identical, never gain a new field it didn't have before.
-  let infinityEdge =
-    system === "infinity"
-      ? clampInfinityEdgeParams(restored.infinityEdge)
-      : undefined;
-  if (
-    infinityEdge?.enabled &&
-    !infinityZones.some((z) => z.side === infinityEdge?.side)
-  )
-    infinityEdge = clampInfinityEdgeParams(undefined);
+  const infinityEdge = system === "infinity"
+    ? resolveInfinitySelection(outline, restored.shape, restored.poolType, restored.infinityEdge?.side)
+    : undefined;
   const {
     infinityEdge: _savedInfinityEdge,
     coverExtension: savedCoverExtension,

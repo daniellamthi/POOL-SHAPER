@@ -30,7 +30,7 @@ export interface ComfortElementPlan {
   spots?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
 }
 
-export type HydroTierRole = "divider" | "frontWall" | "backSeat" | "sideSeat" | "innerSideSeat" | "tubFloor";
+export type HydroTierRole = "divider" | "frontWall" | "sideReturn" | "backSeat" | "sideSeat" | "innerSideSeat" | "tubFloor";
 
 /** Real in-pool spa dimensions (metres), read from the reference: a sunken
  * tub beside the straight flight, a divider wall towards the stairs and, in the
@@ -325,8 +325,11 @@ export function resolveComfortPlan({
         : { minX: Math.min(c0, c1), maxX: Math.max(c0, c1), minZ: Math.min(p, q), maxZ: Math.max(p, q) };
     };
     const back = -H.wallOverlap;
-    const benchInner = outerWall - side * H.benchDepth;
-    const interiorWidth = Math.abs(outerWall - inner);
+    // When this flank faces Infinity it has no pool wall behind the seat.
+    // Close the tub inside its existing safe footprint, never across the lip.
+    const seatBack = outerIsInfinity ? outerWall - side * H.partitionThickness : outerWall;
+    const benchInner = seatBack - side * H.benchDepth;
+    const interiorWidth = Math.abs(seatBack - inner);
     const seatTop = waterY - H.seatWaterDepth;
     const whole = box(back, end, partition0, outer);
     const corners = rectOutline(whole);
@@ -346,14 +349,18 @@ export function resolveComfortPlan({
       const front = frontWall ? lip : end;
       const innerBenchEdge = inner + side * H.benchDepth;
       const tubInner = frontWall ? inner : innerBenchEdge;
-      const wallTop = waterY - H.wallWaterDepth;
+      // The landing is the first tread reached when descending from coping.
+      const wallTop = system === "infinity" ? shelf.landing.topY : waterY - H.wallWaterDepth;
       const tiers: Array<{ footprint: Outline; topY: number; role: HydroTierRole }> = [
         { role: "divider", footprint: rectOutline(box(back, end, partition0, inner)), topY: wallTop },
-        ...(frontWall
-          ? [{ role: "frontWall" as const, footprint: rectOutline(box(lip, end, inner, outer)), topY: wallTop }]
+        ...(outerIsInfinity
+          ? [{ role: "sideReturn" as const, footprint: rectOutline(box(back, end, seatBack, outer)), topY: wallTop }]
           : []),
-        { role: "backSeat", footprint: rectOutline(box(back, H.benchDepth, inner, outer)), topY: seatTop },
-        { role: "sideSeat", footprint: rectOutline(box(H.benchDepth, front, benchInner, outer)), topY: seatTop },
+        ...(frontWall
+          ? [{ role: "frontWall" as const, footprint: rectOutline(box(lip, end, inner, outerIsInfinity ? seatBack : outer)), topY: wallTop }]
+          : []),
+        { role: "backSeat", footprint: rectOutline(box(back, H.benchDepth, inner, outerIsInfinity ? seatBack : outer)), topY: seatTop },
+        { role: "sideSeat", footprint: rectOutline(box(H.benchDepth, front, benchInner, outerIsInfinity ? seatBack : outer)), topY: seatTop },
         ...(!frontWall
           ? [{ role: "innerSideSeat" as const, footprint: rectOutline(box(H.benchDepth, front, inner, innerBenchEdge)), topY: seatTop }]
           : []),
@@ -368,7 +375,7 @@ export function resolveComfortPlan({
             : Math.abs(v - (max - EDGE_INSET)) < 1e-6 ? max + H.wallOverlap : v;
         return [snap(x, bounds.minX, bounds.maxX), snap(z, bounds.minZ, bounds.maxZ)] as const;
       });
-      const jetY = seatTop + H.jetAboveSeat;
+      const jetY = Math.min(seatTop + H.jetAboveSeat, wallTop - H.jetDiameter / 2 - 0.01);
       const spaced = (from: number, to: number) => {
         const count = Math.max(1, Math.floor(Math.abs(to - from) / H.jetSpacing) + 1);
         const step = count > 1 ? (to - from) / (count - 1) : 0;
@@ -380,7 +387,7 @@ export function resolveComfortPlan({
       const innerSideDir = (longX ? [0, side] : [side, 0]) as readonly [number, number];
       const jets = [
         ...spaced(inner + side * 0.3, benchInner - side * 0.25).map((c) => ({ ...point(0, c), y: jetY, dir: headDir })),
-        ...(outerIsInfinity ? [] : spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, outerWall), y: jetY, dir: sideDir }))),
+        ...spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, seatBack), y: jetY, dir: sideDir })),
         ...(!frontWall
           ? spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, inner), y: jetY, dir: innerSideDir }))
           : []),

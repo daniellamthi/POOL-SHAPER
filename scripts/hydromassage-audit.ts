@@ -62,6 +62,7 @@ function config(over: {
   system: PoolConfig["system"];
   features: PoolFeatureId[];
   variant?: HydromassageVariant;
+  side?: number;
 }): PoolConfig {
   return {
     projectType: "new",
@@ -98,7 +99,7 @@ function config(over: {
     uploads: [],
     ...(over.variant ? { hydromassageVariant: over.variant } : {}),
     ...(over.system === "infinity"
-      ? { infinityEdge: clampInfinityEdgeParams({ side: over.reversed ? 1 : 3 }) }
+      ? { infinityEdge: clampInfinityEdgeParams({ enabled: true, side: over.side ?? (over.reversed ? 1 : 3) }) }
       : {}),
   } as PoolConfig;
 }
@@ -198,7 +199,7 @@ for (const length of [6, 8, 10, 12])
           check(dividerC.topY === frontC!.topY, `${tag}: CLOSED dividerTop === frontWallTop`);
           check(
             dividerC.topY === lc.comfort.elements[0]!.topY &&
-              Math.abs(dividerC.topY - (hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
+              Math.abs(dividerC.topY - (system === "infinity" ? hc.landing!.topY : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
             `${tag}: wall top is the shared parametric quota`,
           );
           check(Math.abs(thin(frontC!.footprint) - H.lipThickness) < 1e-6, `${tag}: front wall 15 cm`);
@@ -281,7 +282,7 @@ for (const length of [6, 8, 10, 12])
               `${vtag}: wall > seat > tub floor`,
             );
             check(
-              Math.abs(back.topY - (divider.topY + H.wallWaterDepth - H.seatWaterDepth)) < 1e-9,
+              Math.abs(back.topY - (vl.waterY - H.seatWaterDepth)) < 1e-9,
               `${vtag}: seat 45 cm under water`,
             );
             check(hydro.width >= H.minInteriorWidth - 1e-9, `${vtag}: ergonomic width`);
@@ -457,6 +458,31 @@ for (let w = 2.5; w <= 6; w += 0.25)
         h ? h.width >= H.minInteriorWidth - 1e-9 : !l.comfort.availability.hydromassage.available,
         `resize ${length}x${w} ${variant}`,
       );
+    }
+for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
+  for (const side of [0,1,2,3]) for (const variant of ["closed","open"] as const)
+    for (const sloped of [false,true]) for (const depth of [1.2,1.5,1.8]) {
+      const c = config({length,width,side,variant,sloped,system:"infinity",features:["hydromassage"]});
+      c.dimensions = {...c.dimensions, depth};
+      const resolved = configuredPoolLayout(c), h = hydroOf(resolved);
+      const tag = `Infinity ${length}x${width} side${side}/${variant}/${depth}/${sloped}`;
+      if (!h) { check(!resolved.comfort.availability.hydromassage.available, `${tag}: unavailable is explicit`); continue; }
+      const sideReturn=tier(h,"sideReturn");
+      check(side % 2 === 0 ? !!sideReturn : !sideReturn, `${tag}: missing Infinity flank has a dedicated closure only where needed`);
+      if(sideReturn) check(h.jets!.some(j=>near(j,sideReturn.footprint)),`${tag}: return jets backed by solid wall`);
+      const firstTread = Math.max(h.landing!.topY, ...h.steps!.map(step => step.topY));
+      for (const part of h.tiers!.filter(t => ["divider","frontWall","sideReturn"].includes(t.role)))
+        check(Math.abs(part.topY-firstTread)<1e-9, `${tag}: every divider aligned with first tread`);
+      for (const jet of h.jets!) check(jet.y + H.jetDiameter/2 <= firstTread - 0.009, `${tag}: complete jet bezel below wall top`);
+      const parts=[...h.tiers!,h.landing!,...h.steps!];
+      for(let i=0;i<parts.length;i++) for(let j=i+1;j<parts.length;j++)
+        check(!overlap(parts[i]!.footprint,parts[j]!.footprint),`${tag}: no solid overlap ${i}/${j}`);
+      const outline=buildOutline(c.shape,c.dimensions,c.controlPoints);
+      const verticalLayout=getPoolVerticalLayout({poolType:"in-ground",system:"infinity",overflowType:"hidden",depth,copingThickness:0});
+      const floor=buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout,sunShelf:true,infinityEdge:c.infinityEdge!});
+      const solid=shelfStairGeometry(h,floor);
+      check(watertight(solid),`${tag}: closed union mesh`); solid.dispose();
+      check(variant==="open" ? !tier(h,"frontWall") && !!tier(h,"innerSideSeat") : !!tier(h,"frontWall"),`${tag}: A/B opening preserved`);
     }
 console.log(
   `Hydromassage audit PASS: ${checks} checks; ${built} sizes x 2 variants built, ${unavailable} unavailable.`,

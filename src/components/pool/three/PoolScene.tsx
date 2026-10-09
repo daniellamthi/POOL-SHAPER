@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, ContactShadows, Line, useProgress } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -58,7 +58,7 @@ import {
 } from "@/configurator/3d/scene/visual-preset";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { outlineBounds } from "@/lib/pool/geometry";
-import { getCameraPose, dimensionFrustum, contextualAccessCamera } from "@/lib/pool/camera";
+import { getCameraPose, dimensionFrustum, contextualAccessCamera, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
 import type { ResolvedPoolLayout } from "@/lib/pool/resolved-layout";
 import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
@@ -444,6 +444,15 @@ function CameraRig({
   const idleElapsed = useRef(0);
   const editingPose = useRef<{ key: string; pose: import("@/lib/pool/camera").CameraPose } | null>(null);
   const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
+  const [, refreshVisibleFrame] = useState(0);
+  useLayoutEffect(() => {
+    if (!infinityZone) return;
+    const tray = document.querySelector('[aria-label^="Passo "]');
+    if (!tray) return;
+    const observer = new ResizeObserver(() => refreshVisibleFrame(n => n + 1));
+    observer.observe(tray);
+    return () => observer.disconnect();
+  }, [canvas, Boolean(infinityZone), focus, frameToken]);
 
   useEffect(() => {
     const control = controls.current;
@@ -487,10 +496,16 @@ function CameraRig({
   });
 
   const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping"].includes(focus);
-  const summaryRect = detail ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
+  const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
   const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, SCENE_VISUAL_PRESET.camera.fov, (viewportSize.width - reservedRight) / Math.max(1,viewportSize.height)) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
-    ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov)
+  const visibleFrame = infinityZone && detail
+    ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"]')).map(element => element.getBoundingClientRect()))
+    : { left: 0, top: 0, width: viewportSize.width - reservedRight, height: viewportSize.height };
+  const fitFov = infinityZone && detail
+    ? cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov
+    : SCENE_VISUAL_PRESET.camera.fov;
+  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
+    ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov, {outset:copingOuterOffset("infinity", "hidden"), y:layout.copingY})
     : getCameraPose({
       accessPlan,
       intent: focus,
@@ -499,8 +514,8 @@ function CameraRig({
       depth,
       skimmers,
       ledRow,
-      verticalFov: SCENE_VISUAL_PRESET.camera.fov,
-      viewportAspect: (viewportSize.width - reservedRight) / Math.max(1, viewportSize.height),
+      verticalFov: fitFov,
+      viewportAspect: visibleFrame.width / Math.max(1, visibleFrame.height),
       includeExternalStaircase,
       infinityZone,
     }));
@@ -527,6 +542,9 @@ function CameraRig({
     pose.position = eye.add(right).toArray() as [number, number, number];
     pose.target = target.add(right).toArray() as [number, number, number];
   }
+  if (infinityZone && detail) {
+    pose = offsetCameraToFrame(pose, SCENE_VISUAL_PRESET.camera.fov, viewportSize.width, viewportSize.height, visibleFrame);
+  }
   // Material changes can recreate plans without moving their geometry.
   // Only a different pose/intent or explicit reframe starts a new flight.
   const poseKey = JSON.stringify(pose);
@@ -550,13 +568,22 @@ function CameraRig({
     startTarget.current.copy(controls.current?.target ?? lookAt.current);
     // Drain any orbit inertia without changing the visible starting pose.
     const control = controls.current;
+    if (control) {
+      Object.assign(control, infinityZone && focus !== "top" && focus !== "depth"
+        ? infinityNavigationLimits(pose, detail, layout.waterY)
+        : { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: 2, maxDistance: 160,
+            minPolarAngle: focus === "top" ? Math.PI / 2 : 0,
+            maxPolarAngle: focus === "top" ? Math.PI / 2 : Math.PI / 2.05 });
+    }
     renderQualityState.locked = cameraLocked;
     if (cameraLocked || infinityZone || focus === "top" || focus === "depth") {
       if (control) {
         const damping = control.enableDamping;
         control.enableDamping = false;
         control.update();
+        camera.position.copy(goal.current);
         control.target.copy(lookAt.current);
+        control.update();
         control.enableDamping = damping;
       }
       camera.position.copy(goal.current);
@@ -923,6 +950,7 @@ export default function PoolScene({
   onPhotoModeUnsupported,
 }: SceneProps) {
   const controls = useRef<OrbitControlsImpl | null>(null);
+  const [coastalStatus, setCoastalStatus] = useState<"loading" | "ready" | "error">("loading");
   const radius = Math.hypot(length, width) / 2;
   const visualTheme: Theme =
     sceneTime === "night" ? "dark" : "light";
@@ -1160,6 +1188,7 @@ export default function PoolScene({
   ].join("|");
 
   return (
+    <div className="relative h-full w-full">
     <Canvas
       // PCFSoftShadowMap is deprecated in three.js: WebGLShadowMap silently
       // reassigns it to PCFShadowMap on the very first render anyway (same
@@ -1207,7 +1236,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} /> : null}
 
       <SceneMood
         dusk={dusk}
@@ -1461,7 +1490,7 @@ export default function PoolScene({
         // new drag input, it stops the camera from drifting at all while
         // explicit Photo Mode or a locked presentation view is active.
         enabled={!photoMode && !cameraLocked}
-        enablePan
+        enablePan={!infinityStage}
         enableZoom
         enableRotate={focus !== "top"}
         enableDamping={!cameraLocked && !photoMode}
@@ -1481,7 +1510,7 @@ export default function PoolScene({
         radius={radius}
         controls={controls}
         frameToken={frameToken}
-        focus={construction?.raw && (focus === "overview" || focus === "review") ? "structure" : infinityZone && focus === "overview" ? "infinity" : focus}
+        focus={infinityZone && (focus === "overview" || focus === "review") ? "infinity" : construction?.raw && (focus === "overview" || focus === "review") ? "structure" : focus}
         shape={shape}
         depth={depth}
         outline={outline}
@@ -1521,5 +1550,11 @@ export default function PoolScene({
         </Suspense>
       ) : null}
     </Canvas>
+    {infinityStage && !photoMode && coastalStatus !== "ready" ? (
+      <div role="status" aria-live="polite" className="absolute inset-0 z-[2] flex items-center justify-center bg-viewport text-sm text-foreground/70">
+        {coastalStatus === "error" ? "Panorama non disponibile. Seleziona nuovamente Infinity per riprovare." : "Preparazione panorama Infinity…"}
+      </div>
+    ) : null}
+    </div>
   );
 }

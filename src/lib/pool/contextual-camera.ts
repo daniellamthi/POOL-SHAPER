@@ -102,7 +102,9 @@ const WHOLE_POOL_INTENTS: ReadonlySet<CameraIntent> = new Set<CameraIntent>([
   "cover",
   "infinity",
 ]);
-export function wholePoolIntent(intent: CameraIntent, stepId: string | undefined): CameraIntent {
+export function wholePoolIntent(intent: CameraIntent, stepId: string | undefined, system?: PoolConfig["system"]): CameraIntent {
+  if (system === "infinity" && stepId !== "review" &&
+    ["access", "inox", "shelf", "hydromassage", "bench"].includes(intent)) return intent;
   return stepId !== undefined && WHOLE_POOL_STEP_IDS.has(stepId) && !WHOLE_POOL_INTENTS.has(intent)
     ? "review"
     : intent;
