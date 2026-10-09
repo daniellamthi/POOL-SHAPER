@@ -3,7 +3,7 @@ import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
 import { accessMounting } from "./access-plan";
 import { planSceneLighting, type SceneLightingPlan } from "./lighting-plan";
 import { buildFloorProfile } from "./floor-profile";
-import { buildOutline, computeMetrics } from "./geometry";
+import { buildOutline, computeMetrics, outlineBounds } from "./geometry";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { planSkimmers } from "./engineering";
 import { infinityExclusion } from "./infinity-edge";
@@ -32,6 +32,7 @@ export interface ResolvedPoolLayout {
   lighting: SceneLightingPlan;
 }
 type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
+  stairMirrored?: boolean;
   shape: PoolShapeId;
   poolType: PoolType;
   features: ReadonlyArray<PoolFeatureId>;
@@ -71,18 +72,28 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
   const integrated = comfort.elements.some(
     (element) => element.kind === "sunShelf" || element.kind === "hydromassage",
   );
-  const ladderAsAddon = input.access === "internalSteps" && features.includes("inoxLadder");
-  const effectiveAccess = integrated && input.access === "internalSteps" ? null : input.access;
+  const ladderAsAddon = input.poolType !== "above-ground" && input.access === "internalSteps" && features.includes("inoxLadder");
+  const effectiveAccess = (input.poolType === "above-ground" && input.access === "stainlessSteelLadder") ||
+    (integrated && input.access === "internalSteps") ? null : input.access;
   const mounting = accessMounting(input.system, input.overflowType, input.layout);
-  const resolve = (access: PoolAccess | null, reserved: ReadonlyArray<Outline>) =>
-    resolveAccessPlan({
+  const resolve = (access: PoolAccess | null, reserved: ReadonlyArray<Outline>) => {
+    const request = {
       ...input,
       access,
       topY: input.layout.copingY,
       obstacles: input.skimmers.positions,
       reservedFootprints: reserved,
       ...mounting,
-    });
+      rectangularCorner: input.poolType === "above-ground",
+    };
+    const normal=resolveAccessPlan(request);
+    if(input.poolType!=="above-ground" || !input.stairMirrored || access!=="internalSteps" || !normal.placement) return normal;
+    const bounds=outlineBounds(input.outline),p=normal.placement,longX=bounds.spanX>=bounds.spanZ;
+    return resolveAccessPlan({...request,mirrorAnchor:{
+      x:longX?p.x:bounds.minX+bounds.maxX-p.x,
+      z:longX?bounds.minZ+bounds.maxZ-p.z:p.z,
+    }});
+  };
   const comfortReserved = comfortFootprints(comfort);
   const access = resolve(effectiveAccess, comfortReserved);
   let ladder: ResolvedPoolLayout["ladder"] = null;
@@ -158,6 +169,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     hydromassageVariant: config.hydromassageVariant,
     access: config.poolAccess,
     stairType: config.internalStairType ?? "linear",
+    stairMirrored: !!config.internalStairMirrored,
     skimmers: planSkimmers(
       outline,
       computeMetrics(outline, config.dimensions.depth).waterSurface,

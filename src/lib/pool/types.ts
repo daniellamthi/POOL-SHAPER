@@ -210,6 +210,8 @@ export interface PoolConfig {
   /** Only meaningful while `poolAccess` is "internalSteps". Absent on projects
    *  saved before the corner staircase existed; readers substitute "linear". */
   internalStairType?: InternalStairType;
+  /** Above-ground internal entry at the other valid corner of its end wall. */
+  internalStairMirrored?: boolean;
   /** Only meaningful while "hydromassage" is enabled; absent means "closed". */
   hydromassageVariant?: HydromassageVariant;
   equipment: ReadonlyArray<EquipmentId>;

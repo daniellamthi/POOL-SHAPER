@@ -89,6 +89,7 @@ export function DaylightEnvironment({
   outdoor = false,
   coastalRotation = 0,
   onCoastalStatus,
+  onCoastalMap,
 }: {
   theme: Theme;
   timeOfDay?: SceneTimeOfDay;
@@ -96,11 +97,16 @@ export function DaylightEnvironment({
   outdoor?: boolean;
   coastalRotation?: number;
   onCoastalStatus?: (status: "loading" | "ready" | "error") => void;
+  onCoastalMap?: (map: Texture | null) => void;
 }) {
   const [sky, setSky] = useState<DataTexture | null>(null);
   const [panorama,setPanorama] = useState<Texture|null>(null);
   const [panoramaError, setPanoramaError] = useState(false);
   const [skyError, setSkyError] = useState(false);
+  useLayoutEffect(() => {
+    onCoastalMap?.(outdoor ? panorama : null);
+    return () => onCoastalMap?.(null);
+  }, [outdoor, panorama, onCoastalMap]);
   // Separate background detail from IBL resolution without mixing locations.
   // Studio/night retain their existing resources.
   const photographicSky = outdoor;

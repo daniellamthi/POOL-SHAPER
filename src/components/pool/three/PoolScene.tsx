@@ -14,7 +14,7 @@ import {
   OrthographicCamera,
   SRGBColorSpace,
 } from "three";
-import type { DirectionalLight, HemisphereLight, SpotLight } from "three";
+import type { DirectionalLight, HemisphereLight, SpotLight, Texture } from "three";
 import { PoolModel } from "./PoolModel";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
@@ -26,7 +26,8 @@ import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
 import { createInfinityLandscape, createInfinityDeck, infinityGroundHeight } from "./infinityLandscape";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { coastalCamera, coastalGrade, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
+import { COAST_PHOTO_CAPTURE, coastalCamera, coastalGrade, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
+import { CoastalGroundMaterial } from "./CoastalGroundMaterial";
 import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
 import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
@@ -104,6 +105,7 @@ export interface SceneProps {
   ledIntensity: number;
   /** Which internal staircase is built; resolved upstream. */
   internalStairType: InternalStairType;
+  internalStairMirrored?: boolean;
   hydromassageVariant?: HydromassageVariant;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
@@ -658,6 +660,33 @@ function CameraRig({
   return null;
 }
 
+/** Plan-only annotation of actual resolved geometry; never a mesh cover. */
+function InfinityTechnicalOutline({outline,zone,layout,y}:{outline:Outline;zone:RectangleInfinityZone;layout:ResolvedPoolLayout;y:number}) {
+  const contours=useMemo(()=>{
+    const polygons:Outline[]=[outline];
+    const access=layout.access;
+    if(access.placement) {
+      const p=access.placement,c=Math.cos(p.rotation),s=Math.sin(p.rotation);
+      const world=(points:Outline):Outline=>points.map(([x,z])=>[p.x+c*x+s*z,p.z-s*x+c*z]);
+      if(access.corner) for(const r of access.corner.radii) {
+        polygons.push(world(Array.from({length:25},(_,i)=>[r*Math.sin(i*Math.PI/48),r*Math.cos(i*Math.PI/48)] as const)));
+      } else if(layout.effectiveAccess==="internalSteps") for(let i=0;i<=access.steps;i++)
+        polygons.push(world([[-access.width/2,i*access.tread],[access.width/2,i*access.tread]]));
+    }
+    for(const element of layout.comfort.elements) for(const footprint of [element.footprint,
+      ...(element.tiers??[]).map(tier=>tier.footprint),
+      ...(element.steps??[]).map(step=>step.footprint),...(element.landing?[element.landing.footprint]:[])])
+      polygons.push([...footprint,footprint[0]!]);
+    return polygons;
+  },[outline,layout]);
+  return <group name="infinity-technical-plan-contours">
+    {contours.map((points,i)=><Line key={i} points={(i===0?[...points,points[0]!]:points).map(([x,z])=>[x,y,z] as [number,number,number])}
+      color="#223a45" lineWidth={i===0?2:1.2} depthTest={false} depthWrite={false} toneMapped={false} />)}
+    <Line points={zone.points.map(([x,z])=>[x,y,z] as [number,number,number])} color="#16838c" lineWidth={3}
+      depthTest={false} depthWrite={false} toneMapped={false} />
+  </group>;
+}
+
 /** Neutral showroom floor with a real opening for the basin. */
 function StudioFloor({
   outline,
@@ -668,6 +697,8 @@ function StudioFloor({
   overflowType,
   infinityZone,
   waterY,
+  coastalMap,
+  sceneTime,
 }: {
   outline: Outline;
   size: number;
@@ -676,6 +707,8 @@ function StudioFloor({
   system: SystemType;
   overflowType: OverflowType;
   waterY: number;
+  coastalMap: Texture | null;
+  sceneTime: SceneTimeOfDay;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -726,7 +759,7 @@ function StudioFloor({
         p.setY(i, infinityGroundHeight(outline, infinityZone, p.getX(i), p.getZ(i)) - relief * distance * 0.006);
         uv.setXY(i, p.getX(i), p.getZ(i));
       }
-      coastalGrade(landscape, infinityZone);
+      coastalGrade(landscape, infinityZone, outline);
       // Only the immediate site stays geometric; the photographic coast owns
       // the far field. Retain a full triangle apron around the fade boundary.
       const index=landscape.getIndex(), kept:number[]=[];
@@ -809,7 +842,9 @@ function StudioFloor({
         </mesh>
       ) : null}
       <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
-        <meshStandardMaterial
+        {premiumInfinity && infinityZone && coastalMap ? <CoastalGroundMaterial map={coastalMap}
+          rotation={coastalPhotoRotation(infinityZone)} outline={outline} projectionHeight={COAST_PHOTO_CAPTURE.height}
+          timeOfDay={sceneTime} /> : <meshStandardMaterial
           key={
             premiumInfinity
               ? `coastal-photo-near-${theme}`
@@ -903,7 +938,7 @@ function StudioFloor({
           customProgramCacheKey={() =>
             premiumInfinity ? `coastal-photo-near-v3-${theme}-${waterY}` : "architectural-stone-paving-v1"
           }
-        />
+        />}
       </mesh>
     </group>
   );
@@ -921,6 +956,7 @@ export default function PoolScene({
   ledColor = "#ffffff",
   ledIntensity,
   internalStairType,
+  internalStairMirrored = false,
   hydromassageVariant,
   poolAccess,
   skimmers,
@@ -953,6 +989,7 @@ export default function PoolScene({
 }: SceneProps) {
   const controls = useRef<OrbitControlsImpl | null>(null);
   const [coastalStatus, setCoastalStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [coastalMap, setCoastalMap] = useState<Texture | null>(null);
   const radius = Math.hypot(length, width) / 2;
   const visualTheme: Theme =
     sceneTime === "night" ? "dark" : "light";
@@ -1066,6 +1103,7 @@ export default function PoolScene({
         skimmers: system === "skimmer" ? skimmers : { ...skimmers, positions: [] },
         access: poolAccess,
         stairType: internalStairType,
+        stairMirrored: internalStairMirrored,
         floorProfile,
         infinityExcluded,
       }),
@@ -1080,6 +1118,7 @@ export default function PoolScene({
       system,
       poolAccess,
       internalStairType,
+      internalStairMirrored,
       floorProfile,
       infinityExcluded,
       overflowType,
@@ -1168,6 +1207,7 @@ export default function PoolScene({
     normalisedInfinityEdge?.enabled,
     normalisedInfinityEdge?.side,
     internalStairType,
+    internalStairMirrored,
     floorProfileSetting,
     shallowDepth,
     slopeReversed,
@@ -1241,7 +1281,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
 
       <SceneMood
         dusk={dusk}
@@ -1304,6 +1344,8 @@ export default function PoolScene({
           overflowType={overflowType}
           infinityZone={infinityZone}
           waterY={verticalLayout.waterY}
+          coastalMap={coastalMap}
+          sceneTime={sceneTime}
         />
       ) : (
         <Suspense fallback={null}>
@@ -1425,6 +1467,9 @@ export default function PoolScene({
           waterY={verticalLayout.waterY}
         />
       ) : null}
+
+      {infinityStage && infinityZone && technicalView && focus === "top" ? <InfinityTechnicalOutline
+        outline={outline} zone={infinityZone} layout={resolvedLayout} y={verticalLayout.copingY+0.004} /> : null}
 
       {system === "skimmer" && (construction?.showSystemComponents ?? true) ? (
         <Skimmers

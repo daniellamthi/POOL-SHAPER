@@ -2,8 +2,13 @@ import { BufferGeometry, Color, Float32BufferAttribute, MathUtils, PlaneGeometry
 import type { Outline } from "@/lib/pool/types";
 import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 import type { CameraPose } from "@/lib/pool/camera";
+import { outlineBounds } from "@/lib/pool/geometry";
 
 export const COAST_SEA_Y = -5;
+// The projection floor is a photographic support plane, not the sea datum.
+// Match the local site's existing outer grade instead of forcing the apron
+// down to the old arbitrary -5 m skybox floor.
+export const COAST_PHOTO_CAPTURE = { eyeY: 3, groundY: -1.8, height: 4.8, radius: 260 } as const;
 // Simon's Town Rocks: sea-facing sector u=.53; measured sun u=.6328125, v=.591796875.
 export const COAST_PHOTO_YAW = -1.3823;
 export function coastalPhotoRotation(zone:RectangleInfinityZone) {
@@ -74,12 +79,21 @@ export function coastNoise(x:number,z:number) {
   const ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz,u=fx*fx*(3-2*fx),v=fz*fz*(3-2*fz);
   return MathUtils.lerp(MathUtils.lerp(hash(ix,iz),hash(ix+1,iz),u),MathUtils.lerp(hash(ix,iz+1),hash(ix+1,iz+1),u),v);
 }
-/** Retain the surveyed near grade; the distant selected half-space descends to sea. */
-export function coastalGrade(geometry:BufferGeometry, zone:RectangleInfinityZone) {
-  const f=coastFrame(zone),p=geometry.getAttribute("position");
+/** Retain the installed near grade; the distant selected half-space descends to sea. */
+export function coastalGrade(geometry:BufferGeometry, zone:RectangleInfinityZone, outline?:Outline) {
+  const f=coastFrame(zone),p=geometry.getAttribute("position"),bounds=outline ? outlineBounds(outline) : null;
   for(let i=0;i<p.count;i++) {
-    const v=(p.getX(i)-f.x)*f.nx+(p.getZ(i)-f.z)*f.nz;
-    p.setY(i,MathUtils.lerp(p.getY(i),COAST_SEA_Y-1.2,MathUtils.smoothstep(v,4.5,15)));
+    const x=p.getX(i),z=p.getZ(i),v=(x-f.x)*f.nx+(z-f.z)*f.nz;
+    let y=MathUtils.lerp(p.getY(i),COAST_SEA_Y-1.2,MathUtils.smoothstep(v,4.5,15));
+    if(bounds) {
+      const outside=Math.hypot(Math.max(bounds.minX-x,x-bounds.maxX,0),Math.max(bounds.minZ-z,z-bounds.maxZ,0));
+      // Keep the installed pool, deck and receiving-trough support untouched.
+      // Settle the outer rock only; at the edge its photographic UV and world
+      // height coincide with the backdrop, so no transparency fade is needed.
+      const end=5.6+0.12*(coastNoise(x*.7,z*.7)-.5);
+      y=MathUtils.lerp(y,COAST_PHOTO_CAPTURE.groundY+.002,MathUtils.smoothstep(outside,2.3,end));
+    }
+    p.setY(i,y);
   }
   geometry.computeVertexNormals();geometry.computeBoundingSphere();
 }

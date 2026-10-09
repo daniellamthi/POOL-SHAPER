@@ -295,6 +295,8 @@ export function internalStairFlight(floorY: number, topY: number) {
 }
 
 export interface CornerStairPlan {
+  /** Rectilinear L-shaped treads are used only by the above-ground product. */
+  rectangular?: boolean;
   /** The corner vertex itself: every tread is concentric about this point. */
   x: number;
   z: number;
@@ -596,6 +598,8 @@ export function resolveAccessPlan({
   ladderAnchorOffset = 0.2,
   ladderAnchorY = topY,
   ladderDeckAvailable = true,
+  mirrorAnchor = null,
+  rectangularCorner = false,
 }: {
   outline: Outline;
   access: PoolAccess | null;
@@ -608,6 +612,8 @@ export function resolveAccessPlan({
   ladderAnchorOffset?: number;
   ladderAnchorY?: number;
   ladderDeckAvailable?: boolean;
+  mirrorAnchor?: {x:number;z:number} | null;
+  rectangularCorner?: boolean;
 }) {
   const empty = {
     placement: null as AccessPosition | null,
@@ -676,14 +682,15 @@ export function resolveAccessPlan({
         reason:
           "Scala angolare non disponibile sul fondo inclinato: il raccordo curvo richiede un pianerottolo piano.",
       };
-    const corner = cornerStairPlan(
+    const candidate = cornerStairPlan(
       outline,
       floorProfile.deepFloorY,
       topY,
       floorProfile,
       infinityExcluded,
-      clearOfFittings,
+      footprint => (!mirrorAnchor || Math.hypot(footprint[0]![0]-mirrorAnchor.x,footprint[0]![1]-mirrorAnchor.z)<0.02) && clearOfFittings(footprint),
     );
+    const corner = candidate && rectangularCorner ? { ...candidate, rectangular: true } : candidate;
     if (!corner)
       return {
         ...empty,
@@ -793,6 +800,7 @@ export function resolveAccessPlan({
       infinityExcluded,
       (p) => {
         const footprint = footprintAt(p, width, run);
+        if (mirrorAnchor && Math.hypot(p.x-mirrorAnchor.x,p.z-mirrorAnchor.z)>0.02) return false;
         if (!clearOfFittings(footprint)) return false;
         const ends = footprint.slice(2).map(([x, z]) => floorProfile.floorYAt(x, z));
         if (Math.abs(ends[0]! - ends[1]!) > ACCESS_DIMENSIONS.landingTolerance) return false;
@@ -907,6 +915,13 @@ export function stairSolid(
   return geometry;
 }
 
+/** Disjoint rectangular corner treads, as in the above-ground photographs. */
+export function rectangularCornerTread(inner: number, outer: number): Outline {
+  return inner > 0
+    ? [[0,outer],[outer,outer],[outer,0],[inner,0],[inner,inner],[0,inner]]
+    : [[0,outer],[outer,outer],[outer,0],[0,0]];
+}
+
 export function PoolAccessModel({
   resolvedPlan,
   outline,
@@ -970,6 +985,10 @@ export function PoolAccessModel({
       // Disjoint annular sectors: no stacked/overlapping full cylinders.
       corner.radii.forEach((radius, i) => {
         const inner = i ? corner.radii[i - 1]! : 0;
+        if (corner.rectangular) {
+          result.push(stairSolid(rectangularCornerTread(inner,radius),topY-(i+1)*rise,placement,floorProfile));
+          return;
+        }
         const points: [number, number][] = [];
         for (let j = 0; j <= 48; j++) {
           const a = ((j / 48) * Math.PI) / 2;

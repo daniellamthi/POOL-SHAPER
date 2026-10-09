@@ -548,6 +548,7 @@ function ConfiguratorLayout() {
               ? {
                   exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
                   externalStairSide: config.externalStairSide ?? "short",
+                  internalStairMirrored: !!config.internalStairMirrored,
                   pellicano: config.equipment.includes("pellicano"),
                 }
               : {})}
@@ -569,6 +570,7 @@ function ConfiguratorLayout() {
             slopeReversed={config.dimensions.slopeReversed}
             showMeasurements={
               showMeasurements ||
+              (technicalView && config.system === "infinity") ||
               visualFocus?.focus === "DIMENSIONS_TOP" ||
               visualFocus?.focus === "DEPTH" ||
               activeStepId === "shape-dimensions"
@@ -579,7 +581,7 @@ function ConfiguratorLayout() {
             focus={
               inspectionView ??
               (technicalView
-                ? "review"
+                ? config.system === "infinity" ? "top" : "review"
                 : wholePoolIntent(
                     visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus,
                     renovationWorkflow ? undefined : activeStepId,

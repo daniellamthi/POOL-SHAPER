@@ -117,6 +117,7 @@ type Action =
   | { type: "setExternalStairSide"; value: ExternalStairSide }
   | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
   | { type: "setInternalStairType"; value: InternalStairType }
+  | { type: "setInternalStairMirrored"; value: boolean }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
   | { type: "setPoolAccess"; value: PoolAccess }
   | { type: "toggleInternalSteps" }
@@ -222,6 +223,11 @@ function configurationReducer(state: State, action: Action): State {
         : state;
     case "setInternalStairType":
       return { ...state, config: { ...config, internalStairType: action.value } };
+    case "setInternalStairMirrored": {
+      if (config.poolType !== "above-ground") return state;
+      const next = { ...config, internalStairMirrored: action.value };
+      return configuredAccessPlan(next).placement ? { ...state, config: next } : state;
+    }
     case "setHydromassageVariant":
       return { ...state, config: { ...config, hydromassageVariant: action.value } };
     case "setLedIntensity":
@@ -260,7 +266,7 @@ function configurationReducer(state: State, action: Action): State {
         ? config.structure
         : null;
       const features = action.value === "above-ground"
-        ? config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench")
+        ? config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench" && id !== "inoxLadder")
         : config.features.filter((id) => id !== "externalStaircase");
       const system = compatiblePoolSystem(
         config.system,
@@ -278,7 +284,7 @@ function configurationReducer(state: State, action: Action): State {
         system,
         // Above ground the internal entry steps are included by default; the
         // customer can still remove them in Accesso & comfort.
-        ...(aboveGround && config.poolAccess === null
+        ...(aboveGround && (config.poolAccess === null || config.poolAccess === "stainlessSteelLadder")
           ? { poolAccess: "internalSteps" as const, internalStairType: "linear" as const }
           : {}),
       };
@@ -492,6 +498,7 @@ function configurationReducer(state: State, action: Action): State {
     case "setMosaicFinish":
       return { ...state, config: { ...config, mosaicFinish: action.value } };
     case "togglePoolFeature": {
+      if (action.value === "inoxLadder" && config.poolType === "above-ground") return state;
       if (action.value === "externalStaircase" && config.poolType !== "above-ground") return state;
       const features = config.features.includes(action.value)
         ? normalizeComfortFeatures(config.features.filter((id) => id !== action.value))
@@ -500,10 +507,11 @@ function configurationReducer(state: State, action: Action): State {
     }
     case "toggleInternalSteps":
     case "toggleInoxLadder": {
+      if (action.type === "toggleInoxLadder" && config.poolType === "above-ground") return state;
       // Canonical encoding: steps -> "internalSteps"; ladder only -> "stainlessSteelLadder";
       // both -> "internalSteps" + feature "inoxLadder". Legacy saves keep loading.
       const steps = config.poolAccess === "internalSteps";
-      const ladder = config.poolAccess === "stainlessSteelLadder" || (steps && config.features.includes("inoxLadder"));
+      const ladder = config.poolType !== "above-ground" && (config.poolAccess === "stainlessSteelLadder" || (steps && config.features.includes("inoxLadder")));
       const nextSteps = action.type === "toggleInternalSteps" ? !steps : steps;
       const nextLadder = action.type === "toggleInoxLadder" ? !ladder : ladder;
       const rest = config.features.filter((id) => id !== "inoxLadder");
@@ -512,6 +520,7 @@ function configurationReducer(state: State, action: Action): State {
         features: nextSteps && nextLadder ? [...rest, "inoxLadder"] : rest } };
     }
     case "setPoolAccess":
+      if (config.poolType === "above-ground" && action.value === "stainlessSteelLadder") return state;
       return { ...state, config: { ...config, poolAccess: action.value } };
     case "toggleEquipment": {
       if (action.value === "pellicano" && config.poolType !== "above-ground") return state;
@@ -839,6 +848,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setExternalStairSide: (v) => dispatch({ type: "setExternalStairSide", value: v }),
       setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
+      setInternalStairMirrored: (v) => dispatch({ type: "setInternalStairMirrored", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
       toggleInternalSteps: () => dispatch({ type: "toggleInternalSteps" }),

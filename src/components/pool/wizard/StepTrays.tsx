@@ -439,6 +439,7 @@ export function AccessTray() {
     togglePoolFeature,
     setPoolAccess,
     setInternalStairType,
+    setInternalStairMirrored,
     setHydromassageVariant,
     toggleInternalSteps,
     toggleInoxLadder,
@@ -480,7 +481,10 @@ export function AccessTray() {
     [config, stepsOn],
   );
   const inoxPlan = stepsOn ? inoxLayout.ladder?.plan : inoxLayout.access;
-  const inoxAvailable = inoxOn || !!inoxPlan?.placement;
+  const inoxAvailable = config.poolType !== "above-ground" && (inoxOn || !!inoxPlan?.placement);
+  const orientations = useMemo(() => config.poolType === "above-ground" && stepsOn
+    ? [false,true].map(mirrored => ({mirrored,plan:configuredAccessPlan({...config,internalStairMirrored:mirrored})}))
+    : [],[config,stepsOn]);
 
   const comfort = useMemo(() => configuredComfortPlan(config), [config]);
   const shelfOn = config.features.includes("sunShelf");
@@ -614,7 +618,7 @@ export function AccessTray() {
                       description={
                         type === "linear"
                           ? "Gradini dritti sul lato corto."
-                          : "Gradini a quarto di cerchio nell’angolo."
+                          : config.poolType === "above-ground" ? "Gradini rettangolari integrati nell’angolo." : "Gradini a quarto di cerchio nell’angolo."
                       }
                       image={ill(type === "linear" ? "access-steps-linear" : "access-steps-corner")}
                       selected={stairType === type}
@@ -623,6 +627,17 @@ export function AccessTray() {
                     />
                   ))}
               </ChoiceGrid>
+              {config.poolType === "above-ground" ? <ChoiceGrid label="Orientamento scala interna" dense>
+                {orientations.filter(option=>!!option.plan.placement || option.mirrored===!!config.internalStairMirrored).map(option => (
+                  <ChoiceCard key={String(option.mirrored)} compact
+                    title={option.mirrored ? "Speculare" : "Standard"}
+                    description="Ingresso integrato nell’angolo del lato corto."
+                    image={<span className={option.mirrored ? "-scale-x-100" : ""}>{ill(stairType==="corner"?"access-steps-corner":"access-steps-linear")}</span>}
+                    selected={option.mirrored===!!config.internalStairMirrored}
+                    onSelect={()=>setInternalStairMirrored(option.mirrored)}
+                    footer={option.plan.reason || undefined} />
+                ))}
+              </ChoiceGrid> : null}
               {inoxAvailable ? (
                 <button
                   type="button"

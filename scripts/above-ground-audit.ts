@@ -33,6 +33,10 @@ import { pointInBasin } from "../src/lib/pool/boundary-placement";
 import { pellicanoCurve, createPellicanoSpoutGeometry } from "../src/components/pool/three/Pellicano";
 import { createExternalStairEnclosureGeometry, createExternalStairGuardPostGeometry } from "../src/components/pool/three/ExternalStaircase";
 import { BufferGeometry, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from "three";
+import { rectangularCornerTread, stairSolid } from "../src/components/pool/three/PoolAccessModel";
+import { buildFloorProfile } from "../src/lib/pool/floor-profile";
+import { planSkimmers } from "../src/lib/pool/engineering";
+import { ACCESS_DIMENSIONS } from "../src/components/pool/three/PoolAccessModel";
 
 let checks = 0;
 const ok = (value: unknown, message: string) => {
@@ -306,11 +310,39 @@ equal(
 // Reference staircase: steel frame, landing at the real coping height,
 // parallel to the selected side and placed beside the real internal access.
 for(const length of [6,8,12]) for(const width of [3,4,5]) for(const depth of [1,1.3,1.5])
-  for(const side of ["short","long"] as const) for(const type of ["linear","corner"] as const) {
-    const config:PoolConfig={...withOptions.config,dimensions:{length,width,depth,cornerRadius:0},externalStairSide:side,internalStairType:type};
+  for(const side of ["short","long"] as const) for(const type of ["linear","corner"] as const) for(const mirrored of [false,true]) {
+    const config:PoolConfig={...withOptions.config,dimensions:{length,width,depth,cornerRadius:0},externalStairSide:side,internalStairType:type,internalStairMirrored:mirrored};
     const o=buildOutline("rectangle",config.dimensions,[]),v=getPoolVerticalLayout({poolType:"above-ground",system:"skimmer",depth,copingThickness:0.04});
     const access=configuredPoolLayout(config).access;
-    ok(access.placement,`${length}x${width}: ${type} internal access preserved`);
+    const standard=configuredPoolLayout({...config,internalStairMirrored:false}).access;
+    ok(standard.placement,`${length}x${width}: ${type} existing internal access preserved`);
+    if(mirrored && !access.placement) {
+      const footprint=standard.footprint.map(([x,z])=>[x,-z] as const);
+      const fittings=planSkimmers(o,length*width,true);
+      const blocked=fittings.positions.some(p=>pointInBasin(p.x,p.z,footprint)||footprint.some((a,i)=>{
+        const b=footprint[(i+1)%footprint.length]!,dx=b[0]-a[0],dz=b[1]-a[1];
+        const t=Math.min(1,Math.max(0,((p.x-a[0])*dx+(p.z-a[1])*dz)/(dx*dx+dz*dz)));
+        return Math.hypot(p.x-a[0]-t*dx,p.z-a[1]-t*dz)<ACCESS_DIMENSIONS.fittingClearance;
+      }));
+      ok(blocked,"an unavailable mirror must have a real skimmer clearance collision, never an arbitrary refusal");
+      ok(!!access.reason,"invalid mirror explicitly unavailable, never silently reuses the standard entry");
+      continue;
+    }
+    ok(access.placement,`${length}x${width}: ${type} mirrored access valid where clear`);
+    if(mirrored) {
+      ok(!near(access.placement!.z,standard.placement!.z),`${length}x${width} d${depth} ${type}: mirror actually moves entry (${JSON.stringify(access.placement)} vs ${JSON.stringify(standard.placement)})`);
+      ok(near(access.placement!.x,standard.placement!.x,1e-5),"mirror preserves the same short end");
+    }
+    const profile=buildFloorProfile({outline:o,shape:config.shape,poolType:config.poolType,dimensions:config.dimensions,verticalLayout:v});
+    if(type==="corner") {
+      ok(access.corner?.rectangular,"above-ground corner is rectilinear like the reference, not a round insert");
+      for(let i=0;i<access.steps;i++) {
+        const geometry=stairSolid(rectangularCornerTread(i?access.corner!.radii[i-1]!:0,access.corner!.radii[i]!),v.copingY-(i+1)*access.rise,access.placement!,profile);
+        ok(isClosed(geometry),"every rectangular corner tread is a closed solid");
+        for(const name of ["position","normal","uv"]) ok(Array.from(geometry.getAttribute(name).array).every(Number.isFinite),`valid rectangular tread ${name}`);
+        geometry.dispose();
+      }
+    }
     const input={outline:o,groundY:v.groundY,topY:v.copingY,copingOffset:faceOffset,side,accessAnchor:access.placement};
     const plan=planExternalStaircase(input);
     ok(plan,`${length}x${width}: external ${side} fits`);
@@ -337,7 +369,9 @@ for(const length of [6,8,12]) for(const width of [3,4,5]) for(const depth of [1,
     body.material.dispose();enclosure.dispose();
     const restoredSide=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("ag-side",config,renovation)));
     equal(restoredSide.config.externalStairSide,side,"requested exterior side round-trips");
+    equal(restoredSide.config.internalStairMirrored,mirrored,"internal mirror round-trips without losing external placement");
     equal(createPhotoSceneSpec(restoredSide).selection.externalStairSide,side,"photo spec uses the same side");
+    equal(createPhotoSceneSpec(restoredSide).selection.internalStairMirrored,mirrored,"photo spec preserves the actual internal orientation");
     ok(rows(config).some(row=>row.includes("Scala esterna")&&row.includes(side==="short"?"lato corto":"lato lungo")),"Summary / PDF explicitly carries the side");
   }
 const longSideState=reducer(withOptions,{type:"setExternalStairSide",value:"long"});
@@ -346,6 +380,18 @@ equal(reducer(longSideState,{type:"setPoolType",value:"in-ground"}).config.exter
 equal(reducer(toInGround,{type:"setExternalStairSide",value:"short"}),toInGround,"in-ground refuses external-side changes");
 const invalidSide=parseProjectConfiguration(JSON.stringify({...toProjectConfiguration("bad-side",withOptions.config,renovation),config:{...withOptions.config,externalStairSide:"invalid"}}));
 equal(invalidSide.config.externalStairSide,"short","invalid saved side normalises safely");
+equal(reducer(withOptions,{type:"toggleInoxLadder"}),withOptions,"above-ground refuses retired inox toggle");
+equal(reducer(withOptions,{type:"setPoolAccess",value:"stainlessSteelLadder"}),withOptions,"above-ground refuses retired inox access");
+const oldInox={...withOptions.config,poolAccess:"stainlessSteelLadder" as const,features:[...withOptions.config.features,"inoxLadder" as const]};
+const restoredInox=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("retired-inox",oldInox,renovation))).config;
+equal(restoredInox.poolAccess,null,"legacy above-ground inox is cleared, never secretly rendered or quoted");
+ok(!restoredInox.features.includes("inoxLadder"),"legacy above-ground optional inox cleared");
+equal(configuredPoolLayout(oldInox).effectiveAccess,null,"canonical scene rejects stale above-ground inox");
+equal(configuredPoolLayout(oldInox).ladder,null,"canonical scene rejects stale above-ground addon inox");
+const mirrorState=reducer(withOptions,{type:"setInternalStairMirrored",value:true});
+equal(mirrorState.config.internalStairMirrored,true,"mirror UI action applied to canonical state");
+equal(reducer(mirrorState,{type:"setPoolType",value:"in-ground"}).config.internalStairMirrored,undefined,"in-ground never inherits above-ground mirror");
+ok(rows(mirrorState.config).some(row=>row.includes("speculare")),"Summary/PDF carries the actual mirror");
 
 // Correct broad C profile; the outlet points into the pool and downwards.
 const curve=pellicanoCurve(),mouth=curve.getPoint(1),tangent=curve.getTangent(1);

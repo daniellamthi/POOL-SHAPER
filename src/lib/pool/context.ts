@@ -89,6 +89,7 @@ export interface ConfiguratorContextValue {
   setExternalStairSide: (value: import("./above-ground").ExternalStairSide) => void;
   setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
   setInternalStairType: (value: InternalStairType) => void;
+  setInternalStairMirrored: (value: boolean) => void;
   setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;
   toggleInternalSteps: () => void;

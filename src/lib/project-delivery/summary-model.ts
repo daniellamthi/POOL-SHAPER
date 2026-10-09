@@ -228,7 +228,7 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
     ...(config.poolAccess
       ? [
           config.poolAccess === "internalSteps"
-            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}`
+            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}${config.poolType === "above-ground" && config.internalStairMirrored ? " · speculare" : ""}`
             : POOL_ACCESS_LABEL[config.poolAccess],
         ]
       : []),

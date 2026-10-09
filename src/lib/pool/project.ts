@@ -187,6 +187,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     coverExtension: savedCoverExtension,
     exteriorPanelFinish: _savedPanelFinish,
     externalStairSide: _savedStairSide,
+    internalStairMirrored: _savedStairMirror,
     ...restoredWithoutEdge
   } = restored;
   return {
@@ -199,7 +200,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // External access is only built above ground. Restore the same valid
       // selection in the scene, summary and render export.
       features: normalizeComfortFeatures(restored.poolType === "above-ground"
-        ? restored.features.filter((id) => id !== "sunShelf" && id !== "integratedBench")
+        ? restored.features.filter((id) => id !== "sunShelf" && id !== "integratedBench" && id !== "inoxLadder")
         : restored.features.filter(
             (id) =>
               id !== "externalStaircase" &&
@@ -216,6 +217,10 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       ...(restored.externalStairSide !== undefined && restored.poolType === "above-ground"
         ? { externalStairSide: externalStairSide(restored.externalStairSide) }
         : {}),
+      ...(typeof restored.internalStairMirrored === "boolean" && restored.poolType === "above-ground"
+        ? { internalStairMirrored: restored.internalStairMirrored } : {}),
+      ...(restored.poolType === "above-ground" && restored.poolAccess === "stainlessSteelLadder"
+        ? { poolAccess: null } : {}),
       ledIntensity: normalisedLedIntensity(restored.ledIntensity),
       ...(restored.sceneTime !== undefined
         ? { sceneTime: restored.sceneTime === "night" ? "night" as const : "day" as const }

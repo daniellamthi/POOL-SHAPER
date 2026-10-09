@@ -653,14 +653,12 @@ export function Skimmers({
             </mesh>
           ) : null}
           {/* Removable service lid, a recessed pull slot and perimeter seal. */}
-          <group position={poolType === "in-ground"
-            ? [0, service.y - wallTopY + verticalDrop, service.z]
-            : [0, verticalDrop + copingThickness, -0.105]}>
+          {poolType === "in-ground" ? <group name="skimmer-service-lid" position={[0, service.y - wallTopY + verticalDrop, service.z]}>
           <RoundedBox
             args={[SKIMMER_SERVICE_LID.width, SKIMMER_SERVICE_LID.thickness, SKIMMER_SERVICE_LID.depth]}
             radius={0.0015}
             smoothness={2}
-            position={[0, poolType === "above-ground" ? 0.001 : 0, 0]}
+            position={[0, 0, 0]}
           >
             <meshStandardMaterial color="#595954" roughness={0.8} />
           </RoundedBox>
@@ -668,18 +666,18 @@ export function Skimmers({
             args={[0.228, 0.004, 0.153]}
             radius={0.0015}
             smoothness={2}
-            position={[0, poolType === "above-ground" ? 0.003 : 0.001, 0]}
+            position={[0, 0.001, 0]}
           >
             <primitive object={frameMaterial} attach="material" />
           </RoundedBox>
           <mesh
-            position={[0, poolType === "above-ground" ? 0.0051 : 0.0031, -0.01]}
+            position={[0, 0.0031, -0.01]}
             rotation={[-Math.PI / 2, 0, 0]}
           >
             <planeGeometry args={[0.035, 0.003]} />
             <meshStandardMaterial color="#444844" roughness={0.8} />
           </mesh>
-          </group>
+          </group> : null}
         </group>
       ))}
     </group>
