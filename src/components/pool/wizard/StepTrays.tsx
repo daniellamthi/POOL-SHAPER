@@ -442,6 +442,7 @@ export function AccessTray() {
     setHydromassageVariant,
     toggleInternalSteps,
     toggleInoxLadder,
+    setExternalStairSide,
   } = useConfigurator();
   const [tab, setTab] = useState<"access" | "comfort">("access");
   // Set when the customer turns the internal stair on in this visit, so the
@@ -574,13 +575,30 @@ export function AccessTray() {
               <ChoiceCard
                 optional
                 title="Scala esterna di accesso"
-                description="Blocco a gradini rivestito come la piscina, pedate nel materiale del bordo."
+                description="Struttura e parapetto in acciaio inox, pedate coordinate al bordo."
                 image={ill("access-external")}
                 selected={config.features.includes("externalStaircase")}
                 onSelect={() => togglePoolFeature("externalStaircase")}
               />
             ) : null}
           </ChoiceGrid>
+          {config.poolType === "above-ground" && config.features.includes("externalStaircase") ? (
+            <ChoiceGrid label="Posizione scala esterna" dense>
+              {(["short", "long"] as const).map(side => (
+                <ChoiceCard key={side} compact title={side === "short" ? "Lato corto" : "Lato lungo"}
+                  description="Accostata alla vasca, collegata all’accesso interno."
+                  image={<svg viewBox="0 0 120 84" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                    <rect x="16" y="16" width="80" height="42" rx="1" />
+                    {side === "short" ? <><rect x="96" y="16" width="12" height="42" />
+                      <path d="M96 25h12M96 33h12M96 41h12M96 49h12" /></>
+                      : <><rect x="54" y="58" width="42" height="12" />
+                        <path d="M63 58v12M71 58v12M79 58v12M87 58v12" /></>}
+                  </svg>}
+                  selected={(config.externalStairSide ?? "short") === side}
+                  onSelect={() => setExternalStairSide(side)} />
+              ))}
+            </ChoiceGrid>
+          ) : null}
           {stepsOn &&
           !comfort.elements.some((e) => e.kind === "sunShelf" || e.kind === "hydromassage") ? (
             <RevealSection reveal={stairsJustChosen}>

@@ -28,6 +28,11 @@ import { getPoolVerticalLayout } from "../src/lib/pool/vertical-layout";
 import { EQUIPMENT } from "../src/lib/pool/config";
 import type { PoolConfig } from "../src/lib/pool/types";
 import { describeSelection } from "../src/components/pool/wizard/wizard-model";
+import { configuredPoolLayout } from "../src/lib/pool/resolved-layout";
+import { pointInBasin } from "../src/lib/pool/boundary-placement";
+import { pellicanoCurve, createPellicanoSpoutGeometry } from "../src/components/pool/three/Pellicano";
+import { createExternalStairEnclosureGeometry, createExternalStairGuardPostGeometry } from "../src/components/pool/three/ExternalStaircase";
+import { BufferGeometry, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from "three";
 
 let checks = 0;
 const ok = (value: unknown, message: string) => {
@@ -39,13 +44,27 @@ const equal = (a: unknown, b: unknown, message: string) => {
   checks++;
 };
 const near = (a: number, b: number, tolerance = 1e-6) => Math.abs(a - b) <= tolerance;
+const isClosed = (geometry: BufferGeometry) => {
+  const p=geometry.getAttribute("position"),index=geometry.getIndex(),edges=new Map<string,number>();
+  const vertex=(i:number) => [p.getX(i),p.getY(i),p.getZ(i)].map(value=>Math.round(value*1e5)).join(",");
+  const count=index?.count??p.count;
+  for(let i=0;i<count;i+=3) {
+    const triangle=[0,1,2].map(k=>vertex(index?index.getX(i+k):i+k));
+    for(let k=0;k<3;k++) {
+      const edge=[triangle[k]!,triangle[(k+1)%3]!].sort().join("|");
+      edges.set(edge,(edges.get(edge)??0)+1);
+    }
+  }
+  return [...edges.values()].every(count=>count===2);
+};
 
 // --- 1. Exterior volume and cladding panels -------------------------------
 const faceOffset = claddingFaceOffset(copingOuterOffset("skimmer", "hidden"));
 ok(
   near(copingOuterOffset("skimmer", "hidden") - faceOffset, CLADDING.copingOverhang),
-  "coping overhangs the panels",
+  "coping is flush with the finished panel face",
 );
+equal(CLADDING.copingOverhang,0,"no above-ground coping overhang");
 for (let length = 3; length <= 12; length += 0.5)
   for (let width = 2; width <= Math.min(6, length); width += 0.5) {
     const outline = buildOutline("rectangle", { length, width, depth: 1.3, cornerRadius: 0 }, []);
@@ -283,5 +302,66 @@ equal(
   "gres",
   "photo spec carries the panel finish",
 );
+
+// Reference staircase: steel frame, landing at the real coping height,
+// parallel to the selected side and placed beside the real internal access.
+for(const length of [6,8,12]) for(const width of [3,4,5]) for(const depth of [1,1.3,1.5])
+  for(const side of ["short","long"] as const) for(const type of ["linear","corner"] as const) {
+    const config:PoolConfig={...withOptions.config,dimensions:{length,width,depth,cornerRadius:0},externalStairSide:side,internalStairType:type};
+    const o=buildOutline("rectangle",config.dimensions,[]),v=getPoolVerticalLayout({poolType:"above-ground",system:"skimmer",depth,copingThickness:0.04});
+    const access=configuredPoolLayout(config).access;
+    ok(access.placement,`${length}x${width}: ${type} internal access preserved`);
+    const input={outline:o,groundY:v.groundY,topY:v.copingY,copingOffset:faceOffset,side,accessAnchor:access.placement};
+    const plan=planExternalStaircase(input);
+    ok(plan,`${length}x${width}: external ${side} fits`);
+    equal(plan,planExternalStaircase(input),"same inputs -> same external access");
+    ok(near(plan!.walk[0]*plan!.outward[0]+plan!.walk[1]*plan!.outward[1],0),"stair runs parallel to the wall, not radially from its centre");
+    ok(near(Math.abs(plan!.outward[side==="short"?0:1]),1),"requested wall orientation honoured");
+    ok(near(plan!.height,plan!.rise*plan!.stepCount)&&plan!.rise<=0.2,"regular risers reach the coping");
+    equal(plan!.treadDepth,0.3,"30cm exterior treads");
+    ok(plan!.landingDepth>=1&&plan!.width>=1,"usable landing and stair width");
+    ok(plan!.footprint.every(([x,z])=>!pointInBasin(x,z,o)),"stairs and platform never intersect the basin");
+    const extent=(side==="short"?width:length)/2+faceOffset;
+    ok(plan!.footprint.every(point=>Math.abs(point[side==="short"?1:0])<=extent+1e-6),"stair run stays within the chosen side, no misplaced centre-wall projection");
+    const enclosure=createExternalStairEnclosureGeometry(plan!);
+    enclosure.computeBoundingBox();
+    ok(isClosed(enclosure),"reference stair and landing form one closed enclosure, never an open frame");
+    ok(near(enclosure.boundingBox!.min.y,0),"entire enclosure reaches the ground");
+    ok(near(enclosure.boundingBox!.max.y,plan!.height-0.03,1e-5),"landing enclosure meets the walking slab underside");
+    const body=new Mesh(enclosure,new MeshBasicMaterial());
+    for(let descent=0;descent<plan!.stepCount;descent++) {
+      const z=descent===0?0:plan!.landingDepth/2+(descent-0.5)*plan!.treadDepth;
+      const hits=new Raycaster(new Vector3(0,plan!.height+1,z),new Vector3(0,-1,0)).intersectObject(body);
+      ok(hits.length>0&&near(hits[0]!.point.y,plan!.height-plan!.rise*descent-0.03,1e-5),"closed body supports every tread and the landing without gaps");
+    }
+    body.material.dispose();enclosure.dispose();
+    const restoredSide=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("ag-side",config,renovation)));
+    equal(restoredSide.config.externalStairSide,side,"requested exterior side round-trips");
+    equal(createPhotoSceneSpec(restoredSide).selection.externalStairSide,side,"photo spec uses the same side");
+    ok(rows(config).some(row=>row.includes("Scala esterna")&&row.includes(side==="short"?"lato corto":"lato lungo")),"Summary / PDF explicitly carries the side");
+  }
+const longSideState=reducer(withOptions,{type:"setExternalStairSide",value:"long"});
+equal(longSideState.config.externalStairSide,"long","UI action selects the long side");
+equal(reducer(longSideState,{type:"setPoolType",value:"in-ground"}).config.externalStairSide,undefined,"in-ground clears the above-ground-only side");
+equal(reducer(toInGround,{type:"setExternalStairSide",value:"short"}),toInGround,"in-ground refuses external-side changes");
+const invalidSide=parseProjectConfiguration(JSON.stringify({...toProjectConfiguration("bad-side",withOptions.config,renovation),config:{...withOptions.config,externalStairSide:"invalid"}}));
+equal(invalidSide.config.externalStairSide,"short","invalid saved side normalises safely");
+
+// Correct broad C profile; the outlet points into the pool and downwards.
+const curve=pellicanoCurve(),mouth=curve.getPoint(1),tangent=curve.getTangent(1);
+ok(mouth.z>0.35&&mouth.y>0.65,"reference overhanging mouth");
+ok(tangent.z>0&&tangent.y<0,"water leaves into the basin, downward");
+const spoutGeometry=createPellicanoSpoutGeometry();spoutGeometry.computeBoundingBox();
+const box=spoutGeometry.boundingBox!;
+ok(near(box.max.x-box.min.x,0.44,1e-5),"blade has full transverse width; width/thickness axes not swapped");
+ok(box.max.y>0.8&&box.min.z>-faceOffset,"curved body fits on the coping, never outside the panels");
+for(const attribute of ["position","normal","uv"]) ok(Array.from(spoutGeometry.getAttribute(attribute).array).every(Number.isFinite),`finite spout ${attribute}`);
+spoutGeometry.dispose();
+
+const guardPost=createExternalStairGuardPostGeometry();guardPost.computeBoundingBox();
+ok(isClosed(guardPost),"folded stainless guard post is closed");
+ok(near(guardPost.boundingBox!.max.z-guardPost.boundingBox!.min.z,0.065,1e-5),"reference broad flat-bar post, not a thin tube");
+ok(guardPost.boundingBox!.max.x>0.045,"reference folded foot offset");
+guardPost.dispose();
 
 console.log(`Above-ground audit PASS: ${checks} checks`);

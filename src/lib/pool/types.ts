@@ -223,6 +223,8 @@ export interface PoolConfig {
   /** Above-ground only: finish of the exterior cladding panels. Absent on
    * legacy projects; readers substitute the satin steel default. */
   exteriorPanelFinish?: import("./above-ground").ExteriorPanelFinishId;
+  /** Above-ground exterior access, parallel to the selected wall. */
+  externalStairSide?: import("./above-ground").ExternalStairSide;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;
 }

@@ -246,7 +246,9 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
           ? config.hydromassageVariant === "open"
             ? "Idromassaggio B"
             : "Idromassaggio A"
-          : POOL_FEATURE_LABEL[id],
+          : id === "externalStaircase" && config.poolType === "above-ground"
+            ? `${POOL_FEATURE_LABEL[id]} — ${config.externalStairSide === "long" ? "lato lungo" : "lato corto"}`
+            : POOL_FEATURE_LABEL[id],
       ),
   ];
 

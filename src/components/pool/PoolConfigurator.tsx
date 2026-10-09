@@ -547,6 +547,7 @@ function ConfiguratorLayout() {
             {...(config.poolType === "above-ground"
               ? {
                   exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
+                  externalStairSide: config.externalStairSide ?? "short",
                   pellicano: config.equipment.includes("pellicano"),
                 }
               : {})}

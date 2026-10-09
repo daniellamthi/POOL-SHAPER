@@ -1,4 +1,4 @@
-import { exteriorPanelFinish, withoutAboveGroundOnly, type ExteriorPanelFinishId } from "./above-ground";
+import { exteriorPanelFinish, externalStairSide, withoutAboveGroundOnly, type ExteriorPanelFinishId, type ExternalStairSide } from "./above-ground";
 import {
   useCallback,
   useEffect,
@@ -114,6 +114,7 @@ type Action =
   | { type: "setSceneTime"; value: "day" | "night" }
   | { type: "setPaving"; value: PavingId }
   | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
+  | { type: "setExternalStairSide"; value: ExternalStairSide }
   | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
@@ -235,6 +236,10 @@ function configurationReducer(state: State, action: Action): State {
     case "setExteriorPanelFinish":
       return config.poolType === "above-ground"
         ? { ...state, config: { ...config, exteriorPanelFinish: exteriorPanelFinish(action.value) } }
+        : state;
+    case "setExternalStairSide":
+      return config.poolType === "above-ground"
+        ? { ...state, config: { ...config, externalStairSide: externalStairSide(action.value) } }
         : state;
     case "setPremiumEnvironment":
       return { ...state, config: { ...config, premiumEnvironment: premiumEnvironment(action.value) } };
@@ -831,6 +836,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
       setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),
+      setExternalStairSide: (v) => dispatch({ type: "setExternalStairSide", value: v }),
       setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),

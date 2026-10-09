@@ -6,16 +6,20 @@ import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
  * coping top, z inward over the water (0 = the water's edge). A post rises
  * from a base plate on the coping and arcs over the edge to a mouth that
  * points forward and slightly down, like the reference stainless blades. */
-const SPOUT_PATH = [
-  new THREE.Vector3(0, 0, -0.16),
-  new THREE.Vector3(0, 0.38, -0.16),
-  new THREE.Vector3(0, 0.6, -0.09),
-  new THREE.Vector3(0, 0.63, 0.08),
-  new THREE.Vector3(0, 0.53, 0.23),
-];
-/** Satin AISI 316: mid grey with soft highlights (not the white polished look). */
-const SATIN_STAINLESS_COLOR = "#aeb2b6";
-const BLADE = { width: 0.3, thickness: 0.022, sheetWidth: 0.27 } as const;
+const SPOUT_PATH = Array.from({length:33},(_,i) => {
+  const angle=(230-185*i/32)*Math.PI/180;
+  return new THREE.Vector3(0,0.375+0.46*Math.sin(angle),0.12+0.4*Math.cos(angle));
+});
+const BLADE = { width: 0.44, thickness: 0.045, sheetWidth: 0.4 } as const;
+
+export function pellicanoCurve() { return new THREE.CatmullRomCurve3(SPOUT_PATH,false,"centripetal"); }
+export function createPellicanoSpoutGeometry() {
+  const shape=new THREE.Shape(),w=BLADE.width/2,t=BLADE.thickness/2;
+  // The Frenet normal is transverse X: width and thickness were previously
+  // swapped, producing a narrow post rather than a broad curved blade.
+  shape.moveTo(-w,-t);shape.lineTo(w,-t);shape.lineTo(w,t);shape.lineTo(-w,t);shape.closePath();
+  return new THREE.ExtrudeGeometry(shape,{steps:64,bevelEnabled:false,extrudePath:pellicanoCurve()});
+}
 
 /**
  * Pellicano -- cascata a lama d'acqua. Stainless spout on the coping and a
@@ -36,26 +40,11 @@ export function Pellicano({
   copingY: number;
   waterY: number;
 }) {
-  const spout = useMemo(() => {
-    const curve = new THREE.CatmullRomCurve3(SPOUT_PATH, false, "centripetal");
-    const shape = new THREE.Shape();
-    const w = BLADE.width / 2,
-      t = BLADE.thickness / 2;
-    shape.moveTo(-t, -w);
-    shape.lineTo(t, -w);
-    shape.lineTo(t, w);
-    shape.lineTo(-t, w);
-    shape.closePath();
-    return new THREE.ExtrudeGeometry(shape, {
-      steps: 48,
-      bevelEnabled: false,
-      extrudePath: curve,
-    });
-  }, []);
+  const spout = useMemo(createPellicanoSpoutGeometry, []);
   // The sheet leaves the mouth along the spout's end tangent and falls under
   // gravity to the water surface (a thin ribbon, slightly narrowing).
   const sheet = useMemo(() => {
-    const curve = new THREE.CatmullRomCurve3(SPOUT_PATH, false, "centripetal");
+    const curve = pellicanoCurve();
     const mouth = curve.getPoint(1);
     const tangent = curve.getTangent(1).normalize();
     const speed = 1.15;
@@ -82,25 +71,20 @@ export function Pellicano({
     const landing = mouth.z + tangent.z * speed * tEnd;
     return { geometry, landing };
   }, [copingY, waterY]);
-  useEffect(
-    () => () => {
-      spout.dispose();
-      sheet.geometry.dispose();
-    },
-    [spout, sheet],
-  );
+  useEffect(() => () => spout.dispose(),[spout]);
+  useEffect(() => () => sheet.geometry.dispose(),[sheet]);
   return (
     <group
       name="pellicano"
       position={[position[0], copingY, position[1]]}
       rotation={[0, rotation, 0]}
     >
-      <mesh name="pellicano-base" position={[0, 0.006, -0.16]} castShadow receiveShadow>
-        <boxGeometry args={[BLADE.width + 0.06, 0.012, 0.16]} />
-        <StainlessSteelMaterial finish="satin" color={SATIN_STAINLESS_COLOR} />
+      <mesh name="pellicano-base" position={[0, 0.008, SPOUT_PATH[0]!.z]} castShadow receiveShadow>
+        <boxGeometry args={[BLADE.width + 0.06, 0.016, 0.12]} />
+        <StainlessSteelMaterial finish="polished" />
       </mesh>
       <mesh name="pellicano-spout" geometry={spout} castShadow receiveShadow>
-        <StainlessSteelMaterial finish="satin" color={SATIN_STAINLESS_COLOR} />
+        <StainlessSteelMaterial finish="polished" />
       </mesh>
       <mesh name="pellicano-water-sheet" geometry={sheet.geometry} renderOrder={3}>
         <meshPhysicalMaterial

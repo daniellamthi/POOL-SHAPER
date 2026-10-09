@@ -114,6 +114,7 @@ export interface SceneProps {
   loungers?: boolean;
   /** Above-ground: exterior cladding finish. */
   exteriorPanelFinish?: import("@/lib/pool/above-ground").ExteriorPanelFinishId;
+  externalStairSide?: import("@/lib/pool/above-ground").ExternalStairSide;
   /** Above-ground: stainless water-blade spout (equipment option). */
   pellicano?: boolean;
   technicalView: boolean;
@@ -927,6 +928,7 @@ export default function PoolScene({
   solarShower = false,
   loungers = false,
   exteriorPanelFinish,
+  externalStairSide = "short",
   pellicano = false,
   technicalView,
   infinityEdge,
@@ -1097,6 +1099,8 @@ export default function PoolScene({
     ].filter((p): p is { x: number; z: number; rotation: number } => !!p);
     if (externalStairs) {
       const stairs = planExternalStaircase({
+        side: externalStairSide,
+        accessAnchor: lighting.accessPlan.placement,
         outline,
         copingOffset: copingOuterOffset(system, overflowType),
         infinityExcluded,
@@ -1104,7 +1108,7 @@ export default function PoolScene({
         topY: system === "overflow" ? verticalLayout.waterY - 0.001 : verticalLayout.copingY,
       });
       if (stairs) {
-        const run = stairs.stepCount * stairs.treadDepth;
+        const run = stairs.landingDepth/2 + stairs.run;
         points.push(
           { x: stairs.x, z: stairs.z },
           {
@@ -1119,6 +1123,7 @@ export default function PoolScene({
     resolvedLayout.ladder,
     lighting.accessPlan,
     externalStairs,
+    externalStairSide,
     outline,
     system,
     overflowType,
@@ -1395,6 +1400,8 @@ export default function PoolScene({
 
       {poolType === "above-ground" && features.includes("externalStaircase") && (construction?.showAccessories ?? true) ? (
         <ExternalStaircase
+          side={externalStairSide}
+          accessAnchor={lighting.accessPlan.placement}
           outline={outline}
           copingOffset={copingOuterOffset(system, overflowType)}
           infinityExcluded={infinityExcluded}
@@ -1402,6 +1409,7 @@ export default function PoolScene({
           topY={system === "overflow" ? verticalLayout.waterY - 0.001 : verticalLayout.copingY}
           {...(exteriorPanelFinish ? { finish: exteriorPanelFinish } : {})}
           tread={{
+            id: materials.coping.id,
             color: materials.coping.color,
             roughness: materials.coping.roughness,
             assetDir: "asset" in materials.coping ? materials.coping.asset.dir : null,

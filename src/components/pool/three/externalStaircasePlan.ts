@@ -1,6 +1,7 @@
 import type { Outline } from "@/lib/pool/types";
 import { boundaryRuns, sampleWall, pointInBasin } from "@/lib/pool/boundary-placement";
 import type { InfinityExclusion } from "@/lib/pool/walls";
+import type { ExternalStairSide } from "@/lib/pool/above-ground";
 
 export interface ExternalStaircaseProps {
   outline: Outline;
@@ -8,6 +9,9 @@ export interface ExternalStaircaseProps {
   topY: number;
   copingOffset: number;
   infinityExcluded?: InfinityExclusion | null;
+  side?: ExternalStairSide;
+  /** The actual internal access, not a fixed pool corner. */
+  accessAnchor?: { x: number; z: number } | null;
 }
 
 const clamp = (value: number, minimum: number, maximum: number) =>
@@ -20,28 +24,49 @@ export function planExternalStaircase({
   topY,
   copingOffset,
   infinityExcluded = null,
+  side = "short",
+  accessAnchor = null,
 }: ExternalStaircaseProps) {
   const height = topY - groundY;
-  const stepCount = clamp(Math.ceil(height / 0.2), 1, 14);
+  if (height <= 0) return null;
+  const stepCount = clamp(Math.ceil(height / 0.19), 2, 14);
   const rise = height / stepCount;
-  const treadDepth = clamp(height * 0.19, 0.27, 0.34);
-  const width = 0.96;
+  const treadDepth = 0.3;
+  const width = 1.1;
+  const landingDepth = 1.05;
+  const run = (stepCount-1)*treadDepth;
   const runs = boundaryRuns(outline, infinityExcluded)
     .filter((r) => r.length >= width + 0.4)
-    .sort((a, b) => b.length - a.length);
-  for (const wall of runs)
-    for (const fraction of [0.5, 0.25, 0.75]) {
-      const p = sampleWall(
-        wall,
-        Math.max(width / 2 + 0.2, Math.min(wall.length - width / 2 - 0.2, wall.length * fraction)),
-      );
+    ;
+  if (!runs.length) return null;
+  const selectedLength = side === "long" ? Math.max(...runs.map(r => r.length)) : Math.min(...runs.map(r => r.length));
+  const candidates = runs.filter(r => Math.abs(r.length - selectedLength) < 0.05).map(wall => {
+    const start = sampleWall(wall,0);
+    const desired = accessAnchor
+      ? (accessAnchor.x-start.x)*start.tx + (accessAnchor.z-start.z)*start.tz
+      : wall.length / 2;
+    const low = -copingOffset+landingDepth/2, high = wall.length+copingOffset-landingDepth/2;
+    const choices = [{direction:1,minimum:low,maximum:high-run},{direction:-1,minimum:low+run,maximum:high}]
+      .filter(choice => choice.minimum<=choice.maximum)
+      .map(choice => ({...choice,centre:clamp(desired,choice.minimum,choice.maximum)}))
+      .sort((a,b) => Math.abs(a.centre-desired)-Math.abs(b.centre-desired));
+    const centre = choices[0]?.centre ?? clamp(desired,landingDepth/2,wall.length-landingDepth/2);
+    const direction = choices[0]?.direction ?? (wall.length-centre>=centre?1:-1);
+    const p = sampleWall(wall,centre);
+    return {wall,p,direction,score:accessAnchor ? Math.hypot(p.x-accessAnchor.x,p.z-accessAnchor.z) : 0};
+  }).sort((a,b) => a.score-b.score);
+  for (const {p,direction} of candidates) {
       const outward = [-p.nx, -p.nz] as const;
-      const x = p.x + outward[0] * copingOffset,
-        z = p.z + outward[1] * copingOffset;
+      const walk = [p.tx*direction,p.tz*direction] as const;
+      const rotation = Math.atan2(walk[0],walk[1]);
+      const right = [Math.cos(rotation),-Math.sin(rotation)] as const;
+      const x = p.x + outward[0] * (copingOffset+width/2),
+        z = p.z + outward[1] * (copingOffset+width/2);
+      const world = (across:number,along:number) => [x+right[0]*across+walk[0]*along,z+right[1]*across+walk[1]*along] as const;
       let clear = true;
-      for (let d = 0.02; d <= stepCount * treadDepth + 0.1; d += 0.15)
+      for (let d = -landingDepth/2; d <= landingDepth/2+run; d += 0.15)
         for (const w of [-width / 2, 0, width / 2]) {
-          if (pointInBasin(x + outward[0] * d + p.tx * w, z + outward[1] * d + p.tz * w, outline))
+          if (pointInBasin(...world(w,d),outline))
             clear = false;
         }
       if (clear)
@@ -51,10 +76,17 @@ export function planExternalStaircase({
           rise,
           treadDepth,
           width,
+          landingDepth,
+          run,
+          side,
+          outward,
+          walk,
+          poolSide: (outward[0]*right[0]+outward[1]*right[1] > 0 ? -1 : 1) as -1|1,
+          footprint: [world(-width/2,-landingDepth/2),world(width/2,-landingDepth/2),world(width/2,landingDepth/2+run),world(-width/2,landingDepth/2+run)],
           x,
           z,
-          rotation: Math.atan2(outward[0], outward[1]),
+          rotation,
         };
-    }
+  }
   return null;
 }

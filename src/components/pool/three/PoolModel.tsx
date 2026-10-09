@@ -498,11 +498,13 @@ export function PoolModel({
     () =>
       offsetOutline(
         outline,
-        isVisibleOverflow
+        poolType === "above-ground"
+          ? claddingFaceOffset(copingOuterOffset(system, overflowType))
+          : isVisibleOverflow
           ? OVERFLOW_GEOMETRY.visibleChannelOuterOffset + 0.025
           : ABOVE_GROUND_STRUCTURE_THICKNESS,
       ),
-    [outline, isVisibleOverflow],
+    [outline, isVisibleOverflow, poolType, system, overflowType],
   );
   const overflowWaterEdge = useMemo(
     () => offsetOutline(outline, OVERFLOW_GEOMETRY.waterEdgeOffset),

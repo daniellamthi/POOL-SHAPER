@@ -5,8 +5,7 @@
  *
  * Construction model, outward from the water:
  *   basin wall (ABOVE_GROUND_STRUCTURE_THICKNESS) -> sub-frame -> cladding
- *   panels (outer face at `CLADDING.faceOffset`) -> coping slab overhanging
- *   the panels by `CLADDING.copingOverhang`.
+ *   panels -> coping slab flush with the finished panel face.
  * The interior (liner or visible stainless) is never part of this cladding,
  * so panel joints never appear on wet surfaces.
  */
@@ -48,8 +47,8 @@ export function exteriorPanelFinishTitle(config: Pick<PoolConfig, "exteriorPanel
 }
 
 export const CLADDING = {
-  /** How far the coping projects past the panel face (a drip edge). */
-  copingOverhang: 0.03,
+  /** Flush cap, as in the installation references: no projecting shelf. */
+  copingOverhang: 0,
   /** Panel thickness (a real cladding board on its sub-frame). */
   thickness: 0.03,
   /** Target panel width; every side is divided into equal panels. */
@@ -59,6 +58,11 @@ export const CLADDING = {
   /** Panels stop just above the ground (a recessed plinth shadow line). */
   plinth: 0.012,
 } as const;
+
+export type ExternalStairSide = "long" | "short";
+export function externalStairSide(value: unknown): ExternalStairSide {
+  return value === "long" ? "long" : "short";
+}
 
 /** Outer face of the panels, metres outward from the water's edge: just
  * inside the coping's outer edge, and always clear of the basin wall plus a
@@ -205,8 +209,8 @@ export function planPellicano(
  * the ground so nothing stale reaches the scene, summary or quote. */
 export function withoutAboveGroundOnly(config: PoolConfig): PoolConfig {
   const equipment = config.equipment.filter((id) => id !== "pellicano");
-  if (equipment.length === config.equipment.length && config.exteriorPanelFinish === undefined)
+  if (equipment.length === config.equipment.length && config.exteriorPanelFinish === undefined && config.externalStairSide === undefined)
     return config;
-  const { exteriorPanelFinish: _panels, ...rest } = config;
+  const { exteriorPanelFinish: _panels, externalStairSide: _stairSide, ...rest } = config;
   return { ...rest, equipment };
 }

@@ -13,7 +13,7 @@
  * `JSON.stringify`. Camera position, which dialog is open, hover state, etc.
  * belong in component/store state, not here.
  */
-import { exteriorPanelFinish } from "./above-ground";
+import { exteriorPanelFinish, externalStairSide } from "./above-ground";
 import { normalizeComfortFeatures } from "./comfort-selection";
 import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
@@ -186,6 +186,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     infinityEdge: _savedInfinityEdge,
     coverExtension: savedCoverExtension,
     exteriorPanelFinish: _savedPanelFinish,
+    externalStairSide: _savedStairSide,
     ...restoredWithoutEdge
   } = restored;
   return {
@@ -211,6 +212,9 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
         : restored.equipment.filter((id) => id !== "pellicano"),
       ...(restored.exteriorPanelFinish !== undefined && restored.poolType === "above-ground"
         ? { exteriorPanelFinish: exteriorPanelFinish(restored.exteriorPanelFinish) }
+        : {}),
+      ...(restored.externalStairSide !== undefined && restored.poolType === "above-ground"
+        ? { externalStairSide: externalStairSide(restored.externalStairSide) }
         : {}),
       ledIntensity: normalisedLedIntensity(restored.ledIntensity),
       ...(restored.sceneTime !== undefined

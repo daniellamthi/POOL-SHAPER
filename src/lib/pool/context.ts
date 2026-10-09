@@ -86,6 +86,7 @@ export interface ConfiguratorContextValue {
   setSceneTime: (value: "day" | "night") => void;
   setPaving: (value: import("./presentation").PavingId) => void;
   setExteriorPanelFinish: (value: import("./above-ground").ExteriorPanelFinishId) => void;
+  setExternalStairSide: (value: import("./above-ground").ExternalStairSide) => void;
   setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
   setInternalStairType: (value: InternalStairType) => void;
   setHydromassageVariant: (value: HydromassageVariant) => void;
