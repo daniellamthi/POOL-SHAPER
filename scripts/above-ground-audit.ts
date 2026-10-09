@@ -23,11 +23,11 @@ import {
 import { buildProjectSummary } from "../src/lib/project-delivery/summary-model";
 import { createPhotoSceneSpec } from "../src/lib/pool/photo-scene-spec";
 import { planExternalStaircase } from "../src/components/pool/three/externalStaircasePlan";
-import { copingOuterOffset } from "../src/components/pool/three/poolConstruction";
+import { copingOuterOffset, createGrateGeometry } from "../src/components/pool/three/poolConstruction";
 import { getPoolVerticalLayout } from "../src/lib/pool/vertical-layout";
 import { EQUIPMENT } from "../src/lib/pool/config";
 import type { PoolConfig } from "../src/lib/pool/types";
-import { describeSelection } from "../src/components/pool/wizard/wizard-model";
+import { describeSelection, needsOverflowType } from "../src/components/pool/wizard/wizard-model";
 import { configuredPoolLayout } from "../src/lib/pool/resolved-layout";
 import { pointInBasin } from "../src/lib/pool/boundary-placement";
 import { pellicanoCurve, createPellicanoSpoutGeometry } from "../src/components/pool/three/Pellicano";
@@ -409,5 +409,44 @@ ok(isClosed(guardPost),"folded stainless guard post is closed");
 ok(near(guardPost.boundingBox!.max.z-guardPost.boundingBox!.min.z,0.065,1e-5),"reference broad flat-bar post, not a thin tube");
 ok(guardPost.boundingBox!.max.x>0.045,"reference folded foot offset");
 guardPost.dispose();
+
+// Optional platform: both side choices, no overrun beyond the cladding corners,
+// one closed volume and the same saved selection in every delivery surface.
+equal(needsOverflowType("system","overflow","system"),true,"Continue must present overflow subtype before access");
+equal(needsOverflowType("system","overflow","detail"),false,"after subtype Continue advances normally");
+for (const system of ["skimmer","infinity"] as const)
+  equal(needsOverflowType("system",system,"system"),false,"no extra subtype step for other systems");
+for (const length of [6,8,12]) for (const width of [3,4,5]) for (const depth of [1,1.3,1.5])
+  for (const system of ["skimmer","overflow"] as const) for (const side of ["short","long"] as const)
+    for (const extended of [false,true]) {
+      const config:PoolConfig={...withOptions.config,system,overflowType:"visible",dimensions:{length,width,depth,cornerRadius:0},externalStairSide:side,externalStairPlatformExtended:extended};
+      const outline=buildOutline("rectangle",config.dimensions,[]);
+      const v=getPoolVerticalLayout({poolType:"above-ground",system,overflowType:"visible",depth,copingThickness:0.04});
+      const offset=copingOuterOffset(system,"visible");
+      const topY=system==="overflow"?v.waterY-0.001:v.copingY;
+      const plan=planExternalStaircase({outline,groundY:v.groundY,topY,copingOffset:offset,side,platformExtended:extended,accessAnchor:configuredPoolLayout(config).access.placement});
+      ok(plan,`${length}x${width} ${system} ${side} extended:${extended}: platform fits`);
+      const extent=(side==="short"?width:length)/2+offset;
+      ok(plan!.footprint.every(point=>Math.abs(point[side==="short"?1:0])<=extent+1e-6),"no residual tread or platform projects beyond the side corners");
+      ok(plan!.footprint.every(([x,z])=>!pointInBasin(x,z,outline)),"no basin intrusion");
+      ok(near(plan!.height+v.groundY,topY),"platform shares the rim datum");
+      ok(extended?near(plan!.landingDepth+plan!.run,2*extent):near(plan!.landingDepth,1.05),"extension is derived from available side, compact landing is unchanged");
+      const solid=createExternalStairEnclosureGeometry(plan!);
+      ok(isClosed(solid),"extended and compact structures are watertight"); solid.dispose();
+      const restored=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("platform",config,renovation)));
+      equal(restored.config.externalStairPlatformExtended,extended,"platform choice round-trips");
+      equal(createPhotoSceneSpec(restored).selection.externalStairPlatformExtended,extended,"Photo Spec keeps platform choice");
+      equal(JSON.stringify(buildProjectSummary(restored)).includes("piattaforma prolungata"),extended,"shared Summary/PDF/quote describes the chosen platform only");
+    }
+const extendedState=reducer(withOptions,{type:"setExternalStairPlatformExtended",value:true});
+equal(reducer(extendedState,{type:"setExternalStairSide",value:"long"}).config.externalStairPlatformExtended,true,"side switch preserves independent extension");
+equal(reducer(extendedState,{type:"setPoolType",value:"in-ground"}).config.externalStairPlatformExtended,undefined,"in-ground has no stale platform option");
+const grilleOutline=buildOutline("rectangle",{length:8,width:4,depth:1.3,cornerRadius:0},[]);
+const grille=createGrateGeometry(offsetOutline(grilleOutline,0.11),offsetOutline(grilleOutline,0.355),0.016);
+grille.computeBoundingBox();
+ok(near(grille.boundingBox!.max.y,0),"grille has no raised frame above the rim");
+ok(near(grille.boundingBox!.min.y,-0.025,1e-6),"grille ribs have real 25mm depth");
+ok(isClosed(grille),"grille consists of closed solid ribs, not a texture");
+grille.dispose();
 
 console.log(`Above-ground audit PASS: ${checks} checks`);

@@ -227,6 +227,7 @@ export interface PoolConfig {
   exteriorPanelFinish?: import("./above-ground").ExteriorPanelFinishId;
   /** Above-ground exterior access, parallel to the selected wall. */
   externalStairSide?: import("./above-ground").ExternalStairSide;
+  externalStairPlatformExtended?: boolean;
   customer: CustomerInfo;
   uploads: ReadonlyArray<UploadedFile>;
 }

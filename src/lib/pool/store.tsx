@@ -115,6 +115,7 @@ type Action =
   | { type: "setPaving"; value: PavingId }
   | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
   | { type: "setExternalStairSide"; value: ExternalStairSide }
+  | { type: "setExternalStairPlatformExtended"; value: boolean }
   | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setInternalStairMirrored"; value: boolean }
@@ -246,6 +247,10 @@ function configurationReducer(state: State, action: Action): State {
     case "setExternalStairSide":
       return config.poolType === "above-ground"
         ? { ...state, config: { ...config, externalStairSide: externalStairSide(action.value) } }
+        : state;
+    case "setExternalStairPlatformExtended":
+      return config.poolType === "above-ground"
+        ? { ...state, config: { ...config, externalStairPlatformExtended: action.value } }
         : state;
     case "setPremiumEnvironment":
       return { ...state, config: { ...config, premiumEnvironment: premiumEnvironment(action.value) } };
@@ -846,6 +851,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
       setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),
       setExternalStairSide: (v) => dispatch({ type: "setExternalStairSide", value: v }),
+      setExternalStairPlatformExtended: (v) => dispatch({ type: "setExternalStairPlatformExtended", value: v }),
       setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setInternalStairMirrored: (v) => dispatch({ type: "setInternalStairMirrored", value: v }),

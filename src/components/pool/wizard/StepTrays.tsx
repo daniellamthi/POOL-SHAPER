@@ -90,12 +90,6 @@ const COPING_COPY: Record<string, string> = {
   wpc: "Composito legno-polimero, senza manutenzione.",
 };
 
-function useTab<T extends string>(initial: T, reset: unknown) {
-  const [tab, setTab] = useState<T>(initial);
-  useEffect(() => setTab(initial), [reset]); // eslint-disable-line react-hooks/exhaustive-deps
-  return [tab, setTab] as const;
-}
-
 function TabBody({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-4 animate-rise">{children}</div>;
 }
@@ -296,7 +290,10 @@ export function ShapeTray({ ctx }: { ctx: TrayContext }) {
 
 /* ---------------------------------------------------------------- 03 */
 
-export function SystemTray() {
+export function SystemTray({ tab, setTab }: {
+  tab: "system" | "detail";
+  setTab: (tab: "system" | "detail") => void;
+}) {
   const {
     config,
     outline,
@@ -308,7 +305,6 @@ export function SystemTray() {
   } = useConfigurator();
   const infinityAvailable =
     compatibleInfinityZones(outline, config.shape, config.poolType).length > 0;
-  const [tab, setTab] = useTab<"system" | "detail">(config.system === "infinity" ? "detail" : "system", config.system);
   const detailLabel =
     config.system === "skimmer"
       ? "Modello skimmer"
@@ -356,7 +352,7 @@ export function SystemTray() {
               description={item.description}
               image={ill(`system-${item.id}`)}
               selected={config.system === item.id}
-              onSelect={() => { setSystem(item.id); if (item.id === "infinity") setTab("detail"); }}
+              onSelect={() => { setSystem(item.id); setTab(item.id === "infinity" ? "detail" : "system"); }}
             />
           ))}
         </ChoiceGrid>
@@ -444,6 +440,7 @@ export function AccessTray() {
     toggleInternalSteps,
     toggleInoxLadder,
     setExternalStairSide,
+    setExternalStairPlatformExtended,
   } = useConfigurator();
   const [tab, setTab] = useState<"access" | "comfort">("access");
   // Set when the customer turns the internal stair on in this visit, so the
@@ -587,6 +584,7 @@ export function AccessTray() {
             ) : null}
           </ChoiceGrid>
           {config.poolType === "above-ground" && config.features.includes("externalStaircase") ? (
+            <>
             <ChoiceGrid label="Posizione scala esterna" dense>
               {(["short", "long"] as const).map(side => (
                 <ChoiceCard key={side} compact title={side === "short" ? "Lato corto" : "Lato lungo"}
@@ -602,6 +600,17 @@ export function AccessTray() {
                   onSelect={() => setExternalStairSide(side)} />
               ))}
             </ChoiceGrid>
+            <ChoiceGrid label="Piattaforma scala esterna" dense>
+              <ChoiceCard compact title="Arrivo diretto" description="Pianerottolo compatto a filo bordo."
+                image={<svg viewBox="0 0 120 84" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M15 64h18V53h15V42h15V31h27v33H15Z" /><path d="M63 27h27" /></svg>}
+                selected={!config.externalStairPlatformExtended}
+                onSelect={() => setExternalStairPlatformExtended(false)} />
+              <ChoiceCard compact title="+ Piattaforma prolungata" description="Pianerottolo esteso lungo il lato scelto."
+                image={<svg viewBox="0 0 120 84" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M9 64h12V53h12V42h12V31h66v33H9Z" /><path d="M45 27h66M48 31V16h60v15M48 23h60" /></svg>}
+                selected={config.externalStairPlatformExtended === true}
+                onSelect={() => setExternalStairPlatformExtended(true)} />
+            </ChoiceGrid>
+            </>
           ) : null}
           {stepsOn &&
           !comfort.elements.some((e) => e.kind === "sunShelf" || e.kind === "hydromassage") ? (

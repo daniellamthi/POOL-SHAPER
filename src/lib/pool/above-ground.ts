@@ -209,8 +209,8 @@ export function planPellicano(
  * the ground so nothing stale reaches the scene, summary or quote. */
 export function withoutAboveGroundOnly(config: PoolConfig): PoolConfig {
   const equipment = config.equipment.filter((id) => id !== "pellicano");
-  if (equipment.length === config.equipment.length && config.exteriorPanelFinish === undefined && config.externalStairSide === undefined && config.internalStairMirrored === undefined)
+  if (equipment.length === config.equipment.length && config.exteriorPanelFinish === undefined && config.externalStairSide === undefined && config.externalStairPlatformExtended === undefined && config.internalStairMirrored === undefined)
     return config;
-  const { exteriorPanelFinish: _panels, externalStairSide: _stairSide, internalStairMirrored: _mirror, ...rest } = config;
+  const { exteriorPanelFinish: _panels, externalStairSide: _stairSide, externalStairPlatformExtended: _platform, internalStairMirrored: _mirror, ...rest } = config;
   return { ...rest, equipment };
 }

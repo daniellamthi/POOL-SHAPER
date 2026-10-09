@@ -330,7 +330,7 @@ export function sampleRing(inner: Outline, outer: Outline, pitch: number) {
 }
 
 /** One merged draw call, with actual open gaps and rounded load-bearing ribs. */
-export function createGrateGeometry(inner: Outline, outer: Outline) {
+export function createGrateGeometry(inner: Outline, outer: Outline, pitch = 0.022) {
   const profile = new THREE.Shape([
     new THREE.Vector2(-0.0045, 0),
     new THREE.Vector2(0.0045, 0),
@@ -357,7 +357,7 @@ export function createGrateGeometry(inner: Outline, outer: Outline) {
     });
     const start = Math.min(...bay.map((point) => point.x));
     const end = Math.max(...bay.map((point) => point.x));
-    const count = Math.max(1, Math.ceil((end - start) / 0.022));
+    const count = Math.max(1, Math.ceil((end - start) / pitch));
     for (let rib = 0; rib < count; rib++) {
       const station = start + ((rib + 0.5) * (end - start)) / count;
       const intersections: number[] = [];

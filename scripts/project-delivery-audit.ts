@@ -190,6 +190,13 @@ async function contract(store: ProjectStore, label: string) {
   for (const [name, project] of [
     ["A 8x4 Skimmer", projectA],
     ["B 12x5 Infinity", projectB],
+    ["C above-ground grille + extended platform", {
+      ...projectA,
+      projectId: createProjectId(),
+      config: { ...base, poolType: "above-ground", structure: "modular-steel-panels", system: "overflow",
+        features: ["ledLighting", "externalStaircase"], externalStairSide: "long",
+        externalStairPlatformExtended: true },
+    } satisfies ProjectConfiguration],
   ] as const) {
     const snapshot = serializeProjectConfiguration(project);
     // configure -> snapshot -> server save

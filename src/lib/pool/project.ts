@@ -187,6 +187,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     coverExtension: savedCoverExtension,
     exteriorPanelFinish: _savedPanelFinish,
     externalStairSide: _savedStairSide,
+    externalStairPlatformExtended: _savedStairPlatform,
     internalStairMirrored: _savedStairMirror,
     ...restoredWithoutEdge
   } = restored;
@@ -217,6 +218,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       ...(restored.externalStairSide !== undefined && restored.poolType === "above-ground"
         ? { externalStairSide: externalStairSide(restored.externalStairSide) }
         : {}),
+      ...(typeof restored.externalStairPlatformExtended === "boolean" && restored.poolType === "above-ground"
+        ? { externalStairPlatformExtended: restored.externalStairPlatformExtended } : {}),
       ...(typeof restored.internalStairMirrored === "boolean" && restored.poolType === "above-ground"
         ? { internalStairMirrored: restored.internalStairMirrored } : {}),
       ...(restored.poolType === "above-ground" && restored.poolAccess === "stainlessSteelLadder"

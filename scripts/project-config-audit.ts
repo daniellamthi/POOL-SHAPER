@@ -98,7 +98,8 @@ for (const poolType of ["in-ground", "above-ground"] as const) {
     restored.config.features.includes("externalStaircase") === (poolType === "above-ground"),
     "External stairs must only survive restoration for above-ground pools",
   );
-  assert(restored.config.poolAccess === fullConfig.poolAccess, "Internal access must remain unchanged");
+  assert(restored.config.poolAccess === (poolType === "above-ground" ? null : fullConfig.poolAccess),
+    "Restoration preserves in-ground inox and removes the unsupported above-ground inox option");
 }
 assert(typeof json === "string" && json.length > 0, "serialization must produce a JSON string");
 

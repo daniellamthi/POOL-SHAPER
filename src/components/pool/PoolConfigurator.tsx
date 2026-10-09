@@ -37,7 +37,7 @@ import { PoolViewport } from "./PoolViewport";
 import { useTechnicalData } from "./TechnicalDataPanel";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
 import { ConfiguratorTray, WizardNav } from "./wizard/WizardChrome";
-import { buildMacros, describeSelection, isStepSkipped, STEP_COPY } from "./wizard/wizard-model";
+import { buildMacros, describeSelection, isStepSkipped, needsOverflowType, STEP_COPY } from "./wizard/wizard-model";
 import {
   AccessTray,
   DeckTray,
@@ -394,18 +394,25 @@ function ConfiguratorLayout() {
   const macro = macros[macroIndex];
   const skipped = (index: number) =>
     !renovationWorkflow && isStepSkipped(activeSteps[index]?.id, config);
+  const [systemTab, setSystemTab] = useState<"system" | "detail">("system");
+  useEffect(() => setSystemTab(config.system === "infinity" ? "detail" : "system"), [config.system]);
+  const needsOverflowDetail = !renovationWorkflow && needsOverflowType(activeSteps[step]?.id, config.system, systemTab);
   const goNext = useCallback(() => {
+    if (needsOverflowDetail) { setSystemTab("detail"); setTrayExpanded(true); return; }
     let target = step + 1;
     while (target < activeSteps.length - 1 && skipped(target)) target += 1;
     goToStep(Math.min(target, activeSteps.length - 1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, activeSteps.length, config, goToStep]);
+  }, [step, activeSteps.length, config, goToStep, needsOverflowDetail]);
   const goBack = useCallback(() => {
+    if (activeSteps[step]?.id === "system" && config.system === "overflow" && systemTab === "detail") {
+      setSystemTab("system"); return;
+    }
     let target = step - 1;
     while (target > 0 && skipped(target)) target -= 1;
     goToStep(Math.max(0, target));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, config, goToStep]);
+  }, [step, config, goToStep, activeSteps, systemTab]);
   const selectMacro = (index: number) => {
     const indices = macros[index]?.indices ?? [];
     const target = indices.find((i) => !skipped(i)) ?? indices[0];
@@ -463,7 +470,7 @@ function ConfiguratorLayout() {
   ) : activeStepId === "shape-dimensions" ? (
     <ShapeTray ctx={trayContext} />
   ) : activeStepId === "system" ? (
-    <SystemTray />
+    <SystemTray tab={systemTab} setTab={setSystemTab} />
   ) : activeStepId === "access" ? (
     <AccessTray />
   ) : activeStepId === "style" ? (
@@ -548,6 +555,7 @@ function ConfiguratorLayout() {
               ? {
                   exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
                   externalStairSide: config.externalStairSide ?? "short",
+                  externalStairPlatformExtended: config.externalStairPlatformExtended ?? false,
                   internalStairMirrored: !!config.internalStairMirrored,
                   pellicano: config.equipment.includes("pellicano"),
                 }
@@ -632,7 +640,7 @@ function ConfiguratorLayout() {
           number={macroIndex + 1}
           total={renovationWorkflow ? undefined : macros.length}
           nextLabel={
-            !renovationWorkflow &&
+            needsOverflowDetail ? "Tipologia di sfioro" : !renovationWorkflow &&
             macro &&
             macro.indices[macro.indices.length - 1] === step
               ? macros[macroIndex + 1]?.label

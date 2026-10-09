@@ -10,6 +10,7 @@ export interface ExternalStaircaseProps {
   copingOffset: number;
   infinityExcluded?: InfinityExclusion | null;
   side?: ExternalStairSide;
+  platformExtended?: boolean;
   /** The actual internal access, not a fixed pool corner. */
   accessAnchor?: { x: number; z: number } | null;
 }
@@ -25,6 +26,7 @@ export function planExternalStaircase({
   copingOffset,
   infinityExcluded = null,
   side = "short",
+  platformExtended = false,
   accessAnchor = null,
 }: ExternalStaircaseProps) {
   const height = topY - groundY;
@@ -33,29 +35,32 @@ export function planExternalStaircase({
   const rise = height / stepCount;
   const treadDepth = 0.3;
   const width = 1.1;
-  const landingDepth = 1.05;
   const run = (stepCount-1)*treadDepth;
   const runs = boundaryRuns(outline, infinityExcluded)
     .filter((r) => r.length >= width + 0.4)
     ;
   if (!runs.length) return null;
   const selectedLength = side === "long" ? Math.max(...runs.map(r => r.length)) : Math.min(...runs.map(r => r.length));
-  const candidates = runs.filter(r => Math.abs(r.length - selectedLength) < 0.05).map(wall => {
+  const candidates = runs.filter(r => Math.abs(r.length - selectedLength) < 0.05).flatMap(wall => {
+    const availableLanding = wall.length + 2 * copingOffset - run;
+    if (availableLanding < 1.05 - 1e-6) return [];
+    const landingDepth = platformExtended ? availableLanding : 1.05;
     const start = sampleWall(wall,0);
     const desired = accessAnchor
       ? (accessAnchor.x-start.x)*start.tx + (accessAnchor.z-start.z)*start.tz
       : wall.length / 2;
     const low = -copingOffset+landingDepth/2, high = wall.length+copingOffset-landingDepth/2;
     const choices = [{direction:1,minimum:low,maximum:high-run},{direction:-1,minimum:low+run,maximum:high}]
-      .filter(choice => choice.minimum<=choice.maximum)
+      .filter(choice => choice.minimum<=choice.maximum+1e-6)
       .map(choice => ({...choice,centre:clamp(desired,choice.minimum,choice.maximum)}))
       .sort((a,b) => Math.abs(a.centre-desired)-Math.abs(b.centre-desired));
-    const centre = choices[0]?.centre ?? clamp(desired,landingDepth/2,wall.length-landingDepth/2);
-    const direction = choices[0]?.direction ?? (wall.length-centre>=centre?1:-1);
+    if (!choices.length) return [];
+    const centre = choices[0]!.centre;
+    const direction = choices[0]!.direction;
     const p = sampleWall(wall,centre);
-    return {wall,p,direction,score:accessAnchor ? Math.hypot(p.x-accessAnchor.x,p.z-accessAnchor.z) : 0};
+    return [{wall,p,direction,landingDepth,score:accessAnchor ? Math.hypot(p.x-accessAnchor.x,p.z-accessAnchor.z) : 0}];
   }).sort((a,b) => a.score-b.score);
-  for (const {p,direction} of candidates) {
+  for (const {p,direction,landingDepth} of candidates) {
       const outward = [-p.nx, -p.nz] as const;
       const walk = [p.tx*direction,p.tz*direction] as const;
       const rotation = Math.atan2(walk[0],walk[1]);

@@ -80,6 +80,11 @@ export function isStepSkipped(_stepId: string | undefined, _config: PoolConfig) 
   return false;
 }
 
+/** The overflow subtype is a required decision within the water macro-phase. */
+export function needsOverflowType(stepId: string | undefined, system: PoolConfig["system"], tab: "system" | "detail") {
+  return stepId === "system" && system === "overflow" && tab === "system";
+}
+
 export function buildMacros(
   config: PoolConfig,
   current: number,

@@ -87,6 +87,7 @@ export interface ConfiguratorContextValue {
   setPaving: (value: import("./presentation").PavingId) => void;
   setExteriorPanelFinish: (value: import("./above-ground").ExteriorPanelFinishId) => void;
   setExternalStairSide: (value: import("./above-ground").ExternalStairSide) => void;
+  setExternalStairPlatformExtended: (value: boolean) => void;
   setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
   setInternalStairType: (value: InternalStairType) => void;
   setInternalStairMirrored: (value: boolean) => void;

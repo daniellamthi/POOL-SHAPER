@@ -117,6 +117,7 @@ export interface SceneProps {
   /** Above-ground: exterior cladding finish. */
   exteriorPanelFinish?: import("@/lib/pool/above-ground").ExteriorPanelFinishId;
   externalStairSide?: import("@/lib/pool/above-ground").ExternalStairSide;
+  externalStairPlatformExtended?: boolean;
   /** Above-ground: stainless water-blade spout (equipment option). */
   pellicano?: boolean;
   technicalView: boolean;
@@ -965,6 +966,7 @@ export default function PoolScene({
   loungers = false,
   exteriorPanelFinish,
   externalStairSide = "short",
+  externalStairPlatformExtended = false,
   pellicano = false,
   technicalView,
   infinityEdge,
@@ -1139,6 +1141,7 @@ export default function PoolScene({
     if (externalStairs) {
       const stairs = planExternalStaircase({
         side: externalStairSide,
+        platformExtended: externalStairPlatformExtended,
         accessAnchor: lighting.accessPlan.placement,
         outline,
         copingOffset: copingOuterOffset(system, overflowType),
@@ -1163,6 +1166,7 @@ export default function PoolScene({
     lighting.accessPlan,
     externalStairs,
     externalStairSide,
+    externalStairPlatformExtended,
     outline,
     system,
     overflowType,
@@ -1443,6 +1447,7 @@ export default function PoolScene({
       {poolType === "above-ground" && features.includes("externalStaircase") && (construction?.showAccessories ?? true) ? (
         <ExternalStaircase
           side={externalStairSide}
+          platformExtended={externalStairPlatformExtended}
           accessAnchor={lighting.accessPlan.placement}
           outline={outline}
           copingOffset={copingOuterOffset(system, overflowType)}

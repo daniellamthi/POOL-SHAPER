@@ -957,9 +957,9 @@ export function PoolModel({
   const visibleOverflowGrate = useDisposable(
     () =>
       isVisibleOverflow
-        ? createGrateGeometry(overflowKerbOuter, overflowChannelOuter)
+        ? createGrateGeometry(overflowKerbOuter, overflowChannelOuter, poolType === "above-ground" ? 0.016 : 0.022)
         : new THREE.BufferGeometry(),
-    [overflowChannelOuter, overflowKerbOuter, isVisibleOverflow],
+    [overflowChannelOuter, overflowKerbOuter, isVisibleOverflow, poolType],
   );
   const channelFloor = useDisposable(
     () =>

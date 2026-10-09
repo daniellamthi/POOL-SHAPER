@@ -17,7 +17,7 @@ const POST_SETBACK = 0.075;
 /** Steel construction enclosed in the same panels as the pool references.
  * Only the walking surfaces inherit the selected coping finish. */
 export function ExternalStaircase({ outline, groundY, topY, copingOffset, infinityExcluded = null,
-  side = "short", accessAnchor = null, finish = DEFAULT_EXTERIOR_PANEL_FINISH, tread }: ExternalStaircaseProps & {
+  side = "short", platformExtended = false, accessAnchor = null, finish = DEFAULT_EXTERIOR_PANEL_FINISH, tread }: ExternalStaircaseProps & {
     finish?: ExteriorPanelFinishId;
     tread: { id: CopingMaterialId; color: string; roughness: number; assetDir: string|null };
   }) {
@@ -26,8 +26,8 @@ export function ExternalStaircase({ outline, groundY, topY, copingOffset, infini
     : tread.id === "wpc" ? createWPCMaps() : tread.id === "deck-marrone" ? createWoodDeckMaps() : null,
     [tread.assetDir,tread.id]);
   useEffect(() => () => { if(maps) Object.values(maps).forEach(map => map?.dispose()); },[maps]);
-  const layout = useMemo(() => planExternalStaircase({outline,groundY,topY,copingOffset,infinityExcluded,side,accessAnchor}),
-    [outline,groundY,topY,copingOffset,infinityExcluded,side,accessAnchor]);
+  const layout = useMemo(() => planExternalStaircase({outline,groundY,topY,copingOffset,infinityExcluded,side,platformExtended,accessAnchor}),
+    [outline,groundY,topY,copingOffset,infinityExcluded,side,platformExtended,accessAnchor]);
   const contactAOMap = useMemo(() => createContactAOGradientMap(),[]);
   useEffect(() => () => contactAOMap.dispose(),[contactAOMap]);
   const enclosure = useMemo(() => layout ? createExternalStairEnclosureGeometry(layout) : null,[layout]);
@@ -49,10 +49,10 @@ export function ExternalStaircase({ outline, groundY, topY, copingOffset, infini
   const post = (s:number,y:number,z:number,key:string) => (
     <group key={key}>
       <mesh name="external-stair-guard-post" position={[s*(width/2-POST_SETBACK),y,z]} scale={[s,1,1]} geometry={postGeometry} castShadow>
-        <StainlessSteelMaterial finish="polished" />
+        <StainlessSteelMaterial finish="brushed" />
       </mesh>
       <mesh position={[s*(width/2-POST_SETBACK),y+0.007,z]} castShadow>
-        <boxGeometry args={[0.12,0.014,0.12]} /><StainlessSteelMaterial finish="polished" />
+        <boxGeometry args={[0.12,0.014,0.12]} /><StainlessSteelMaterial finish="brushed" />
       </mesh>
     </group>
   );
@@ -76,19 +76,23 @@ export function ExternalStaircase({ outline, groundY, topY, copingOffset, infini
           <Beam from={[-width*0.46,y-SLAB-0.025,z]} to={[width*0.46,y-SLAB-0.025,z]} width={0.035} depth={0.045} />
         </group>;
       })}
-      {/* Both stair flanks protected; pool-facing landing entry stays open. */}
-      {[-1,1].map(s => {
-        const x=s*(width/2-POST_SETBACK+POST_FOLD), outer=s!==poolSide;
+      {/* The pool wall closes the inner flank. Guard only the exposed edge. */}
+      {[-poolSide].map(s => {
+        const x=s*(width/2-POST_SETBACK+POST_FOLD);
         return <group key={`guard-${s}`} name="external-stair-steel-guard">
           {[...new Set([1,Math.ceil((stepCount-1)/2),stepCount-1])].map(level =>
             post(s,groundY+rise*level,start+(stepCount-level-0.5)*treadDepth,`post-${level}`))}
-          {outer ? [post(s,topY,-landingDepth/2+0.075,"rear"),post(s,topY,railStart,"front")] : post(s,topY,-landingDepth/2+0.075,"rear")}
+          {Array.from({length:Math.ceil((landingDepth-0.225)/1.1)+1},(_,i) => {
+            const spans=Math.ceil((landingDepth-0.225)/1.1);
+            return post(s,topY,-landingDepth/2+0.075+(landingDepth-0.225)*i/spans,`landing-${i}`);
+          })}
           {[0.22,0.48,0.74,GUARD_HEIGHT].map(h => <group key={h}>
             <Rail from={[x,topY+h,railStart]} to={[x,groundY+rise+h,lowZ]} radius={h===GUARD_HEIGHT?0.012:0.006} />
-            {outer ? <Rail from={[x,topY+h,-landingDepth/2+0.075]} to={[x,topY+h,railStart]} radius={h===GUARD_HEIGHT?0.012:0.006} /> : null}
+            <Rail from={[x,topY+h,-landingDepth/2+0.075]} to={[x,topY+h,railStart]} radius={h===GUARD_HEIGHT?0.012:0.006} />
           </group>)}
         </group>;
       })}
+      {post(poolSide,topY,-landingDepth/2+0.075,"end-guard-terminal")}
       {[0.22,0.48,0.74,GUARD_HEIGHT].map(h => <Rail key={`rear-${h}`} from={[-width/2+POST_SETBACK-POST_FOLD,topY+h,-landingDepth/2+0.075]}
         to={[width/2-POST_SETBACK+POST_FOLD,topY+h,-landingDepth/2+0.075]} radius={h===GUARD_HEIGHT?0.012:0.006} />)}
     </group>
@@ -155,5 +159,5 @@ function Beam({from,to,width,depth}:{from:Point;to:Point;width:number;depth:numb
 }
 function Rail({from,to,radius}:{from:Point;to:Point;radius:number}) {
   const p=beamPose(from,to);
-  return <mesh position={p.position} quaternion={p.quaternion} castShadow><cylinderGeometry args={[radius,radius,p.length,10]} /><StainlessSteelMaterial finish="polished" /></mesh>;
+  return <mesh position={p.position} quaternion={p.quaternion} castShadow><cylinderGeometry args={[radius,radius,p.length,10]} /><StainlessSteelMaterial finish="brushed" /></mesh>;
 }
