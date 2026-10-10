@@ -250,7 +250,7 @@ function configurationReducer(state: State, action: Action): State {
         : state;
     case "setExternalStairPlatformExtended":
       return config.poolType === "above-ground"
-        ? { ...state, config: { ...config, externalStairPlatformExtended: action.value } }
+        ? { ...state, config: { ...config, externalStairPlatformExtended: true } }
         : state;
     case "setPremiumEnvironment":
       return { ...state, config: { ...config, premiumEnvironment: premiumEnvironment(action.value) } };

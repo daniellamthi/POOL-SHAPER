@@ -430,13 +430,13 @@ for (const length of [6,8,12]) for (const width of [3,4,5]) for (const depth of 
       ok(plan!.footprint.every(point=>Math.abs(point[side==="short"?1:0])<=extent+1e-6),"no residual tread or platform projects beyond the side corners");
       ok(plan!.footprint.every(([x,z])=>!pointInBasin(x,z,outline)),"no basin intrusion");
       ok(near(plan!.height+v.groundY,topY),"platform shares the rim datum");
-      ok(extended?near(plan!.landingDepth+plan!.run,2*extent):near(plan!.landingDepth,1.05),"extension is derived from available side, compact landing is unchanged");
+      ok(near(plan!.landingDepth+plan!.run,2*extent),"standard extension fills available side even for legacy false values");
       const solid=createExternalStairEnclosureGeometry(plan!);
       ok(isClosed(solid),"extended and compact structures are watertight"); solid.dispose();
       const restored=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("platform",config,renovation)));
-      equal(restored.config.externalStairPlatformExtended,extended,"platform choice round-trips");
-      equal(createPhotoSceneSpec(restored).selection.externalStairPlatformExtended,extended,"Photo Spec keeps platform choice");
-      equal(JSON.stringify(buildProjectSummary(restored)).includes("piattaforma prolungata"),extended,"shared Summary/PDF/quote describes the chosen platform only");
+      equal(restored.config.externalStairPlatformExtended,true,"legacy platform choice migrates to standard extension");
+      equal(createPhotoSceneSpec(restored).selection.externalStairPlatformExtended,true,"Photo Spec keeps standard platform");
+      equal(JSON.stringify(buildProjectSummary(restored)).includes("piattaforma prolungata"),true,"shared Summary/PDF/quote describes standard platform");
     }
 const extendedState=reducer(withOptions,{type:"setExternalStairPlatformExtended",value:true});
 equal(reducer(extendedState,{type:"setExternalStairSide",value:"long"}).config.externalStairPlatformExtended,true,"side switch preserves independent extension");

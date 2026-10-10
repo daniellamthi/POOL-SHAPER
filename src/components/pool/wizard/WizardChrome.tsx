@@ -302,14 +302,17 @@ export function ConfiguratorTray({
             onClick={onContinue}
             disabled={!canContinue}
             title={canContinue ? undefined : continueHint}
-            className="shrink-0 rounded-full px-5 lg:hidden"
+            className="h-auto min-h-10 shrink-0 rounded-full px-4 py-2 lg:hidden"
           >
-            {continueLabel}
+            <span className="flex max-w-[110px] flex-col gap-0.5 whitespace-normal">
+              <span>{continueLabel}</span>
+              {nextLabel && canContinue ? <span className="text-[10px] font-normal normal-case tracking-normal opacity-80">{nextLabel}</span> : null}
+            </span>
             <ArrowRight className="size-3.5" strokeWidth={1.5} />
           </Button>
         </header>
 
-        <ScrollCueArea className={expanded ? "flex" : "hidden lg:flex"}>{children}</ScrollCueArea>
+        <ScrollCueArea key={`${number}-${substep ?? ""}`} className={expanded ? "flex" : "hidden lg:flex"}>{children}</ScrollCueArea>
       </div>
 
       <footer className="hidden shrink-0 items-center justify-between gap-6 border-t border-hairline px-7 py-3.5 lg:flex">

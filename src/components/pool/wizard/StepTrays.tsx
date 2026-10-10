@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import type { DecisionProps } from "./decisions";
 import { ArrowRight, Check, Moon, Plus, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfigurator } from "@/lib/pool/context";
@@ -53,8 +54,7 @@ import { Illustration } from "./illustrations";
 export interface TrayContext {
   focus: (intent: SceneFocus | null) => void;
   /** Bumped by the final step's primary action: opens the proposal request. */
-  requestToken?: number;
-  photoMode?: { available: boolean; reason?: string; enter: () => void };
+  photoMode?: { available: boolean; active: boolean; reason?: string; enter: () => void };
   /** Clean hero capture of the configured pool (Build 2). */
   captureHero?: () => Promise<string | null>;
   captureDayNight?: () => Promise<DayNightCapture>;
@@ -161,11 +161,9 @@ export function StructureTray() {
 
 /* ---------------------------------------------------------------- 02 */
 
-export function ShapeTray({ ctx }: { ctx: TrayContext }) {
+export function ShapeTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
   const { config, setShape, setCustomMode, setDimension, metrics } = useConfigurator();
-  const [tab, setTab] = useState<"shape" | "plan" | "depth">(
-    config.shapeSelected ? "plan" : "shape",
-  );
+  useEffect(() => { ctx.focus(tab === "plan" ? "top" : tab === "depth" ? "depth" : null); }, [tab]);
   const choose = (next: typeof tab) => {
     setTab(next);
     ctx.focus(next === "plan" ? "top" : next === "depth" ? "depth" : null);
@@ -429,7 +427,7 @@ export function SystemTray({ tab, setTab }: {
 
 /* ---------------------------------------------------------------- 04 */
 
-export function AccessTray() {
+export function AccessTray({ tab, setTab }: DecisionProps) {
   const {
     config,
     togglePoolFeature,
@@ -440,9 +438,7 @@ export function AccessTray() {
     toggleInternalSteps,
     toggleInoxLadder,
     setExternalStairSide,
-    setExternalStairPlatformExtended,
   } = useConfigurator();
-  const [tab, setTab] = useState<"access" | "comfort">("access");
   // Set when the customer turns the internal stair on in this visit, so the
   // follow-up options (stair shape, optional inox ladder) are brought into view.
   const [stairsJustChosen, setStairsJustChosen] = useState(false);
@@ -600,16 +596,7 @@ export function AccessTray() {
                   onSelect={() => setExternalStairSide(side)} />
               ))}
             </ChoiceGrid>
-            <ChoiceGrid label="Piattaforma scala esterna" dense>
-              <ChoiceCard compact title="Arrivo diretto" description="Pianerottolo compatto a filo bordo."
-                image={<svg viewBox="0 0 120 84" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M15 64h18V53h15V42h15V31h27v33H15Z" /><path d="M63 27h27" /></svg>}
-                selected={!config.externalStairPlatformExtended}
-                onSelect={() => setExternalStairPlatformExtended(false)} />
-              <ChoiceCard compact title="+ Piattaforma prolungata" description="Pianerottolo esteso lungo il lato scelto."
-                image={<svg viewBox="0 0 120 84" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M9 64h12V53h12V42h12V31h66v33H9Z" /><path d="M45 27h66M48 31V16h60v15M48 23h60" /></svg>}
-                selected={config.externalStairPlatformExtended === true}
-                onSelect={() => setExternalStairPlatformExtended(true)} />
-            </ChoiceGrid>
+            <p className="text-sm text-muted-foreground">Piattaforma prolungata inclusa, con parapetto sui soli lati esterni.</p>
             </>
           ) : null}
           {stepsOn &&
@@ -754,7 +741,7 @@ export function AccessTray() {
 
 /* ---------------------------------------------------------------- 05 */
 
-export function FinishTray() {
+export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionProps) {
   const {
     config,
     setFinish,
@@ -763,7 +750,6 @@ export function FinishTray() {
     setPoolStructure,
     setExteriorPanelFinish,
   } = useConfigurator();
-  const [finishTab, setFinishTab] = useState<"interior" | "exterior">("interior");
   const steel = customerStructureOf(config.structure) === "steel";
   const visibleSteel = isVisibleStainlessStructure(config.structure);
   const active: "steel" | "liner" | "mosaic" = visibleSteel
@@ -905,12 +891,12 @@ const PANEL_SWATCH: Record<string, string> = {
 
 /* ---------------------------------------------------------------- 06 */
 
-export function LightTray() {
+export function LightTray({ tab, setTab }: DecisionProps) {
   const { config, togglePoolFeature, setLedColor, setLedIntensity, setSceneTime } =
     useConfigurator();
   const hasLed = config.features.includes("ledLighting");
   const plan = useMemo(() => (hasLed ? configuredLightingPlan(config) : null), [config, hasLed]);
-  const [tab, setTab] = useState<"lighting" | "color">(hasLed ? "color" : "lighting");
+  useEffect(() => { if (tab === "color" && hasLed) setSceneTime("night"); }, [tab, hasLed]);
   const night = config.sceneTime === "night";
   // Night exists only to judge the LEDs: no LEDs, no night.
   useEffect(() => {
@@ -1014,12 +1000,11 @@ const PAVING_IMAGES: Record<string, string | undefined> = {
   wood: "/textures/coping/deck/basecolor.png",
 };
 
-export function DeckTray() {
+export function DeckTray({ tab, setTab }: DecisionProps) {
   const { config, setCopingMaterial, setPaving } = useConfigurator();
   const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
   // Above ground the pool stands on the lawn: the coping is the only finish.
   const pavingOffered = config.poolType !== "above-ground";
-  const [tab, setTab] = useState<"coping" | "paving">(copingVisible ? "coping" : "paving");
   return (
     <TabBody>
       <StepTabs
@@ -1053,12 +1038,12 @@ export function DeckTray() {
               title={p.label}
               description={p.note}
               image={
-                PAVING_IMAGES[p.id] ?? (
+                PAVING_IMAGES[p.id] ?? (p.id !== "gres" && p.id !== "wood" && p.id !== "istria" ? getCopingSwatchDataUrl(p.id) : (
                   <span
                     className="block h-full w-full rounded-xl"
                     style={{ background: p.color }}
                   />
-                )
+                ))
               }
               selected={pavingId(config.paving) === p.id}
               onSelect={() => setPaving(p.id)}
@@ -1072,9 +1057,8 @@ export function DeckTray() {
 
 /* ---------------------------------------------------------------- 08 */
 
-export function OptionalTray({ ctx }: { ctx: TrayContext }) {
+export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
   const { config, toggleEquipment, setCoverExtension } = useConfigurator();
-  const [tab, setTab] = useState<"outdoor" | "water" | "heat">("outdoor");
   const coverOn = config.equipment.includes("automaticCover");
   const coverPlan = resolveAutomaticCover(
     coverOn ? config : { ...config, equipment: [...config.equipment, "automaticCover"] },
@@ -1162,14 +1146,9 @@ export function OptionalTray({ ctx }: { ctx: TrayContext }) {
 
 /* ---------------------------------------------------------------- 09 */
 
-export function PresentationTray({ ctx }: { ctx: TrayContext }) {
-  const { config, setSceneTime, projectConfiguration, sharedProject } = useConfigurator();
-  const [tab, setTab] = useState<"scene" | "summary" | "request">("scene");
+export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
+  const { config, setSceneTime, projectConfiguration } = useConfigurator();
   const delivery = useProjectDelivery();
-  // A shared link lands on the project recap.
-  useEffect(() => {
-    if (sharedProject?.status === "ready") setTab("summary");
-  }, [sharedProject?.status]);
   // The recap opens with a clean capture of the configured pool.
   const { heroUrl, setHeroUrl } = delivery;
   const capture = ctx.captureHero;
@@ -1183,9 +1162,6 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
       active = false;
     };
   }, [tab, heroUrl, capture, setHeroUrl]);
-  useEffect(() => {
-    if (ctx.requestToken) setTab("request");
-  }, [ctx.requestToken]);
   // Without LEDs the presentation is always the daylight one.
   const night = config.sceneTime === "night" && config.features.includes("ledLighting");
   return (
@@ -1239,7 +1215,7 @@ export function PresentationTray({ ctx }: { ctx: TrayContext }) {
                 }
                 image={ill("photo")}
                 badge={ctx.photoMode.available ? undefined : "Desktop"}
-                selected={false}
+                selected={ctx.photoMode.active}
                 onSelect={() => ctx.photoMode?.available && ctx.photoMode.enter()}
               />
             ) : null}

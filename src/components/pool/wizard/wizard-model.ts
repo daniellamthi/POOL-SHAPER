@@ -73,11 +73,9 @@ export const STEP_COPY: Record<string, { title: string; subtitle: string }> = {
   },
 };
 
-/** A step with no real decision for this configuration would be skipped by
- * navigation. None today: the finish step always offers a choice (steel:
- * "Acciaio a vista" or "Liner"; concrete: "Liner" or "Mosaico"). */
-export function isStepSkipped(_stepId: string | undefined, _config: PoolConfig) {
-  return false;
+/** Above-ground grille overflow has neither selectable coping nor local paving. */
+export function isStepSkipped(stepId: string | undefined, config: PoolConfig) {
+  return stepId === "deck" && config.poolType === "above-ground" && config.system === "overflow" && config.overflowType === "visible";
 }
 
 /** The overflow subtype is a required decision within the water macro-phase. */

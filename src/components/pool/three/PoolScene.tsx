@@ -18,7 +18,7 @@ import type { DirectionalLight, HemisphereLight, SpotLight, Texture } from "thre
 import { PoolModel } from "./PoolModel";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
-import { StudioPaving } from "./StudioPaving";
+import { StudioPaving, PavingMaterial } from "./StudioPaving";
 import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
 import { DeckLoungers } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
@@ -700,6 +700,7 @@ function StudioFloor({
   waterY,
   coastalMap,
   sceneTime,
+  paving,
 }: {
   outline: Outline;
   size: number;
@@ -710,6 +711,7 @@ function StudioFloor({
   waterY: number;
   coastalMap: Texture | null;
   sceneTime: SceneTimeOfDay;
+  paving: import("@/lib/pool/presentation").PavingId;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -815,31 +817,7 @@ function StudioFloor({
           receiveShadow
           castShadow
         >
-          <meshStandardMaterial
-            side={DoubleSide}
-            color="#f0eade"
-            map={stone.colorMap}
-            normalMap={stone.normalMap}
-            normalScale={[0.3, 0.3]}
-            roughnessMap={stone.roughnessMap}
-            roughness={0.72}
-            metalness={0}
-            onBeforeCompile={(shader) => {
-              excludeSubmergedDirectLights(shader, waterY);
-              shader.fragmentShader = shader.fragmentShader.replace(
-                "#include <map_fragment>",
-                `
-              #include <map_fragment>
-              vec2 slabs = vMapUv / vec2(3.0, 1.5);
-              vec2 edge = min(fract(slabs), 1.0 - fract(slabs));
-              vec2 joint = smoothstep(vec2(0.0015), vec2(0.0015) + fwidth(slabs), edge);
-              float variation = fract(sin(dot(floor(slabs), vec2(127.1,311.7))) * 43758.5453);
-              diffuseColor.rgb *= mix(0.8, 0.98 + variation * 0.025, min(joint.x, joint.y));
-            `,
-              );
-            }}
-            customProgramCacheKey={() => `level-limestone-120x60-v3-${waterY}`}
-          />
+          <PavingMaterial key={paving} id={paving} waterY={waterY} vertexColors={false} />
         </mesh>
       ) : null}
       <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
@@ -1224,6 +1202,11 @@ export default function PoolScene({
     construction?.structure,
     materials.surface.textureUrl,
     materials.coping.color,
+    materials.coping.id,
+    paving,
+    exteriorPanelFinish,
+    externalStairSide,
+    externalStairPlatformExtended,
     materials.skimmer.color,
     materials.skimmer.type,
     visualTheme,
@@ -1338,6 +1321,7 @@ export default function PoolScene({
         distance={radius * 8}
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[visualTheme]}
       />
+      <Suspense fallback={null}>
       {infinityStage ? (
         <StudioFloor
           outline={outline}
@@ -1350,9 +1334,9 @@ export default function PoolScene({
           waterY={verticalLayout.waterY}
           coastalMap={coastalMap}
           sceneTime={sceneTime}
+          paving={paving ?? "gres"}
         />
       ) : (
-        <Suspense fallback={null}>
           <StudioPaving
             outline={outline}
             poolType={poolType}
@@ -1364,8 +1348,17 @@ export default function PoolScene({
             decking={poolType !== "above-ground" && (construction?.showDecking ?? true)}
             waterY={verticalLayout.waterY}
           />
-        </Suspense>
       )}
+      {/* Commit paving textures before the tracer snapshots the scene. */}
+      {photoMode ? (
+        <PhotoModeRenderer
+          key={photoModeSceneKey}
+          theme={theme}
+          quality={photoModeQuality}
+          onUnsupported={onPhotoModeUnsupported}
+        />
+      ) : null}
+      </Suspense>
       {/* Presentation furniture on the studio deck: hidden in the raw
           construction stages and never part of the configuration. */}
       {system !== "infinity" && (construction?.showEnvironment ?? true) ? (
@@ -1597,16 +1590,6 @@ export default function PoolScene({
 
       {/* Normal configuration is raster-only. Tracing is loaded and mounted
           exclusively in response to the user's explicit Photo Mode toggle. */}
-      {photoMode ? (
-        <Suspense fallback={null}>
-          <PhotoModeRenderer
-            key={photoModeSceneKey}
-            theme={theme}
-            quality={photoModeQuality}
-            onUnsupported={onPhotoModeUnsupported}
-          />
-        </Suspense>
-      ) : null}
     </Canvas>
     {infinityStage && !photoMode && coastalStatus !== "ready" ? (
       <div role="status" aria-live="polite" className="absolute inset-0 z-[2] flex items-center justify-center bg-viewport text-sm text-foreground/70">

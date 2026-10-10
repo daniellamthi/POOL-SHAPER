@@ -15,7 +15,8 @@ import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { PAVING, pavingId, type PavingId } from "@/lib/pool/presentation";
 import { createSurfaceGeometry } from "./poolGeometry";
 import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
-import { createLimestoneMaps } from "./stoneTextures";
+import { createLimestoneMaps, createPrunMaps, createWPCMaps } from "./stoneTextures";
+import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 
 type Point = [number, number];
@@ -76,7 +77,11 @@ export function createPavingModules(
         const offU = Math.floor(rnd * 997) * 0.37,
           offV = Math.floor(((rnd * 7919) % 1) * 991) * 0.41;
         for (let k = 1; k + 1 < polygon.length; k++) {
-          for (const v of [polygon[0]!, polygon[k]!, polygon[k + 1]!]) {
+          const vertices = [polygon[0]!, polygon[k]!, polygon[k + 1]!].map(v => [Math.fround(v[0]), Math.fround(v[1])] as Point);
+          const [a, b, c] = vertices as [Point, Point, Point];
+          // Clipping at a module/footprint corner can leave collinear vertices.
+          if (Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) < 1e-10) continue;
+          for (const v of vertices) {
             positions.push(v[0], 0, v[1]);
             uv.push(v[0] + offU, -v[1] + offV);
             colors.push(variation, variation, variation);
@@ -94,16 +99,44 @@ export function createPavingModules(
   return geometry;
 }
 
-function PavingMaterial({
+export function PavingMaterial(props: { id: PavingId; waterY: number; joint?: boolean; vertexColors?: boolean }) {
+  return ["gres", "wood", "istria"].includes(props.id)
+    ? <OriginalPavingMaterial {...props} /> : <CatalogPavingMaterial {...props} />;
+}
+
+function CatalogPavingMaterial({ id, waterY, joint = false, vertexColors = true }: { id: PavingId; waterY: number; joint?: boolean; vertexColors?: boolean }) {
+  const definition = COPING_MATERIALS.find(m => m.id === id)!;
+  const asset = "asset" in definition ? definition.asset : null;
+  const sources = useLoader(TextureLoader, asset ? ["basecolor", "normal", ...("roughnessMap" in asset && asset.roughnessMap === false ? [] : ["roughness"])].map(name => `${asset.dir}/${name}.png`) : []);
+  const maps = useMemo(() => {
+    const maps = asset
+      ? { colorMap: sources[0]!.clone(), normalMap: sources[1]!.clone(), roughnessMap: sources[2]?.clone() ?? null }
+      : id === "prun" ? createPrunMaps() : id === "wpc" ? createWPCMaps() : createLimestoneMaps();
+    const aspect = "asset" in definition && "aspect" in definition.asset ? definition.asset.aspect : 1;
+    maps.colorMap.colorSpace = SRGBColorSpace;
+    Object.values(maps).forEach(t => { if (t) { t.wrapS = t.wrapT = RepeatWrapping; t.repeat.set(1 / definition.moduleSize, aspect / definition.moduleSize); t.needsUpdate = true; } });
+    return maps;
+  }, [definition, id, asset, sources]);
+  useEffect(() => () => Object.values(maps).forEach(t => t?.dispose()), [maps]);
+  return <meshStandardMaterial vertexColors={vertexColors && !joint} color={joint ? "#bdbdbd" : definition.color}
+    map={maps.colorMap} normalMap={maps.normalMap} roughnessMap={maps.roughnessMap}
+    normalScale={[definition.normalStrength, definition.normalStrength]} roughness={definition.roughness}
+    onBeforeCompile={shader => excludeSubmergedDirectLights(shader, waterY)}
+    customProgramCacheKey={() => `catalog-paving-dry-${waterY}`} />;
+}
+
+function OriginalPavingMaterial({
   id,
   waterY,
   joint = false,
+  vertexColors = true,
 }: {
   id: PavingId;
   waterY: number;
   /** The joint bedding: the slab's own material a shade darker, so joints
    * read in the stone's tone instead of a light graphic grid. */
   joint?: boolean;
+  vertexColors?: boolean;
 }) {
   const definition = PAVING.find((p) => p.id === id)!;
   const maxAnisotropy = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
@@ -136,7 +169,7 @@ function PavingMaterial({
   }, [maps, id, maxAnisotropy]);
   return (
     <meshStandardMaterial
-      vertexColors={!joint}
+      vertexColors={vertexColors && !joint}
       color={
         joint ? (id === "istria" ? "#b1b0a7" : "#bdbdbd") : id === "istria" ? "#deddd1" : "#ffffff"
       }

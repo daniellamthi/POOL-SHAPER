@@ -1,4 +1,5 @@
 import { exteriorPanelFinish } from "@/lib/pool/above-ground";
+import { decisions } from "./wizard/decisions";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -37,7 +38,7 @@ import { PoolViewport } from "./PoolViewport";
 import { useTechnicalData } from "./TechnicalDataPanel";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
 import { ConfiguratorTray, WizardNav } from "./wizard/WizardChrome";
-import { buildMacros, describeSelection, isStepSkipped, needsOverflowType, STEP_COPY } from "./wizard/wizard-model";
+import { buildMacros, describeSelection, isStepSkipped, STEP_COPY } from "./wizard/wizard-model";
 import {
   AccessTray,
   DeckTray,
@@ -394,25 +395,35 @@ function ConfiguratorLayout() {
   const macro = macros[macroIndex];
   const skipped = (index: number) =>
     !renovationWorkflow && isStepSkipped(activeSteps[index]?.id, config);
-  const [systemTab, setSystemTab] = useState<"system" | "detail">("system");
-  useEffect(() => setSystemTab(config.system === "infinity" ? "detail" : "system"), [config.system]);
-  const needsOverflowDetail = !renovationWorkflow && needsOverflowType(activeSteps[step]?.id, config.system, systemTab);
+  const [decisionState, setDecisionState] = useState<{ step: number; id: string }>({ step: -1, id: "" });
+  const currentDecisions = renovationWorkflow ? [] : decisions(activeStepId, config);
+  const decisionIndex = Math.max(0, currentDecisions.findIndex(d => decisionState.step === step && d.id === decisionState.id));
+  const decision = currentDecisions[decisionIndex];
+  const setDecision = (id: string) => { setDecisionState({ step, id }); setTrayExpanded(true); };
+  const decisionProps = { tab: decision?.id ?? "", setTab: setDecision };
+  const nextDecision = currentDecisions[decisionIndex + 1];
+  useEffect(() => {
+    if (sharedProject?.status === "ready") {
+      const reviewStep = activeSteps.findIndex(s => s.id === "review");
+      setDecisionState({ step: reviewStep, id: "summary" });
+    }
+  }, [sharedProject?.status]);
   const goNext = useCallback(() => {
-    if (needsOverflowDetail) { setSystemTab("detail"); setTrayExpanded(true); return; }
+    if (nextDecision) { setDecision(nextDecision.id); return; }
     let target = step + 1;
     while (target < activeSteps.length - 1 && skipped(target)) target += 1;
+    setDecisionState({ step: target, id: decisions(activeSteps[target]?.id, config)[0]?.id ?? "" });
     goToStep(Math.min(target, activeSteps.length - 1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, activeSteps.length, config, goToStep, needsOverflowDetail]);
+  }, [step, activeSteps.length, config, goToStep, nextDecision]);
   const goBack = useCallback(() => {
-    if (activeSteps[step]?.id === "system" && config.system === "overflow" && systemTab === "detail") {
-      setSystemTab("system"); return;
-    }
+    if (decisionIndex > 0) { setDecision(currentDecisions[decisionIndex - 1]!.id); return; }
     let target = step - 1;
     while (target > 0 && skipped(target)) target -= 1;
+    setDecisionState({ step: target, id: decisions(activeSteps[target]?.id, config).at(-1)?.id ?? "" });
     goToStep(Math.max(0, target));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, config, goToStep, activeSteps, systemTab]);
+  }, [step, config, goToStep, activeSteps, decisionIndex, currentDecisions]);
   const selectMacro = (index: number) => {
     const indices = macros[index]?.indices ?? [];
     const target = indices.find((i) => !skipped(i)) ?? indices[0];
@@ -434,10 +445,8 @@ function ConfiguratorLayout() {
     if (sharedProject?.status === "ready") setTrayExpanded(true);
   }, [sharedProject?.status]);
   // The final step's primary action opens the proposal request.
-  const [requestToken, setRequestToken] = useState(0);
-  const finalRequest = !renovationWorkflow && activeStepId === "review";
+  const finalRequest = !renovationWorkflow && activeStepId === "review" && !nextDecision;
   const trayContext: TrayContext = {
-    requestToken,
     focus: (intent) => {
       setInspectionView(intent);
       reframe();
@@ -445,6 +454,7 @@ function ConfiguratorLayout() {
     captureHero,
     captureDayNight,
     photoMode: {
+      active: photoMode,
       available: ACTIVE_RENDERING_QUALITY.id === "experience" && !photoModeUnsupported,
       reason: photoModeUnsupported
         ? "Il rendering fotografico non è supportato da questo dispositivo."
@@ -468,21 +478,21 @@ function ConfiguratorLayout() {
   ) : activeStepId === "structure" ? (
     <StructureTray />
   ) : activeStepId === "shape-dimensions" ? (
-    <ShapeTray ctx={trayContext} />
+    <ShapeTray ctx={trayContext} {...decisionProps} />
   ) : activeStepId === "system" ? (
-    <SystemTray tab={systemTab} setTab={setSystemTab} />
+    <SystemTray tab={decisionProps.tab === "detail" ? "detail" : "system"} setTab={setDecision} />
   ) : activeStepId === "access" ? (
-    <AccessTray />
+    <AccessTray {...decisionProps} />
   ) : activeStepId === "style" ? (
-    <FinishTray />
+    <FinishTray {...decisionProps} />
   ) : activeStepId === "lighting" ? (
-    <LightTray />
+    <LightTray {...decisionProps} />
   ) : activeStepId === "deck" ? (
-    <DeckTray />
+    <DeckTray {...decisionProps} />
   ) : activeStepId === "technology" ? (
-    <OptionalTray ctx={trayContext} />
+    <OptionalTray ctx={trayContext} {...decisionProps} />
   ) : (
-    <PresentationTray ctx={trayContext} />
+    <PresentationTray ctx={trayContext} {...decisionProps} />
   );
   const copy = renovationWorkflow
     ? { title: activeSteps[step]?.title ?? "", subtitle: activeSteps[step]?.subtitle ?? "" }
@@ -555,7 +565,7 @@ function ConfiguratorLayout() {
               ? {
                   exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
                   externalStairSide: config.externalStairSide ?? "short",
-                  externalStairPlatformExtended: config.externalStairPlatformExtended ?? false,
+                  externalStairPlatformExtended: true,
                   internalStairMirrored: !!config.internalStairMirrored,
                   pellicano: config.equipment.includes("pellicano"),
                 }
@@ -640,15 +650,15 @@ function ConfiguratorLayout() {
           number={macroIndex + 1}
           total={renovationWorkflow ? undefined : macros.length}
           nextLabel={
-            needsOverflowDetail ? "Tipologia di sfioro" : !renovationWorkflow &&
+            nextDecision ? nextDecision.label : !renovationWorkflow &&
             macro &&
             macro.indices[macro.indices.length - 1] === step
               ? macros[macroIndex + 1]?.label
-              : undefined
+              : STEP_COPY[activeSteps[step + 1]?.id ?? ""]?.title
           }
           title={renovationWorkflow ? copy.title : (macro?.label ?? copy.title)}
           subtitle={copy.subtitle}
-          {...(substepPosition
+          {...(decision ? { substep: `${decisionIndex + 1}/${currentDecisions.length} · ${decision.label}` } : substepPosition
             ? { substep: `${substepPosition}/${macro!.indices.length} · ${copy.title}` }
             : {})}
           selection={
@@ -657,16 +667,16 @@ function ConfiguratorLayout() {
               : describeSelection(activeStepId, config)
           }
           canBack={step > 0}
-          canContinue={finalRequest || (!isLast && canContinue)}
+          canContinue={finalRequest || ((Boolean(nextDecision) || !isLast) && canContinue)}
           continueLabel={
-            finalRequest ? "Richiedi proposta" : isLast ? "Configurazione completa" : "Continua"
+            finalRequest ? "Richiedi proposta" : isLast && !nextDecision ? "Configurazione completa" : "Continua"
           }
           continueHint={isLast ? undefined : "Completa la scelta per continuare"}
           onBack={goBack}
           onContinue={
             finalRequest
               ? () => {
-                  setRequestToken((n) => n + 1);
+                  setDecision("request");
                   setTrayExpanded(true);
                 }
               : goNext
@@ -674,7 +684,7 @@ function ConfiguratorLayout() {
           expanded={trayExpanded}
           onExpandedChange={setTrayExpanded}
         >
-          <div key={step} className="animate-rise">
+          <div key={`${step}-${decision?.id ?? ""}`} className="animate-rise">
             {trayContent}
           </div>
         </ConfiguratorTray>

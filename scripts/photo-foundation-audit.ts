@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { decisions } from "../src/components/pool/wizard/decisions";
 import { readFileSync } from "node:fs";
 import { createPhotoSceneSpec } from "../src/lib/pool/photo-scene-spec";
 import { parseProjectConfiguration, serializeProjectConfiguration, toProjectConfiguration } from "../src/lib/pool/project";
@@ -35,6 +36,20 @@ for (const position of ["open", "closed"] as const) {
   assert.deepEqual(spec.pool.cover.geometry, plan.geometry);
 }
 let checks = 0;
+for (const poolType of ["in-ground", "above-ground"] as const) for (const system of ["skimmer", "overflow", "infinity"] as const) {
+  const c = { ...base, poolType, system };
+  const ids = (step: string) => decisions(step, c).map(d => d.id);
+  assert.deepEqual(ids("technology"), ["outdoor", "water", "heat"]);
+  assert.deepEqual(ids("shape-dimensions"), ["shape", "plan", "depth"]);
+  assert.deepEqual(ids("system"), ["system", "detail"]);
+  assert.deepEqual(ids("style"), poolType === "above-ground" ? ["interior", "exterior"] : ["interior"]);
+  assert.deepEqual(ids("deck"), poolType === "above-ground" ? ["coping"] : ["coping", "paving"]);
+  assert.deepEqual(decisions("deck", { ...c, system: "overflow", overflowType: "visible" }).map(d => d.id), poolType === "above-ground" ? [] : ["paving"]);
+  assert.deepEqual(ids("lighting"), ["lighting"]);
+  assert.deepEqual(decisions("lighting", { ...c, features: ["ledLighting"] }).map(d => d.id), ["lighting", "color"]);
+  assert.deepEqual(ids("review"), ["scene", "summary", "request"]);
+  checks += 9;
+}
 for (const length of [6, 8, 10, 12]) for (const width of [3, 4.5, 5])
 for (const system of ["skimmer", "overflow", "infinity"] as const)
 for (const floorProfile of ["flat", "slope"] as const)
@@ -80,7 +95,8 @@ for (const paving of PAVING) for (const environment of PREMIUM_ENVIRONMENTS) for
   assert.equal(restored.config.sceneTime, sceneTime);
   assert.equal(restored.config.copingMaterial, "travertine");
   assert.equal(createPhotoSceneSpec(restored).pool.materials.coping.id, "travertine");
-  checks += 5;
+  assert.equal(createPhotoSceneSpec(restored).paving.id, paving.id);
+  checks += 6;
 }
 for (const shape of ["rectangle", "l-shape", "custom"] as const) for (const length of [6, 12]) for (const paving of PAVING) {
   const outline = buildOutline(shape, { ...base.dimensions, length }, [[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]]);
@@ -90,7 +106,7 @@ for (const shape of ["rectangle", "l-shape", "custom"] as const) for (const leng
   assert.ok(p.count > 0);
   for (let i = 0; i < p.count; i++) {
     assert.ok(Number.isFinite(p.getX(i)) && Number.isFinite(p.getZ(i)));
-    assert.ok(n.getY(i) > .99, "slab faces point upwards");
+    assert.ok(n.getY(i) > .99, `slab faces point upwards: ${shape}/${length}/${paving.id}, vertex ${i}, normal ${n.getY(i)}`);
   }
   mesh.dispose(); checks += 2;
 }

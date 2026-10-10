@@ -1,11 +1,17 @@
 /** Presentation choices never change the pool or its compatibility rules. */
-export type PavingId = "gres" | "wood" | "istria";
+import { COPING_MATERIALS, type CopingMaterialId } from "./coping-materials";
+export type PavingId = "gres" | "wood" | "istria" | Exclude<CopingMaterialId, "anthracite-gres" | "deck-marrone">;
 export type PremiumEnvironment = "outdoor-villa" | "indoor-wellness" | "panorama-infinity";
-export const PAVING = [
+export const PAVING: ReadonlyArray<{ id: PavingId; label: string; module: readonly [number, number]; color: string; maps: string | null; note: string }> = [
   { id: "gres", label: "Gres porcellanato", module: [1.2, 0.6], color: "#c5bfb5", maps: "gres", note: "Effetto minerale · lastre 120 × 60 cm" },
   { id: "wood", label: "Legno decking", module: [2.4, 0.14], color: "#a88b6b", maps: "deck", note: "Doghe 240 × 14 cm" },
   { id: "istria", label: "Pietra d’Istria", module: [0.6, 0.4], color: "#dad8c9", maps: null, note: "Resa indicativa, non scansione certificata · 60 × 40 cm" },
-] as const;
+  ...COPING_MATERIALS.filter(m => m.id !== "anthracite-gres" && m.id !== "deck-marrone").map(m => ({
+    id: m.id as PavingId, label: m.title, module: [m.id === "wpc" ? 2.4 : m.moduleSize, m.moduleSize] as const,
+    color: m.color, maps: "asset" in m ? m.asset.dir.split("/").at(-1)! : null,
+    note: "Finitura del catalogo bordo · selezione indipendente",
+  })),
+];
 export const PREMIUM_ENVIRONMENTS = [
   { id: "outdoor-villa", label: "Outdoor Villa", description: "Architettura contemporanea intorno alla tua piscina." },
   { id: "indoor-wellness", label: "Indoor Wellness", description: "Vetrate, bosco e sauna: spazio dimensionato sulla vasca." },

@@ -26,7 +26,6 @@ export function planExternalStaircase({
   copingOffset,
   infinityExcluded = null,
   side = "short",
-  platformExtended = false,
   accessAnchor = null,
 }: ExternalStaircaseProps) {
   const height = topY - groundY;
@@ -44,7 +43,7 @@ export function planExternalStaircase({
   const candidates = runs.filter(r => Math.abs(r.length - selectedLength) < 0.05).flatMap(wall => {
     const availableLanding = wall.length + 2 * copingOffset - run;
     if (availableLanding < 1.05 - 1e-6) return [];
-    const landingDepth = platformExtended ? availableLanding : 1.05;
+    const landingDepth = availableLanding;
     const start = sampleWall(wall,0);
     const desired = accessAnchor
       ? (accessAnchor.x-start.x)*start.tx + (accessAnchor.z-start.z)*start.tz

@@ -70,6 +70,7 @@ export function toProjectConfiguration(
     projectId,
     config: {
       ...config,
+      ...(config.poolType === "above-ground" ? { externalStairPlatformExtended: true } : {}),
       structure,
       finish: normaliseFinishForStructure(structure, config.finish),
     },
@@ -218,8 +219,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       ...(restored.externalStairSide !== undefined && restored.poolType === "above-ground"
         ? { externalStairSide: externalStairSide(restored.externalStairSide) }
         : {}),
-      ...(typeof restored.externalStairPlatformExtended === "boolean" && restored.poolType === "above-ground"
-        ? { externalStairPlatformExtended: restored.externalStairPlatformExtended } : {}),
+      ...(restored.poolType === "above-ground" ? { externalStairPlatformExtended: true } : {}),
       ...(typeof restored.internalStairMirrored === "boolean" && restored.poolType === "above-ground"
         ? { internalStairMirrored: restored.internalStairMirrored } : {}),
       ...(restored.poolType === "above-ground" && restored.poolAccess === "stainlessSteelLadder"
