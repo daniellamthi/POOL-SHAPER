@@ -49,6 +49,7 @@ export type SkimmerTypeId = "standard" | "slim" | "highWaterline" | "flush";
 
 export type PoolFeatureId =
   | "ledLighting"
+  | "stairLighting"
   | "hydromassage"
   | "sunShelf"
   | "integratedBench"

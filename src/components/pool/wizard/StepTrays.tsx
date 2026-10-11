@@ -895,13 +895,16 @@ export function LightTray({ tab, setTab }: DecisionProps) {
   const { config, togglePoolFeature, setLedColor, setLedIntensity, setSceneTime } =
     useConfigurator();
   const hasLed = config.features.includes("ledLighting");
+  const stairSpots = useMemo(() => configuredPoolLayout(config).stairMicroSpots, [config]);
+  const hasStairLed = config.features.includes("stairLighting") && stairSpots.length > 0;
+  const hasAnyLed = hasLed || hasStairLed;
   const plan = useMemo(() => (hasLed ? configuredLightingPlan(config) : null), [config, hasLed]);
   useEffect(() => { if (tab === "color" && hasLed) setSceneTime("night"); }, [tab, hasLed]);
   const night = config.sceneTime === "night";
   // Night exists only to judge the LEDs: no LEDs, no night.
   useEffect(() => {
-    if (!hasLed && night) setSceneTime("day");
-  }, [hasLed, night, setSceneTime]);
+    if (!hasAnyLed && night) setSceneTime("day");
+  }, [hasAnyLed, night, setSceneTime]);
   return (
     <TabBody>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -918,7 +921,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
             ...(hasLed ? [{ id: "color" as const, label: "Colore LED" }] : []),
           ]}
         />
-        {hasLed ? (
+        {hasAnyLed ? (
           <div
             role="radiogroup"
             aria-label="Anteprima luce"
@@ -960,7 +963,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
         <ChoiceGrid label="Illuminazione subacquea">
           <ChoiceCard
             title="Senza illuminazione"
-            description="Nessun faro subacqueo: la piscina resta in luce diurna."
+            description="Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti."
             image={ill("led-off")}
             selected={!hasLed}
             onSelect={() => {
@@ -968,6 +971,17 @@ export function LightTray({ tab, setTab }: DecisionProps) {
               setSceneTime("day");
             }}
           />
+          {stairSpots.length > 0 ? <ChoiceCard
+            title="+ Micro-spot sulle scale"
+            description="Piccoli LED a luce calda nelle alzate, anche sulla scala angolare. Optional indipendente."
+            image={ill("led-on")}
+            selected={hasStairLed}
+            footer={stairSpots.length ? `${stairSpots.length} micro-spot · nelle alzate` : "Seleziona una scala interna o un accesso comfort compatibile"}
+            onSelect={() => {
+              togglePoolFeature("stairLighting");
+              if (!hasStairLed) setSceneTime("night");
+            }}
+          /> : <p className="text-sm text-muted-foreground">Micro-spot sulle scale: seleziona una scala interna o un accesso comfort compatibile.</p>}
           <ChoiceCard
             title="LED subacquei"
             description="Fari RGB a parete, disposti automaticamente. Anteprima notturna."
@@ -1163,7 +1177,12 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
     };
   }, [tab, heroUrl, capture, setHeroUrl]);
   // Without LEDs the presentation is always the daylight one.
-  const night = config.sceneTime === "night" && config.features.includes("ledLighting");
+  const hasAnyLed = config.features.includes("ledLighting") ||
+    (config.features.includes("stairLighting") && configuredPoolLayout(config).stairMicroSpots.length > 0);
+  const night = config.sceneTime === "night" && hasAnyLed;
+  useEffect(() => {
+    if (!hasAnyLed && config.sceneTime === "night") setSceneTime("day");
+  }, [hasAnyLed, config.sceneTime, setSceneTime]);
   return (
     <TabBody>
       <StepTabs
@@ -1188,7 +1207,7 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
               selected={!night}
               onSelect={() => setSceneTime("day")}
             />
-            {config.features.includes("ledLighting") ? (
+            {hasAnyLed ? (
               <ChoiceCard
                 compact
                 title="Notte"

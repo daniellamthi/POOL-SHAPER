@@ -1,6 +1,7 @@
 import { exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { decisions } from "./wizard/decisions";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -164,6 +165,7 @@ function ConfiguratorLayout() {
   // start uncluttered. Customers can still toggle Guides explicitly.
   const [showMeasurements, setShowMeasurements] = useState(false);
   const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
+  const hasStairLed = useMemo(() => configuredStairMicroSpots(config).length > 0, [config]);
   // Night is contextual: the live scene shows it only while LED colours are
   // being evaluated (lighting step) or while the Project Book captures its
   // day/night pair. Everywhere else the journey stays in daylight.
@@ -615,7 +617,7 @@ function ConfiguratorLayout() {
                 dayNightCapture ||
                 // The final presentation may be shown at night, but only
                 // for a pool that actually has LEDs to show.
-                (activeStepId === "review" && config.features.includes("ledLighting")))
+                (activeStepId === "review" && (config.features.includes("ledLighting") || hasStairLed)))
                 ? sceneTime
                 : "day"
             }

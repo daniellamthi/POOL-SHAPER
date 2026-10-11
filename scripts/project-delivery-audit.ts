@@ -41,6 +41,7 @@ import {
   MAX_SNAPSHOT_BYTES,
   ProjectDeliveryError,
   saveProject,
+  shareableProject,
 } from "../src/lib/project-delivery/service";
 import QRCode from "qrcode";
 import { buildProjectSummary } from "../src/lib/project-delivery/summary-model";
@@ -48,10 +49,16 @@ import { buildProjectBook, pdfText } from "../src/lib/project-delivery/projectBo
 import { leadSubmissionInputSchema } from "../src/lib/lead/schema";
 import { formatLeadEmail } from "../src/lib/lead/formatLeadEmail";
 import type { LeadSubmission } from "../src/lib/lead/types";
+import { getLeadStore } from "../src/lib/lead/storage";
+import { projectLinkIsDirty, projectSnapshotFingerprint, savedProjectLocation } from "../src/lib/project-delivery/client";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
 };
+const copyLocation = new URL(savedProjectLocation("http://127.0.0.1:3001/?p=PW-0000-000000&qa=cloud#pool-viewport", "PW-0001-000001"));
+assert(copyLocation.searchParams.get("p") === "PW-0001-000001", "copy reload must address the new saved reference");
+assert(copyLocation.searchParams.get("qa") === "cloud" && copyLocation.hash === "#pool-viewport", "save preserves preview context");
+assert(new URL(savedProjectLocation("http://127.0.0.1:3001/", "PW-0001-000001")).searchParams.get("p") === "PW-0001-000001", "first save gains reloadable reference");
 /** Field-by-field equality; key order is irrelevant (Postgres jsonb reorders keys). */
 const stable = (value: unknown): unknown =>
   Array.isArray(value)
@@ -129,6 +136,12 @@ const projectA: ProjectConfiguration = {
   renovation,
 };
 
+const ownerLink={publicRef:createPublicRef(),editToken:createEditToken(),savedSnapshot:serializeProjectConfiguration(projectA)};
+assert(!projectLinkIsDirty(ownerLink,projectA),"legacy saved snapshot stays clean after reload");
+assert(!projectLinkIsDirty({...ownerLink,savedSnapshot:projectSnapshotFingerprint(projectA)},JSON.parse(JSON.stringify(stable(projectA)))),"jsonb property order does not create false dirty state");
+assert(projectLinkIsDirty(ownerLink,{...projectA,config:{...base,dimensions:{...base.dimensions,length:10}}}),"real configuration edit remains dirty");
+assert(!projectLinkIsDirty({...ownerLink,editToken:undefined},projectA),"read-only share has no owner dirty marker");
+
 // Reference project B: 12 x 5 rectangle, Infinity on a real candidate side.
 const dimsB = { length: 12, width: 5, depth: 1.6, cornerRadius: 0, floorProfile: "flat" as const };
 const zoneB = infinityZonesForOutline(
@@ -185,6 +198,11 @@ const dayImage = await QRCode.toDataURL("day", { width: 64 });
 const nightImage = await QRCode.toDataURL("night", { width: 64 });
 
 let mismatches = 0;
+const injected = JSON.parse(serializeProjectConfiguration(projectA));
+injected.config.contact = { email: "private@example.com" };
+injected.config.dimensions.secret = "private@example.com";
+injected.renovation.secret = "private@example.com";
+assert(!JSON.stringify(shareableProject(injected)).includes("private@example.com"), "unknown personal fields excluded from public snapshots");
 
 async function contract(store: ProjectStore, label: string) {
   for (const [name, project] of [
@@ -195,7 +213,7 @@ async function contract(store: ProjectStore, label: string) {
       projectId: createProjectId(),
       config: { ...base, poolType: "above-ground", structure: "modular-steel-panels", system: "overflow",
         features: ["ledLighting", "externalStaircase"], externalStairSide: "long",
-        externalStairPlatformExtended: true },
+        externalStairPlatformExtended: true, equipment: ["pellicano"] },
     } satisfies ProjectConfiguration],
   ] as const) {
     const snapshot = serializeProjectConfiguration(project);
@@ -282,7 +300,7 @@ async function contract(store: ProjectStore, label: string) {
     }
     assert(parsed.projectReference === created.publicRef, `${label} ${name}: quote reference`);
     const submission: LeadSubmission = {
-      requestId: "req-audit",
+      requestId: crypto.randomUUID(),
       projectId: restored.projectId,
       projectReference: created.publicRef,
       schemaVersion: restored.schemaVersion,
@@ -298,6 +316,14 @@ async function contract(store: ProjectStore, label: string) {
       email.subject.includes(created.publicRef) && email.text.includes(created.publicRef),
       `${label} ${name}: quote email carries the Project ID`,
     );
+    if (store.durable) {
+      const leadStore = getLeadStore();
+      const idempotency = `build2-qa-${submission.requestId}`;
+      const first = await leadStore.upsertLead(submission, idempotency);
+      const repeat = await leadStore.upsertLead({ ...submission, requestId: crypto.randomUUID() }, idempotency);
+      assert(first.stored && !first.existing && repeat.existing?.requestId === submission.requestId, `${name}: real lead durable and duplicate prevented`);
+      console.log(`PASS — live ${name}: lead persisted once; retry retains request identity (no email sent)`);
+    }
 
     // Owner update.
     const changed: ProjectConfiguration = {
@@ -314,6 +340,10 @@ async function contract(store: ProjectStore, label: string) {
       (await loadSharedProject(store, created.publicRef)).snapshot,
     );
     assert(reread.config.ledIntensity === 0.9, `${label} ${name}: owner update persisted`);
+    await expectCode(saveProject(store, {
+      snapshot: serializeProjectConfiguration({ ...changed, projectId: createProjectId() }),
+      publicRef: created.publicRef, editToken: created.editToken!,
+    }), "forbidden", `${label} ${name}: project identity cannot change during update`);
 
     // Non-owner cannot mutate: wrong token, unknown ref, malformed input.
     const attack = serializeProjectConfiguration({

@@ -16,6 +16,8 @@ import {
   type SharedProjectResult,
 } from "./service";
 import { getProjectStore, ProjectStorageError } from "./store";
+import { attachmentOwner } from "../lead/attachmentOwner.server";
+import { parseProjectConfiguration } from "../pool/project";
 
 type Outcome<T> =
   ({ ok: true } & T) | { ok: false; code: ProjectDeliveryErrorCode; message: string };
@@ -48,7 +50,12 @@ const saveInput = z.object({
 export const saveProjectFn = createServerFn({ method: "POST" })
   .validator(saveInput)
   .handler(async ({ data }): Promise<Outcome<SaveProjectResult>> =>
-    run(() => saveProject(getProjectStore(), data)),
+    run(async () => {
+      const saved = await saveProject(getProjectStore(), data);
+      const editToken = saved.editToken ?? data.editToken;
+      if (editToken) await attachmentOwner(parseProjectConfiguration(data.snapshot).projectId, { publicRef: saved.publicRef, editToken });
+      return saved;
+    }),
   );
 
 export const loadSharedProjectFn = createServerFn({ method: "POST" })

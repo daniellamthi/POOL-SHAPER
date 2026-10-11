@@ -16,6 +16,7 @@ import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, getShapeDefinition } from "@/lib/pool/config";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
+import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { formatNumber } from "@/lib/pool/format";
@@ -95,6 +96,7 @@ function newPoolLines(submission: LeadSubmission): string[] {
       ? [`Pannelli esterni: ${exteriorPanelFinishTitle(config)}`]
       : []),
     `Accesso: ${accessLabel}`,
+    ...(configuredStairMicroSpots(config).length ? [`Optional scale: ${POOL_FEATURE_LABEL.stairLighting}`] : []),
     ...(featureLabels.length ? [`Comfort: ${featureLabels.join(", ")}`] : []),
     ...(hasLed
       ? [

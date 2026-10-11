@@ -10,11 +10,8 @@ import { checkAttachment } from "./attachmentPolicy";
 import type { LeadAttachment } from "./types";
 import type { ProjectConfiguration } from "@/lib/pool/project";
 
-/** Only ever includes entries that a real, server-validated upload
- * actually completed for (`uploadStatus === "uploaded"` + a real
- * `storagePath`) -- re-checked here against the same attachment policy
- * as a defense-in-depth measure against a tampered client payload
- * claiming a storagePath it never actually uploaded to. */
+/** Extract candidate attachments only. The submission endpoint must verify
+ * their project-scoped paths and metadata against durable storage. */
 export function deriveAttachments(project: ProjectConfiguration): ReadonlyArray<LeadAttachment> {
   const uploads = project.config.uploads;
   if (!Array.isArray(uploads)) return [];

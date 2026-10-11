@@ -130,7 +130,7 @@ export function PoolComfortModel({
 /** LED micro-spot flush in the seat front face: satin bezel and a warm lens.
  * By day the lens reads as a small fitting; at night it glows softly, with a
  * faint halo on the face instead of a real light (no extra shadow/light cost). */
-function HydroSpot({
+export function HydroSpot({
   spot,
   night,
 }: {

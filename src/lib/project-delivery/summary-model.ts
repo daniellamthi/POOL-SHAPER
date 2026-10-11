@@ -17,7 +17,7 @@ import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
 import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
-import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
+import { configuredPoolLayout, configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 import { buildTechnicalPlan, type TechnicalPlan } from "@/lib/pool/technical-plan";
 import { resolveAutomaticCover, type CoverPlan } from "@/lib/pool/cover-plan";
 import { finishDescription } from "@/lib/pool/structure-finish";
@@ -326,12 +326,15 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
       rows: comfortItems.map((item) => ({ label: "Incluso", value: item })),
     });
   }
-  if (hasLed) {
+  const hasStairLed = configuredStairMicroSpots(config).length > 0;
+  if (hasLed || hasStairLed) {
     sections.push({
       id: "lighting",
       title: "Illuminazione",
       stepId: "lighting",
       rows: [
+        ...(hasStairLed ? [{ label: "Optional scale", value: POOL_FEATURE_LABEL.stairLighting }] : []),
+        ...(hasLed ? [
         { label: "Impianto", value: "Illuminazione subacquea a LED" },
         {
           label: "Punti luce",
@@ -342,6 +345,7 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
           label: "Intensità luce",
           value: `${Math.round(normalisedLedIntensity(config.ledIntensity) * 100)}%`,
         },
+        ] : []),
       ],
     });
   }

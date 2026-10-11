@@ -42,6 +42,7 @@ import {
 import { loadSharedProjectFn } from "@/lib/project-delivery/projectDelivery.server";
 import {
   getProjectLink,
+  projectSnapshotFingerprint,
   setProjectLink,
   sharedRefFromLocation,
 } from "@/lib/project-delivery/client";
@@ -706,6 +707,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
             publicRef: sharedRef,
             editToken: known?.publicRef === sharedRef ? known.editToken : undefined,
             savedAt: result.updatedAt,
+            savedSnapshot: projectSnapshotFingerprint(toProjectConfiguration(project.projectId, validateInfinity(project.config), project.renovation)),
           });
           dispatch({ type: "restoreProject", value: project });
           dispatch({

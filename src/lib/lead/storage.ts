@@ -1,11 +1,7 @@
 /**
- * Durable lead storage adapter. `getLeadStore()` picks the real
- * (Supabase-backed) implementation when `SUPABASE_URL` +
- * `SUPABASE_SERVICE_ROLE_KEY` are configured, and otherwise falls back to
- * an in-process, non-durable store -- so this deployment never crashes or
- * fakes success, it's just honest that nothing survives an isolate
- * recycle until real credentials are added. See the P6A report for the
- * exact blocker in this environment (Supabase account project quota).
+ * Durable lead storage adapter. Production requires the authorized Supabase
+ * destination and server credentials; missing storage fails closed.
+ * The memory implementation is available only for explicit test fixtures.
  *
  * Talks to Supabase over its REST (PostgREST) API via plain `fetch` --
  * no `@supabase/supabase-js` dependency, matching the same
@@ -14,6 +10,7 @@
  * expects.
  */
 import type { LeadSubmission, LeadSubmissionErrorCode } from "./types";
+import { assertPoolShaperTarget } from "../supabase-target.server";
 
 export interface LeadRecordStatus {
   requestId: string;
@@ -33,7 +30,7 @@ export interface LeadStore {
   ): Promise<{ stored: boolean; existing: LeadRecordStatus | null }>;
   updateEmailStatus(
     requestId: string,
-    status: "email_sent" | "email_failed",
+    status: "pending" | "email_sent" | "email_failed",
     emailError?: string,
   ): Promise<void>;
 }
@@ -76,6 +73,7 @@ class SupabaseLeadStore implements LeadStore {
       request_id: submission.requestId,
       idempotency_key: idempotencyKey,
       project_id: submission.projectId,
+      project_reference: submission.projectReference ?? null,
       schema_version: submission.schemaVersion,
       customer_name: submission.customer.name,
       customer_email: submission.customer.email,
@@ -114,14 +112,15 @@ class SupabaseLeadStore implements LeadStore {
     // already existed -- fetch the existing row's status instead of
     // silently creating a second lead.
     const existingResponse = await fetch(
-      `${this.url}/rest/v1/leads?idempotency_key=eq.${encodeURIComponent(idempotencyKey)}&select=request_id,status`,
+      `${this.url}/rest/v1/leads?idempotency_key=eq.${encodeURIComponent(idempotencyKey)}&select=request_id,status,project_id`,
       { headers: this.headers() },
     );
     if (!existingResponse.ok) {
       throw new LeadStorageError("STORAGE_UNAVAILABLE", "Supabase idempotency lookup failed");
     }
-    const rows = (await existingResponse.json()) as Array<{ request_id: string; status: string }>;
+    const rows = (await existingResponse.json()) as Array<{ request_id: string; status: string; project_id?: string }>;
     const existing = rows[0];
+    if (existing?.project_id && existing.project_id !== submission.projectId) throw new LeadStorageError("VALIDATION_FAILED", "Richiesta non appartenente al progetto.");
     return {
       stored: true,
       existing: existing
@@ -132,7 +131,7 @@ class SupabaseLeadStore implements LeadStore {
 
   async updateEmailStatus(
     requestId: string,
-    status: "email_sent" | "email_failed",
+    status: "pending" | "email_sent" | "email_failed",
     emailError?: string,
   ): Promise<void> {
     await fetch(`${this.url}/rest/v1/leads?request_id=eq.${encodeURIComponent(requestId)}`, {
@@ -156,7 +155,7 @@ class SupabaseLeadStore implements LeadStore {
  * store so `submitLead.server.ts` never has to branch on which one it
  * got, but `stored` is always false: nothing here survives an isolate
  * recycle. This is what P3 originally shipped with. */
-class MemoryLeadStore implements LeadStore {
+export class MemoryLeadStore implements LeadStore {
   readonly kind = "memory" as const;
   private byIdempotencyKey = new Map<string, { at: number; status: LeadRecordStatus }>();
   private readonly ttlMs = 5 * 60_000;
@@ -182,7 +181,7 @@ class MemoryLeadStore implements LeadStore {
 
   updateEmailStatus(
     requestId: string,
-    status: "email_sent" | "email_failed",
+    status: "pending" | "email_sent" | "email_failed",
     _emailError?: string,
   ): Promise<void> {
     for (const entry of this.byIdempotencyKey.values()) {
@@ -192,11 +191,10 @@ class MemoryLeadStore implements LeadStore {
   }
 }
 
-const memoryStore = new MemoryLeadStore();
-
 export function getLeadStore(): LeadStore {
   const url = getServerEnv("SUPABASE_URL");
   const serviceRoleKey = getServerEnv("SUPABASE_SERVICE_ROLE_KEY");
+  if (url) assertPoolShaperTarget(url);
   if (url && serviceRoleKey) return new SupabaseLeadStore(url, serviceRoleKey);
-  return memoryStore;
+  throw new LeadStorageError("STORAGE_UNAVAILABLE", "Il salvataggio della richiesta non è disponibile.");
 }

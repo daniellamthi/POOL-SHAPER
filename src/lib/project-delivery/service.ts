@@ -87,7 +87,21 @@ export function canonicalSnapshot(snapshot: string): ProjectConfiguration {
  * details and upload metadata stay in the owner's browser and in the quote
  * request; they are stripped before storage and again on every shared read. */
 export function shareableProject(project: ProjectConfiguration): ProjectConfiguration {
-  return { ...project, config: { ...project.config, customer: DEFAULT_CUSTOMER, uploads: [] } };
+  const pick = <T extends object>(value: T, keys: readonly (keyof T)[]): T =>
+    Object.fromEntries(keys.filter((key) => Object.hasOwn(value, key)).map((key) => [key, value[key]])) as T;
+  const config = pick(project.config, [
+    "projectType", "poolType", "structure", "shape", "shapeSelected", "copingMaterial", "paving", "premiumEnvironment",
+    "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
+    "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "sceneTime", "infinityEdge", "poolAccess",
+    "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
+    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended",
+  ]);
+  config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
+  if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection"]);
+  config.customer = DEFAULT_CUSTOMER;
+  config.uploads = [];
+  return { schemaVersion: project.schemaVersion, projectId: project.projectId, config,
+    renovation: pick(project.renovation, ["areas", "currentFinish", "filtrationWorks", "replaceCoping", "copingMaterial", "structureIssues", "equipmentUpgrades"]) };
 }
 
 export async function saveProject(

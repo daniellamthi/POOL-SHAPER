@@ -7,8 +7,9 @@
  * authoritative gate.
  */
 import { createServerFn } from "@tanstack/react-start";
-import { checkAttachment } from "./attachmentPolicy";
+import { checkAttachment, matchesAttachmentSignature } from "./attachmentPolicy";
 import { getAttachmentStore, type StoredAttachment } from "./attachmentStorage";
+import { attachmentOwner } from "./attachmentOwner.server";
 
 export interface UploadAttachmentResult extends StoredAttachment {
   success: true;
@@ -23,7 +24,7 @@ function validateUploadForm(data: unknown): { file: File; projectId: string } {
   if (!(file instanceof File)) {
     throw new Error("Nessun file ricevuto.");
   }
-  if (typeof projectId !== "string" || projectId.trim().length === 0) {
+  if (typeof projectId !== "string" || !/^[A-Za-z0-9_-]{1,100}$/.test(projectId)) {
     throw new Error("Progetto non identificato.");
   }
   return { file, projectId: projectId.trim() };
@@ -45,8 +46,12 @@ export const uploadAttachment = createServerFn({ method: "POST" })
     if (bytes.byteLength !== file.size || bytes.byteLength <= 0) {
       throw new Error("Il file ricevuto non corrisponde a quanto dichiarato.");
     }
+    if (!matchesAttachmentSignature(bytes, file.type)) {
+      throw new Error("Il contenuto del file non corrisponde al formato dichiarato.");
+    }
 
     const store = getAttachmentStore();
-    const stored = await store.upload({ name: file.name, type: file.type, bytes }, { projectId });
+    const ownerHash = await attachmentOwner(projectId);
+    const stored = await store.upload({ name: file.name, type: file.type, bytes }, { projectId, ownerHash });
     return { success: true, ...stored };
   });

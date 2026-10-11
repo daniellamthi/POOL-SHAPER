@@ -6,6 +6,16 @@
  * from their side becomes their own copy.
  */
 import { isEditToken, isPublicRef } from "./reference";
+import { parseProjectConfiguration, serializeProjectConfiguration, type ProjectConfiguration } from "../pool/project";
+
+/** Compare normalized data independently of Postgres jsonb property ordering. */
+export function projectSnapshotFingerprint(project: ProjectConfiguration): string {
+  const normalized = parseProjectConfiguration(serializeProjectConfiguration(project));
+  const ordered = (value: unknown): unknown => Array.isArray(value) ? value.map(ordered)
+    : value && typeof value === "object" ? Object.fromEntries(Object.entries(value)
+      .sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, ordered(item)])) : value;
+  return JSON.stringify(ordered(normalized));
+}
 
 const STORAGE_KEY = "pool-shaper:cloud-projects:v1";
 
@@ -17,6 +27,14 @@ export interface ProjectLink {
   /** The snapshot as last saved from this browser, so "unsaved changes"
    * survives a reload. Owner-only; never sent anywhere. */
   savedSnapshot?: string | undefined;
+}
+
+export function projectLinkIsDirty(link: ProjectLink | null, project: ProjectConfiguration): boolean {
+  if (!link?.editToken) return false;
+  if (!link.savedSnapshot) return true;
+  try {
+    return projectSnapshotFingerprint(parseProjectConfiguration(link.savedSnapshot)) !== projectSnapshotFingerprint(project);
+  } catch { return true; }
 }
 
 function readAll(): Record<string, ProjectLink> {
@@ -56,4 +74,12 @@ export function sharedRefFromLocation(): string | null {
   if (typeof window === "undefined") return null;
   const value = new URLSearchParams(window.location.search).get("p");
   return isPublicRef(value) ? value : null;
+}
+
+/** Reload must restore the saved copy, not the share link it originated from. */
+export function savedProjectLocation(href: string, publicRef: string): string {
+  if (!isPublicRef(publicRef)) throw new Error("Invalid project reference");
+  const location = new URL(href);
+  location.searchParams.set("p", publicRef);
+  return location.href;
 }

@@ -419,6 +419,7 @@ export const POOL_FEATURES: ReadonlyArray<{
   description: string;
 }> = [
   { id: "ledLighting", title: "Illuminazione LED", description: "Illuminazione subacquea." },
+  { id: "stairLighting", title: "Micro-spot sulle scale", description: "LED optional integrati nelle alzate delle scale interne." },
   {
     id: "hydromassage",
     title: "Idromassaggio",

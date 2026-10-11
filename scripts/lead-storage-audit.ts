@@ -14,7 +14,7 @@ import {
 } from "../src/lib/pool/project";
 import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
 import type { LeadSubmission } from "../src/lib/lead/types";
-import { getLeadStore, LeadStorageError } from "../src/lib/lead/storage";
+import { getLeadStore, LeadStorageError, MemoryLeadStore } from "../src/lib/lead/storage";
 
 const assert = (condition: unknown, message: string): asserts condition => {
   if (!condition) throw new Error(message);
@@ -91,17 +91,16 @@ function submission(requestId: string): LeadSubmission {
   };
 }
 
-// --- getLeadStore() picks memory when no Supabase env is set. ---
+// --- Production must fail closed without durable storage. ---
 delete process.env.SUPABASE_URL;
 delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-const memoryStore = getLeadStore();
-assert(
-  memoryStore.kind === "memory",
-  "with no SUPABASE_URL/KEY, getLeadStore must fall back to memory",
-);
-console.log(
-  "PASS — getLeadStore() falls back to the memory store when Supabase env vars are unset",
-);
+let missingStorageRejected = false;
+try { getLeadStore(); } catch (error) {
+  missingStorageRejected = error instanceof LeadStorageError && error.code === "STORAGE_UNAVAILABLE";
+}
+assert(missingStorageRejected, "Missing durable credentials must reject requests");
+const memoryStore = new MemoryLeadStore();
+console.log("PASS — missing durable storage is rejected; memory adapter is test-only");
 
 // --- C. Duplicate request (same idempotency key) -> no duplicate row. ---
 const key = "qa-idempotency-key-1";
@@ -130,7 +129,7 @@ console.log("PASS — updateEmailStatus is reflected on subsequent idempotency l
 // --- Supabase-backed store: env selection + request/response handling
 //     via a stubbed fetch (no live project available in this
 //     environment -- see the P6A report). ---
-process.env.SUPABASE_URL = "https://example.supabase.co";
+process.env.SUPABASE_URL = "https://waetxxqdlsuanqescuye.supabase.co";
 process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
 const supabaseStore = getLeadStore();
 assert(

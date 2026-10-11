@@ -16,6 +16,7 @@ import { PAVING, pavingId } from "@/lib/pool/presentation";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
 import type { PoolConfig } from "@/lib/pool/types";
+import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 
 /** One numbered entry of the primary navigation (a group of internal steps). */
 export interface MacroStep {
@@ -201,7 +202,10 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
         ? `Mosaico · ${MOSAIC_FINISHES.find((m) => m.id === config.mosaicFinish)?.name ?? ""}`
         : `${title(FINISHES, "liner")} · ${(title(LINER_COLORS, config.linerColor) ?? "").replace("Motion ", "")}`;
     case "lighting":
-      return `${config.sceneTime === "night" ? "Notte" : "Giorno"} · ${config.features.includes("ledLighting") ? "LED subacquei" : "senza luci"}`;
+      return `${config.sceneTime === "night" ? "Notte" : "Giorno"} · ${[
+        ...(config.features.includes("ledLighting") ? ["LED subacquei"] : []),
+        ...(configuredStairMicroSpots(config).length ? ["micro-spot scale"] : []),
+      ].join(" + ") || "senza luci"}`;
     case "deck": {
       const coping =
         COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? "";

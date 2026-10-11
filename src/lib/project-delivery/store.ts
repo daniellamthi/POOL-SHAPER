@@ -2,10 +2,12 @@
  * Durable project storage (Build 2). Same adapter pattern as
  * `src/lib/lead/storage.ts`: the Supabase/PostgREST implementation when
  * `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are configured (server-only
- * secret), otherwise an in-process store that is honest about not being
- * durable (`durable: false`). Plain `fetch`, no client SDK.
+ * secret). Missing storage fails closed; memory is an explicit test fixture.
+ * Plain `fetch`, no client SDK.
  * Schema: supabase/migrations/0003_create_projects_table.sql.
  */
+
+import { assertPoolShaperTarget } from "../supabase-target.server";
 
 export interface StoredProjectRow {
   publicRef: string;
@@ -120,7 +122,9 @@ export class SupabaseProjectStore implements ProjectStore {
     snapshotVersion: number,
     snapshot: unknown,
   ): Promise<StoredProjectRow | null> {
-    const query = `?public_ref=eq.${encodeURIComponent(publicRef)}&edit_token_hash=eq.${editTokenHash}&select=${SELECT}`;
+    const projectId = (snapshot as { projectId?: unknown } | null)?.projectId;
+    if (typeof projectId !== "string") return null;
+    const query = `?public_ref=eq.${encodeURIComponent(publicRef)}&edit_token_hash=eq.${editTokenHash}&project_id=eq.${encodeURIComponent(projectId)}&select=${SELECT}`;
     const response = await fetch(this.endpoint(query), {
       method: "PATCH",
       headers: this.headers("return=representation"),
@@ -169,7 +173,7 @@ export class MemoryProjectStore implements ProjectStore {
     snapshot: unknown,
   ): Promise<StoredProjectRow | null> {
     const row = this.rows.get(publicRef);
-    if (!row || row.editTokenHash !== editTokenHash) return Promise.resolve(null);
+    if (!row || row.editTokenHash !== editTokenHash || row.projectId !== (snapshot as { projectId?: unknown } | null)?.projectId) return Promise.resolve(null);
     row.snapshotVersion = snapshotVersion;
     row.snapshot = structuredClone(snapshot);
     row.updatedAt = new Date().toISOString();
@@ -185,11 +189,10 @@ export class MemoryProjectStore implements ProjectStore {
   }
 }
 
-const memoryStore = new MemoryProjectStore();
-
 export function getProjectStore(): ProjectStore {
   const url = getServerEnv("SUPABASE_URL");
   const serviceRoleKey = getServerEnv("SUPABASE_SERVICE_ROLE_KEY");
+  if (url) assertPoolShaperTarget(url);
   if (url && serviceRoleKey) return new SupabaseProjectStore(url, serviceRoleKey);
-  return memoryStore;
+  throw new ProjectStorageError("Durable project storage is not configured.");
 }

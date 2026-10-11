@@ -239,7 +239,7 @@ delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   );
 }
 
-process.env.SUPABASE_URL = "https://example.supabase.co";
+process.env.SUPABASE_URL = "https://waetxxqdlsuanqescuye.supabase.co";
 process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
 const originalFetch = global.fetch;
 try {
@@ -252,9 +252,9 @@ try {
   // Successful upload: list returns few existing files, upload succeeds.
   let uploadRequest: { url: string; headers: Record<string, string> } | null = null;
   global.fetch = (async (url: string, init?: RequestInit) => {
-    if (url.includes("/object/list/")) {
-      return new Response(JSON.stringify([{ name: "existing.jpg" }]), { status: 200 });
-    }
+    if (url.includes("/rpc/reserve_attachment")) return new Response(JSON.stringify({id:"12345678-1234-1234-1234-123456789abc",state:"reserved",storage_path:"proj-abc/12345678-1234-1234-1234-123456789abc-site_photo.jpg",name:"site photo.jpg",mime_type:"image/jpeg",size:4}));
+    if (url.includes("/rpc/consume_attachment_grant")) return new Response("true");
+    if (url.includes("/rest/v1/attachment_uploads")) return new Response(JSON.stringify([{id:"12345678-1234-1234-1234-123456789abc"}]));
     uploadRequest = {
       url,
       headers: Object.fromEntries(new Headers(init?.headers).entries()),
@@ -263,8 +263,8 @@ try {
   }) as typeof fetch;
 
   const uploaded = await store.upload(
-    { name: "site photo.jpg", type: "image/jpeg", bytes: new Uint8Array([1, 2, 3, 4]) },
-    { projectId: "proj-abc" },
+    { name: "site photo.jpg", type: "image/jpeg", bytes: new Uint8Array([255, 216, 255, 4]) },
+    { projectId: "proj-abc", ownerHash: "a".repeat(64) },
   );
   assert(uploaded.storagePath.startsWith("proj-abc/"), "storage path must be scoped by projectId");
   assert(
@@ -288,19 +288,14 @@ try {
 
   // Max-count enforcement: list returns MAX_ATTACHMENTS_PER_PROJECT entries.
   global.fetch = (async (url: string) => {
-    if (url.includes("/object/list/")) {
-      const entries = Array.from({ length: MAX_ATTACHMENTS_PER_PROJECT }, (_, i) => ({
-        name: `f${i}.jpg`,
-      }));
-      return new Response(JSON.stringify(entries), { status: 200 });
-    }
+    if (url.includes("/rpc/reserve_attachment")) return new Response(JSON.stringify({state:"full"}));
     throw new Error("upload should not be attempted once the project is at capacity");
   }) as typeof fetch;
   let capacityThrew = false;
   try {
     await store.upload(
-      { name: "one-too-many.jpg", type: "image/jpeg", bytes: new Uint8Array([1]) },
-      { projectId: "proj-full" },
+      { name: "one-too-many.jpg", type: "image/jpeg", bytes: new Uint8Array([255,216,255]) },
+      { projectId: "proj-full", ownerHash: "a".repeat(64) },
     );
   } catch (error) {
     capacityThrew = true;

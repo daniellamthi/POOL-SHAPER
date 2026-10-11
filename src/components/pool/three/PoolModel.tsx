@@ -28,7 +28,7 @@ import {
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
 import { PoolAccessModel } from "./PoolAccessModel";
-import { PoolComfortModel } from "./PoolComfortModel";
+import { PoolComfortModel, HydroSpot } from "./PoolComfortModel";
 import { RawShellMaterial, type RawShellKind } from "./RawShellMaterial";
 import type { StructureFamily } from "@/lib/pool/construction-presentation";
 import { subdivideFloorBoundary } from "@/lib/pool/floor-profile";
@@ -1075,6 +1075,13 @@ export function PoolModel({
           waterline these surfaces would otherwise render nonsensical
           close-up backfaces instead of a clean sky/coping reflection. */}
       <group name="pool-basin">
+        {showAccessories && features.includes("stairLighting") ? (
+          <group name="pool-stair-micro-spots">
+            {resolvedLayout.stairMicroSpots.map((spot, i) => (
+              <HydroSpot key={i} spot={spot} night={night && showWater} />
+            ))}
+          </group>
+        ) : null}
         <PoolComfortModel
           plan={comfortPlan}
           floorProfile={floorProfile}

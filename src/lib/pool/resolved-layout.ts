@@ -8,6 +8,7 @@ import { getPoolVerticalLayout } from "./vertical-layout";
 import { planSkimmers } from "./engineering";
 import { infinityExclusion } from "./infinity-edge";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
+import { planStairMicroSpots, type StairMicroSpot } from "./stair-lighting";
 import type {
   HydromassageVariant,
   Outline,
@@ -30,6 +31,7 @@ export interface ResolvedPoolLayout {
     status: "VALID" | "REPOSITION" | "UNAVAILABLE";
   };
   lighting: SceneLightingPlan;
+  stairMicroSpots: ReadonlyArray<StairMicroSpot>;
 }
 type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   stairMirrored?: boolean;
@@ -135,7 +137,13 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
     effectiveAccess,
     ladder,
     lighting,
+    stairMicroSpots: planStairMicroSpots(access, comfort, input.layout.copingY, input.floorProfile),
   };
+}
+
+/** Only actual, selected riser fittings may appear in commercial exports or night controls. */
+export function configuredStairMicroSpots(config: PoolConfig): ReadonlyArray<StairMicroSpot> {
+  return config.features.includes("stairLighting") ? configuredPoolLayout(config).stairMicroSpots : [];
 }
 
 export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {

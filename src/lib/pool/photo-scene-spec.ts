@@ -94,6 +94,7 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     },
     paving: PAVING.find(p => p.id === pavingId(config.paving))!,
     lighting: { time: config.sceneTime === "night" ? "night" : "day",
+      stairMicroSpots: { enabled: config.features.includes("stairLighting") && layout.stairMicroSpots.length > 0, positions: config.features.includes("stairLighting") ? layout.stairMicroSpots : [] },
       ledsEnabled: config.features.includes("ledLighting"), color: config.ledColor ?? "#ffffff",
       intensity: normalisedLedIntensity(config.ledIntensity) },
     environment: { id: premiumEnvironment(config.premiumEnvironment),

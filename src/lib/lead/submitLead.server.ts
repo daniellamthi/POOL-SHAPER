@@ -16,9 +16,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestIP } from "@tanstack/react-start/server";
 import { leadSubmissionInputSchema } from "./schema";
-import { formatLeadEmail } from "./formatLeadEmail";
 import { getLeadStore } from "./storage";
 import { deriveAttachments } from "./deriveAttachments";
+import { verifyStoredAttachments } from "./verifyAttachments.server";
+import { currentAttachmentOwner } from "./attachmentOwner.server";
+import { processLeadNotification, syncLeadNotificationStatus } from "./leadNotification.server";
 import type { LeadSubmission, LeadSubmissionErrorCode, LeadSubmissionResult } from "./types";
 
 export class LeadSubmissionError extends Error {
@@ -51,47 +53,6 @@ function pruneExpiredRateLimits() {
  * per `.output/nitro.json`) for `process.env` to see them -- if that turns
  * out not to hold in production, the fix is reading `getCloudflareContext().env`
  * instead, not changing anything in this file's validation/formatting. */
-function getServerEnv(name: string): string | undefined {
-  const value = typeof process !== "undefined" ? process.env[name] : undefined;
-  return value && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-async function sendLeadEmail(submission: LeadSubmission): Promise<void> {
-  const apiKey = getServerEnv("RESEND_API_KEY");
-  const to = getServerEnv("LEAD_NOTIFY_EMAIL");
-  const from = getServerEnv("LEAD_FROM_EMAIL");
-
-  if (!apiKey || !to || !from) {
-    throw new LeadSubmissionError(
-      "EMAIL_NOT_CONFIGURED",
-      "Il servizio di invio email non è configurato per questo ambiente (RESEND_API_KEY / LEAD_NOTIFY_EMAIL / LEAD_FROM_EMAIL).",
-    );
-  }
-
-  const { subject, text, html } = formatLeadEmail(submission);
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from,
-      to,
-      reply_to: submission.customer.email,
-      subject,
-      text,
-      html,
-    }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    console.error("[lead] Resend delivery failed", response.status, body);
-    throw new LeadSubmissionError(
-      "EMAIL_SEND_FAILED",
-      "Invio dell'email non riuscito. Riprova tra poco.",
-    );
-  }
-}
-
 export const submitLead = createServerFn({ method: "POST" })
   .validator(leadSubmissionInputSchema)
   .handler(async ({ data }): Promise<LeadSubmissionResult> => {
@@ -139,47 +100,45 @@ export const submitLead = createServerFn({ method: "POST" })
       attachments: deriveAttachments(data.project),
     };
 
+    await verifyStoredAttachments(submission.projectId, submission.attachments,
+      submission.attachments.length ? await currentAttachmentOwner(submission.projectId) : undefined);
+    // Persist only verified attachment metadata, never arbitrary upload URLs.
+    submission.project = {
+      ...submission.project,
+      config: { ...submission.project.config, uploads: submission.project.config.uploads
+        .filter((upload) => submission.attachments.some((item) => item.storagePath === upload.storagePath))
+        .map((upload) => ({ id: upload.id, name: upload.name, type: upload.type, size: upload.size,
+          category: upload.category, url: null, storagePath: upload.storagePath ?? null, uploadStatus: "uploaded" as const })) },
+    };
     const store = getLeadStore();
     const { stored, existing } = await store.upsertLead(submission, data.idempotencyKey);
-
-    if (existing) {
-      // Same idempotency key as a previous attempt -- return its outcome
-      // instead of creating (or re-emailing) a second lead.
-      return {
-        success: true,
-        requestId: existing.requestId,
-        projectId: submission.projectId,
-        stored,
-        emailDelivered: existing.status === "email_sent",
-      };
-    }
 
     console.log("[lead] submission persisted", {
       requestId: submission.requestId,
       projectId: submission.projectId,
-      customerEmail: submission.customer.email,
       stored,
     });
 
+    const persistedRequestId = existing?.requestId ?? requestId;
     try {
-      await sendLeadEmail(submission);
-      await store.updateEmailStatus(requestId, "email_sent");
+      const notification = await processLeadNotification(persistedRequestId);
+      await syncLeadNotificationStatus(persistedRequestId);
       return {
         success: true,
-        requestId,
+        requestId: persistedRequestId,
         projectId: submission.projectId,
         stored,
-        emailDelivered: true,
+        emailDelivered: notification.delivered,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await store.updateEmailStatus(requestId, "email_failed", message);
+      // Recovery must not overwrite a newer delivered/bounced webhook with failure.
+      await syncLeadNotificationStatus(persistedRequestId).catch(() => undefined);
       if (stored) {
         // The lead survives durably even though the email didn't go out
         // -- honest partial success, not a lost lead.
         return {
           success: true,
-          requestId,
+          requestId: persistedRequestId,
           projectId: submission.projectId,
           stored: true,
           emailDelivered: false,
