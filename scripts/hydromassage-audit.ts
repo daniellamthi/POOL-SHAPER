@@ -200,7 +200,7 @@ for (const length of [6, 8, 10, 12])
           check(dividerC.topY === frontC!.topY, `${tag}: CLOSED dividerTop === frontWallTop`);
           check(
             dividerC.topY === lc.comfort.elements[0]!.topY &&
-              Math.abs(dividerC.topY - (system === "infinity" ? POOL_BORDER_PRESET.thickness : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
+              Math.abs(dividerC.topY - (system === "infinity" ? Math.max(hc.landing!.topY, ...hc.steps!.map(step => step.topY)) : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
             `${tag}: wall top is the shared parametric quota`,
           );
           check(Math.abs(thin(frontC!.footprint) - H.lipThickness) < 1e-6, `${tag}: front wall 15 cm`);
@@ -473,8 +473,8 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
       if(sideReturn) check(h.jets!.some(j=>near(j,sideReturn.footprint)),`${tag}: return jets backed by solid wall`);
       const firstTread = Math.max(h.landing!.topY, ...h.steps!.map(step => step.topY));
       for (const part of h.tiers!.filter(t => ["divider","frontWall","sideReturn"].includes(t.role)))
-        check(Math.abs(part.topY-POOL_BORDER_PRESET.thickness)<1e-9, `${tag}: every backrest aligned with finished coping`);
-      check(h.topY > firstTread, `${tag}: backrest is independent of first tread`);
+        check(Math.abs(part.topY-firstTread)<1e-9, `${tag}: both dividers and opposite closure aligned with first tread`);
+      check(h.topY === firstTread, `${tag}: A/B wall quota derives from actual stairs`);
       for (const jet of h.jets!) check(jet.y + H.jetDiameter/2 <= h.topY - 0.009, `${tag}: complete jet bezel below wall top`);
       const parts=[...h.tiers!,h.landing!,...h.steps!];
       for(let i=0;i<parts.length;i++) for(let j=i+1;j<parts.length;j++)

@@ -1,5 +1,4 @@
 import { normalizeComfortFeatures } from "./comfort-selection";
-import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 export { normalizeComfortFeatures, activeFlightKind } from "./comfort-selection";
 import { configuredPoolLayout } from "./resolved-layout";
 import { splitFloorOutline } from "./floor-profile";
@@ -131,7 +130,6 @@ export function resolveComfortPlan({
   system,
   floorProfile,
   waterY,
-  copingY = POOL_BORDER_PRESET.thickness,
   enabled,
   accessFootprint = [],
   infinityExcluded = null,
@@ -143,7 +141,6 @@ export function resolveComfortPlan({
   system: SystemType;
   floorProfile: FloorProfileModel;
   waterY: number;
-  copingY?: number;
   enabled: ReadonlyArray<PoolFeatureId>;
   accessFootprint?: Outline;
   infinityExcluded?: InfinityExclusion | null;
@@ -360,9 +357,10 @@ export function resolveComfortPlan({
       const front = frontWall ? lip : end;
       const innerBenchEdge = inner + side * H.benchDepth;
       const tubInner = frontWall ? inner : innerBenchEdge;
-      // Infinity backrests form a continuous enclosure at the finished rim,
-      // independent of the stair's first tread. Seating remains submerged.
-      const wallTop = system === "infinity" ? copingY : waterY - H.wallWaterDepth;
+      // Both Infinity dividers share the first tread's actual elevation,
+      // including the opposite closure. Seating and jets keep their own levels.
+      const firstTreadY = Math.max(shelf.landing.topY, ...shelf.steps.map(step => step.topY));
+      const wallTop = system === "infinity" ? firstTreadY : waterY - H.wallWaterDepth;
       const tiers: Array<{ footprint: Outline; topY: number; role: HydroTierRole }> = [
         { role: "divider", footprint: rectOutline(box(back, end, partition0, inner)), topY: wallTop },
         ...(outerIsInfinity
