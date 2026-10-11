@@ -94,10 +94,12 @@ export function dimensionFrustum(outline: Outline, aspect: number) {
 
 /** Frames the SAME resolved comfort/ladder geometry used by PoolModel. */
 export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedPoolLayout, layout: PoolVerticalLayout, outline: Outline, fov: number, aspect: number, infinityZone?: RectangleInfinityZone | null): CameraPose | null {
+  if (intent === "access" && infinityZone) return getAccessDetailCamera(resolved.access, layout, fov, aspect, true);
   if (intent === "inox") {
     const plan = resolved.ladder?.plan ?? (resolved.access.ladderDepths.length ? resolved.access : null);
-    const pose = plan?.placement ? getAccessDetailCamera(plan, layout, fov, aspect) : null;
+    const pose = plan?.placement ? getAccessDetailCamera(plan, layout, fov, aspect, !!infinityZone) : null;
     if (!pose) return null;
+    if (infinityZone) return pose;
     const dx = pose.position[0]-pose.target[0], dz = pose.position[2]-pose.target[2];
     const yaw = Math.PI/9, c = Math.cos(yaw), s = Math.sin(yaw);
     return { target: pose.target, position: [pose.target[0]+(dx*c-dz*s)*1.14, pose.target[1]+(pose.position[1]-pose.target[1])*1.14, pose.target[2]+(dx*s+dz*c)*1.14] };
@@ -116,12 +118,12 @@ export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedP
   const levels = [element.topY, ...(element.tiers ?? []).map(t => t.topY),
     ...(element.steps ?? []).map(s => s.topY), ...(element.landing ? [element.landing.topY] : [])];
   const floor = (element.steps?.at(-1)?.topY ?? layout.floorY) - (element.riser ?? 0);
-  const low = Math.min(floor, ...levels), high = Math.max(...levels);
+  const low = Math.min(floor, ...levels), high = Math.max(...levels, ...(infinityZone ? [layout.copingY + 0.08] : []));
   const target: CameraPoint = [x, infinityZone ? (low + high) / 2 : layout.waterY - 0.55, z];
   const radius = Math.hypot(b.spanX + 0.7, b.spanZ + 0.7, infinityZone ? high - low + 0.3 : 1.7) / 2;
   const half = Math.atan(Math.tan(fov * Math.PI / 360) * Math.min(1, Math.max(0.2, aspect)));
   let distance = radius / Math.sin(half) * 1.08;
-  const direction = [nx + nz * 0.25, 1.35, nz - nx * 0.25];
+  const direction = infinityZone ? [nx, 1.6, nz] : [nx + nz * 0.25, 1.35, nz - nx * 0.25];
   const norm = Math.hypot(...direction);
   if (infinityZone) {
     const eyeDirection = new Vector3(direction[0],direction[1],direction[2]).normalize();
@@ -514,7 +516,7 @@ function getInteriorFinishCamera({
 }
 
 /** Bounds of the canonical access plan, never a second placement algorithm. */
-export function getAccessDetailCamera(plan: SceneLightingPlan["accessPlan"], layout: PoolVerticalLayout, verticalFov: number, aspect: number): CameraPose | null {
+export function getAccessDetailCamera(plan: SceneLightingPlan["accessPlan"], layout: PoolVerticalLayout, verticalFov: number, aspect: number, preciseInfinity = false): CameraPose | null {
   const p = plan.placement;
   if (!p || !plan.footprint.length) return null;
   const ladder = plan.ladderDepths.length > 0;
@@ -530,9 +532,21 @@ export function getAccessDetailCamera(plan: SceneLightingPlan["accessPlan"], lay
   else { nx /= n; nz /= n; }
   const radius = Math.hypot(bounds.spanX + 0.35, bounds.spanZ + 0.35, high - low + 0.25) / 2;
   const halfFov = Math.atan(Math.tan(verticalFov * Math.PI / 360) * Math.min(1, Math.max(0.2, aspect)));
-  const distance = radius / Math.sin(halfFov) * 1.12;
-  const elevation = ladder ? 0.72 : 1.5;
+  let distance = radius / Math.sin(halfFov) * 1.12;
+  const elevation = ladder ? (preciseInfinity ? 1.35 : 0.72) : 1.5;
   const length = Math.hypot(1, elevation);
+  if (preciseInfinity) {
+    const eye = new Vector3(nx, elevation, nz).normalize();
+    const right = eye.clone().negate().cross(new Vector3(0, 1, 0)).normalize();
+    const up = eye.clone().cross(right).normalize();
+    const tanY = Math.tan(verticalFov * Math.PI / 360) * 0.88;
+    const tanX = tanY * Math.max(0.2, aspect);
+    distance = Math.max(1.5, ...[bounds.minX - 0.12, bounds.maxX + 0.12].flatMap(x =>
+      [low - 0.08, high + 0.08].flatMap(y => [bounds.minZ - 0.12, bounds.maxZ + 0.12].map(z => {
+        const v = new Vector3(x - target[0], y - target[1], z - target[2]);
+        return v.dot(eye) + Math.max(Math.abs(v.dot(right)) / tanX, Math.abs(v.dot(up)) / tanY);
+      }))));
+  }
   return { target, position: [target[0] + nx * distance / length, target[1] + elevation * distance / length, target[2] + nz * distance / length] };
 }
 

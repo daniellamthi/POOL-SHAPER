@@ -141,4 +141,24 @@ ok(scene.includes('new OrthographicCamera(')&&scene.includes('.manual = true'),"
 ok(scene.includes('maxPolarAngle={focus === "top" ? Math.PI / 2'),"true downward plan cannot tilt under controls");
 ok(scene.includes('if (cameraLocked || infinityZone ||'),"Infinity switches directly");
 ok(scene.includes('if (editingPose.current?.key !== editKey)'),"depth editing freezes pose");
+for (const [length,width] of [[6,3],[8,4],[12,5]]) for (const side of [0,1,2,3]) {
+ const c={...base,system:"infinity" as const,dimensions:{...base.dimensions,length:length!,width:width!},features:["inoxLadder" as const],infinityEdge:{enabled:true,side,startT:0,endT:1,dropDirection:"outward" as const}};
+ const outline=buildOutline(c.shape,c.dimensions,c.controlPoints);
+ const zone=infinityZonesForOutline(outline,c.shape).find(z=>z.side===side)!;
+ const resolved=configuredPoolLayout(c);
+ const layout=getPoolVerticalLayout({poolType:"in-ground",system:"infinity",depth:c.dimensions.depth,copingThickness:0.04});
+ for (const intent of ["access","inox"] as const) for (const aspect of [390/350,430/350,1440/450]) {
+  const plan=intent==="inox"?resolved.ladder?.plan:resolved.access;
+  if(!plan?.placement) continue;
+  const pose=contextualAccessCamera(intent,resolved,layout,outline,34,aspect,zone)!;
+  ok(!!pose,"Infinity access must use its dedicated close-up");
+  const camera=new PerspectiveCamera(34,aspect,0.05,500); camera.position.set(...pose.position);camera.lookAt(new Vector3(...pose.target));camera.updateMatrixWorld();
+  const low=plan.ladderDepths.length?plan.ladderAnchorY-plan.ladderDepths.at(-1)!-0.15:layout.copingY-plan.rise*plan.riseCount;
+  const high=plan.ladderDepths.length?plan.ladderAnchorY+0.82:layout.copingY;
+  for(const [x,z] of plan.footprint) for(const y of [low,high]) {
+   const point=new Vector3(x,y,z).project(camera);
+   ok(Math.abs(point.x)<0.98&&Math.abs(point.y)<0.98,"Infinity internal/inox complete element fits with margin");
+  }
+ }
+}
 console.log(`PASS: ${checks} contextual camera checks — semantics, orthographic metric scale, persistence isolation, actual access/comfort, stable edits, mobile aspect.`);

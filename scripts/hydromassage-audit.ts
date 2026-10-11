@@ -12,6 +12,7 @@ import { buildOutline } from "../src/lib/pool/geometry";
 import { getPoolVerticalLayout } from "../src/lib/pool/vertical-layout";
 import { clampInfinityEdgeParams } from "../src/lib/pool/infinity-edge";
 import { DEFAULT_CONTROL_POINTS, DEFAULT_DIMENSIONS } from "../src/lib/pool/config";
+import { POOL_BORDER_PRESET } from "../src/configurator/materials/visual-presets";
 import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
 import { parseProjectConfiguration, serializeProjectConfiguration } from "../src/lib/pool/project";
 import type {
@@ -199,7 +200,7 @@ for (const length of [6, 8, 10, 12])
           check(dividerC.topY === frontC!.topY, `${tag}: CLOSED dividerTop === frontWallTop`);
           check(
             dividerC.topY === lc.comfort.elements[0]!.topY &&
-              Math.abs(dividerC.topY - (system === "infinity" ? hc.landing!.topY : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
+              Math.abs(dividerC.topY - (system === "infinity" ? POOL_BORDER_PRESET.thickness : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
             `${tag}: wall top is the shared parametric quota`,
           );
           check(Math.abs(thin(frontC!.footprint) - H.lipThickness) < 1e-6, `${tag}: front wall 15 cm`);
@@ -416,7 +417,7 @@ check(
 // Persistence: variant survives save/load; unknown values restore as closed; absent stays absent.
 const roundTrip = (c: PoolConfig) =>
   parseProjectConfiguration(
-    serializeProjectConfiguration({ schemaVersion: 1, projectId: "p", config: c, renovation: {} as never }),
+    serializeProjectConfiguration({ schemaVersion: 1, projectId: "p", config: c, renovation: { areas: [], currentFinish: "liner", filtrationWorks: [], replaceCoping: null, copingMaterial: "", structureIssues: [], equipmentUpgrades: [] } }),
   ).config;
 for (const variant of ["closed", "open"] as const) {
   const saved = config({
@@ -472,8 +473,9 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
       if(sideReturn) check(h.jets!.some(j=>near(j,sideReturn.footprint)),`${tag}: return jets backed by solid wall`);
       const firstTread = Math.max(h.landing!.topY, ...h.steps!.map(step => step.topY));
       for (const part of h.tiers!.filter(t => ["divider","frontWall","sideReturn"].includes(t.role)))
-        check(Math.abs(part.topY-firstTread)<1e-9, `${tag}: every divider aligned with first tread`);
-      for (const jet of h.jets!) check(jet.y + H.jetDiameter/2 <= firstTread - 0.009, `${tag}: complete jet bezel below wall top`);
+        check(Math.abs(part.topY-POOL_BORDER_PRESET.thickness)<1e-9, `${tag}: every backrest aligned with finished coping`);
+      check(h.topY > firstTread, `${tag}: backrest is independent of first tread`);
+      for (const jet of h.jets!) check(jet.y + H.jetDiameter/2 <= h.topY - 0.009, `${tag}: complete jet bezel below wall top`);
       const parts=[...h.tiers!,h.landing!,...h.steps!];
       for(let i=0;i<parts.length;i++) for(let j=i+1;j<parts.length;j++)
         check(!overlap(parts[i]!.footprint,parts[j]!.footprint),`${tag}: no solid overlap ${i}/${j}`);
@@ -484,6 +486,23 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
       check(watertight(solid),`${tag}: closed union mesh`); solid.dispose();
       check(variant==="open" ? !tier(h,"frontWall") && !!tier(h,"innerSideSeat") : !!tier(h,"frontWall"),`${tag}: A/B opening preserved`);
     }
+// Infinity shelf joins the structural shell while keeping the overflow exclusion.
+for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
+  for (const side of [0,1,2,3]) for (const sloped of [false,true]) {
+    const c = config({length,width,side,sloped,system:"infinity",features:["sunShelf"]});
+    const shelf = configuredPoolLayout(c).comfort.elements.find(e => e.kind === "sunShelf");
+    check(!!shelf, `Infinity shelf ${length}/${width}/${side}/${sloped} available`);
+    const outline = buildOutline(c.shape,c.dimensions,c.controlPoints);
+    const layout = getPoolVerticalLayout({poolType:"in-ground",system:"infinity",depth:c.dimensions.depth,copingThickness:POOL_BORDER_PRESET.thickness});
+    const floor = buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout:layout,sunShelf:true,infinityEdge:c.infinityEdge!});
+    const mesh = shelfStairGeometry(shelf!,floor);
+    check(watertight(mesh), "Infinity shelf/landing/steps form one closed floor-supported solid");
+    mesh.dispose();
+    for (const part of [shelf!,shelf!.landing!,...shelf!.steps!]) for (const [x,z] of part.footprint) {
+      check(Math.abs(Math.abs(x) - (length/2-0.035)) > 1e-6, "no old 35mm X shell gap");
+      check(Math.abs(Math.abs(z) - (width/2-0.035)) > 1e-6, "no old 35mm Z shell gap");
+    }
+  }
 console.log(
   `Hydromassage audit PASS: ${checks} checks; ${built} sizes x 2 variants built, ${unavailable} unavailable.`,
 );

@@ -60,6 +60,7 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
   const comfort = resolveComfortPlan({
     ...input,
     waterY: input.layout.waterY,
+    copingY: input.layout.copingY,
     enabled: missingShelfLanding
       ? features.filter((feature) => feature !== "sunShelf" && feature !== "hydromassage")
       : features,

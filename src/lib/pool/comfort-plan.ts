@@ -1,4 +1,5 @@
 import { normalizeComfortFeatures } from "./comfort-selection";
+import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 export { normalizeComfortFeatures, activeFlightKind } from "./comfort-selection";
 import { configuredPoolLayout } from "./resolved-layout";
 import { splitFloorOutline } from "./floor-profile";
@@ -130,6 +131,7 @@ export function resolveComfortPlan({
   system,
   floorProfile,
   waterY,
+  copingY = POOL_BORDER_PRESET.thickness,
   enabled,
   accessFootprint = [],
   infinityExcluded = null,
@@ -141,6 +143,7 @@ export function resolveComfortPlan({
   system: SystemType;
   floorProfile: FloorProfileModel;
   waterY: number;
+  copingY?: number;
   enabled: ReadonlyArray<PoolFeatureId>;
   accessFootprint?: Outline;
   infinityExcluded?: InfinityExclusion | null;
@@ -277,16 +280,24 @@ export function resolveComfortPlan({
   if (!shelf) availability.sunShelf = { available: false, reason: "Nessuna testata libera da scala, accessi o bordo Infinity." };
   else if (wantsShelf) {
     const rect = shelf.rect;
+    // Join the Infinity shelf and flight to the shell, not an inset floating block.
+    // The excluded overflow edge keeps its existing safety clearance.
+    const joinShell = (points: Outline): Outline => system !== "infinity" ? points : points.map(([x, z]) => {
+      const snap = (v: number, min: number, max: number) =>
+        Math.abs(v - (min + EDGE_INSET)) < 1e-6 ? min
+          : Math.abs(v - (max - EDGE_INSET)) < 1e-6 ? max : v;
+      return [snap(x, bounds.minX, bounds.maxX), snap(z, bounds.minZ, bounds.maxZ)] as const;
+    });
     const element: ComfortElementPlan = {
       kind: "sunShelf",
-      footprint: rectOutline(rect),
+      footprint: joinShell(rectOutline(rect)),
       topY: waterY - 0.22,
       waterDepth: 0.22,
       width: longX ? rect.maxZ - rect.minZ : rect.maxX - rect.minX,
       run: shelf.totalRun,
-      steps: shelf.steps,
+      steps: shelf.steps.map(step => ({ ...step, footprint: joinShell(step.footprint) })),
       riser: shelf.riser,
-      landing: shelf.landing,
+      landing: { ...shelf.landing, footprint: joinShell(shelf.landing.footprint) },
     };
     elements.push(element);
     selectedRects.push(rect);
@@ -349,8 +360,9 @@ export function resolveComfortPlan({
       const front = frontWall ? lip : end;
       const innerBenchEdge = inner + side * H.benchDepth;
       const tubInner = frontWall ? inner : innerBenchEdge;
-      // The landing is the first tread reached when descending from coping.
-      const wallTop = system === "infinity" ? shelf.landing.topY : waterY - H.wallWaterDepth;
+      // Infinity backrests form a continuous enclosure at the finished rim,
+      // independent of the stair's first tread. Seating remains submerged.
+      const wallTop = system === "infinity" ? copingY : waterY - H.wallWaterDepth;
       const tiers: Array<{ footprint: Outline; topY: number; role: HydroTierRole }> = [
         { role: "divider", footprint: rectOutline(box(back, end, partition0, inner)), topY: wallTop },
         ...(outerIsInfinity
