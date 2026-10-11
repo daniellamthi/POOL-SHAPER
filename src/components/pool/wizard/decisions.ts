@@ -9,7 +9,7 @@ export function decisions(step: string | undefined, config: PoolConfig): { id: s
     case "access": return [{ id: "access", label: "Accesso" }, ...(!above ? [{ id: "comfort", label: "Comfort in acqua" }] : [])];
     case "style": return [{ id: "interior", label: "Rivestimento interno" }, ...(above ? [{ id: "exterior", label: "Pannelli esterni" }] : [])];
     case "lighting": return [{ id: "lighting", label: "Illuminazione" }, ...(config.features.includes("ledLighting") ? [{ id: "color", label: "Colore LED" }] : [])];
-    case "deck": return [...(!(config.system === "overflow" && config.overflowType === "visible") ? [{ id: "coping", label: "Bordo vasca" }] : []), ...(!above ? [{ id: "paving", label: "Pavimentazione" }] : [])];
+    case "deck": return [...(!(config.system === "overflow" && config.overflowType === "visible") ? [{ id: "coping", label: "Bordo vasca" }] : []), { id: "paving", label: "Pavimentazione" }];
     case "technology": return [{ id: "outdoor", label: "Esterni" }, { id: "water", label: "Trattamento acqua" }, { id: "heat", label: "Temperatura" }];
     case "review": return [{ id: "scene", label: "Scena" }, { id: "summary", label: "Riepilogo" }, { id: "request", label: "Richiedi proposta" }];
     default: return [];

@@ -79,7 +79,7 @@ import type {
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
 import { clampOrganicShapeParams } from "./organic-shape";
-import { pavingId, premiumEnvironment, type PavingId, type PremiumEnvironment } from "./presentation";
+import { pavingId, pavingFormatId, premiumEnvironment, type PavingId, type PavingFormatId, type PremiumEnvironment } from "./presentation";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline, resolveInfinitySelection } from "./infinity-edge";
 import {
   allowedFinishesForStructure,
@@ -115,6 +115,7 @@ type Action =
   | { type: "setLedIntensity"; value: number }
   | { type: "setSceneTime"; value: "day" | "night" }
   | { type: "setPaving"; value: PavingId }
+  | { type: "setPavingFormat"; value: PavingFormatId }
   | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
   | { type: "setExternalStairSide"; value: ExternalStairSide }
   | { type: "setExternalStairPlatformExtended"; value: boolean }
@@ -241,7 +242,9 @@ function configurationReducer(state: State, action: Action): State {
     case "setSceneTime":
       return { ...state, config: { ...config, sceneTime: action.value } };
     case "setPaving":
-      return { ...state, config: { ...config, paving: pavingId(action.value) } };
+      return { ...state, config: { ...config, paving: pavingId(action.value), pavingFormat: pavingFormatId(action.value, config.pavingFormat) } };
+    case "setPavingFormat":
+      return { ...state, config: { ...config, pavingFormat: pavingFormatId(config.paving, action.value) } };
     case "setExteriorPanelFinish":
       return config.poolType === "above-ground"
         ? { ...state, config: { ...config, exteriorPanelFinish: exteriorPanelFinish(action.value) } }
@@ -849,6 +852,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
       setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
+      setPavingFormat: (v) => dispatch({ type: "setPavingFormat", value: v }),
       setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),
       setExternalStairSide: (v) => dispatch({ type: "setExternalStairSide", value: v }),
       setExternalStairPlatformExtended: (v) => dispatch({ type: "setExternalStairPlatformExtended", value: v }),

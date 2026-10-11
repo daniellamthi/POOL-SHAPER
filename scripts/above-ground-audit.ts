@@ -176,8 +176,8 @@ equal(
 );
 equal(
   describeSelection("deck", finished.config),
-  "Limestone Ivory",
-  "above-ground navigation does not advertise a nonexistent paving finish",
+  "Limestone Ivory · Gres porcellanato · 60 × 120 cm",
+  "above-ground navigation includes independent metric ground paving",
 );
 equal(
   reducer(noSteps, { type: "toggleInternalSteps" } as Action).config.poolAccess,
@@ -287,8 +287,8 @@ ok(
   "summary names the panels",
 );
 ok(
-  !rows(withOptions.config).some((r) => r.startsWith("Pavimentazione")),
-  "no terrace in an above-ground summary",
+  rows(withOptions.config).some((r) => r.startsWith("Pavimentazione")) && rows(withOptions.config).some((r) => r.startsWith("Formato pavimentazione")),
+  "above-ground summary includes independent ground paving and its metric format",
 );
 ok(
   !rows(toInGround.config).some((r) => r.startsWith("Pannelli esterni")),

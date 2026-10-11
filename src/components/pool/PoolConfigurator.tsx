@@ -645,6 +645,7 @@ function ConfiguratorLayout() {
                 : "day"
             }
             paving={config.paving ?? "gres"}
+            pavingFormat={config.pavingFormat}
             photoMode={photoMode}
             onTogglePhotoMode={togglePhotoMode}
             photoModeQuality={photoModeQuality}

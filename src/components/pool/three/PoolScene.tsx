@@ -19,6 +19,8 @@ import { PoolModel } from "./PoolModel";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
 import { StudioPaving, PavingMaterial } from "./StudioPaving";
+import { createPavingOnSurface } from "./pavingGeometry";
+import { pavingLayout, type PavingFormatId } from "@/lib/pool/presentation";
 import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
 import { DeckLoungers } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
@@ -143,6 +145,7 @@ export interface SceneProps {
   theme: Theme;
   sceneTime: SceneTimeOfDay;
   paving?: import("@/lib/pool/presentation").PavingId;
+  pavingFormat?: PavingFormatId | undefined;
   photoMode: boolean;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
@@ -701,6 +704,7 @@ function StudioFloor({
   coastalMap,
   sceneTime,
   paving,
+  pavingFormat,
 }: {
   outline: Outline;
   size: number;
@@ -712,6 +716,7 @@ function StudioFloor({
   coastalMap: Texture | null;
   sceneTime: SceneTimeOfDay;
   paving: import("@/lib/pool/presentation").PavingId;
+  pavingFormat?: PavingFormatId | undefined;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -729,6 +734,17 @@ function StudioFloor({
     [premiumInfinity, infinityZone, outline, system, overflowType],
   );
   useEffect(() => () => pavingGeometry?.dispose(), [pavingGeometry]);
+  const terrace = useMemo(() => {
+    if (!pavingGeometry) return null;
+    const layout = pavingLayout(paving, pavingFormat);
+    const slabs = createPavingOnSurface(pavingGeometry, layout.module, layout);
+    const bed = pavingGeometry.clone();
+    const p = bed.getAttribute("position");
+    for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) < 1e-6) p.setY(i, -layout.thickness);
+    bed.computeVertexNormals();
+    return { slabs, bed };
+  }, [pavingGeometry, paving, pavingFormat]);
+  useEffect(() => () => { terrace?.slabs.dispose(); terrace?.bed.dispose(); }, [terrace]);
   const geometry = useMemo(() => {
     if (premiumInfinity && infinityZone) {
       const landscape = createInfinityLandscape(
@@ -810,15 +826,20 @@ function StudioFloor({
 
   return (
     <group>
-      {pavingGeometry ? (
+      {terrace ? (
+        <>
         <mesh
           name="infinity-level-limestone-deck"
-          geometry={pavingGeometry}
+          geometry={terrace.bed}
           receiveShadow
           castShadow
         >
-          <PavingMaterial key={paving} id={paving} waterY={waterY} vertexColors={false} />
+          <PavingMaterial key={paving} id={paving} waterY={waterY} joint />
         </mesh>
+        <mesh name="infinity-paving-modules" geometry={terrace.slabs} receiveShadow castShadow>
+          <PavingMaterial key={paving} id={paving} waterY={waterY} />
+        </mesh>
+        </>
       ) : null}
       <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
         {premiumInfinity && infinityZone && coastalMap ? <CoastalGroundMaterial map={coastalMap}
@@ -963,6 +984,7 @@ export default function PoolScene({
   theme,
   sceneTime,
   paving,
+  pavingFormat,
   photoMode,
   photoModeQuality,
   onPhotoModeUnsupported,
@@ -1204,6 +1226,7 @@ export default function PoolScene({
     materials.coping.color,
     materials.coping.id,
     paving,
+    pavingFormat,
     exteriorPanelFinish,
     externalStairSide,
     externalStairPlatformExtended,
@@ -1335,6 +1358,7 @@ export default function PoolScene({
           coastalMap={coastalMap}
           sceneTime={sceneTime}
           paving={paving ?? "gres"}
+          pavingFormat={pavingFormat}
         />
       ) : (
           <StudioPaving
@@ -1343,9 +1367,9 @@ export default function PoolScene({
             system={system}
             overflowType={overflowType}
             paving={paving ?? "gres"}
+            pavingFormat={pavingFormat}
             environment={construction?.showEnvironment ?? true}
-            // An above-ground pool stands on the lawn: no arbitrary terrace.
-            decking={poolType !== "above-ground" && (construction?.showDecking ?? true)}
+            decking={construction?.showDecking ?? true}
             waterY={verticalLayout.waterY}
           />
       )}

@@ -85,6 +85,7 @@ export interface ConfiguratorContextValue {
   setLedIntensity: (value: number) => void;
   setSceneTime: (value: "day" | "night") => void;
   setPaving: (value: import("./presentation").PavingId) => void;
+  setPavingFormat: (value: import("./presentation").PavingFormatId) => void;
   setExteriorPanelFinish: (value: import("./above-ground").ExteriorPanelFinishId) => void;
   setExternalStairSide: (value: import("./above-ground").ExternalStairSide) => void;
   setExternalStairPlatformExtended: (value: boolean) => void;

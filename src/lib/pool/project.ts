@@ -22,7 +22,7 @@ import { clampLShapeDimensions } from "./l-shape";
 import { compatiblePoolSystem, resolveInfinitySelection } from "./infinity-edge";
 import { buildOutline } from "./geometry";
 import { isRenovationConfig } from "./renovation";
-import { pavingId, premiumEnvironment } from "./presentation";
+import { pavingId, pavingFormatId, premiumEnvironment } from "./presentation";
 import {
   normaliseFinishForStructure,
   normalisePoolStructure,
@@ -199,6 +199,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     config: {
       ...restoredWithoutEdge,
       ...(restored.paving !== undefined ? { paving: pavingId(restored.paving) } : {}),
+      ...(restored.pavingFormat !== undefined ? { pavingFormat: pavingFormatId(restored.paving, restored.pavingFormat) } : {}),
       ...(restored.premiumEnvironment !== undefined ? { premiumEnvironment: premiumEnvironment(restored.premiumEnvironment) } : {}),
       // External access is only built above ground. Restore the same valid
       // selection in the scene, summary and render export.

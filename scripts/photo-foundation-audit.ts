@@ -43,8 +43,8 @@ for (const poolType of ["in-ground", "above-ground"] as const) for (const system
   assert.deepEqual(ids("shape-dimensions"), ["shape", "plan", "depth"]);
   assert.deepEqual(ids("system"), ["system", "detail"]);
   assert.deepEqual(ids("style"), poolType === "above-ground" ? ["interior", "exterior"] : ["interior"]);
-  assert.deepEqual(ids("deck"), poolType === "above-ground" ? ["coping"] : ["coping", "paving"]);
-  assert.deepEqual(decisions("deck", { ...c, system: "overflow", overflowType: "visible" }).map(d => d.id), poolType === "above-ground" ? [] : ["paving"]);
+  assert.deepEqual(ids("deck"), ["coping", "paving"]);
+  assert.deepEqual(decisions("deck", { ...c, system: "overflow", overflowType: "visible" }).map(d => d.id), ["paving"]);
   assert.deepEqual(ids("lighting"), ["lighting"]);
   assert.deepEqual(decisions("lighting", { ...c, features: ["ledLighting"] }).map(d => d.id), ["lighting", "color"]);
   assert.deepEqual(ids("review"), ["scene", "summary", "request"]);
@@ -106,7 +106,10 @@ for (const shape of ["rectangle", "l-shape", "custom"] as const) for (const leng
   assert.ok(p.count > 0);
   for (let i = 0; i < p.count; i++) {
     assert.ok(Number.isFinite(p.getX(i)) && Number.isFinite(p.getZ(i)));
-    assert.ok(n.getY(i) > .99, `slab faces point upwards: ${shape}/${length}/${paving.id}, vertex ${i}, normal ${n.getY(i)}`);
+    const triangle = Math.floor(i / 3) * 3;
+    const top = [0, 1, 2].every(j => Math.abs(p.getY(triangle + j)) < 1e-6);
+    assert.ok(top ? n.getY(i) > .99 : Math.abs(n.getY(i)) < 1e-5,
+      `top faces upward, module edges vertical: ${shape}/${length}/${paving.id}, vertex ${i}`);
   }
   mesh.dispose(); checks += 2;
 }

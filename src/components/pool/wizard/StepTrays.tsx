@@ -15,7 +15,7 @@ import {
   SKIMMER_TYPES,
 } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
-import { PAVING, pavingId } from "@/lib/pool/presentation";
+import { PAVING, pavingId, pavingFormats, pavingLayout, PAVING_FORMATS } from "@/lib/pool/presentation";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
@@ -1015,10 +1015,9 @@ const PAVING_IMAGES: Record<string, string | undefined> = {
 };
 
 export function DeckTray({ tab, setTab }: DecisionProps) {
-  const { config, setCopingMaterial, setPaving } = useConfigurator();
+  const { config, setCopingMaterial, setPaving, setPavingFormat } = useConfigurator();
+  const layout = pavingLayout(config.paving, config.pavingFormat);
   const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
-  // Above ground the pool stands on the lawn: the coping is the only finish.
-  const pavingOffered = config.poolType !== "above-ground";
   return (
     <TabBody>
       <StepTabs
@@ -1027,7 +1026,7 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
         onChange={setTab}
         tabs={[
           ...(copingVisible ? [{ id: "coping" as const, label: "Bordo vasca" }] : []),
-          ...(pavingOffered ? [{ id: "paving" as const, label: "Pavimentazione" }] : []),
+          { id: "paving" as const, label: "Pavimentazione" },
         ]}
       />
       {tab === "coping" && copingVisible ? (
@@ -1045,10 +1044,12 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
           ))}
         </ChoiceGrid>
       ) : (
-        <ChoiceGrid label="Pavimentazione">
+        <div className="space-y-5">
+        <ChoiceGrid label="Pavimentazione" dense>
           {PAVING.map((p) => (
             <ChoiceCard
               key={p.id}
+              compact
               title={p.label}
               description={p.note}
               image={
@@ -1064,6 +1065,23 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
             />
           ))}
         </ChoiceGrid>
+        <div className="space-y-3">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Formato · {layout.label}</p>
+          <ChoiceGrid label="Formato pavimentazione" dense>
+            {pavingFormats(config.paving).map(format => (
+              <ChoiceCard compact key={format} title={PAVING_FORMATS[format].label}
+                image={<svg aria-hidden="true" viewBox="0 0 120 60" className="h-full w-full" fill="none" stroke="currentColor" strokeWidth="1">
+                  <rect x={60 - Math.min(50, 25 * PAVING_FORMATS[format].module[0] / PAVING_FORMATS[format].module[1])}
+                    y={30 - Math.min(25, 50 * PAVING_FORMATS[format].module[1] / PAVING_FORMATS[format].module[0])}
+                    width={Math.min(100, 50 * PAVING_FORMATS[format].module[0] / PAVING_FORMATS[format].module[1])}
+                    height={Math.min(50, 100 * PAVING_FORMATS[format].module[1] / PAVING_FORMATS[format].module[0])} rx="1" />
+                </svg>}
+                selected={layout.formatId === format} onSelect={() => setPavingFormat(format)} />
+            ))}
+          </ChoiceGrid>
+          <p className="text-xs text-muted-foreground">Dimensioni di riferimento della posa. Formati e spessori di fornitura da confermare.</p>
+        </div>
+        </div>
       )}
     </TabBody>
   );

@@ -8,7 +8,7 @@ import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import type { ProjectConfiguration } from "@/lib/pool/project";
 import { projectGeometry } from "@/lib/pool/project-metrics";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
-import { PAVING, pavingId } from "@/lib/pool/presentation";
+import { pavingLayout } from "@/lib/pool/presentation";
 import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, FINISHES } from "@/lib/pool/config";
@@ -258,7 +258,7 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
   const ledColor = config.ledColor ?? "#ffffff";
   const lightingPlan = hasLed ? configuredLightingPlan(config) : null;
   const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
-  const paving = PAVING.find((p) => p.id === pavingId(config.paving))!;
+  const paving = pavingLayout(config.paving, config.pavingFormat);
 
   let sections: SummarySection[] = [
     {
@@ -313,10 +313,11 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
           value: copingMaterial?.title ?? "Da selezionare",
           swatch: copingMaterial ? { hex: copingMaterial.color } : undefined,
         },
-        // Above ground: the exterior cladding replaces the terrace.
         ...(config.poolType === "above-ground"
           ? [{ label: "Pannelli esterni", value: exteriorPanelFinishTitle(config) }]
-          : [{ label: "Pavimentazione", value: paving.label, swatch: { hex: paving.color } }]),
+          : []),
+        { label: "Pavimentazione", value: paving.label, swatch: { hex: paving.color } },
+        { label: "Formato pavimentazione", value: paving.formatLabel, hint: "Dimensioni di riferimento della visualizzazione; fornitura da confermare." },
       ],
     },
   ];

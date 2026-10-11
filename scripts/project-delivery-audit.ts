@@ -122,6 +122,8 @@ const base: PoolConfig = {
   internalStairType: "corner",
   equipment: ["heatPump"],
   sceneTime: "day",
+  paving: "travertine",
+  pavingFormat: "30x60",
   customer,
   uploads: [
     { id: "u1", name: "giardino.jpg", size: 1024, type: "image/jpeg", url: null, category: "site" },

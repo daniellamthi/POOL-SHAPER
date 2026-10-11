@@ -12,7 +12,7 @@ import {
   STEPS,
 } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
-import { PAVING, pavingId } from "@/lib/pool/presentation";
+import { pavingLayout } from "@/lib/pool/presentation";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
 import type { PoolConfig } from "@/lib/pool/types";
@@ -74,9 +74,9 @@ export const STEP_COPY: Record<string, { title: string; subtitle: string }> = {
   },
 };
 
-/** Above-ground grille overflow has neither selectable coping nor local paving. */
-export function isStepSkipped(stepId: string | undefined, config: PoolConfig) {
-  return stepId === "deck" && config.poolType === "above-ground" && config.system === "overflow" && config.overflowType === "visible";
+/** Even grille overflow retains the independent ground-level paving decision. */
+export function isStepSkipped(_stepId: string | undefined, _config: PoolConfig) {
+  return false;
 }
 
 /** The overflow subtype is a required decision within the water macro-phase. */
@@ -209,9 +209,8 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
     case "deck": {
       const coping =
         COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? "";
-      return config.poolType === "above-ground"
-        ? coping
-        : `${coping} · ${PAVING.find((p) => p.id === pavingId(config.paving))?.label ?? ""}`;
+      const paving = pavingLayout(config.paving, config.pavingFormat);
+      return `${config.system === "overflow" && config.overflowType === "visible" ? "" : `${coping} · `}${paving.label} · ${paving.formatLabel}`;
     }
     case "technology": {
       const chosen = EQUIPMENT.filter((e) => config.equipment.includes(e.id)).map((e) => e.title);

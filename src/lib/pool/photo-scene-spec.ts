@@ -6,7 +6,7 @@ import { configuredPoolLayout } from "./resolved-layout";
 import { planSkimmers } from "./engineering";
 import { resolveMaterials } from "./materials";
 import { POOL_BORDER_PRESET, WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
-import { pavingId, premiumEnvironment, PAVING } from "./presentation";
+import { pavingLayout, premiumEnvironment } from "./presentation";
 import { normalisedLedIntensity } from "./led-optics";
 import { computeInfinityEdgeGeometry, infinityExclusion } from "./infinity-edge";
 import { resolveAutomaticCover } from "./cover-plan";
@@ -92,7 +92,7 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
         } : null,
       },
     },
-    paving: PAVING.find(p => p.id === pavingId(config.paving))!,
+    paving: pavingLayout(config.paving, config.pavingFormat),
     lighting: { time: config.sceneTime === "night" ? "night" : "day",
       stairMicroSpots: { enabled: config.features.includes("stairLighting") && layout.stairMicroSpots.length > 0, positions: config.features.includes("stairLighting") ? layout.stairMicroSpots : [] },
       ledsEnabled: config.features.includes("ledLighting"), color: config.ledColor ?? "#ffffff",

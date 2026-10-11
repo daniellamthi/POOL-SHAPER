@@ -23,6 +23,8 @@ const fullConfig: PoolConfig = {
   shape: "custom",
   shapeSelected: true,
   copingMaterial: "prun",
+  paving: "prun",
+  pavingFormat: "50x50",
   customMode: "draw",
   controlPoints: [
     [-0.5, -0.5],
