@@ -1315,8 +1315,8 @@ export function PoolModel({
                   castShadow
                 >
                   <meshStandardMaterial
-                    color="#e5e3dc"
-                    roughness={0.48}
+                    color="#ffffff"
+                    roughness={0.62}
                     metalness={0}
                     side={DoubleSide}
                   />
