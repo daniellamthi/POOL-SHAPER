@@ -13,31 +13,31 @@ import type {
 } from "@/lib/pool/types";
 
 export const RENOVATION_AREA_LABEL: Record<RenovationArea, string> = {
-  interiorFinish: "Interior Finish",
-  filtration: "Pool Filtration System",
-  coping: "Pool Edge / Coping",
-  structure: "Pool Structure",
-  equipment: "Pool Equipment Upgrade",
-  complete: "Complete Pool Renovation",
+  interiorFinish: "Rivestimento interno",
+  filtration: "Impianto di filtrazione",
+  coping: "Bordo piscina",
+  structure: "Ripristini della struttura",
+  equipment: "Optional impianto",
+  complete: "Ristrutturazione completa",
 };
 
 export const FILTRATION_WORK_LABEL: Record<FiltrationWork, string> = {
-  pump: "Replace Pump",
-  filter: "Replace Filter",
-  skimmers: "Replace Skimmers",
-  overflow: "Convert to Overflow Edge Pool",
+  pump: "Sostituzione pompa",
+  filter: "Sostituzione filtro",
+  skimmers: "Sostituzione skimmer",
+  overflow: "Conversione a sfioro",
 };
 
 export const STRUCTURE_ISSUE_LABEL: Record<StructureIssue, string> = {
-  leakage: "Water leakage",
-  crack: "Structural crack",
-  waterproofing: "Waterproofing problem",
-  generalRepair: "General structural repair",
+  leakage: "Perdite d’acqua",
+  crack: "Fessurazioni",
+  waterproofing: "Impermeabilizzazione",
+  generalRepair: "Ripristino generale",
 };
 
 export const EQUIPMENT_UPGRADE_LABEL: Record<EquipmentUpgrade, string> = {
-  salt: "Salt chlorination",
-  dosing: "Automatic dosing",
-  heatPump: "Heat pump",
-  automation: "Automation / Smart Control",
+  salt: "Clorazione a sale",
+  dosing: "Dosaggio automatico",
+  heatPump: "Pompa di calore",
+  automation: "Automazione e controllo",
 };

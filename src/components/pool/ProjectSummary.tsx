@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from "react";
-import { STEPS } from "@/lib/pool/config";
+import { STEPS, RENOVATION_STEPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import {
   buildProjectSummary,
@@ -85,7 +85,8 @@ export function ProjectSummary({
   const { projectConfiguration, goToStep } = useConfigurator();
   const model = useMemo(() => buildProjectSummary(projectConfiguration), [projectConfiguration]);
   const editStep = (id: string) => {
-    const index = stepIndex(id);
+    const index = projectConfiguration.config.projectType === "renovation"
+      ? RENOVATION_STEPS.findIndex(step => step.id === id) : stepIndex(id);
     return index >= 0 ? () => goToStep(index) : undefined;
   };
 

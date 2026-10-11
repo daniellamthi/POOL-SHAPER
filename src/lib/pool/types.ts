@@ -99,6 +99,19 @@ export interface RenovationConfig {
   copingMaterial: string;
   structureIssues: ReadonlyArray<StructureIssue>;
   equipmentUpgrades: ReadonlyArray<EquipmentUpgrade>;
+  /** Existing conditions, separate from the proposed configuration. Optional for legacy snapshots. */
+  existing?: {
+    poolType?: PoolType;
+    structure?: PoolStructure;
+    system?: "skimmer" | "overflow";
+    overflowType?: OverflowType;
+    finish?: SelectableFinishMaterial;
+    linerColor?: LinerColor;
+    mosaicFinish?: MosaicFinishId;
+    copingMaterial?: NonNullable<PoolConfig["copingMaterial"]>;
+    poolAccess?: PoolAccess | null;
+    internalStairType?: InternalStairType;
+  };
 }
 
 /** Floor construction. Selectable (rectangle, in-ground pools only -- see

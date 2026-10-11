@@ -59,7 +59,7 @@ export function LeadRequestDialog({
   /** Optional -- with Customer Details no longer a mandatory earlier step,
    * this dialog is normally the first and only place contact details are
    * collected, so it starts blank unless a caller has something to prefill. */
-  defaultCustomer?: { name: string; email: string; phone: string };
+  defaultCustomer?: { name: string; email: string; phone: string; projectLocation?: string; notes?: string };
 }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
@@ -70,9 +70,9 @@ export function LeadRequestDialog({
     name: defaultCustomer.name,
     email: defaultCustomer.email,
     phone: defaultCustomer.phone,
-    projectLocation: "",
+    projectLocation: defaultCustomer.projectLocation ?? "",
     timing: "",
-    notes: "",
+    notes: defaultCustomer.notes ?? "",
     privacyAccepted: false,
     marketingConsent: false,
     website: "",

@@ -23,6 +23,7 @@ import { resolveMaterials } from "../src/lib/pool/materials";
 import type { PoolConfig, RenovationConfig, UploadedFile } from "../src/lib/pool/types";
 import { leadSubmissionInputSchema } from "../src/lib/lead/schema";
 import { formatLeadEmail } from "../src/lib/lead/formatLeadEmail";
+import { renovationMosaicLabel } from "../src/lib/pool/renovation";
 import type { LeadSubmission } from "../src/lib/lead/types";
 
 const assert = (condition: unknown, message: string): asserts condition => {
@@ -416,8 +417,8 @@ function validRenovationInput(overrides: Record<string, unknown> = {}) {
   const selectedMosaic = getMosaicFinish(renovationConfig.mosaicFinish);
   assert(resolveMaterials(renovationConfig).surface.textureUrl === selectedMosaic.texture,
     "Renovation preview must render the selected actual mosaic, not PVC");
-  assert(text.includes(selectedMosaic.name),
-    "Renovation quote must name the same mosaic as the preview and Review");
+  assert(text.includes(renovationMosaicLabel(selectedMosaic.id)) && !text.includes(selectedMosaic.id),
+    "Renovation quote must name the same real catalogue sample as preview/Review, without raw technical IDs");
   const pvcConfig: PoolConfig = { ...renovationConfig, finish: "liner", linerColor: "motionSandBeach179" };
   assert(resolveMaterials(pvcConfig).surface.textureUrl.includes("motion-sand-beach-179"),
     "Renovation PVC preview must use the selected liner texture");

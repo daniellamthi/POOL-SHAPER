@@ -21,6 +21,7 @@ import { clampShallowDepth } from "./floor-profile";
 import { clampLShapeDimensions } from "./l-shape";
 import { compatiblePoolSystem, resolveInfinitySelection } from "./infinity-edge";
 import { buildOutline } from "./geometry";
+import { isRenovationConfig } from "./renovation";
 import { pavingId, premiumEnvironment } from "./presentation";
 import {
   normaliseFinishForStructure,
@@ -108,7 +109,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     throw new Error("ProjectConfiguration: missing config");
   }
   const renovation = record["renovation"];
-  if (typeof renovation !== "object" || renovation === null) {
+  if (!isRenovationConfig(renovation)) {
     throw new Error("ProjectConfiguration: missing renovation");
   }
   // A project saved before the LED dimmer existed has no `ledIntensity`.

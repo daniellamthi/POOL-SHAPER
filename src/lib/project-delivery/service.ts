@@ -100,8 +100,10 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
   if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection"]);
   config.customer = DEFAULT_CUSTOMER;
   config.uploads = [];
-  return { schemaVersion: project.schemaVersion, projectId: project.projectId, config,
-    renovation: pick(project.renovation, ["areas", "currentFinish", "filtrationWorks", "replaceCoping", "copingMaterial", "structureIssues", "equipmentUpgrades"]) };
+  const renovation = pick(project.renovation, ["areas", "currentFinish", "filtrationWorks", "replaceCoping", "copingMaterial", "structureIssues", "equipmentUpgrades"]);
+  if (project.renovation.existing) renovation.existing = pick(project.renovation.existing,
+    ["poolType", "structure", "system", "overflowType", "finish", "linerColor", "mosaicFinish", "copingMaterial", "poolAccess", "internalStairType"]);
+  return { schemaVersion: project.schemaVersion, projectId: project.projectId, config, renovation };
 }
 
 export async function saveProject(

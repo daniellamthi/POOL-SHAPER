@@ -31,6 +31,7 @@ import {
   STRUCTURE_LABEL,
 } from "@/configurator/steps/final-review/summary-labels";
 import { finishDescription } from "@/lib/pool/structure-finish";
+import { buildProjectSummary } from "@/lib/project-delivery/summary-model";
 import {
   EQUIPMENT_UPGRADE_LABEL,
   FILTRATION_WORK_LABEL,
@@ -112,71 +113,16 @@ function newPoolLines(submission: LeadSubmission): string[] {
 }
 
 function renovationLines(submission: LeadSubmission): string[] {
-  const config = submission.project.config;
-  const renovation = submission.project.renovation;
-  const areaLabels = renovation.areas.map((id) => RENOVATION_AREA_LABEL[id]);
-  const lines = [
-    `--- RISTRUTTURAZIONE PISCINA ---`,
-    `Interventi richiesti: ${areaLabels.length ? areaLabels.join(", ") : "Da definire"}`,
+  const model = buildProjectSummary(submission.project);
+  return [
+    "--- RISTRUTTURAZIONE PISCINA ---",
+    ...model.sections.flatMap(section => [
+      `--- ${section.title.toUpperCase()} ---`,
+      ...section.rows.map(row => `${row.label}: ${row.value}`),
+    ]),
+    ...model.technical.map(row => `${row.label}: ${row.value}`),
+    model.technicalNote,
   ];
-
-  if (config.shape || config.dimensions) {
-    lines.push(
-      `Piscina attuale: forma ${config.shape}, dimensioni indicative ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m, profondità ${formatNumber(config.dimensions.depth, 2)} m`,
-    );
-  }
-
-  const wantsInterior =
-    renovation.areas.includes("interiorFinish") || renovation.areas.includes("complete");
-  if (wantsInterior) {
-    const newFinishTitle =
-      config.finish === "mosaic"
-        ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
-        : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
-    lines.push(
-      `Rivestimento: attuale ${renovation.currentFinish} → richiesto ${config.finish} (${newFinishTitle})`,
-    );
-  }
-
-  const wantsFiltration =
-    renovation.areas.includes("filtration") || renovation.areas.includes("complete");
-  if (wantsFiltration) {
-    const filtrationLabels = renovation.filtrationWorks.map((id) => FILTRATION_WORK_LABEL[id]);
-    lines.push(
-      `Impianto filtrazione: ${filtrationLabels.length ? filtrationLabels.join(", ") : "Valutazione richiesta"}`,
-    );
-  }
-
-  const wantsCoping = renovation.areas.includes("coping") || renovation.areas.includes("complete");
-  if (wantsCoping) {
-    lines.push(
-      `Bordo/coping: ${
-        renovation.replaceCoping
-          ? `sostituzione richiesta${renovation.copingMaterial ? ` (${renovation.copingMaterial})` : ""}`
-          : "nessuna sostituzione richiesta"
-      }`,
-    );
-  }
-
-  const wantsStructure =
-    renovation.areas.includes("structure") || renovation.areas.includes("complete");
-  if (wantsStructure) {
-    const structureLabels = renovation.structureIssues.map((id) => STRUCTURE_ISSUE_LABEL[id]);
-    lines.push(
-      `Problemi struttura: ${structureLabels.length ? structureLabels.join(", ") : "Valutazione generale richiesta"}`,
-    );
-  }
-
-  const wantsEquipment =
-    renovation.areas.includes("equipment") || renovation.areas.includes("complete");
-  if (wantsEquipment) {
-    const equipmentLabels = renovation.equipmentUpgrades.map((id) => EQUIPMENT_UPGRADE_LABEL[id]);
-    lines.push(
-      `Aggiornamento dotazioni: ${equipmentLabels.length ? equipmentLabels.join(", ") : "Valutazione richiesta"}`,
-    );
-  }
-
-  return lines;
 }
 
 export function formatLeadEmail(submission: LeadSubmission): {

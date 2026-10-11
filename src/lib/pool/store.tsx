@@ -33,6 +33,7 @@ import {
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { projectMetrics } from "./project-metrics";
 import { getCustomerValidation } from "./validation";
+import { cleanRenovation, renovationPreviewConfig, renovationStepComplete } from "./renovation";
 import {
   createProjectId,
   parseProjectConfiguration,
@@ -562,8 +563,15 @@ function configurationReducer(state: State, action: Action): State {
         },
       };
     }
-    case "updateRenovation":
-      return { ...state, renovation: { ...state.renovation, ...action.value } };
+    case "updateRenovation": {
+      const renovation = { ...state.renovation, ...action.value };
+      if (renovation.existing?.finish) {
+        renovation.existing = { ...renovation.existing,
+          linerColor: renovation.existing.linerColor ?? config.linerColor,
+          mosaicFinish: renovation.existing.mosaicFinish ?? config.mosaicFinish };
+      }
+      return { ...state, renovation };
+    }
     case "addUploads": {
       const withDefaults: UploadedFile[] = action.value.map((file) => {
         const next: UploadedFile = { ...file };
@@ -635,13 +643,8 @@ function configurationReducer(state: State, action: Action): State {
  * against the just-loaded draft before that state is committed. */
 function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConfig): number {
   if (config.projectType === "renovation") {
-    if (renovation.areas.length === 0) return 1;
-    const customer = config.customer;
-    const contactComplete =
-      ["name", "surname", "email", "phone", "city", "country"].every(
-        (key) => customer[key as keyof CustomerInfo].trim().length > 0,
-      ) && getCustomerValidation(customer).emailValid;
-    if (!contactComplete) return 4;
+    for (let i = 1; i < RENOVATION_STEPS.length - 1; i++)
+      if (!renovationStepComplete(i, config, renovation)) return i;
     return RENOVATION_STEPS.length - 1;
   }
   for (let index = 0; index < STEPS.length; index++) {
@@ -661,7 +664,11 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
 }
 
 export function reducer(state: State, action: Action): State {
-  const next = configurationReducer(state, action);
+  let next = configurationReducer(state, action);
+  if (next.config.projectType === "renovation") {
+    const renovation = cleanRenovation(next.renovation);
+    next = { ...next, renovation, config: renovationPreviewConfig(next.config, renovation) };
+  }
   return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config)) };
 }
 
@@ -779,16 +786,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     (index: number) => {
       if (index === 0) return config.projectType !== null;
       if (config.projectType === "renovation") {
-        if (index === 1) return renovation.areas.length > 0;
-        if (index === 4) {
-          const customer = config.customer;
-          return (
-            ["name", "surname", "email", "phone", "city", "country"].every(
-              (key) => customer[key as keyof CustomerInfo].trim().length > 0,
-            ) && getCustomerValidation(customer).emailValid
-          );
-        }
-        return true;
+        return renovationStepComplete(index, config, renovation);
       }
       const stepId = STEPS[index]?.id;
       if (stepId === "pool-type") return config.poolType !== null;
@@ -919,4 +917,4 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
 
 /** The pure configuration reducer and initial state, for the node audits
  * (scripts/above-ground-audit.ts). Not used by the app. */
-export const configuratorTesting = { reducer: configurationReducer, createInitialState };
+export const configuratorTesting = { reducer: configurationReducer, transitionReducer: reducer, createInitialState };

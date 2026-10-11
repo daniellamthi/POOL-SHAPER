@@ -161,7 +161,7 @@ export function StructureTray() {
 
 /* ---------------------------------------------------------------- 02 */
 
-export function ShapeTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
+export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayContext; showTabs?: boolean } & DecisionProps) {
   const { config, setShape, setCustomMode, setDimension, metrics } = useConfigurator();
   useEffect(() => { ctx.focus(tab === "plan" ? "top" : tab === "depth" ? "depth" : null); }, [tab]);
   const choose = (next: typeof tab) => {
@@ -173,7 +173,7 @@ export function ShapeTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionP
     (config.shape === "rectangle" || config.shape === "l-shape" || config.shape === "organic");
   return (
     <TabBody>
-      <StepTabs
+      {showTabs ? <StepTabs
         label="Forma e dimensioni"
         value={tab}
         onChange={choose}
@@ -182,7 +182,7 @@ export function ShapeTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionP
           { id: "plan", label: "Lunghezza e larghezza" },
           { id: "depth", label: "Profondità" },
         ]}
-      />
+      /> : null}
       {tab === "shape" ? (
         <ChoiceGrid label="Forma della piscina">
           {POOL_SHAPES.map((shape) => (

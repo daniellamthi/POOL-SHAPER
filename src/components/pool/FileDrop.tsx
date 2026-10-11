@@ -102,7 +102,7 @@ export function FileDrop({ category, label, hint }: Props) {
       >
         <Upload className="size-4 text-muted-foreground" strokeWidth={1.25} />
         <span className="text-[12px] font-light text-muted-foreground">
-          Drop files here or click to browse — JPG, PNG, WEBP, PDF
+          {config.projectType === "renovation" ? "Trascina qui o scegli un file — JPG, PNG, WebP, PDF" : "Drop files here or click to browse — JPG, PNG, WEBP, PDF"}
         </span>
       </button>
       <input

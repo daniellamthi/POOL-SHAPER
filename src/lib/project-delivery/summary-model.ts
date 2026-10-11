@@ -11,7 +11,9 @@ import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { PAVING, pavingId } from "@/lib/pool/presentation";
 import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
-import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES } from "@/lib/pool/config";
+import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, FINISHES } from "@/lib/pool/config";
+import { renovationIncludes, renovationMosaicLabel, renovationLinerLabel } from "@/lib/pool/renovation";
+import { RENOVATION_AREA_LABEL, FILTRATION_WORK_LABEL, STRUCTURE_ISSUE_LABEL, EQUIPMENT_UPGRADE_LABEL } from "@/lib/lead/renovationLabels";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { formatNumber } from "@/lib/pool/format";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
@@ -48,7 +50,7 @@ export interface SummaryRow {
 }
 
 export interface SummarySection {
-  id: "pool" | "water" | "materials" | "comfort" | "lighting" | "exterior" | "scene";
+  id: "pool" | "water" | "materials" | "comfort" | "lighting" | "exterior" | "scene" | "renovation";
   title: string;
   /** Wizard step that edits this section (Summary "Modifica" links). */
   stepId: string;
@@ -258,7 +260,7 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
   const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
   const paving = PAVING.find((p) => p.id === pavingId(config.paving))!;
 
-  const sections: SummarySection[] = [
+  let sections: SummarySection[] = [
     {
       id: "pool",
       title: "La tua piscina",
@@ -378,8 +380,53 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
     ...(config.equipment.length > 0 ? ["Dimensionamento definitivo dell'impianto tecnico"] : []),
   ];
 
+  if (config.projectType === "renovation") {
+    const r = project.renovation;
+    const e = r.existing;
+    const currentName = r.currentFinish === "mosaic"
+      ? renovationMosaicLabel(e?.mosaicFinish ?? config.mosaicFinish)
+      : renovationLinerLabel(LINER_COLORS.find(l => l.id === (e?.linerColor ?? config.linerColor))?.title ?? "Liner PVC");
+    const formatList = <T extends string>(ids: readonly T[], labels: Record<T, string>) =>
+      ids.map(id => labels[id]).join(", ") || "Valutazione con il consulente";
+    const works: SummaryRow[] = [
+      { label: "Interventi richiesti", value: formatList(r.areas, RENOVATION_AREA_LABEL) },
+      ...(renovationIncludes(r, "filtration") ? [{ label: "Impianto filtrazione", value: formatList(r.filtrationWorks, FILTRATION_WORK_LABEL) }] : []),
+      ...(renovationIncludes(r, "structure") ? [{ label: "Problemi struttura", value: formatList(r.structureIssues, STRUCTURE_ISSUE_LABEL) }] : []),
+      ...(renovationIncludes(r, "equipment") ? [{ label: "Optional impianto", value: formatList(r.equipmentUpgrades, EQUIPMENT_UPGRADE_LABEL) }] : []),
+    ];
+    sections = [
+      { id: "pool", title: "Piscina esistente", stepId: "renovation-pool", rows: [
+        { label: "Tipologia", value: poolTypeLabel(e?.poolType ?? config.poolType) },
+        { label: "Struttura", value: (e?.structure ?? config.structure) ? STRUCTURE_LABEL[(e?.structure ?? config.structure)!] : "Da verificare" },
+        { label: "Dimensioni", value: dimensionsSentence },
+        { label: "Fondo", value: isSlopedFloor ? "In pendenza" : "Piano" },
+        { label: "Accesso esistente", value: config.poolAccess === "internalSteps"
+          ? INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"] : config.poolAccess ? POOL_ACCESS_LABEL[config.poolAccess] : "Senza scala interna" },
+      ] },
+      { id: "water", title: "Impianto esistente e proposta", stepId: "renovation-pool", rows: [
+        { label: "Sistema esistente", value: systemHeadline(e?.system ?? config.system, e?.overflowType ?? config.overflowType) },
+        { label: "Sistema proposto", value: systemLine },
+        { label: "Fattibilità", value: "Verifica tecnica in cantiere" },
+      ] },
+      { id: "materials", title: "Rivestimenti e bordo", stepId: "renovation-details", rows: [
+        { label: "Rivestimento esistente", value: `${FINISHES.find(f => f.id === r.currentFinish)?.title ?? "Da verificare"} · ${currentName}` },
+        { label: "Rivestimento proposto", value: renovationIncludes(r, "interiorFinish")
+          ? config.finish === "mosaic" ? renovationMosaicLabel(config.mosaicFinish) : renovationLinerLabel(finishTitle)
+          : "Conservato", ...(renovationIncludes(r, "interiorFinish") ? { swatch: finishSwatch } : {}) },
+        { label: "Bordo", value: !renovationIncludes(r, "coping") || r.replaceCoping === false ? "Conservato" :
+          r.replaceCoping === null ? "Da definire" : COPING_MATERIALS.find(c => c.id === r.copingMaterial)?.title ?? (r.copingMaterial || "Materiale da definire") },
+      ] },
+      { id: "renovation", title: "Lavori proposti e optional", stepId: "renovation-details", rows: works },
+      { id: "scene", title: "Presentazione", stepId: "renovation-review", rows: [
+        { label: "Anteprima", value: "Proposta indicativa, non progetto esecutivo" },
+        { label: "Momento", value: config.sceneTime === "night" ? "Notte" : "Giorno" },
+      ] },
+    ];
+    deferred.push("Fattibilità degli interventi e sopralluogo", "Preventivo su valutazione del consulente, senza prezzi automatici");
+  }
+
   return {
-    headline: dimensionsSentence,
+    headline: config.projectType === "renovation" ? `Ristrutturazione · ${dimensionsSentence}` : dimensionsSentence,
     subline: `${poolType} · ${systemLine} · circa ${formatNumber(metrics.waterVolume, 0)} m³ d'acqua`,
     projectId: project.projectId,
     sections,

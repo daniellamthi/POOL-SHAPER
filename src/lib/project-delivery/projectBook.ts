@@ -88,12 +88,13 @@ function sectionBlock(doc: jsPDF, section: SummarySection, x: number, y: number,
 }
 
 /** Draws an image filling the box (centre crop via a clip path). */
-function coverImage(doc: jsPDF, dataUrl: string, x: number, y: number, w: number, h: number) {
+function coverImage(doc: jsPDF, dataUrl: string, x: number, y: number, w: number, h: number, contain = false) {
   const format = dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
   const props = doc.getImageProperties(dataUrl);
   const ratio = props.width / props.height;
-  const drawW = ratio > w / h ? h * ratio : w;
-  const drawH = ratio > w / h ? h : w / ratio;
+  const fitWidth = contain ? ratio > w / h : ratio <= w / h;
+  const drawW = fitWidth ? w : h * ratio;
+  const drawH = fitWidth ? w / ratio : h;
   doc.saveGraphicsState();
   doc.rect(x, y, w, h, null);
   doc.clip();
@@ -222,10 +223,10 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
 
   // 4 · Accesso, comfort e optional
   doc.addPage();
-  header(doc, "Accesso, comfort e optional", publicRef, 4);
+  header(doc, byId("renovation") ? "Lavori proposti e optional" : "Accesso, comfort e optional", publicRef, 4);
   let leftY = 50,
     rightY = 50;
-  for (const id of ["comfort", "lighting", "exterior", "scene"] as const) {
+  for (const id of ["renovation", "comfort", "lighting", "exterior", "scene"] as const) {
     const section = byId(id);
     if (!section) continue;
     if (leftY <= rightY) leftY = sectionBlock(doc, section, M, leftY, 120) + 6;
@@ -271,7 +272,8 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
       ] as const
     ).entries()) {
       const x = M + index * (boxW + gap);
-      coverImage(doc, url, x, top, boxW, boxH);
+      // Preserve the whole renovation comparison, including mobile captures.
+      coverImage(doc, url, x, top, boxW, boxH, Boolean(byId("renovation")));
       doc.setFontSize(8);
       doc.setTextColor(...VIOLET);
       doc.text(label.toUpperCase(), x, top + boxH + 8);

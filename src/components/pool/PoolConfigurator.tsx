@@ -57,6 +57,11 @@ import {
 import type { SceneFocus, PhotoModeQuality, SceneTimeOfDay } from "./three/PoolScene";
 import { renderQualityState } from "@/lib/pool/renderQualityState";
 import { requestHeroCapture } from "@/lib/project-delivery/heroCapture";
+import { renovationPreviewConfig, renovationDecisions, renovationDecisionComplete, renovationMacroReachable } from "@/lib/pool/renovation";
+import { planSkimmers } from "@/lib/pool/engineering";
+import { projectMetrics } from "@/lib/pool/project-metrics";
+import { buildTechnicalPlan } from "@/lib/pool/technical-plan";
+import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 
 
 /**
@@ -107,11 +112,12 @@ const RENOVATION_COMPONENTS = [
 ] as const;
 
 function ConfiguratorLayout() {
-  const { technical, cover } = useTechnicalData();
+  const { technical: projectTechnical, cover } = useTechnicalData();
   const {
-    config,
+    config: projectConfig,
+    renovation,
     outline,
-    skimmers,
+    skimmers: projectSkimmers,
     step,
     visualFocus,
     next,
@@ -126,6 +132,16 @@ function ConfiguratorLayout() {
     dismissRestoredProjectNotice,
     sharedProject,
   } = useConfigurator();
+  const [renovationBefore, setRenovationBefore] = useState(false);
+  // View-only comparison. Saved snapshots and exports always use the proposal.
+  const config = useMemo(() => renovationPreviewConfig(projectConfig, renovation,
+    step === 2 || (step === 3 && renovationBefore)), [projectConfig, renovation, step, renovationBefore]);
+  const skimmers = useMemo(() => projectConfig.projectType === "renovation"
+    ? planSkimmers(outline, projectMetrics(config, outline).waterSurface, config.system === "skimmer")
+    : projectSkimmers, [projectConfig.projectType, config, outline, projectSkimmers]);
+  const technical = useMemo(() => projectConfig.projectType === "renovation"
+    ? buildTechnicalPlan({ config, outline, skimmers, metrics: projectMetrics(config, outline), layout: configuredPoolLayout(config) })
+    : projectTechnical, [projectConfig.projectType, config, outline, skimmers, projectTechnical]);
   const { theme } = useTheme();
 
   // P4 autosave: a small, non-blocking notice -- never a modal -- offering
@@ -385,7 +401,7 @@ function ConfiguratorLayout() {
             label: s.short,
             indices: [index],
             complete: index < step && isStepComplete(index),
-            reachable: index <= step || isStepComplete(Math.max(0, index - 1)),
+            reachable: renovationMacroReachable(index, step, isStepComplete),
           }))
         : buildMacros(config, step, isStepComplete),
     [renovationWorkflow, config, step, isStepComplete],
@@ -398,7 +414,7 @@ function ConfiguratorLayout() {
   const skipped = (index: number) =>
     !renovationWorkflow && isStepSkipped(activeSteps[index]?.id, config);
   const [decisionState, setDecisionState] = useState<{ step: number; id: string }>({ step: -1, id: "" });
-  const currentDecisions = renovationWorkflow ? [] : decisions(activeStepId, config);
+  const currentDecisions = renovationWorkflow ? renovationDecisions(activeStepId, renovation) : decisions(activeStepId, config);
   const decisionIndex = Math.max(0, currentDecisions.findIndex(d => decisionState.step === step && d.id === decisionState.id));
   const decision = currentDecisions[decisionIndex];
   const setDecision = (id: string) => { setDecisionState({ step, id }); setTrayExpanded(true); };
@@ -414,18 +430,20 @@ function ConfiguratorLayout() {
     if (nextDecision) { setDecision(nextDecision.id); return; }
     let target = step + 1;
     while (target < activeSteps.length - 1 && skipped(target)) target += 1;
-    setDecisionState({ step: target, id: decisions(activeSteps[target]?.id, config)[0]?.id ?? "" });
+    const targetDecisions = renovationWorkflow ? renovationDecisions(activeSteps[target]?.id, renovation) : decisions(activeSteps[target]?.id, config);
+    setDecisionState({ step: target, id: targetDecisions[0]?.id ?? "" });
     goToStep(Math.min(target, activeSteps.length - 1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, activeSteps.length, config, goToStep, nextDecision]);
+  }, [step, activeSteps.length, config, goToStep, nextDecision, renovationWorkflow, renovation]);
   const goBack = useCallback(() => {
     if (decisionIndex > 0) { setDecision(currentDecisions[decisionIndex - 1]!.id); return; }
     let target = step - 1;
     while (target > 0 && skipped(target)) target -= 1;
-    setDecisionState({ step: target, id: decisions(activeSteps[target]?.id, config).at(-1)?.id ?? "" });
+    const targetDecisions = renovationWorkflow ? renovationDecisions(activeSteps[target]?.id, renovation) : decisions(activeSteps[target]?.id, config);
+    setDecisionState({ step: target, id: targetDecisions.at(-1)?.id ?? "" });
     goToStep(Math.max(0, target));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, config, goToStep, activeSteps, decisionIndex, currentDecisions]);
+  }, [step, config, goToStep, activeSteps, decisionIndex, currentDecisions, renovationWorkflow, renovation]);
   const selectMacro = (index: number) => {
     const indices = macros[index]?.indices ?? [];
     const target = indices.find((i) => !skipped(i)) ?? indices[0];
@@ -471,7 +489,10 @@ function ConfiguratorLayout() {
     step === 0 ? (
       <ProjectTray />
     ) : (
-      <RenovationComponent />
+      activeStepId === "renovation-pool" ? <RenovationPoolStep ctx={trayContext} {...decisionProps} />
+        : activeStepId === "renovation-details" ? <RenovationDetailsStep {...decisionProps} before={renovationBefore} setBefore={setRenovationBefore} />
+        : activeStepId === "renovation-review" ? <RenovationReviewStep ctx={trayContext} />
+        : activeStepId === "renovation-customer" ? <RenovationCustomerStep /> : <RenovationScopeStep />
     )
   ) : activeStepId === "project" ? (
     <ProjectTray />
@@ -599,6 +620,8 @@ function ConfiguratorLayout() {
             onReframe={reframe}
             frameToken={frameToken + (visualFocus?.revision ?? 0)}
             focus={
+              // Renovation PDF: changing time must not replace the hero with LED focus.
+              (dayNightCapture && renovationWorkflow ? "review" : null) ??
               inspectionView ??
               (technicalView
                 ? config.system === "infinity" ? "top" : "review"
@@ -650,13 +673,13 @@ function ConfiguratorLayout() {
 
         <ConfiguratorTray
           number={macroIndex + 1}
-          total={renovationWorkflow ? undefined : macros.length}
+          total={macros.length}
           nextLabel={
             nextDecision ? nextDecision.label : !renovationWorkflow &&
             macro &&
             macro.indices[macro.indices.length - 1] === step
               ? macros[macroIndex + 1]?.label
-              : STEP_COPY[activeSteps[step + 1]?.id ?? ""]?.title
+              : renovationWorkflow ? activeSteps[step + 1]?.title : STEP_COPY[activeSteps[step + 1]?.id ?? ""]?.title
           }
           title={renovationWorkflow ? copy.title : (macro?.label ?? copy.title)}
           subtitle={copy.subtitle}
@@ -669,7 +692,9 @@ function ConfiguratorLayout() {
               : describeSelection(activeStepId, config)
           }
           canBack={step > 0}
-          canContinue={finalRequest || ((Boolean(nextDecision) || !isLast) && canContinue)}
+          canContinue={finalRequest || ((Boolean(nextDecision) || !isLast) && (renovationWorkflow && decision
+            ? renovationDecisionComplete(activeStepId, decision.id, projectConfig, renovation) && (Boolean(nextDecision) || canContinue)
+            : canContinue))}
           continueLabel={
             finalRequest ? "Richiedi proposta" : isLast && !nextDecision ? "Configurazione completa" : "Continua"
           }

@@ -13,6 +13,7 @@ import type { PoolShapeId, PoolType } from "@/lib/pool/types";
 import { buildOutline } from "@/lib/pool/geometry";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "./types";
+import { isRenovationConfig } from "@/lib/pool/renovation";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // Kept as a literal tuple (not derived via .map(), which would widen to
@@ -46,7 +47,7 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   const projectId = project["projectId"];
   if (typeof projectId !== "string" || projectId.trim().length === 0) return false;
   const renovation = project["renovation"];
-  if (typeof renovation !== "object" || renovation === null) return false;
+  if (!isRenovationConfig(renovation)) return false;
   const configValue = project["config"];
   if (typeof configValue !== "object" || configValue === null) return false;
 
