@@ -101,6 +101,7 @@ interface PoolModelProps {
   poolType: PoolType;
   copingThickness: number;
   showWater: boolean;
+  planView?: boolean;
   /** Above-ground exterior cladding finish. */
   exteriorPanelFinish?: ExteriorPanelFinishId;
   rawStructure?: StructureFamily | null;
@@ -443,6 +444,7 @@ export function PoolModel({
   poolType,
   copingThickness,
   showWater,
+  planView = false,
   exteriorPanelFinish = DEFAULT_EXTERIOR_PANEL_FINISH,
   rawStructure = null,
   structureFamily = null,
@@ -1142,7 +1144,7 @@ export function PoolModel({
           </PoolAccessModel>
         ) : null}
         {/* Interior walls */}
-        <mesh geometry={walls} renderOrder={0} receiveShadow castShadow>
+        <mesh name="plan-basin-walls" geometry={walls} renderOrder={0} receiveShadow castShadow>
           {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
             key={showWater ? "wet" : "dry"}
             color={materials.liner.color}
@@ -1176,6 +1178,7 @@ export function PoolModel({
             the mesh itself sits at the origin; flat floors keep the single
             constant-Y geometry raised by `position`, exactly as before. */}
         <mesh
+          name="plan-basin-floor"
           geometry={floor}
           position={floorProfile.sloped ? [0, 0, 0] : [0, verticalLayout.floorY, 0]}
           receiveShadow
@@ -1211,6 +1214,7 @@ export function PoolModel({
         {showWater ? (
           <mesh geometry={water} position={[0, waterLevel, 0]} renderOrder={2}>
             <WaterSurfaceMaterial
+              planView={planView}
               waterLevel={waterLevel}
               depth={waterLevel - verticalLayout.floorY}
               outline={waterOutline}
@@ -1271,6 +1275,7 @@ export function PoolModel({
                   <meshStandardMaterial color="#242929" roughness={0.9} metalness={0.08} />
                 </mesh>
                 <mesh
+                  name="plan-grille-inner-seat"
                   geometry={grilleInnerSeat}
                   position={[0, verticalLayout.wallTopY - 0.013, 0]}
                   receiveShadow
@@ -1278,6 +1283,7 @@ export function PoolModel({
                   <meshStandardMaterial color="#77796f" roughness={0.68} side={DoubleSide} />
                 </mesh>
                 <mesh
+                  name="plan-grille-outer-seat"
                   geometry={grilleOuterSeat}
                   position={[0, verticalLayout.wallTopY - 0.013, 0]}
                   receiveShadow
@@ -1398,7 +1404,7 @@ export function PoolModel({
               />
             )}
           </mesh>
-          <mesh geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
+          <mesh name="plan-coping" geometry={coping} position={[0, copingSurfaceY, 0]} receiveShadow castShadow>
             {rawShellKind ? (
               <RawShellMaterial kind={rawShellKind} />
             ) : (

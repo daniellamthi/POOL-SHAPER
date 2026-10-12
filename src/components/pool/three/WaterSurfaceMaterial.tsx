@@ -422,6 +422,7 @@ export function WaterSurfaceMaterial({
   outline,
   fallingFilm = false,
   flowing = false,
+  planView = false,
 }: {
   waterLevel?: number;
   reflections?: boolean;
@@ -430,9 +431,11 @@ export function WaterSurfaceMaterial({
   fallingFilm?: boolean;
   /** Infinity circulation retains gentle ripples when the camera settles. */
   flowing?: boolean;
+  planView?: boolean;
 }) {
   const { broad: largeNormal, micro: microNormal } = useRippleResources();
   const shaders = useRef<WaterShader[]>([]);
+  reflections = reflections && !planView;
   const reflection = useWaterReflection(waterLevel, reflections);
   const shoreline = useMemo(() => (outline ? createShorelineField(outline) : null), [outline]);
   useEffect(() => () => shoreline?.texture.dispose(), [shoreline]);
@@ -591,7 +594,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       color={WATER_VISUAL_PRESET.surfaceColor}
       transparent
       opacity={WATER_VISUAL_PRESET.opacity}
-      roughness={fallingFilm ? 0.115 : debugModeName === "specular" ? 0.035 : WATER_VISUAL_PRESET.roughness}
+      roughness={planView ? 0.12 : fallingFilm ? 0.115 : debugModeName === "specular" ? 0.035 : WATER_VISUAL_PRESET.roughness}
       metalness={WATER_VISUAL_PRESET.metalness}
       transmission={WATER_VISUAL_PRESET.transmission}
       // Metric depth for still rendering; raster basin transmission is
@@ -603,9 +606,9 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       attenuationColor="#ffffff"
       attenuationDistance={WATER_VISUAL_PRESET.attenuationDistance}
       envMapIntensity={
-        debugModeName === "specular" ? 0 : WATER_VISUAL_PRESET.environmentIntensity.day
+        debugModeName === "specular" ? 0 : WATER_VISUAL_PRESET.environmentIntensity.day * (planView ? 0.65 : 1)
       }
-      specularIntensity={WATER_VISUAL_PRESET.specularIntensity}
+      specularIntensity={WATER_VISUAL_PRESET.specularIntensity * (planView ? 0.65 : 1)}
       specularColor={WATER_VISUAL_PRESET.specularColor}
       normalMap={largeNormal}
       normalScale={[1, 1]}

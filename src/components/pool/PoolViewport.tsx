@@ -255,7 +255,7 @@ export const PoolViewport = memo(function PoolViewport({
         role="status" data-testid="construction-stage">
         {scene.construction.label}
       </div> : null}
-      {scene.technicalView && !scene.photoMode ? <div className="pointer-events-auto absolute right-3 top-3 z-10 w-36 sm:max-h-[58%] sm:w-[260px] sm:overflow-y-auto sm:rounded-2xl sm:shadow-lg">
+      {scene.technicalView && !scene.photoMode ? <div data-technical-panel className="pointer-events-auto absolute right-3 top-3 z-10 w-36 sm:max-h-[58%] sm:w-[260px] sm:overflow-y-auto sm:rounded-2xl sm:shadow-lg">
         <div className="hidden sm:block"><TechnicalDataPanel technical={technicalPlan} cover={scene.coverPlan} compact /></div>
         <label className="sr-only" htmlFor="technical-focus">Dettaglio tecnico</label>
         <select id="technical-focus" aria-label="Dettaglio tecnico" defaultValue="" onChange={(event) => onTechnicalFocus(event.target.value as VisualFocus)} className="mt-1 min-h-11 w-full rounded-xl border border-hairline bg-card px-3 text-xs text-foreground">

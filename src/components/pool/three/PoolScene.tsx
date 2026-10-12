@@ -16,6 +16,8 @@ import {
 } from "three";
 import type { DirectionalLight, HemisphereLight, SpotLight, Texture } from "three";
 import { PoolModel } from "./PoolModel";
+import { ArchitecturalOutline, ARCHITECTURAL_OUTLINE_NAME } from "./ArchitecturalOutline";
+import { architecturalFrustum } from "./architecturalPlan";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
 import { StudioPaving, PavingMaterial } from "./StudioPaving";
@@ -61,7 +63,7 @@ import {
 } from "@/configurator/3d/scene/visual-preset";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { outlineBounds } from "@/lib/pool/geometry";
-import { getCameraPose, dimensionFrustum, contextualAccessCamera, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
+import { getCameraPose, contextualAccessCamera, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
 import type { ResolvedPoolLayout } from "@/lib/pool/resolved-layout";
 import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
@@ -259,6 +261,9 @@ function HeroCaptureListener() {
     // pre-pass instead of the composed scene. A higher pixel ratio for this
     // one frame gives the Project Book a print-worthy cover.
     const previousRatio = gl.getPixelRatio();
+    const outlines = state.scene.getObjectByName(ARCHITECTURAL_OUTLINE_NAME);
+    const outlinesVisible = outlines?.visible;
+    if (outlines) outlines.visible = false;
     const height = gl.domElement.clientHeight || 1;
     try {
       gl.setPixelRatio(Math.min(3, Math.max(previousRatio, HERO_CAPTURE_HEIGHT / height)));
@@ -269,6 +274,7 @@ function HeroCaptureListener() {
       console.error("[hero] canvas capture failed", error);
       pending(null);
     } finally {
+      if (outlines) outlines.visible = outlinesVisible ?? true;
       gl.setPixelRatio(previousRatio);
     }
   });
@@ -411,6 +417,7 @@ function CameraRig({
   skimmers,
   ledRow,
   includeExternalStaircase,
+  planBounds,
   photoMode,
   infinityZone,
 }: {
@@ -428,6 +435,7 @@ function CameraRig({
   skimmers: SkimmerPlan;
   ledRow: readonly PoolLightPosition[];
   includeExternalStaircase: boolean;
+  planBounds: Outline;
   photoMode: boolean;
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
    * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
@@ -453,7 +461,7 @@ function CameraRig({
   const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
   const [, refreshVisibleFrame] = useState(0);
   useLayoutEffect(() => {
-    if (!infinityZone) return;
+    if (!infinityZone && focus !== "top") return;
     const tray = document.querySelector('[aria-label^="Passo "]');
     if (!tray) return;
     const observer = new ResizeObserver(() => refreshVisibleFrame(n => n + 1));
@@ -505,8 +513,8 @@ function CameraRig({
   const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping"].includes(focus);
   const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
   const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  const visibleFrame = infinityZone && detail
-    ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"]')).map(element => element.getBoundingClientRect()))
+  const visibleFrame = (infinityZone && detail) || focus === "top"
+    ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"], [data-technical-panel]')).map(element => element.getBoundingClientRect()))
     : { left: 0, top: 0, width: viewportSize.width - reservedRight, height: viewportSize.height };
   const fitFov = infinityZone && detail
     ? cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov
@@ -532,12 +540,7 @@ function CameraRig({
     pose = editingPose.current.pose;
   } else editingPose.current = null;
   if (focus === "top") {
-    const next = dimensionFrustum(outline, viewportSize.width / Math.max(1, viewportSize.height));
-    if (planFit.current?.key !== editKey) planFit.current = { key: editKey, ...next };
-    // Keep world scale while editing; expand only when geometry would clip.
-    const bounds = outlineBounds(outline);
-    if (bounds.spanX + 2.2 > planFit.current.width || bounds.spanZ + 2.2 > planFit.current.height)
-      planFit.current = { key: editKey, ...next };
+    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, visibleFrame) };
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
   } else planFit.current = null;
@@ -664,32 +667,6 @@ function CameraRig({
   return null;
 }
 
-/** Plan-only annotation of actual resolved geometry; never a mesh cover. */
-function InfinityTechnicalOutline({outline,zone,layout,y}:{outline:Outline;zone:RectangleInfinityZone;layout:ResolvedPoolLayout;y:number}) {
-  const contours=useMemo(()=>{
-    const polygons:Outline[]=[outline];
-    const access=layout.access;
-    if(access.placement) {
-      const p=access.placement,c=Math.cos(p.rotation),s=Math.sin(p.rotation);
-      const world=(points:Outline):Outline=>points.map(([x,z])=>[p.x+c*x+s*z,p.z-s*x+c*z]);
-      if(access.corner) for(const r of access.corner.radii) {
-        polygons.push(world(Array.from({length:25},(_,i)=>[r*Math.sin(i*Math.PI/48),r*Math.cos(i*Math.PI/48)] as const)));
-      } else if(layout.effectiveAccess==="internalSteps") for(let i=0;i<=access.steps;i++)
-        polygons.push(world([[-access.width/2,i*access.tread],[access.width/2,i*access.tread]]));
-    }
-    for(const element of layout.comfort.elements) for(const footprint of [element.footprint,
-      ...(element.tiers??[]).map(tier=>tier.footprint),
-      ...(element.steps??[]).map(step=>step.footprint),...(element.landing?[element.landing.footprint]:[])])
-      polygons.push([...footprint,footprint[0]!]);
-    return polygons;
-  },[outline,layout]);
-  return <group name="infinity-technical-plan-contours">
-    {contours.map((points,i)=><Line key={i} points={(i===0?[...points,points[0]!]:points).map(([x,z])=>[x,y,z] as [number,number,number])}
-      color="#223a45" lineWidth={i===0?2:1.2} depthTest={false} depthWrite={false} toneMapped={false} />)}
-    <Line points={zone.points.map(([x,z])=>[x,y,z] as [number,number,number])} color="#16838c" lineWidth={3}
-      depthTest={false} depthWrite={false} toneMapped={false} />
-  </group>;
-}
 
 /** Neutral showroom floor with a real opening for the basin. */
 function StudioFloor({
@@ -1133,6 +1110,28 @@ export default function PoolScene({
   // anchored), the access placement itself and, above ground, both ends of
   // the external staircase.
   const externalStairs = poolType === "above-ground" && features.includes("externalStaircase");
+  const planBounds = useMemo(() => {
+    const b = outlineBounds(outline);
+    // Include the actual shell/coping envelope; Infinity's receiver projects
+    // beyond it. No furniture/scenery can inflate this architectural fit.
+    const margin = copingOuterOffset(system, overflowType) + (infinityZone ? 0.5 : 0.05);
+    const points: [number, number][] = [
+      [b.minX-margin,b.minZ-margin], [b.maxX+margin,b.maxZ+margin],
+    ];
+    if (externalStairs) {
+      const stairs = planExternalStaircase({ outline, side: externalStairSide,
+        platformExtended: externalStairPlatformExtended, accessAnchor: lighting.accessPlan.placement,
+        copingOffset: copingOuterOffset(system, overflowType), infinityExcluded,
+        groundY: verticalLayout.groundY,
+        topY: system === "overflow" ? verticalLayout.waterY-0.001 : verticalLayout.copingY });
+      if (stairs) points.push(...stairs.footprint.map(p => [p[0], p[1]] as [number,number]));
+    }
+    return points;
+  }, [outline, system, overflowType, infinityZone, externalStairs, externalStairSide,
+    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout]);
+  const planView = focus === "top" && !photoMode;
+  const planRevision = JSON.stringify([outline, depth, features, resolvedLayout, system, overflowType,
+    poolType, copingThickness, materials.coping.id, externalStairSide, externalStairPlatformExtended, construction]);
   const deckObstacles = useMemo(() => {
     const points: { x: number; z: number }[] = [
       resolvedLayout.ladder?.plan.placement,
@@ -1316,6 +1315,7 @@ export default function PoolScene({
         intensity={SCENE_VISUAL_PRESET.lighting.sun.intensity[visualTheme]}
         color={SCENE_VISUAL_PRESET.lighting.sun.color}
         castShadow
+        shadow-intensity={planView ? 0.35 : 1}
         shadow-autoUpdate={false}
         // Canvas mounts asynchronously: the parent's layout effect can run
         // before this light exists. Allocate its cached shadow on first draw.
@@ -1415,6 +1415,7 @@ export default function PoolScene({
         poolType={poolType}
         copingThickness={copingThickness}
         showWater={showWater}
+        planView={planView}
         rawStructure={construction?.raw ? construction.structure ?? "REINFORCED_CONCRETE" : null}
         structureFamily={construction?.structure ?? null}
         showAccessories={construction?.showAccessories ?? true}
@@ -1490,8 +1491,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {infinityStage && infinityZone && technicalView && focus === "top" ? <InfinityTechnicalOutline
-        outline={outline} zone={infinityZone} layout={resolvedLayout} y={verticalLayout.copingY+0.004} /> : null}
+      {planView ? <ArchitecturalOutline revision={planRevision} /> : null}
 
       {system === "skimmer" && (construction?.showSystemComponents ?? true) ? (
         <Skimmers
@@ -1598,6 +1598,7 @@ export default function PoolScene({
         // Pool System camera -- that step's premium front view (both
         // skimmers, centred, from inside looking out) always wins.
         includeExternalStaircase={false}
+        planBounds={planBounds}
       />
 
       {/* Premium post pass -- only ever mounts (and only ever fetches its
