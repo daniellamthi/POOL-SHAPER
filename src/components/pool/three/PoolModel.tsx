@@ -47,6 +47,7 @@ import {
   type StoneMaps,
 } from "./stoneTextures";
 import type { CopingMaterialId } from "@/lib/pool/coping-materials";
+import { configureDeckCopingGrain } from "./deckCopingGrain";
 
 /** Each premium coping finish gets its own procedural stone bake (distinct
  * structural DNA -- vein/grain/pore character), never a shared texture with
@@ -880,8 +881,9 @@ export function PoolModel({
             "if (vTriSwap > 0.5) triBlendedWorldNormal = triBlendedWorldNormal.zyx;\nnormal = normalize(mat3(viewMatrix) * triBlendedWorldNormal);",
           ),
         );
+      if (materials.coping.id === "deck-marrone") configureDeckCopingGrain(shader);
     },
-    [copingDetail, materials.coping.moduleSize, copingAssetAspect],
+    [copingDetail, materials.coping.moduleSize, materials.coping.id, copingAssetAspect],
   );
 
   const configurePanelTriplanar = useCallback((shader: TriplanarShader) => {
@@ -939,8 +941,8 @@ export function PoolModel({
     () =>
       isVisibleOverflow
         ? new THREE.BufferGeometry()
-        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection),
-    [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, infinitySection],
+        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection, materials.coping.id === "deck-marrone"),
+    [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, infinitySection, materials.coping.id],
   );
   const overflowLip = useDisposable(
     () =>
@@ -1278,7 +1280,7 @@ export function PoolModel({
                       configureCopingTriplanar(shader);
                       excludeSubmergedDirectLights(shader, waterLevel);
                     }}
-                    customProgramCacheKey={() => `overflow-stone-continuity-v4-dry-${waterLevel}`}
+                    customProgramCacheKey={() => `overflow-stone-continuity-v4-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}`}
                     clearcoat={0}
                     clearcoatRoughness={0.12}
                     side={DoubleSide}
@@ -1420,7 +1422,7 @@ export function PoolModel({
                   configureCopingTriplanar(shader);
                   excludeSubmergedDirectLights(shader, waterLevel);
                 }}
-                customProgramCacheKey={() => `coping-bed-triplanar-v2-dry-${waterLevel}`}
+                customProgramCacheKey={() => `coping-bed-triplanar-v2-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}`}
                 side={DoubleSide}
               />
             )}
@@ -1445,7 +1447,7 @@ export function PoolModel({
                   // Dry stone: a submerged LED cannot light it through the shell.
                   excludeSubmergedDirectLights(shader, waterLevel);
                 }}
-                customProgramCacheKey={() => `coping-triplanar-v6-slab-dry-${waterLevel}`}
+                customProgramCacheKey={() => `coping-triplanar-v6-slab-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}`}
                 side={DoubleSide}
               />
             )}

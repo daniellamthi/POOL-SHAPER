@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 
@@ -24,6 +24,21 @@ const END_CLEARANCE = 0.03;
 const NOMINAL_SLAT_PITCH = 0.07;
 const SLAT_GAP = 0.0025;
 const SLAT_THICKNESS = 0.018;
+const LEADING_BAR_THICKNESS = 0.024;
+
+/** Resolve the upper plane from the actual configured coping/grille mesh,
+ * including its thickness, system-specific elevation and world transform. */
+export function automaticCoverRimTop(scene: THREE.Object3D): number | null {
+  for (const name of ["plan-coping", "overflow-grille"]) {
+    const rim = scene.getObjectByName(name);
+    if (!(rim instanceof THREE.Mesh) || !rim.geometry.getAttribute("position")?.count) continue;
+    rim.geometry.computeBoundingBox();
+    rim.updateWorldMatrix(true, false);
+    const bounds = rim.geometry.boundingBox?.clone().applyMatrix4(rim.matrixWorld);
+    if (bounds && Number.isFinite(bounds.max.y)) return bounds.max.y;
+  }
+  return null;
+}
 /** Travel of the slat mat, as a fraction of the full run per second. Fast
  * enough to follow the slider live, slow enough that a jump from the
  * "Aperta"/"Chiusa" presets still reads as the mat unrolling. */
@@ -49,6 +64,8 @@ function SlatMat({
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const bar = useRef<THREE.Mesh>(null);
+  const scene = useThree(state => state.scene);
+  const rimReady = useRef(false);
   const { minX, maxX, minZ, maxZ } = plan.footprint;
   const run = maxX - minX - END_CLEARANCE * 2;
   const width = maxZ - minZ - END_CLEARANCE * 2;
@@ -61,12 +78,16 @@ function SlatMat({
   useLayoutEffect(() => {
     const instances = mesh.current;
     if (!instances) return;
+    const topY = automaticCoverRimTop(scene);
+    rimReady.current = topY !== null;
+    if (topY === null) { instances.visible = false; if (bar.current) bar.current.visible = false; return; }
+    if (bar.current) bar.current.position.y = topY - LEADING_BAR_THICKNESS / 2;
     const transform = new THREE.Object3D();
     const colours = [new THREE.Color("#e8e7df"), new THREE.Color("#e3e3dc")];
     for (let index = 0; index < count; index += 1) {
       transform.position.set(
         start + direction * (index + 0.5) * pitch,
-        plan.waterY + 0.022,
+        topY - SLAT_THICKNESS / 2,
         (minZ + maxZ) / 2,
       );
       transform.updateMatrix();
@@ -76,11 +97,11 @@ function SlatMat({
     instances.instanceMatrix.needsUpdate = true;
     if (instances.instanceColor) instances.instanceColor.needsUpdate = true;
     instances.computeBoundingSphere();
-  }, [count, maxZ, minZ, pitch, plan.waterY, start, direction]);
+  }, [count, maxZ, minZ, pitch, plan, scene, start, direction]);
 
   useFrame(() => {
     const instances = mesh.current;
-    if (!instances) return;
+    if (!instances || !rimReady.current) return;
     const deployed = Math.round(count * progress.current);
     instances.count = deployed;
     instances.visible = deployed > 0;
@@ -101,10 +122,10 @@ function SlatMat({
       <mesh
         ref={bar}
         name="automatic-cover-leading-bar"
-        position={[start + direction * 0.009, plan.waterY + 0.024, (minZ + maxZ) / 2]}
+        position={[start + direction * 0.009, 0, (minZ + maxZ) / 2]}
         castShadow
       >
-        <boxGeometry args={[0.018, 0.024, width]} />
+        <boxGeometry args={[0.018, LEADING_BAR_THICKNESS, width]} />
         <StainlessSteelMaterial finish="brushed" brushRotation={Math.PI / 2} />
       </mesh>
     </group>

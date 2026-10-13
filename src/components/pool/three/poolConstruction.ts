@@ -162,6 +162,8 @@ export function createCopingSlabGeometry(
    * `null`/`undefined` (every pre-Infinity call site) is byte-identical to
    * before. */
   excludeSection: number | ReadonlySet<number> | null = null,
+  /** Deck Marrone alone: one solid run between real corners. */
+  continuousSides = false,
 ) {
   if (inner.length !== outer.length || inner.length < 3)
     throw new Error("Mismatched coping outlines");
@@ -226,11 +228,12 @@ export function createCopingSlabGeometry(
       continue;
     const start = corners[section]!,
       length = corners[section + 1]! - start;
-    const count = Math.max(1, Math.round(length / 0.62));
+    const count = continuousSides ? 1 : Math.max(1, Math.round(length / 0.62));
     for (let slab = 0; slab < count; slab++) {
       const from = start + (length * slab) / count,
         to = start + (length * (slab + 1)) / count;
-      const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5), to];
+      const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5),
+        ...(continuousSides ? [(from + to) / 2] : []), to].sort((a, b) => a - b);
       // Joints are laid square to the pool edge: a joint between two slabs
       // runs straight out across the coping (the outer point is the inner
       // point projected onto the outer edge), and only a true corner keeps
