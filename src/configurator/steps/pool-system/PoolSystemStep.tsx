@@ -1,6 +1,6 @@
 import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
-import { SKIMMER_FINISHES, SKIMMER_TYPES } from "@/lib/pool/config";
+import { SKIMMER_FINISHES, SELECTABLE_SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
 import { InfinitySideSelector } from "./InfinitySideSelector";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
@@ -65,7 +65,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
             <div className="flex flex-col gap-4 rounded-2xl border border-hairline p-5">
               <p className="label-xs">Tipo skimmer</p>
               <div className="grid gap-3 sm:grid-cols-2">
-                {SKIMMER_TYPES.map((option) => (
+                {SELECTABLE_SKIMMER_TYPES.map((option) => (
                   <OptionCard
                     key={option.id}
                     title={option.title}

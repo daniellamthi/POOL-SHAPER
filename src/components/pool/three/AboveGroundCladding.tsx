@@ -4,7 +4,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import type { Outline } from "@/lib/pool/types";
 import { offsetOutline } from "@/lib/pool/geometry";
 import { CLADDING, planCladding, type ExteriorPanelFinishId } from "@/lib/pool/above-ground";
-import { loadCopingTextureMaps } from "./stoneTextures";
+import { createWPCMaps, loadCopingTextureMaps } from "./stoneTextures";
 import { createWallGeometry } from "./poolGeometry";
 
 /**
@@ -77,7 +77,7 @@ export function AboveGroundCladding({
     [boards, backing],
   );
   const backingColor =
-    finish === "steel-satin" ? "#5d6063" : finish === "gres" ? "#6e665c" : "#8f8d88";
+    finish === "steel-satin" ? "#5d6063" : finish === "gres" ? "#6e665c" : finish === "wpc" ? "#51463d" : "#8f8d88";
   return (
     <group name="above-ground-cladding">
       <mesh name="cladding-backing" geometry={backing} receiveShadow>
@@ -95,6 +95,10 @@ const GRES_NORMAL = new THREE.Vector2(0.45, 0.45);
 /** The board finish, shared by the cladding and the external staircase so
  * the stair's sides always match the pool's panels. */
 export function CladdingMaterial({ finish }: { finish: ExteriorPanelFinishId }) {
+  const wpc = useMemo(() => finish === "wpc" ? createWPCMaps() : null, [finish]);
+  useEffect(() => () => {
+    if (wpc) Object.values(wpc).forEach((map) => map?.dispose());
+  }, [wpc]);
   const gres = useMemo(
     () => (finish === "gres" ? loadCopingTextureMaps("/textures/coping/gres") : null),
     [finish],
@@ -130,6 +134,35 @@ export function CladdingMaterial({ finish }: { finish: ExteriorPanelFinishId }) 
         roughnessMap={gres.roughnessMap}
         roughness={1}
         metalness={0}
+      />
+    );
+  if (finish === "wpc" && wpc)
+    return (
+      <meshStandardMaterial
+        key="wpc"
+        color="#e2dbd1"
+        map={wpc.colorMap}
+        normalMap={wpc.normalMap}
+        normalScale={[0.25, 0.25]}
+        roughnessMap={wpc.roughnessMap}
+        roughness={1}
+        metalness={0}
+        onBeforeCompile={(shader) => {
+          // The shared pool/stair enclosure material measures metres in world
+          // space, independent of each mesh's UVs, height or panel width.
+          // WPC grain runs along texture U: vertical, with 14 cm board courses.
+          shader.vertexShader = shader.vertexShader.replace("#include <uv_vertex>", `
+            #include <uv_vertex>
+            vec3 wpcWorld = (modelMatrix * vec4(position, 1.0)).xyz;
+            vec3 wpcNormal = normalize(mat3(modelMatrix) * normal);
+            float wpcAcross = abs(wpcNormal.x) > abs(wpcNormal.z) ? wpcWorld.z : wpcWorld.x;
+            vec2 wpcUv = vec2(wpcWorld.y / 2.2, wpcAcross / 0.14);
+            vMapUv = wpcUv;
+            vNormalMapUv = wpcUv;
+            vRoughnessMapUv = wpcUv;
+          `);
+        }}
+        customProgramCacheKey={() => "vertical-wpc-metric-v1"}
       />
     );
   return <meshStandardMaterial key="composite" color="#e2e0da" roughness={0.72} metalness={0} />;

@@ -274,12 +274,12 @@ export const SKIMMER_TYPES: ReadonlyArray<{
   },
   {
     id: "slim",
-    title: "Slim / Moderno",
+    title: "Slim Moderno",
     description: "Cornice sottile a basso profilo, bordo minimo, apertura più ampia.",
   },
   {
     id: "highWaterline",
-    title: "Livello acqua alto",
+    title: "Livello Acqua Alto",
     description: "Corpo basso posizionato in alto contro il bordo, per un livello quasi a filo.",
   },
   {
@@ -289,6 +289,9 @@ export const SKIMMER_TYPES: ReadonlyArray<{
       "Piastra senza cornice, quasi a filo, con una sottile fessura d'ombra nella parete.",
   },
 ];
+
+/** Legacy variants remain readable in saved projects, not selectable for new work. */
+export const SELECTABLE_SKIMMER_TYPES = SKIMMER_TYPES.filter(({ id }) => id === "slim" || id === "highWaterline");
 
 export const LINER_COLORS: ReadonlyArray<{
   id: LinerColor;

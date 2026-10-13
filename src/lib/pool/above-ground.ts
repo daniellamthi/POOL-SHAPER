@@ -30,6 +30,11 @@ export const EXTERIOR_PANEL_FINISHES = [
     title: "Gres porcellanato",
     description: "Lastre in gres effetto cemento, greige caldo opaco.",
   },
+  {
+    id: "wpc",
+    title: "WPC",
+    description: "Pannelli in composito legno-polimero marrone, con venatura verticale opaca.",
+  },
 ] as const;
 
 export type ExteriorPanelFinishId = (typeof EXTERIOR_PANEL_FINISHES)[number]["id"];

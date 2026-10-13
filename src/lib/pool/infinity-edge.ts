@@ -131,9 +131,12 @@ export function clampInfinityEdgeParams(
  * Structural design defaults in metres; indicative visualization dimensions,
  * not construction certification or manufacturer specifications.
  */
+/** Structural crest below the millimetric flowing water film, not coping. */
+export const infinityCrestY = (waterY: number) => waterY - 0.006;
+
 export const INFINITY_EDGE_DIMENSIONS = {
   /** Width of the water-covered structural crest. */
-  lipWidth: { min: 0.08, max: 0.3, default: 0.12 },
+  lipWidth: { min: 0.08, max: 0.3, default: 0.2 },
   /** Architectural drop to a shallow receiving trough, independent of basin depth. */
   dropHeight: { min: 0.1, max: 0.9, default: 0.55 },
   /** Receiving channel clear width, measured outward from the crest. */

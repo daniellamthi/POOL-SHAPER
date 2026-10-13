@@ -43,10 +43,10 @@ function NotFoundComponent() {
  * with no DevTools involved: message, stack, and the React component stack
  * when the router's error boundary captured one.
  */
-function formatErrorDiagnostics(error: Error, info?: { componentStack: string }): string {
+function formatErrorDiagnostics(error: unknown, info?: { componentStack: string }): string {
   const parts = [
-    `Message: ${error.message || "(no message)"}`,
-    error.stack ? `Stack:\n${error.stack}` : "Stack: (not available)",
+    `Message: ${error instanceof Error ? error.message || "(no message)" : String(error)}`,
+    error instanceof Error && error.stack ? `Stack:\n${error.stack}` : "Stack: (not available)",
   ];
   if (info?.componentStack) {
     parts.push(`Component stack:${info.componentStack}`);
@@ -58,7 +58,7 @@ function ErrorDiagnostics({
   error,
   info,
 }: {
-  error: Error;
+  error: unknown;
   info: { componentStack: string } | undefined;
 }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
@@ -102,7 +102,7 @@ function ErrorComponent({
   info,
   reset,
 }: {
-  error: Error;
+  error: unknown;
   info?: { componentStack: string };
   reset: () => void;
 }) {

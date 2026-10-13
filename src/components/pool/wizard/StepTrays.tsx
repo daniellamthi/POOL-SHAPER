@@ -12,7 +12,7 @@ import {
   POOL_TYPES,
   PROJECT_TYPES,
   SKIMMER_FINISHES,
-  SKIMMER_TYPES,
+  SELECTABLE_SKIMMER_TYPES,
 } from "@/lib/pool/config";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { PAVING, pavingId, pavingFormats, pavingLayout, PAVING_FORMATS } from "@/lib/pool/presentation";
@@ -82,7 +82,7 @@ const LINER_COPY: Record<string, string> = {
 /** Customer-facing Italian lines for the coping catalogue cards. */
 const COPING_COPY: Record<string, string> = {
   limestone: "Pietra calcarea chiara, grana fine e contemporanea.",
-  prun: "Pietra grigia con inclusioni minerali.",
+  prun: "Pietra crema con venature naturali.",
   travertine: "Pietra italiana calda, venatura naturale.",
   "anthracite-gres": "Gres porcellanato opaco, resistente e uniforme.",
   ardesia: "Ardesia naturale, scura e materica.",
@@ -359,7 +359,7 @@ export function SystemTray({ tab, setTab }: {
           <div className="flex flex-col gap-3">
             <GroupLabel>Modello</GroupLabel>
             <ChoiceGrid label="Tipo skimmer" dense>
-              {SKIMMER_TYPES.map((item) => (
+              {SELECTABLE_SKIMMER_TYPES.map((item) => (
                 <ChoiceCard
                   compact
                   key={item.id}
@@ -878,6 +878,7 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
 /** Card images for the exterior panels: a steel swatch drawn as boards,
  * and the real textures for gres and composite. */
 const PANEL_SWATCH: Record<string, string> = {
+  wpc: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><defs><pattern id="w" width="20" height="100" patternUnits="userSpaceOnUse"><rect width="20" height="100" fill="#80634a"/><path d="M1 0v100M6 0v100M12 0v100M18 0v100" stroke="#a38463" stroke-width=".6"/><path d="M0 0v100" stroke="#594735" stroke-width="1"/></pattern></defs><rect width="160" height="100" fill="url(#w)"/></svg>')}`,
   "steel-satin": `data:image/svg+xml;utf8,${encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#9a9da1"/><stop offset=".5" stop-color="#b9bcc0"/><stop offset="1" stop-color="#8e9195"/></linearGradient></defs><rect width="160" height="100" fill="url(#g)"/><g stroke="#6f7276" stroke-width="1.2"><line x1="40" y1="0" x2="40" y2="100"/><line x1="80" y1="0" x2="80" y2="100"/><line x1="120" y1="0" x2="120" y2="100"/></g></svg>',
   )}`,
@@ -1233,27 +1234,6 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
                 image={ill("time-night")}
                 selected={night}
                 onSelect={() => setSceneTime("night")}
-              />
-            ) : null}
-          </ChoiceGrid>
-          {/* Outdoor Villa / Indoor Wellness are Photo Mode environments
-              (Build 08), not realtime scenes: they are not offered here, so
-              the live preview never shows a choice that changes nothing. */}
-          {ctx.photoMode ? <GroupLabel>Immagine fotografica</GroupLabel> : null}
-          <ChoiceGrid label="Immagine fotografica" dense>
-            {ctx.photoMode ? (
-              <ChoiceCard
-                compact
-                title="Modalità foto"
-                description={
-                  ctx.photoMode.available
-                    ? "Immagine fotografica della stessa piscina, stessa geometria."
-                    : (ctx.photoMode.reason ?? "Disponibile su computer desktop.")
-                }
-                image={ill("photo")}
-                badge={ctx.photoMode.available ? undefined : "Desktop"}
-                selected={ctx.photoMode.active}
-                onSelect={() => ctx.photoMode?.available && ctx.photoMode.enter()}
               />
             ) : null}
           </ChoiceGrid>

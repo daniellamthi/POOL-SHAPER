@@ -22,12 +22,12 @@ export type StoneMaps = {
  * Colour space matters: BaseColor is authored in sRGB, while Normal/Roughness
  * are linear data and must NOT be gamma-decoded.
  */
-export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true): StoneMaps {
+export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true, hasNormalMap = true, mirroredRepeat = false): StoneMaps {
   const loader = new THREE.TextureLoader();
   const load = (name: string, srgb: boolean) => {
     const texture = loader.load(`${dir}/${name}.png`);
     texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.wrapS = texture.wrapT = mirroredRepeat ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.generateMipmaps = true;
@@ -35,7 +35,9 @@ export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true): Ston
   };
   return {
     colorMap: load("basecolor", true),
-    normalMap: load("normal", false),
+    // A photograph alone does not establish relief. Use a flat normal rather
+    // than interpreting mineral colour as invented holes or raised veins.
+    normalMap: hasNormalMap ? load("normal", false) : makeTexture(new Uint8Array([128, 128, 255, 255]), 1, false),
     roughnessMap: hasRoughnessMap ? load("roughness", false) : null,
   };
 }
@@ -199,13 +201,14 @@ export function createLimestoneMaps(size = 512): StoneMaps {
         const dy = py - iy - 0.5 - (hash(ix, iy + 9) - 0.5) * 0.4;
         const fleck =
           seed > 0.85 ? 1 - THREE.MathUtils.smoothstep(Math.hypot(dx, dy), 0.02, 0.06) : 0;
-        // Faint sedimentary bedding: very soft, low-contrast streaks along
-        // one axis, so the honed face reads as quarried stone, not plaster.
+        // Irregular sedimentary bedding, without periodic sine stripes.
+        // Integer periodic noise keeps the metre-scaled tile continuous.
         const bedding =
-          (valueNoise(u, v, 23) - 0.5) * 0.5 + Math.sin(Math.PI * 2 * 10 * v + cloud * 3) * 0.5; // whole periods: tiles seamlessly
-        height[y * size + x] = cloud * 0.026 + fineGrain * 0.01 - fleck * 0.06;
+          (valueNoise(u, v * 3, 7) - 0.5) * 0.65 +
+          (valueNoise(u * 2, v * 5, 11) - 0.5) * 0.35;
+        height[y * size + x] = cloud * 0.012 + fineGrain * 0.004 - fleck * 0.018;
         const value =
-          0.88 + (cloud - 0.5) * 0.26 + bedding * 0.02 + fineGrain * 0.04 - fleck * 0.09;
+          0.90 + (cloud - 0.5) * 0.14 + bedding * 0.025 + fineGrain * 0.012 - fleck * 0.055;
         const o = (y * size + x) * 4;
         color[o] = value * 255;
         color[o + 1] = (value - fleck * 0.006) * 255;

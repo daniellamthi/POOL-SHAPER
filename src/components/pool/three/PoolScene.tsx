@@ -420,6 +420,8 @@ function CameraRig({
   planBounds,
   photoMode,
   infinityZone,
+  externalStairPlan,
+  pellicanoPlacement,
 }: {
   accessPlan: SceneLightingPlan["accessPlan"];
   resolvedLayout: ResolvedPoolLayout;
@@ -440,6 +442,8 @@ function CameraRig({
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
    * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
   infinityZone: RectangleInfinityZone | null;
+  externalStairPlan: ReturnType<typeof planExternalStaircase>;
+  pellicanoPlacement: ReturnType<typeof planPellicano>;
 }) {
   const camera = useThree((state) => state.camera);
   const viewportSize = useThree((state) => state.size);
@@ -461,7 +465,7 @@ function CameraRig({
   const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
   const [, refreshVisibleFrame] = useState(0);
   useLayoutEffect(() => {
-    if (!infinityZone && focus !== "top") return;
+    if (!infinityZone && focus !== "top" && !["access","inox","shelf","hydromassage","bench","coping","paving","exterior-panel","external-stairs","pellicano","stair-lighting","liner","mosaic","skimmer-detail","overflow-hidden","overflow-visible","features"].includes(focus)) return;
     const tray = document.querySelector('[aria-label^="Passo "]');
     if (!tray) return;
     const observer = new ResizeObserver(() => refreshVisibleFrame(n => n + 1));
@@ -510,13 +514,14 @@ function CameraRig({
     }
   });
 
-  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping"].includes(focus);
+  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping",
+    ...(!infinityZone ? ["paving","exterior-panel","external-stairs","pellicano","stair-lighting","skimmer-detail","overflow-hidden","overflow-visible","features"] : [])].includes(focus);
   const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
   const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  const visibleFrame = (infinityZone && detail) || focus === "top"
+  const visibleFrame = detail || focus === "top"
     ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"], [data-technical-panel]')).map(element => element.getBoundingClientRect()))
     : { left: 0, top: 0, width: viewportSize.width - reservedRight, height: viewportSize.height };
-  const fitFov = infinityZone && detail
+  const fitFov = detail
     ? cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov
     : SCENE_VISUAL_PRESET.camera.fov;
   let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
@@ -533,6 +538,8 @@ function CameraRig({
       viewportAspect: visibleFrame.width / Math.max(1, visibleFrame.height),
       includeExternalStaircase,
       infinityZone,
+      externalStairPlan,
+      pellicanoPlacement,
     }));
   const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${frameToken}`;
   if (focus === "depth") {
@@ -552,7 +559,7 @@ function CameraRig({
     pose.position = eye.add(right).toArray() as [number, number, number];
     pose.target = target.add(right).toArray() as [number, number, number];
   }
-  if (infinityZone && detail) {
+  if (detail) {
     pose = offsetCameraToFrame(pose, SCENE_VISUAL_PRESET.camera.fov, viewportSize.width, viewportSize.height, visibleFrame);
   }
   // Material changes can recreate plans without moving their geometry.
@@ -619,7 +626,7 @@ function CameraRig({
     // animations/transitions -- it doesn't reach this Three.js-driven lerp.)
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     const largeMove = startPosition.current.distanceTo(goal.current) > Math.max(2, radius * 0.65);
-    duration.current = reducedMotion || largeMove ? 0 : 0.24;
+    duration.current = reducedMotion || (largeMove && (!detail || infinityZone)) ? 0 : 0.24;
     flying.current =
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;
@@ -1599,6 +1606,11 @@ export default function PoolScene({
         // skimmers, centred, from inside looking out) always wins.
         includeExternalStaircase={false}
         planBounds={planBounds}
+        externalStairPlan={externalStairs ? planExternalStaircase({outline, side:externalStairSide,
+          platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
+          copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,
+          groundY:verticalLayout.groundY, topY:system==="overflow"?verticalLayout.waterY-.001:verticalLayout.copingY}) : null}
+        pellicanoPlacement={pellicanoPlacement}
       />
 
       {/* Premium post pass -- only ever mounts (and only ever fetches its

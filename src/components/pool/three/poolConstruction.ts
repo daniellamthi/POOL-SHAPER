@@ -125,6 +125,29 @@ export const SKIMMER_PROFILES = {
   },
 } satisfies Record<SkimmerTypeId, object>;
 
+/** Square the two free ends beside an omitted Infinity run. Closed corners
+ * retain their mitres; non-Infinity outlines are returned unchanged.
+ * Project the outer endpoint onto the transverse plane through the inner
+ * endpoint, perpendicular to the remaining run (also valid after rotation). */
+export function squareInfinityCopingEnds(
+  inner: Outline, outer: Outline, excluded: ReadonlySet<number> | null,
+): Outline {
+  if (!excluded?.size || inner.length !== outer.length) return outer;
+  const n = inner.length;
+  return outer.map((point, i) => {
+    const previous = (i + n - 1) % n;
+    if (excluded.has(previous) === excluded.has(i)) return point;
+    const a = inner[excluded.has(previous) ? i : previous]!;
+    const b = inner[excluded.has(previous) ? (i + 1) % n : i]!;
+    const dx = b[0] - a[0], dz = b[1] - a[1];
+    const lengthSquared = dx * dx + dz * dz;
+    if (lengthSquared < 1e-12) return point;
+    const end = inner[i]!;
+    const along = ((point[0] - end[0]) * dx + (point[1] - end[1]) * dz) / lengthSquared;
+    return [point[0] - along * dx, point[1] - along * dz] as const;
+  });
+}
+
 /** Individually eased, full-thickness slabs, including real mitres at hard corners.
  * All slabs share one geometry/material draw; colour variation is per slab. */
 export function createCopingSlabGeometry(

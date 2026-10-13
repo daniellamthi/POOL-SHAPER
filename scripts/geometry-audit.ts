@@ -1183,7 +1183,7 @@ assert(
 );
 assert(
   POOL_FEATURES.map(({ id }) => id).join(",") ===
-    "ledLighting,hydromassage,sunShelf,integratedBench",
+    "ledLighting,stairLighting,hydromassage,sunShelf,integratedBench",
   "invalid pool features",
 );
 assert(
@@ -1201,8 +1201,8 @@ for (const mosaicFinish of MOSAIC_FINISHES) {
   });
   assert(materials.surface.textureUrl === mosaicFinish.texture, "invalid mosaic texture mapping");
   assert(
-    Math.abs(materials.surface.tileSize - 0.2) < 1e-9,
-    "an 8 x 8 mosaic module must cover 0.2 metres",
+    Math.abs(materials.surface.tileSize - mosaicFinish.tileSize) < 1e-9,
+    "mosaic physical module must match its calibrated catalog dimensions",
   );
 }
 

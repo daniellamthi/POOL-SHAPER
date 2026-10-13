@@ -14,23 +14,37 @@ export const COPING_MATERIALS = [
     subtitle: "Soft contemporary limestone",
     category: "Natural stone",
     description: "A soft, homogeneous limestone with a fine, quietly contemporary grain.",
-    color: "#ece0c8",
+    color: "#e5dfd3",
     // Honed stone: matte with a readable grain (0.1 read as smooth plastic).
     roughness: 0.82,
-    normalStrength: 0.3,
-    moduleSize: 0.45,
+    normalStrength: 0.22,
+    // Metres of stone per texture tile, independent from the slab format.
+    moduleSize: 1.2,
   },
   {
     id: "prun",
     title: "Pietra di Prun",
-    subtitle: "Grey stone with mineral inclusions",
+    subtitle: "Pietra crema con venature naturali",
     category: "Natural stone",
     description:
-      "A grey natural-stone finish with pale mineral inclusions, following the selected reference.",
-    color: "#91938e",
+      "Pietra naturale color crema con venature calde, dalla fotografia reale del campione di Prun.",
+    color: "#ffffff",
     roughness: 0.82,
-    normalStrength: 0.32,
+    normalStrength: 0,
     moduleSize: 0.4,
+    asset: {
+      dir: "/textures/coping/prun",
+      source: "Owner-supplied Prun stone photograph",
+      license: "User supplied for this project",
+      maps: "BaseColor only — no measured normal or roughness supplied",
+      resolution: 547,
+      normalMap: false,
+      roughnessMap: false,
+      mirroredRepeat: true,
+      // Preserve the photograph's proportions: provisional 0.40 × 0.60 m
+      // coverage, not a claim about the physical sample's measured size.
+      aspect: 365 / 547,
+    },
   },
   {
     id: "travertine",

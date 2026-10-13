@@ -19,8 +19,6 @@ import { skimmerServicePosition, SKIMMER_SERVICE_LID } from "@/lib/pool/skimmer-
 import { GROUND_LEVEL } from "@/lib/pool/vertical-layout";
 
 const CAVITY_COLOR = "#202829";
-const THROAT_LIGHT = "#e9ebe8";
-const THROAT_LIGHT_ALT = "#eef0ed";
 /** Dark reveal line used by the Architectural Flush variant's shadow-gap
  * groove -- distinct from `CAVITY_COLOR` (which reads as an open cavity)
  * because this one must read as a shallow cut line, not a hole. */
@@ -133,19 +131,19 @@ function StandardSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }:
       {/* White throat panels make the opening read as a real inset channel. */}
       <mesh position={[-0.192, 0.017, -0.066]}>
         <boxGeometry args={[0.016, 0.115, 0.15]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.58} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0.192, 0.017, -0.066]}>
         <boxGeometry args={[0.016, 0.115, 0.15]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.58} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, 0.069, -0.066]}>
         <boxGeometry args={[0.4, 0.014, 0.15]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.58} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, -0.035, -0.066]}>
         <boxGeometry args={[0.4, 0.014, 0.15]} />
-        <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
 
       {/* Geometric 48 x 19.5 cm face frame with a raised inner profile.
@@ -255,19 +253,19 @@ function SlimSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: Ass
           so panels are narrower than Standard's, letting the throat dominate. */}
       <mesh position={[-(throatWidth / 2 + 0.005), vc, -0.06]}>
         <boxGeometry args={[0.01, sideBarHeight, 0.14]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[throatWidth / 2 + 0.005, vc, -0.06]}>
         <boxGeometry args={[0.01, sideBarHeight, 0.14]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, topBarY - barThickness / 2 - 0.005, -0.06]}>
         <boxGeometry args={[throatWidth, 0.01, 0.14]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, bottomBarY + barThickness / 2 + 0.005, -0.06]}>
         <boxGeometry args={[throatWidth, 0.01, 0.14]} />
-        <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.42} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
 
       {/* Thin, crisp-edged bars (small bevel radius) -- the "modern" reveal
@@ -357,21 +355,21 @@ function HighWaterlineSkimmerAssembly({
 
       <mesh position={[-(throatWidth / 2 + 0.006), vc, -0.055]}>
         <boxGeometry args={[0.012, sideBarHeight, 0.13]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.58} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[throatWidth / 2 + 0.006, vc, -0.055]}>
         <boxGeometry args={[0.012, sideBarHeight, 0.13]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.58} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       {/* Only a thin dry lip above the waterline -- most of the opening
           below it is the submerged water plane. */}
       <mesh position={[0, topBarY - barThickness / 2 - 0.005, -0.055]}>
         <boxGeometry args={[throatWidth, 0.01, 0.13]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.58} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, bottomBarY + barThickness / 2 + 0.005, -0.055]}>
         <boxGeometry args={[throatWidth, 0.01, 0.13]} />
-        <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
 
       <RoundedBox
@@ -463,19 +461,19 @@ function FlushSkimmerAssembly({ frameMaterial, contactAOMap, wallThickness }: As
 
       <mesh position={[-(throatWidth / 2 + 0.004), vc, -0.05]}>
         <boxGeometry args={[0.008, sideBarHeight, 0.12]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[throatWidth / 2 + 0.004, vc, -0.05]}>
         <boxGeometry args={[0.008, sideBarHeight, 0.12]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, topBarY - barThickness / 2 - 0.004, -0.05]}>
         <boxGeometry args={[throatWidth, 0.008, 0.12]} />
-        <meshStandardMaterial color={THROAT_LIGHT} roughness={0.5} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
       <mesh position={[0, bottomBarY + barThickness / 2 + 0.004, -0.05]}>
         <boxGeometry args={[throatWidth, 0.008, 0.12]} />
-        <meshStandardMaterial color={THROAT_LIGHT_ALT} roughness={0.42} />
+        <primitive object={frameMaterial} attach="material" />
       </mesh>
 
       {/* Near-flush bars -- almost no protrusion, sharp edge (minimal bevel). */}
@@ -660,7 +658,7 @@ export function Skimmers({
             smoothness={2}
             position={[0, 0, 0]}
           >
-            <meshStandardMaterial color="#595954" roughness={0.8} />
+            <primitive object={frameMaterial} attach="material" />
           </RoundedBox>
           <RoundedBox
             args={[0.228, 0.004, 0.153]}

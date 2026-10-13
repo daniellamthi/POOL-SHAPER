@@ -4,7 +4,7 @@ import type { CameraIntent } from "./camera";
 /** Ephemeral presentation intent, never part of ProjectConfiguration. */
 export type VisualFocus = "STRUCTURE_OVERVIEW" | "POOL_OVERVIEW" | "DIMENSIONS_TOP" | "DEPTH" | "STAIRS" | "INOX" |
   "SUN_SHELF" | "HYDROMASSAGE" | "BENCH" | "SKIMMER" | "OVERFLOW" | "INFINITY" |
-  "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "COVER" | "TECHNICAL" |
+  "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "STAIR_LIGHTING" | "EXTERIOR_PANEL" | "EXTERNAL_STAIRS" | "PELLICANO" | "COVER" | "TECHNICAL" |
   "TECHNICAL_SKIMMER" | "TECHNICAL_RETURNS" | "TECHNICAL_DRAINS" |
   "TECHNICAL_OVERFLOW" | "TECHNICAL_COMPENSATION" | "TECHNICAL_COVER";
 export interface FocusRequest { focus: VisualFocus; revision: number }
@@ -27,16 +27,21 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
     case "setPoolStructure": return "STRUCTURE_OVERVIEW";
     case "setFinish": case "setLinerColor": case "setMosaicFinish": return "INTERIOR_FINISH";
     case "setCopingMaterial": return "COPING";
-    case "setPaving": return "PAVING";
-    case "setLedColor": case "setLedIntensity": case "setSceneTime": return "LIGHTING";
-    case "setInternalStairType": case "toggleInternalSteps": case "setPoolAccess": return accessFocus(c);
+    case "setPaving": case "setPavingFormat": return "PAVING";
+    case "setExteriorPanelFinish": return "EXTERIOR_PANEL";
+    case "setExternalStairSide": case "setExternalStairPlatformExtended": return "EXTERNAL_STAIRS";
+    case "setLedColor": case "setLedIntensity": return "LIGHTING";
+    case "setSceneTime": return c.system !== "infinity" && !c.features.includes("ledLighting") && c.features.includes("stairLighting") ? "STAIR_LIGHTING" : "LIGHTING";
+    case "setInternalStairType": case "setInternalStairMirrored": case "toggleInternalSteps": case "setPoolAccess": return accessFocus(c);
     case "setHydromassageVariant": return accessFocus(c);
     case "toggleInoxLadder": return c.features.includes("inoxLadder") || c.poolAccess === "stainlessSteelLadder" ? "INOX" : accessFocus(c);
     case "togglePoolFeature":
       if (action.value === "ledLighting") return "LIGHTING";
+      if (action.value === "stairLighting") return c.system === "infinity" ? accessFocus(c) : "STAIR_LIGHTING";
+      if (action.value === "externalStaircase") return c.features.includes("externalStaircase") ? "EXTERNAL_STAIRS" : "POOL_OVERVIEW";
       if (action.value === "integratedBench" && c.features.includes("integratedBench")) return "BENCH";
       return accessFocus(c);
-    case "toggleEquipment": return action.value === "automaticCover" ? "COVER" : "TECHNICAL";
+    case "toggleEquipment": return action.value === "automaticCover" ? "COVER" : action.value === "pellicano" ? c.equipment.includes("pellicano") ? "PELLICANO" : "POOL_OVERVIEW" : "TECHNICAL";
     case "setCoverPosition": case "setCoverExtension": return "COVER";
     case "updateRenovation":
       if (action.value && typeof action.value === "object" && ("targetFinish" in action.value || "linerColor" in action.value || "mosaicFinish" in action.value)) return "INTERIOR_FINISH";
@@ -69,6 +74,11 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
     case "INFINITY": return "infinity";
     case "INTERIOR_FINISH": return c.finish === "mosaic" ? "mosaic" : "liner";
     case "COPING": return "coping";
+    case "PAVING": return "paving";
+    case "EXTERIOR_PANEL": return "exterior-panel";
+    case "EXTERNAL_STAIRS": return "external-stairs";
+    case "PELLICANO": return "pellicano";
+    case "STAIR_LIGHTING": return "stair-lighting";
     case "LIGHTING": return c.system === "infinity" ? "infinity" : "features";
     case "COVER": case "TECHNICAL_COVER": return "cover";
     case "TECHNICAL_SKIMMER": return "skimmer-detail";
@@ -78,10 +88,8 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
   }
 }
 
-/** Wizard steps where the whole pool must stay readable (Sistema acqua
- * through Presentazione): an option choice there reframes the whole basin
- * with breathing room instead of cutting to a detail close-up. Close-ups
- * stay available on request from the viewport's view menu. */
+/** Preserve the previously approved Infinity routing. Other systems keep
+ * the selected detail; only final presentation returns to the whole pool. */
 export const WHOLE_POOL_STEP_IDS: ReadonlySet<string> = new Set([
   "system",
   "access",
@@ -103,6 +111,8 @@ const WHOLE_POOL_INTENTS: ReadonlySet<CameraIntent> = new Set<CameraIntent>([
   "infinity",
 ]);
 export function wholePoolIntent(intent: CameraIntent, stepId: string | undefined, system?: PoolConfig["system"]): CameraIntent {
+  if (system !== "infinity" && stepId === "style" && intent === "structure") return "liner";
+  if (system !== "infinity") return stepId === "review" && !WHOLE_POOL_INTENTS.has(intent) ? "review" : intent;
   if (system === "infinity" && stepId !== "review" &&
     ["access", "inox", "shelf", "hydromassage", "bench"].includes(intent)) return intent;
   return stepId !== undefined && WHOLE_POOL_STEP_IDS.has(stepId) && !WHOLE_POOL_INTENTS.has(intent)

@@ -5,6 +5,13 @@ const mosaicTextureUrl = (filename: string) => `/textures/mosaico/${encodeURICom
 export const MOSAIC_TEXTURE_MODULE_SIZE_METERS = 8 * 0.025;
 export const PVC_TEXTURE_MODULE_SIZE_METERS = 0.7;
 
+// Catalog photographs: eight tesserae per axis, except DD99152F (nine).
+// Keep the same 25 mm nominal pitch rather than shrinking that finish.
+const mosaicModuleSize = (filename: string) =>
+  filename === "DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG"
+    ? 9 * 0.025
+    : MOSAIC_TEXTURE_MODULE_SIZE_METERS;
+
 export interface InteriorTextureMetadata {
   /** Physical dimensions represented by one repeat. PVC values await catalogue calibration. */
   physicalWidth: number;
@@ -46,21 +53,21 @@ export const MOSAIC_FINISHES: ReadonlyArray<MosaicFinishDefinition> = MOSAIC_ASS
     name,
     preview: mosaicTextureUrl(filename),
     texture: mosaicTextureUrl(filename),
-    tileSize: MOSAIC_TEXTURE_MODULE_SIZE_METERS,
+    tileSize: mosaicModuleSize(filename),
     textureMetadata: {
-      physicalWidth: MOSAIC_TEXTURE_MODULE_SIZE_METERS,
-      physicalHeight: MOSAIC_TEXTURE_MODULE_SIZE_METERS,
-      tileSize: MOSAIC_TEXTURE_MODULE_SIZE_METERS,
+      physicalWidth: mosaicModuleSize(filename),
+      physicalHeight: mosaicModuleSize(filename),
+      tileSize: mosaicModuleSize(filename),
       colorSpace: "srgb",
       textureType: "base-color",
       repeatStrategy: "world-space",
     },
     maps: { baseColorMap: mosaicTextureUrl(filename) },
     materialSettings: {
-      roughness: 0.12,
+      roughness: 0.32,
       metalness: 0,
-      clearcoat: 0.55,
-      clearcoatRoughness: 0.07,
+      clearcoat: 0.24,
+      clearcoatRoughness: 0.22,
     },
   }),
 );

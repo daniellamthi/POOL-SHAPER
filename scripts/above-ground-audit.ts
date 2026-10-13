@@ -129,7 +129,7 @@ for (let length = 3; length <= 12; length += 0.5)
 // --- 2. Finishes: catalogue, normalisation, independence -----------------
 equal(
   EXTERIOR_PANEL_FINISHES.map((f) => f.id),
-  ["steel-satin", "composite-light", "gres"],
+  ["steel-satin", "composite-light", "gres", "wpc"],
   "panel finishes from existing materials only",
 );
 equal(exteriorPanelFinish(undefined), DEFAULT_EXTERIOR_PANEL_FINISH, "default satin steel");
@@ -169,6 +169,11 @@ equal(
 // --- 3. Internal stairs ON/OFF -------------------------------------------
 const noSteps = reducer(above, { type: "toggleInternalSteps" } as Action);
 equal(noSteps.config.poolAccess, null, "internal stairs OFF");
+equal(
+  reducer(noSteps, { type: "setPoolType", value: "above-ground" } as Action).config.poolAccess,
+  null,
+  "reselecting above-ground preserves internal stairs OFF",
+);
 equal(
   describeSelection("access", noSteps.config),
   "Scala interna disattivata",
@@ -255,6 +260,30 @@ equal(
 
 // --- 6. Save / restore / summary / photo spec -----------------------------
 const renovation = createInitialState().renovation;
+const wpcPanels = reducer(finished, { type: "setExteriorPanelFinish", value: "wpc" } as Action);
+equal(wpcPanels.config.copingMaterial, finished.config.copingMaterial, "WPC panels preserve coping");
+equal(wpcPanels.config.paving, finished.config.paving, "WPC panels preserve paving");
+equal(wpcPanels.config.pavingFormat, finished.config.pavingFormat, "WPC panels preserve paving format");
+equal(wpcPanels.config.linerColor, finished.config.linerColor, "WPC panels preserve liner");
+equal(
+  reducer(wpcPanels, { type: "setCopingMaterial", value: "travertine" } as Action).config.exteriorPanelFinish,
+  "wpc",
+  "changing coping preserves WPC panels",
+);
+equal(
+  reducer(wpcPanels, { type: "setPaving", value: "limestone" } as Action).config.exteriorPanelFinish,
+  "wpc",
+  "changing paving preserves WPC panels",
+);
+const restoredWpc = parseProjectConfiguration(
+  serializeProjectConfiguration(toProjectConfiguration("ag-wpc", wpcPanels.config, renovation)),
+);
+equal(restoredWpc.config.exteriorPanelFinish, "wpc", "restore keeps WPC exterior panels");
+equal(
+  (createPhotoSceneSpec(restoredWpc).selection as Partial<PoolConfig>).exteriorPanelFinish,
+  "wpc",
+  "photo spec keeps WPC exterior panels",
+);
 const saved = parseProjectConfiguration(
   serializeProjectConfiguration(toProjectConfiguration("ag-audit", withOptions.config, renovation)),
 );
@@ -282,6 +311,7 @@ const rows = (config: PoolConfig) =>
   buildProjectSummary(toProjectConfiguration("ag-sum", config, renovation)).sections.flatMap((s) =>
     s.rows.map((r) => `${r.label}:${r.value}`),
   );
+ok(rows(restoredWpc.config).includes("Pannelli esterni:WPC"), "PDF and quote summary name WPC panels");
 ok(
   rows(withOptions.config).includes("Pannelli esterni:Gres porcellanato"),
   "summary names the panels",

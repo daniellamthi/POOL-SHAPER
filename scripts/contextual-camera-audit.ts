@@ -8,6 +8,8 @@ import { infinityZonesForOutline } from "../src/lib/pool/infinity-edge";
 import { coastalCamera } from "../src/components/pool/three/coastalLayout";
 import { parseProjectConfiguration } from "../src/lib/pool/project";
 import { configuredPoolLayout } from "../src/lib/pool/resolved-layout";
+import { planExternalStaircase } from "../src/components/pool/three/externalStaircasePlan";
+import { planPellicano } from "../src/lib/pool/above-ground";
 import { buildOutline, offsetOutline } from "../src/lib/pool/geometry";
 import { copingOuterOffset } from "../src/components/pool/three/poolConstruction";
 import { getPoolVerticalLayout } from "../src/lib/pool/vertical-layout";
@@ -92,8 +94,8 @@ equal(reducer(partialState,{type:"setDimension",key:"length",value:12}).config.i
 for(const intent of ["access","inox","shelf","hydromassage","bench"] as const) {
  equal(wholePoolIntent(intent,"access","infinity"),intent);
  equal(wholePoolIntent(intent,"review","infinity"),"review");
- equal(wholePoolIntent(intent,"access","skimmer"),"review");
- equal(wholePoolIntent(intent,"access","overflow"),"review");
+ equal(wholePoolIntent(intent,"access","skimmer"),intent);
+ equal(wholePoolIntent(intent,"access","overflow"),intent);
 }
 equal(visibleCameraFrame({left:0,top:0,width:390,height:350},[{left:0,top:100,width:390,height:600}]),{left:0,top:0,width:390,height:100});
 equal(visibleCameraFrame({left:0,top:0,width:1100,height:450},[{left:0,top:470,width:1100,height:400}]),{left:0,top:0,width:1100,height:450});
@@ -159,6 +161,54 @@ for (const [length,width] of [[6,3],[8,4],[12,5]]) for (const side of [0,1,2,3])
    const point=new Vector3(x,y,z).project(camera);
    ok(Math.abs(point.x)<0.98&&Math.abs(point.y)<0.98,"Infinity internal/inox complete element fits with margin");
   }
+ }
+}
+for(const [action,expected] of [["setPavingFormat","PAVING"],["setExteriorPanelFinish","EXTERIOR_PANEL"],["setExternalStairSide","EXTERNAL_STAIRS"],["setExternalStairPlatformExtended","EXTERNAL_STAIRS"],["setInternalStairMirrored","STAIRS"]] as const)equal(focusForAction({type:action},base),expected);
+equal(contextualIntent("PAVING",base),"paving");
+equal(contextualIntent("EXTERIOR_PANEL",base),"exterior-panel");
+equal(contextualIntent("EXTERNAL_STAIRS",base),"external-stairs");
+equal(contextualIntent("PELLICANO",base),"pellicano");
+equal(contextualIntent("STAIR_LIGHTING",base),"stair-lighting");
+equal(focusForAction({type:"toggleEquipment",value:"pellicano"},{...base,equipment:["pellicano"]}),"PELLICANO");
+equal(focusForAction({type:"setSceneTime"},{...base,features:["stairLighting"]}),"STAIR_LIGHTING");
+equal(focusForAction({type:"setSceneTime"},{...base,system:"infinity",features:["stairLighting"]}),"LIGHTING");
+equal(focusForAction({type:"togglePoolFeature",value:"stairLighting"},{...base,system:"infinity",features:["stairLighting"]}),focusForAction({type:"setInternalStairType"},{...base,system:"infinity",features:["stairLighting"]}));
+equal(wholePoolIntent("structure","style","skimmer"),"liner");
+equal(wholePoolIntent("structure","style","infinity"),"structure");
+for(const [length,width,depth] of [[6,3,1.2],[8,4,1.5],[12,5,1.5]])for(const aspect of [1440/419,390/310,430/353]) {
+ const c={...base,poolType:"above-ground" as const,dimensions:{...base.dimensions,length:length!,width:width!,depth:depth!}};
+ const outline=buildOutline(c.shape,c.dimensions,c.controlPoints),layout=getPoolVerticalLayout({poolType:c.poolType,system:"skimmer",depth:depth!,copingThickness:.04});
+ const resolved=configuredPoolLayout(c),p=planPellicano(outline,[]);
+ for(const side of ["long","short"] as const) {
+  const stairs=planExternalStaircase({outline,side,groundY:layout.groundY,topY:layout.copingY,copingOffset:.18,accessAnchor:resolved.access.placement});
+  ok(!!stairs,"valid fixture for external camera test");
+  const pose=getCameraPose({intent:"external-stairs",outline,layout,depth:1.5,skimmers:{positions:[],count:0} as never,externalStairPlan:stairs,viewportAspect:aspect,verticalFov:34});
+  const camera=new PerspectiveCamera(34,aspect,.05,500);camera.position.set(...pose.position);camera.lookAt(new Vector3(...pose.target));camera.updateMatrixWorld();
+  for(const [x,z] of stairs!.footprint)for(const y of [layout.groundY,layout.copingY+1.05]) {
+   const v=new Vector3(x,y,z).project(camera);ok(Math.abs(v.x)<.9&&Math.abs(v.y)<.9&&v.z>-1&&v.z<1,"actual stair/guard envelope fits with margins");
+  }
+ }
+ for(const intent of ["paving","exterior-panel","pellicano"] as const) {
+  const pose=getCameraPose({intent,outline,layout,depth:1.5,skimmers:{positions:[],count:0} as never,pellicanoPlacement:p,viewportAspect:aspect});
+  ok([...pose.target,...pose.position].every(Number.isFinite),"parametric product detail is finite");
+ }
+ for(const feature of ["sunShelf","hydromassage"] as const) {
+  const r=configuredPoolLayout({...base,dimensions:c.dimensions,features:[feature,"stairLighting"]});
+  const groundLayout=getPoolVerticalLayout({poolType:"in-ground",system:"skimmer",depth:1.5,copingThickness:.04});
+  const pose=contextualAccessCamera("stair-lighting",r,groundLayout,outline,34,aspect)!;
+  ok(!!pose,"comfort staircase micro-spots have a dedicated camera");
+  const cam=new PerspectiveCamera(34,aspect,.05,500);cam.position.set(...pose.position);cam.lookAt(new Vector3(...pose.target));cam.updateMatrixWorld();
+  for(const spot of r.stairMicroSpots) {const v=new Vector3(spot.x,spot.y,spot.z).project(cam);ok(Math.abs(v.x)<.9&&Math.abs(v.y)<.9,"actual micro-spots fit with margins");}
+ }
+}
+for (const [length,width] of [[6,3],[8,4],[12,5]]) for (const aspect of [1440/419,390/310,430/353]) {
+ const c={...base,dimensions:{...base.dimensions,length:length!,width:width!}};
+ const outline=buildOutline(c.shape,c.dimensions,c.controlPoints);
+ const layout=getPoolVerticalLayout({poolType:"in-ground",system:"skimmer",depth:1.5,copingThickness:.04});
+ const pose=getCameraPose({intent:"features",outline,layout,depth:1.5,skimmers:{positions:[],count:0} as never,viewportAspect:aspect,verticalFov:34});
+ const camera=new PerspectiveCamera(34,aspect,.05,500);camera.position.set(...pose.position);camera.lookAt(new Vector3(...pose.target));camera.updateMatrixWorld();
+ for(const [x,z] of outline) for(const y of [layout.floorY,layout.copingY+.7]) {
+  const v=new Vector3(x,y,z).project(camera);ok(Math.abs(v.x)<.9&&Math.abs(v.y)<.9&&v.z>-1&&v.z<1,"LED colour overview retains basin/coping/access envelope");
  }
 }
 console.log(`PASS: ${checks} contextual camera checks — semantics, orthographic metric scale, persistence isolation, actual access/comfort, stable edits, mobile aspect.`);

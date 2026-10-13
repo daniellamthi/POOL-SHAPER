@@ -5,7 +5,7 @@ import { CladdingMaterial } from "./AboveGroundCladding";
 import { planExternalStaircase, type ExternalStaircaseProps } from "./externalStaircasePlan";
 import { createContactAOGradientMap } from "./textures";
 import { createWoodDeckMaps, createWPCMaps, loadCopingTextureMaps, type StoneMaps } from "./stoneTextures";
-import type { CopingMaterialId } from "@/lib/pool/coping-materials";
+import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
 import { DEFAULT_EXTERIOR_PANEL_FINISH, type ExteriorPanelFinishId } from "@/lib/pool/above-ground";
 
 type Point = readonly [number,number,number];
@@ -22,9 +22,18 @@ export function ExternalStaircase({ outline, groundY, topY, copingOffset, infini
     tread: { id: CopingMaterialId; color: string; roughness: number; assetDir: string|null };
   }) {
   const timber = tread.id === "wpc" || tread.id === "deck-marrone";
-  const maps = useMemo(() => tread.assetDir ? loadCopingTextureMaps(tread.assetDir)
-    : tread.id === "wpc" ? createWPCMaps() : tread.id === "deck-marrone" ? createWoodDeckMaps() : null,
-    [tread.assetDir,tread.id]);
+  const maps = useMemo(() => {
+    if (tread.id === "prun" && tread.assetDir) {
+      const definition = COPING_MATERIALS.find(m => m.id === "prun")!;
+      const maps = loadCopingTextureMaps(tread.assetDir, false, false, true);
+      // Tread UVs already divide world metres by 1.2. Match the coping's
+      // metric photo footprint rather than stretching the portrait sample.
+      maps.colorMap.repeat.set(1.2 / definition.moduleSize, 1.2 * definition.asset.aspect / definition.moduleSize);
+      return maps;
+    }
+    return tread.assetDir ? loadCopingTextureMaps(tread.assetDir)
+    : tread.id === "wpc" ? createWPCMaps() : tread.id === "deck-marrone" ? createWoodDeckMaps() : null;
+  }, [tread.assetDir,tread.id]);
   useEffect(() => () => { if(maps) Object.values(maps).forEach(map => map?.dispose()); },[maps]);
   const layout = useMemo(() => planExternalStaircase({outline,groundY,topY,copingOffset,infinityExcluded,side,platformExtended,accessAnchor}),
     [outline,groundY,topY,copingOffset,infinityExcluded,side,platformExtended,accessAnchor]);

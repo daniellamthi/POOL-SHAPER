@@ -183,7 +183,7 @@ function createInitialState(): State {
       system: "skimmer",
       overflowType: "hidden",
       skimmerFinish: "white",
-      skimmerType: "standard",
+      skimmerType: "slim",
       finish: "liner",
       linerColor: "motionBlueSky602",
       mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
@@ -272,6 +272,7 @@ function configurationReducer(state: State, action: Action): State {
       };
     }
     case "setPoolType": {
+      if (config.poolType === action.value) return state;
       const structure = structureSupportsPoolType(config.structure, action.value)
         ? config.structure
         : null;

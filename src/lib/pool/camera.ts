@@ -53,6 +53,7 @@ function overviewDirection(
 export type CameraIntent =
   | "structure"
   | "depth" | "inox" | "shelf" | "hydromassage" | "bench" | "coping"
+  | "paving" | "exterior-panel" | "external-stairs" | "pellicano" | "stair-lighting"
   | "top"
   /** Above-ground elevations: the full exterior volume, square to a side,
    * from the ground contact to the coping. */
@@ -84,6 +85,23 @@ export interface CameraPose {
   target: CameraPoint;
 }
 
+/** Fit a real component envelope, with the same physical margin at every size. */
+export function fitComponentCamera(points: readonly CameraPoint[], direction: CameraPoint, fov: number, aspect: number): CameraPose {
+  const target = new Vector3(...points[0]!);
+  const min = target.clone(), max = target.clone();
+  for (const p of points) { min.min(new Vector3(...p)); max.max(new Vector3(...p)); }
+  target.copy(min).add(max).multiplyScalar(.5);
+  const eye = new Vector3(...direction).normalize();
+  const right = new Vector3(0,1,0).cross(eye).normalize(), up = eye.clone().cross(right);
+  const tanY = Math.tan(fov*Math.PI/360)*.84, tanX = tanY*Math.max(.2,aspect);
+  let distance = 1;
+  for (const p of points) {
+    const v = new Vector3(...p).sub(target);
+    distance = Math.max(distance, v.dot(eye)+Math.max(Math.abs(v.dot(right))/tanX,Math.abs(v.dot(up))/tanY));
+  }
+  return { target: target.toArray() as [number,number,number], position: target.addScaledVector(eye,distance+.15).toArray() as [number,number,number] };
+}
+
 /** World-space orthographic frustum: the actual plan plus paving and labels. */
 export function dimensionFrustum(outline: Outline, aspect: number) {
   const b = outlineBounds(outline);
@@ -94,6 +112,12 @@ export function dimensionFrustum(outline: Outline, aspect: number) {
 
 /** Frames the SAME resolved comfort/ladder geometry used by PoolModel. */
 export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedPoolLayout, layout: PoolVerticalLayout, outline: Outline, fov: number, aspect: number, infinityZone?: RectangleInfinityZone | null): CameraPose | null {
+  if (intent === "stair-lighting" && !infinityZone && resolved.stairMicroSpots.length) {
+    const spots=resolved.stairMicroSpots, points:CameraPoint[]=[];
+    for(const spot of spots)for(const dx of [-.6,.6])for(const dz of [-.4,.4])for(const dy of [-.15,.25])points.push([spot.x+dx,spot.y+dy,spot.z+dz]);
+    const dir=spots.reduce((v,s)=>[v[0]+s.dir[0],v[1]+s.dir[1]] as [number,number],[0,0] as [number,number]);
+    return fitComponentCamera(points,[dir[0]/spots.length,1.25,dir[1]/spots.length],fov,aspect);
+  }
   if (intent === "access" && infinityZone) return getAccessDetailCamera(resolved.access, layout, fov, aspect, true);
   if (intent === "inox") {
     const plan = resolved.ladder?.plan ?? (resolved.access.ladderDepths.length ? resolved.access : null);
@@ -119,6 +143,11 @@ export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedP
     ...(element.steps ?? []).map(s => s.topY), ...(element.landing ? [element.landing.topY] : [])];
   const floor = (element.steps?.at(-1)?.topY ?? layout.floorY) - (element.riser ?? 0);
   const low = Math.min(floor, ...levels), high = Math.max(...levels, ...(infinityZone ? [layout.copingY + 0.08] : []));
+  if (!infinityZone) {
+    const envelope:CameraPoint[]=[];
+    for(const px of [b.minX-.12,b.maxX+.12])for(const pz of [b.minZ-.12,b.maxZ+.12])for(const y of [layout.floorY,layout.copingY+.08])envelope.push([px,y,pz]);
+    return fitComponentCamera(envelope,[nx+nz*.25,1.35,nz-nx*.25],fov,aspect);
+  }
   const target: CameraPoint = [x, infinityZone ? (low + high) / 2 : layout.waterY - 0.55, z];
   const radius = Math.hypot(b.spanX + 0.7, b.spanZ + 0.7, infinityZone ? high - low + 0.3 : 1.7) / 2;
   const half = Math.atan(Math.tan(fov * Math.PI / 360) * Math.min(1, Math.max(0.2, aspect)));
@@ -657,9 +686,13 @@ export function getCameraPose({
   includeExternalStaircase = false,
   infinityZone = null,
   accessPlan,
+  externalStairPlan,
+  pellicanoPlacement,
 }: {
   intent: CameraIntent;
   accessPlan?: SceneLightingPlan["accessPlan"];
+  externalStairPlan?: { footprint: readonly (readonly [number,number])[]; outward: readonly [number,number]; walk: readonly [number,number] } | null;
+  pellicanoPlacement?: { x:number; z:number; inward: readonly [number,number] } | null;
   outline: Outline;
   layout: PoolVerticalLayout;
   depth: number;
@@ -680,6 +713,31 @@ export function getCameraPose({
   const safeDepth = Math.max(0.01, depth);
   const radius = Math.max(1, Math.hypot(bounds.spanX, bounds.spanZ, safeDepth) / 2);
   const verticalCentre = (layout.floorY + layout.wallTopY) / 2;
+  if (intent === "stair-lighting" && accessPlan) {
+    const pose = getAccessDetailCamera(accessPlan,layout,verticalFov,viewportAspect);
+    if (pose) return pose;
+  }
+  if (intent === "external-stairs" && externalStairPlan) {
+    const s = externalStairPlan;
+    const points:CameraPoint[] = s.footprint.flatMap(([x,z])=>[layout.groundY,layout.copingY+1.05].map(y=>[x,y,z] as CameraPoint));
+    return fitComponentCamera(points,[s.outward[0]+s.walk[0]*.5,.7,s.outward[1]+s.walk[1]*.5],verticalFov,viewportAspect);
+  }
+  if (intent === "pellicano" && pellicanoPlacement) {
+    const p=pellicanoPlacement, [nx,nz]=p.inward, tx=nz,tz=-nx;
+    const points:CameraPoint[]=[];
+    for(const along of [-.25,1.25])for(const across of [-.45,.45])for(const y of [layout.waterY-.05,layout.copingY+1.15])points.push([p.x+nx*along+tx*across,y,p.z+nz*along+tz*across]);
+    return fitComponentCamera(points,[nx+tx*.7,.65,nz+tz*.7],verticalFov,viewportAspect);
+  }
+  if (intent === "paving" || intent === "exterior-panel") {
+    const reference=getFrontWallReference(outline,skimmers), [x,z]=reference.point, [nx,nz]=reference.inward, [tx,tz]=reference.tangent;
+    const points:CameraPoint[]=[];
+    if(intent==="paving") {
+      for(const along of [-1.5,1.5])for(const out of [.45,2.25])points.push([x-nx*out+tx*along,layout.groundY,z-nz*out+tz*along]);
+      return fitComponentCamera(points,[-nx+tx*.55,1.6,-nz+tz*.55],verticalFov,viewportAspect);
+    }
+    for(const along of [-1.4,1.4])for(const y of [layout.groundY,layout.copingY+.08])points.push([x-nx*.18+tx*along,y,z-nz*.18+tz*along]);
+    return fitComponentCamera(points,[-nx+tx*.35,.32,-nz+tz*.35],verticalFov,viewportAspect);
+  }
   if (intent === "top") {
     const extent = Math.max(bounds.spanZ + 4, (bounds.spanX + 4) / Math.max(0.25, viewportAspect));
     const height = extent / (2 * Math.tan(verticalFov * Math.PI / 360));
@@ -707,6 +765,12 @@ export function getCameraPose({
   }
   if (intent === "coping") {
     const reference = getFrontWallReference(outline, skimmers);
+    if(!infinityZone) {
+      const [x,z]=reference.point,[nx,nz]=reference.inward,[tx,tz]=reference.tangent;
+      const points:CameraPoint[]=[];
+      for(const along of [-1.2,1.2])for(const out of [-.55,.15])for(const y of [layout.copingY-.12,layout.copingY+.05])points.push([x+nx*out+tx*along,y,z+nz*out+tz*along]);
+      return fitComponentCamera(points,[nx+tx*.4,.8,nz+tz*.4],verticalFov,viewportAspect);
+    }
     return detailPose({ focus: reference, targetY: layout.copingY, cameraY: layout.copingY + 3.1, distance: 3.8 / Math.min(1, Math.max(0.4, viewportAspect)), tangentAmount: 1.3 });
   }
   if (intent === "access" && accessPlan) {
@@ -778,6 +842,17 @@ export function getCameraPose({
   }
 
   if (intent === "features") {
+    if (!infinityZone) {
+      // Colour selection previews the whole illuminated basin, not just a lens.
+      const points: CameraPoint[] = [];
+      for (const x of [bounds.minX-.45,bounds.maxX+.45])
+        for (const z of [bounds.minZ-.45,bounds.maxZ+.45])
+          for (const y of [layout.floorY,layout.copingY+.8]) points.push([x,y,z]);
+      if (externalStairPlan) for (const [x,z] of externalStairPlan.footprint)
+        for (const y of [layout.groundY,layout.copingY+1.05]) points.push([x,y,z]);
+      const rotation = ledRow[0]?.rotation ?? 0;
+      return fitComponentCamera(points,[Math.sin(rotation)+Math.cos(rotation)*.08,.8,Math.cos(rotation)-Math.sin(rotation)*.08],verticalFov,viewportAspect);
+    }
     return getFeaturesCamera({ outline, layout, centre, radius, ledRow });
   }
 

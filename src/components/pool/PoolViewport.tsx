@@ -338,9 +338,6 @@ export const PoolViewport = memo(function PoolViewport({
                   <DropdownMenuItem onSelect={onToggleTechnicalView}>
                     {scene.technicalView ? "Chiudi vista tecnica" : "Vista tecnica"}
                   </DropdownMenuItem>
-                  {premiumPresentationAvailable ? <DropdownMenuItem onSelect={onGeneratePhotorealisticRender}>
-                    Premium Visualization · prepara
-                  </DropdownMenuItem> : null}
                 </>
               )}
             </DropdownMenuContent>
@@ -388,37 +385,6 @@ export const PoolViewport = memo(function PoolViewport({
             <span aria-hidden className="mx-0.5 h-4 w-px bg-hairline" />
             <ToolButton onClick={onReframe} icon={<Focus />} label="Riquadra" />
           </div>
-          {scene.photoMode || !premiumPresentationAvailable ? null : (
-            <Button
-              type="button"
-              variant={renderPhase === "complete" ? "viewportActive" : "viewport"}
-              size="sm"
-              onClick={onGeneratePhotorealisticRender}
-              title="Prepara l’ambiente della futura vista fotografica; rendering non ancora disponibile"
-            >
-              {renderPhase === "rendering" ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  {renderProgress
-                    ? `Rendering… ${Math.round((renderProgress.current / renderProgress.total) * 100)}%`
-                    : "Rendering…"}
-                  <X className="size-3.5" strokeWidth={1.5} />
-                </>
-              ) : renderPhase === "complete" ? (
-                <>
-                  <Download />
-                  Download Render
-                </>
-              ) : (
-                <>
-                  <Aperture />
-                  {renderPhase === "error"
-                    ? "Retry Photorealistic Render"
-                    : "Premium Visualization"}
-                </>
-              )}
-            </Button>
-          )}
         </div>
       </div>
     </div>

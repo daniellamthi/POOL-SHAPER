@@ -473,16 +473,6 @@ function ConfiguratorLayout() {
     },
     captureHero,
     captureDayNight,
-    photoMode: {
-      active: photoMode,
-      available: ACTIVE_RENDERING_QUALITY.id === "experience" && !photoModeUnsupported,
-      reason: photoModeUnsupported
-        ? "Il rendering fotografico non è supportato da questo dispositivo."
-        : "Disponibile su computer desktop.",
-      enter: () => {
-        if (!photoMode) togglePhotoMode();
-      },
-    },
   };
   const RenovationComponent = RENOVATION_COMPONENTS[step] ?? ProjectTypeStep;
   const trayContent = renovationWorkflow ? (
