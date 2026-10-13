@@ -31,6 +31,7 @@ import type { TechnicalPlan } from "@/lib/pool/technical-plan";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
 
 const PoolScene = lazy(() => import("./three/PoolScene"));
+const HybridPhotoStudio = lazy(() => import("./HybridPhotoStudio"));
 
 type ViewportProps = SceneProps & {
   technicalPlan: TechnicalPlan;
@@ -199,6 +200,10 @@ export const PoolViewport = memo(function PoolViewport({
 }: ViewportProps) {
   const samples = usePhotoModeSamples();
   const exportReady = scene.photoMode && samples >= PHOTO_MODE_EXPORT_READY_SAMPLES;
+  // Replace, rather than hide, the live Canvas: one scene/environment in memory.
+  if (scene.photoMode && premiumPresentationAvailable) return <Suspense fallback={<ViewportFallback />}>
+    <HybridPhotoStudio scene={scene} onClose={onTogglePhotoMode} />
+  </Suspense>;
   const renderButtonLabel =
     renderPhase === "rendering"
       ? renderProgress
@@ -338,8 +343,8 @@ export const PoolViewport = memo(function PoolViewport({
                   <DropdownMenuItem onSelect={onToggleTechnicalView}>
                     {scene.technicalView ? "Chiudi vista tecnica" : "Vista tecnica"}
                   </DropdownMenuItem>
-                  {premiumPresentationAvailable ? <DropdownMenuItem onSelect={onGeneratePhotorealisticRender}>
-                    Premium Visualization · prepara
+                  {premiumPresentationAvailable ? <DropdownMenuItem onSelect={onTogglePhotoMode}>
+                    Premium Visualization · Photo Mode
                   </DropdownMenuItem> : null}
                 </>
               )}
@@ -393,8 +398,8 @@ export const PoolViewport = memo(function PoolViewport({
               type="button"
               variant={renderPhase === "complete" ? "viewportActive" : "viewport"}
               size="sm"
-              onClick={onGeneratePhotorealisticRender}
-              title="Prepara l’ambiente della futura vista fotografica; rendering non ancora disponibile"
+              onClick={onTogglePhotoMode}
+              title="Apri Photo Mode: stessa piscina, viste curate ed esportazione immagine"
             >
               {renderPhase === "rendering" ? (
                 <>

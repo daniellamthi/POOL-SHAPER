@@ -10,7 +10,9 @@ import { shelfStairGeometry } from "../src/components/pool/three/PoolComfortMode
 import { buildFloorProfile } from "../src/lib/pool/floor-profile";
 import { buildOutline } from "../src/lib/pool/geometry";
 import { getPoolVerticalLayout } from "../src/lib/pool/vertical-layout";
-import { clampInfinityEdgeParams } from "../src/lib/pool/infinity-edge";
+import { clampInfinityEdgeParams, infinityCrestY, infinityExclusion, clampInfinityEdgeDimensions } from "../src/lib/pool/infinity-edge";
+import { clearOfInfinityEdge } from "../src/lib/pool/infinity-access";
+import { infinityContainmentLevels } from "../src/components/pool/three/infinityContainment";
 import { DEFAULT_CONTROL_POINTS, DEFAULT_DIMENSIONS } from "../src/lib/pool/config";
 import { POOL_BORDER_PRESET } from "../src/configurator/materials/visual-presets";
 import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
@@ -200,7 +202,7 @@ for (const length of [6, 8, 10, 12])
           check(dividerC.topY === frontC!.topY, `${tag}: CLOSED dividerTop === frontWallTop`);
           check(
             dividerC.topY === lc.comfort.elements[0]!.topY &&
-              Math.abs(dividerC.topY - (system === "infinity" ? Math.max(hc.landing!.topY, ...hc.steps!.map(step => step.topY)) : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
+              Math.abs(dividerC.topY - (system === "infinity" ? infinityCrestY(hc.landing!.topY + 0.22) : hc.landing!.topY + 0.22 - H.wallWaterDepth)) < 1e-9,
             `${tag}: wall top is the shared parametric quota`,
           );
           check(Math.abs(thin(frontC!.footprint) - H.lipThickness) < 1e-6, `${tag}: front wall 15 cm`);
@@ -468,19 +470,33 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
       const resolved = configuredPoolLayout(c), h = hydroOf(resolved);
       const tag = `Infinity ${length}x${width} side${side}/${variant}/${depth}/${sloped}`;
       if (!h) { check(!resolved.comfort.availability.hydromassage.available, `${tag}: unavailable is explicit`); continue; }
-      const sideReturn=tier(h,"sideReturn");
-      check(side % 2 === 0 ? !!sideReturn : !sideReturn, `${tag}: missing Infinity flank has a dedicated closure only where needed`);
-      if(sideReturn) check(h.jets!.some(j=>near(j,sideReturn.footprint)),`${tag}: return jets backed by solid wall`);
+      check(!tier(h,"sideReturn"), `${tag}: shared Infinity wall is not duplicated by a second inner wall`);
+      const outline=buildOutline(c.shape,c.dimensions,c.controlPoints);
+      const verticalLayout=getPoolVerticalLayout({poolType:"in-ground",system:"infinity",overflowType:"hidden",depth,copingThickness:0});
+      const dims = clampInfinityEdgeDimensions(undefined);
+      const crest = infinityContainmentLevels(dims, verticalLayout.waterY).crestY;
+      check(dims.lipWidth === 0.2, `${tag}: Infinity spill wall nominal thickness 20 cm`);
+      check(crest < verticalLayout.copingY, `${tag}: lowered crest is below surrounding coping`);
       const firstTread = Math.max(h.landing!.topY, ...h.steps!.map(step => step.topY));
       for (const part of h.tiers!.filter(t => ["divider","frontWall","sideReturn"].includes(t.role)))
-        check(Math.abs(part.topY-firstTread)<1e-9, `${tag}: both dividers and opposite closure aligned with first tread`);
-      check(h.topY === firstTread, `${tag}: A/B wall quota derives from actual stairs`);
+        check(Math.abs(part.topY-crest)<1e-9, `${tag}: every divider exactly aligned with constructed Infinity crest`);
+      check(h.topY === crest && h.topY > firstTread, `${tag}: A/B wall quota is not the first tread`);
+      const exclusion = infinityExclusion(outline, c.infinityEdge!, c.shape)!;
+      for (const p of [h.landing!.footprint, ...h.steps!.map(s=>s.footprint)])
+        check(clearOfInfinityEdge(outline, exclusion, p), `${tag}: access retains Infinity clearance`);
+      if (side % 2 === 0) {
+        const axis = exclusion.axis === "x" ? 0 : 1;
+        const seat = tier(h,"sideSeat")!;
+        check(seat.footprint.some(p=>Math.abs(p[axis]-exclusion.coordinate)<1e-9), `${tag}: widened seat joins Infinity inner face without gap`);
+        check(h.footprint.some(p=>Math.abs(p[axis]-exclusion.coordinate)<1e-9), `${tag}: hydro extends to shared spill wall`);
+        const values = outline.map(p=>p[axis]);
+        check(h.footprint.every(p=>p[axis]>=Math.min(...values)-1e-9 && p[axis]<=Math.max(...values)+1e-9), `${tag}: no hydro geometry crosses the spill crest`);
+        check(h.jets!.some(j=>Math.abs((axis===0?j.x:j.z)-exclusion.coordinate)<1e-9), `${tag}: jets mounted on shared backrest`);
+      }
       for (const jet of h.jets!) check(jet.y + H.jetDiameter/2 <= h.topY - 0.009, `${tag}: complete jet bezel below wall top`);
       const parts=[...h.tiers!,h.landing!,...h.steps!];
       for(let i=0;i<parts.length;i++) for(let j=i+1;j<parts.length;j++)
         check(!overlap(parts[i]!.footprint,parts[j]!.footprint),`${tag}: no solid overlap ${i}/${j}`);
-      const outline=buildOutline(c.shape,c.dimensions,c.controlPoints);
-      const verticalLayout=getPoolVerticalLayout({poolType:"in-ground",system:"infinity",overflowType:"hidden",depth,copingThickness:0});
       const floor=buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout,sunShelf:true,infinityEdge:c.infinityEdge!});
       const solid=shelfStairGeometry(h,floor);
       check(watertight(solid),`${tag}: closed union mesh`); solid.dispose();

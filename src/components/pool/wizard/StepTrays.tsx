@@ -82,7 +82,7 @@ const LINER_COPY: Record<string, string> = {
 /** Customer-facing Italian lines for the coping catalogue cards. */
 const COPING_COPY: Record<string, string> = {
   limestone: "Pietra calcarea chiara, grana fine e contemporanea.",
-  prun: "Pietra grigia con inclusioni minerali.",
+  prun: "Pietra crema con venature naturali.",
   travertine: "Pietra italiana calda, venatura naturale.",
   "anthracite-gres": "Gres porcellanato opaco, resistente e uniforme.",
   ardesia: "Ardesia naturale, scura e materica.",

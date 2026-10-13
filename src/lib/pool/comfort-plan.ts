@@ -7,6 +7,7 @@ import type { FloorProfileModel } from "./floor-profile";
 import type { HydromassageVariant, Outline, PoolConfig, PoolFeatureId, PoolShapeId, PoolType, SystemType } from "./types";
 import type { InfinityExclusion } from "./walls";
 import { clearOfInfinityEdge, INFINITY_ACCESS_CLEARANCE } from "./infinity-access";
+import { infinityCrestY } from "./infinity-edge";
 
 export type ComfortKind = "sunShelf" | "integratedBench" | "hydromassage";
 
@@ -317,12 +318,11 @@ export function resolveComfortPlan({
     const inner = partition0 + side * H.partitionThickness;
     const outerPoolWall = flightAtMin ? wallMax : wallMin;
     const outerIsInfinity = excludedWall(infinityExcluded, crossAxis, outerPoolWall);
-    const outerWall = outerIsInfinity
-      ? flightAtMin
-        ? (longX ? shelf.rect.maxZ : shelf.rect.maxX)
-        : (longX ? shelf.rect.minZ : shelf.rect.minX)
-      : outerPoolWall;
-    const outer = outerWall + side * H.wallOverlap;
+    // The tub meets the Infinity shell's inner face. That existing spill wall
+    // is its shared backrest: do not build a second parallel wall inside it.
+    // The flight retains the original safe candidate and is never relocated.
+    const outerWall = outerPoolWall;
+    const outer = outerWall + (outerIsInfinity ? 0 : side * H.wallOverlap);
     const end = shelf.totalRun;
     const lip = end - H.lipThickness;
     // Local frame: `a` metres from the head wall, `c` across the head wall.
@@ -333,9 +333,7 @@ export function resolveComfortPlan({
         : { minX: Math.min(c0, c1), maxX: Math.max(c0, c1), minZ: Math.min(p, q), maxZ: Math.max(p, q) };
     };
     const back = -H.wallOverlap;
-    // When this flank faces Infinity it has no pool wall behind the seat.
-    // Close the tub inside its existing safe footprint, never across the lip.
-    const seatBack = outerIsInfinity ? outerWall - side * H.partitionThickness : outerWall;
+    const seatBack = outerWall;
     const benchInner = seatBack - side * H.benchDepth;
     const interiorWidth = Math.abs(seatBack - inner);
     const seatTop = waterY - H.seatWaterDepth;
@@ -344,7 +342,7 @@ export function resolveComfortPlan({
     const floorUnder = Math.max(...corners.map(([x, z]) => floorProfile.floorYAt(x, z)));
     const tubFloor = waterY - H.tubWaterDepth;
     const raisedFloor = tubFloor > floorUnder + 0.05;
-    if (!clearOfInfinityEdge(outline, infinityExcluded, rectOutline(whole)))
+    if (!outerIsInfinity && !clearOfInfinityEdge(outline, infinityExcluded, rectOutline(whole)))
       availability.hydromassage = { available: false, reason: "Spazio insufficiente per tenere la vasca lontana dal bordo Infinity." };
     else if (interiorWidth < H.minInteriorWidth || lip - H.benchDepth < H.minLegroom)
       availability.hydromassage = { available: false, reason: "Spazio insufficiente per vasca, panca e scala rettilinea con misure ergonomiche." };
@@ -357,15 +355,11 @@ export function resolveComfortPlan({
       const front = frontWall ? lip : end;
       const innerBenchEdge = inner + side * H.benchDepth;
       const tubInner = frontWall ? inner : innerBenchEdge;
-      // Both Infinity dividers share the first tread's actual elevation,
-      // including the opposite closure. Seating and jets keep their own levels.
-      const firstTreadY = Math.max(shelf.landing.topY, ...shelf.steps.map(step => step.topY));
-      const wallTop = system === "infinity" ? firstTreadY : waterY - H.wallWaterDepth;
+      // Match the actual lowered spill crest, never the surrounding coping
+      // or the first tread. Seat, jet and micro-spot elevations are unchanged.
+      const wallTop = system === "infinity" ? infinityCrestY(waterY) : waterY - H.wallWaterDepth;
       const tiers: Array<{ footprint: Outline; topY: number; role: HydroTierRole }> = [
         { role: "divider", footprint: rectOutline(box(back, end, partition0, inner)), topY: wallTop },
-        ...(outerIsInfinity
-          ? [{ role: "sideReturn" as const, footprint: rectOutline(box(back, end, seatBack, outer)), topY: wallTop }]
-          : []),
         ...(frontWall
           ? [{ role: "frontWall" as const, footprint: rectOutline(box(lip, end, inner, outerIsInfinity ? seatBack : outer)), topY: wallTop }]
           : []),

@@ -86,6 +86,8 @@ export type { PhotoModeQuality };
 // Split into its own chunk: only fetched when Experience quality is active,
 // so Configuration (today's default) never downloads the postprocessing lib.
 const PremiumPostFX = lazy(() => import("./PremiumPostFX"));
+const HybridPhotoController = lazy(() => import("./HybridPhotoController"));
+const HybridEnvironment = lazy(() => import("./HybridEnvironment"));
 // Same reasoning: three-gpu-pathtracer is a substantial library that only
 // Photo Mode needs, so the live configurator never pays for it.
 const PhotoModeRenderer = lazy(() =>
@@ -96,6 +98,7 @@ export type SceneFocus = CameraIntent;
 export type SceneTimeOfDay = "day" | "night";
 
 export interface SceneProps {
+  hybridPhoto?: import("@/lib/pool/hybrid-photo").HybridPhotoRequest;
   construction?: import("@/lib/pool/construction-presentation").ConstructionPresentation;
   outline: Outline;
   shape: PoolShapeId;
@@ -184,6 +187,7 @@ function SceneMood({
   baseExposure,
   baseEnvironment,
   coastalDaylight = false,
+  indoorPhoto = false,
   sky,
   sun,
   auxiliary,
@@ -193,6 +197,7 @@ function SceneMood({
   baseExposure: number;
   baseEnvironment: number;
   coastalDaylight?: boolean;
+  indoorPhoto?: boolean;
   sky: React.RefObject<HemisphereLight | null>;
   sun: React.RefObject<DirectionalLight | null>;
   auxiliary: React.RefObject<SpotLight | null>;
@@ -219,17 +224,17 @@ function SceneMood({
     const t = blend.current;
     const preset = SCENE_VISUAL_PRESET.dusk;
 
-    gl.toneMappingExposure = MathUtils.lerp(baseExposure, preset.exposure, t);
-    scene.environmentIntensity = MathUtils.lerp(baseEnvironment, preset.environment, t);
+    gl.toneMappingExposure = indoorPhoto ? 1.1 : MathUtils.lerp(baseExposure, preset.exposure, t);
+    scene.environmentIntensity = indoorPhoto ? .75 : MathUtils.lerp(baseEnvironment, preset.environment, t);
     scratch.copy(dayColor).lerp(duskColor, t);
     if (scene.background instanceof Color) scene.background.copy(scratch);
     if (scene.fog) scene.fog.color.copy(scratch);
     if (sky.current)
-      sky.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sky : baseSky.current, preset.skyIntensity, t);
+      sky.current.intensity = indoorPhoto ? .12 : MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sky : baseSky.current, preset.skyIntensity, t);
     if (sun.current)
-      sun.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sun : baseSun.current, preset.sunIntensity, t);
+      sun.current.intensity = indoorPhoto ? 0 : MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sun : baseSun.current, preset.sunIntensity, t);
     if (auxiliary.current) {
-      auxiliary.current.intensity = MathUtils.lerp(baseAux.current, preset.auxiliaryIntensity, t);
+      auxiliary.current.intensity = indoorPhoto ? 0 : MathUtils.lerp(baseAux.current, preset.auxiliaryIntensity, t);
     }
   });
   return null;
@@ -420,6 +425,8 @@ function CameraRig({
   planBounds,
   photoMode,
   infinityZone,
+  externalStairPlan,
+  pellicanoPlacement,
 }: {
   accessPlan: SceneLightingPlan["accessPlan"];
   resolvedLayout: ResolvedPoolLayout;
@@ -440,6 +447,8 @@ function CameraRig({
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
    * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
   infinityZone: RectangleInfinityZone | null;
+  externalStairPlan: ReturnType<typeof planExternalStaircase>;
+  pellicanoPlacement: ReturnType<typeof planPellicano>;
 }) {
   const camera = useThree((state) => state.camera);
   const viewportSize = useThree((state) => state.size);
@@ -461,7 +470,7 @@ function CameraRig({
   const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
   const [, refreshVisibleFrame] = useState(0);
   useLayoutEffect(() => {
-    if (!infinityZone && focus !== "top") return;
+    if (!infinityZone && focus !== "top" && !["access","inox","shelf","hydromassage","bench","coping","paving","exterior-panel","external-stairs","pellicano","stair-lighting","liner","mosaic","skimmer-detail","overflow-hidden","overflow-visible","features"].includes(focus)) return;
     const tray = document.querySelector('[aria-label^="Passo "]');
     if (!tray) return;
     const observer = new ResizeObserver(() => refreshVisibleFrame(n => n + 1));
@@ -510,13 +519,14 @@ function CameraRig({
     }
   });
 
-  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping"].includes(focus);
+  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping",
+    ...(!infinityZone ? ["paving","exterior-panel","external-stairs","pellicano","stair-lighting","skimmer-detail","overflow-hidden","overflow-visible","features"] : [])].includes(focus);
   const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
   const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  const visibleFrame = (infinityZone && detail) || focus === "top"
+  const visibleFrame = detail || focus === "top"
     ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"], [data-technical-panel]')).map(element => element.getBoundingClientRect()))
     : { left: 0, top: 0, width: viewportSize.width - reservedRight, height: viewportSize.height };
-  const fitFov = infinityZone && detail
+  const fitFov = detail
     ? cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov
     : SCENE_VISUAL_PRESET.camera.fov;
   let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
@@ -533,6 +543,8 @@ function CameraRig({
       viewportAspect: visibleFrame.width / Math.max(1, visibleFrame.height),
       includeExternalStaircase,
       infinityZone,
+      externalStairPlan,
+      pellicanoPlacement,
     }));
   const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${frameToken}`;
   if (focus === "depth") {
@@ -552,7 +564,7 @@ function CameraRig({
     pose.position = eye.add(right).toArray() as [number, number, number];
     pose.target = target.add(right).toArray() as [number, number, number];
   }
-  if (infinityZone && detail) {
+  if (detail) {
     pose = offsetCameraToFrame(pose, SCENE_VISUAL_PRESET.camera.fov, viewportSize.width, viewportSize.height, visibleFrame);
   }
   // Material changes can recreate plans without moving their geometry.
@@ -619,7 +631,7 @@ function CameraRig({
     // animations/transitions -- it doesn't reach this Three.js-driven lerp.)
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     const largeMove = startPosition.current.distanceTo(goal.current) > Math.max(2, radius * 0.65);
-    duration.current = reducedMotion || largeMove ? 0 : 0.24;
+    duration.current = reducedMotion || (largeMove && !detail) ? 0 : 0.24;
     flying.current =
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;
@@ -670,6 +682,7 @@ function CameraRig({
 
 /** Neutral showroom floor with a real opening for the basin. */
 function StudioFloor({
+  photoRelief = false,
   outline,
   size,
   theme,
@@ -683,6 +696,7 @@ function StudioFloor({
   paving,
   pavingFormat,
 }: {
+  photoRelief?: boolean;
   outline: Outline;
   size: number;
   theme: Theme;
@@ -821,7 +835,7 @@ function StudioFloor({
       <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
         {premiumInfinity && infinityZone && coastalMap ? <CoastalGroundMaterial map={coastalMap}
           rotation={coastalPhotoRotation(infinityZone)} outline={outline} projectionHeight={COAST_PHOTO_CAPTURE.height}
-          timeOfDay={sceneTime} /> : <meshStandardMaterial
+          timeOfDay={sceneTime} photographicRelief={photoRelief} /> : <meshStandardMaterial
           key={
             premiumInfinity
               ? `coastal-photo-near-${theme}`
@@ -965,9 +979,12 @@ export default function PoolScene({
   photoMode,
   photoModeQuality,
   onPhotoModeUnsupported,
+  hybridPhoto,
 }: SceneProps) {
   const controls = useRef<OrbitControlsImpl | null>(null);
   const [coastalStatus, setCoastalStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [hybridReady,setHybridReady]=useState(false);
+  const hybridRoom=hybridPhoto && (hybridPhoto.environment==="outdoor-villa"||hybridPhoto.environment==="indoor-wellness");
   const [coastalMap, setCoastalMap] = useState<Texture | null>(null);
   const radius = Math.hypot(length, width) / 2;
   const visualTheme: Theme =
@@ -1198,7 +1215,9 @@ export default function PoolScene({
     () => outline.map(([x, z]) => `${x.toFixed(4)},${z.toFixed(4)}`).join(";"),
     [outline],
   );
-  const sunPosition: [number, number, number] = system === "infinity" && infinityZone
+  const sunPosition: [number, number, number] = hybridPhoto?.environment === "outdoor-villa"
+    ? [radius * 1.5, radius * 1.8, radius * 2]
+    : system === "infinity" && infinityZone
     ? coastalPhotoSun(infinityZone,radius*4+25)
     : [radius * 2 + 6, radius * 2.4 + 12, radius + 6];
   // Remount PhotoModeRenderer (fresh WebGLPathTracer + setScene) whenever the
@@ -1250,7 +1269,7 @@ export default function PoolScene({
       // here is a zero-behaviour-change fix for the console warning, not a
       // visual change.
       shadows={{ type: PCFShadowMap }}
-      dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr}
+      dpr={hybridPhoto ? [1,1.5] : cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr}
       gl={{
         antialias: ACTIVE_RENDERING_QUALITY.antialias,
         // Retaining every WebGL back buffer causes sustained GPU-memory growth
@@ -1259,7 +1278,7 @@ export default function PoolScene({
         preserveDrawingBuffer: false,
         // Apply AgX exactly once, with no bloom/contrast pass. If a quality
         // preset opts into a composer again, its output owns tone mapping.
-        toneMapping: ACTIVE_RENDERING_QUALITY.postProcessing.enabled
+        toneMapping: ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !hybridPhoto
           ? NoToneMapping
           : AgXToneMapping,
         toneMappingExposure: SCENE_VISUAL_PRESET.exposure[visualTheme],
@@ -1275,7 +1294,7 @@ export default function PoolScene({
       }}
     >
       <color attach="background" args={[background]} />
-      {system !== "infinity" ? <fog
+      {system !== "infinity" && !hybridPhoto ? <fog
         attach="fog"
         args={[
           background,
@@ -1290,14 +1309,17 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
+      {!photoMode && hybridPhoto?.environment!=="indoor-wellness" ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage && !hybridRoom} showBackdrop={!hybridRoom} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
+      {hybridRoom ? <Suspense fallback={null}><HybridEnvironment id={hybridPhoto.environment} bounds={outline}
+        ground={verticalLayout.groundY} rim={verticalLayout.copingY} night={dusk} onReady={setHybridReady} onError={hybridPhoto.onError}/></Suspense>:null}
 
       <SceneMood
+        indoorPhoto={hybridPhoto?.environment==="indoor-wellness"}
         dusk={dusk}
         baseBackground={background}
         baseExposure={SCENE_VISUAL_PRESET.exposure[visualTheme]}
-        baseEnvironment={system === "infinity" ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[visualTheme]}
-        coastalDaylight={system === "infinity"}
+        baseEnvironment={system === "infinity" && !hybridRoom ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[visualTheme]}
+        coastalDaylight={system === "infinity" && !hybridRoom}
         sky={skyLight}
         sun={sunLight}
         auxiliary={auxiliaryLight}
@@ -1345,8 +1367,9 @@ export default function PoolScene({
         color={SCENE_VISUAL_PRESET.lighting.auxiliary.color[visualTheme]}
       />
       <Suspense fallback={null}>
-      {infinityStage ? (
+      {infinityStage && !hybridRoom ? (
         <StudioFloor
+          photoRelief={!!hybridPhoto}
           outline={outline}
           size={deckSize}
           theme={visualTheme}
@@ -1368,8 +1391,10 @@ export default function PoolScene({
             overflowType={overflowType}
             paving={paving ?? "gres"}
             pavingFormat={pavingFormat}
-            environment={construction?.showEnvironment ?? true}
+            environment={hybridRoom ? false : construction?.showEnvironment ?? true}
             decking={construction?.showDecking ?? true}
+            showGround={!hybridRoom}
+            photoGroundY={verticalLayout.groundY}
             waterY={verticalLayout.waterY}
           />
       )}
@@ -1526,7 +1551,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {ACTIVE_RENDERING_QUALITY.contactShadows.enabled && system !== "infinity" ? (
+      {ACTIVE_RENDERING_QUALITY.contactShadows.enabled && system !== "infinity" && !hybridPhoto ? (
         <ContactShadows
           name="pool-contact-shadows"
           key={`${shape}-${length}-${width}-${depth}-${system}-${overflowType}-${poolType}-${outlineSignature}-${solarShower}-${loungers}-${features.join(",")}-${Boolean(coverPlan.geometry)}`}
@@ -1552,7 +1577,7 @@ export default function PoolScene({
 
       {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
       {!photoMode ? <HeroCaptureListener /> : null}
-      {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
+      {!photoMode && !cameraLocked && !hybridPhoto ? <AdaptiveQuality /> : null}
 
       <PlanCamera enabled={focus === "top"} />
       <OrbitControls
@@ -1564,7 +1589,7 @@ export default function PoolScene({
         // while `enabled` is true, so disabling it here doesn't just ignore
         // new drag input, it stops the camera from drifting at all while
         // explicit Photo Mode or a locked presentation view is active.
-        enabled={!photoMode && !cameraLocked}
+        enabled={!photoMode && !cameraLocked && !hybridPhoto}
         enablePan={!infinityStage}
         enableZoom
         enableRotate={focus !== "top"}
@@ -1578,7 +1603,7 @@ export default function PoolScene({
         minPolarAngle={focus === "top" ? Math.PI / 2 : 0}
         maxPolarAngle={focus === "top" ? Math.PI / 2 : Math.PI / 2.05}
       />
-      <CameraRig
+      {!hybridPhoto ? <CameraRig
         accessPlan={lighting.accessPlan}
         resolvedLayout={resolvedLayout}
         cameraLocked={cameraLocked}
@@ -1599,7 +1624,15 @@ export default function PoolScene({
         // skimmers, centred, from inside looking out) always wins.
         includeExternalStaircase={false}
         planBounds={planBounds}
-      />
+        externalStairPlan={externalStairs ? planExternalStaircase({outline, side:externalStairSide,
+          platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
+          copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,
+          groundY:verticalLayout.groundY, topY:system==="overflow"?verticalLayout.waterY-.001:verticalLayout.copingY}) : null}
+        pellicanoPlacement={pellicanoPlacement}
+      /> : <Suspense fallback={null}><HybridPhotoController request={hybridPhoto}
+        bounds={planBounds} outline={outline} ground={verticalLayout.groundY}
+        rim={verticalLayout.copingY} water={verticalLayout.waterY} zone={infinityZone}
+        time={sceneTime} environmentReady={hybridRoom ? hybridReady : !infinityStage || coastalStatus === "ready"} /></Suspense>}
 
       {/* Premium post pass -- only ever mounts (and only ever fetches its
           chunk) when the active quality tier opts in (Experience);
@@ -1607,7 +1640,7 @@ export default function PoolScene({
           Skipped in Photo Mode: EffectComposer takes over the render loop
           with its own render-priority mechanism, which would fight with
           PhotoModeRenderer's for who owns the final canvas draw. */}
-      {ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !photoMode ? (
+      {ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !photoMode && !hybridPhoto ? (
         <Suspense fallback={null}>
           <PremiumPostFX />
         </Suspense>
@@ -1616,7 +1649,7 @@ export default function PoolScene({
       {/* Normal configuration is raster-only. Tracing is loaded and mounted
           exclusively in response to the user's explicit Photo Mode toggle. */}
     </Canvas>
-    {infinityStage && !photoMode && coastalStatus !== "ready" ? (
+    {infinityStage && !hybridRoom && !photoMode && coastalStatus !== "ready" ? (
       <div role="status" aria-live="polite" className="absolute inset-0 z-[2] flex items-center justify-center bg-viewport text-sm text-foreground/70">
         {coastalStatus === "error" ? "Panorama non disponibile. Seleziona nuovamente Infinity per riprovare." : "Preparazione panorama Infinity…"}
       </div>

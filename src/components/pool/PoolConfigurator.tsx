@@ -242,6 +242,7 @@ function ConfiguratorLayout() {
       : { day: alternate, night: current };
   }, [captureHero, config.sceneTime, setSceneTime]);
   const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
+  useEffect(() => { if (!premiumPresentationAvailable) setPhotoMode(false); }, [premiumPresentationAvailable]);
   const openPremiumPresentation = useCallback(() => {
     if (!premiumPresentationAvailable) return;
     document.getElementById("premium-presentation")?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -254,9 +255,9 @@ function ConfiguratorLayout() {
     if (config.projectType !== "renovation" && STEPS[step]?.id === "system") reframe();
   }, [config.projectType, config.system, config.overflowType, step, reframe]);
   const togglePhotoMode = useCallback(() => {
-    if (photoModeUnsupported) return;
+    if (!premiumPresentationAvailable) return;
     setPhotoMode((value) => !value);
-  }, [photoModeUnsupported]);
+  }, [premiumPresentationAvailable]);
   // PhotoModeRenderer's setup effect can genuinely run more than once for a
   // single user click (e.g. an intervening re-render changing
   // `photoModeSceneKey` remounts it before the first attempt's failure is
@@ -475,7 +476,7 @@ function ConfiguratorLayout() {
     captureDayNight,
     photoMode: {
       active: photoMode,
-      available: ACTIVE_RENDERING_QUALITY.id === "experience" && !photoModeUnsupported,
+      available: premiumPresentationAvailable,
       reason: photoModeUnsupported
         ? "Il rendering fotografico non è supportato da questo dispositivo."
         : "Disponibile su computer desktop.",

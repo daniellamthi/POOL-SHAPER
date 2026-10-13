@@ -1,12 +1,13 @@
 import * as THREE from "three";
 import type { InfinityEdgeDimensions, RectangleInfinityZone } from "@/lib/pool/infinity-edge";
+import { infinityCrestY } from "@/lib/pool/infinity-edge";
 import { offsetOutline } from "@/lib/pool/geometry";
 import type { Outline } from "@/lib/pool/types";
 
 /** Construction and water share these elevations; the rim is above the receiver. */
 export function infinityContainmentLevels(dims: InfinityEdgeDimensions, waterY: number) {
   const receiverY = waterY - dims.dropHeight;
-  return { crestY: waterY - 0.006, receiverY, rimY: receiverY + 0.045,
+  return { crestY: infinityCrestY(waterY), receiverY, rimY: receiverY + 0.045,
     floorY: receiverY - dims.catchBasinDepth, baseY: receiverY - dims.catchBasinDepth - 0.08 };
 }
 

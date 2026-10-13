@@ -6,12 +6,19 @@ import { planSkimmers } from "../src/lib/pool/engineering";
 import { clampInfinityEdgeParams, infinityExclusion, infinityZonesForOutline } from "../src/lib/pool/infinity-edge";
 import { clearOfInfinityEdge, INFINITY_ACCESS_CLEARANCE, oppositeInfinityCoordinate } from "../src/lib/pool/infinity-access";
 import { comfortFootprints, resolvePoolLayout } from "../src/lib/pool/resolved-layout";
+import type { ComfortPlan } from "../src/lib/pool/comfort-plan";
 import { resolveAccessPlan } from "../src/components/pool/three/PoolAccessModel";
 import { shelfStairGeometry } from "../src/components/pool/three/PoolComfortModel";
 import { DEFAULT_CONTROL_POINTS, DEFAULT_DIMENSIONS } from "../src/lib/pool/config";
 import type { Outline, PoolFeatureId, PoolShapeId } from "../src/lib/pool/types";
 
 let checks = 0;
+// Hydro's basin now shares the spill wall by design; only its access must
+// retain the 45 cm exclusion. Shelf and standalone access are unchanged.
+const accessFootprints = (plan: ComfortPlan) => plan.elements.flatMap(element =>
+  element.kind === "hydromassage"
+    ? [...(element.steps ?? []).map(step => step.footprint), ...(element.landing ? [element.landing.footprint] : [])]
+    : comfortFootprints({ ...plan, elements: [element] }));
 const check = (condition: unknown, message: string) => { assert(condition, message); checks++; };
 const rectangleClear = (footprint: Outline, axis: "x" | "z", coordinate: number) =>
   footprint.every(point => Math.abs(point[axis === "x" ? 0 : 1] - coordinate) >= INFINITY_ACCESS_CLEARANCE - 1e-8);
@@ -77,10 +84,10 @@ for (const zone of zones) {
     const element = resolved.comfort.elements.find(item => item.kind === feature);
     check(!!element && resolved.comfort.availability[feature].available,
       `side ${zone.side}: ${feature} with integrated steps available`);
-    for (const footprint of comfortFootprints(resolved.comfort))
+    for (const footprint of accessFootprints(resolved.comfort))
       check(clearOfInfinityEdge(input.outline, input.infinityExcluded, footprint) &&
         rectangleClear(footprint, input.infinityExcluded!.axis, input.infinityExcluded!.coordinate),
-        `side ${zone.side}: ${feature} complete assembly clear`);
+        `side ${zone.side}: ${feature} access / shelf clearance preserved`);
     if (input.infinityExcluded!.axis === "x") {
       const opposite = oppositeInfinityCoordinate(input.outline, input.infinityExcluded!);
       check(element!.landing!.footprint.some(point => Math.abs(point[0] - opposite) < 0.05),
@@ -98,10 +105,10 @@ for (const zone of zones) {
     const slopedElement = slopedPlan.comfort.elements.find(item => item.kind === feature);
     check(!!slopedElement && !!sloped.floorProfile.shelfZone,
       `side ${zone.side}: ${feature} retains stepped landing on slope`);
-    for (const footprint of comfortFootprints(slopedPlan.comfort))
+    for (const footprint of accessFootprints(slopedPlan.comfort))
       check(clearOfInfinityEdge(sloped.outline, sloped.infinityExcluded, footprint) &&
         rectangleClear(footprint, sloped.infinityExcluded!.axis, sloped.infinityExcluded!.coordinate),
-        `side ${zone.side}: sloped ${feature} assembly clear`);
+        `side ${zone.side}: sloped ${feature} access / shelf clearance preserved`);
     if (slopedElement) {
       const geometry = shelfStairGeometry(slopedElement, sloped.floorProfile);
       check(geometry.getAttribute("position").count > 0 &&

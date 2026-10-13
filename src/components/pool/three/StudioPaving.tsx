@@ -8,6 +8,7 @@ import {
   DataTexture,
   SRGBColorSpace,
   TextureLoader,
+  ShaderChunk,
 } from "three";
 import type { WebGLProgramParametersWithUniforms } from "three";
 import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
@@ -138,6 +139,8 @@ export function StudioPaving({
   pavingFormat,
   environment = true,
   decking = true,
+  showGround = true,
+  photoGroundY = 0,
   waterY,
 }: {
   outline: Outline;
@@ -151,6 +154,8 @@ export function StudioPaving({
   /** Progressive reveal: before Bordo e decking the basin sits in a plain
    * ground plane, with no paving around the coping yet. */
   decking?: boolean;
+  showGround?: boolean;
+  photoGroundY?: number;
   /** Submerged LEDs are linked out of every dry deck material (they cannot
    * shine through the shell), so the beam stays inside the basin. */
   waterY: number;
@@ -176,10 +181,10 @@ export function StudioPaving({
       // that showed the basin shell at low cameras.
       ground: createSurfaceGeometry(
         far,
-        decking ? offsetOutline(inner, studioDeckBand(outline, environment) - 0.04) : inner,
+        !showGround ? outline : decking ? offsetOutline(inner, studioDeckBand(outline, environment) - 0.04) : inner,
       ),
     };
-  }, [outline, poolType, system, overflowType, layout, environment, decking]);
+  }, [outline, poolType, system, overflowType, layout, environment, decking, showGround]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
@@ -234,10 +239,11 @@ export function StudioPaving({
       <mesh
         name={environment ? "studio-lawn" : "studio-ground"}
         geometry={geometry.ground}
-        position={[0, -0.012, 0]}
+        position={[0, (showGround ? 0 : photoGroundY)-0.012, 0]}
         receiveShadow
+        renderOrder={showGround ? 0 : -1}
       >
-        {environment ? (
+        {!showGround ? <meshBasicMaterial colorWrite={false}/> : environment ? (
           <meshStandardMaterial
             color="#ffffff"
             roughness={0.97}
@@ -253,12 +259,24 @@ export function StudioPaving({
           />
         )}
       </mesh>
+      {!showGround ? <mesh geometry={geometry.ground} position={[0,photoGroundY-.008,0]} receiveShadow>
+        <shadowMaterial transparent opacity={.35} depthWrite={false}
+          onBeforeCompile={shader=>{
+            // Underwater spotlights cannot cast a dark rectangular footprint
+            // across photographic grass outside the opaque basin either.
+            shader.uniforms['photoShadowWaterY']={value:waterY};
+            shader.fragmentShader="uniform float photoShadowWaterY;\n"+shader.fragmentShader;
+            shader.fragmentShader=shader.fragmentShader.replace("#include <shadowmask_pars_fragment>",
+              ShaderChunk.shadowmask_pars_fragment.replace("shadow *= receiveShadow ? getShadow( spotShadowMap",
+                "shadow *= (receiveShadow && (transpose(mat3(viewMatrix)) * spotLights[ i ].position + cameraPosition).y > photoShadowWaterY) ? getShadow( spotShadowMap"));
+          }} customProgramCacheKey={()=>`photo-dry-shadows-${waterY}`}/>
+      </mesh> : null}
       {decking ? (
         <>
           <mesh geometry={geometry.grout} position={[0, -layout.thickness, 0]} receiveShadow>
             <PavingMaterial key={`${id}-joint`} id={id} waterY={waterY} joint />
           </mesh>
-          <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
+          <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow castShadow={!showGround}>
             <PavingMaterial key={id} id={id} waterY={waterY} />
           </mesh>
         </>

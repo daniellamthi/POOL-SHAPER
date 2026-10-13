@@ -78,6 +78,7 @@ import type { SkimmerPlan } from "@/lib/pool/engineering";
 import {
   copingOuterOffset,
   createCopingSlabGeometry,
+  squareInfinityCopingEnds,
   createGrateGeometry,
   SKIMMER_PROFILES,
 } from "./poolConstruction";
@@ -608,9 +609,10 @@ export function PoolModel({
   const surfaceMicroRoughness = derivedSurfaceDetail?.roughnessMap ?? materialMicroRoughness;
   const surfaceMicroAo = derivedSurfaceDetail?.aoMap ?? materialMicroAo;
   const interiorMicroMaps = useMemo(() => {
-    // Photo-derived PVC maps describe the same patch as the colour image.
+    // Every photo-derived map describes the same patch as its colour image,
+    // including mosaic sheets of 8 × 8 (or 9 × 9) tesserae.
     // The fallback micrograin keeps its independent small-scale repeat.
-    const moduleSize = derivedSurfaceDetail && materials.surface.kind === "liner"
+    const moduleSize = derivedSurfaceDetail
       ? materials.surface.tileSize : materials.surface.microDetail.moduleSize;
     const floorRepeat = 1 / moduleSize;
     const wallRepeatX = perimeter / moduleSize;
@@ -660,6 +662,8 @@ export function PoolModel({
   // Scanned asset when the finish has one; procedural bake only as the
   // documented fallback for finishes whose real maps aren't sourced yet.
   const copingAssetDir = "asset" in materials.coping ? materials.coping.asset.dir : null;
+  const copingAssetHasNormal = !("asset" in materials.coping && "normalMap" in materials.coping.asset && materials.coping.asset.normalMap === false);
+  const copingAssetMirrored = "asset" in materials.coping && "mirroredRepeat" in materials.coping.asset && materials.coping.asset.mirroredRepeat;
   const copingAssetHasRoughness =
     "asset" in materials.coping && "roughnessMap" in materials.coping.asset
       ? materials.coping.asset.roughnessMap !== false
@@ -674,9 +678,9 @@ export function PoolModel({
   const copingDetail = useMemo(
     () =>
       copingAssetDir
-        ? loadCopingTextureMaps(copingAssetDir, copingAssetHasRoughness)
+        ? loadCopingTextureMaps(copingAssetDir, copingAssetHasRoughness, copingAssetHasNormal, copingAssetMirrored)
         : COPING_STONE_BUILDERS[materials.coping.id](),
-    [materials.coping.id, copingAssetDir, copingAssetHasRoughness],
+    [materials.coping.id, copingAssetDir, copingAssetHasRoughness, copingAssetHasNormal, copingAssetMirrored],
   );
   useEffect(() => {
     const maps = Object.values(copingDetail).filter((map) => map !== null);
@@ -927,12 +931,16 @@ export function PoolModel({
     () => createWallGeometry(structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY),
     [structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY],
   );
+  const terminatedCopingOutline = useMemo(
+    () => squareInfinityCopingEnds(copingInner, copingOutline, infinitySection),
+    [copingInner, copingOutline, infinitySection],
+  );
   const coping = useDisposable(
     () =>
       isVisibleOverflow
         ? new THREE.BufferGeometry()
-        : createCopingSlabGeometry(copingInner, copingOutline, copingThickness, infinitySection),
-    [copingInner, copingOutline, copingThickness, isVisibleOverflow, infinitySection],
+        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection),
+    [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, infinitySection],
   );
   const overflowLip = useDisposable(
     () =>
@@ -945,8 +953,8 @@ export function PoolModel({
     () =>
       isVisibleOverflow
         ? new THREE.BufferGeometry()
-        : createRingGeometry(copingInner, copingOutline, false, infinitySection),
-    [copingInner, copingOutline, isVisibleOverflow, infinitySection],
+        : createRingGeometry(copingInner, terminatedCopingOutline, false, infinitySection),
+    [copingInner, terminatedCopingOutline, isVisibleOverflow, infinitySection],
   );
   const grilleInnerSeat = useDisposable(
     () => createRingGeometry(overflowKerbOuter, offsetOutline(overflowKerbOuter, 0.012)),
@@ -1041,6 +1049,17 @@ export function PoolModel({
       : null;
   const rawShellKind = rawStructure ? shellKind(rawStructure) : null;
   const wallSize = [perimeter, depth] as const;
+  // Identical glass-tile response on walls, floor, stairs and comfort solids.
+  // Only the water surface supplies the strong wet reflection; the mosaic
+  // remains a readable glazed material underneath, not a second mirror.
+  const mosaicResponse = materials.surface.kind === "mosaic" ? {
+    clearcoat: showWater ? 0.06 : materials.surface.wallClearcoat,
+    clearcoatRoughness: materials.surface.wallClearcoatRoughness,
+    ior: showWater ? 1.13 : 1.5,
+    reflectivity: 0.42,
+    envMapIntensity: 1,
+    specularIntensity: 0.58,
+  } : {};
   // A finished stainless basin is seen through the water exactly like a
   // liner: same absorption, scattering and caustics, only once filled.
   const interiorUnderwater =
@@ -1059,9 +1078,10 @@ export function PoolModel({
             ]}
             roughness={materials.liner.roughness}
             metalness={materials.liner.metalness}
-            roughnessMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null}
-            aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
+            roughnessMap={interiorMicroMaps.floorRoughness}
+            aoMap={interiorMicroMaps.floorAo}
             aoMapIntensity={0.6}
+            {...mosaicResponse}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
               `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
@@ -1104,11 +1124,10 @@ export function PoolModel({
               ]}
               roughness={materials.liner.roughness}
               metalness={materials.liner.metalness}
-              roughnessMap={
-                materials.surface.kind === "liner" ? interiorMicroMaps.floorRoughness : null
-              }
-              aoMap={materials.surface.kind === "liner" ? interiorMicroMaps.floorAo : null}
+              roughnessMap={interiorMicroMaps.floorRoughness}
+              aoMap={interiorMicroMaps.floorAo}
               aoMapIntensity={0.6}
+              {...mosaicResponse}
               onBeforeCompile={configureCaustics}
               customProgramCacheKey={() =>
                 `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
@@ -1165,6 +1184,7 @@ export function PoolModel({
             reflectivity={0.42}
             envMapIntensity={1.0}
             specularIntensity={0.58}
+            {...mosaicResponse}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
               `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
@@ -1202,6 +1222,7 @@ export function PoolModel({
             clearcoatRoughness={materials.surface.floorClearcoatRoughness}
             reflectivity={0.38}
             envMapIntensity={0.95}
+            {...mosaicResponse}
             onBeforeCompile={configureCaustics}
             customProgramCacheKey={() =>
               `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`

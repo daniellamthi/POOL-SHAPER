@@ -122,7 +122,7 @@ export const POOL_SURFACE_PRESET = {
 
 export const MATERIAL_MICRO_DETAIL_PRESET = {
   liner: { moduleSize: 0.08, normalStrength: 0.05 },
-  mosaic: { moduleSize: 0.04, normalStrength: 0.025 },
+  mosaic: { moduleSize: 0.04, normalStrength: 0.1 },
   coping: { moduleSize: 0.4, normalStrength: 0.75 },
   aboveGroundPanel: { moduleSize: 0.12, normalStrength: 0.025 },
   studioFloor: { moduleSize: 0.22, normalStrength: 0.018 },

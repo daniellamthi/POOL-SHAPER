@@ -11,7 +11,8 @@ import { buildOutline, offsetOutline } from "../src/lib/pool/geometry";
 import { createPavingModules } from "../src/components/pool/three/StudioPaving";
 import { copingOuterOffset } from "../src/components/pool/three/poolConstruction";
 import { coastalCamera, coastFrame } from "../src/components/pool/three/coastalLayout";
-import { infinityZonesForOutline } from "../src/lib/pool/infinity-edge";
+import { infinityZonesForOutline, infinityExclusion } from "../src/lib/pool/infinity-edge";
+import { clearOfInfinityEdge } from "../src/lib/pool/infinity-access";
 import { resolveAutomaticCover } from "../src/lib/pool/cover-plan";
 import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
 
@@ -75,8 +76,18 @@ for (const comfort of [null, "sunShelf", "hydromassage"] as const) {
     const access = spec.pool.technicalConfiguration.infinityAccess;
     assert.ok(access, "Infinity technical configuration retains the selected edge and resolved access");
     assert.ok(access.resolvedAnchors.length > 0, "Infinity access anchors come from the resolved layout");
-    assert.ok(access.resolvedAnchors.every(anchor => !anchor.onInfinityEdge),
-      `No resolved access or comfort anchor occupies the Infinity overflow edge: ${JSON.stringify({ length, width, floorProfile, comfort, access })}`);
+    assert.ok(access.resolvedAnchors.filter(anchor=>anchor.kind!=="hydromassage").every(anchor => !anchor.onInfinityEdge),
+      `Standalone and shelf access must stay off the Infinity edge: ${JSON.stringify({length,width,comfort,access})}`);
+    // Approved hydro WIP extends its BASIN to the spill wall. Its centroid is
+    // a comfort anchor, not a stair entrance. Check the actual entry geometry
+    // instead of incorrectly forbidding the approved shared basin wall.
+    const excluded=infinityExclusion(spec.pool.outline,config.infinityEdge!,config.shape);
+    for(const hydro of spec.pool.layout.comfort.elements.filter(e=>e.kind==="hydromassage")) {
+      assert.ok(hydro.steps?.length && hydro.landing,"Hydro retains explicit stair and landing geometry");
+      for(const footprint of [...hydro.steps!.map(s=>s.footprint),hydro.landing!.footprint]) {
+        assert.ok(clearOfInfinityEdge(spec.pool.outline,excluded,footprint),"Hydro access geometry remains outside the Infinity exclusion");
+      }
+    }
   }
   assert.ok(!("customer" in spec.selection) && !("uploads" in spec.selection));
   for (const environment of PREMIUM_ENVIRONMENTS) {

@@ -22,12 +22,12 @@ export type StoneMaps = {
  * Colour space matters: BaseColor is authored in sRGB, while Normal/Roughness
  * are linear data and must NOT be gamma-decoded.
  */
-export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true): StoneMaps {
+export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true, hasNormalMap = true, mirroredRepeat = false): StoneMaps {
   const loader = new THREE.TextureLoader();
   const load = (name: string, srgb: boolean) => {
     const texture = loader.load(`${dir}/${name}.png`);
     texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.wrapS = texture.wrapT = mirroredRepeat ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.generateMipmaps = true;
@@ -35,7 +35,9 @@ export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true): Ston
   };
   return {
     colorMap: load("basecolor", true),
-    normalMap: load("normal", false),
+    // A photograph alone does not establish relief. Use a flat normal rather
+    // than interpreting mineral colour as invented holes or raised veins.
+    normalMap: hasNormalMap ? load("normal", false) : makeTexture(new Uint8Array([128, 128, 255, 255]), 1, false),
     roughnessMap: hasRoughnessMap ? load("roughness", false) : null,
   };
 }
