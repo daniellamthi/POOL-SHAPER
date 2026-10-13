@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check } from "lucide-react";
+import { Check, Info, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StepSection({
@@ -12,7 +12,7 @@ export function StepSection({
   children: ReactNode;
 }) {
   return (
-    <section key={title} className="animate-rise flex flex-col gap-14">
+    <section key={title} className="animate-rise flex flex-col gap-4 lg:gap-14">
       <header className="flex flex-col gap-5">
         <span aria-hidden className="h-px w-8 bg-foreground/35" />
         <h2 className="text-[38px] leading-[1.02] font-extralight tracking-[-0.045em] text-foreground sm:text-[42px]">
@@ -33,45 +33,77 @@ export function OptionCard({
   selected,
   onSelect,
   meta,
+  disabled,
+  disabledReason,
+  optional,
 }: {
   title: string;
   description?: string;
   selected: boolean;
   onSelect: () => void;
   meta?: ReactNode;
+  /** A real, customer-friendly disabled state -- greyed out and inert,
+   * never a fake/broken selection that silently does nothing. */
+  disabled?: boolean;
+  /** Shown in place of `description` while disabled, explaining WHY (e.g.
+   * "not available for this shape"), never just hiding the reason. */
+  disabledReason?: string;
+  /** Optional add-on: shows a "+" when off and a quiet "Aggiunto" state when on. */
+  optional?: boolean;
 }) {
   return (
     <button
       type="button"
-      onClick={onSelect}
+      onClick={disabled ? undefined : onSelect}
       aria-pressed={selected}
+      aria-disabled={disabled}
+      disabled={disabled}
+      title={disabled ? disabledReason : undefined}
       className={cn(
-        "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-7 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992]",
-        selected
-          ? "border-brand bg-transparent pl-3"
-          : "border-hairline bg-transparent hover:border-foreground/30 hover:pl-3",
+        "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-4 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992] sm:py-7",
+        disabled
+          ? "cursor-not-allowed border-hairline bg-transparent opacity-40"
+          : selected
+            ? "border-brand bg-transparent pl-3"
+            : "border-hairline bg-transparent hover:border-foreground/30 hover:pl-3",
       )}
     >
       <span className="flex items-start justify-between gap-4">
         <span className="text-[15px] font-light tracking-[-0.012em] text-foreground">{title}</span>
-        <span
-          className={cn(
-            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-            selected
-              ? "scale-100 bg-brand text-background shadow-[0_0_0_4px_var(--brand-soft)]"
-              : "scale-75 border border-foreground/25 text-transparent opacity-0 group-hover:scale-100 group-hover:opacity-100",
-          )}
-        >
-          <Check
+        <span className="flex shrink-0 items-center gap-2">
+          {optional && selected ? (
+            <span className="text-[11px] font-light tracking-wide text-brand">Aggiunto</span>
+          ) : null}
+          <span
+            data-optional-state={optional ? (selected ? "added" : "off") : undefined}
             className={cn(
-              "size-3 transition-all duration-300",
-              selected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+              "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+              selected
+                ? "scale-100 bg-brand text-background shadow-[0_0_0_4px_var(--brand-soft)]"
+                : optional
+                  ? "scale-100 border border-foreground/30 text-foreground/70"
+                  : "scale-75 border border-foreground/25 text-transparent opacity-0 group-hover:scale-100 group-hover:opacity-100",
             )}
-            strokeWidth={1.75}
-          />
+          >
+            {optional && !selected ? (
+              <Plus className="size-3" strokeWidth={1.75} />
+            ) : (
+              <Check
+                className={cn(
+                  "size-3 transition-all duration-300",
+                  selected ? "scale-100 opacity-100" : "scale-50 opacity-0",
+                )}
+                strokeWidth={1.75}
+              />
+            )}
+          </span>
         </span>
       </span>
-      {description ? (
+      {disabled && disabledReason ? (
+        <span className="max-w-[38ch] text-[12.5px] leading-[1.65] font-light text-muted-foreground">
+          {disabledReason}
+        </span>
+      ) : description ? (
         <span className="max-w-[38ch] text-[12.5px] leading-[1.65] font-light text-muted-foreground">
           {description}
         </span>
@@ -126,6 +158,79 @@ export function SwatchOption({
         {title}
       </span>
     </button>
+  );
+}
+
+/**
+ * Premium architectural material sample -- a realistic textured swatch (not
+ * a flat colour chip), name, short elegant subtitle, and a restrained
+ * selected state. Used for the coping-material collection; `SwatchOption`
+ * above remains the shared flat colour/liner swatch used elsewhere. */
+export function MaterialSwatch({
+  title,
+  subtitle,
+  previewUrl,
+  selected,
+  onSelect,
+  onViewDetail,
+}: {
+  title: string;
+  subtitle: string;
+  previewUrl: string;
+  selected: boolean;
+  onSelect: () => void;
+  onViewDetail?: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col gap-2.5 rounded-2xl border p-2.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        selected ? "border-foreground/30 bg-card lift" : "border-hairline hover:border-border",
+      )}
+    >
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={selected}
+        className="relative block aspect-[4/3] w-full overflow-hidden rounded-xl border border-hairline bg-cover bg-center outline-none focus-visible:ring-1 focus-visible:ring-foreground/35"
+        style={{ backgroundImage: `url(${previewUrl})` }}
+      >
+        {/* State-driven, not hover-revealed: `group-hover` compiles to a
+            plain `:hover` selector with no touch-device guard, so on phones
+            a scroll/tap can leave it visually "stuck" active on whichever
+            card was last touched -- looking like two materials selected at
+            once. An always-visible outline that fills in in on select
+            works identically (and unambiguously) on mouse and touch. */}
+        <span
+          className={cn(
+            "absolute right-2 top-2 flex size-5 items-center justify-center rounded-full shadow-[0_0_0_1px_var(--border)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            selected ? "bg-background text-foreground" : "bg-background/50 text-transparent",
+          )}
+        >
+          <Check className="size-3" strokeWidth={1.75} />
+        </span>
+      </button>
+      {onViewDetail ? (
+        <button
+          type="button"
+          onClick={onViewDetail}
+          aria-label={`View ${title} detail`}
+          className="absolute left-3 top-3 flex size-5 items-center justify-center rounded-full bg-background/60 text-muted-foreground shadow-[0_0_0_1px_var(--border)] transition-colors duration-300 hover:bg-background/85 hover:text-foreground focus-visible:bg-background/85 focus-visible:text-foreground"
+        >
+          <Info className="size-3" strokeWidth={1.75} />
+        </button>
+      ) : null}
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex flex-col items-start gap-0.5 text-left outline-none"
+      >
+        <span className="text-[12.5px] font-normal tracking-tight text-foreground">{title}</span>
+        <span className="text-[10.5px] leading-snug font-light text-muted-foreground">
+          {subtitle}
+        </span>
+      </button>
+    </div>
   );
 }
 

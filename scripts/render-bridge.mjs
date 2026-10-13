@@ -158,7 +158,9 @@ async function handleCreateRender(req, res, origin) {
       job.progress = job.progress ? { ...job.progress, current: job.progress.total } : null;
     } else {
       job.status = "error";
-      job.error = job.error ?? `Blender exited with code ${code}.\n${job.log.slice(-8).join("")}`.slice(0, 4000);
+      job.error =
+        job.error ??
+        `Blender exited with code ${code}.\n${job.log.slice(-8).join("")}`.slice(0, 4000);
     }
   });
 
@@ -175,7 +177,12 @@ function handleOutput(jobId, res, origin) {
   const job = jobs.get(jobId);
   if (!job) return sendJson(res, 404, { error: "Unknown job id." }, origin);
   if (job.status !== "complete") {
-    return sendJson(res, 409, { error: `Render not finished yet (status: ${job.status}).` }, origin);
+    return sendJson(
+      res,
+      409,
+      { error: `Render not finished yet (status: ${job.status}).` },
+      origin,
+    );
   }
   res.writeHead(200, {
     "Content-Type": "image/png",
@@ -216,10 +223,20 @@ const server = createServer((req, res) => {
   if (req.method === "GET" && parts.length === 2 && parts[0] === "render") {
     return handleStatus(parts[1], res, origin);
   }
-  if (req.method === "GET" && parts.length === 3 && parts[0] === "render" && parts[2] === "output") {
+  if (
+    req.method === "GET" &&
+    parts.length === 3 &&
+    parts[0] === "render" &&
+    parts[2] === "output"
+  ) {
     return handleOutput(parts[1], res, origin);
   }
-  if (req.method === "POST" && parts.length === 3 && parts[0] === "render" && parts[2] === "cancel") {
+  if (
+    req.method === "POST" &&
+    parts.length === 3 &&
+    parts[0] === "render" &&
+    parts[2] === "cancel"
+  ) {
     return handleCancel(parts[1], res, origin);
   }
   sendJson(res, 404, { error: "Not found." }, origin);

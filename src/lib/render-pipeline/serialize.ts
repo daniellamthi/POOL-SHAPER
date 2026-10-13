@@ -80,6 +80,17 @@ function resolveFinishDescriptor(
   config: PoolConfig,
   materials: ReturnType<typeof resolveMaterials>,
 ) {
+  if (config.finish === "none") {
+    return {
+      material: "visible-stainless-steel" as const,
+      colorId: "visible-stainless-steel",
+      title: "Acciaio inox satinato a vista",
+      baseColorHex: "#bfc6c8",
+      textureUrl: null,
+      roughness: 0.32,
+      metalness: 1,
+    };
+  }
   if (config.finish === "mosaic") {
     const mosaic = getMosaicFinish(config.mosaicFinish);
     const finishDefinition = FINISHES.find((item) => item.id === "mosaic");
@@ -116,6 +127,53 @@ export function serializePoolRenderConfig(
   options: SerializePoolRenderConfigOptions = {},
 ): PoolRenderConfig {
   const { config, outline, skimmers, theme } = input;
+  // Geometry Pass A (sloped floor) has no Blender/Cycles counterpart yet --
+  // the live configurator and the photorealistic export must never disagree
+  // about the basin's shape, so a sloped project refuses to export rather
+  // than silently rendering the flat pool it would otherwise fall back to.
+  const isSlopedFloor =
+    config.shape === "rectangle" &&
+    (config.poolType ?? "in-ground") === "in-ground" &&
+    config.dimensions.floorProfile === "slope" &&
+    Number.isFinite(config.dimensions.shallowDepth) &&
+    config.dimensions.shallowDepth! < config.dimensions.depth;
+  if (isSlopedFloor) {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora il fondo in pendenza. " +
+        "Passa temporaneamente a fondo piano per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
+  // Geometry Pass B (L-shape) has no Blender/Cycles counterpart yet either --
+  // same policy as the sloped-floor guard above: refuse the export with a
+  // truthful message rather than silently serialising the L pool's outline
+  // under a `PoolRenderShapeKind` ("rectangle" | "custom") that doesn't
+  // actually describe it.
+  if (config.shape === "l-shape") {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora la forma angolare (forma a L). " +
+        "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
+  // Geometry Pass C (Organic) has no Blender/Cycles counterpart yet either --
+  // same honest-refusal policy as the sloped-floor and L-shape guards above.
+  if (config.shape === "organic") {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora la forma organica. " +
+        "Passa temporaneamente a una forma rettangolare per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
+  // Geometry Pass D (Infinity, Rectangle-only first slice) has no
+  // Blender/Cycles counterpart yet either -- same honest-refusal policy as
+  // the sloped-floor/L-shape/Organic guards above: refuse rather than
+  // silently exporting the Infinity pool as an ordinary skimmer/overflow
+  // rectangle, which would drop the disappearing edge, waterfall and catch
+  // basin entirely without saying so.
+  if (config.system === "infinity") {
+    throw new Error(
+      "Il rendering fotorealistico non supporta ancora la vasca a sfioro infinity. " +
+        "Passa temporaneamente a skimmer o sfioro perimetrale per generare il render, oppure attendi il prossimo aggiornamento.",
+    );
+  }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;
   const outputPreset = RENDER_OUTPUT_PRESETS[outputPresetId];
@@ -136,6 +194,7 @@ export function serializePoolRenderConfig(
     linerColor: config.linerColor,
     mosaicFinish: config.mosaicFinish,
     skimmerFinish: config.skimmerFinish,
+    skimmerType: config.skimmerType,
   });
 
   const cameraPose = getCameraPose({
@@ -153,7 +212,9 @@ export function serializePoolRenderConfig(
     generatedAt: new Date().toISOString(),
     sourceProject: "pool-shape-shaper-main",
     shape: {
-      kind: config.shape,
+      // Safe: the L-shape guard above already threw for `config.shape ===
+      // "l-shape"`, so only "rectangle" | "custom" ever reach this point.
+      kind: config.shape as "rectangle" | "custom",
       outline,
     },
     dimensions: {
@@ -164,6 +225,7 @@ export function serializePoolRenderConfig(
     },
     structure: {
       installation,
+      construction: config.structure,
       system: config.system,
       overflowType: config.system === "overflow" ? config.overflowType : null,
     },

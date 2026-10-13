@@ -46,6 +46,11 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    if (new URL(request.url).pathname === "/api/resend/webhook") {
+      if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+      const { resendWebhook } = await import("./lib/lead/resendWebhook.server");
+      return resendWebhook(request);
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

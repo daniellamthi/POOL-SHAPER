@@ -3,13 +3,14 @@ import type {
   CustomerInfo,
   Dimensions,
   EquipmentId,
-  FinishMaterial,
+  SelectableFinishMaterial,
   LinerColor,
   PoolFeatureId,
   PoolStructure,
   PoolType,
   PoolShapeId,
   SkimmerFinishId,
+  SkimmerTypeId,
   StepDefinition,
 } from "./types";
 
@@ -18,6 +19,23 @@ export const DIMENSION_LIMITS = {
   width: { min: 2, max: 12, step: 0.1, unit: "m" },
   depth: { min: 0.8, max: 1.5, step: 0.05, unit: "m" },
   cornerRadius: { min: 0, max: 1, step: 0.01, unit: "" },
+  /** Shallow-end depth for a sloped floor. Same physical range as `depth` --
+   * the shallow end is still a real, standing-depth pool floor, never a
+   * beach entry -- further clamped below `depth` by `clampShallowDepth`
+   * (floor-profile.ts) so the slope itself is always real and finite. */
+  shallowDepth: { min: 0.8, max: 1.5, step: 0.05, unit: "m" },
+  /** L-shape only. These are the SLIDER's own static range -- the real,
+   * size-dependent minimum/maximum (never let a leg thin to a corridor) is
+   * enforced by `clampLShapeDimensions` (l-shape.ts) wherever the outline is
+   * actually built, the same two-tier pattern `shallowDepth` already uses
+   * against `depth` via `clampShallowDepth`. */
+  lShapeRecessLength: { min: 1.5, max: 20, step: 0.1, unit: "m" },
+  lShapeRecessWidth: { min: 1.5, max: 12, step: 0.1, unit: "m" },
+  /** Organic shape only. The slider's own static range -- the real,
+   * area-dependent minimum (never let curvature collapse the basin toward
+   * zero area) is enforced by `clampOrganicShapeParams` (organic-shape.ts)
+   * wherever the outline is actually built, same two-tier pattern as above. */
+  organicCurvature: { min: 0, max: 1, step: 0.01, unit: "" },
 } as const;
 
 export type DimensionKey = keyof typeof DIMENSION_LIMITS;
@@ -27,6 +45,9 @@ export const DEFAULT_DIMENSIONS: Dimensions = {
   width: 4.5,
   depth: 1.5,
   cornerRadius: 0.25,
+  // Explicit, so a fresh project is already in the canonical form that
+  // `parseProjectConfiguration` restores (a save/reload is byte-identical).
+  floorProfile: "flat",
 };
 
 export const DEFAULT_CUSTOMER: CustomerInfo = {
@@ -55,13 +76,14 @@ export const DEFAULT_CONTROL_POINTS: ReadonlyArray<ControlPoint> = [
 export const PROJECT_TYPES = [
   {
     id: "new" as const,
-    title: "New Pool",
-    description: "A complete build, from excavation and structure to finishing and technology.",
+    title: "Nuova piscina",
+    description:
+      "Una costruzione completa, dallo scavo e la struttura fino a finiture e tecnologia.",
   },
   {
     id: "renovation" as const,
-    title: "Pool Renovation",
-    description: "Reshape, reline and modernise an existing basin with contemporary systems.",
+    title: "Ristrutturazione piscina",
+    description: "Rimodella, riveste e ammoderna una vasca esistente con impianti contemporanei.",
   },
 ];
 
@@ -72,13 +94,13 @@ export const POOL_TYPES: ReadonlyArray<{
 }> = [
   {
     id: "in-ground",
-    title: "In-Ground Pool",
-    description: "A pool installed completely below ground level.",
+    title: "Piscina interrata",
+    description: "Una piscina installata completamente sotto il livello del terreno.",
   },
   {
     id: "above-ground",
-    title: "Above-Ground Pool",
-    description: "A pool installed above the surrounding ground level.",
+    title: "Piscina fuori terra",
+    description: "Una piscina installata sopra il livello del terreno circostante.",
   },
 ];
 
@@ -86,15 +108,64 @@ export const POOL_STRUCTURES: ReadonlyArray<{
   id: PoolStructure;
   poolTypes: ReadonlyArray<PoolType>;
   title: string;
+  description: string;
 }> = [
-  { id: "reinforced-concrete", poolTypes: ["in-ground"], title: "Reinforced Concrete" },
-  { id: "modular-steel-panels", poolTypes: ["in-ground"], title: "Modular Steel Panels" },
   {
-    id: "modular-steel-structure",
-    poolTypes: ["above-ground"],
-    title: "Modular Steel Structure",
+    id: "reinforced-concrete",
+    poolTypes: ["in-ground"],
+    title: "Cemento armato",
+    description: "Vasca strutturale monolitica in CLS, pronta per liner o mosaico.",
+  },
+  {
+    id: "modular-steel-panels",
+    poolTypes: ["in-ground", "above-ground"],
+    title: "Pannelli in acciaio",
+    description: "Pannelli metallici modulari zincati, completati con liner/PVC.",
+  },
+  {
+    id: "visible-stainless-steel",
+    poolTypes: ["in-ground", "above-ground"],
+    title: "Acciaio inox a vista",
+    description: "Vasca finita in acciaio inox satinato, senza rivestimenti aggiuntivi.",
   },
 ];
+
+/**
+ * What the customer chooses in the Structure step: two materials only.
+ * "Acciaio" is then resolved in the Interior Finish step into one of the two
+ * canonical steel structures above -- visible watertight stainless basin
+ * ("Acciaio a vista") or galvanised steel panels lined with PVC ("Liner").
+ * Galvanised structural panels are never shown as a finished bare basin.
+ */
+export type CustomerStructure = "concrete" | "steel";
+
+export const CUSTOMER_STRUCTURES: ReadonlyArray<{
+  id: CustomerStructure;
+  poolTypes: ReadonlyArray<PoolType>;
+  title: string;
+  description: string;
+  illustration: PoolStructure;
+}> = [
+  {
+    id: "concrete",
+    poolTypes: ["in-ground"],
+    title: "Cemento armato",
+    description: "Vasca monolitica in calcestruzzo armato, rifinita con liner o mosaico.",
+    illustration: "reinforced-concrete",
+  },
+  {
+    id: "steel",
+    poolTypes: ["in-ground", "above-ground"],
+    title: "Acciaio",
+    description: "Vasca in acciaio: inox a vista satinato oppure rivestita in liner.",
+    illustration: "visible-stainless-steel",
+  },
+];
+
+export function customerStructureOf(structure: PoolStructure | null): CustomerStructure | null {
+  if (structure === null) return null;
+  return structure === "reinforced-concrete" ? "concrete" : "steel";
+}
 
 export const CUSTOMER_FIELDS: ReadonlyArray<{
   key: keyof CustomerInfo;
@@ -121,14 +192,21 @@ export interface ShapeDefinition {
 export const POOL_SHAPES: ReadonlyArray<ShapeDefinition> = [
   {
     id: "rectangle",
-    title: "Rectangle",
-    description: "Architectural lap geometry with pure straight edges.",
+    title: "Rettangolare",
+    description: "Geometria architettonica a corsia, con spigoli puramente rettilinei.",
+    supportsCornerRadius: false,
+  },
+  {
+    id: "l-shape",
+    title: "Angolare",
+    description: "Due bracci rettangolari uniti ad angolo retto, per planimetrie articolate.",
     supportsCornerRadius: false,
   },
   {
     id: "custom",
-    title: "Custom Shape",
-    description: "Draw the outline with editable control points, or upload a plan.",
+    title: "Forma personalizzata",
+    description:
+      "Disegna il perimetro con punti di controllo modificabili, o carica una planimetria.",
     supportsCornerRadius: false,
   },
 ];
@@ -137,7 +215,7 @@ export const getShapeDefinition = (id: PoolShapeId): ShapeDefinition =>
   POOL_SHAPES.find((shape) => shape.id === id) ?? POOL_SHAPES[0]!;
 
 export const FINISHES: ReadonlyArray<{
-  id: FinishMaterial;
+  id: SelectableFinishMaterial;
   title: string;
   description: string;
   color: string;
@@ -146,16 +224,16 @@ export const FINISHES: ReadonlyArray<{
 }> = [
   {
     id: "liner",
-    title: "PVC Liner",
-    description: "Reinforced 150/100 membrane, welded on site. Six architectural finishes.",
+    title: "Liner PVC",
+    description: "Membrana rinforzata 150/100, saldata in opera. Sei finiture architettoniche.",
     color: "#dfe9ec",
     roughness: 0.32,
     metalness: 0.02,
   },
   {
     id: "mosaic",
-    title: "Mosaic",
-    description: "Vitreous glass tesserae with iridescent depth and fine grout lines.",
+    title: "Mosaico",
+    description: "Tessere in vetro con profondità iridescente e fughe sottili.",
     color: "#8fc4d2",
     roughness: 0.12,
     metalness: 0.06,
@@ -163,17 +241,57 @@ export const FINISHES: ReadonlyArray<{
 ];
 
 /** Skimmer face-frame finish. A short, self-contained list -- extend it here
- * when more finishes are needed, nothing else has to change. */
+ * when more finishes are needed, nothing else has to change. `metalness`
+ * defaults to 0 (moulded ABS) except the satin AISI-316-style steel finish. */
 export const SKIMMER_FINISHES: ReadonlyArray<{
   id: SkimmerFinishId;
   title: string;
   hex: string;
   roughness: number;
+  metalness: number;
 }> = [
-  { id: "white", title: "Bianco", hex: "#f5f5f1", roughness: 0.24 },
-  { id: "graphite", title: "Antracite", hex: "#3a3d3f", roughness: 0.32 },
-  { id: "sand", title: "Sabbia", hex: "#d8cdb8", roughness: 0.3 },
+  { id: "white", title: "Bianco ABS", hex: "#f5f5f1", roughness: 0.24, metalness: 0 },
+  { id: "graphite", title: "Antracite ABS", hex: "#3a3d3f", roughness: 0.32, metalness: 0 },
+  { id: "sand", title: "Sabbia ABS", hex: "#d8cdb8", roughness: 0.3, metalness: 0 },
+  // Satin AISI-316-style stainless steel -- brushed, not mirror-polished, so
+  // no fake chrome: roughness is high enough to keep specular highlights soft.
+  { id: "steel", title: "Acciaio satinato", hex: "#c9cdd0", roughness: 0.34, metalness: 1 },
 ];
+
+/** Skimmer housing family. Each id maps to a real geometry variant in
+ * `Skimmers.tsx` (`SKIMMER_GEOMETRY`) -- differences are dimensional
+ * (throat/frame proportions, recess depth, waterline offset), never a
+ * colour-only reskin. */
+export const SKIMMER_TYPES: ReadonlyArray<{
+  id: SkimmerTypeId;
+  title: string;
+  description: string;
+}> = [
+  {
+    id: "standard",
+    title: "Standard raffinato",
+    description: "Cornice stampata con profilo rialzato ben visibile e proporzioni classiche.",
+  },
+  {
+    id: "slim",
+    title: "Slim Moderno",
+    description: "Cornice sottile a basso profilo, bordo minimo, apertura più ampia.",
+  },
+  {
+    id: "highWaterline",
+    title: "Livello Acqua Alto",
+    description: "Corpo basso posizionato in alto contro il bordo, per un livello quasi a filo.",
+  },
+  {
+    id: "flush",
+    title: "Filo parete architettonico",
+    description:
+      "Piastra senza cornice, quasi a filo, con una sottile fessura d'ombra nella parete.",
+  },
+];
+
+/** Legacy variants remain readable in saved projects, not selectable for new work. */
+export const SELECTABLE_SKIMMER_TYPES = SKIMMER_TYPES.filter(({ id }) => id === "slim" || id === "highWaterline");
 
 export const LINER_COLORS: ReadonlyArray<{
   id: LinerColor;
@@ -303,11 +421,22 @@ export const POOL_FEATURES: ReadonlyArray<{
   title: string;
   description: string;
 }> = [
-  { id: "ledLighting", title: "LED Pool Lights", description: "Underwater lighting." },
+  { id: "ledLighting", title: "Illuminazione LED", description: "Illuminazione subacquea." },
+  { id: "stairLighting", title: "Micro-spot sulle scale", description: "LED optional integrati nelle alzate delle scale interne." },
   {
     id: "hydromassage",
-    title: "Hydromassage Jets",
-    description: "Integrated hydromassage jets.",
+    title: "Idromassaggio",
+    description: "Ugelli idromassaggio integrati.",
+  },
+  {
+    id: "sunShelf",
+    title: "Sun shelf",
+    description: "Solarium sommerso integrato.",
+  },
+  {
+    id: "integratedBench",
+    title: "Panca integrata",
+    description: "Seduta sommersa lungo parete.",
   },
 ];
 
@@ -316,17 +445,58 @@ export const EQUIPMENT: ReadonlyArray<{
   title: string;
   description: string;
 }> = [
-  { id: "automaticCover", title: "Automatic Cover", description: "Safety and thermal cover." },
-  { id: "heatPump", title: "Heat Pump", description: "Efficient pool water heating." },
+  {
+    id: "automaticCover",
+    title: "Copertura automatica",
+    description: "Copertura a doghe; fattibilità e prestazioni da verificare in progetto.",
+  },
+  { id: "heatPump", title: "Pompa di calore", description: "Riscaldamento efficiente dell'acqua." },
   {
     id: "saltElectrolysis",
-    title: "Salt Electrolysis",
-    description: "Automated salt-water treatment.",
+    title: "Elettrolisi al sale",
+    description: "Trattamento automatico dell'acqua salata.",
   },
   {
     id: "automaticDosing",
-    title: "Automatic Chlorine / pH Dosing",
-    description: "Automatic water treatment control.",
+    title: "Dosaggio automatico cloro / pH",
+    description: "Controllo automatico del trattamento dell'acqua.",
+  },
+  {
+    id: "solarShower",
+    title: "Doccia solare",
+    description: "Doccia da esterno a riscaldamento solare, alluminio antracite e acciaio inox.",
+  },
+  {
+    id: "pellicano",
+    title: "Pellicano — Cascata a lama d’acqua",
+    description:
+      "Bocchetta in acciaio inox a lama sul bordo: allacciamento e pompa da verificare in progetto.",
+  },
+  {
+    id: "loungers",
+    title: "Chaise longue",
+    description: "Quattro lettini minimal sul lato lungo, lontani da scale e accessi.",
+  },
+];
+
+/** Customer-facing subgroups for the Technology step -- purely a display
+ * grouping over `EQUIPMENT`, every id must exist there. */
+export const EQUIPMENT_GROUPS: ReadonlyArray<{
+  id: string;
+  title: string;
+  equipmentIds: ReadonlyArray<EquipmentId>;
+}> = [
+  {
+    id: "water-treatment",
+    title: "Trattamento acqua",
+    equipmentIds: ["saltElectrolysis", "automaticDosing"],
+  },
+  { id: "temperature", title: "Temperatura", equipmentIds: ["heatPump"] },
+  { id: "protection", title: "Protezione", equipmentIds: ["automaticCover"] },
+  {
+    id: "poolside",
+    title: "Bordo piscina",
+    equipmentIds: ["pellicano", "loungers", "solarShower"],
   },
 ];
 
@@ -334,73 +504,105 @@ export const STEPS: ReadonlyArray<StepDefinition> = [
   {
     id: "project",
     index: 0,
-    title: "Project Type",
-    subtitle: "Tell us the nature of the intervention.",
-    short: "Project",
+    title: "Tipo di progetto",
+    subtitle: "Indicaci la natura dell'intervento.",
+    short: "Progetto",
   },
   {
     id: "pool-type",
     index: 1,
-    title: "Pool Type",
-    subtitle: "Choose the installation type for your new pool.",
-    short: "Type",
+    title: "Tipo di piscina",
+    subtitle: "Scegli la tipologia di installazione della tua nuova piscina.",
+    short: "Tipologia",
   },
   {
     id: "structure",
     index: 2,
-    title: "Pool Structure",
-    subtitle: "Choose the construction system for your pool.",
-    short: "Structure",
+    title: "Struttura della piscina",
+    subtitle: "Scegli il sistema costruttivo della tua piscina.",
+    short: "Struttura",
   },
   {
     id: "shape-dimensions",
     index: 3,
-    title: "Shape & Dimensions",
-    subtitle: "Choose the silhouette and size the basin in real time.",
-    short: "Shape",
+    title: "Forma e dimensioni",
+    subtitle: "Scegli la sagoma e dimensiona la vasca in tempo reale.",
+    short: "Forma",
   },
   {
     id: "system",
     index: 4,
-    title: "Pool System",
-    subtitle: "Hydraulic principle and water line management.",
-    short: "System",
+    title: "Sistema idraulico",
+    subtitle: "Principio idraulico e gestione della linea d'acqua.",
+    short: "Acqua",
   },
   {
-    id: "finish",
+    id: "access",
     index: 5,
-    title: "Interior Finish",
-    subtitle: "The material that defines the colour of the water.",
-    short: "Finish",
+    title: "Accesso e comfort",
+    subtitle: "Scale, scaletta e comfort in acqua.",
+    short: "Comfort",
   },
   {
-    id: "features",
+    id: "style",
     index: 6,
-    title: "Pool Features",
-    subtitle: "Select the essential features built into the pool.",
-    short: "Features",
+    title: "Materiali e stile",
+    subtitle: "Il materiale che definisce carattere e colore dell'acqua, e il bordo vasca.",
+    short: "Stile",
   },
   {
-    id: "equipment",
+    id: "lighting",
     index: 7,
-    title: "Equipment",
-    subtitle: "Select equipment to include in the quotation.",
-    short: "Equipment",
+    title: "Illuminazione",
+    subtitle: "Illuminazione subacquea a LED: colore e intensità.",
+    short: "Luce",
   },
   {
-    id: "contact",
+    id: "deck",
     index: 8,
-    title: "Customer Details",
-    subtitle: "Contact and project location information.",
-    short: "Customer",
+    title: "Bordo e decking",
+    subtitle: "Il bordo della vasca e la pavimentazione attorno.",
+    short: "Bordo",
+  },
+  {
+    id: "technology",
+    index: 9,
+    title: "Tecnologia",
+    subtitle: "Seleziona la tecnologia da includere nel preventivo.",
+    short: "Tecnologia",
   },
   {
     id: "review",
-    index: 9,
-    title: "Final Review",
-    subtitle: "Review the pool configuration before requesting a quote.",
-    short: "Review",
+    index: 10,
+    title: "Revisione finale",
+    subtitle: "Rivedi la configurazione della piscina prima di richiedere un preventivo.",
+    short: "Riepilogo",
   },
+];
+
+/** The customer-facing "Nuova piscina" rail: seven groups over the ten
+ * internal `STEPS`. Purely a display grouping -- `PoolConfigurator` still
+ * navigates step-by-step through every id in `stepIds`; `StepIndicator`
+ * collapses them into one dot per group so the rail stays uncrowded.
+ * Renovation is untouched and never uses this. */
+export interface StepGroup {
+  id: string;
+  label: string;
+  stepIds: ReadonlyArray<string>;
+}
+
+export const STEP_GROUPS: ReadonlyArray<StepGroup> = [
+  {
+    id: "piscina",
+    label: "Piscina",
+    stepIds: ["project", "pool-type", "structure", "shape-dimensions"],
+  },
+  { id: "sistema", label: "Sistema acqua", stepIds: ["system"] },
+  { id: "accesso", label: "Accesso & comfort", stepIds: ["access"] },
+  { id: "finiture", label: "Finiture", stepIds: ["style", "lighting"] },
+  { id: "esterno", label: "Esterno", stepIds: ["deck"] },
+  { id: "optional", label: "Optional", stepIds: ["technology"] },
+  { id: "presentazione", label: "Presentazione", stepIds: ["review"] },
 ];
 
 export const RENOVATION_STEPS: ReadonlyArray<StepDefinition> = [
@@ -408,37 +610,37 @@ export const RENOVATION_STEPS: ReadonlyArray<StepDefinition> = [
   {
     id: "renovation-scope",
     index: 1,
-    title: "Renovation Scope",
-    subtitle: "Select the work your pool needs.",
-    short: "Scope",
+    title: "Interventi richiesti",
+    subtitle: "Seleziona le parti della piscina da rinnovare. La fattibilità sarà verificata da un consulente.",
+    short: "Interventi",
   },
   {
     id: "renovation-pool",
     index: 2,
-    title: "Current Pool",
-    subtitle: "Only the essential existing dimensions.",
-    short: "Pool",
+    title: "Piscina esistente",
+    subtitle: "Descrivi la vasca attuale: forma, dimensioni, struttura, impianto e rivestimento.",
+    short: "Esistente",
   },
   {
     id: "renovation-details",
     index: 3,
-    title: "Renovation Details",
-    subtitle: "Questions tailored to your selected work.",
-    short: "Details",
+    title: "Lavori proposti",
+    subtitle: "Solo le lavorazioni richieste, con materiali dal nostro catalogo. Nessun prezzo automatico.",
+    short: "Proposta",
   },
   {
     id: "renovation-customer",
     index: 4,
-    title: "Customer Information",
-    subtitle: "Contact details for your consultation.",
-    short: "Customer",
+    title: "Contatti e località",
+    subtitle: "I tuoi riferimenti per la proposta. Il consenso sarà richiesto prima dell’invio.",
+    short: "Contatti",
   },
   {
     id: "renovation-review",
     index: 5,
-    title: "Review",
-    subtitle: "Review the proposed renovation work.",
-    short: "Review",
+    title: "Riepilogo ristrutturazione",
+    subtitle: "Verifica situazione esistente e lavori proposti, salva e richiedi una valutazione.",
+    short: "Riepilogo",
   },
 ];
 
@@ -447,14 +649,38 @@ export const COPING_WIDTH = 0.2;
 export const OVERFLOW_GEOMETRY = {
   waterEdgeOffset: 0.055,
   hiddenChannelOffset: 0.105,
-  visibleChannelOuterOffset: 0.165,
+  /**
+   * Outer edge of the VISIBLE overflow perimeter. Built, not styled: it is the
+   * kerb plus the grille, and the audit enforces that identity rather than
+   * letting the three numbers drift apart.
+   */
+  visibleChannelOuterOffset: 0.355,
+  /**
+   * The constructed kerb (muretto) between the basin and the grille. 110 mm is
+   * a real finished kerb -- a block or cast upstand with its cladding -- not
+   * the 62 mm decorative strip this started as, which read as a trim bead
+   * rather than as structure.
+   */
+  visibleKerbWidth: 0.11,
+  /**
+   * Flush overflow crest: the reference grille and lip share the wall-top
+   * datum. The water film overtops it; there is no skimmer-like dry upstand.
+   */
+  visibleKerbRise: 0,
+  /**
+   * Overflow grille width. 245 mm is a stock section (the common residential
+   * size between 195 and 295), so the grille is proportioned like a product
+   * that exists rather than to whatever was left over from the channel band.
+   */
+  visibleGrateWidth: 0.245,
   visibleWaterFilmWidth: 0.02,
   hiddenWaterChannelClearance: 0.015,
-  visibleGrateTopOffset: 0.006,
+  visibleGrateTopOffset: 0,
   visibleWaterAboveLip: 0.001,
   hiddenWaterTopClearance: 0.0005,
   surfaceMovementAmplitude: 0.00025,
-  channelDepth: 0.19,
+  /** Channel below the grille -- a real perimeter gutter, not a slot. */
+  channelDepth: 0.22,
   grateSlatPitch: 0.075,
 } as const;
 /** Distance from the coping top down to the waterline, in metres.

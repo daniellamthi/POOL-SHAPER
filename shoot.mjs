@@ -1,6 +1,7 @@
 import { chromium } from "playwright-core";
 
-const OUT = "/private/tmp/claude-501/-Users-danielelamthi-Downloads-GITHUB-CONFIG--3D-PISICNE-WELLNESS/d70c3732-5560-441b-93e2-e62113287b28/scratchpad";
+const OUT =
+  "/private/tmp/claude-501/-Users-danielelamthi-Downloads-GITHUB-CONFIG--3D-PISICNE-WELLNESS/d70c3732-5560-441b-93e2-e62113287b28/scratchpad";
 const LINERS = [
   "Motion Deep Sea",
   "Motion Blue Sky",
@@ -25,7 +26,11 @@ await page.waitForTimeout(800);
 
 // Walk through steps until we reach "Finish"
 for (let i = 0; i < 6; i++) {
-  const stepLabel = await page.locator("h2, h1").first().textContent().catch(() => "");
+  const stepLabel = await page
+    .locator("h2, h1")
+    .first()
+    .textContent()
+    .catch(() => "");
   console.log("step heading:", stepLabel);
   if (stepLabel && /finish/i.test(stepLabel)) break;
   const contBtn = page.locator('button:has-text("Continue")');

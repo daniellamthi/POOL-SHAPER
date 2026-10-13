@@ -32,8 +32,38 @@ function boxBlurWrapped(src: Float32Array, size: number, radius: number): Float3
   return out;
 }
 
+/**
+ * Generic once-per-size memoization for the parameterless procedural maps
+ * below: several unrelated components (studio floor, skimmers, PoolModel's
+ * fallback micro-detail, staircase contact shadow) each call these factories
+ * independently on mount, and every call re-runs the same per-pixel trig/
+ * gradient loop over identical output. The expensive canvas is built once
+ * per `size` and kept as a template; each call site still gets its own
+ * `Texture` instance (via `.clone()`) so it can freely set `repeat`/
+ * `anisotropy` and `dispose()` without affecting any other consumer -- only
+ * the redundant CPU generation is removed.
+ */
+function memoizedTemplate(
+  cache: Map<number, THREE.Texture>,
+  size: number,
+  build: () => THREE.Texture,
+): THREE.Texture {
+  let template = cache.get(size);
+  if (!template) {
+    template = build();
+    cache.set(size, template);
+  }
+  return template.clone();
+}
+
+const microNormalTemplateCache = new Map<number, THREE.Texture>();
+
 /** Neutral, seamless micro-normal used only to break perfectly flat highlights. */
 export function createMaterialMicroNormalMap(size = 256): THREE.Texture {
+  return memoizedTemplate(microNormalTemplateCache, size, () => buildMaterialMicroNormalMap(size));
+}
+
+function buildMaterialMicroNormalMap(size: number): THREE.Texture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -72,8 +102,16 @@ export function createMaterialMicroNormalMap(size = 256): THREE.Texture {
   return texture;
 }
 
+const microRoughnessTemplateCache = new Map<number, THREE.Texture>();
+
 /** High-valued roughness modulation: subtle variation without darkening base colour. */
 export function createMaterialMicroRoughnessMap(size = 256): THREE.Texture {
+  return memoizedTemplate(microRoughnessTemplateCache, size, () =>
+    buildMaterialMicroRoughnessMap(size),
+  );
+}
+
+function buildMaterialMicroRoughnessMap(size: number): THREE.Texture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -106,19 +144,66 @@ export function createMaterialMicroRoughnessMap(size = 256): THREE.Texture {
   return texture;
 }
 
+/**
+ * Near-white occlusion fallback for finishes with no photographed source to
+ * derive real joint/grout shadowing from (see `getDerivedDetailMaps`'s own
+ * `aoMap`, which is preferred whenever one is available). Kept extremely
+ * subtle and only ever modulates indirect light -- direct lighting and base
+ * colour are untouched -- so it reads as gentle micro-occlusion rather than
+ * baked shading.
+ */
+export function createMaterialMicroAoMap(size = 256): THREE.Texture {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d")!;
+  const image = context.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const u = (x / size) * Math.PI * 2;
+      const v = (y / size) * Math.PI * 2;
+      const variation =
+        Math.sin(u * 5 + v * 3) * 0.45 +
+        Math.sin(v * 7 - u * 2) * 0.32 +
+        Math.sin((u + v) * 11) * 0.23;
+      const value = Math.round(246 + variation * 8);
+      const offset = (y * size + x) * 4;
+      image.data[offset] = value;
+      image.data[offset + 1] = value;
+      image.data[offset + 2] = value;
+      image.data[offset + 3] = 255;
+    }
+  }
+  context.putImageData(image, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  return texture;
+}
+
 /** Height field shared by both ripple layers -- broad, slow swells vs. tight, fast chop. */
 function rippleHeight(layer: "broad" | "micro", x: number, y: number, size: number): number {
   const u = (x / size) * Math.PI * 2;
   const v = (y / size) * Math.PI * 2;
   if (layer === "broad") {
     return (
-      Math.sin(u * 2 + Math.sin(v * 2) * 0.42) * 0.5 +
-      Math.sin(v * 3 - Math.cos(u * 2) * 0.35) * 0.32
+      Math.sin(u * 2 + v * 3 + Math.sin(v * 2) * 0.65) * 0.26 +
+      Math.sin(u * 4 - v * 3 + Math.cos(u + v) * 0.72) * 0.19 +
+      Math.sin(u * 3 + v * 7 + 1.7) * 0.12 +
+      Math.sin(u * 8 - v * 5 + 2.4) * 0.07 +
+      Math.sin(u * 9 + v * 4 + 0.9) * 0.05 +
+      Math.sin(u - v * 6 + Math.cos(u * 2) * 0.6) * 0.1
     );
   }
   return (
-    Math.sin(u * 7 + v * 5 + Math.sin(v * 3) * 0.28) * 0.2 +
-    Math.sin(u * 11 - v * 9 - Math.cos(u * 4) * 0.22) * 0.14
+    Math.sin(u * 7 + v * 5 + Math.sin(v * 3) * 0.8) * 0.12 +
+    Math.sin(u * 11 - v * 9 - Math.cos(u * 4) * 0.6) * 0.08 +
+    Math.sin(u * 13 + v * 3 + 3.1) * 0.06 +
+    Math.sin(u * 4 - v * 15 + 0.6) * 0.04
   );
 }
 
@@ -153,6 +238,83 @@ export function createRippleNormalMap(
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   return texture;
+}
+
+const causticTemplateCache = new Map<number, THREE.Texture>();
+
+/** Periodic, warped cellular light concentrations. Generated once on CPU;
+ * the basin shader needs just two bilinear samples, not a per-pixel noise loop. */
+export function createCausticsMap(size = 512): THREE.Texture {
+  return memoizedTemplate(causticTemplateCache, size, () => {
+    const data = new Uint8Array(size * size * 4);
+    const cells = 6;
+    const hash = (x: number, y: number) => {
+      const n =
+        Math.sin(((x + cells) % cells) * 127.1 + ((y + cells) % cells) * 311.7) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        const u = x / size,
+          v = y / size;
+        const px = u * cells + Math.sin(v * Math.PI * 4) * 0.35;
+        const py = v * cells + Math.sin(u * Math.PI * 6) * 0.3;
+        const ix = Math.floor(px),
+          iy = Math.floor(py);
+        let first = 10,
+          second = 10;
+        for (let j = -1; j <= 1; j++)
+          for (let i = -1; i <= 1; i++) {
+            const dx = ix + i + 0.15 + hash(ix + i, iy + j) * 0.7 - px;
+            const dy = iy + j + 0.15 + hash(iy + j, ix + i + 7) * 0.7 - py;
+            const distance = Math.hypot(dx, dy);
+            if (distance < first) {
+              second = first;
+              first = distance;
+            } else if (distance < second) second = distance;
+          }
+        // Concentrate light near cell boundaries instead of lifting the
+        // whole cell interior. Keep the existing soft filter and peak gain.
+        const edge =
+          Math.exp(-(second - first) * 22) *
+          (0.3 + 0.7 * THREE.MathUtils.smoothstep(hash(ix, iy + 29), 0.15, 0.85));
+        const value = Math.round(edge * 255),
+          o = (y * size + x) * 4;
+        data[o] = data[o + 1] = data[o + 2] = value;
+        data[o + 3] = 255;
+      }
+    // Soft finite-width light traces; contrast is bounded in the receiving
+    // material, rather than erasing the spatial cue with a very broad blur.
+    // Periodic separable Gaussian filtering is baked once, not per frame.
+    const radius = 6;
+    const kernel = Array.from({ length: radius * 2 + 1 }, (_, i) =>
+      Math.exp(-((i - radius) ** 2) / 18),
+    );
+    const weight = kernel.reduce((sum, value) => sum + value, 0);
+    const horizontal = new Float32Array(size * size);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        let value = 0;
+        for (let k = -radius; k <= radius; k++)
+          value += data[(y * size + ((x + k + size) % size)) * 4]! * kernel[k + radius]!;
+        horizontal[y * size + x] = value / weight;
+      }
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        let value = 0;
+        for (let k = -radius; k <= radius; k++)
+          value += horizontal[((y + k + size) % size) * size + x]! * kernel[k + radius]!;
+        const o = (y * size + x) * 4;
+        data[o] = data[o + 1] = data[o + 2] = Math.round(value / weight);
+      }
+    const texture = new THREE.DataTexture(data, size, size);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+    return texture;
+  });
 }
 
 /**
@@ -210,9 +372,49 @@ export function createDualRippleNormalMap(
 export interface DerivedDetailMaps {
   normalMap: THREE.Texture;
   roughnessMap: THREE.Texture;
+  /** Only produced from a real photographed source (see `getDerivedDetailMaps`); the
+   * procedural triplanar generator below has no comparable joint/seam data to derive it from. */
+  aoMap?: THREE.Texture;
 }
 
 const derivedDetailCache = new Map<string, DerivedDetailMaps>();
+
+/** Indicative PVC sample calibration, not a measured product scan.
+ * Remove broad photographic shading and recover the existing fine grain;
+ * no new pattern, displacement, hue tint or per-frame shader work. */
+export function createLinerSampleMap(source: THREE.Texture): THREE.Texture {
+  const image = source.image as HTMLImageElement | undefined;
+  if (!image?.width || !image.height) return source;
+  const size = 1024;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return source;
+  ctx.drawImage(image, 0, 0, size, size);
+  const pixels = ctx.getImageData(0, 0, size, size);
+  const luminance = new Float32Array(size * size);
+  let mean = 0;
+  for (let i = 0; i < luminance.length; i++) {
+    const o = i * 4;
+    luminance[i] = (pixels.data[o]! * 0.2126 + pixels.data[o + 1]! * 0.7152 + pixels.data[o + 2]! * 0.0722) / 255;
+    mean += luminance[i]! / luminance.length;
+  }
+  const broad = boxBlurWrapped(luminance, size, 32);
+  for (let i = 0; i < luminance.length; i++) {
+    // Bounded enhancement keeps embossed PVC soft rather than stony.
+    const grain = THREE.MathUtils.clamp((luminance[i]! - broad[i]!) * 2.5, -0.12, 0.12);
+    const target = mean + (broad[i]! - mean) * 0.2 + grain;
+    const gain = target / Math.max(luminance[i]!, 0.01);
+    for (let channel = 0; channel < 3; channel++) pixels.data[i * 4 + channel] = pixels.data[i * 4 + channel]! * gain;
+  }
+  ctx.putImageData(pixels, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  return texture;
+}
 
 /**
  * Derives a real normal + micro-roughness pair from an already-loaded
@@ -261,6 +463,7 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
 
   const normalImage = new Uint8ClampedArray(size * size * 4);
   const roughnessImage = new Uint8ClampedArray(size * size * 4);
+  const aoImage = new Uint8ClampedArray(size * size * 4);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       // Sobel gradient of the real photographed pattern: grout joints and
@@ -294,6 +497,14 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
         roughnessImage[o + 2] =
           Math.round(230 + edge * 25);
       roughnessImage[o + 3] = 255;
+
+      // Same edge signal read as recessed joints/seams instead: real grout
+      // and print-seam grooves receive slightly less indirect light than the
+      // flat tile/panel face around them. Kept close to white (three.js only
+      // applies aoMap to indirect diffuse/specular, never direct light or
+      // base colour) so this stays a gentle cue, not baked shading.
+      aoImage[o] = aoImage[o + 1] = aoImage[o + 2] = Math.round(255 - edge * 70);
+      aoImage[o + 3] = 255;
     }
   }
 
@@ -323,7 +534,20 @@ export function getDerivedDetailMaps(colorTexture: THREE.Texture): DerivedDetail
   roughnessMap.generateMipmaps = true;
   roughnessMap.needsUpdate = true;
 
-  const result: DerivedDetailMaps = { normalMap, roughnessMap };
+  const aoCanvas = document.createElement("canvas");
+  aoCanvas.width = size;
+  aoCanvas.height = size;
+  aoCanvas.getContext("2d")!.putImageData(new ImageData(aoImage, size, size), 0, 0);
+  const aoMap = new THREE.CanvasTexture(aoCanvas);
+  aoMap.wrapS = THREE.RepeatWrapping;
+  aoMap.wrapT = THREE.RepeatWrapping;
+  aoMap.colorSpace = THREE.NoColorSpace;
+  aoMap.minFilter = THREE.LinearMipmapLinearFilter;
+  aoMap.magFilter = THREE.LinearFilter;
+  aoMap.generateMipmaps = true;
+  aoMap.needsUpdate = true;
+
+  const result: DerivedDetailMaps = { normalMap, roughnessMap, aoMap };
   derivedDetailCache.set(cacheKey, result);
   return result;
 }
@@ -485,7 +709,13 @@ export function createTriplanarDetailMaps(kind: "stone" | "panel", size = 512): 
  * post-processing dependency, so it reads identically in Configuration and
  * Experience. Deliberately gentle -- a soft gradient, not a hard dark ring.
  */
+const contactAOTemplateCache = new Map<number, THREE.Texture>();
+
 export function createContactAOGradientMap(size = 128): THREE.Texture {
+  return memoizedTemplate(contactAOTemplateCache, size, () => buildContactAOGradientMap(size));
+}
+
+function buildContactAOGradientMap(size: number): THREE.Texture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;

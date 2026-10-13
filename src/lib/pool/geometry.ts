@@ -8,6 +8,8 @@ import type {
   SystemType,
 } from "./types";
 import { COPING_WIDTH, CURVE_SAMPLES, OVERFLOW_GEOMETRY } from "./config";
+import { buildLShapeOutline, clampLShapeDimensions } from "./l-shape";
+import { buildOrganicShapeOutline, clampOrganicShapeParams } from "./organic-shape";
 
 export const POOL_SHAPE_GUARDRAILS = {
   minimumPreferredRadius: 0.9,
@@ -213,6 +215,34 @@ export function buildOutline(
   dimensions: Dimensions,
   controlPoints: ReadonlyArray<ControlPoint>,
 ): Outline {
+  if (shape === "l-shape") {
+    // Own canonical generator (l-shape.ts) -- an L is not a scaled unit
+    // shape, it's an outer rectangle with an absolute-metre recess cut from
+    // one corner, so it never goes through the unit-square scaling path
+    // every other shape uses.
+    return buildLShapeOutline(
+      clampLShapeDimensions({
+        totalLength: dimensions.length,
+        totalWidth: dimensions.width,
+        recessLength: dimensions.lShapeRecessLength,
+        recessWidth: dimensions.lShapeRecessWidth,
+        orientation: dimensions.lShapeOrientation,
+      }),
+    );
+  }
+  if (shape === "organic") {
+    // Own canonical generator (organic-shape.ts) -- a deterministic smooth
+    // closed curve in real metres, likewise never going through the unit
+    // -square scaling path (it already samples at the real length/width).
+    return buildOrganicShapeOutline(
+      clampOrganicShapeParams({
+        length: dimensions.length,
+        width: dimensions.width,
+        curvature: dimensions.organicCurvature,
+        mirror: dimensions.organicMirror,
+      }),
+    );
+  }
   const unit = shape === "rectangle" ? unitRectangle() : unitFromControlPoints(controlPoints);
   const length = Number.isFinite(dimensions.length) ? Math.max(0.01, dimensions.length) : 1;
   const width = Number.isFinite(dimensions.width) ? Math.max(0.01, dimensions.width) : 1;
@@ -228,6 +258,43 @@ export function outlineArea(outline: Outline): number {
     sum += x1 * y2 - x2 * y1;
   }
   return Math.abs(sum) / 2;
+}
+
+/**
+ * Exact area centroid (signed shoelace formula) of a simple polygon -- NOT
+ * the mean of its vertices, which is wrong for any non-regular polygon (an
+ * L-shape or a densely-sampled organic curve most of all, since extra
+ * vertices along a nearly-straight run would silently drag a vertex-average
+ * off-centre). Used by `computeSlopeMetrics` (floor-profile.ts): because a
+ * single-axis planar ramp's elevation is an affine function of (x, z), the
+ * exact integral of that elevation over the polygon equals the elevation
+ * evaluated at this centroid, times the area -- a real closed-form identity,
+ * not an approximation, and it is what makes sloped-floor volume correct for
+ * a non-constant-cross-width basin (L-shape, organic) instead of only a
+ * constant-width rectangle. */
+export function outlineCentroid(outline: Outline): readonly [number, number] {
+  let signedAreaSum = 0;
+  let cx = 0;
+  let cz = 0;
+  for (let i = 0; i < outline.length; i++) {
+    const [x1, z1] = outline[i]!;
+    const [x2, z2] = outline[(i + 1) % outline.length]!;
+    const cross = x1 * z2 - x2 * z1;
+    signedAreaSum += cross;
+    cx += (x1 + x2) * cross;
+    cz += (z1 + z2) * cross;
+  }
+  const signedArea = signedAreaSum / 2;
+  if (Math.abs(signedArea) < 1e-12) {
+    // Degenerate (zero-area) polygon: fall back to the plain vertex mean
+    // rather than dividing by ~zero.
+    const n = Math.max(1, outline.length);
+    const mean = outline.reduce((sum, [x, z]) => [sum[0] + x / n, sum[1] + z / n] as const, [
+      0, 0,
+    ] as readonly [number, number]);
+    return mean;
+  }
+  return [cx / (6 * signedArea), cz / (6 * signedArea)];
 }
 
 export function outlinePerimeter(outline: Outline): number {
@@ -357,12 +424,16 @@ export function buildWaterOutline(
   system: SystemType,
   overflowType: OverflowType,
 ): Outline {
-  if (system === "skimmer") return outline;
-  const offset =
-    overflowType === "visible"
-      ? OVERFLOW_GEOMETRY.waterEdgeOffset + OVERFLOW_GEOMETRY.visibleWaterFilmWidth
-      : OVERFLOW_GEOMETRY.hiddenChannelOffset - OVERFLOW_GEOMETRY.hiddenWaterChannelClearance;
-  return offsetOutline(outline, offset);
+  // Infinity's own disappearing side is handled entirely by InfinityEdge.tsx
+  // (the lip/cascade geometry, not the main water body); the other 3 sides
+  // meet the water exactly the way skimmer coping does.
+  if (system === "skimmer" || system === "infinity") return outline;
+  // The flush crest carries the water film from the basin to the grille.
+  if (overflowType === "visible") return offsetOutline(outline, OVERFLOW_GEOMETRY.visibleKerbWidth);
+  return offsetOutline(
+    outline,
+    OVERFLOW_GEOMETRY.hiddenChannelOffset - OVERFLOW_GEOMETRY.hiddenWaterChannelClearance,
+  );
 }
 
 function rawOffsetOutline(outline: Outline, distance: number): Outline {

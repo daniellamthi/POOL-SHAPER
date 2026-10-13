@@ -1,183 +1,172 @@
 import { useEffect, useMemo } from "react";
-import type { Outline } from "@/lib/pool/types";
-import { COPING_WIDTH } from "@/lib/pool/config";
+import { BoxGeometry, ExtrudeGeometry, Quaternion, Shape, Vector3 } from "three";
+import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
+import { CladdingMaterial } from "./AboveGroundCladding";
+import { planExternalStaircase, type ExternalStaircaseProps } from "./externalStaircasePlan";
 import { createContactAOGradientMap } from "./textures";
+import { createWoodDeckMaps, createWPCMaps, loadCopingTextureMaps, type StoneMaps } from "./stoneTextures";
+import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
+import { DEFAULT_EXTERIOR_PANEL_FINISH, type ExteriorPanelFinishId } from "@/lib/pool/above-ground";
 
-interface ExternalStaircaseProps {
-  outline: Outline;
-  groundY: number;
-  topY: number;
-}
+type Point = readonly [number,number,number];
+const SLAB = 0.03;
+const GUARD_HEIGHT = 1;
+const POST_FOLD = 0.045;
+const POST_SETBACK = 0.075;
 
-const clamp = (value: number, minimum: number, maximum: number) =>
-  Math.min(maximum, Math.max(minimum, value));
-
-export function ExternalStaircase({ outline, groundY, topY }: ExternalStaircaseProps) {
-  const layout = useMemo(() => {
-    const centre = outline.reduce(
-      (sum, [x, z]) => [sum[0] + x / outline.length, sum[1] + z / outline.length] as const,
-      [0, 0] as const,
-    );
-    let longest: {
-      length: number;
-      midpoint: readonly [number, number];
-      outward: readonly [number, number];
-      tangent: readonly [number, number];
-    } = { length: 0, midpoint: [0, 0], outward: [0, 1], tangent: [1, 0] };
-    for (let index = 0; index < outline.length; index++) {
-      const start = outline[index]!;
-      const end = outline[(index + 1) % outline.length]!;
-      const dx = end[0] - start[0];
-      const dz = end[1] - start[1];
-      const length = Math.hypot(dx, dz);
-      if (length <= longest.length) continue;
-      const midpoint: readonly [number, number] = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-      const firstNormal: readonly [number, number] = [-dz / length, dx / length];
-      const pointsOutward =
-        firstNormal[0] * (midpoint[0] - centre[0]) + firstNormal[1] * (midpoint[1] - centre[1]) > 0;
-      longest = {
-        length,
-        midpoint,
-        outward: pointsOutward ? firstNormal : [-firstNormal[0], -firstNormal[1]],
-        tangent:
-          dx > 0 || (Math.abs(dx) < 1e-9 && dz > 0)
-            ? [dx / length, dz / length]
-            : [-dx / length, -dz / length],
-      };
+/** Steel construction enclosed in the same panels as the pool references.
+ * Only the walking surfaces inherit the selected coping finish. */
+export function ExternalStaircase({ outline, groundY, topY, copingOffset, infinityExcluded = null,
+  side = "short", platformExtended = false, accessAnchor = null, finish = DEFAULT_EXTERIOR_PANEL_FINISH, tread }: ExternalStaircaseProps & {
+    finish?: ExteriorPanelFinishId;
+    tread: { id: CopingMaterialId; color: string; roughness: number; assetDir: string|null };
+  }) {
+  const timber = tread.id === "wpc" || tread.id === "deck-marrone";
+  const maps = useMemo(() => {
+    if (tread.id === "prun" && tread.assetDir) {
+      const definition = COPING_MATERIALS.find(m => m.id === "prun")!;
+      const maps = loadCopingTextureMaps(tread.assetDir, false, false, true);
+      // Tread UVs already divide world metres by 1.2. Match the coping's
+      // metric photo footprint rather than stretching the portrait sample.
+      maps.colorMap.repeat.set(1.2 / definition.moduleSize, 1.2 * definition.asset.aspect / definition.moduleSize);
+      return maps;
     }
-    const height = Math.max(0.6, topY - groundY);
-    const stepCount = clamp(Math.ceil(height / 0.2), 3, 10);
-    const rise = height / stepCount;
-    const treadDepth = clamp(height * 0.19, 0.27, 0.34);
-    const width = 0.96;
-    const endOffset = longest.length / 2;
-    return {
-      ...longest,
-      centre,
-      midpoint: [
-        longest.midpoint[0] + longest.tangent[0] * endOffset,
-        longest.midpoint[1] + longest.tangent[1] * endOffset,
-      ] as const,
-      height,
-      stepCount,
-      rise,
-      treadDepth,
-      width,
-      rotation: Math.atan2(-longest.tangent[0], -longest.tangent[1]),
-    };
-  }, [groundY, outline, topY]);
-
-  // `outline` is the pool's wall outline; the coping band extends
-  // COPING_WIDTH beyond it (see PoolModel's `offsetOutline(outline,
-  // COPING_WIDTH)`). The staircase sits right at the wall's end, where the
-  // coping's mitred corner bulges slightly past that straight-edge offset --
-  // a small extra clearance keeps the staircase clear of that corner too,
-  // without reading as a gap at real scale.
-  const CORNER_MITRE_CLEARANCE = 0.05;
-  const copingClearance = COPING_WIDTH + CORNER_MITRE_CLEARANCE;
-  const groupPosition: readonly [number, number, number] = [
-    layout.midpoint[0] + layout.outward[0] * (layout.width / 2 + copingClearance),
-    0,
-    layout.midpoint[1] + layout.outward[1] * (layout.width / 2 + copingClearance),
-  ];
-  // The staircase sits at the end of its wall (see `endOffset` above), so
-  // one of its two rails can land past the corner, next to (or over) the
-  // adjacent wall -- an "inner" rail that reads as entering the pool. Keep
-  // only whichever rail is actually farther from the pool's own centre,
-  // i.e. genuinely external, for any wall/corner this ends up on.
-  const cosRotation = Math.cos(layout.rotation);
-  const sinRotation = Math.sin(layout.rotation);
-  const railSides = [-1, 1] as const;
-  const externalSide = railSides.reduce((farthest, side) => {
-    const localX = side * layout.width * 0.49;
-    const worldX = groupPosition[0] + localX * cosRotation;
-    const worldZ = groupPosition[2] - localX * sinRotation;
-    const distance = Math.hypot(worldX - layout.centre[0], worldZ - layout.centre[1]);
-    const farthestLocalX = farthest * layout.width * 0.49;
-    const farthestWorldX = groupPosition[0] + farthestLocalX * cosRotation;
-    const farthestWorldZ = groupPosition[2] - farthestLocalX * sinRotation;
-    const farthestDistance = Math.hypot(
-      farthestWorldX - layout.centre[0],
-      farthestWorldZ - layout.centre[1],
-    );
-    return distance > farthestDistance ? side : farthest;
-  }, railSides[0]);
-
-  const railHeight = 0.88;
-  const lowestZ = (layout.stepCount - 0.5) * layout.treadDepth;
-  const highestZ = 0.5 * layout.treadDepth;
-  const lowerRailY = groundY + layout.rise + railHeight;
-  const upperRailY = topY + railHeight;
-  const railLength = Math.hypot(upperRailY - lowerRailY, highestZ - lowestZ);
-  const railAngle = Math.atan2(highestZ - lowestZ, upperRailY - lowerRailY);
-
-  const contactAOMap = useMemo(() => createContactAOGradientMap(), []);
-  useEffect(() => () => contactAOMap.dispose(), [contactAOMap]);
-
-  return (
-    <group position={groupPosition} rotation={[0, layout.rotation, 0]}>
-      {/* Soft ground contact shadow under the whole footprint: the global,
-          heavily-blurred pool ContactShadows bake is sized for the pool
-          itself and reads too faint at this small a footprint to anchor it
-          visually to the ground. */}
-      <mesh
-        name="contact-ao-decal"
-        position={[0, groundY + 0.003, (layout.stepCount * layout.treadDepth) / 2]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        renderOrder={1}
-      >
-        <planeGeometry args={[layout.width * 1.2, layout.stepCount * layout.treadDepth * 1.15]} />
-        <meshBasicMaterial map={contactAOMap} transparent depthWrite={false} />
-      </mesh>
-
-      {Array.from({ length: layout.stepCount }, (_, index) => {
-        const level = index + 1;
-        const blockHeight = layout.rise * level;
-        const z = (layout.stepCount - index - 0.5) * layout.treadDepth;
-        // The top step's own riser top already sits exactly at `topY` (its
-        // block height is defined as the full `height`), so it's already
-        // flush with the pool's top edge -- the proud nosing cap every other
-        // tread gets would push *this* one above that edge instead of
-        // landing flush with it, so the top step skips it.
-        const isTopStep = level === layout.stepCount;
-        return (
-          <group key={level}>
-            <mesh position={[0, groundY + blockHeight / 2, z]} castShadow receiveShadow>
-              <boxGeometry args={[layout.width, blockHeight, layout.treadDepth]} />
-              <meshStandardMaterial color="#f1f2f2" roughness={0.48} metalness={0.02} />
-            </mesh>
-            {!isTopStep ? (
-              <mesh position={[0, groundY + blockHeight + 0.018, z]} castShadow receiveShadow>
-                <boxGeometry args={[layout.width + 0.04, 0.036, layout.treadDepth + 0.025]} />
-                <meshStandardMaterial color="#34383c" roughness={0.34} metalness={0.08} />
-              </mesh>
-            ) : null}
-          </group>
-        );
-      })}
-
-      {[externalSide].map((side) => (
-        <group key={side} position={[side * layout.width * 0.49, 0, 0]}>
-          {[0, Math.floor((layout.stepCount - 1) / 2), layout.stepCount - 1].map((index) => {
-            const stepY = groundY + layout.rise * (index + 1);
-            const z = (layout.stepCount - index - 0.5) * layout.treadDepth;
-            return (
-              <mesh key={index} position={[0, stepY + railHeight / 2, z]} castShadow>
-                <cylinderGeometry args={[0.016, 0.016, railHeight, 10]} />
-                <meshStandardMaterial color="#c8ced1" roughness={0.2} metalness={0.9} />
-              </mesh>
-            );
-          })}
-          <mesh
-            position={[0, (lowerRailY + upperRailY) / 2, (lowestZ + highestZ) / 2]}
-            rotation={[railAngle, 0, 0]}
-            castShadow
-          >
-            <cylinderGeometry args={[0.018, 0.018, railLength, 10]} />
-            <meshStandardMaterial color="#c8ced1" roughness={0.18} metalness={0.92} />
-          </mesh>
-        </group>
-      ))}
+    return tread.assetDir ? loadCopingTextureMaps(tread.assetDir)
+    : tread.id === "wpc" ? createWPCMaps() : tread.id === "deck-marrone" ? createWoodDeckMaps() : null;
+  }, [tread.assetDir,tread.id]);
+  useEffect(() => () => { if(maps) Object.values(maps).forEach(map => map?.dispose()); },[maps]);
+  const layout = useMemo(() => planExternalStaircase({outline,groundY,topY,copingOffset,infinityExcluded,side,platformExtended,accessAnchor}),
+    [outline,groundY,topY,copingOffset,infinityExcluded,side,platformExtended,accessAnchor]);
+  const contactAOMap = useMemo(() => createContactAOGradientMap(),[]);
+  useEffect(() => () => contactAOMap.dispose(),[contactAOMap]);
+  const enclosure = useMemo(() => layout ? createExternalStairEnclosureGeometry(layout) : null,[layout]);
+  const postGeometry = useMemo(() => createExternalStairGuardPostGeometry(),[]);
+  useEffect(() => () => enclosure?.dispose(),[enclosure]);
+  useEffect(() => () => postGeometry.dispose(),[postGeometry]);
+  if(!layout) return null;
+  const {width,landingDepth,run,rise,treadDepth,stepCount,poolSide} = layout;
+  const start = landingDepth/2, railStart = start-treadDepth/2, lowZ = start+run-treadDepth/2;
+  const walkingSurface = (y:number,z:number,depth:number,key:string) => (
+    <group key={key} position={[0,y-SLAB/2,z]}>
+      {timber ? Array.from({length:Math.max(1,Math.round(depth/0.15))},(_,i) => {
+        const count=Math.max(1,Math.round(depth/0.15)), boardDepth=depth/count;
+        return <Tread key={i} width={width} depth={boardDepth-0.003} z={-depth/2+boardDepth*(i+0.5)}
+          maps={maps} color={tread.color} roughness={tread.roughness} timber />;
+      }) : <Tread width={width} depth={depth} z={0} maps={maps} color={tread.color} roughness={tread.roughness} timber={false} />}
     </group>
   );
+  const post = (s:number,y:number,z:number,key:string) => (
+    <group key={key}>
+      <mesh name="external-stair-guard-post" position={[s*(width/2-POST_SETBACK),y,z]} scale={[s,1,1]} geometry={postGeometry} castShadow>
+        <StainlessSteelMaterial finish="brushed" />
+      </mesh>
+      <mesh position={[s*(width/2-POST_SETBACK),y+0.007,z]} castShadow>
+        <boxGeometry args={[0.12,0.014,0.12]} /><StainlessSteelMaterial finish="brushed" />
+      </mesh>
+    </group>
+  );
+  return (
+    <group name="external-staircase" position={[layout.x,0,layout.z]} rotation={[0,layout.rotation,0]}>
+      <mesh name="contact-ao-decal" position={[0,groundY+0.003,run/2]} rotation={[-Math.PI/2,0,0]} renderOrder={1}>
+        <planeGeometry args={[width*1.15,(landingDepth+run)*1.12]} />
+        <meshBasicMaterial map={contactAOMap} transparent depthWrite={false} />
+      </mesh>
+      <mesh name="external-stair-closed-panel-enclosure" geometry={enclosure!} position={[0,groundY,0]} castShadow receiveShadow>
+        <CladdingMaterial finish={finish} />
+      </mesh>
+      {walkingSurface(topY,0,landingDepth,"landing")}
+      {[-1,1].map(s => <group key={`frame-${s}`}>
+        <Beam from={[s*width*0.43,topY-SLAB-0.04,-landingDepth/2]} to={[s*width*0.43,topY-SLAB-0.04,start]} width={0.045} depth={0.08} />
+      </group>)}
+      {Array.from({length:stepCount-1},(_,i) => {
+        const level=i+1,y=groundY+rise*level,z=start+(stepCount-level-0.5)*treadDepth;
+        return <group key={`step-${level}`}>
+          {walkingSurface(y,z,treadDepth,`tread-${level}`)}
+          <Beam from={[-width*0.46,y-SLAB-0.025,z]} to={[width*0.46,y-SLAB-0.025,z]} width={0.035} depth={0.045} />
+        </group>;
+      })}
+      {/* The pool wall closes the inner flank. Guard only the exposed edge. */}
+      {[-poolSide].map(s => {
+        const x=s*(width/2-POST_SETBACK+POST_FOLD);
+        return <group key={`guard-${s}`} name="external-stair-steel-guard">
+          {[...new Set([1,Math.ceil((stepCount-1)/2),stepCount-1])].map(level =>
+            post(s,groundY+rise*level,start+(stepCount-level-0.5)*treadDepth,`post-${level}`))}
+          {Array.from({length:Math.ceil((landingDepth-0.225)/1.1)+1},(_,i) => {
+            const spans=Math.ceil((landingDepth-0.225)/1.1);
+            return post(s,topY,-landingDepth/2+0.075+(landingDepth-0.225)*i/spans,`landing-${i}`);
+          })}
+          {[0.22,0.48,0.74,GUARD_HEIGHT].map(h => <group key={h}>
+            <Rail from={[x,topY+h,railStart]} to={[x,groundY+rise+h,lowZ]} radius={h===GUARD_HEIGHT?0.012:0.006} />
+            <Rail from={[x,topY+h,-landingDepth/2+0.075]} to={[x,topY+h,railStart]} radius={h===GUARD_HEIGHT?0.012:0.006} />
+          </group>)}
+        </group>;
+      })}
+      {post(poolSide,topY,-landingDepth/2+0.075,"end-guard-terminal")}
+      {[0.22,0.48,0.74,GUARD_HEIGHT].map(h => <Rail key={`rear-${h}`} from={[-width/2+POST_SETBACK-POST_FOLD,topY+h,-landingDepth/2+0.075]}
+        to={[width/2-POST_SETBACK+POST_FOLD,topY+h,-landingDepth/2+0.075]} radius={h===GUARD_HEIGHT?0.012:0.006} />)}
+    </group>
+  );
+}
+
+/** A single closed, stepped volume, including the full-height landing.
+ * No stacked overlapping blocks, floating platform or exposed underside. */
+export function createExternalStairEnclosureGeometry(layout: NonNullable<ReturnType<typeof planExternalStaircase>>) {
+  const {height,width,landingDepth,rise,treadDepth,stepCount} = layout;
+  const profile=new Shape(), start=landingDepth/2;
+  profile.moveTo(-start,0);
+  profile.lineTo(-start,height-SLAB);
+  profile.lineTo(start,height-SLAB);
+  for(let descent=1;descent<stepCount;descent++) {
+    const z=start+(descent-1)*treadDepth,y=height-rise*descent-SLAB;
+    profile.lineTo(z,y);
+    profile.lineTo(z+treadDepth,y);
+  }
+  profile.lineTo(start+(stepCount-1)*treadDepth,0);
+  profile.closePath();
+  const geometry=new ExtrudeGeometry(profile,{depth:width,bevelEnabled:false,steps:1});
+  geometry.rotateY(-Math.PI/2);
+  geometry.translate(width/2,0,0);
+  return geometry;
+}
+
+/** Broad polished flat-bar stanchion with the folded foot in the references. */
+export function createExternalStairGuardPostGeometry() {
+  const profile=new Shape();
+  profile.moveTo(-0.006,0);
+  profile.lineTo(0.006,0);
+  profile.lineTo(0.006,0.10);
+  profile.lineTo(POST_FOLD+0.006,0.24);
+  profile.lineTo(POST_FOLD+0.006,GUARD_HEIGHT);
+  profile.lineTo(POST_FOLD-0.006,GUARD_HEIGHT);
+  profile.lineTo(POST_FOLD-0.006,0.24);
+  profile.lineTo(-0.006,0.10);
+  profile.closePath();
+  const geometry=new ExtrudeGeometry(profile,{depth:0.065,bevelEnabled:false,steps:1});
+  geometry.translate(0,0,-0.0325);
+  return geometry;
+}
+
+function Tread({width,depth,z,maps,color,roughness,timber}:{width:number;depth:number;z:number;maps:StoneMaps|null;color:string;roughness:number;timber:boolean}) {
+  const geometry=useMemo(() => {
+    const g=new BoxGeometry(width,SLAB,depth),p=g.getAttribute("position"),uv=g.getAttribute("uv");
+    for(let i=0;i<p.count;i++) uv.setXY(i,p.getX(i)/1.2,(p.getZ(i)+z)/1.2);
+    return g;
+  },[width,depth,z]);
+  useEffect(() => () => geometry.dispose(),[geometry]);
+  return <mesh name="external-stair-tread" position={[0,0,z]} geometry={geometry} castShadow receiveShadow>
+    <meshStandardMaterial color={timber||!maps?color:"#ffffff"} map={timber?null:maps?.colorMap??null}
+      normalMap={maps?.normalMap??null} normalScale={[0.3,0.3]} roughnessMap={maps?.roughnessMap??null} roughness={maps?.roughnessMap?1:roughness} metalness={0} />
+  </mesh>;
+}
+function beamPose(from:Point,to:Point) {
+  const a=new Vector3(...from),b=new Vector3(...to),delta=b.clone().sub(a);
+  return {position:a.add(b).multiplyScalar(0.5),length:delta.length(),quaternion:new Quaternion().setFromUnitVectors(new Vector3(0,1,0),delta.normalize())};
+}
+function Beam({from,to,width,depth}:{from:Point;to:Point;width:number;depth:number}) {
+  const p=beamPose(from,to);
+  return <mesh name="external-stair-steel-frame" position={p.position} quaternion={p.quaternion} castShadow><boxGeometry args={[width,p.length,depth]} /><StainlessSteelMaterial finish="brushed" /></mesh>;
+}
+function Rail({from,to,radius}:{from:Point;to:Point;radius:number}) {
+  const p=beamPose(from,to);
+  return <mesh position={p.position} quaternion={p.quaternion} castShadow><cylinderGeometry args={[radius,radius,p.length,10]} /><StainlessSteelMaterial finish="brushed" /></mesh>;
 }

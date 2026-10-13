@@ -1,12 +1,20 @@
+import { exteriorPanelFinish } from "@/lib/pool/above-ground";
+import { decisions } from "./wizard/decisions";
+import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
+import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
+import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import { useConfigurator } from "@/lib/pool/context";
 import { ConfiguratorProvider } from "@/lib/pool/store";
+import { contextualIntent, focusForAction, wholePoolIntent } from "@/lib/pool/contextual-camera";
 import { resolveMaterials } from "@/lib/pool/materials";
+import { constructionPresentation } from "@/lib/pool/construction-presentation";
 import { ThemeProvider, useTheme } from "@/lib/theme";
 import {
   cancelRenderJob,
@@ -19,15 +27,6 @@ import {
   type RenderJobStatus,
 } from "@/lib/render-pipeline";
 import { ProjectTypeStep } from "@/configurator/steps/project-type";
-import { PoolTypeStep } from "@/configurator/steps/pool-type";
-import { PoolStructureStep } from "@/configurator/steps/pool-structure";
-import { PoolShapeStep } from "@/configurator/steps/pool-shape";
-import { PoolSystemStep } from "@/configurator/steps/pool-system";
-import { InteriorFinishStep } from "@/configurator/steps/interior-finish";
-import { PoolFeaturesStep } from "@/configurator/steps/pool-features";
-import { EquipmentStep } from "@/configurator/steps/equipment";
-import { ContactDetailsStep } from "@/configurator/steps/contact-details";
-import { FinalReviewStep } from "@/configurator/steps/final-review";
 import {
   RenovationCustomerStep,
   RenovationDetailsStep,
@@ -37,23 +36,33 @@ import {
 } from "@/configurator/steps/renovation";
 import { BrandLogo } from "./BrandLogo";
 import { PoolViewport } from "./PoolViewport";
-import { ThemeToggle } from "./ThemeToggle";
-import { StepIndicator } from "./StepIndicator";
-import { LiveSummary } from "./LiveSummary";
-import type { SceneFocus, PhotoModeQuality } from "./three/PoolScene";
+import { useTechnicalData } from "./TechnicalDataPanel";
+import type { VisualFocus } from "@/lib/pool/contextual-camera";
+import { ConfiguratorTray, WizardNav } from "./wizard/WizardChrome";
+import { buildMacros, describeSelection, isStepSkipped, STEP_COPY } from "./wizard/wizard-model";
+import {
+  AccessTray,
+  DeckTray,
+  FinishTray,
+  LightTray,
+  OptionalTray,
+  PoolTypeTray,
+  PresentationTray,
+  ProjectTray,
+  ShapeTray,
+  StructureTray,
+  SystemTray,
+  type TrayContext,
+} from "./wizard/StepTrays";
+import type { SceneFocus, PhotoModeQuality, SceneTimeOfDay } from "./three/PoolScene";
+import { renderQualityState } from "@/lib/pool/renderQualityState";
+import { requestHeroCapture } from "@/lib/project-delivery/heroCapture";
+import { renovationPreviewConfig, renovationDecisions, renovationDecisionComplete, renovationMacroReachable } from "@/lib/pool/renovation";
+import { planSkimmers } from "@/lib/pool/engineering";
+import { projectMetrics } from "@/lib/pool/project-metrics";
+import { buildTechnicalPlan } from "@/lib/pool/technical-plan";
+import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 
-const STEP_COMPONENTS = [
-  ProjectTypeStep,
-  PoolTypeStep,
-  PoolStructureStep,
-  PoolShapeStep,
-  PoolSystemStep,
-  InteriorFinishStep,
-  PoolFeaturesStep,
-  EquipmentStep,
-  ContactDetailsStep,
-  FinalReviewStep,
-] as const;
 
 /**
  * Brief automotive/architectural-style entrance -- logo + wordmark settle in,
@@ -103,19 +112,51 @@ const RENOVATION_COMPONENTS = [
 ] as const;
 
 function ConfiguratorLayout() {
+  const { technical: projectTechnical, cover } = useTechnicalData();
   const {
-    config,
+    config: projectConfig,
+    renovation,
     outline,
-    skimmers,
+    skimmers: projectSkimmers,
     step,
+    visualFocus,
     next,
     previous,
     goToStep,
     reset,
     canContinue,
     isStepComplete,
+    setInfinitySide,
+    setSceneTime,
+    justRestoredProject,
+    dismissRestoredProjectNotice,
+    sharedProject,
   } = useConfigurator();
+  const [renovationBefore, setRenovationBefore] = useState(false);
+  // View-only comparison. Saved snapshots and exports always use the proposal.
+  const config = useMemo(() => renovationPreviewConfig(projectConfig, renovation,
+    step === 2 || (step === 3 && renovationBefore)), [projectConfig, renovation, step, renovationBefore]);
+  const skimmers = useMemo(() => projectConfig.projectType === "renovation"
+    ? planSkimmers(outline, projectMetrics(config, outline).waterSurface, config.system === "skimmer")
+    : projectSkimmers, [projectConfig.projectType, config, outline, projectSkimmers]);
+  const technical = useMemo(() => projectConfig.projectType === "renovation"
+    ? buildTechnicalPlan({ config, outline, skimmers, metrics: projectMetrics(config, outline), layout: configuredPoolLayout(config) })
+    : projectTechnical, [projectConfig.projectType, config, outline, skimmers, projectTechnical]);
   const { theme } = useTheme();
+
+  // P4 autosave: a small, non-blocking notice -- never a modal -- offering
+  // to continue the restored draft or start over. Marked handled right
+  // away so it can't reopen from an unrelated re-render.
+  useEffect(() => {
+    if (!justRestoredProject) return;
+    toast.message("Abbiamo ripristinato il tuo progetto.", {
+      description: "Puoi continuare da dove avevi lasciato oppure iniziare un nuovo progetto.",
+      action: { label: "Nuovo progetto", onClick: () => reset() },
+      duration: 8000,
+    });
+    dismissRestoredProjectNotice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [justRestoredProject]);
   const materials = useMemo(
     () =>
       resolveMaterials({
@@ -123,12 +164,38 @@ function ConfiguratorLayout() {
         linerColor: config.linerColor,
         mosaicFinish: config.mosaicFinish,
         skimmerFinish: config.skimmerFinish,
+        skimmerType: config.skimmerType,
+        copingMaterial: config.copingMaterial ?? "travertine",
       }),
-    [config.finish, config.linerColor, config.mosaicFinish, config.skimmerFinish],
+    [
+      config.finish,
+      config.linerColor,
+      config.mosaicFinish,
+      config.skimmerFinish,
+      config.skimmerType,
+      config.copingMaterial,
+    ],
   );
 
-  const [showMeasurements, setShowMeasurements] = useState(true);
+  // Dimension/depth editing always shows live guides; optional detail views
+  // start uncluttered. Customers can still toggle Guides explicitly.
+  const [showMeasurements, setShowMeasurements] = useState(false);
+  const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
+  const hasStairLed = useMemo(() => configuredStairMicroSpots(config).length > 0, [config]);
+  // Night is contextual: the live scene shows it only while LED colours are
+  // being evaluated (lighting step) or while the Project Book captures its
+  // day/night pair. Everywhere else the journey stays in daylight.
+  const [dayNightCapture, setDayNightCapture] = useState(false);
   const [frameToken, setFrameToken] = useState(0);
+  const [inspectionView, setInspectionView] = useState<SceneFocus | null>(null);
+  const [technicalView, setTechnicalView] = useState(false);
+  useEffect(() => setInspectionView(null), [step, visualFocus]);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+  // P5: mobile-only fullscreen presentation of the SAME live viewport --
+  // never a second Canvas/renderer, just a CSS repositioning of the
+  // existing <main>, so camera/orbit state carries over untouched.
+  const [mobileExpanded, setMobileExpanded] = useState(false);
+  const toggleMobileExpanded = useCallback(() => setMobileExpanded((value) => !value), []);
   const [photoMode, setPhotoMode] = useState(false);
   const [photoModeQuality, setPhotoModeQuality] = useState<PhotoModeQuality>("standard");
   // Set once the path tracer has proven it can't run on this device (no
@@ -139,6 +206,53 @@ function ConfiguratorLayout() {
   const [photoModeUnsupported, setPhotoModeUnsupported] = useState(false);
   const toggleMeasurements = useCallback(() => setShowMeasurements((value) => !value), []);
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
+  // Build 2 · clean hero: reframe to the whole-pool hero, let the scripted
+  // flight start (the camera leaves its idle state) and settle, then capture.
+  const captureHero = useCallback(async () => {
+    setInspectionView("review");
+    reframe();
+    const started = Date.now();
+    while (renderQualityState.idle && Date.now() - started < 3000) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return requestHeroCapture();
+  }, [reframe]);
+  /** Project Book "Presentazione": the same configuration and view, by day
+   * and by night. Only the presentation time changes, and it is restored. */
+  const captureDayNight = useCallback(async () => {
+    const original = config.sceneTime === "night" ? "night" : "day";
+    const other = original === "day" ? "night" : "day";
+    setDayNightCapture(true);
+    let current: string | null = null;
+    let alternate: string | null = null;
+    try {
+      current = await captureHero();
+      setSceneTime(other);
+      // Let the lighting transition finish before the settled capture.
+      await new Promise((resolve) =>
+        setTimeout(resolve, SCENE_VISUAL_PRESET.dusk.transitionSeconds * 1000 + 600),
+      );
+      alternate = await requestHeroCapture();
+    } finally {
+      setSceneTime(original);
+      setDayNightCapture(false);
+    }
+    return original === "day"
+      ? { day: current, night: alternate }
+      : { day: alternate, night: current };
+  }, [captureHero, config.sceneTime, setSceneTime]);
+  const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
+  const openPremiumPresentation = useCallback(() => {
+    if (!premiumPresentationAvailable) return;
+    document.getElementById("premium-presentation")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [premiumPresentationAvailable]);
+  useEffect(() => {
+    stepContentRef.current?.scrollTo({ top: 0 });
+    if (window.innerWidth < 1024) window.scrollTo({ top: 0 });
+  }, [step]);
+  useEffect(() => {
+    if (config.projectType !== "renovation" && STEPS[step]?.id === "system") reframe();
+  }, [config.projectType, config.system, config.overflowType, step, reframe]);
   const togglePhotoMode = useCallback(() => {
     if (photoModeUnsupported) return;
     setPhotoMode((value) => !value);
@@ -251,82 +365,195 @@ function ConfiguratorLayout() {
 
   const renovationWorkflow = config.projectType === "renovation";
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
-  const components = renovationWorkflow ? RENOVATION_COMPONENTS : STEP_COMPONENTS;
-  const StepComponent = components[step] ?? ProjectTypeStep;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
+  const construction = constructionPresentation(config, activeStepId, technicalView);
+  // System details frame automatically, but remain inspectable by orbit/touch.
+  const cameraLocked = false;
   const cameraFocus: SceneFocus = renovationWorkflow
     ? "overview"
-    : activeStepId === "system"
-      ? config.system
-      : activeStepId === "finish" || activeStepId === "color"
-        ? "liner"
-        : activeStepId === "review"
+    : activeStepId === "structure" || activeStepId === "project" || activeStepId === "pool-type"
+      ? "structure"
+      : activeStepId === "shape-dimensions"
+        ? "top"
+        : // System and finish open on the whole basin: the choice is about
+          // the waterline and the colour of the pool, which a detail close-up
+          // crops away. Clicking an option still frames its detail.
+          activeStepId === "system" || activeStepId === "style"
           ? "review"
-          : "overview";
-  const stepContent =
-    !renovationWorkflow && activeStepId === "system" ? (
-      <PoolSystemStep onSkimmerSelect={reframe} />
+          : activeStepId === "access"
+            ? contextualIntent(
+                focusForAction({ type: "setPoolAccess" }, config) ?? "STAIRS",
+                config,
+              )
+            : activeStepId === "lighting"
+              ? config.system === "infinity"
+                ? "infinity"
+                : "features"
+              : "review";
+
+  // ---- New wizard navigation: nine macro steps, skipped empty steps ----
+  const macros = useMemo(
+    () =>
+      renovationWorkflow
+        ? RENOVATION_STEPS.map((s, index) => ({
+            id: s.id,
+            label: s.short,
+            indices: [index],
+            complete: index < step && isStepComplete(index),
+            reachable: renovationMacroReachable(index, step, isStepComplete),
+          }))
+        : buildMacros(config, step, isStepComplete),
+    [renovationWorkflow, config, step, isStepComplete],
+  );
+  const macroIndex = Math.max(
+    0,
+    macros.findIndex((m) => m.indices.includes(step)),
+  );
+  const macro = macros[macroIndex];
+  const skipped = (index: number) =>
+    !renovationWorkflow && isStepSkipped(activeSteps[index]?.id, config);
+  const [decisionState, setDecisionState] = useState<{ step: number; id: string }>({ step: -1, id: "" });
+  const currentDecisions = renovationWorkflow ? renovationDecisions(activeStepId, renovation) : decisions(activeStepId, config);
+  const decisionIndex = Math.max(0, currentDecisions.findIndex(d => decisionState.step === step && d.id === decisionState.id));
+  const decision = currentDecisions[decisionIndex];
+  const setDecision = (id: string) => { setDecisionState({ step, id }); setTrayExpanded(true); };
+  const decisionProps = { tab: decision?.id ?? "", setTab: setDecision };
+  const nextDecision = currentDecisions[decisionIndex + 1];
+  useEffect(() => {
+    if (sharedProject?.status === "ready") {
+      const reviewStep = activeSteps.findIndex(s => s.id === "review");
+      setDecisionState({ step: reviewStep, id: "summary" });
+    }
+  }, [sharedProject?.status]);
+  const goNext = useCallback(() => {
+    if (nextDecision) { setDecision(nextDecision.id); return; }
+    let target = step + 1;
+    while (target < activeSteps.length - 1 && skipped(target)) target += 1;
+    const targetDecisions = renovationWorkflow ? renovationDecisions(activeSteps[target]?.id, renovation) : decisions(activeSteps[target]?.id, config);
+    setDecisionState({ step: target, id: targetDecisions[0]?.id ?? "" });
+    goToStep(Math.min(target, activeSteps.length - 1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, activeSteps.length, config, goToStep, nextDecision, renovationWorkflow, renovation]);
+  const goBack = useCallback(() => {
+    if (decisionIndex > 0) { setDecision(currentDecisions[decisionIndex - 1]!.id); return; }
+    let target = step - 1;
+    while (target > 0 && skipped(target)) target -= 1;
+    const targetDecisions = renovationWorkflow ? renovationDecisions(activeSteps[target]?.id, renovation) : decisions(activeSteps[target]?.id, config);
+    setDecisionState({ step: target, id: targetDecisions.at(-1)?.id ?? "" });
+    goToStep(Math.max(0, target));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, config, goToStep, activeSteps, decisionIndex, currentDecisions, renovationWorkflow, renovation]);
+  const selectMacro = (index: number) => {
+    const indices = macros[index]?.indices ?? [];
+    const target = indices.find((i) => !skipped(i)) ?? indices[0];
+    if (target !== undefined) goToStep(target);
+  };
+  // If the configuration makes the current step empty (e.g. visible inox on
+  // the finish step), move on instead of showing an empty decision.
+  useEffect(() => {
+    if (skipped(step)) goNext();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, config.structure]);
+  // Phones: a step that still needs a decision opens with its cards; a step
+  // revisited after it was completed opens collapsed, so the pool stays visible.
+  const [trayExpanded, setTrayExpanded] = useState(true);
+  useEffect(() => setTrayExpanded(!isStepComplete(step)), [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A share link lands on the Summary: open the mobile sheet so the
+  // visitor sees the project, its ID and the save/share/PDF actions.
+  useEffect(() => {
+    if (sharedProject?.status === "ready") setTrayExpanded(true);
+  }, [sharedProject?.status]);
+  // The final step's primary action opens the proposal request.
+  const finalRequest = !renovationWorkflow && activeStepId === "review" && !nextDecision;
+  const trayContext: TrayContext = {
+    focus: (intent) => {
+      setInspectionView(intent);
+      reframe();
+    },
+    captureHero,
+    captureDayNight,
+  };
+  const RenovationComponent = RENOVATION_COMPONENTS[step] ?? ProjectTypeStep;
+  const trayContent = renovationWorkflow ? (
+    step === 0 ? (
+      <ProjectTray />
     ) : (
-      <StepComponent />
-    );
+      activeStepId === "renovation-pool" ? <RenovationPoolStep ctx={trayContext} {...decisionProps} />
+        : activeStepId === "renovation-details" ? <RenovationDetailsStep {...decisionProps} before={renovationBefore} setBefore={setRenovationBefore} />
+        : activeStepId === "renovation-review" ? <RenovationReviewStep ctx={trayContext} />
+        : activeStepId === "renovation-customer" ? <RenovationCustomerStep /> : <RenovationScopeStep />
+    )
+  ) : activeStepId === "project" ? (
+    <ProjectTray />
+  ) : activeStepId === "pool-type" ? (
+    <PoolTypeTray />
+  ) : activeStepId === "structure" ? (
+    <StructureTray />
+  ) : activeStepId === "shape-dimensions" ? (
+    <ShapeTray ctx={trayContext} {...decisionProps} />
+  ) : activeStepId === "system" ? (
+    <SystemTray tab={decisionProps.tab === "detail" ? "detail" : "system"} setTab={setDecision} />
+  ) : activeStepId === "access" ? (
+    <AccessTray {...decisionProps} />
+  ) : activeStepId === "style" ? (
+    <FinishTray {...decisionProps} />
+  ) : activeStepId === "lighting" ? (
+    <LightTray {...decisionProps} />
+  ) : activeStepId === "deck" ? (
+    <DeckTray {...decisionProps} />
+  ) : activeStepId === "technology" ? (
+    <OptionalTray ctx={trayContext} {...decisionProps} />
+  ) : (
+    <PresentationTray ctx={trayContext} {...decisionProps} />
+  );
+  const copy = renovationWorkflow
+    ? { title: activeSteps[step]?.title ?? "", subtitle: activeSteps[step]?.subtitle ?? "" }
+    : (STEP_COPY[activeStepId ?? "project"] ?? { title: "", subtitle: "" });
+  const substepPosition = macro && macro.indices.length > 1 ? macro.indices.indexOf(step) + 1 : 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background lg:h-screen lg:overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
       <IntroVeil />
-      <header className="z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-8 border-b border-hairline bg-background/90 px-6 py-4 backdrop-blur-sm sm:px-9">
-        <div className="flex min-w-0 items-center">
-          <BrandLogo className="h-8 max-w-[112px]" />
+      <header className="z-30 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-hairline bg-background px-4 py-3 sm:px-6 lg:gap-8">
+        <BrandLogo className="h-7 max-w-[100px]" />
+        <div className="flex min-w-0 justify-center">
+          <WizardNav
+            macros={macros}
+            current={macroIndex}
+            onSelect={selectMacro}
+            progress={
+              macro && macro.indices.length > 1
+                ? (macro.indices.indexOf(step) + 1) / macro.indices.length
+                : 0.5
+            }
+          />
         </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Button type="button" variant="ghost" size="sm" onClick={reset} className="rounded-full px-3">
+        <div className="flex items-center gap-1 sm:gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={reset}
+            aria-label="Ricomincia"
+            className="rounded-full px-2.5"
+          >
             <RotateCcw />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden xl:inline">Ricomincia</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col-reverse gap-3 p-3 lg:min-h-0 lg:flex-row lg:p-4">
-        <aside className="relative z-10 flex w-full flex-col rounded-[1.75rem] border border-hairline bg-background/95 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.85)] lg:w-[452px] xl:w-[512px]">
-          <div className="border-b border-hairline/80 px-5 pb-6 pt-6 sm:px-8">
-            <StepIndicator
-              current={step}
-              steps={activeSteps}
-              isStepComplete={isStepComplete}
-              onSelect={goToStep}
-            />
-          </div>
-
-          <div className="scroll-slim flex-1 overflow-y-auto px-5 pb-18 pt-8 sm:px-8 lg:min-h-0">
-            {stepContent}
-          </div>
-
-          <div className="flex items-center justify-between gap-6 border-t border-hairline bg-background/60 px-5 py-5 sm:px-8">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={previous}
-              disabled={step === 0}
-              className="px-0 hover:bg-transparent"
-            >
-              <ArrowLeft />
-              <span className="hidden sm:inline">Back</span>
-            </Button>
-            <Button
-              type="button"
-              onClick={next}
-              disabled={isLast || !canContinue}
-              title={canContinue ? undefined : "Complete this step to continue"}
-              className="px-6"
-            >
-              Continue
-              <ArrowRight className="size-3.5" strokeWidth={1.5} />
-            </Button>
-          </div>
-        </aside>
-
-        <main className="relative h-[46vh] w-full min-h-[320px] overflow-hidden rounded-[1.75rem] border border-hairline bg-viewport sm:h-[54vh] lg:h-auto lg:flex-1">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 p-2 sm:p-3 lg:p-4">
+        <main
+          id="pool-viewport"
+          className={cn(
+            "relative w-full overflow-hidden bg-viewport",
+            mobileExpanded
+              ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
+              : "min-h-[200px] flex-1 rounded-[20px] border border-hairline lg:rounded-[24px]",
+          )}
+        >
           <PoolViewport
             outline={outline}
             shape={config.shape}
@@ -334,30 +561,151 @@ function ConfiguratorLayout() {
             overflowType={config.overflowType}
             poolType={config.poolType ?? "in-ground"}
             materials={materials}
+            construction={construction}
             features={config.features}
+            ledColor={config.ledColor ?? "#ffffff"}
+            ledIntensity={normalisedLedIntensity(config.ledIntensity)}
+            internalStairType={config.internalStairType ?? "linear"}
+            {...(config.hydromassageVariant
+              ? { hydromassageVariant: config.hydromassageVariant }
+              : {})}
+            poolAccess={config.poolAccess}
             skimmers={skimmers}
+            coverPlan={cover}
+            solarShower={config.equipment.includes("solarShower")}
+            loungers={config.equipment.includes("loungers")}
+            {...(config.poolType === "above-ground"
+              ? {
+                  exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
+                  externalStairSide: config.externalStairSide ?? "short",
+                  externalStairPlatformExtended: true,
+                  internalStairMirrored: !!config.internalStairMirrored,
+                  pellicano: config.equipment.includes("pellicano"),
+                }
+              : {})}
+            technicalView={technicalView}
+            technicalPlan={technical}
+            onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}
+            onTechnicalFocus={(focus: VisualFocus) => { setInspectionView(contextualIntent(focus, config)); reframe(); }}
+            {...(config.infinityEdge ? { infinityEdge: config.infinityEdge } : {})}
+            onSelectInfinitySide={
+              activeStepId === "system" && config.system === "infinity"
+                ? setInfinitySide
+                : undefined
+            }
             length={config.dimensions.length}
             width={config.dimensions.width}
             depth={config.dimensions.depth}
-            showMeasurements={showMeasurements}
+            floorProfile={config.dimensions.floorProfile}
+            shallowDepth={config.dimensions.shallowDepth}
+            slopeReversed={config.dimensions.slopeReversed}
+            showMeasurements={
+              showMeasurements ||
+              (technicalView && config.system === "infinity") ||
+              visualFocus?.focus === "DIMENSIONS_TOP" ||
+              visualFocus?.focus === "DEPTH" ||
+              activeStepId === "shape-dimensions"
+            }
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}
-            frameToken={frameToken}
-            focus={cameraFocus}
-            showWater={renovationWorkflow || activeStepId !== "finish"}
+            frameToken={frameToken + (visualFocus?.revision ?? 0)}
+            focus={
+              // Renovation PDF: changing time must not replace the hero with LED focus.
+              (dayNightCapture && renovationWorkflow ? "review" : null) ??
+              inspectionView ??
+              (technicalView
+                ? config.system === "infinity" ? "top" : "review"
+                : wholePoolIntent(
+                    visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus,
+                    renovationWorkflow ? undefined : activeStepId,
+                    config.system,
+                  ))
+            }
+            cameraLocked={cameraLocked}
+            showWater={construction.showWater}
             theme={theme}
+            sceneTime={
+              construction.showWater &&
+              (activeStepId === "lighting" ||
+                dayNightCapture ||
+                // The final presentation may be shown at night, but only
+                // for a pool that actually has LEDs to show.
+                (activeStepId === "review" && (config.features.includes("ledLighting") || hasStairLed)))
+                ? sceneTime
+                : "day"
+            }
+            paving={config.paving ?? "gres"}
+            pavingFormat={config.pavingFormat}
             photoMode={photoMode}
             onTogglePhotoMode={togglePhotoMode}
             photoModeQuality={photoModeQuality}
             onSetPhotoModeQuality={setPhotoModeQuality}
             photoModeUnsupported={photoModeUnsupported}
             onPhotoModeUnsupported={handlePhotoModeUnsupported}
-            onGeneratePhotorealisticRender={handleGeneratePhotorealisticRender}
+            onGeneratePhotorealisticRender={openPremiumPresentation}
+            premiumPresentationAvailable={premiumPresentationAvailable}
             renderPhase={renderPhase}
             renderProgress={renderProgress}
+            mobileExpanded={mobileExpanded}
+            onToggleMobileExpanded={toggleMobileExpanded}
+            onInspectionView={(view) => { setInspectionView(view); reframe(); }}
           />
-          <LiveSummary />
         </main>
+
+        {/* Phones: reserve the sheet's height so the 3D viewport reframes the
+            pool above it, collapsed or half open, instead of hiding behind it. */}
+        <div
+          aria-hidden
+          className={cn(
+            "shrink-0 transition-[height] duration-300 lg:hidden",
+            trayExpanded ? "h-[52dvh]" : "h-[136px]",
+          )}
+        />
+
+        <ConfiguratorTray
+          number={macroIndex + 1}
+          total={macros.length}
+          nextLabel={
+            nextDecision ? nextDecision.label : !renovationWorkflow &&
+            macro &&
+            macro.indices[macro.indices.length - 1] === step
+              ? macros[macroIndex + 1]?.label
+              : renovationWorkflow ? activeSteps[step + 1]?.title : STEP_COPY[activeSteps[step + 1]?.id ?? ""]?.title
+          }
+          title={renovationWorkflow ? copy.title : (macro?.label ?? copy.title)}
+          subtitle={copy.subtitle}
+          {...(decision ? { substep: `${decisionIndex + 1}/${currentDecisions.length} · ${decision.label}` } : substepPosition
+            ? { substep: `${substepPosition}/${macro!.indices.length} · ${copy.title}` }
+            : {})}
+          selection={
+            renovationWorkflow
+              ? (activeSteps[step]?.short ?? "")
+              : describeSelection(activeStepId, config)
+          }
+          canBack={step > 0}
+          canContinue={finalRequest || ((Boolean(nextDecision) || !isLast) && (renovationWorkflow && decision
+            ? renovationDecisionComplete(activeStepId, decision.id, projectConfig, renovation) && (Boolean(nextDecision) || canContinue)
+            : canContinue))}
+          continueLabel={
+            finalRequest ? "Richiedi proposta" : isLast && !nextDecision ? "Configurazione completa" : "Continua"
+          }
+          continueHint={isLast ? undefined : "Completa la scelta per continuare"}
+          onBack={goBack}
+          onContinue={
+            finalRequest
+              ? () => {
+                  setDecision("request");
+                  setTrayExpanded(true);
+                }
+              : goNext
+          }
+          expanded={trayExpanded}
+          onExpandedChange={setTrayExpanded}
+        >
+          <div key={`${step}-${decision?.id ?? ""}`} className="animate-rise">
+            {trayContent}
+          </div>
+        </ConfiguratorTray>
       </div>
     </div>
   );

@@ -1,26 +1,52 @@
 import { OptionCard, StepSection, SwatchOption } from "@/components/pool/StepSection";
 import { useConfigurator } from "@/lib/pool/context";
-import { SKIMMER_FINISHES } from "@/lib/pool/config";
+import { SKIMMER_FINISHES, SELECTABLE_SKIMMER_TYPES } from "@/lib/pool/config";
 import { cn } from "@/lib/utils";
+import { InfinitySideSelector } from "./InfinitySideSelector";
+import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 
 /**
- * Step 4 — selects the hydraulic system.
+ * Step 4 — selects the hydraulic system (Acqua / Linea d'acqua).
  * Engineering values remain derived from the existing configurator store.
+ * Coping/border material selection lives in the Style step, not here.
  */
 export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => void } = {}) {
-  const { config, setSystem, setOverflowType, setSkimmerFinish } = useConfigurator();
+  const {
+    config,
+    outline,
+    setSystem,
+    setOverflowType,
+    setSkimmerFinish,
+    setSkimmerType,
+    setInfinitySide,
+  } = useConfigurator();
 
   const selectSkimmer = () => {
     setSystem("skimmer");
     onSkimmerSelect?.();
   };
 
+  // Geometry Pass D: Infinity's real geometry now exists for all 3 buildable
+  // shapes -- Rectangle, L-shape and Organic (see infinity-edge.ts's
+  // `organicInfinityZones`). "custom" (the generic draw-your-own outline,
+  // not one of the 3 procedural shapes) still has no candidate-zone logic at
+  // all and stays gated off, mirroring the same gate `infinityZonesForOutline`
+  // itself applies, so the UI never offers a selection the 3D view/export
+  // guard would then have to silently reject.
+  const infinityAvailable = compatibleInfinityZones(outline, config.shape, config.poolType).length > 0;
+  const infinityUnavailableReason = config.poolType === "above-ground"
+    ? "Infinity non disponibile per piscine fuori terra."
+    : "Infinity non ancora disponibile per questa forma.";
+
   return (
-    <StepSection title="Pool System" subtitle="Hydraulic principle and water line management.">
-      <div className="grid gap-4" role="group" aria-label="Pool system">
+    <StepSection
+      title="Sistema idraulico"
+      subtitle="Principio idraulico e gestione della linea d'acqua."
+    >
+      <div className="grid gap-4" role="group" aria-label="Sistema idraulico">
         <OptionCard
-          title="Skimmer Pool"
-          description="Water line 12 cm below the coping. Skimmers sized to industry standard."
+          title="Piscina a skimmer"
+          description="Linea d'acqua 12 cm sotto il bordo. Skimmer dimensionati secondo lo standard di settore."
           selected={config.system === "skimmer"}
           onSelect={selectSkimmer}
         />
@@ -29,6 +55,7 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
             makes this smoothly animate to its natural height without a
             measured-pixel-height hack. */}
         <div
+          inert={config.system !== "skimmer"}
           className={cn(
             "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
             config.system === "skimmer" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
@@ -36,8 +63,20 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
         >
           <div className="overflow-hidden">
             <div className="flex flex-col gap-4 rounded-2xl border border-hairline p-5">
+              <p className="label-xs">Tipo skimmer</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {SELECTABLE_SKIMMER_TYPES.map((option) => (
+                  <OptionCard
+                    key={option.id}
+                    title={option.title}
+                    description={option.description}
+                    selected={config.skimmerType === option.id}
+                    onSelect={() => setSkimmerType(option.id)}
+                  />
+                ))}
+              </div>
               <p className="label-xs">Finitura skimmer</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {SKIMMER_FINISHES.map((option) => (
                   <SwatchOption
                     key={option.id}
@@ -53,28 +92,61 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
         </div>
 
         <OptionCard
-          title="Overflow Edge Pool"
-          description="A flush water line with selectable perimeter overflow collection."
+          title="Piscina a sfioro"
+          description="Linea d'acqua a filo bordo, con raccolta perimetrale a sfioro selezionabile."
           selected={config.system === "overflow"}
           onSelect={() => setSystem("overflow")}
         />
         {config.system === "overflow" ? (
-          <div className="mt-4 grid gap-4" role="group" aria-label="Overflow type">
-            <p className="label-xs">Overflow Type</p>
+          <div className="mt-4 grid gap-4" role="group" aria-label="Tipo di sfioro">
+            <p className="label-xs">Tipo di sfioro</p>
             <OptionCard
-              title="Hidden Overflow"
-              description="Overflow channel concealed beneath the perimeter coping."
+              title="Sfioro nascosto"
+              description="Canale di sfioro nascosto sotto il bordo perimetrale."
               selected={config.overflowType === "hidden"}
               onSelect={() => setOverflowType("hidden")}
             />
             <OptionCard
-              title="Visible Overflow"
-              description="Deck-level overflow with visible perimeter drainage channel."
+              title="Sfioro a vista"
+              description="Sfioro a livello del bordo con canale di drenaggio perimetrale a vista."
               selected={config.overflowType === "visible"}
               onSelect={() => setOverflowType("visible")}
             />
           </div>
         ) : null}
+
+        <OptionCard
+          title="Piscina Infinity"
+          description="Bordo a sfioro totale su un lato, con cascata e canale di raccolta a vista."
+          selected={config.system === "infinity"}
+          onSelect={() => setSystem("infinity")}
+          disabled={!infinityAvailable}
+          disabledReason={infinityUnavailableReason}
+        />
+        <div
+          inert={config.system !== "infinity"}
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            config.system === "infinity" ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}
+        >
+          <div className="overflow-hidden">
+            {infinityAvailable ? (
+              <InfinitySideSelector
+                outline={outline}
+                shape={config.shape}
+                selectedSide={config.infinityEdge?.side ?? null}
+                onSelect={setInfinitySide}
+              />
+            ) : (
+              <div className="rounded-2xl border border-hairline p-5">
+                <p className="text-[13px] font-light text-muted-foreground">
+                  {infinityUnavailableReason}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </StepSection>
   );

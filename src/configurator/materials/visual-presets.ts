@@ -53,10 +53,11 @@ export const WATER_P1C_BASELINE_PRESET = {
 /** P1-C correction: stronger water cues without changing surface colour or opacity. */
 const WATER_CONFIGURATION_PRESET = {
   ...WATER_P1C_BASELINE_PRESET,
-  opacity: 0.12,
-  transmission: 0.92,
-  roughness: 0.105,
-  clearcoat: 0.16,
+  opacity: 1,
+  transmission: 1,
+  thickness: 0.32,
+  roughness: 0.035,
+  clearcoat: 0,
   clearcoatRoughness: 0.12,
   reflectivity: 0.5,
   specularIntensity: 1,
@@ -65,11 +66,15 @@ const WATER_CONFIGURATION_PRESET = {
   scatteringContribution: 0.16,
   maxScatteringEnergy: 0.06,
   scatteringDepthStart: 0.18,
-  causticVisibility: 2.3,
+  // The field is already softly filtered and modulates direct light only.
+  // Keep a readable underwater light cue without a white emissive overlay.
+  causticVisibility: 0.75,
   caustics: { strength: 0.027, scale: 20, speed: 0.28 },
+  // Normal textures encode small finite-difference slopes; retain enough
+  // amplitude to read the surface without displacing transmitted geometry.
   normals: {
-    large: { scale: 0.82, strength: 0.3, rotation: 0.24 },
-    micro: { scale: 3.8, strength: 0.21, rotation: -0.68 },
+    large: { scale: 1.65, strength: 0.08, rotation: 0.24 },
+    micro: { scale: 1.15, strength: 0.024, rotation: -0.68 },
   },
   waves: {
     speed: [0.0013, 0.00086] as const,
@@ -104,8 +109,12 @@ const selectWaterPreset = (mode: "legacy" | "premium") =>
 export const WATER_VISUAL_PRESET = selectWaterPreset(ACTIVE_WATER_RENDERING);
 
 export const POOL_SURFACE_PRESET = {
-  linerClearcoat: 0.58,
-  linerClearcoatRoughness: 0.1,
+  // Softened from a sharp 0.58/0.1 lacquer response: at that intensity/
+  // sharpness the clearcoat read as a laminated, shrink-wrapped plastic
+  // sheet rather than a vinyl membrane's soft, water-wet sheen -- keeps a
+  // believable highlight without the glassy "CG plastic" tell.
+  linerClearcoat: 0.38,
+  linerClearcoatRoughness: 0.22,
   floorClearcoat: 0.5,
   dayCaustics: 0.16,
   nightCaustics: 0.13,
@@ -113,8 +122,8 @@ export const POOL_SURFACE_PRESET = {
 
 export const MATERIAL_MICRO_DETAIL_PRESET = {
   liner: { moduleSize: 0.08, normalStrength: 0.05 },
-  mosaic: { moduleSize: 0.04, normalStrength: 0.025 },
-  coping: { moduleSize: 0.12, normalStrength: 0.055 },
+  mosaic: { moduleSize: 0.04, normalStrength: 0.1 },
+  coping: { moduleSize: 0.4, normalStrength: 0.75 },
   aboveGroundPanel: { moduleSize: 0.12, normalStrength: 0.025 },
   studioFloor: { moduleSize: 0.22, normalStrength: 0.018 },
   skimmer: { repeat: [7, 4] as const, normalStrength: 0.032 },

@@ -2,9 +2,16 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
-import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
+import {
+  ACTIVE_RENDERING_QUALITY,
+  SCENE_VISUAL_PRESET,
+} from "@/configurator/3d/scene/visual-preset";
 import { photoModeState } from "@/lib/pool/photoModeState";
+import { renderQualityState } from "@/lib/pool/renderQualityState";
 import { createRippleNormalMap } from "./textures";
+import { createShorelineField } from "./waterDepth";
+import { boostMetalEnvironment } from "./metalEnvironment";
+import type { Outline } from "@/lib/pool/types";
 
 interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
   uniforms: THREE.WebGLProgramParametersWithUniforms["uniforms"] & {
@@ -14,6 +21,7 @@ interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
     waterMicroScale?: { value: number };
     waterLargeStrength?: { value: number };
     waterMicroStrength?: { value: number };
+    waterCalm?: { value: number };
     waterLargeRotation?: { value: number };
     waterMicroRotation?: { value: number };
     waterMicroNormalMap?: { value: THREE.Texture };
@@ -23,6 +31,50 @@ interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
     waterAboveWaterline?: { value: number };
   };
 }
+
+// Immutable 256px normals shared by every water surface in one renderer.
+// Reference counting is deferred one microtask so StrictMode effect replay
+// cannot dispose textures which the immediately remounted surface still uses.
+const rippleResources = new WeakMap<THREE.WebGLRenderer, { broad: THREE.Texture; micro: THREE.Texture; users: number }>();
+function useRippleResources() {
+  const gl = useThree(state => state.gl);
+  const resource = useMemo(() => {
+    let pair = rippleResources.get(gl);
+    if (!pair) {
+      pair = { broad: createRippleNormalMap("broad"), micro: createRippleNormalMap("micro"), users: 0 };
+      for (const texture of [pair.broad, pair.micro]) texture.anisotropy = Math.min(4, gl.capabilities.getMaxAnisotropy());
+      rippleResources.set(gl, pair);
+    }
+    return pair;
+  }, [gl]);
+  useEffect(() => {
+    resource.users++;
+    return () => {
+      resource.users--;
+      queueMicrotask(() => {
+        if (resource.users === 0 && rippleResources.get(gl) === resource) {
+          resource.broad.dispose(); resource.micro.dispose(); rippleResources.delete(gl);
+        }
+      });
+    };
+  }, [gl, resource]);
+  return resource;
+}
+
+// Metric capillary slopes from shared normal fields: irregular highlights,
+// not a scrolling colour picture. The physical material still owns Fresnel/IBL
+// and transmission; no tint or decorative emission is added to the wall.
+const FALLING_FILM_NORMAL_FRAGMENT = `
+vec2 p = vNormalMapUv;
+float t = waterLargeOffset.y;
+// Two existing stochastic normal fields at unequal metric scales avoid
+// equally spaced vertical ribs. Only surface normals move, never colour.
+vec2 filmBroad = texture2D(normalMap, p * vec2(2.37, 0.93) + vec2(0.0, t * 0.18)).xy * 2.0 - 1.0;
+vec2 filmFine = texture2D(waterMicroNormalMap, p * vec2(9.71, 3.19) + vec2(0.17, t * 0.31)).xy * 2.0 - 1.0;
+vec2 combinedSlope = (filmBroad * 0.4 + filmFine * 0.15) * vec2(1.0, 0.55);
+vec3 waterNormal = normalize(vec3(combinedSlope, 1.0));
+normal = normalize(tbn * waterNormal);
+`;
 
 const DUAL_NORMAL_FRAGMENT = `
 float largeCos = cos(waterLargeRotation);
@@ -40,9 +92,15 @@ vec3 microRipple = texture2D(
   waterMicroNormalMap,
   microRotation * centeredNormalUv * waterMicroScale + 0.5 + waterMicroOffset
 ).xyz * 2.0 - 1.0;
-vec2 combinedSlope =
-  largeRipple.xy * waterLargeStrength +
-  microRipple.xy * waterMicroStrength;
+// Incommensurate capillary waves in physical surface coordinates. Analytic
+// slopes avoid 8-bit normal-map banding and repeated highlight grids at grazing angles.
+float waveTime = waterLargeOffset.x * 110.0;
+vec2 p = centeredNormalUv;
+vec2 calmSlope = (vec2(1.7, 0.8) * 0.0026 * cos(dot(p, vec2(1.7, 0.8)) - waveTime * 0.73)
+  + vec2(-0.7, 2.1) * 0.0018 * cos(dot(p, vec2(-0.7, 2.1)) + waveTime * 0.57)
+  + vec2(3.6, -1.2) * 0.0008 * cos(dot(p, vec2(3.6, -1.2)) - waveTime * 1.13)
+  + vec2(5.2, 3.7) * 0.0003 * cos(dot(p, vec2(5.2, 3.7)) + waveTime * 0.91)) * waterCalm;
+vec2 combinedSlope = calmSlope + largeRipple.xy * waterLargeStrength + microRipple.xy * waterMicroStrength;
 vec3 waterNormal = normalize(vec3(combinedSlope, 1.0));
 normal = normalize(tbn * waterNormal);
 `;
@@ -76,9 +134,13 @@ if (waterDebugMode == 1) {
   // (it starts showing the basin instead of sky/coping) -- fade back to the
   // material's own IBL response, which is already sitting in outgoingLight,
   // instead of a visibly wrong image.
-  mirrorFresnel *= waterAboveWaterline;
-  vec3 mirrorColor = texture2DProj(waterReflectionTexture, vWaterMirrorCoord).rgb;
-  outgoingLight = mix(outgoingLight, mirrorColor, mirrorFresnel);
+  vec2 mirrorUv = vWaterMirrorCoord.xy / vWaterMirrorCoord.w;
+  // The reflected scene bends with the same wave normal as the refraction.
+  mirrorUv += combinedSlope * 0.015;
+  vec3 mirrorColor = texture2D(waterReflectionTexture, clamp(mirrorUv, 0.001, 0.999)).rgb;
+  // Transmission already contains (1-F). Replace only the indirect specular
+  // lobe, retaining transmitted radiance and the sun's direct highlight.
+  outgoingLight += (mirrorColor * mirrorFresnel - reflectedLight.indirectSpecular) * waterAboveWaterline;
 }
 #include <opaque_fragment>
 `;
@@ -107,6 +169,16 @@ const WATER_DEBUG_MODE =
         : 0;
 const REFLECTION_ENABLED = ACTIVE_RENDERING_QUALITY.planarReflection.enabled;
 const REFLECTION_RESOLUTION = ACTIVE_RENDERING_QUALITY.planarReflection.resolution;
+// Once the camera settles (see renderQualityState/CameraRig) the mirror
+// capture only has to look good in a single still frame instead of keeping
+// up with 60fps motion, so it's worth the one-off cost of a sharper render
+// target -- the same "spend the stationary budget on image quality" idea
+// AdaptiveQuality already applies to the main framebuffer's DPR. Reusing the
+// live WebGLRenderTarget's own `setSize` (not allocating a new one) keeps
+// its `.texture` reference stable, so the already-compiled water shader's
+// `waterReflectionTexture` uniform keeps sampling it correctly across the
+// resize with no shader recompile.
+const REFLECTION_IDLE_RESOLUTION = REFLECTION_RESOLUTION * 2;
 // Structural safety margin, not a look/tuning knob: below this height above
 // the water plane the mirror camera has crossed to the wrong side of it
 // (see the fade below), roughly matching the coping's own thickness.
@@ -126,7 +198,9 @@ function isWaterSurfaceMesh(object: THREE.Object3D): object is THREE.Mesh {
   if (!(object instanceof THREE.Mesh) || Array.isArray(object.material)) return false;
   const key = (object.material as THREE.Material & { customProgramCacheKey?: () => string })
     .customProgramCacheKey;
-  return typeof key === "function" && key.call(object.material).includes("dual-normal-physical-water");
+  return (
+    typeof key === "function" && key.call(object.material).includes("dual-normal-physical-water")
+  );
 }
 
 /**
@@ -138,35 +212,67 @@ function isWaterSurfaceMesh(object: THREE.Object3D): object is THREE.Mesh {
  * scene draw calls for the parts visible above the waterline, so
  * Configuration keeps today's exact cost and output.
  */
-function useWaterReflection(waterLevel: number) {
+function useWaterReflection(waterLevel: number, enabled: boolean) {
   const { gl, scene, camera } = useThree();
 
   const target = useMemo(() => {
-    if (!REFLECTION_ENABLED) return null;
+    if (!REFLECTION_ENABLED || !enabled) return null;
     const renderTarget = new THREE.WebGLRenderTarget(REFLECTION_RESOLUTION, REFLECTION_RESOLUTION, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       generateMipmaps: false,
+      type: THREE.HalfFloatType,
     });
     return renderTarget;
-  }, []);
+  }, [enabled]);
   useEffect(() => () => target?.dispose(), [target]);
 
   const mirrorCamera = useMemo(
-    () => (REFLECTION_ENABLED ? new THREE.PerspectiveCamera() : null),
-    [],
+    () => (REFLECTION_ENABLED && enabled ? new THREE.PerspectiveCamera() : null),
+    [enabled],
   );
   const textureMatrix = useRef(new THREE.Matrix4());
   const aboveWaterline = useRef({ value: 1 }).current;
   const frame = useRef(0);
+  const wasIdleForReflection = useRef(false);
+  const captureState = useMemo(() => ({
+    time: -Infinity,
+    cameraWorld: new THREE.Matrix4(),
+    projection: new THREE.Matrix4(),
+    waterLevel: NaN,
+  }), []);
+  const clipping = useMemo(
+    () => ({ plane: new THREE.Plane(), vector: new THREE.Vector4(), q: new THREE.Vector4() }),
+    [],
+  );
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!target || !mirrorCamera || !(camera instanceof THREE.PerspectiveCamera)) return;
+    mirrorCamera.name = "pool-water-reflection";
+    mirrorCamera.layers.enable(1);
     // Photo Mode ignores this material's onBeforeCompile entirely (the path
     // tracer reads plain material properties, never the patched WebGL
     // program), so the mirror-camera render this hook drives would just be
     // extra GPU work feeding a uniform nothing reads.
     if (photoModeState.active) return;
+
+    // Spend the stationary budget on reflection sharpness: bump the render
+    // target up once the camera has actually settled, drop it back the
+    // instant movement resumes so interaction never pays for the larger
+    // capture. `setSize` reallocates the target's GPU storage in place, so
+    // the compiled water shader's texture uniform (bound to this same
+    // WebGLRenderTarget's `.texture`) keeps working across the resize.
+    let resized = false;
+    if (renderQualityState.idle !== wasIdleForReflection.current) {
+      wasIdleForReflection.current = renderQualityState.idle;
+      const resolution = renderQualityState.idle
+        ? REFLECTION_IDLE_RESOLUTION
+        : REFLECTION_RESOLUTION;
+      if (target.width !== resolution) {
+        target.setSize(resolution, resolution);
+        resized = true;
+      }
+    }
 
     // Tracks camera height every frame regardless of the render throttle
     // below, so the fallback fade stays smooth even on skipped frames.
@@ -176,10 +282,20 @@ function useWaterReflection(waterLevel: number) {
       waterLevel + REFLECTION_FALLBACK_MARGIN,
     );
 
-    // Every other frame: calm water reflections change slowly enough that
-    // one frame of staleness is invisible, and it halves the extra cost.
+    // Ripple normals still animate every frame in the main material; the
+    // mirror captures only the surrounding scene, not the water itself.
+    // Reuse that image between 15 Hz stationary refreshes. Camera/projection
+    // edits and target reallocations invalidate it immediately; animated
+    // lighting still refreshes, so this is not a permanently frozen mirror.
     frame.current += 1;
-    if (frame.current % 2 !== 0) return;
+    const cameraChanged = !captureState.cameraWorld.equals(camera.matrixWorld)
+      || !captureState.projection.equals(camera.projectionMatrix);
+    const invalidated = resized || captureState.waterLevel !== waterLevel;
+    if (!invalidated) {
+      if (renderQualityState.idle && !cameraChanged && clock.elapsedTime - captureState.time < 1 / 15) return;
+      if (!renderQualityState.idle && frame.current > 1 && frame.current % 2 !== 0) return;
+    }
+    if (aboveWaterline.value === 0) return;
 
     mirrorCamera.position.set(
       camera.position.x,
@@ -207,6 +323,30 @@ function useWaterReflection(waterLevel: number) {
       .multiply(mirrorCamera.projectionMatrix)
       .multiply(mirrorCamera.matrixWorldInverse);
 
+    // Oblique near plane clips submerged geometry out of the reflected image.
+    // This is the horizontal-water specialization of Three's Reflector camera.
+    clipping.plane.normal.set(0, 1, 0);
+    clipping.plane.constant = -waterLevel;
+    clipping.plane.applyMatrix4(mirrorCamera.matrixWorldInverse);
+    clipping.vector.set(
+      clipping.plane.normal.x,
+      clipping.plane.normal.y,
+      clipping.plane.normal.z,
+      clipping.plane.constant,
+    );
+    const projection = mirrorCamera.projectionMatrix.elements;
+    clipping.q.set(
+      (Math.sign(clipping.vector.x) + projection[8]!) / projection[0]!,
+      (Math.sign(clipping.vector.y) + projection[9]!) / projection[5]!,
+      -1,
+      (1 + projection[10]!) / projection[14]!,
+    );
+    clipping.vector.multiplyScalar(2 / clipping.vector.dot(clipping.q));
+    projection[2] = clipping.vector.x;
+    projection[6] = clipping.vector.y;
+    projection[10] = clipping.vector.z + 1 - 0.001;
+    projection[14] = clipping.vector.w;
+
     const basin = scene.getObjectByName("pool-basin");
     const wasVisible = basin?.visible ?? true;
     if (basin) basin.visible = false;
@@ -221,42 +361,98 @@ function useWaterReflection(waterLevel: number) {
     // restored immediately after.
     const hiddenWater: THREE.Object3D[] = [];
     scene.traverse((object) => {
-      if (object.visible && isWaterSurfaceMesh(object)) {
+      // Keep sky/environment reflection, but omit the presentation deck and
+      // every dry edge/border finish from this pass: mirrored right next to
+      // the real thing, their reflected strips double the pool outline and
+      // make the actual border harder to read. Covers the skimmer coping
+      // (pool-perimeter-finish), the studio deck, the physical skimmer
+      // housings (pool-skimmers), the hidden-overflow stone lip
+      // (overflow-edge-without-grille) and the visible-overflow grille
+      // (overflow-grille) -- whichever of these is this system's actual
+      // border. Also excludes the baked ContactShadows plane
+      // (pool-contact-shadows): its blurred shadow blob sits right at deck
+      // level and, uncaught, mirrors into the water as a smeared dark streak
+      // exactly where the coping/waterline read needed to be cleanest. The
+      // main scene and all interaction remain unchanged.
+      if (
+        object.visible &&
+        (isWaterSurfaceMesh(object) ||
+          object.name === "pool-perimeter-finish" ||
+          object.name === "pool-studio-deck" ||
+          object.name === "pool-skimmers" ||
+          object.name === "overflow-edge-without-grille" ||
+          object.name === "overflow-grille" ||
+          object.name === "pool-contact-shadows")
+      ) {
         object.visible = false;
         hiddenWater.push(object);
       }
     });
 
     const previousTarget = gl.getRenderTarget();
-    gl.setRenderTarget(target);
-    gl.clear();
-    gl.render(scene, mirrorCamera);
-    gl.setRenderTarget(previousTarget);
-    if (basin) basin.visible = wasVisible;
-    for (const object of hiddenWater) object.visible = true;
+    const shadowAutoUpdate = gl.shadowMap.autoUpdate;
+    const xrEnabled = gl.xr.enabled;
+    try {
+      gl.shadowMap.autoUpdate = false;
+      gl.xr.enabled = false;
+      gl.setRenderTarget(target);
+      gl.clear();
+      gl.render(scene, mirrorCamera);
+      captureState.time = clock.elapsedTime;
+      captureState.cameraWorld.copy(camera.matrixWorld);
+      captureState.projection.copy(camera.projectionMatrix);
+      captureState.waterLevel = waterLevel;
+    } finally {
+      gl.setRenderTarget(previousTarget);
+      gl.shadowMap.autoUpdate = shadowAutoUpdate;
+      gl.xr.enabled = xrEnabled;
+      if (basin) basin.visible = wasVisible;
+      for (const object of hiddenWater) object.visible = true;
+    }
   });
 
   return { texture: target?.texture ?? null, textureMatrix, aboveWaterline };
 }
 
 /** Shared physical water surface used by the pool and skimmer tongue. */
-export function WaterSurfaceMaterial({ waterLevel = 0 }: { waterLevel?: number }) {
-  const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
-  const largeNormal = useMemo(() => createRippleNormalMap("broad"), []);
-  const microNormal = useMemo(() => createRippleNormalMap("micro"), []);
+export function WaterSurfaceMaterial({
+  waterLevel = 0,
+  reflections = true,
+  depth = 0.13,
+  outline,
+  fallingFilm = false,
+  flowing = false,
+  planView = false,
+}: {
+  waterLevel?: number;
+  reflections?: boolean;
+  depth?: number;
+  outline?: Outline;
+  fallingFilm?: boolean;
+  /** Infinity circulation retains gentle ripples when the camera settles. */
+  flowing?: boolean;
+  planView?: boolean;
+}) {
+  const { broad: largeNormal, micro: microNormal } = useRippleResources();
   const shaders = useRef<WaterShader[]>([]);
-  const reflection = useWaterReflection(waterLevel);
-
+  reflections = reflections && !planView;
+  const reflection = useWaterReflection(waterLevel, reflections);
+  const shoreline = useMemo(() => (outline ? createShorelineField(outline) : null), [outline]);
+  useEffect(() => () => shoreline?.texture.dispose(), [shoreline]);
   useEffect(() => {
-    for (const texture of [largeNormal, microNormal]) {
-      texture.anisotropy = Math.min(8, maxAnisotropy);
-      texture.needsUpdate = true;
+    if (!shoreline) return;
+    // Shape edits reuse the compiled program: update its live uniforms before
+    // the next frame instead of retaining a disposed previous distance field.
+    for (const shader of shaders.current) {
+      const textureUniform = shader.uniforms["waterShoreline"];
+      const boundsUniform = shader.uniforms["waterShoreBounds"];
+      const scaleUniform = shader.uniforms["waterShoreScale"];
+      if (!textureUniform || !boundsUniform || !scaleUniform) continue;
+      textureUniform.value = shoreline.texture;
+      boundsUniform.value = shoreline.bounds;
+      scaleUniform.value = shoreline.scale;
     }
-    return () => {
-      largeNormal.dispose();
-      microNormal.dispose();
-    };
-  }, [largeNormal, microNormal, maxAnisotropy]);
+  }, [shoreline]);
 
   const configureWaterSurface = useCallback(
     (shader: WaterShader) => {
@@ -268,8 +464,14 @@ export function WaterSurfaceMaterial({ waterLevel = 0 }: { waterLevel?: number }
       shader.uniforms.waterMicroStrength = { value: WATER_VISUAL_PRESET.normals.micro.strength };
       shader.uniforms.waterLargeRotation = { value: WATER_VISUAL_PRESET.normals.large.rotation };
       shader.uniforms.waterMicroRotation = { value: WATER_VISUAL_PRESET.normals.micro.rotation };
+      shader.uniforms.waterCalm = { value: 1 };
       shader.uniforms.waterMicroNormalMap = { value: microNormal };
       shader.uniforms.waterDebugMode = { value: WATER_DEBUG_MODE };
+      if (shoreline) {
+        shader.uniforms["waterShoreline"] = { value: shoreline.texture };
+        shader.uniforms["waterShoreBounds"] = { value: shoreline.bounds };
+        shader.uniforms["waterShoreScale"] = { value: shoreline.scale };
+      }
       let fragmentHeader = `#include <common>
 uniform vec2 waterLargeOffset;
 uniform vec2 waterMicroOffset;
@@ -279,8 +481,14 @@ uniform float waterLargeStrength;
 uniform float waterMicroStrength;
 uniform float waterLargeRotation;
 uniform float waterMicroRotation;
+uniform float waterCalm;
 uniform int waterDebugMode;
 uniform sampler2D waterMicroNormalMap;`;
+      if (shoreline)
+        fragmentHeader += `
+uniform sampler2D waterShoreline;
+uniform vec4 waterShoreBounds;
+uniform float waterShoreScale;`;
       let vertexHeader = "#include <common>";
       let vertexBody = "#include <worldpos_vertex>";
       let finalFragment = DEBUG_FRAGMENT;
@@ -306,18 +514,78 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
         .replace("#include <worldpos_vertex>", vertexBody);
       shader.fragmentShader = shader.fragmentShader
         .replace("#include <common>", fragmentHeader)
-        .replace("#include <normal_fragment_maps>", DUAL_NORMAL_FRAGMENT)
+        .replace("#include <normal_fragment_maps>", fallingFilm
+          ? FALLING_FILM_NORMAL_FRAGMENT
+          : DUAL_NORMAL_FRAGMENT)
         .replace("#include <opaque_fragment>", finalFragment);
+      if (shoreline) {
+        const boundedTransmission = THREE.ShaderChunk.transmission_fragment.replace(
+          "vec4 transmitted = getIBLVolumeRefraction(",
+          `
+          // The opaque transmission buffer also contains emerged coping and
+          // handrails. A shoreline bound cannot distinguish those pixels from
+          // submerged surfaces: displacing them duplicates dry geometry at
+          // grazing angles. Use undisplaced transmission for the main basin
+          // until a depth-aware, water-clipped capture exists. Keep Fresnel,
+          // normals, reflection, shadows and submerged material absorption.
+          // Only the raster shader uses this thin-interface fallback; the
+          // physical material retains its metric depth for still rendering.
+          material.thickness = 0.0;
+          vec4 transmitted = getIBLVolumeRefraction(`,
+        );
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <transmission_fragment>",
+          boundedTransmission,
+        );
+      }
+      // three.js replaces envMapIntensity with scene.environmentIntensity for
+      // materials without their own envMap, so the studio's 0.24 IBL left the
+      // water reflecting a quarter of its calibrated sky (0.83). Restore that
+      // ratio on the indirect specular lobe only, capped so the coastal scene
+      // (already at 0.85) is untouched. With the planar mirror (Experience)
+      // this lobe is replaced by the mirror above the waterline anyway.
+      boostMetalEnvironment(
+        shader,
+        WATER_VISUAL_PRESET.environmentIntensity.day / SCENE_VISUAL_PRESET.environment.light,
+        WATER_VISUAL_PRESET.environmentIntensity.day,
+      );
       if (!shaders.current.includes(shader)) shaders.current.push(shader);
     },
-    [microNormal, reflection.texture, reflection.textureMatrix, reflection.aboveWaterline],
+    [
+      microNormal,
+      reflection.texture,
+      reflection.textureMatrix,
+      reflection.aboveWaterline,
+      shoreline,
+      fallingFilm,
+    ],
   );
 
-  useFrame(({ clock }) => {
+  const stillness = useRef(0);
+  useFrame(({ clock }, delta) => {
     const time = clock.getElapsedTime();
+    // Eases toward "held still" while the camera is settled (see
+    // renderQualityState/CameraRig) and snaps back the instant it moves
+    // again -- the surface keeps drifting either way (a perfectly static
+    // normal map is its own tell), just far less while the fixed
+    // presentation cameras are actually being looked at, for the glassy
+    // stillness a real calm pool has in a photograph rather than a
+    // real-time viewport's constant shimmer.
+    const stillTarget = renderQualityState.idle ? 1 : 0;
+    stillness.current = THREE.MathUtils.damp(stillness.current, stillTarget, 2.2, delta);
+    const calm = THREE.MathUtils.lerp(1, flowing ? 0.8 : 0.32, stillness.current);
     for (const shader of shaders.current) {
-      shader.uniforms.waterLargeOffset?.value.set(time * 0.004, time * 0.0022);
-      shader.uniforms.waterMicroOffset?.value.set(-time * 0.011, time * 0.008);
+      // Slowed vs. the original bake: a calmer, more architectural drift --
+      // still alive, not the "game water" scroll speed the raw values read as.
+      shader.uniforms.waterLargeOffset?.value.set(time * 0.0013, time * (fallingFilm ? -0.12 : 0.0007));
+      shader.uniforms.waterMicroOffset?.value.set(-time * 0.0035, time * (fallingFilm ? -0.17 : 0.0026));
+      if (shader.uniforms.waterLargeStrength) {
+        shader.uniforms.waterLargeStrength.value = WATER_VISUAL_PRESET.normals.large.strength * (fallingFilm ? 1 : calm) * (flowing ? 3 : 1);
+      }
+      if (shader.uniforms.waterMicroStrength) {
+        shader.uniforms.waterMicroStrength.value = WATER_VISUAL_PRESET.normals.micro.strength * calm;
+      }
+      if (shader.uniforms.waterCalm) shader.uniforms.waterCalm.value = calm;
     }
   });
 
@@ -326,19 +594,21 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       color={WATER_VISUAL_PRESET.surfaceColor}
       transparent
       opacity={WATER_VISUAL_PRESET.opacity}
-      roughness={debugModeName === "specular" ? 0.035 : WATER_VISUAL_PRESET.roughness}
+      roughness={planView ? 0.12 : fallingFilm ? 0.115 : debugModeName === "specular" ? 0.035 : WATER_VISUAL_PRESET.roughness}
       metalness={WATER_VISUAL_PRESET.metalness}
       transmission={WATER_VISUAL_PRESET.transmission}
-      thickness={WATER_VISUAL_PRESET.thickness}
+      // Metric depth for still rendering; raster basin transmission is
+      // undisplaced to avoid sampling dry foreground objects a second time.
+      thickness={outline ? depth : Math.min(depth, 0.22)}
       ior={WATER_VISUAL_PRESET.ior}
       clearcoat={WATER_VISUAL_PRESET.clearcoat}
       clearcoatRoughness={WATER_VISUAL_PRESET.clearcoatRoughness}
-      attenuationColor={WATER_VISUAL_PRESET.attenuationColor}
+      attenuationColor="#ffffff"
       attenuationDistance={WATER_VISUAL_PRESET.attenuationDistance}
       envMapIntensity={
-        debugModeName === "specular" ? 0 : WATER_VISUAL_PRESET.environmentIntensity.day
+        debugModeName === "specular" ? 0 : WATER_VISUAL_PRESET.environmentIntensity.day * (planView ? 0.65 : 1)
       }
-      specularIntensity={WATER_VISUAL_PRESET.specularIntensity}
+      specularIntensity={WATER_VISUAL_PRESET.specularIntensity * (planView ? 0.65 : 1)}
       specularColor={WATER_VISUAL_PRESET.specularColor}
       normalMap={largeNormal}
       normalScale={[1, 1]}
@@ -348,7 +618,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       side={THREE.DoubleSide}
       onBeforeCompile={configureWaterSurface}
       customProgramCacheKey={() =>
-        `p1c-dual-normal-physical-water-v3-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED ? 1 : 0}`
+        `p1c-dual-normal-physical-water-v15-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}-${outline ? 1 : 0}-${fallingFilm ? 1 : 0}`
       }
     />
   );

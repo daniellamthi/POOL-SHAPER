@@ -1,0 +1,345 @@
+import {
+  createProjectId,
+  parseProjectConfiguration,
+  PROJECT_SCHEMA_VERSION,
+  serializeProjectConfiguration,
+  toProjectConfiguration,
+  type ProjectConfiguration,
+} from "../src/lib/pool/project";
+import { DEFAULT_MOSAIC_FINISH_ID } from "../src/configurator/materials/interior-textures";
+import type { PoolConfig, RenovationConfig } from "../src/lib/pool/types";
+import { LED_OPTICS } from "../src/lib/pool/led-optics";
+import { buildOutline } from "../src/lib/pool/geometry";
+import { clampInfinityEdgeParams, compatiblePoolSystem } from "../src/lib/pool/infinity-edge";
+
+const assert = (condition: unknown, message: string): asserts condition => {
+  if (!condition) throw new Error(message);
+};
+
+const fullConfig: PoolConfig = {
+  projectType: "new",
+  poolType: "in-ground",
+  structure: "reinforced-concrete",
+  shape: "custom",
+  shapeSelected: true,
+  copingMaterial: "prun",
+  paving: "prun",
+  pavingFormat: "50x50",
+  customMode: "draw",
+  controlPoints: [
+    [-0.5, -0.5],
+    [0.5, -0.5],
+    [0.5, 0.5],
+    [-0.5, 0.5],
+  ],
+  dimensions: { length: 8, width: 4, depth: 1.5, cornerRadius: 0.1, floorProfile: "flat" },
+  system: "overflow",
+  overflowType: "visible",
+  skimmerFinish: "steel",
+  skimmerType: "flush",
+  finish: "mosaic",
+  linerColor: "motionGreyRock798",
+  mosaicFinish: DEFAULT_MOSAIC_FINISH_ID,
+  features: ["ledLighting", "hydromassage"],
+  ledColor: "#3fa8ff",
+  ledIntensity: 0.75,
+  poolAccess: "stainlessSteelLadder",
+  internalStairType: "corner",
+  equipment: ["heatPump", "saltElectrolysis"],
+  customer: {
+    name: "Ada",
+    surname: "Lovelace",
+    company: "Analytical Engines Ltd",
+    email: "ada@example.com",
+    phone: "+44 20 7946 0000",
+    city: "London",
+    country: "United Kingdom",
+    notes: "Prefers a quiet consultation slot.",
+  },
+  uploads: [
+    {
+      id: "u1",
+      name: "site-photo.jpg",
+      size: 204800,
+      type: "image/jpeg",
+      url: null,
+      category: "site",
+    },
+  ],
+};
+
+const fullRenovation: RenovationConfig = {
+  areas: ["interiorFinish", "coping", "structure"],
+  currentFinish: "liner",
+  filtrationWorks: ["pump", "overflow"],
+  replaceCoping: true,
+  copingMaterial: "Travertine, warm tone",
+  structureIssues: ["leakage", "crack"],
+  equipmentUpgrades: ["heatPump"],
+};
+
+// 1. A full configuration can be serialized.
+const projectId = createProjectId();
+assert(
+  typeof projectId === "string" && projectId.length > 0,
+  "createProjectId must return a non-empty id",
+);
+
+const project = toProjectConfiguration(projectId, fullConfig, fullRenovation);
+assert(
+  project.schemaVersion === PROJECT_SCHEMA_VERSION,
+  "schemaVersion must be stamped on the project",
+);
+const json = serializeProjectConfiguration(project);
+for (const poolType of ["in-ground", "above-ground"] as const) {
+  const restored = parseProjectConfiguration(JSON.stringify({
+    ...project,
+    config: { ...fullConfig, poolType, features: [...fullConfig.features, "externalStaircase"] },
+  }));
+  assert(
+    restored.config.features.includes("externalStaircase") === (poolType === "above-ground"),
+    "External stairs must only survive restoration for above-ground pools",
+  );
+  assert(restored.config.poolAccess === (poolType === "above-ground" ? null : fullConfig.poolAccess),
+    "Restoration preserves in-ground inox and removes the unsupported above-ground inox option");
+}
+assert(typeof json === "string" && json.length > 0, "serialization must produce a JSON string");
+
+// 2 & 3. Serialization retains every important selection; round trip preserves values.
+const roundTripped: ProjectConfiguration = parseProjectConfiguration(json);
+assert(roundTripped.projectId === projectId, "projectId must survive the round trip");
+assert(
+  roundTripped.schemaVersion === PROJECT_SCHEMA_VERSION,
+  "schemaVersion must survive the round trip",
+);
+assert(
+  JSON.stringify(roundTripped.config) === JSON.stringify(fullConfig),
+  "config must be byte-for-byte identical after round trip",
+);
+assert(
+  JSON.stringify(roundTripped.renovation) === JSON.stringify(fullRenovation),
+  "renovation must be byte-for-byte identical after round trip",
+);
+
+// The compatibility rule is shared by live state, UI and project restoration.
+const rectangleConfig: PoolConfig = { ...fullConfig, shape: "rectangle", dimensions: { ...fullConfig.dimensions, cornerRadius: 0 } };
+const rectangleOutline = buildOutline(rectangleConfig.shape, rectangleConfig.dimensions, rectangleConfig.controlPoints);
+assert(compatiblePoolSystem("infinity", rectangleOutline, "rectangle", "in-ground") === "infinity",
+  "in-ground rectangular Infinity must remain available");
+assert(compatiblePoolSystem("infinity", rectangleOutline, "rectangle", "above-ground") === "skimmer",
+  "above-ground must resolve Infinity to Skimmer immediately");
+for (const sceneTime of ["day", "night"] as const) {
+  const restored = parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration(
+    createProjectId(), { ...rectangleConfig, sceneTime }, fullRenovation,
+  )));
+  assert(restored.config.sceneTime === sceneTime, `${sceneTime} must survive save/refresh`);
+}
+assert(roundTripped.config.sceneTime === undefined,
+  "a legacy draft without a Day/Night choice must still display Day by default");
+const invalidTime = parseProjectConfiguration(JSON.stringify(toProjectConfiguration(
+  createProjectId(), { ...rectangleConfig, sceneTime: "sunset" as "day" }, fullRenovation,
+)));
+assert(invalidTime.config.sceneTime === "day", "invalid saved presentation choice must normalize to Day");
+const restoredAboveGround = parseProjectConfiguration(JSON.stringify(toProjectConfiguration(
+  createProjectId(), {
+    ...rectangleConfig, poolType: "above-ground", system: "infinity",
+    infinityEdge: clampInfinityEdgeParams({ enabled: true, side: 0 }),
+  }, fullRenovation,
+)));
+assert(restoredAboveGround.config.system === "skimmer" && restoredAboveGround.config.infinityEdge === undefined,
+  "saved above-ground Infinity must restore as Skimmer without a stale edge");
+
+// 4. Hidden/Visible Overflow survives.
+assert(roundTripped.config.system === "overflow", "system must survive");
+assert(roundTripped.config.overflowType === "visible", "visible overflow must survive");
+const hiddenOverflowProject = toProjectConfiguration(
+  createProjectId(),
+  { ...fullConfig, overflowType: "hidden" },
+  fullRenovation,
+);
+const hiddenRoundTrip = parseProjectConfiguration(
+  serializeProjectConfiguration(hiddenOverflowProject),
+);
+assert(hiddenRoundTrip.config.overflowType === "hidden", "hidden overflow must survive");
+
+// 5. Coping material survives.
+assert(roundTripped.config.copingMaterial === "prun", "coping material id must survive");
+
+// 6. Interior finish survives.
+assert(roundTripped.config.finish === "mosaic", "finish material must survive");
+assert(
+  roundTripped.config.mosaicFinish === DEFAULT_MOSAIC_FINISH_ID,
+  "mosaic finish id must survive",
+);
+const linerProject = toProjectConfiguration(
+  createProjectId(),
+  { ...fullConfig, finish: "liner", linerColor: "motionBlackStone799" },
+  fullRenovation,
+);
+const linerRoundTrip = parseProjectConfiguration(serializeProjectConfiguration(linerProject));
+assert(linerRoundTrip.config.finish === "liner", "liner finish must survive");
+assert(linerRoundTrip.config.linerColor === "motionBlackStone799", "liner colour must survive");
+
+// 7. Pool Access survives.
+assert(roundTripped.config.poolAccess === "stainlessSteelLadder", "pool access must survive");
+assert(roundTripped.config.internalStairType === "corner", "internal stair variant must survive");
+{
+  const { internalStairType: _omitted, ...legacyStairs } = fullConfig;
+  const legacy = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(createProjectId(), legacyStairs as PoolConfig, fullRenovation),
+    ),
+  );
+  assert(
+    legacy.config.internalStairType === "linear",
+    "a project without internalStairType must restore as the straight flight it was drawn with",
+  );
+}
+
+// 8. RGB LED colour survives.
+assert(roundTripped.config.ledColor === "#3fa8ff", "LED RGB colour must survive");
+assert(roundTripped.config.ledIntensity === 0.75, "LED intensity must survive");
+// A project saved before the dimmer existed must come back with the real
+// default rather than undefined, so nothing downstream has to invent one.
+{
+  const { ledIntensity: _omitted, ...legacyConfig } = fullConfig;
+  const legacy = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(createProjectId(), legacyConfig as PoolConfig, fullRenovation),
+    ),
+  );
+  assert(
+    legacy.config.ledIntensity === LED_OPTICS.defaultIntensity,
+    "a project without ledIntensity must restore at the default, not undefined",
+  );
+  const clamped = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(
+        createProjectId(),
+        { ...fullConfig, ledIntensity: 4.2 } as PoolConfig,
+        fullRenovation,
+      ),
+    ),
+  );
+  assert(clamped.config.ledIntensity === 1, "an out-of-range ledIntensity must be clamped to 0..1");
+}
+assert(roundTripped.config.features.includes("ledLighting"), "LED feature flag must survive");
+
+// 8b. `dimensions.floorProfile` -- the backward-compatible foundation for
+// geometry pass A (sloped floor) -- normalises the same way: a project
+// saved before it existed restores as "flat", the only value any renderer
+// reads today.
+assert(roundTripped.config.dimensions.floorProfile === "flat", "floorProfile must survive");
+{
+  const { floorProfile: _omitted, ...legacyDimensions } = fullConfig.dimensions;
+  const legacy = parseProjectConfiguration(
+    serializeProjectConfiguration(
+      toProjectConfiguration(
+        createProjectId(),
+        { ...fullConfig, dimensions: legacyDimensions as PoolConfig["dimensions"] },
+        fullRenovation,
+      ),
+    ),
+  );
+  assert(
+    legacy.config.dimensions.floorProfile === "flat",
+    "a project without dimensions.floorProfile must restore as flat",
+  );
+}
+
+// 8c. A genuine sloped-floor project round-trips its shallow depth and
+// slope direction, and malformed slope data (shallow depth at or past the
+// deep depth) is normalised to a real, safe slope rather than surviving
+// inverted or zero-difference.
+{
+  const slopedProject = toProjectConfiguration(
+    createProjectId(),
+    {
+      ...fullConfig,
+      dimensions: {
+        ...fullConfig.dimensions,
+        floorProfile: "slope",
+        shallowDepth: 1.2,
+        slopeReversed: true,
+      },
+    },
+    fullRenovation,
+  );
+  const slopedRoundTrip = parseProjectConfiguration(serializeProjectConfiguration(slopedProject));
+  assert(
+    slopedRoundTrip.config.dimensions.floorProfile === "slope",
+    "slope floorProfile must survive",
+  );
+  assert(slopedRoundTrip.config.dimensions.shallowDepth === 1.2, "shallowDepth must survive");
+  assert(slopedRoundTrip.config.dimensions.slopeReversed === true, "slopeReversed must survive");
+
+  const malformedProject = toProjectConfiguration(
+    createProjectId(),
+    {
+      ...fullConfig,
+      dimensions: {
+        ...fullConfig.dimensions,
+        floorProfile: "slope",
+        shallowDepth: fullConfig.dimensions.depth + 0.5, // deeper than "deep" -- inverted
+      },
+    },
+    fullRenovation,
+  );
+  const malformedRoundTrip = parseProjectConfiguration(
+    serializeProjectConfiguration(malformedProject),
+  );
+  assert(
+    malformedRoundTrip.config.dimensions.shallowDepth! < malformedRoundTrip.config.dimensions.depth,
+    "an inverted shallowDepth must normalise below the deep depth, never survive inverted",
+  );
+}
+
+// 9. Renovation-specific data survives where applicable.
+assert(
+  roundTripped.renovation.areas.length === fullRenovation.areas.length &&
+    fullRenovation.areas.every((area) => roundTripped.renovation.areas.includes(area)),
+  "renovation areas must survive",
+);
+assert(roundTripped.renovation.replaceCoping === true, "renovation replaceCoping must survive");
+assert(
+  roundTripped.renovation.copingMaterial === fullRenovation.copingMaterial,
+  "renovation coping material free-text must survive",
+);
+assert(
+  roundTripped.renovation.structureIssues.includes("leakage") &&
+    roundTripped.renovation.structureIssues.includes("crack"),
+  "renovation structure issues must survive",
+);
+
+// Malformed / mismatched-schema input must be rejected, not silently accepted.
+let rejectedMissingField = false;
+try {
+  parseProjectConfiguration(
+    JSON.stringify({ schemaVersion: PROJECT_SCHEMA_VERSION, projectId: "x" }),
+  );
+} catch {
+  rejectedMissingField = true;
+}
+assert(
+  rejectedMissingField,
+  "parseProjectConfiguration must reject a project missing config/renovation",
+);
+
+let rejectedBadVersion = false;
+try {
+  parseProjectConfiguration(
+    JSON.stringify({
+      schemaVersion: 999,
+      projectId: "x",
+      config: fullConfig,
+      renovation: fullRenovation,
+    }),
+  );
+} catch {
+  rejectedBadVersion = true;
+}
+assert(rejectedBadVersion, "parseProjectConfiguration must reject an unknown schemaVersion");
+
+console.log(
+  "Project configuration audit passed: full round trip, overflow/coping/finish/access/LED/renovation fields all verified.",
+);

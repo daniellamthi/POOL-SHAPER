@@ -1,0 +1,435 @@
+import * as THREE from "three";
+import { mergeGeometries, toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+import type { Outline, OverflowType, SkimmerTypeId, SystemType } from "@/lib/pool/types";
+import { offsetOutline } from "@/lib/pool/geometry";
+import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
+import { clampInfinityEdgeDimensions } from "@/lib/pool/infinity-edge";
+import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
+
+/** Architectural presentation only; never changes basin dimensions or quotation logic. */
+export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
+  // The deck meets the grille directly: no separate masonry border.
+  if (system === "overflow" && overflow === "visible")
+    return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;
+  return 0.32 + (system === "overflow" ? OVERFLOW_GEOMETRY.hiddenChannelOffset : 0);
+}
+
+/**
+ * Geometry Pass D (Infinity): the deck's own cutout normally clears the pool
+ * by a uniform `copingOuterOffset` on every side -- fine everywhere except
+ * the Infinity side, whose real assembly (lip + catch basin, out to
+ * `lipWidth + catchBasinWidth + wallThickness`) reaches well past that
+ * uniform offset. Left uniform, the deck's own opaque floor plane simply
+ * covers the outer half of the catch basin, hiding its far wall/floor/end
+ * walls under solid deck with no visible drop or basin at all -- not a
+ * camera problem, a real occlusion bug. Steps just that one zone's cutout
+ * edge out to clear the assembly so every other side and every corner stays
+ * exactly the plain uniform offset. `zone` `null` (every pre-Infinity call,
+ * or Infinity with no side chosen yet) returns the plain uniform-offset
+ * outline, byte-identical to before.
+ *
+ * Arc-length/normal-generic (Rectangle, L-shape AND Organic): a zone's own
+ * `points`/`pointNormals` (`infinity-edge.ts`) drive the notch, not a single
+ * edge/normal pair. A single-edge zone (Rectangle/L-shape, `points.length ===
+ * 2`) has no interior vertex to drop, so this is byte-identical to the
+ * original "insert 2 extra vertices, keep everything else" behaviour (still
+ * covered by the L-shape audit's own `outline.length + 2` assertion). A
+ * multi-point Organic arc instead drops its own interior original vertices
+ * (which would otherwise leave a stray un-offset kink cutting back into the
+ * notch) and replaces the whole span with each point pushed out along its
+ * OWN local normal -- so the cutout edge follows the true curve outward
+ * instead of jumping in a straight line between the arc's two shoulders,
+ * which could leave a sliver of deck still overlapping the catch basin on
+ * the outside of a curve. Net vertex-count change is always the same +2
+ * regardless of span length (`points.length` pushed out, `points.length - 2`
+ * interior originals dropped) -- the same invariant the L-shape test asserts
+ * on, now proven to hold generically rather than only for a 2-point span.
+ */
+export function buildDeckCutoutOutline(
+  outline: Outline,
+  baseOffset: number,
+  zone: RectangleInfinityZone | null,
+): Outline {
+  const base = offsetOutline(outline, baseOffset);
+  if (!zone || base.length !== outline.length) return base;
+  const dims = clampInfinityEdgeDimensions(undefined);
+  // Clear the receiving assembly and leave a visible dry inspection margin.
+  // Only the selected outward arc is cut back, never a bounding-box half-plane.
+  const reach = dims.lipWidth + dims.catchBasinWidth + dims.wallThickness + 2.4;
+  const extra = reach - baseOffset;
+  if (!(extra > 1e-6)) return base;
+  const n = base.length;
+  const i = zone.side;
+  const spanCount = zone.points.length;
+  // Every outline index strictly between the arc's start (i) and end
+  // (i + spanCount - 1, mod n) -- dropped from the plain offset ring below,
+  // replaced by their own pushed-out position instead.
+  const interiorIndices = new Set<number>();
+  for (let m = 1; m < spanCount - 1; m++) interiorIndices.add((i + m) % n);
+  const pushOut = (
+    base: readonly [number, number],
+    normal: readonly [number, number],
+  ): [number, number] => [base[0] + normal[0] * extra, base[1] + normal[1] * extra];
+  const result: Array<readonly [number, number]> = [];
+  for (let k = 0; k < n; k++) {
+    if (interiorIndices.has(k)) continue;
+    result.push(base[k]!);
+    if (k === i) {
+      for (let m = 0; m < spanCount; m++) {
+        const idx = (i + m) % n;
+        const normal = zone.pointNormals[m] ?? zone.normal;
+        result.push(pushOut(base[idx]!, normal));
+      }
+    }
+  }
+  return result;
+}
+
+/** Metres; shared by the wall apertures and the manufactured face assemblies. */
+export const SKIMMER_PROFILES = {
+  standard: {
+    width: 0.468,
+    height: 0.25,
+    bar: 0.044,
+    depth: 0.035,
+    drop: 0.16,
+    center: 0.023,
+    radius: 0.005,
+  },
+  slim: {
+    width: 0.46,
+    height: 0.22,
+    bar: 0.026,
+    depth: 0.018,
+    drop: 0.16,
+    center: 0.019,
+    radius: 0.003,
+  },
+  highWaterline: {
+    width: 0.46,
+    height: 0.14,
+    bar: 0.028,
+    depth: 0.03,
+    drop: 0.13,
+    center: 0.012,
+    radius: 0.004,
+  },
+  flush: {
+    width: 0.46,
+    height: 0.2,
+    bar: 0.014,
+    depth: 0.008,
+    drop: 0.15,
+    center: 0.017,
+    radius: 0.0015,
+  },
+} satisfies Record<SkimmerTypeId, object>;
+
+/** Square the two free ends beside an omitted Infinity run. Closed corners
+ * retain their mitres; non-Infinity outlines are returned unchanged.
+ * Project the outer endpoint onto the transverse plane through the inner
+ * endpoint, perpendicular to the remaining run (also valid after rotation). */
+export function squareInfinityCopingEnds(
+  inner: Outline, outer: Outline, excluded: ReadonlySet<number> | null,
+): Outline {
+  if (!excluded?.size || inner.length !== outer.length) return outer;
+  const n = inner.length;
+  return outer.map((point, i) => {
+    const previous = (i + n - 1) % n;
+    if (excluded.has(previous) === excluded.has(i)) return point;
+    const a = inner[excluded.has(previous) ? i : previous]!;
+    const b = inner[excluded.has(previous) ? (i + 1) % n : i]!;
+    const dx = b[0] - a[0], dz = b[1] - a[1];
+    const lengthSquared = dx * dx + dz * dz;
+    if (lengthSquared < 1e-12) return point;
+    const end = inner[i]!;
+    const along = ((point[0] - end[0]) * dx + (point[1] - end[1]) * dz) / lengthSquared;
+    return [point[0] - along * dx, point[1] - along * dz] as const;
+  });
+}
+
+/** Individually eased, full-thickness slabs, including real mitres at hard corners.
+ * All slabs share one geometry/material draw; colour variation is per slab. */
+export function createCopingSlabGeometry(
+  inner: Outline,
+  outer: Outline,
+  thickness: number,
+  /** Geometry Pass D (Infinity): the coping SECTION to omit entirely (Rectangle
+   * only -- for a 4-vertex rectangle each section between corners corresponds
+   * exactly 1:1 to `RectangleInfinityZone.side`). The remaining sections keep
+   * their own mitred end faces untouched, so the horseshoe this leaves has
+   * clean vertical end caps at both open ends with no extra geometry needed.
+   * `null`/`undefined` (every pre-Infinity call site) is byte-identical to
+   * before. */
+  excludeSection: number | ReadonlySet<number> | null = null,
+) {
+  if (inner.length !== outer.length || inner.length < 3)
+    throw new Error("Mismatched coping outlines");
+  const distances = [0];
+  for (let i = 0; i < inner.length; i++) {
+    const a = inner[i]!;
+    const b = inner[(i + 1) % inner.length]!;
+    distances.push(distances[i]! + Math.hypot(b[0] - a[0], b[1] - a[1]));
+  }
+  const total = distances[inner.length]!;
+  const corners = [0];
+  for (let i = 1; i < inner.length; i++) {
+    const a = inner[i - 1]!,
+      b = inner[i]!,
+      c = inner[(i + 1) % inner.length]!;
+    const u = new THREE.Vector2(b[0] - a[0], b[1] - a[1]).normalize();
+    const v = new THREE.Vector2(c[0] - b[0], c[1] - b[1]).normalize();
+    if (
+      u.dot(v) < 0.94 ||
+      (typeof excludeSection !== "number" &&
+        excludeSection &&
+        excludeSection.has(i) !== excludeSection.has(i - 1))
+    )
+      corners.push(distances[i]!);
+  }
+  corners.push(total);
+  const pointAt = (ring: Outline, d: number): [number, number] => {
+    let i = 0;
+    while (i < inner.length - 1 && distances[i + 1]! < d - 1e-8) i++;
+    const t = THREE.MathUtils.clamp(
+      (d - distances[i]!) / Math.max(1e-8, distances[i + 1]! - distances[i]!),
+      0,
+      1,
+    );
+    const a = ring[i]!,
+      b = ring[(i + 1) % ring.length]!;
+    return [THREE.MathUtils.lerp(a[0], b[0], t), THREE.MathUtils.lerp(a[1], b[1], t)];
+  };
+  /** Inner point at arc distance `d`, projected square onto the matching
+   * outer edge (clamped to that edge). */
+  const squareToEdge = (d: number): [number, number] => {
+    let i = 0;
+    while (i < inner.length - 1 && distances[i + 1]! < d - 1e-8) i++;
+    const [px, pz] = pointAt(inner, d);
+    const a = outer[i]!,
+      b = outer[(i + 1) % outer.length]!;
+    const ex = b[0] - a[0],
+      ez = b[1] - a[1];
+    const t = THREE.MathUtils.clamp(
+      ((px - a[0]) * ex + (pz - a[1]) * ez) / Math.max(1e-10, ex * ex + ez * ez),
+      0,
+      1,
+    );
+    return [a[0] + ex * t, a[1] + ez * t];
+  };
+  const parts: THREE.BufferGeometry[] = [];
+  for (let section = 0; section < corners.length - 1; section++) {
+    const rawEdge = distances.findIndex((d) => Math.abs(d - corners[section]!) < 1e-7);
+    if (
+      typeof excludeSection === "number" ? section === excludeSection : excludeSection?.has(rawEdge)
+    )
+      continue;
+    const start = corners[section]!,
+      length = corners[section + 1]! - start;
+    const count = Math.max(1, Math.round(length / 0.62));
+    for (let slab = 0; slab < count; slab++) {
+      const from = start + (length * slab) / count,
+        to = start + (length * (slab + 1)) / count;
+      const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5), to];
+      // Joints are laid square to the pool edge: a joint between two slabs
+      // runs straight out across the coping (the outer point is the inner
+      // point projected onto the outer edge), and only a true corner keeps
+      // its mitre (inner vertex to outer vertex). Mapping the joint by the
+      // same parametric fraction along the longer outer edge fanned every
+      // intermediate joint into a diagonal.
+      const outerAt = (d: number): [number, number] => {
+        const atCorner = Math.abs(d - start) < 1e-6 || Math.abs(d - (start + length)) < 1e-6;
+        const atVertex = distances.some((v) => Math.abs(v - d) < 1e-6);
+        if (atCorner || atVertex) return pointAt(outer, d);
+        return squareToEdge(d);
+      };
+      const polygon: Outline = [
+        ...stations.map((d) => pointAt(inner, d)),
+        ...[...stations].reverse().map(outerAt),
+      ];
+      // Real coping joint: ~2mm at the slab sides, opening to ~4.5mm at the
+      // honed face through a 1.8mm eased arris that catches a soft highlight.
+      // (A 9mm rounded opening over a deep bed read as a black graphic line.)
+      // Insetting before extrusion keeps the stone inside its surveyed perimeter.
+      const arris = 0.0018;
+      const inset = offsetOutline(polygon, -0.0022);
+      const shape = new THREE.Shape(inset.map(([x, z]) => new THREE.Vector2(x, -z)));
+      const raw = new THREE.ExtrudeGeometry(shape, {
+        depth: thickness - 0.003 - arris,
+        bevelEnabled: true,
+        bevelSize: arris,
+        bevelThickness: arris,
+        bevelSegments: 3,
+        steps: 1,
+        curveSegments: 1,
+      });
+      raw.rotateX(-Math.PI / 2);
+      raw.translate(0, -thickness + 0.003, 0);
+      const geometry = toCreasedNormals(raw, Math.PI / 3);
+      if (geometry !== raw) raw.dispose();
+      // Keep the honed face planar. Averaging its corner normals with the
+      // arris makes the entire slab look inflated, not just its 3mm bevel.
+      const positions = geometry.getAttribute("position");
+      const normals = geometry.getAttribute("normal");
+      for (let i = 0; i < positions.count; i++) {
+        if (Math.abs(positions.getY(i)) < 1e-6) normals.setXYZ(i, 0, 1, 0);
+      }
+      // Quarried stone varies slab to slab, but only within a narrow band:
+      // a wider spread made every slab read as a separate tile.
+      const seed = Math.sin(parts.length * 127.1 + 19.7) * 43758.5453;
+      const shade = 0.975 + (seed - Math.floor(seed)) * 0.025;
+      const colors = new Float32Array(geometry.getAttribute("position").count * 3).fill(shade);
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      // Each slab is cut from its own piece of stone: its own window of the
+      // scan (origin + seed) with the vein running along the slab's length
+      // (swap when the side runs along Z). Without this the world-space
+      // texture flowed straight through every joint, so a side read as one
+      // painted strip with lines drawn on it.
+      const a = pointAt(inner, from),
+        b = pointAt(inner, to);
+      const frame = new Float32Array(geometry.getAttribute("position").count * 4);
+      const swap = Math.abs(b[1] - a[1]) > Math.abs(b[0] - a[0]) ? 1 : 0;
+      for (let i = 0; i < frame.length; i += 4) {
+        frame[i] = (a[0] + b[0]) / 2;
+        frame[i + 1] = (a[1] + b[1]) / 2;
+        frame[i + 2] = swap;
+        frame[i + 3] = 0.05 + (seed - Math.floor(seed)) * 0.9;
+      }
+      geometry.setAttribute("slabFrame", new THREE.BufferAttribute(frame, 4));
+      parts.push(geometry);
+    }
+  }
+  const merged = mergeGeometries(parts)!;
+  parts.forEach((p) => p.dispose());
+  return merged;
+}
+
+export interface WallOpening {
+  x: number;
+  z: number;
+  rotation: number;
+  width: number;
+  top: number;
+  bottom: number;
+}
+
+/** Sample matching ring boundaries by physical perimeter, independent of tessellation. */
+export function sampleRing(inner: Outline, outer: Outline, pitch: number) {
+  const lengths = inner.map((p, i) => {
+    const q = inner[(i + 1) % inner.length]!;
+    return Math.hypot(q[0] - p[0], q[1] - p[1]);
+  });
+  const total = lengths.reduce((a, b) => a + b, 0);
+  const count = Math.max(1, Math.ceil(total / pitch));
+  const samples: Array<{ inner: THREE.Vector3; outer: THREE.Vector3; tangent: THREE.Vector3 }> = [];
+  let segment = 0;
+  let start = 0;
+  for (let i = 0; i < count; i++) {
+    const distance = ((i + 0.5) * total) / count;
+    while (segment < lengths.length - 1 && distance > start + lengths[segment]!) {
+      start += lengths[segment++]!;
+    }
+    const t = (distance - start) / Math.max(lengths[segment]!, 1e-8);
+    const next = (segment + 1) % inner.length;
+    const a = inner[segment]!;
+    const b = inner[next]!;
+    const c = outer[segment]!;
+    const d = outer[next]!;
+    samples.push({
+      inner: new THREE.Vector3(
+        THREE.MathUtils.lerp(a[0], b[0], t),
+        0,
+        THREE.MathUtils.lerp(a[1], b[1], t),
+      ),
+      outer: new THREE.Vector3(
+        THREE.MathUtils.lerp(c[0], d[0], t),
+        0,
+        THREE.MathUtils.lerp(c[1], d[1], t),
+      ),
+      tangent: new THREE.Vector3(b[0] - a[0], 0, b[1] - a[1]).normalize(),
+    });
+  }
+  return samples;
+}
+
+/** One merged draw call, with actual open gaps and rounded load-bearing ribs. */
+export function createGrateGeometry(inner: Outline, outer: Outline, pitch = 0.022) {
+  const profile = new THREE.Shape([
+    new THREE.Vector2(-0.0045, 0),
+    new THREE.Vector2(0.0045, 0),
+    new THREE.Vector2(0.006, -0.0015),
+    new THREE.Vector2(0.006, -0.0235),
+    new THREE.Vector2(0.0045, -0.025),
+    new THREE.Vector2(-0.0045, -0.025),
+    new THREE.Vector2(-0.006, -0.0235),
+    new THREE.Vector2(-0.006, -0.0015),
+  ]);
+  const parts: THREE.BufferGeometry[] = [];
+  for (let i = 0; i < inner.length; i++) {
+    const next = (i + 1) % inner.length;
+    const a = new THREE.Vector2(...inner[i]!);
+    const b = new THREE.Vector2(...inner[next]!);
+    const tangent = b.clone().sub(a).normalize();
+    const normal = new THREE.Vector2(tangent.y, -tangent.x);
+    // Slice each mitred channel bay perpendicular to its inner edge. Extending
+    // stations to the outer corners covers the corner patches without fanning
+    // straight-run ribs or overlapping the adjacent mitred bay.
+    const bay = [inner[i]!, inner[next]!, outer[next]!, outer[i]!].map((point) => {
+      const relative = new THREE.Vector2(...point).sub(a);
+      return new THREE.Vector2(relative.dot(tangent), relative.dot(normal));
+    });
+    const start = Math.min(...bay.map((point) => point.x));
+    const end = Math.max(...bay.map((point) => point.x));
+    const count = Math.max(1, Math.ceil((end - start) / pitch));
+    for (let rib = 0; rib < count; rib++) {
+      const station = start + ((rib + 0.5) * (end - start)) / count;
+      const intersections: number[] = [];
+      for (let edge = 0; edge < bay.length; edge++) {
+        const p = bay[edge]!,
+          q = bay[(edge + 1) % bay.length]!;
+        if (Math.abs(q.x - p.x) < 1e-8) continue;
+        const t = (station - p.x) / (q.x - p.x);
+        if (t >= 0 && t <= 1) intersections.push(THREE.MathUtils.lerp(p.y, q.y, t));
+      }
+      if (intersections.length < 2) continue;
+      const from = Math.min(...intersections) + 0.001;
+      const to = Math.max(...intersections) - 0.001;
+      if (to - from < 0.002) continue;
+      const geometry = new THREE.ExtrudeGeometry(profile, {
+        depth: to - from,
+        bevelEnabled: false,
+        steps: 1,
+      });
+      geometry.rotateY(Math.atan2(normal.x, normal.y));
+      const origin = a.clone().addScaledVector(tangent, station).addScaledVector(normal, from);
+      geometry.translate(origin.x, 0, origin.y);
+      parts.push(geometry);
+    }
+  }
+  const merged = mergeGeometries(parts)!;
+  parts.forEach((part) => part.dispose());
+  return merged;
+}
+
+/** Fine grout joints traverse the top and both fascias, giving slabs a real scale. */
+export function createCopingJointGeometry(inner: Outline, outer: Outline, thickness: number) {
+  const parts: THREE.BufferGeometry[] = [];
+  for (const sample of sampleRing(inner, outer, 0.62)) {
+    const across = sample.outer.clone().sub(sample.inner);
+    const angle = Math.atan2(across.x, across.z);
+    const center = sample.inner.clone().add(sample.outer).multiplyScalar(0.5);
+    const top = new THREE.BoxGeometry(0.0025, 0.0008, across.length() - 0.012);
+    top.rotateY(angle);
+    top.translate(center.x, 0.0002, center.z);
+    parts.push(top);
+    for (const edge of [sample.inner, sample.outer]) {
+      const fascia = new THREE.BoxGeometry(0.0025, Math.max(0.003, thickness - 0.012), 0.001);
+      fascia.rotateY(angle);
+      fascia.translate(edge.x, -thickness / 2 - 0.003, edge.z);
+      parts.push(fascia);
+    }
+  }
+  const merged = mergeGeometries(parts)!;
+  parts.forEach((part) => part.dispose());
+  return merged;
+}

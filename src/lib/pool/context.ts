@@ -6,7 +6,11 @@ import type {
   CustomMode,
   CustomerInfo,
   EquipmentId,
+  CoverPosition,
   FinishMaterial,
+  FloorProfile,
+  InternalStairType,
+  HydromassageVariant,
   PoolType,
   LinerColor,
   MosaicFinishId,
@@ -20,18 +24,29 @@ import type {
   PoolStructure,
   ProjectType,
   SkimmerFinishId,
+  SkimmerTypeId,
   SystemType,
   UploadedFile,
   RenovationConfig,
 } from "./types";
+import type { ProjectConfiguration } from "./project";
+import type { LShapeOrientation } from "./l-shape";
+import type { OrganicShapeParams } from "./organic-shape";
 
 export interface ConfiguratorContextValue {
+  visualFocus: import("./contextual-camera").FocusRequest | null;
   config: PoolConfig;
   step: number;
   outline: Outline;
   metrics: PoolMetrics;
   skimmers: SkimmerPlan;
   renovation: RenovationConfig;
+  /** Stable identity for the project being configured. */
+  projectId: string;
+  /** The single canonical, serializable representation of everything the
+   * customer has selected so far -- the source of truth for the summary,
+   * autosave, exports and any future CRM/lead handoff. */
+  projectConfiguration: ProjectConfiguration;
   isStepComplete: (index: number) => boolean;
   canContinue: boolean;
   setProjectType: (value: ProjectType) => void;
@@ -39,26 +54,84 @@ export interface ConfiguratorContextValue {
   setPoolStructure: (value: PoolStructure) => void;
   setCustomerField: (key: keyof CustomerInfo, value: string) => void;
   setShape: (value: PoolShapeId) => void;
+  setCopingMaterial: (value: NonNullable<PoolConfig["copingMaterial"]>) => void;
   setCustomMode: (value: CustomMode) => void;
   setControlPoint: (index: number, value: ControlPoint) => void;
   resetControlPoints: () => void;
   setDimension: (key: DimensionKey, value: number) => void;
+  setFloorProfile: (value: FloorProfile) => void;
+  /** Swaps which end of the slope axis is shallow without changing the two
+   * selected depths. */
+  toggleSlopeReversed: () => void;
+  setLShapeOrientation: (value: LShapeOrientation) => void;
+  /** Curvature is a plain dimension (`organicCurvature`, via `setDimension`).
+   * Mirror is a boolean flag, mirroring `setLShapeOrientation`'s own pattern. */
+  setOrganicMirror: (value: boolean) => void;
   setSystem: (value: SystemType) => void;
   setOverflowType: (value: OverflowType) => void;
+  /** Geometry Pass D (Infinity, Rectangle + L-shape): selects the
+   * disappearing-edge side and marks it enabled in one step -- the Acqua
+   * step never has to know about `InfinityEdgeParams`'s other fields. The
+   * index is whatever the current shape's own candidate zone list uses
+   * (Rectangle 0-3, L-shape 0-5); re-validated downstream regardless. */
+  setInfinitySide: (value: number) => void;
   setSkimmerFinish: (value: SkimmerFinishId) => void;
+  setSkimmerType: (value: SkimmerTypeId) => void;
   setFinish: (value: FinishMaterial) => void;
   setLinerColor: (value: LinerColor) => void;
   setMosaicFinish: (value: MosaicFinishId) => void;
   togglePoolFeature: (value: PoolFeatureId) => void;
+  setLedColor: (value: string) => void;
+  setLedIntensity: (value: number) => void;
+  setSceneTime: (value: "day" | "night") => void;
+  setPaving: (value: import("./presentation").PavingId) => void;
+  setPavingFormat: (value: import("./presentation").PavingFormatId) => void;
+  setExteriorPanelFinish: (value: import("./above-ground").ExteriorPanelFinishId) => void;
+  setExternalStairSide: (value: import("./above-ground").ExternalStairSide) => void;
+  setExternalStairPlatformExtended: (value: boolean) => void;
+  setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
+  setInternalStairType: (value: InternalStairType) => void;
+  setInternalStairMirrored: (value: boolean) => void;
+  setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;
+  toggleInternalSteps: () => void;
+  toggleInoxLadder: () => void;
   toggleEquipment: (value: EquipmentId) => void;
+  setCoverPosition: (value: CoverPosition) => void;
+  /** Progressive cover deployment, 0..1; also keeps `coverPosition` in step. */
+  setCoverExtension: (value: number) => void;
   updateRenovation: (value: Partial<RenovationConfig>) => void;
   addUploads: (files: UploadedFile[]) => void;
   removeUpload: (id: string) => void;
+  /** P6B: records the outcome of a real upload attempt for a previously
+   * added file -- never called with a fake "uploaded" result. */
+  setUploadStatus: (
+    id: string,
+    status: NonNullable<UploadedFile["uploadStatus"]>,
+    storagePath?: string | null,
+    uploadError?: string,
+  ) => void;
   goToStep: (index: number) => void;
   next: () => void;
   previous: () => void;
+  /** Starts a fresh project: new `projectId`, blank config, and clears any
+   * locally saved draft (P4 autosave). */
   reset: () => void;
+  /** True for the rest of this session once a saved draft has been
+   * restored on load, until dismissed. Drives the "Abbiamo ripristinato il
+   * tuo progetto" notice. */
+  justRestoredProject: boolean;
+  dismissRestoredProjectNotice: () => void;
+  /** Replaces the whole configuration with a canonical snapshot (Build 2:
+   * shared links, "save as my copy"). */
+  restoreProject: (project: ProjectConfiguration) => void;
+  /** Public reference the page was opened with (`?p=`), once restored;
+   * "loading" while the shared project is being fetched. */
+  sharedProject: {
+    publicRef: string;
+    status: "loading" | "ready" | "error";
+    message?: string;
+  } | null;
 }
 
 export const ConfiguratorContext = createContext<ConfiguratorContextValue | null>(null);

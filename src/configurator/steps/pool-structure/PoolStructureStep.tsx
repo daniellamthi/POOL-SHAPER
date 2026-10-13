@@ -9,17 +9,22 @@ export function PoolStructureStep() {
   );
 
   return (
-    <StepSection title="Pool Structure" subtitle="Choose the construction system for your pool.">
-      <div className="grid gap-4" role="group" aria-label="Pool structure">
+    <StepSection
+      title="Struttura della piscina"
+      subtitle="Scegli il sistema costruttivo della tua piscina."
+    >
+      <div className="grid gap-4" role="group" aria-label="Struttura della piscina">
         {structures.map((structure) => (
           <OptionCard
             key={structure.id}
             title={structure.title}
+            description={structure.description}
             selected={config.structure === structure.id}
             onSelect={() => setPoolStructure(structure.id)}
           />
         ))}
       </div>
+      <p className="text-xs leading-relaxed text-muted-foreground">Anteprima costruttiva indicativa: giunti e finitura grezza non costituiscono un dettaglio esecutivo.</p>
     </StepSection>
   );
 }

@@ -45,13 +45,37 @@ export const RENDERING_QUALITY_PRESETS: Readonly<
     ambientOcclusion: { enabled: false },
     waterQuality: "experience",
     textureAnisotropy: 16,
-    postProcessing: { enabled: true },
+    postProcessing: { enabled: false },
     planarReflection: { enabled: true, resolution: 512 },
   },
 };
 
-/** Temporarily set to Experience for live visual verification in the browser. */
-export const ACTIVE_RENDERING_QUALITY = RENDERING_QUALITY_PRESETS.experience;
+/**
+ * One-time device heuristic, evaluated when this (browser-only, lazily
+ * loaded) module is first imported: Experience's 4K shadow maps, 2x DPR,
+ * planar reflection and postprocessing are desktop-class GPU cost, so
+ * touch/small-viewport/low-core devices get the lighter Configuration tier
+ * instead. This used to be hardcoded to Experience for every visitor
+ * (left over from browser verification) -- correctness on real content is
+ * unaffected either way, but that meant no device ever actually got the
+ * lighter tier the preset system already defines. Conservative on purpose:
+ * any single low-power signal downgrades, since shipping poor mobile FPS
+ * costs more than a desktop losing a reflection it wouldn't render slowly
+ * anyway.
+ */
+function detectRenderingQualityMode(): RenderingQualityMode {
+  if (typeof navigator === "undefined" || typeof window === "undefined") return "experience";
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const smallViewport = window.matchMedia?.("(max-width: 767px)").matches ?? false;
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  const limitedMemory = typeof deviceMemory === "number" && deviceMemory <= 4;
+  const limitedCores =
+    typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 4;
+  const isLowPower = coarsePointer || smallViewport || limitedMemory || limitedCores;
+  return isLowPower ? "configuration" : "experience";
+}
+
+export const ACTIVE_RENDERING_QUALITY = RENDERING_QUALITY_PRESETS[detectRenderingQualityMode()];
 
 export const SCENE_VISUAL_PRESET = {
   backgrounds: {
@@ -64,8 +88,8 @@ export const SCENE_VISUAL_PRESET = {
   // grounded architectural photography instead of a CG model floating over
   // its own studio floor. Water/liner calibration untouched.
   contactShadow: { dark: 0.42, light: 0.35, blur: 2.5 },
-  exposure: { dark: 1.12, light: 1.18, night: 0.9 },
-  environment: { dark: 0.95, light: 1.18, night: 0.22 },
+  exposure: { dark: 0.95, light: 0.95, night: 0.9 },
+  environment: { dark: 0.24, light: 0.24, night: 0.22 },
   lighting: {
     sky: {
       intensity: { dark: 0.15, light: 0.24 },
@@ -73,7 +97,7 @@ export const SCENE_VISUAL_PRESET = {
       groundColor: { dark: "#171a1e", light: "#dcd4cb" },
     },
     sun: {
-      intensity: { dark: 1.32, light: 1.95 },
+      intensity: { dark: 3.2, light: 3.2 },
       color: "#f9f6f1",
       bias: -0.0002,
       normalBias: 0.005,
@@ -87,4 +111,24 @@ export const SCENE_VISUAL_PRESET = {
   },
   camera: { fov: 34, near: 0.1, far: 500, defaultDistanceFactor: 3.25 },
   renderer: { maxDpr: ACTIVE_RENDERING_QUALITY.dpr[1] },
+  /**
+   * Blue hour, used while the customer is choosing lighting. Underwater LEDs
+   * are invisible under a midday sun -- in a real pool as much as in this
+   * scene -- so the step that sells them shows them at the hour they are
+   * actually seen. Deliberately dusk and not night: the deck, coping and
+   * surroundings stay readable, so the pool is still being configured rather
+   * than staged as a black backdrop with glowing water.
+   */
+  dusk: {
+    background: "#101b28",
+    exposure: 1.05,
+    environment: 0.06,
+    skyIntensity: 0.05,
+    skyGroundColor: "#0c1119",
+    sunIntensity: 0.22,
+    sunColor: "#9fb6d8",
+    auxiliaryIntensity: 0.04,
+    /** Seconds for the daylight <-> dusk crossfade. */
+    transitionSeconds: 0.9,
+  },
 } as const;

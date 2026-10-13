@@ -1,0 +1,304 @@
+#!/usr/bin/env node
+// Deterministic visual-regression harness (AUTO-009).
+//
+// Boots the app via `vite dev` and drives a fixed Chromium viewport through
+// a small set of named reference configurations, and either saves the
+// current screenshot as the baseline (`--update`) or diffs it against the
+// existing baseline with pixelmatch, failing the run if any reference
+// exceeds the pixel-difference threshold.
+//
+// NOTE: `vite dev` is used rather than a production preview because this
+// project's `vite preview` / `.output` (Nitro `cloudflare-module` preset)
+// combination does not serve locally out of the box (500: cannot find
+// `dist/server/server.js` -- TanStack Start's preview-server plugin expects
+// a different build layout than this preset produces). That mismatch is a
+// pre-existing, separate build/tooling gap -- tracked as AUTO-011 in
+// docs/AUTONOMOUS_ISSUES.md -- not something this harness works around by
+// design. The 3D scene under audit is fully client-rendered, so `vite dev`
+// output is visually equivalent for screenshot purposes; revisit once
+// AUTO-011 is fixed.
+//
+// Reference set intentionally starts small (see docs/AUTONOMOUS_BACKLOG.md
+// AUTO-009) and grows incrementally -- each entry describes exactly how to
+// reach it from a fresh load, so a case is reproducible by inspection.
+//
+// Usage:
+//   node scripts/visual-audit.mjs            # compare against baselines
+//   node scripts/visual-audit.mjs --update   # (re)write baselines
+
+import { chromium } from "playwright";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
+import { spawn } from "node:child_process";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "..");
+const BASELINE_DIR = path.join(ROOT, "test-baselines", "visual");
+const PREVIEW_PORT = 4174;
+const PREVIEW_URL = `http://127.0.0.1:${PREVIEW_PORT}/`;
+const DIFF_THRESHOLD_RATIO = 0.005; // 0.5% of pixels may differ before failing
+const UPDATE = process.argv.includes("--update");
+
+// This sandbox's headless Chromium falls back to a software GL rasterizer
+// for the Pool3D WebGL canvas ("GPU stall due to ReadPixels" console
+// warnings, observed frame times of 1-6s+ per frame). Real mouse-simulated
+// Playwright clicks (`locator.click()`) time out waiting for the main
+// thread to go idle between such stalls, even though the click itself is
+// perfectly deliverable -- so wizard navigation below dispatches clicks
+// directly via `Element.click()` in-page (`page.evaluate`), which doesn't
+// depend on the compositor keeping up. Per directive §68, this sandbox's
+// software rendering is a comparative/CI proxy, not a real-GPU proof.
+
+/** Clicks the first `<button>` inside `[role="group"][aria-label=label]`. */
+async function clickFirstOption(page, groupLabel) {
+  await page.evaluate((label) => {
+    const group = document.querySelector(`[role="group"][aria-label="${label}"]`);
+    const button = group?.querySelector("button");
+    if (!button) throw new Error(`clickFirstOption: no button in group "${label}"`);
+    button.click();
+  }, groupLabel);
+}
+
+/** Clicks the `OptionCard` inside a group whose title span matches exactly. */
+async function clickOptionByTitle(page, groupLabel, title) {
+  await page.evaluate(
+    ({ label, title }) => {
+      const group = document.querySelector(`[role="group"][aria-label="${label}"]`);
+      const button = Array.from(group?.querySelectorAll("button") ?? []).find(
+        (b) =>
+          b.querySelector(":scope > span:first-child > span:first-child")?.textContent?.trim() ===
+          title,
+      );
+      if (!button) throw new Error(`clickOptionByTitle: no "${title}" option in group "${label}"`);
+      button.click();
+    },
+    { label: groupLabel, title },
+  );
+}
+
+/** Clicks the wizard's "Continue" button. */
+async function clickContinue(page) {
+  await page.evaluate(() => {
+    const button = Array.from(document.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Continua",
+    );
+    if (!button) throw new Error("clickContinue: no Continue button found");
+    button.click();
+  });
+}
+
+/**
+ * Drives the wizard from its fresh-load Step 01 state to Step 06 "Interior
+ * Finish" using only the default option in each of the three steps that
+ * require an explicit selection to unlock Continue (project type, pool
+ * type, structure) -- shape/dimensions and system already validate with
+ * their defaults. Ends with the Interior Finish step's default "PVC Liner"
+ * finish selected and expanded (matches `InteriorFinishStep`'s
+ * `useState(config.finish)` initial expansion), which is also what puts the
+ * live camera in the "liner" `CameraIntent` (see `PoolConfigurator.tsx`'s
+ * `activeStepId === "style"` branch and `getCameraPose`/
+ * `getInteriorFinishCamera` in `src/lib/pool/camera.ts`).
+ */
+async function navigateToInteriorFinish(page) {
+  for (const groupLabel of ["Tipo di progetto", "Tipo di piscina", "Struttura della piscina"]) {
+    await clickFirstOption(page, groupLabel);
+    await page.waitForTimeout(400);
+    await clickContinue(page);
+    await page.waitForTimeout(400);
+  }
+  // Shape & Dimensions, then Pool System: both already valid with defaults.
+  await clickContinue(page);
+  await page.waitForTimeout(400);
+  await clickContinue(page);
+  await settleCameraFlight(page);
+}
+
+/**
+ * `CameraRig` (`src/components/pool/three/PoolScene.tsx`) advances its
+ * eased camera-pose transition by at most 0.05s of *simulated* time per
+ * rendered frame, regardless of real elapsed time -- so completing a
+ * 0.78-0.88s transition always takes >=16 rendered frames. This sandbox's
+ * software-rasterized WebGL (see the module comment above) has been
+ * observed as slow as ~0.2-0.9 fps, so 16 frames can take over a minute of
+ * real time here (nowhere near the case on real GPU hardware -- directive
+ * §68 notes SwiftShader timing isn't representative). A short fixed wait
+ * would screenshot mid-flight; wait generously instead.
+ */
+async function settleCameraFlight(page) {
+  await page.waitForTimeout(45000);
+}
+
+/** @type {{ name: string, viewport: { width: number, height: number }, run: (page: import('playwright').Page) => Promise<void> }[]} */
+const REFERENCES = [
+  {
+    name: "landing-desktop",
+    viewport: { width: 1440, height: 900 },
+    // Fresh load, no interaction: Step 01 "Project Type" with the default
+    // rectangle/skimmer/PVC-Liner preview pool. This is the one reference
+    // currently exercised by CI/local smoke checks (see AUTO-007's
+    // Playwright smoke test) -- kept here as the first, always-reachable
+    // baseline so the harness itself has continuous coverage.
+    async run() {
+      // no-op: default state after load is the reference.
+    },
+  },
+  {
+    name: "liner-closeup",
+    viewport: { width: 1440, height: 900 },
+    // AUTO-010: Interior Finish step, default "PVC Liner" finish -- the
+    // wall-anchored `getInteriorFinishCamera` "liner" framing. Validates the
+    // ported interior AO (AUTO-007/70f0d0c) against the pulled-back,
+    // architectural Liner composition: grout/seam AO should be subtle and
+    // only affect indirect light, never direct-light darkening or the
+    // liner's base colour.
+    async run(page) {
+      await navigateToInteriorFinish(page);
+    },
+  },
+  {
+    name: "mosaic-closeup",
+    viewport: { width: 1440, height: 900 },
+    // AUTO-010: same step, "Mosaic" finish selected -- the tighter
+    // material-swatch "mosaic" framing (reachable in the live UI since
+    // ac2a458). Validates the same AO derivation against Mosaic's distinct
+    // photographed base texture/grout pattern.
+    async run(page) {
+      await navigateToInteriorFinish(page);
+      await clickOptionByTitle(page, "Rivestimento interno", "Mosaico");
+      await settleCameraFlight(page);
+    },
+  },
+];
+
+function waitForServer(url, timeoutMs = 20000) {
+  const start = Date.now();
+  return new Promise((resolve, reject) => {
+    const attempt = async () => {
+      try {
+        const res = await fetch(url);
+        if (res.ok || res.status < 500) return resolve(undefined);
+      } catch {
+        // not up yet
+      }
+      if (Date.now() - start > timeoutMs) return reject(new Error(`Timed out waiting for ${url}`));
+      setTimeout(attempt, 300);
+    };
+    attempt();
+  });
+}
+
+async function main() {
+  await mkdir(BASELINE_DIR, { recursive: true });
+
+  const viteBin = path.join(ROOT, "node_modules", ".bin", "vite");
+  const preview = spawn(
+    viteBin,
+    ["dev", "--host", "127.0.0.1", "--port", String(PREVIEW_PORT), "--strictPort"],
+    { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"], detached: true },
+  );
+  let previewOutput = "";
+  preview.stdout.on("data", (d) => (previewOutput += d));
+  preview.stderr.on("data", (d) => (previewOutput += d));
+
+  const browser = await chromium.launch({
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || "/opt/pw-browsers/chromium",
+    headless: true,
+  });
+
+  let failures = 0;
+  try {
+    await waitForServer(PREVIEW_URL);
+
+    for (const ref of REFERENCES) {
+      const page = await browser.newPage({ viewport: ref.viewport, deviceScaleFactor: 1 });
+      const consoleErrors = [];
+      page.on("console", (msg) => {
+        if (msg.type() === "error") consoleErrors.push(msg.text());
+      });
+      page.on("pageerror", (err) => consoleErrors.push(String(err)));
+
+      await page.goto(PREVIEW_URL, { waitUntil: "networkidle", timeout: 30000 });
+      await page.waitForTimeout(3000); // let the 3D scene settle (async texture/material load)
+      await ref.run(page);
+      await page.waitForTimeout(500);
+
+      const buffer = await page.screenshot();
+      await page.close();
+
+      const baselinePath = path.join(BASELINE_DIR, `${ref.name}.png`);
+      const currentPath = path.join(BASELINE_DIR, `${ref.name}.current.png`);
+      await writeFile(currentPath, buffer);
+
+      if (UPDATE || !existsSync(baselinePath)) {
+        await writeFile(baselinePath, buffer);
+        console.log(`[baseline] wrote ${ref.name} (${buffer.length} bytes)`);
+        continue;
+      }
+
+      const baseline = PNG.sync.read(await readFile(baselinePath));
+      const current = PNG.sync.read(buffer);
+      if (baseline.width !== current.width || baseline.height !== current.height) {
+        console.error(
+          `[FAIL] ${ref.name}: dimension mismatch baseline=${baseline.width}x${baseline.height} current=${current.width}x${current.height}`,
+        );
+        failures++;
+        continue;
+      }
+      const diff = new PNG({ width: baseline.width, height: baseline.height });
+      const diffPixels = pixelmatch(
+        baseline.data,
+        current.data,
+        diff.data,
+        baseline.width,
+        baseline.height,
+        {
+          threshold: 0.1,
+        },
+      );
+      const totalPixels = baseline.width * baseline.height;
+      const ratio = diffPixels / totalPixels;
+      const status = ratio > DIFF_THRESHOLD_RATIO ? "FAIL" : "pass";
+      if (status === "FAIL") {
+        failures++;
+        const diffPath = path.join(BASELINE_DIR, `${ref.name}.diff.png`);
+        await writeFile(diffPath, PNG.sync.write(diff));
+        console.error(
+          `[FAIL] ${ref.name}: ${diffPixels}/${totalPixels} px differ (${(ratio * 100).toFixed(3)}%) > ${(DIFF_THRESHOLD_RATIO * 100).toFixed(2)}% threshold -- see ${diffPath}`,
+        );
+      } else {
+        console.log(
+          `[pass] ${ref.name}: ${diffPixels}/${totalPixels} px differ (${(ratio * 100).toFixed(3)}%)`,
+        );
+      }
+      if (consoleErrors.length > 0) {
+        console.warn(
+          `[warn] ${ref.name}: ${consoleErrors.length} console error(s): ${consoleErrors.join(" | ")}`,
+        );
+      }
+    }
+  } finally {
+    await browser.close();
+    // `vite dev` forks its own child process; kill the whole group (negative
+    // pid) so nothing is left dangling after this script exits.
+    try {
+      process.kill(-preview.pid, "SIGTERM");
+    } catch {
+      preview.kill();
+    }
+  }
+
+  if (failures > 0) {
+    console.error(`\n${failures} reference(s) failed. Preview log:\n${previewOutput}`);
+    process.exit(1);
+  }
+  console.log(`\nVisual audit passed: ${REFERENCES.length} reference(s).`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

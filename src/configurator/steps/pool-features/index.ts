@@ -1,1 +1,2 @@
-export { PoolFeaturesStep } from "./PoolFeaturesStep";
+export { LedColorWheel } from "./LedColorWheel";
+export { LedIntensityControl } from "./LedIntensityControl";
