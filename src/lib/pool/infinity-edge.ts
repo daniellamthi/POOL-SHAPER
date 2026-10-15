@@ -46,6 +46,8 @@ export const L_SHAPE_INFINITY_SIDES: readonly LShapeInfinitySide[] = [0, 1, 2, 3
 
 export interface InfinityEdgeParams {
   enabled: boolean;
+  /** Presentation concept, subject to structural engineering. Legacy = traditional. */
+  wallType?: "traditional" | "glass";
   /** Index of the outline vertex the selected side starts at -- Rectangle
    * (0-3) or L-shape (0-5), whichever the current shape's outline actually
    * has. `null` when nothing is selected, or for Organic, which has no
@@ -78,12 +80,13 @@ export function resolveInfinitySelection(
   shape: PoolShapeId,
   poolType: PoolType | null,
   preferredSide: number | null | undefined,
+  wallType?: InfinityEdgeParams["wallType"],
 ): InfinityEdgeParams | undefined {
   const zones = compatibleInfinityZones(outline, shape, poolType);
   const selected = zones.find(zone => zone.side === preferredSide) ??
     zones.reduce<RectangleInfinityZone | undefined>((best, zone) =>
       !best || zone.length >= best.length ? zone : best, undefined);
-  return selected ? clampInfinityEdgeParams({ enabled: true, side: selected.side }) : undefined;
+  return selected ? clampInfinityEdgeParams({ enabled: true, side: selected.side, ...(wallType ? { wallType } : {}) }) : undefined;
 }
 
 /**
@@ -124,7 +127,7 @@ export function clampInfinityEdgeParams(
   // lip a later pass didn't actually implement yet.
   const startT = Math.min(0, Math.max(0, startTRaw)) === 0 ? 0 : 0;
   const endT = Math.max(1, Math.min(1, endTRaw)) === 1 ? 1 : 1;
-  return { enabled, side, startT, endT, dropDirection: "outward" };
+  return { enabled, side, startT, endT, dropDirection: "outward", ...(input.wallType === "glass" ? { wallType: "glass" as const } : {}) };
 }
 
 /**

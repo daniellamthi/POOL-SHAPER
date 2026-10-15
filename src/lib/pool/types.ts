@@ -51,7 +51,9 @@ export type PoolFeatureId =
   | "ledLighting"
   | "stairLighting"
   | "hydromassage"
+  | "hydromassageBenchLighting"
   | "sunShelf"
+  | "sunShelfLoungers"
   | "integratedBench"
   | "inoxLadder"
   | "externalStaircase";
@@ -208,6 +210,8 @@ export interface PoolConfig {
   linerColor: LinerColor;
   mosaicFinish: MosaicFinishId;
   features: ReadonlyArray<PoolFeatureId>;
+  /** Optional immersed furniture; actual capacity is derived from the Sun Shelf. */
+  sunShelfLoungerCount?: number;
   ledColor?: string;
   /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before
    * the control existed; readers substitute LED_OPTICS.defaultIntensity. */

@@ -1,22 +1,76 @@
 import { BufferGeometry, Color, Float32BufferAttribute, MathUtils, PlaneGeometry } from "three";
 import type { Outline } from "@/lib/pool/types";
-import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
+import { clampInfinityEdgeDimensions, type RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 import type { CameraPose } from "@/lib/pool/camera";
 import { outlineBounds } from "@/lib/pool/geometry";
+import { createInfinityDeck } from "./infinityLandscape";
+
+/** Architectural support outside the approved paving, open toward the sea.
+ * Reuses the same actual outline/cutout; never changes the pool or its deck. */
+export function createCoastalTerrace(outline: Outline, zone: RectangleInfinityZone, innerOffset: number, waterY = 0) {
+  const geometry = createInfinityDeck(outline, zone, innerOffset, 20);
+  const positions = geometry.getAttribute("position"), uv = geometry.getAttribute("uv"), normals = geometry.getAttribute("normal");
+  for (let i = 0; i < positions.count; i++) {
+    const y = positions.getY(i) < -0.001 ? COAST_SEA_Y - 0.2 : -0.04;
+    positions.setY(i, y);
+    if (Math.abs(normals.getY(i)) > 0.5) uv.setXY(i, positions.getX(i), positions.getZ(i));
+    else uv.setY(i, y);
+  }
+  // The support closes BELOW the existing receiver, never behind the glass.
+  // Without it, the liner's lower back and the underside hang over the sea.
+  const dims = clampInfinityEdgeDimensions(undefined);
+  const top = waterY - dims.dropHeight - dims.catchBasinDepth - 0.08;
+  const offset = dims.lipWidth + dims.catchBasinWidth + dims.wallThickness;
+  const vertices = Array.from(positions.array), coords = Array.from(uv.array);
+  const supported = zone.points.map((point, index) => {
+    if (index !== 0 && index !== zone.points.length - 1) return point;
+    const neighbour = zone.points[index === 0 ? 1 : index - 1]!;
+    const dx = point[0] - neighbour[0], dz = point[1] - neighbour[1];
+    const length = Math.hypot(dx, dz);
+    return [point[0] + dx / length * innerOffset, point[1] + dz / length * innerOffset] as const;
+  });
+  for (let i=0;i<supported.length-1;i++) {
+    const a=supported[i]!,b=supported[i+1]!,na=zone.pointNormals[i]!,nb=zone.pointNormals[i+1]!;
+    const points=[[a[0]+na[0]*offset,top,a[1]+na[1]*offset],[b[0]+nb[0]*offset,top,b[1]+nb[1]*offset],
+      [a[0]+na[0]*offset,COAST_SEA_Y-.2,a[1]+na[1]*offset],[b[0]+nb[0]*offset,COAST_SEA_Y-.2,b[1]+nb[1]*offset]];
+    for(const k of [0,2,1,1,2,3]) { const p=points[k]!;vertices.push(...p);coords.push(p[0]!+p[2]!,p[1]!); }
+  }
+  // Close the short returns below the receiver as well: they must not
+  // expose the basin liner when viewed from the exterior corner.
+  for (const end of [0, zone.points.length - 1]) {
+    const p = supported[end]!, n = zone.pointNormals[end]!;
+    const points = [[p[0], top, p[1]], [p[0]+n[0]*offset, top, p[1]+n[1]*offset],
+      [p[0], COAST_SEA_Y-.2, p[1]], [p[0]+n[0]*offset, COAST_SEA_Y-.2, p[1]+n[1]*offset]];
+    for (const k of end === 0 ? [0,2,1,1,2,3] : [0,1,2,1,3,2]) {
+      const v = points[k]!; vertices.push(...v); coords.push(v[0]!+v[2]!, v[1]!);
+    }
+  }
+  geometry.setAttribute("position",new Float32BufferAttribute(vertices,3));
+  geometry.setAttribute("uv",new Float32BufferAttribute(coords,2));
+  geometry.computeVertexNormals(); geometry.computeBoundingSphere();
+  return geometry;
+}
 
 export const COAST_SEA_Y = -5;
 // The projection floor is a photographic support plane, not the sea datum.
 // Match the local site's existing outer grade instead of forcing the apron
 // down to the old arbitrary -5 m skybox floor.
 export const COAST_PHOTO_CAPTURE = { eyeY: 3, groundY: -1.8, height: 4.8, radius: 260 } as const;
-// Simon's Town Rocks: sea-facing sector u=.53; measured sun u=.6328125, v=.591796875.
-export const COAST_PHOTO_YAW = -1.3823;
+// White Cliff Top: open sea with the headland to the right; the background
+// and lighting rotate together with the selected Infinity edge.
+export const COAST_PHOTO_YAW = (0.14 - 0.5) * Math.PI * 2 - Math.PI / 2;
+/** Place the installation on the seaward terrace, not on the capture tripod.
+ * The same origin is used by the dome and the real near-ground projection. */
+export function coastalPhotoOrigin(rotation: number): [number, number, number] {
+  const heading = rotation - COAST_PHOTO_YAW;
+  return [-Math.sin(heading) * 14, COAST_PHOTO_CAPTURE.eyeY, -Math.cos(heading) * 14];
+}
 export function coastalPhotoRotation(zone:RectangleInfinityZone) {
   return Math.atan2(zone.normal[0],zone.normal[1])+COAST_PHOTO_YAW;
 }
 export function coastalPhotoSun(zone:RectangleInfinityZone,distance:number):[number,number,number] {
-  const azimuth=(.6328125-.5)*Math.PI*2-coastalPhotoRotation(zone);
-  const elevation=(.591796875-.5)*Math.PI;
+  const azimuth=(.625-.5)*Math.PI*2-coastalPhotoRotation(zone);
+  const elevation=(.63-.5)*Math.PI;
   return [Math.cos(azimuth)*Math.cos(elevation)*distance,Math.sin(elevation)*distance,Math.sin(azimuth)*Math.cos(elevation)*distance];
 }
 export function coastFrame(zone: RectangleInfinityZone) {

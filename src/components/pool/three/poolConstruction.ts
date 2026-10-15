@@ -6,6 +6,20 @@ import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import { clampInfinityEdgeDimensions } from "@/lib/pool/infinity-edge";
 import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 
+/** A 15 mm intake with the collector concealed beneath the full stone coping.
+ * Presentation dimensions only; hydraulic sizing remains project-specific. */
+export function concealedOverflowSection(wallTopY: number, copingThickness: number) {
+  return {
+    slotWidth: 0.015,
+    copingInnerOffset: OVERFLOW_GEOMETRY.waterEdgeOffset + 0.015,
+    copingTopY: wallTopY + 0.008,
+    // Matches the eased slab's lowest face (see arris/inset below).
+    copingBottomY: wallTopY + 0.008 - copingThickness + 0.0012,
+    channelOuterOffset: OVERFLOW_GEOMETRY.hiddenChannelOffset,
+    channelFloorY: wallTopY - OVERFLOW_GEOMETRY.channelDepth,
+  };
+}
+
 /** Architectural presentation only; never changes basin dimensions or quotation logic. */
 export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
   // The deck meets the grille directly: no separate masonry border.

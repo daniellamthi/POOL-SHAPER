@@ -12,10 +12,13 @@ import {
   NoToneMapping,
   PCFShadowMap,
   OrthographicCamera,
+  PerspectiveCamera,
   SRGBColorSpace,
 } from "three";
 import type { DirectionalLight, HemisphereLight, SpotLight, Texture } from "three";
 import { PoolModel } from "./PoolModel";
+import { SunShelfLoungers } from "./SunShelfLoungers";
+import { resolveSunShelfLoungers } from "@/lib/pool/sun-shelf-loungers";
 import { ArchitecturalOutline, ARCHITECTURAL_OUTLINE_NAME } from "./ArchitecturalOutline";
 import { architecturalFrustum } from "./architecturalPlan";
 import { AutomaticCover } from "./AutomaticCover";
@@ -28,10 +31,9 @@ import { DeckLoungers } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
-import { createInfinityLandscape, createInfinityDeck, infinityGroundHeight } from "./infinityLandscape";
+import { createInfinityDeck } from "./infinityLandscape";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { COAST_PHOTO_CAPTURE, coastalCamera, coastalGrade, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
-import { CoastalGroundMaterial } from "./CoastalGroundMaterial";
+import { coastalCamera, createCoastalTerrace, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
 import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
 import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
@@ -149,6 +151,9 @@ export interface SceneProps {
   paving?: import("@/lib/pool/presentation").PavingId;
   pavingFormat?: PavingFormatId | undefined;
   photoMode: boolean;
+  /** Export framing ignores DOM panels without changing the configured pool. */
+  cleanCapture?: boolean;
+  sunShelfLoungerCount?: number;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
 }
@@ -371,16 +376,26 @@ function DevelopmentRendererMetrics() {
  * the instant movement resumes. `setDpr` is react-three-fiber's own API for
  * this (the same one its `dpr` array prop uses internally), so this never
  * fights the initial dpr clamp; it only ever runs on the moving/idle
- * transition edge, not every frame, so it costs nothing while settled.
+ * transition or viewport resize, never reallocating unchanged settled frames.
  */
 function AdaptiveQuality() {
   const setDpr = useThree((state) => state.setDpr);
-  const wasIdle = useRef(false);
+  const size = useThree((state) => state.size);
+  const canvas = useThree((state) => state.gl.domElement);
+  // Fullscreen adds pixels, not geometry. Bound interactive supersampling;
+  // Photo Mode and locked export cameras retain the original quality tier.
+  const fullscreenCeiling = canvas.closest(".pool-fullscreen")
+    ? Math.sqrt(2_560_000 / Math.max(1, size.width * size.height))
+    : Infinity;
+  const appliedDpr = useRef<number | null>(null);
+  useEffect(() => () => setDpr(ACTIVE_RENDERING_QUALITY.dpr[1]), [setDpr]);
 
   useFrame(() => {
-    if (renderQualityState.idle === wasIdle.current) return;
-    wasIdle.current = renderQualityState.idle;
-    setDpr(wasIdle.current ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr[0]);
+    const tier = renderQualityState.idle ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr[0];
+    const dpr = Math.min(tier, Math.max(0.85, fullscreenCeiling));
+    if (dpr === appliedDpr.current) return;
+    appliedDpr.current = dpr;
+    setDpr(dpr);
   });
 
   return null;
@@ -419,6 +434,7 @@ function CameraRig({
   includeExternalStaircase,
   planBounds,
   photoMode,
+  cleanCapture,
   infinityZone,
   externalStairPlan,
   pellicanoPlacement,
@@ -439,6 +455,7 @@ function CameraRig({
   includeExternalStaircase: boolean;
   planBounds: Outline;
   photoMode: boolean;
+  cleanCapture: boolean;
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
    * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
   infinityZone: RectangleInfinityZone | null;
@@ -464,14 +481,14 @@ function CameraRig({
   const editingPose = useRef<{ key: string; pose: import("@/lib/pool/camera").CameraPose } | null>(null);
   const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
   const [, refreshVisibleFrame] = useState(0);
+  const occluderRoot = canvas.closest(".pool-fullscreen") ?? document;
+  // Layout identities must not depend on translated accessible labels.
+  const occluderSelector = '[data-camera-occluder], [data-testid="construction-stage"], [data-technical-panel]';
   useLayoutEffect(() => {
-    if (!infinityZone && focus !== "top" && !["access","inox","shelf","hydromassage","bench","coping","paving","exterior-panel","external-stairs","pellicano","stair-lighting","liner","mosaic","skimmer-detail","overflow-hidden","overflow-visible","features"].includes(focus)) return;
-    const tray = document.querySelector('[aria-label^="Passo "]');
-    if (!tray) return;
     const observer = new ResizeObserver(() => refreshVisibleFrame(n => n + 1));
-    observer.observe(tray);
+    occluderRoot.querySelectorAll(occluderSelector).forEach(element => observer.observe(element));
     return () => observer.disconnect();
-  }, [canvas, Boolean(infinityZone), focus, frameToken]);
+  }, [occluderRoot, occluderSelector, focus, frameToken]);
 
   useEffect(() => {
     const control = controls.current;
@@ -516,15 +533,15 @@ function CameraRig({
 
   const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping",
     ...(!infinityZone ? ["paving","exterior-panel","external-stairs","pellicano","stair-lighting","skimmer-detail","overflow-hidden","overflow-visible","features"] : [])].includes(focus);
-  const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
-  const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  const visibleFrame = detail || focus === "top"
-    ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"], [data-technical-panel]')).map(element => element.getBoundingClientRect()))
-    : { left: 0, top: 0, width: viewportSize.width - reservedRight, height: viewportSize.height };
-  const fitFov = detail
-    ? cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov
-    : SCENE_VISUAL_PRESET.camera.fov;
-  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
+  const coastalHero = !!infinityZone && ["infinity", "review", "overview"].includes(focus);
+  const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[data-config-summary]')?.getBoundingClientRect() : null;
+  const visibleFrame = cleanCapture ? { left: 0, top: 0, width: viewportSize.width, height: viewportSize.height } : visibleCameraFrame(canvas.getBoundingClientRect(), [
+    ...Array.from(occluderRoot.querySelectorAll(occluderSelector)).map(element => element.getBoundingClientRect()),
+    ...(summaryRect ? [summaryRect] : []),
+  ]);
+  const visibleFrameKey = `${visibleFrame.left}:${visibleFrame.top}:${visibleFrame.width}:${visibleFrame.height}`;
+  const fitFov = cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov;
+  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (coastalHero && infinityZone
     ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov, {outset:copingOuterOffset("infinity", "hidden"), y:layout.copingY})
     : getCameraPose({
       accessPlan,
@@ -541,7 +558,7 @@ function CameraRig({
       externalStairPlan,
       pellicanoPlacement,
     }));
-  const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${frameToken}`;
+  const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${visibleFrameKey}:${frameToken}`;
   if (focus === "depth") {
     if (editingPose.current?.key !== editKey) editingPose.current = { key: editKey, pose };
     pose = editingPose.current.pose;
@@ -551,15 +568,7 @@ function CameraRig({
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
   } else planFit.current = null;
-  if (reservedRight) {
-    const eye = new Vector3(...pose.position), target = new Vector3(...pose.target);
-    const right = target.clone().sub(eye).cross(new Vector3(0, 1, 0)).normalize();
-    const offset = eye.distanceTo(target) * Math.tan(SCENE_VISUAL_PRESET.camera.fov * Math.PI / 360) * reservedRight / viewportSize.height;
-    right.multiplyScalar(offset);
-    pose.position = eye.add(right).toArray() as [number, number, number];
-    pose.target = target.add(right).toArray() as [number, number, number];
-  }
-  if (detail) {
+  if (focus !== "top" && !coastalHero) {
     pose = offsetCameraToFrame(pose, SCENE_VISUAL_PRESET.camera.fov, viewportSize.width, viewportSize.height, visibleFrame);
   }
   // Material changes can recreate plans without moving their geometry.
@@ -578,6 +587,17 @@ function CameraRig({
     if ("fov" in camera) {
       camera.fov = "fov" in pose ? Number(pose.fov) : SCENE_VISUAL_PRESET.camera.fov;
       camera.updateProjectionMatrix();
+    }
+    if (camera instanceof PerspectiveCamera) {
+      if (coastalHero) {
+        // Fit the original coastal image into the unobscured UI rectangle.
+        // Keep its photographic eye/target/FOV and site standoff unchanged.
+        const scale = Math.min(visibleFrame.width / viewportSize.width, visibleFrame.height / viewportSize.height);
+        const width = viewportSize.width * scale, height = viewportSize.height * scale;
+        const left = visibleFrame.left + (visibleFrame.width - width) / 2;
+        const top = visibleFrame.top + (visibleFrame.height - height) / 2;
+        camera.setViewOffset(width, height, -left, -top, viewportSize.width, viewportSize.height);
+      } else camera.clearViewOffset();
     }
     goal.current.set(...pose.position);
     lookAt.current.set(...pose.target);
@@ -638,6 +658,13 @@ function CameraRig({
     frameToken,
     focus,
     poseKey,
+    coastalHero,
+    viewportSize.width,
+    viewportSize.height,
+    visibleFrame.left,
+    visibleFrame.top,
+    visibleFrame.width,
+    visibleFrame.height,
     planFit.current?.width,
     planFit.current?.height,
   ]);
@@ -731,51 +758,7 @@ function StudioFloor({
   useEffect(() => () => { terrace?.slabs.dispose(); terrace?.bed.dispose(); }, [terrace]);
   const geometry = useMemo(() => {
     if (premiumInfinity && infinityZone) {
-      const landscape = createInfinityLandscape(
-        outline,
-        infinityZone,
-        size,
-        copingOuterOffset(system, overflowType),
-      );
-      // Extend only the distant landscape: retain near-pool tessellation and
-      // topology, without a dense 400 m terrain or a visible showroom edge.
-      const bounds = outlineBounds(outline);
-      const p = landscape.getAttribute("position");
-      const uv = landscape.getAttribute("uv");
-      const near = Math.max(bounds.spanX, bounds.spanZ) / 2 + 12;
-      for (let i = 0; i < p.count; i++) {
-        const extend = (v: number) => {
-          const beyond = Math.max(0, Math.abs(v) - near);
-          // Continuous first derivative avoids a hard normal crease where
-          // the near terrain starts stretching toward the distant horizon.
-          return Math.sign(v) * (Math.abs(v) + 80 * beyond * beyond / (beyond + 4));
-        };
-        p.setX(i, extend(p.getX(i)));
-        p.setZ(i, extend(p.getZ(i)));
-        // Broad distant relief only: the surveyed near-pool grade and deck
-        // junctions remain byte-identical. No extra terrain meshes/textures.
-        const distance = Math.hypot(p.getX(i), p.getZ(i));
-        const relief = MathUtils.smoothstep(distance, near + 8, near + 55);
-        // Evaluate the grade at its final position, not the pre-stretch
-        // coordinates (which dragged near slopes across hundreds of metres).
-        // A gentle distant fall avoids undersampled sinusoidal ridge teeth.
-        p.setY(i, infinityGroundHeight(outline, infinityZone, p.getX(i), p.getZ(i)) - relief * distance * 0.006);
-        uv.setXY(i, p.getX(i), p.getZ(i));
-      }
-      coastalGrade(landscape, infinityZone, outline);
-      // Only the immediate site stays geometric; the photographic coast owns
-      // the far field. Retain a full triangle apron around the fade boundary.
-      const index=landscape.getIndex(), kept:number[]=[];
-      if(index && photographicCoast) {
-        for(let i=0;i<index.count;i+=3) {
-          const ids=[index.getX(i),index.getX(i+1),index.getX(i+2)];
-          if(ids.some(id=>p.getX(id)>bounds.minX-7 && p.getX(id)<bounds.maxX+7 && p.getZ(id)>bounds.minZ-7 && p.getZ(id)<bounds.maxZ+7)) kept.push(...ids);
-        }
-        landscape.setIndex(kept);
-      }
-      landscape.computeVertexNormals();
-      landscape.computeBoundingSphere();
-      return landscape;
+      return createCoastalTerrace(outline, infinityZone, copingOuterOffset(system, overflowType), waterY);
     }
     const half = size / 2;
     const outer: Outline = [
@@ -794,19 +777,19 @@ function StudioFloor({
           )
         : undefined;
     return createSurfaceGeometry(outer, inner);
-  }, [outline, size, poolType, system, overflowType, infinityZone, premiumInfinity, photographicCoast]);
+  }, [outline, size, poolType, system, overflowType, infinityZone, premiumInfinity, photographicCoast, waterY]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   const stone = useMemo(() => premiumInfinity ? createLimestoneMaps() : createTravertineMaps(), [premiumInfinity]);
   useEffect(() => {
     const textures = Object.values(stone).filter((texture) => texture !== null);
     for (const texture of textures) {
-      texture.repeat.set(2.5, 2.5);
+      texture.repeat.set(premiumInfinity ? 0.5 : 2.5, premiumInfinity ? 0.5 : 2.5);
       texture.anisotropy = Math.min(8, maxAnisotropy);
       texture.needsUpdate = true;
     }
     return () => textures.forEach((texture) => texture.dispose());
-  }, [stone, maxAnisotropy]);
+  }, [stone, maxAnisotropy, premiumInfinity]);
 
   return (
     <group>
@@ -826,9 +809,12 @@ function StudioFloor({
         </>
       ) : null}
       <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
-        {premiumInfinity && infinityZone && coastalMap ? <CoastalGroundMaterial map={coastalMap}
-          rotation={coastalPhotoRotation(infinityZone)} outline={outline} projectionHeight={COAST_PHOTO_CAPTURE.height}
-          timeOfDay={sceneTime} /> : <meshStandardMaterial
+        {premiumInfinity && infinityZone && coastalMap ? <meshStandardMaterial
+          side={DoubleSide}
+          color={sceneTime === "night" ? "#68655e" : "#c1b8a7"}
+          map={stone.colorMap} normalMap={stone.normalMap} normalScale={[0.18,0.18]}
+          roughnessMap={stone.roughnessMap} roughness={0.88} metalness={0}
+        /> : <meshStandardMaterial
           key={
             premiumInfinity
               ? `coastal-photo-near-${theme}`
@@ -970,6 +956,8 @@ export default function PoolScene({
   paving,
   pavingFormat,
   photoMode,
+  cleanCapture = false,
+  sunShelfLoungerCount,
   photoModeQuality,
   onPhotoModeUnsupported,
 }: SceneProps) {
@@ -1430,6 +1418,14 @@ export default function PoolScene({
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />
+      {features.includes("sunShelfLoungers") && (construction?.showAccessories ?? true) ? <SunShelfLoungers plan={resolveSunShelfLoungers({
+        comfort: resolvedLayout.comfort, outline, waterY: verticalLayout.waterY,
+        enabled: true, quantity: sunShelfLoungerCount, infinityExcluded,
+        accessFootprints: [
+          ...(resolvedLayout.access.placement ? [resolvedLayout.access.footprint] : []),
+          ...(resolvedLayout.ladder?.plan.placement ? [resolvedLayout.ladder.plan.footprint] : []),
+        ],
+      })} /> : null}
       {coverPlan.geometry && !photoMode && (construction?.showWater ?? true) ? <AutomaticCover plan={coverPlan} /> : null}
       {technicalView && !photoMode && system === "skimmer" ? skimmers.positions.map((point, index) => (
         <mesh key={`technical-skimmer-${index}`} name="technical-skimmer-marker" position={[point.x, verticalLayout.waterY + 0.075, point.z]}>
@@ -1600,6 +1596,7 @@ export default function PoolScene({
         skimmers={skimmers}
         ledRow={lighting.plan.positions}
         photoMode={photoMode}
+        cleanCapture={cleanCapture}
         infinityZone={infinityZone}
         // The exterior/staircase framing must never hijack the Step 05
         // Pool System camera -- that step's premium front view (both

@@ -1,0 +1,1073 @@
+{
+  "endpoint": "http://127.0.0.1:3003/",
+  "capturedAt": "2026-10-15T09:29:58.317Z",
+  "results": [
+    {
+      "key": "overflow-visible",
+      "filename": "overflow-visible.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "overflow-grille",
+      "camera": [
+        0.7906843985951777,
+        1.1756156594852598,
+        -0.29534369554959006
+      ],
+      "target": [
+        0,
+        0.02,
+        -2.12
+      ],
+      "box": {
+        "min": [
+          -4.354000091552734,
+          -0.02500000037252903,
+          -2.3540000915527344
+        ],
+        "max": [
+          4.354000091552734,
+          0,
+          2.3540000915527344
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "overflow",
+        "overflowType": "visible",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "overflow-hidden",
+      "filename": "overflow-hidden.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "overflow-edge-without-grille",
+      "camera": [
+        0.7906843985951777,
+        1.1756156594852598,
+        -0.29534369554959006
+      ],
+      "target": [
+        0,
+        0.02,
+        -2.12
+      ],
+      "box": {
+        "min": [
+          -4.054999828338623,
+          -0.004500000026077032,
+          -2.055000066757202
+        ],
+        "max": [
+          4.054999828338623,
+          -0.0015,
+          2.055000066757202
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "overflow",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "access-ladder",
+      "filename": "access-ladder.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "pool-access-stainlessSteelLadder-linear",
+      "camera": [
+        -5.505957261229699,
+        1.7909016625425374,
+        -1.5148401652000363
+      ],
+      "target": [
+        -3.04,
+        -0.18186414644122134,
+        1.9375000005215406
+      ],
+      "box": {
+        "min": [
+          -3.3499999986588955,
+          -1.1990000018477442,
+          1.6150000023841857
+        ],
+        "max": [
+          -2.7300000013411045,
+          0.8352717089653016,
+          2.2599999986588957
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "stainlessSteelLadder",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "access-external",
+      "filename": "access-external.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "external-staircase",
+      "camera": [
+        8.757735282641708,
+        3.4040828814930855,
+        -4.948026723362174
+      ],
+      "target": [
+        4.87,
+        1.283500000052154,
+        0
+      ],
+      "box": {
+        "min": [
+          4.2375000071525575,
+          0,
+          -2.598400115966797
+        ],
+        "max": [
+          5.502499992847443,
+          2.567000000104308,
+          2.598400115966797
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "above-ground",
+        "structure": "modular-steel-panels",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [
+          "externalStaircase"
+        ],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": [],
+        "externalStairPlatformExtended": true
+      }
+    },
+    {
+      "key": "equipment-pellicano",
+      "filename": "equipment-pellicano.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "pellicano",
+      "camera": [
+        -1.6739265800523937,
+        2.5832150074755678,
+        -1.2572469216434108
+      ],
+      "target": [
+        -3.629644013719923,
+        1.88474449545145,
+        1.6653345369377348e-16
+      ],
+      "box": {
+        "min": [
+          -4.302499443292618,
+          1.3570000010728835,
+          -0.36000001430511464
+        ],
+        "max": [
+          -2.956788584147228,
+          2.412488989830017,
+          0.36000001430511497
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "above-ground",
+        "structure": "modular-steel-panels",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [
+          "pellicano"
+        ],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": [],
+        "externalStairPlatformExtended": true
+      }
+    },
+    {
+      "key": "equipment-loungers",
+      "filename": "equipment-loungers.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "deck-furniture",
+      "camera": [
+        2.5953346719112167,
+        2.94462289705909,
+        0.29533967130848193
+      ],
+      "target": [
+        0,
+        0.34928822514787317,
+        -3.783043384552002
+      ],
+      "box": {
+        "min": [
+          -2.1470000743865967,
+          -5.215406578829018e-11,
+          -4.756086826324463
+        ],
+        "max": [
+          2.1470000743865967,
+          0.6985764503479004,
+          -2.809999942779541
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [
+          "loungers"
+        ],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "comfort-sunShelf",
+      "filename": "comfort-sunShelf.jpg",
+      "kind": "3d-preview",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "pool-comfort-sunShelf",
+      "camera": [
+        -1.0794315601265358,
+        2.651050762796148,
+        3.2325507655379617
+      ],
+      "target": [
+        -3.15749990940094,
+        -0.5815000027418137,
+        0
+      ],
+      "box": {
+        "min": [
+          -3.9649999141693115,
+          -1.5,
+          -1.965000033378601
+        ],
+        "max": [
+          -2.3499999046325684,
+          -0.3630000054836273,
+          1.965000033378601
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [
+          "sunShelf"
+        ],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "skimmer-slim",
+      "filename": "skimmer-slim.jpg",
+      "kind": "3d-preview",
+      "capturedAt": "2026-10-15T09:27:44.182Z",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture. Direct WebGL canvas export without UI.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "pool-skimmers",
+      "camera": [
+        -1.5805665920027703,
+        0.06858464984487525,
+        -0.8384921009307484
+      ],
+      "target": [
+        -2,
+        -0.125,
+        -2
+      ],
+      "box": {
+        "min": [
+          -2.300000011920929,
+          -0.2910000059604645,
+          -2.4999999982118606
+        ],
+        "max": [
+          -1.699999988079071,
+          0.009000005960464463,
+          -1.9800000003874303
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "skimmer-high",
+      "filename": "skimmer-high.jpg",
+      "kind": "3d-preview",
+      "capturedAt": "2026-10-15T09:27:49.817Z",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture. Direct WebGL canvas export without UI.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "pool-skimmers",
+      "camera": [
+        -1.5805665920027703,
+        0.09858464984487525,
+        -0.8384921009307484
+      ],
+      "target": [
+        -2,
+        -0.095,
+        -2
+      ],
+      "box": {
+        "min": [
+          -2.2899999916553497,
+          -0.2180000014901161,
+          -2.4999999982118606
+        ],
+        "max": [
+          -1.7100000083446503,
+          -0.0009000000000000033,
+          -1.9679999994039536
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 8,
+          "width": 4,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "highWaterline",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": []
+      }
+    },
+    {
+      "key": "equipment-sunShelfLoungers",
+      "filename": "equipment-sunShelfLoungers.jpg",
+      "kind": "3d-preview",
+      "capturedAt": "2026-10-15T09:29:56.510Z",
+      "source": "Actual configurator geometry/materials/lighting, synthetic local fixture; camera only changed for capture. Direct WebGL canvas export without UI.",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "object": "sun-shelf-loungers",
+      "camera": [
+        -3.3218823529411763,
+        1.822282343976638,
+        3.261176470588236
+      ],
+      "target": [
+        -5.016,
+        -0.08360000896453856,
+        0.72
+      ],
+      "box": {
+        "min": [
+          -5.9049999985694885,
+          -0.363,
+          0.015799987697601048
+        ],
+        "max": [
+          -4.1270000014305115,
+          0.19579998207092286,
+          1.4242000123023988
+        ]
+      },
+      "config": {
+        "projectType": "new",
+        "poolType": "in-ground",
+        "structure": "reinforced-concrete",
+        "shape": "rectangle",
+        "shapeSelected": true,
+        "copingMaterial": "travertine",
+        "customMode": "draw",
+        "controlPoints": [
+          [
+            -0.5,
+            -0.36
+          ],
+          [
+            -0.16,
+            -0.5
+          ],
+          [
+            0.22,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.3
+          ],
+          [
+            0.5,
+            0.32
+          ],
+          [
+            0.18,
+            0.5
+          ],
+          [
+            -0.2,
+            0.5
+          ],
+          [
+            -0.5,
+            0.34
+          ]
+        ],
+        "dimensions": {
+          "length": 12,
+          "width": 5,
+          "depth": 1.5,
+          "cornerRadius": 0.25,
+          "floorProfile": "flat"
+        },
+        "system": "skimmer",
+        "overflowType": "hidden",
+        "skimmerFinish": "white",
+        "skimmerType": "slim",
+        "finish": "liner",
+        "linerColor": "motionBlueSky602",
+        "mosaicFinish": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+        "features": [
+          "sunShelf",
+          "sunShelfLoungers"
+        ],
+        "ledColor": "#ffffff",
+        "ledIntensity": 0.6,
+        "sceneTime": "day",
+        "poolAccess": "internalSteps",
+        "internalStairType": "linear",
+        "equipment": [],
+        "customer": {
+          "name": "",
+          "surname": "",
+          "company": "",
+          "email": "",
+          "phone": "",
+          "city": "",
+          "country": "",
+          "notes": ""
+        },
+        "uploads": [],
+        "sunShelfLoungerCount": 2
+      }
+    }
+  ]
+}

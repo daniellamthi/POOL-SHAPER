@@ -35,3 +35,5 @@ dist-ssr
 # per-run "current" capture and any failure diff images are not).
 test-baselines/visual/*.current.png
 test-baselines/visual/*.diff.png
+# Local browser/PDF evidence; requirements report remains tracked separately.
+docs/fullscreen-qa-evidence/

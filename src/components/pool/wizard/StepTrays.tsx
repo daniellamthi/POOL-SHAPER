@@ -48,6 +48,9 @@ import type { SceneFocus } from "@/components/pool/three/PoolScene";
 import { ChoiceCard, ChoiceGrid, GroupLabel, RevealSection, StepTabs } from "./ChoiceCard";
 import { EXTERIOR_PANEL_FINISHES, exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { Illustration } from "./illustrations";
+import { ProductMedia, hasProductMedia } from "./product-media";
+import { configuredSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
+import { useI18n } from "@/lib/i18n";
 
 /** What a tray may ask of the shell: point the camera at what is being edited,
  * and the presentation controls the shell owns (photo mode). */
@@ -60,7 +63,7 @@ export interface TrayContext {
   captureDayNight?: () => Promise<DayNightCapture>;
 }
 
-const ill = (name: string) => <Illustration name={name} />;
+const ill = (name: string) => hasProductMedia(name) ? <ProductMedia name={name} /> : <Illustration name={name} />;
 
 /** Customer-facing one-liners for option families whose catalogue entries
  * carry no description of their own. */
@@ -97,14 +100,15 @@ function TabBody({ children }: { children: ReactNode }) {
 /* ---------------------------------------------------------------- 01 */
 
 export function ProjectTray() {
+  const { t } = useI18n();
   const { config, setProjectType } = useConfigurator();
   return (
-    <ChoiceGrid label="Tipo di progetto">
+    <ChoiceGrid label={t("Tipo di progetto")}>
       {PROJECT_TYPES.map((item) => (
         <ChoiceCard
           key={item.id}
-          title={item.title}
-          description={item.description}
+          title={t(item.title)}
+          description={t(item.description)}
           image={ill(`project-${item.id}`)}
           selected={config.projectType === item.id}
           onSelect={() => setProjectType(item.id)}
@@ -115,14 +119,15 @@ export function ProjectTray() {
 }
 
 export function PoolTypeTray() {
+  const { t } = useI18n();
   const { config, setPoolType } = useConfigurator();
   return (
-    <ChoiceGrid label="Tipo di piscina">
+    <ChoiceGrid label={t("Tipo di piscina")}>
       {POOL_TYPES.map((item) => (
         <ChoiceCard
           key={item.id}
-          title={item.title}
-          description={item.description}
+          title={t(item.title)}
+          description={t(item.description)}
           image={ill(`pooltype-${item.id}`)}
           selected={config.poolType === item.id}
           onSelect={() => setPoolType(item.id)}
@@ -133,18 +138,19 @@ export function PoolTypeTray() {
 }
 
 export function StructureTray() {
+  const { t } = useI18n();
   const { config, setPoolStructure } = useConfigurator();
   const structures = CUSTOMER_STRUCTURES.filter((s) =>
     config.poolType ? s.poolTypes.includes(config.poolType) : false,
   );
   const current = customerStructureOf(config.structure);
   return (
-    <ChoiceGrid label="Struttura della piscina">
+    <ChoiceGrid label={t("Struttura della piscina")}>
       {structures.map((item) => (
         <ChoiceCard
           key={item.id}
-          title={item.title}
-          description={item.description}
+          title={t(item.title)}
+          description={t(item.description)}
           image={ill(`structure-${item.illustration}`)}
           selected={current === item.id}
           onSelect={() => {
@@ -162,6 +168,7 @@ export function StructureTray() {
 /* ---------------------------------------------------------------- 02 */
 
 export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayContext; showTabs?: boolean } & DecisionProps) {
+  const { t } = useI18n();
   const { config, setShape, setCustomMode, setDimension, metrics } = useConfigurator();
   useEffect(() => { ctx.focus(tab === "plan" ? "top" : tab === "depth" ? "depth" : null); }, [tab]);
   const choose = (next: typeof tab) => {
@@ -174,7 +181,7 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
   return (
     <TabBody>
       {showTabs ? <StepTabs
-        label="Forma e dimensioni"
+        label={t("Forma e dimensioni")}
         value={tab}
         onChange={choose}
         tabs={[
@@ -184,12 +191,12 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
         ]}
       /> : null}
       {tab === "shape" ? (
-        <ChoiceGrid label="Forma della piscina">
+        <ChoiceGrid label={t("Forma della piscina")}>
           {POOL_SHAPES.map((shape) => (
             <ChoiceCard
               key={shape.id}
-              title={shape.title}
-              description={shape.description}
+              title={t(shape.title)}
+              description={t(shape.description)}
               image={ill(`shape-${shape.id}`)}
               selected={config.shapeSelected === true && config.shape === shape.id}
               onSelect={() => {
@@ -208,7 +215,7 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
               return (
                 <DimensionControl
                   key={key}
-                  label={key === "length" ? "Lunghezza" : "Larghezza"}
+                  label={t(key === "length" ? "Lunghezza" : "Larghezza")}
                   value={config.dimensions[key]}
                   unit={limits.unit}
                   min={limits.min}
@@ -230,7 +237,7 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
             ) : config.shape === "custom" ? (
               <>
                 <StepTabs
-                  label="Metodo forma personalizzata"
+                  label={t("Metodo forma personalizzata")}
                   value={config.customMode}
                   onChange={setCustomMode}
                   tabs={[
@@ -243,20 +250,18 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
                 ) : (
                   <FileDrop
                     category="reference"
-                    label="Riferimento architettonico"
+                    label={t("Riferimento architettonico")}
                     hint="PDF, planimetria o immagine di riferimento."
                   />
                 )}
               </>
             ) : (
               <p className="text-[12.5px] leading-relaxed font-light text-muted-foreground">
-                La vista dall’alto mostra la pianta in scala reale. Trascina i cursori: la vasca si
-                ridimensiona in tempo reale.
-              </p>
+                {t("La vista dall’alto mostra la pianta in scala reale. Trascina i cursori: la vasca si ridimensiona in tempo reale.")}</p>
             )}
           </div>
           <div className="flex flex-col gap-3">
-            <GroupLabel>Valori calcolati</GroupLabel>
+            <GroupLabel>{t("Valori calcolati")}</GroupLabel>
             <MetricsPanel metrics={metrics} />
           </div>
         </div>
@@ -267,7 +272,7 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
             <FloorProfileSection disabled={false} />
           ) : (
             <DimensionControl
-              label="Profondità"
+              label={t("Profondità")}
               value={config.dimensions.depth}
               unit={DIMENSION_LIMITS.depth.unit}
               min={DIMENSION_LIMITS.depth.min}
@@ -277,7 +282,7 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
             />
           )}
           <div className="flex flex-col gap-3">
-            <GroupLabel>Valori calcolati</GroupLabel>
+            <GroupLabel>{t("Valori calcolati")}</GroupLabel>
             <MetricsPanel metrics={metrics} />
           </div>
         </div>
@@ -292,6 +297,7 @@ export function SystemTray({ tab, setTab }: {
   tab: "system" | "detail";
   setTab: (tab: "system" | "detail") => void;
 }) {
+  const { t } = useI18n();
   const {
     config,
     outline,
@@ -300,6 +306,7 @@ export function SystemTray({ tab, setTab }: {
     setSkimmerFinish,
     setSkimmerType,
     setInfinitySide,
+    setInfinityWall,
   } = useConfigurator();
   const infinityAvailable =
     compatibleInfinityZones(outline, config.shape, config.poolType).length > 0;
@@ -333,7 +340,7 @@ export function SystemTray({ tab, setTab }: {
   return (
     <TabBody>
       <StepTabs
-        label="Sistema piscina"
+        label={t("Sistema piscina")}
         value={tab}
         onChange={setTab}
         tabs={[
@@ -342,12 +349,12 @@ export function SystemTray({ tab, setTab }: {
         ]}
       />
       {tab === "system" ? (
-        <ChoiceGrid label="Sistema idraulico">
+        <ChoiceGrid label={t("Sistema idraulico")}>
           {systems.map((item) => (
             <ChoiceCard
               key={item.id}
-              title={item.title}
-              description={item.description}
+              title={t(item.title)}
+              description={t(item.description)}
               image={ill(`system-${item.id}`)}
               selected={config.system === item.id}
               onSelect={() => { setSystem(item.id); setTab(item.id === "infinity" ? "detail" : "system"); }}
@@ -357,15 +364,15 @@ export function SystemTray({ tab, setTab }: {
       ) : config.system === "skimmer" ? (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="flex flex-col gap-3">
-            <GroupLabel>Modello</GroupLabel>
-            <ChoiceGrid label="Tipo skimmer" dense>
+            <GroupLabel>{t("Modello")}</GroupLabel>
+            <ChoiceGrid label={t("Tipo skimmer")} dense>
               {SELECTABLE_SKIMMER_TYPES.map((item) => (
                 <ChoiceCard
                   compact
                   key={item.id}
-                  title={item.title}
-                  description={item.description}
-                  image={ill("system-skimmer")}
+                  title={t(item.title)}
+                  description={t(item.description)}
+                  image={ill(item.id === "highWaterline" ? "skimmer-high" : "skimmer-slim")}
                   selected={config.skimmerType === item.id}
                   onSelect={() => setSkimmerType(item.id)}
                 />
@@ -373,14 +380,14 @@ export function SystemTray({ tab, setTab }: {
             </ChoiceGrid>
           </div>
           <div className="flex flex-col gap-3">
-            <GroupLabel>Finitura</GroupLabel>
-            <ChoiceGrid label="Finitura skimmer" dense>
+            <GroupLabel>{t("Finitura")}</GroupLabel>
+            <ChoiceGrid label={t("Finitura skimmer")} dense>
               {SKIMMER_FINISHES.map((item) => (
                 <ChoiceCard
                   compact
                   key={item.id}
-                  title={item.title}
-                  description={SKIMMER_FINISH_COPY[item.id] ?? "Finitura del frontalino."}
+                  title={t(item.title)}
+                  description={t(SKIMMER_FINISH_COPY[item.id] ?? "Finitura del frontalino.")}
                   image={
                     <span
                       className="block h-full w-full rounded-xl"
@@ -395,20 +402,20 @@ export function SystemTray({ tab, setTab }: {
           </div>
         </div>
       ) : config.system === "overflow" ? (
-        <ChoiceGrid label="Tipo di sfioro">
+        <ChoiceGrid label={t("Tipo di sfioro")}>
           <ChoiceCard
-            title="Sfioro nascosto"
-            description="Il canale scompare sotto il bordo in pietra."
-            image={ill("overflow-hidden")}
-            selected={config.overflowType === "hidden"}
-            onSelect={() => setOverflowType("hidden")}
-          />
-          <ChoiceCard
-            title="Sfioro a vista"
-            description="Griglia perimetrale a vista lungo il bordo."
+            title={t("Sfioro a griglia")}
+            description={t("Griglia perimetrale a vista lungo il bordo.")}
             image={ill("overflow-visible")}
             selected={config.overflowType === "visible"}
             onSelect={() => setOverflowType("visible")}
+          />
+          <ChoiceCard
+            title={t("Sfioro nascosto")}
+            description={t("Il canale scompare sotto il bordo in pietra.")}
+            image={ill("overflow-hidden")}
+            selected={config.overflowType === "hidden"}
+            onSelect={() => setOverflowType("hidden")}
           />
         </ChoiceGrid>
       ) : (
@@ -419,6 +426,20 @@ export function SystemTray({ tab, setTab }: {
             selectedSide={config.infinityEdge?.side ?? null}
             onSelect={setInfinitySide}
           />
+          <GroupLabel>{t("Parete di sfioro")}</GroupLabel>
+          <ChoiceGrid label={t("Parete di sfioro Infinity")}>
+            <ChoiceCard compact title={t("Parete Infinity tradizionale")} description={t("Contenimento pieno.")} image={ill("infinity")}
+              selected={config.infinityEdge?.wallType !== "glass"} onSelect={() => setInfinityWall("traditional")} />
+            <ChoiceCard compact title={t("Parete Infinity in vetro")} description={t("Contenimento panoramico trasparente.")}
+              image={<svg viewBox="0 0 160 90" className="h-full w-full" aria-hidden="true">
+                <path d="M22 24H130V64H22Z" fill="#dcecef" />
+                <path d="M22 24H130M22 64H136V71H22" fill="none" stroke="#777883" strokeWidth="2" />
+                <path d="M128 24H134V64H128Z" fill="#a9d8df" fillOpacity=".5" stroke="#688d99" />
+                <path d="M125 32L134 41M125 44L134 53" stroke="white" strokeWidth="2" />
+              </svg>}
+              selected={config.infinityEdge?.wallType === "glass"} onSelect={() => setInfinityWall("glass")} />
+          </ChoiceGrid>
+          <p className="mt-2 text-xs text-muted-foreground">{t("Soluzione progettuale soggetta a verifica strutturale.")}</p>
         </div>
       )}
     </TabBody>
@@ -428,6 +449,7 @@ export function SystemTray({ tab, setTab }: {
 /* ---------------------------------------------------------------- 04 */
 
 export function AccessTray({ tab, setTab }: DecisionProps) {
+  const { t, number } = useI18n();
   const {
     config,
     togglePoolFeature,
@@ -438,6 +460,8 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     toggleInternalSteps,
     toggleInoxLadder,
     setExternalStairSide,
+    setSunShelfLoungerCount,
+    sunShelfNotice,
   } = useConfigurator();
   // Set when the customer turns the internal stair on in this visit, so the
   // follow-up options (stair shape, optional inox ladder) are brought into view.
@@ -481,6 +505,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
 
   const comfort = useMemo(() => configuredComfortPlan(config), [config]);
   const shelfOn = config.features.includes("sunShelf");
+  const shelfLoungers = useMemo(() => configuredSunShelfLoungers(config), [config]);
   const hydroOn = config.features.includes("hydromassage") && !shelfOn;
   const hydroVariant = config.hydromassageVariant ?? "closed";
   const shelfProposal = useMemo(
@@ -530,7 +555,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
   return (
     <TabBody>
       <StepTabs
-        label="Accesso e comfort"
+        label={t("Accesso e comfort")}
         value={tab}
         onChange={setTab}
         tabs={[
@@ -543,10 +568,10 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
       />
       {tab === "access" || config.poolType === "above-ground" ? (
         <div className="flex flex-col gap-5">
-          <ChoiceGrid label="Accesso alla piscina">
+          <ChoiceGrid label={t("Accesso alla piscina")}>
             <ChoiceCard
-              title="Scala interna"
-              description="Gradini in muratura, rivestiti come la vasca."
+              title={t("Scala interna")}
+              description={t("Gradini in muratura, rivestiti come la vasca.")}
               image={ill("access-steps")}
               selected={stepsOn}
               onSelect={() => {
@@ -557,12 +582,10 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             {inoxAvailable ? (
               <ChoiceCard
                 optional={stepsOn}
-                title="Scaletta inox"
-                description={
-                  stepsOn
+                title={t("Scaletta inox")}
+                description={t(stepsOn
                     ? "Aggiuntiva alla scala interna."
-                    : "Corrimano tubolari e pedate antiscivolo."
-                }
+                    : "Corrimano tubolari e pedate antiscivolo.")}
                 image={ill("access-ladder")}
                 selected={inoxOn}
                 onSelect={() => toggleInoxLadder()}
@@ -571,8 +594,8 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             {config.poolType === "above-ground" ? (
               <ChoiceCard
                 optional
-                title="Scala esterna di accesso"
-                description="Struttura e parapetto in acciaio inox, pedate coordinate al bordo."
+                title={t("Scala esterna di accesso")}
+                description={t("Struttura e parapetto in acciaio inox, pedate coordinate al bordo.")}
                 image={ill("access-external")}
                 selected={config.features.includes("externalStaircase")}
                 onSelect={() => togglePoolFeature("externalStaircase")}
@@ -581,10 +604,10 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
           </ChoiceGrid>
           {config.poolType === "above-ground" && config.features.includes("externalStaircase") ? (
             <>
-            <ChoiceGrid label="Posizione scala esterna" dense>
+            <ChoiceGrid label={t("Posizione scala esterna")} dense>
               {(["short", "long"] as const).map(side => (
-                <ChoiceCard key={side} compact title={side === "short" ? "Lato corto" : "Lato lungo"}
-                  description="Accostata alla vasca, collegata all’accesso interno."
+                <ChoiceCard key={side} compact title={t(side === "short" ? "Lato corto" : "Lato lungo")}
+                  description={t("Accostata alla vasca, collegata all’accesso interno.")}
                   image={<svg viewBox="0 0 120 84" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                     <rect x="16" y="16" width="80" height="42" rx="1" />
                     {side === "short" ? <><rect x="96" y="16" width="12" height="42" />
@@ -596,26 +619,24 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                   onSelect={() => setExternalStairSide(side)} />
               ))}
             </ChoiceGrid>
-            <p className="text-sm text-muted-foreground">Piattaforma prolungata inclusa, con parapetto sui soli lati esterni.</p>
+            <p className="text-sm text-muted-foreground">{t("Piattaforma prolungata inclusa, con parapetto sui soli lati esterni.")}</p>
             </>
           ) : null}
           {stepsOn &&
           !comfort.elements.some((e) => e.kind === "sunShelf" || e.kind === "hydromassage") ? (
             <RevealSection reveal={stairsJustChosen}>
-              <GroupLabel>Forma della scala</GroupLabel>
-              <ChoiceGrid label="Tipo di scala interna" dense>
+              <GroupLabel>{t("Forma della scala")}</GroupLabel>
+              <ChoiceGrid label={t("Tipo di scala interna")} dense>
                 {(["linear", "corner"] as const)
                   .filter((type) => !plans[type].reason || stairType === type)
                   .map((type) => (
                     <ChoiceCard
                       compact
                       key={type}
-                      title={type === "linear" ? "Rettilinea" : "Angolare"}
-                      description={
-                        type === "linear"
+                      title={t(type === "linear" ? "Rettilinea" : "Angolare")}
+                      description={t(type === "linear"
                           ? "Gradini dritti sul lato corto."
-                          : config.poolType === "above-ground" ? "Gradini rettangolari integrati nell’angolo." : "Gradini a quarto di cerchio nell’angolo."
-                      }
+                          : config.poolType === "above-ground" ? "Gradini rettangolari integrati nell’angolo." : "Gradini a quarto di cerchio nell’angolo.")}
                       image={ill(type === "linear" ? "access-steps-linear" : "access-steps-corner")}
                       selected={stairType === type}
                       onSelect={() => setInternalStairType(type)}
@@ -623,11 +644,11 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                     />
                   ))}
               </ChoiceGrid>
-              {config.poolType === "above-ground" ? <ChoiceGrid label="Orientamento scala interna" dense>
+              {config.poolType === "above-ground" ? <ChoiceGrid label={t("Orientamento scala interna")} dense>
                 {orientations.filter(option=>!!option.plan.placement || option.mirrored===!!config.internalStairMirrored).map(option => (
                   <ChoiceCard key={String(option.mirrored)} compact
-                    title={option.mirrored ? "Speculare" : "Standard"}
-                    description="Ingresso integrato nell’angolo del lato corto."
+                    title={t(option.mirrored ? "Speculare" : "Standard")}
+                    description={t("Ingresso integrato nell’angolo del lato corto.")}
                     image={<span className={option.mirrored ? "-scale-x-100" : ""}>{ill(stairType==="corner"?"access-steps-corner":"access-steps-linear")}</span>}
                     selected={option.mirrored===!!config.internalStairMirrored}
                     onSelect={()=>setInternalStairMirrored(option.mirrored)}
@@ -651,7 +672,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                   ) : (
                     <Plus className="size-3.5 text-brand" strokeWidth={1.6} aria-hidden />
                   )}
-                  {inoxOn ? "Scaletta inox aggiunta" : "Aggiungi anche la scaletta inox"}
+                  {t(inoxOn ? "Scaletta inox aggiunta" : "Aggiungi anche la scaletta inox")}
                 </button>
               ) : null}
             </RevealSection>
@@ -662,25 +683,25 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
               onClick={() => setTab("comfort")}
               className="inline-flex w-fit items-center gap-1.5 self-start rounded-full px-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
             >
-              Prosegui con <span className="text-foreground">Comfort in acqua</span>
+              {t("Prosegui con")}<span className="text-foreground">{t("Comfort in acqua")}</span>
               <ArrowRight className="size-3.5 text-brand" strokeWidth={1.5} aria-hidden />
             </button>
           )}
         </div>
       ) : (
         <div className="flex flex-col gap-5">
-          <ChoiceGrid label="Zona comfort">
+          <ChoiceGrid label={t("Zona comfort")}>
             <ChoiceCard
-              title="Nessuna zona comfort"
-              description="Vasca libera, solo la scala scelta."
+              title={t("Nessuna zona comfort")}
+              description={t("Vasca libera, solo la scala scelta.")}
               image={ill("comfort-none")}
               selected={comfortChoice === "none"}
               onSelect={() => chooseComfort("none")}
             />
             {shelfOn || shelfProposal.availability.sunShelf.available ? (
               <ChoiceCard
-                title="Sun shelf"
-                description="Solarium sommerso a 22 cm per sdraiarsi in acqua."
+                title={t("Sun shelf")}
+                description={t("Solarium sommerso a 22 cm per sdraiarsi in acqua.")}
                 image={ill("comfort-sunShelf")}
                 selected={comfortChoice === "sunShelf"}
                 onSelect={() => chooseComfort("sunShelf")}
@@ -689,15 +710,15 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             {hydroOn || hydroProposal.availability.hydromassage.available ? (
               <>
                 <ChoiceCard
-                  title="Idromassaggio A"
-                  description="Zona delimitata da un muretto, panca a L con getti."
+                  title={t("Idromassaggio A")}
+                  description={t("Zona delimitata da un muretto, panca a L con getti.")}
                   image={ill("comfort-hydro-closed")}
                   selected={comfortChoice === "closed"}
                   onSelect={() => chooseComfort("closed")}
                 />
                 <ChoiceCard
-                  title="Idromassaggio B"
-                  description="Panca a U con getti, aperta sulla vasca."
+                  title={t("Idromassaggio B")}
+                  description={t("Panca a U con getti, aperta sulla vasca.")}
                   image={ill("comfort-hydro-open")}
                   selected={comfortChoice === "open"}
                   onSelect={() => chooseComfort("open")}
@@ -705,6 +726,27 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
               </>
             ) : null}
           </ChoiceGrid>
+          {shelfOn ? <div className="flex flex-col gap-3">
+            <ChoiceGrid label={t("Optional per la spiaggetta")}>
+              <ChoiceCard optional title={t("Lettini per spiaggetta")}
+                description={t("Lettini per superfici sommerse, distinti dalle chaise longue esterne.")}
+                image={ill("equipment-sunShelfLoungers")}
+                selected={shelfLoungers.enabled} disabled={!shelfLoungers.available}
+                onSelect={() => togglePoolFeature("sunShelfLoungers")} />
+            </ChoiceGrid>
+            {shelfLoungers.available ? <>
+              <p className="text-xs text-muted-foreground">{t("Quantità consentite: da 1 a {count}.", { count: number(shelfLoungers.capacity) })}</p>
+              {shelfLoungers.enabled ? <label className="flex items-center gap-3 text-sm">
+                {t("Quantità lettini")}
+                <select aria-label={t("Quantità lettini")} className="rounded-lg border border-hairline bg-card px-3 py-2"
+                  value={shelfLoungers.count} onChange={event => setSunShelfLoungerCount(Number(event.target.value))}>
+                  {Array.from({length: shelfLoungers.capacity}, (_,i) => i+1).map(count => <option key={count} value={count}>{t(number(count))}</option>)}
+                </select>
+              </label> : null}
+            </> : <p role="status" className="text-xs text-muted-foreground">{t(shelfLoungers.reason ?? "Non disponibile per questa configurazione.")}</p>}
+            <p className="text-xs text-muted-foreground">{t("Anteprima 3D dimensionale; modello e fornitura da confermare.")} {t(number(SUN_SHELF_LOUNGER_MODEL.length, {maximumFractionDigits:3}))} {t("×")}{t(number(SUN_SHELF_LOUNGER_MODEL.width, {maximumFractionDigits:4}))} {t("m.")}</p>
+          </div> : null}
+          {sunShelfNotice ? <p role="status" className="text-xs text-muted-foreground">{t(sunShelfNotice)}</p> : null}
           {benchAvailable ? (
             <div className="flex flex-col gap-3">
               <p className="flex items-center gap-2 text-[12px] text-muted-foreground">
@@ -716,16 +758,14 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                   <path d="M6 3v7.5A3.5 3.5 0 0 0 9.5 14H18M14.5 10.5L18 14l-3.5 3.5" />
                 </svg>
                 <span>
-                  <span className="font-normal text-foreground">Per il tuo Sun shelf</span> ·
-                  compare solo con questa scelta
-                </span>
+                  <span className="font-normal text-foreground">{t("Per il tuo Sun shelf")}</span> {t("· compare solo con questa scelta")}</span>
               </p>
-              <ChoiceGrid label="Panca integrata" dense>
+              <ChoiceGrid label={t("Panca integrata")} dense>
                 <ChoiceCard
                   compact
                   optional
-                  title="Panca integrata"
-                  description="Seduta sommersa lungo parete."
+                  title={t("Panca integrata")}
+                  description={t("Seduta sommersa lungo parete.")}
                   image={ill("comfort-bench")}
                   selected={benchOn}
                   onSelect={() => togglePoolFeature("integratedBench")}
@@ -742,6 +782,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
 /* ---------------------------------------------------------------- 05 */
 
 export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionProps) {
+  const { t } = useI18n();
   const {
     config,
     setFinish,
@@ -798,7 +839,7 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
     <TabBody>
       {aboveGround ? (
         <StepTabs
-          label="Finiture"
+          label={t("Finiture")}
           value={finishTab}
           onChange={setFinishTab}
           tabs={[
@@ -808,12 +849,12 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
         />
       ) : null}
       {aboveGround && finishTab === "exterior" ? (
-        <ChoiceGrid label="Pannelli esterni">
+        <ChoiceGrid label={t("Pannelli esterni")}>
           {EXTERIOR_PANEL_FINISHES.map((panel) => (
             <ChoiceCard
               key={panel.id}
-              title={panel.title}
-              description={panel.description}
+              title={t(panel.title)}
+              description={t(panel.description)}
               image={PANEL_SWATCH[panel.id]}
               selected={exteriorPanelFinish(config.exteriorPanelFinish) === panel.id}
               onSelect={() => setExteriorPanelFinish(panel.id)}
@@ -822,12 +863,12 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
         </ChoiceGrid>
       ) : (
         <>
-          <ChoiceGrid label="Rivestimento interno">
+          <ChoiceGrid label={t("Rivestimento interno")}>
             {options.map((option) => (
               <ChoiceCard
                 key={option.id}
-                title={option.title}
-                description={option.description}
+                title={t(option.title)}
+                description={t(option.description)}
                 image={option.image}
                 selected={active === option.id}
                 onSelect={option.select}
@@ -836,14 +877,14 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
           </ChoiceGrid>
           {active === "liner" ? (
             <div className="flex flex-col gap-3">
-              <GroupLabel>Colore del liner</GroupLabel>
-              <ChoiceGrid label="Colore liner PVC" dense>
+              <GroupLabel>{t("Colore del liner")}</GroupLabel>
+              <ChoiceGrid label={t("Colore liner PVC")} dense>
                 {LINER_COLORS.map((color) => (
                   <ChoiceCard
                     compact
                     key={color.id}
-                    title={color.title.replace("Motion ", "")}
-                    description={LINER_COPY[color.id] ?? "Liner PVC armato."}
+                    title={t(color.title.replace("Motion ", ""))}
+                    description={t(LINER_COPY[color.id] ?? "Liner PVC armato.")}
                     image={color.texture}
                     selected={config.linerColor === color.id}
                     onSelect={() => setLinerColor(color.id)}
@@ -853,14 +894,14 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
             </div>
           ) : active === "mosaic" ? (
             <div className="flex flex-col gap-3">
-              <GroupLabel>Finitura mosaico</GroupLabel>
-              <ChoiceGrid label="Finitura mosaico" dense>
+              <GroupLabel>{t("Finitura mosaico")}</GroupLabel>
+              <ChoiceGrid label={t("Finitura mosaico")} dense>
                 {MOSAIC_FINISHES.map((mosaic) => (
                   <ChoiceCard
                     compact
                     key={mosaic.id}
-                    title={mosaic.name}
-                    description="Tessere in vetro, posa a mano."
+                    title={t(mosaic.name)}
+                    description={t("Tessere in vetro, posa a mano.")}
                     image={mosaic.preview}
                     selected={config.mosaicFinish === mosaic.id}
                     onSelect={() => setMosaicFinish(mosaic.id)}
@@ -893,24 +934,22 @@ const PANEL_SWATCH: Record<string, string> = {
 /* ---------------------------------------------------------------- 06 */
 
 export function LightTray({ tab, setTab }: DecisionProps) {
+  const { t } = useI18n();
   const { config, togglePoolFeature, setLedColor, setLedIntensity, setSceneTime } =
     useConfigurator();
   const hasLed = config.features.includes("ledLighting");
   const stairSpots = useMemo(() => configuredPoolLayout(config).stairMicroSpots, [config]);
   const hasStairLed = config.features.includes("stairLighting") && stairSpots.length > 0;
-  const hasAnyLed = hasLed || hasStairLed;
+  const hasBenchLed = config.features.includes("hydromassageBenchLighting");
+  const hasAnyLed = hasLed || hasStairLed || (hasBenchLed && config.features.includes("hydromassage"));
   const plan = useMemo(() => (hasLed ? configuredLightingPlan(config) : null), [config, hasLed]);
   useEffect(() => { if (tab === "color" && hasLed) setSceneTime("night"); }, [tab, hasLed]);
   const night = config.sceneTime === "night";
-  // Night exists only to judge the LEDs: no LEDs, no night.
-  useEffect(() => {
-    if (!hasAnyLed && night) setSceneTime("day");
-  }, [hasAnyLed, night, setSceneTime]);
   return (
     <TabBody>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <StepTabs
-          label="Acqua e luci"
+          label={t("Acqua e luci")}
           value={tab}
           onChange={(next) => {
             setTab(next);
@@ -925,12 +964,11 @@ export function LightTray({ tab, setTab }: DecisionProps) {
         {hasAnyLed ? (
           <div
             role="radiogroup"
-            aria-label="Anteprima luce"
+            aria-label={t("Anteprima luce")}
             className="inline-flex items-center gap-0.5 rounded-full border border-hairline bg-card p-0.5"
           >
             <span className="px-2.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Anteprima
-            </span>
+              {t("Anteprima")}</span>
             {(
               [
                 { id: "day", label: "Giorno", Icon: Sun },
@@ -953,7 +991,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
                   )}
                 >
                   <Icon className="size-3.5" strokeWidth={1.4} aria-hidden />
-                  {label}
+                  {t(label)}
                 </button>
               );
             })}
@@ -961,20 +999,19 @@ export function LightTray({ tab, setTab }: DecisionProps) {
         ) : null}
       </div>
       {tab === "lighting" ? (
-        <ChoiceGrid label="Illuminazione subacquea">
+        <ChoiceGrid label={t("Illuminazione subacquea")}>
           <ChoiceCard
-            title="Senza illuminazione"
-            description="Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti."
+            title={t("Senza illuminazione")}
+            description={t("Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.")}
             image={ill("led-off")}
             selected={!hasLed}
             onSelect={() => {
               if (hasLed) togglePoolFeature("ledLighting");
-              setSceneTime("day");
             }}
           />
           {stairSpots.length > 0 ? <ChoiceCard
-            title="+ Micro-spot sulle scale"
-            description="Piccoli LED a luce calda nelle alzate, anche sulla scala angolare. Optional indipendente."
+            title={t("+ Micro-spot sulle scale")}
+            description={t("Piccoli LED a luce calda nelle alzate, anche sulla scala angolare. Optional indipendente.")}
             image={ill("led-on")}
             selected={hasStairLed}
             footer={stairSpots.length ? `${stairSpots.length} micro-spot · nelle alzate` : "Seleziona una scala interna o un accesso comfort compatibile"}
@@ -982,10 +1019,10 @@ export function LightTray({ tab, setTab }: DecisionProps) {
               togglePoolFeature("stairLighting");
               if (!hasStairLed) setSceneTime("night");
             }}
-          /> : <p className="text-sm text-muted-foreground">Micro-spot sulle scale: seleziona una scala interna o un accesso comfort compatibile.</p>}
+          /> : <p className="text-sm text-muted-foreground">{t("Micro-spot sulle scale: seleziona una scala interna o un accesso comfort compatibile.")}</p>}
           <ChoiceCard
-            title="LED subacquei"
-            description="Fari RGB a parete, disposti automaticamente. Anteprima notturna."
+            title={t("LED subacquei")}
+            description={t("Fari RGB a parete, disposti automaticamente. Anteprima notturna.")}
             image={ill("led-on")}
             selected={hasLed}
             onSelect={() => {
@@ -995,6 +1032,18 @@ export function LightTray({ tab, setTab }: DecisionProps) {
             }}
             footer={plan ? `${plan.count} fari · ${plan.surfaceArea.toFixed(1)} m²` : undefined}
           />
+          {config.features.includes("hydromassage") ? (
+            <ChoiceCard
+              title={t("Micro-spot sulla panca")}
+              description={t("Luce calda sotto la seduta dell’idromassaggio. Optional indipendente.")}
+              image={ill("led-on")}
+              selected={hasBenchLed}
+              onSelect={() => {
+                togglePoolFeature("hydromassageBenchLighting");
+                if (!hasBenchLed) setSceneTime("night");
+              }}
+            />
+          ) : null}
         </ChoiceGrid>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -1016,13 +1065,14 @@ const PAVING_IMAGES: Record<string, string | undefined> = {
 };
 
 export function DeckTray({ tab, setTab }: DecisionProps) {
+  const { t } = useI18n();
   const { config, setCopingMaterial, setPaving, setPavingFormat } = useConfigurator();
   const layout = pavingLayout(config.paving, config.pavingFormat);
   const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
   return (
     <TabBody>
       <StepTabs
-        label="Bordo e decking"
+        label={t("Bordo e decking")}
         value={tab}
         onChange={setTab}
         tabs={[
@@ -1031,13 +1081,13 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
         ]}
       />
       {tab === "coping" && copingVisible ? (
-        <ChoiceGrid label="Materiale del bordo" dense>
+        <ChoiceGrid label={t("Materiale del bordo")} dense>
           {COPING_MATERIALS.map((option) => (
             <ChoiceCard
               compact
               key={option.id}
-              title={option.title}
-              description={COPING_COPY[option.id] ?? option.subtitle}
+              title={t(option.title)}
+              description={t(COPING_COPY[option.id] ?? option.subtitle)}
               image={getCopingSwatchDataUrl(option.id)}
               selected={(config.copingMaterial ?? "travertine") === option.id}
               onSelect={() => setCopingMaterial(option.id)}
@@ -1046,13 +1096,13 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
         </ChoiceGrid>
       ) : (
         <div className="space-y-5">
-        <ChoiceGrid label="Pavimentazione" dense>
+        <ChoiceGrid label={t("Pavimentazione")} dense>
           {PAVING.map((p) => (
             <ChoiceCard
               key={p.id}
               compact
-              title={p.label}
-              description={p.note}
+              title={t(p.label)}
+              description={t(p.note)}
               image={
                 PAVING_IMAGES[p.id] ?? (p.id !== "gres" && p.id !== "wood" && p.id !== "istria" ? getCopingSwatchDataUrl(p.id) : (
                   <span
@@ -1067,10 +1117,10 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
           ))}
         </ChoiceGrid>
         <div className="space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Formato · {layout.label}</p>
-          <ChoiceGrid label="Formato pavimentazione" dense>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">{t("Formato ·")}{t(layout.label)}</p>
+          <ChoiceGrid label={t("Formato pavimentazione")} dense>
             {pavingFormats(config.paving).map(format => (
-              <ChoiceCard compact key={format} title={PAVING_FORMATS[format].label}
+              <ChoiceCard compact key={format} title={t(PAVING_FORMATS[format].label)}
                 image={<svg aria-hidden="true" viewBox="0 0 120 60" className="h-full w-full" fill="none" stroke="currentColor" strokeWidth="1">
                   <rect x={60 - Math.min(50, 25 * PAVING_FORMATS[format].module[0] / PAVING_FORMATS[format].module[1])}
                     y={30 - Math.min(25, 50 * PAVING_FORMATS[format].module[1] / PAVING_FORMATS[format].module[0])}
@@ -1080,7 +1130,7 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
                 selected={layout.formatId === format} onSelect={() => setPavingFormat(format)} />
             ))}
           </ChoiceGrid>
-          <p className="text-xs text-muted-foreground">Dimensioni di riferimento della posa. Formati e spessori di fornitura da confermare.</p>
+          <p className="text-xs text-muted-foreground">{t("Dimensioni di riferimento della posa. Formati e spessori di fornitura da confermare.")}</p>
         </div>
         </div>
       )}
@@ -1091,6 +1141,7 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
 /* ---------------------------------------------------------------- 08 */
 
 export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
+  const { t } = useI18n();
   const { config, toggleEquipment, setCoverExtension } = useConfigurator();
   const coverOn = config.equipment.includes("automaticCover");
   const coverPlan = resolveAutomaticCover(
@@ -1102,8 +1153,8 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
     <ChoiceCard
       key={id}
       optional
-      title={item(id).title}
-      description={item(id).description}
+      title={t(item(id).title)}
+      description={t(item(id).description)}
       image={ill(`equipment-${id}`)}
       selected={config.equipment.includes(id)}
       onSelect={onSelect ?? (() => toggleEquipment(id))}
@@ -1112,7 +1163,7 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
   return (
     <TabBody>
       <StepTabs
-        label="Optional"
+        label={t("Optional")}
         value={tab}
         onChange={setTab}
         tabs={[
@@ -1123,7 +1174,7 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
       />
       {tab === "outdoor" ? (
         <div className="flex flex-col gap-5">
-          <ChoiceGrid label="Optional esterni">
+          <ChoiceGrid label={t("Optional esterni")}>
             {coverOn || coverPlan.status !== "UNAVAILABLE"
               ? card("automaticCover", () => {
                   toggleEquipment("automaticCover");
@@ -1136,24 +1187,21 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
           </ChoiceGrid>
           {config.system === "infinity" ? (
             <p className="text-[12px] leading-relaxed text-muted-foreground">
-              Con il bordo Infinity l’esterno è il paesaggio: niente lettini sul bordo a sfioro. La
-              doccia solare resta nella proposta, posizionata in fase di progetto.
-            </p>
+              {t("Con il bordo Infinity l’esterno è il paesaggio: niente lettini sul bordo a sfioro. La doccia solare resta nella proposta, posizionata in fase di progetto.")}</p>
           ) : null}
           {coverOn && coverPlan.status !== "UNAVAILABLE" ? (
             <div className="flex max-w-xl flex-col gap-2 rounded-2xl border border-hairline p-4">
               <div className="flex items-baseline justify-between">
-                <GroupLabel>Apertura copertura</GroupLabel>
+                <GroupLabel>{t("Apertura copertura")}</GroupLabel>
                 <output className="font-mono text-xs text-muted-foreground">
-                  {coverPercent}% chiusa
-                </output>
+                  {coverPercent}{t("% chiusa")}</output>
               </div>
               <input
                 type="range"
                 min={0}
                 max={100}
                 value={coverPercent}
-                aria-label="Estensione copertura automatica"
+                aria-label={t("Estensione copertura automatica")}
                 onChange={(event) => setCoverExtension(Number(event.target.value) / 100)}
                 className="h-9 w-full accent-[var(--foreground)]"
               />
@@ -1161,17 +1209,17 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
           ) : null}
           {!coverOn && coverPlan.status === "UNAVAILABLE" && coverPlan.reason ? (
             <p className="text-xs text-muted-foreground">
-              Copertura automatica: {coverPlan.reason}
+              {t("Copertura automatica:")}{t(coverPlan.reason)}
             </p>
           ) : null}
         </div>
       ) : tab === "water" ? (
-        <ChoiceGrid label="Trattamento acqua">
+        <ChoiceGrid label={t("Trattamento acqua")}>
           {card("saltElectrolysis")}
           {card("automaticDosing")}
         </ChoiceGrid>
       ) : (
-        <ChoiceGrid label="Temperatura">{card("heatPump")}</ChoiceGrid>
+        <ChoiceGrid label={t("Temperatura")}>{card("heatPump")}</ChoiceGrid>
       )}
     </TabBody>
   );
@@ -1180,6 +1228,7 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
 /* ---------------------------------------------------------------- 09 */
 
 export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
+  const { t } = useI18n();
   const { config, setSceneTime, projectConfiguration } = useConfigurator();
   const delivery = useProjectDelivery();
   // The recap opens with a clean capture of the configured pool.
@@ -1195,17 +1244,11 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
       active = false;
     };
   }, [tab, heroUrl, capture, setHeroUrl]);
-  // Without LEDs the presentation is always the daylight one.
-  const hasAnyLed = config.features.includes("ledLighting") ||
-    (config.features.includes("stairLighting") && configuredPoolLayout(config).stairMicroSpots.length > 0);
-  const night = config.sceneTime === "night" && hasAnyLed;
-  useEffect(() => {
-    if (!hasAnyLed && config.sceneTime === "night") setSceneTime("day");
-  }, [hasAnyLed, config.sceneTime, setSceneTime]);
+  const night = config.sceneTime === "night";
   return (
     <TabBody>
       <StepTabs
-        label="Presentazione"
+        label={t("Presentazione")}
         value={tab}
         onChange={setTab}
         tabs={[
@@ -1216,26 +1259,24 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
       />
       {tab === "scene" ? (
         <div className="flex flex-col gap-5">
-          <GroupLabel>Momento della giornata</GroupLabel>
-          <ChoiceGrid label="Momento della giornata" dense>
+          <GroupLabel>{t("Momento della giornata")}</GroupLabel>
+          <ChoiceGrid label={t("Momento della giornata")} dense>
             <ChoiceCard
               compact
-              title="Giorno"
-              description="Luce naturale, colori reali del rivestimento."
+              title={t("Giorno")}
+              description={t("Luce naturale, colori reali del rivestimento.")}
               image={ill("time-day")}
               selected={!night}
               onSelect={() => setSceneTime("day")}
             />
-            {hasAnyLed ? (
               <ChoiceCard
                 compact
-                title="Notte"
-                description="Il bagliore dei fari LED nell’acqua."
+                title={t("Notte")}
+                description={t("Scena notturna, con le luci selezionate.")}
                 image={ill("time-night")}
                 selected={night}
                 onSelect={() => setSceneTime("night")}
               />
-            ) : null}
           </ChoiceGrid>
         </div>
       ) : tab === "summary" ? (
@@ -1250,14 +1291,16 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
       ) : (
         <section className="flex max-w-xl flex-col items-start gap-4">
           <h3 className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">
-            Vuoi trasformare questo progetto in una proposta reale?
-          </h3>
+            {t("Vuoi trasformare questo progetto in una proposta reale?")}</h3>
           <p className="text-[13px] leading-[1.7] font-light text-muted-foreground">
-            Un consulente verifica configurazione, fattibilità e investimento.
-          </p>
+            {t("Un consulente verifica configurazione, fattibilità e investimento.")}</p>
           <LeadRequestDialog
             projectConfiguration={projectConfiguration}
             projectReference={delivery.link?.publicRef}
+            prepareProject={async () => {
+              const saved = await delivery.save();
+              return saved ? { projectConfiguration: saved.projectConfiguration, projectReference: saved.publicRef } : null;
+            }}
           />
         </section>
       )}

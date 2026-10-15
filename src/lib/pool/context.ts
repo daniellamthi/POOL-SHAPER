@@ -75,15 +75,18 @@ export interface ConfiguratorContextValue {
    * index is whatever the current shape's own candidate zone list uses
    * (Rectangle 0-3, L-shape 0-5); re-validated downstream regardless. */
   setInfinitySide: (value: number) => void;
+  setInfinityWall: (value: "traditional" | "glass") => void;
   setSkimmerFinish: (value: SkimmerFinishId) => void;
   setSkimmerType: (value: SkimmerTypeId) => void;
   setFinish: (value: FinishMaterial) => void;
   setLinerColor: (value: LinerColor) => void;
   setMosaicFinish: (value: MosaicFinishId) => void;
   togglePoolFeature: (value: PoolFeatureId) => void;
+  setSunShelfLoungerCount: (value: number) => void;
+  sunShelfNotice: string | null;
   setLedColor: (value: string) => void;
   setLedIntensity: (value: number) => void;
-  setSceneTime: (value: "day" | "night") => void;
+  setSceneTime: (value: "day" | "night", preserveCamera?: boolean) => void;
   setPaving: (value: import("./presentation").PavingId) => void;
   setPavingFormat: (value: import("./presentation").PavingFormatId) => void;
   setExteriorPanelFinish: (value: import("./above-ground").ExteriorPanelFinishId) => void;

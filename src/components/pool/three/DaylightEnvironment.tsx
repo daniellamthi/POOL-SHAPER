@@ -113,7 +113,7 @@ export function DaylightEnvironment({
   // Night must never light or reflect the daytime capture (its clouds and
   // sun showed up in the night water): it uses the procedural night sky.
   const night = timeOfDay === "night";
-  const assetUrl = photographicSky ? "/hdri/simons-town-rocks-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
+  const assetUrl = photographicSky ? "/hdri/infinity-white-cliff-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
   useLayoutEffect(() => {
     onCoastalStatus?.(!photographicSky ? "loading" : panoramaError || (!night && skyError) ? "error"
       : panorama && (night || sky) ? "ready" : "loading");
@@ -122,9 +122,10 @@ export function DaylightEnvironment({
     setPanoramaError(false);
     if(!photographicSky)return;
     let active=true,owned:Texture|null=null;
-    new TextureLoader().load("/hdri/simons-town-rocks-background.jpg",texture=>{
+    new TextureLoader().load("/hdri/infinity-white-cliff.jpg",texture=>{
       if(!active){texture.dispose();return;}
       texture.colorSpace=SRGBColorSpace;
+      texture.anisotropy = 8;
       owned=texture;setPanorama(texture);
     },undefined,()=>{ if (active) setPanoramaError(true); console.warn("[Pool3D] Coastal panorama unavailable."); });
     return()=>{active=false;owned?.dispose();setPanorama(null);};

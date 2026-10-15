@@ -30,8 +30,8 @@ export interface ProjectLink {
 }
 
 export function projectLinkIsDirty(link: ProjectLink | null, project: ProjectConfiguration): boolean {
-  if (!link?.editToken) return false;
-  if (!link.savedSnapshot) return true;
+  if (!link) return false;
+  if (!link.savedSnapshot) return Boolean(link.editToken);
   try {
     return projectSnapshotFingerprint(parseProjectConfiguration(link.savedSnapshot)) !== projectSnapshotFingerprint(project);
   } catch { return true; }

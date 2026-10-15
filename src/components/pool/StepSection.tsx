@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import type { ReactNode } from "react";
 import { Check, Info, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,15 +12,16 @@ export function StepSection({
   subtitle: string;
   children: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
-    <section key={title} className="animate-rise flex flex-col gap-4 lg:gap-14">
+    <section className="animate-rise flex flex-col gap-4 lg:gap-14">
       <header className="flex flex-col gap-5">
         <span aria-hidden className="h-px w-8 bg-foreground/35" />
         <h2 className="text-[38px] leading-[1.02] font-extralight tracking-[-0.045em] text-foreground sm:text-[42px]">
-          {title}
+          {t(title)}
         </h2>
         <p className="max-w-[40ch] text-[13px] leading-[1.8] font-light text-muted-foreground">
-          {subtitle}
+          {t(subtitle)}
         </p>
       </header>
       {children}
@@ -51,6 +53,7 @@ export function OptionCard({
   /** Optional add-on: shows a "+" when off and a quiet "Aggiunto" state when on. */
   optional?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -58,7 +61,7 @@ export function OptionCard({
       aria-pressed={selected}
       aria-disabled={disabled}
       disabled={disabled}
-      title={disabled ? disabledReason : undefined}
+      title={disabled && disabledReason ? t(disabledReason) : undefined}
       className={cn(
         "group relative flex w-full flex-col gap-3.5 overflow-hidden border-x-0 border-t-0 px-1 py-4 text-left outline-none transition-[border-color,background-color,padding,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-1 focus-visible:ring-foreground/40 focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.992] sm:py-7",
         disabled
@@ -69,10 +72,10 @@ export function OptionCard({
       )}
     >
       <span className="flex items-start justify-between gap-4">
-        <span className="text-[15px] font-light tracking-[-0.012em] text-foreground">{title}</span>
+        <span className="text-[15px] font-light tracking-[-0.012em] text-foreground">{t(title)}</span>
         <span className="flex shrink-0 items-center gap-2">
           {optional && selected ? (
-            <span className="text-[11px] font-light tracking-wide text-brand">Aggiunto</span>
+            <span className="text-[11px] font-light tracking-wide text-brand">{t("Aggiunto")}</span>
           ) : null}
           <span
             data-optional-state={optional ? (selected ? "added" : "off") : undefined}
@@ -101,11 +104,11 @@ export function OptionCard({
       </span>
       {disabled && disabledReason ? (
         <span className="max-w-[38ch] text-[12.5px] leading-[1.65] font-light text-muted-foreground">
-          {disabledReason}
+          {t(disabledReason)}
         </span>
       ) : description ? (
         <span className="max-w-[38ch] text-[12.5px] leading-[1.65] font-light text-muted-foreground">
-          {description}
+          {t(description)}
         </span>
       ) : null}
       {meta}
@@ -133,6 +136,7 @@ export function SwatchOption({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -155,7 +159,7 @@ export function SwatchOption({
         ) : null}
       </span>
       <span className="text-[11px] font-light tracking-tight text-muted-foreground group-hover:text-foreground">
-        {title}
+        {t(title)}
       </span>
     </button>
   );
@@ -181,6 +185,7 @@ export function MaterialSwatch({
   onSelect: () => void;
   onViewDetail?: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <div
       className={cn(
@@ -214,7 +219,7 @@ export function MaterialSwatch({
         <button
           type="button"
           onClick={onViewDetail}
-          aria-label={`View ${title} detail`}
+          aria-label={t("Vedi dettaglio di {title}", { title: t(title) })}
           className="absolute left-3 top-3 flex size-5 items-center justify-center rounded-full bg-background/60 text-muted-foreground shadow-[0_0_0_1px_var(--border)] transition-colors duration-300 hover:bg-background/85 hover:text-foreground focus-visible:bg-background/85 focus-visible:text-foreground"
         >
           <Info className="size-3" strokeWidth={1.75} />
@@ -225,9 +230,9 @@ export function MaterialSwatch({
         onClick={onSelect}
         className="flex flex-col items-start gap-0.5 text-left outline-none"
       >
-        <span className="text-[12.5px] font-normal tracking-tight text-foreground">{title}</span>
+        <span className="text-[12.5px] font-normal tracking-tight text-foreground">{t(title)}</span>
         <span className="text-[10.5px] leading-snug font-light text-muted-foreground">
-          {subtitle}
+          {t(subtitle)}
         </span>
       </button>
     </div>
@@ -248,6 +253,7 @@ export function ToggleChip({
   onToggle: () => void;
   icon?: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -274,9 +280,9 @@ export function ToggleChip({
         </span>
       ) : null}
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="text-[13px] font-normal tracking-tight text-foreground">{title}</span>
+        <span className="text-[13px] font-normal tracking-tight text-foreground">{t(title)}</span>
         <span className="text-[11.5px] leading-relaxed font-light text-muted-foreground">
-          {description}
+          {t(description)}
         </span>
       </span>
     </button>
@@ -285,10 +291,11 @@ export function ToggleChip({
 
 /** Small labelled technical readout used across engineering panels. */
 export function DataRow({ label, value }: { label: string; value: string }) {
+  const { t } = useI18n();
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-hairline pb-2.5 last:border-0 last:pb-0">
-      <span className="label-xs">{label}</span>
-      <span className="numeric text-[13px] text-foreground">{value}</span>
+      <span className="label-xs">{t(label)}</span>
+      <span className="numeric text-[13px] text-foreground">{t(value)}</span>
     </div>
   );
 }

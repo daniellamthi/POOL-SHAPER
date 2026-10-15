@@ -429,6 +429,11 @@ export const POOL_FEATURES: ReadonlyArray<{
     description: "Ugelli idromassaggio integrati.",
   },
   {
+    id: "hydromassageBenchLighting",
+    title: "Micro-spot sulla panca",
+    description: "LED optional integrati nella panca idromassaggio.",
+  },
+  {
     id: "sunShelf",
     title: "Sun shelf",
     description: "Solarium sommerso integrato.",
@@ -438,6 +443,7 @@ export const POOL_FEATURES: ReadonlyArray<{
     title: "Panca integrata",
     description: "Seduta sommersa lungo parete.",
   },
+  { id: "sunShelfLoungers", title: "Lettini per spiaggetta", description: "Lettini per superfici sommerse, distinti dalle chaise longue esterne." },
 ];
 
 export const EQUIPMENT: ReadonlyArray<{

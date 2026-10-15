@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function ChoiceCard({
   badge,
   footer,
   compact = false,
+  disabled = false,
 }: {
   title: string;
   description?: string;
@@ -37,7 +39,9 @@ export function ChoiceCard({
   footer?: ReactNode;
   /** Smaller card for secondary choices (finishes, variants). */
   compact?: boolean;
+  disabled?: boolean;
 }) {
+  const { t } = useI18n();
   if (optional) {
     // Frozen choice system: an add-on is never a card. It is a full-width
     // row -- dashed while available, solid violet once added -- with an
@@ -47,9 +51,12 @@ export function ChoiceCard({
       <button
         type="button"
         onClick={onSelect}
+        aria-label={t(title)}
+        aria-description={t(selected ? "Rimuovi questo optional" : "Aggiungi questo optional")}
+        disabled={disabled}
         aria-pressed={selected}
         className={cn(
-          "col-span-full flex min-h-[64px] w-full items-center gap-3 rounded-[14px] border p-2 pr-2.5 text-left outline-none transition-[border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-foreground/40",
+          "col-span-full flex min-h-[64px] w-full items-center gap-3 rounded-[14px] border p-2 pr-2.5 text-left outline-none transition-[border-color,background-color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] focus-visible:ring-2 focus-visible:ring-foreground/40 disabled:cursor-not-allowed disabled:opacity-50",
           selected
             ? "border-solid border-brand bg-card"
             : "border-dashed border-foreground/25 bg-transparent hover:border-solid hover:border-foreground/40",
@@ -68,19 +75,19 @@ export function ChoiceCard({
           ) : null}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-[13.5px] tracking-[-0.01em] text-foreground">{title}</span>
+          <span className="truncate text-[13.5px] tracking-[-0.01em] text-foreground">{t(title)}</span>
           {description ? (
             <span className="truncate text-[12px] font-light text-muted-foreground">
-              {description}
+              {t(description)}
             </span>
           ) : null}
           {footer ? (
-            <span className="text-[11px] font-light text-muted-foreground">{footer}</span>
+            <span className="text-[11px] font-light text-muted-foreground">{typeof footer === "string" ? t(footer) : footer}</span>
           ) : null}
         </span>
         {badge ? (
           <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] tracking-wide text-muted-foreground sm:inline">
-            {badge}
+            {t(badge)}
           </span>
         ) : null}
         <span
@@ -97,7 +104,7 @@ export function ChoiceCard({
           ) : (
             <Plus className="size-3.5" strokeWidth={1.75} />
           )}
-          {selected ? "Aggiunto" : "Aggiungi"}
+          {t(selected ? "Aggiunto" : "Aggiungi")}
         </span>
       </button>
     );
@@ -106,9 +113,11 @@ export function ChoiceCard({
     <button
       type="button"
       onClick={onSelect}
+      aria-label={t(title)}
+      disabled={disabled}
       aria-pressed={selected}
       className={cn(
-        "group relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border bg-card text-left outline-none transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-foreground/40 active:scale-[0.985]",
+        "group relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border bg-card text-left outline-none transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-foreground/40 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50",
         selected
           ? "border-brand shadow-[0_0_0_1px_var(--brand)]"
           : "border-hairline hover:border-foreground/40",
@@ -136,12 +145,11 @@ export function ChoiceCard({
           </span>
         ) : (
           <span className="absolute inset-0 flex items-center justify-center text-[11px] tracking-[0.18em] text-muted-foreground uppercase">
-            Immagine
-          </span>
+            {t("Immagine")}{" "}</span>
         )}
         {badge ? (
           <span className="absolute left-2.5 top-2.5 rounded-full bg-background/90 px-2.5 py-1 text-[10px] tracking-wide text-foreground">
-            {badge}
+            {t(badge)}
           </span>
         ) : null}
         <span
@@ -164,16 +172,16 @@ export function ChoiceCard({
               compact ? "text-[13px]" : "text-[14.5px]",
             )}
           >
-            {title}
+            {t(title)}
           </span>
         </span>
         {description ? (
           <span className="line-clamp-2 text-[12px] leading-[1.5] font-light text-muted-foreground">
-            {description}
+            {t(description)}
           </span>
         ) : null}
         {footer ? (
-          <span className="mt-1 text-[11px] font-light text-muted-foreground">{footer}</span>
+          <span className="mt-1 text-[11px] font-light text-muted-foreground">{typeof footer === "string" ? t(footer) : footer}</span>
         ) : null}
       </span>
     </button>
@@ -191,10 +199,11 @@ export function ChoiceGrid({
   children: ReactNode;
   dense?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <div
       role="group"
-      aria-label={label}
+      aria-label={t(label)}
       className={cn(
         "grid gap-3",
         dense
@@ -220,11 +229,12 @@ export function StepTabs<T extends string>({
   onChange: (id: T) => void;
   label: string;
 }) {
+  const { t } = useI18n();
   if (tabs.length < 2) return null;
   return (
     <div
       role="tablist"
-      aria-label={label}
+      aria-label={t(label)}
       className="inline-flex w-fit max-w-full self-start gap-1 overflow-x-auto rounded-full border border-hairline bg-background p-1"
     >
       {tabs.map((tab) => (
@@ -241,8 +251,8 @@ export function StepTabs<T extends string>({
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          {tab.label}
-          {tab.hint ? <span className="ml-1.5 opacity-60">{tab.hint}</span> : null}
+          {t(tab.label)}
+          {tab.hint ? <span className="ml-1.5 opacity-60">{t(tab.hint)}</span> : null}
         </button>
       ))}
     </div>
@@ -251,7 +261,8 @@ export function StepTabs<T extends string>({
 
 /** Small heading for a secondary choice row inside a tab. */
 export function GroupLabel({ children }: { children: ReactNode }) {
-  return <p className="label-xs">{children}</p>;
+  const { t } = useI18n();
+  return <p className="label-xs">{typeof children === "string" ? t(children) : children}</p>;
 }
 
 /**

@@ -21,7 +21,7 @@ const restore = (state: State) => parseProjectConfiguration(serializeProjectConf
 
 equal(SELECTABLE_SKIMMER_TYPES.map(item => item.id), ["slim", "highWaterline"], "two selectable skimmers");
 equal(SKIMMER_TYPES.map(item => item.id), ["standard", "slim", "highWaterline", "flush"], "four readable legacy skimmers");
-equal(POOL_FEATURES.map(item => item.id), ["ledLighting", "stairLighting", "hydromassage", "sunShelf", "integratedBench"], "complete generic feature catalog");
+equal(POOL_FEATURES.map(item => item.id), ["ledLighting", "stairLighting", "hydromassage", "hydromassageBenchLighting", "sunShelf", "integratedBench"], "complete generic feature catalog");
 
 const base = run(createInitialState(), [
   { type: "setProjectType", value: "new" },

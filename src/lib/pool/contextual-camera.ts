@@ -15,7 +15,7 @@ const accessFocus = (c: PoolConfig): VisualFocus => c.features.includes("sunShel
   : c.poolAccess === "stainlessSteelLadder" ? "INOX" : "POOL_OVERVIEW";
 
 /** Interpret the accepted configuration, not optimistic UI selections. */
-export function focusForAction(action: { type: string; key?: string; value?: unknown }, c: PoolConfig): VisualFocus | null | undefined {
+export function focusForAction(action: { type: string; key?: string; value?: unknown; preserveCamera?: boolean }, c: PoolConfig): VisualFocus | null | undefined {
   switch (action.type) {
     case "next": case "previous": case "goToStep": case "reset": case "restoreProject": return null;
     case "setDimension": return action.key === "depth" || action.key === "shallowDepth" ? "DEPTH" : "DIMENSIONS_TOP";
@@ -31,7 +31,7 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
     case "setExteriorPanelFinish": return "EXTERIOR_PANEL";
     case "setExternalStairSide": case "setExternalStairPlatformExtended": return "EXTERNAL_STAIRS";
     case "setLedColor": case "setLedIntensity": return "LIGHTING";
-    case "setSceneTime": return c.system !== "infinity" && !c.features.includes("ledLighting") && c.features.includes("stairLighting") ? "STAIR_LIGHTING" : "LIGHTING";
+    case "setSceneTime": return action.preserveCamera ? undefined : c.system !== "infinity" && !c.features.includes("ledLighting") && c.features.includes("stairLighting") ? "STAIR_LIGHTING" : "LIGHTING";
     case "setInternalStairType": case "setInternalStairMirrored": case "toggleInternalSteps": case "setPoolAccess": return accessFocus(c);
     case "setHydromassageVariant": return accessFocus(c);
     case "toggleInoxLadder": return c.features.includes("inoxLadder") || c.poolAccess === "stainlessSteelLadder" ? "INOX" : accessFocus(c);

@@ -77,6 +77,7 @@ import {
 import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
 import type { SkimmerPlan } from "@/lib/pool/engineering";
 import {
+  concealedOverflowSection,
   copingOuterOffset,
   createCopingSlabGeometry,
   squareInfinityCopingEnds,
@@ -84,7 +85,8 @@ import {
   SKIMMER_PROFILES,
 } from "./poolConstruction";
 import { InfinityEdge } from "./InfinityEdge";
-import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
+import { infinityZonesForOutline, clampInfinityEdgeDimensions } from "@/lib/pool/infinity-edge";
+import { infinityContainmentLevels } from "./infinityContainment";
 import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { InfinityExclusion } from "@/lib/pool/walls.ts";
 
@@ -491,12 +493,11 @@ export function PoolModel({
     () => offsetOutline(outline, copingOuterOffset(system, overflowType)),
     [outline, system, overflowType],
   );
-  // Must match the channel's outer edge exactly (hiddenChannelOffset), not a
-  // point partway across it -- otherwise the deck coping caps most of the
-  // receiving slot and the hidden channel never reads as open.
+  const hiddenSection = concealedOverflowSection(verticalLayout.wallTopY, copingThickness);
+  // Conceal the collector beneath the solid coping, leaving its narrow intake.
   const concealedCopingEdge = useMemo(
-    () => offsetOutline(outline, OVERFLOW_GEOMETRY.hiddenChannelOffset),
-    [outline],
+    () => offsetOutline(outline, hiddenSection.copingInnerOffset),
+    [outline, hiddenSection.copingInnerOffset],
   );
   const structuralOutline = useMemo(
     () =>
@@ -540,13 +541,25 @@ export function PoolModel({
       ? overflowChannelOuter
       : concealedCopingEdge
     : outline;
-  const copingSurfaceY = isOverflow ? waterLevel - 0.001 : verticalLayout.copingY;
+  const copingSurfaceY = isOverflow
+    ? isVisibleOverflow ? waterLevel - 0.001 : hiddenSection.copingTopY
+    : verticalLayout.copingY;
   const perimeter = useMemo(() => outlinePerimeter(outline), [outline]);
   const structuralPerimeter = useMemo(
     () => outlinePerimeter(structuralOutline),
     [structuralOutline],
   );
   const openings = useMemo(() => {
+    if (isInfinity && infinityEdge?.wallType === "glass") {
+      const zone = infinityZonesForOutline(outline, shape).find(z => z.side === infinityEdge.side);
+      const bottom = infinityContainmentLevels(clampInfinityEdgeDimensions(undefined), waterLevel).baseY;
+      return zone ? zone.points.slice(0, -1).map((a, i) => {
+        const b = zone.points[i + 1]!;
+        return { x: (a[0] + b[0]) / 2, z: (a[1] + b[1]) / 2,
+          rotation: -Math.atan2(b[1] - a[1], b[0] - a[0]),
+          width: Math.hypot(b[0] - a[0], b[1] - a[1]), top: verticalLayout.wallTopY + 0.01, bottom };
+      }) : [];
+    }
     if (system !== "skimmer") return [];
     const p = SKIMMER_PROFILES[materials.skimmer.type];
     const centerY = verticalLayout.wallTopY - p.drop + p.center;
@@ -556,7 +569,7 @@ export function PoolModel({
       top: centerY + p.height / 2 - p.bar + 0.004,
       bottom: centerY - p.height / 2 + p.bar - 0.004,
     }));
-  }, [system, skimmers.positions, materials.skimmer.type, verticalLayout.wallTopY]);
+  }, [system, skimmers.positions, materials.skimmer.type, verticalLayout.wallTopY, isInfinity, infinityEdge, outline, shape, waterLevel]);
   const sourceSurfaceMap = useSafeSurfaceTexture(materials.surface.maps.baseColorMap);
   const calibratedSurfaceMap = useMemo(() => materials.surface.calibrateSample
     ? createLinerSampleMap(sourceSurfaceMap) : sourceSurfaceMap,
@@ -1000,10 +1013,10 @@ export function PoolModel({
     () =>
       createWallGeometry(
         overflowSlotEdge,
-        verticalLayout.wallTopY - 0.018,
+        hiddenSection.copingBottomY,
         verticalLayout.wallTopY - OVERFLOW_GEOMETRY.channelDepth,
       ),
-    [overflowSlotEdge, verticalLayout.wallTopY],
+    [overflowSlotEdge, verticalLayout.wallTopY, hiddenSection.copingBottomY],
   );
   const overflowKerbTopY = verticalLayout.wallTopY + OVERFLOW_GEOMETRY.visibleKerbRise;
   const overflowKerbTop = useDisposable(
@@ -1110,6 +1123,7 @@ export function PoolModel({
           plan={comfortPlan}
           floorProfile={floorProfile}
           showJets={showAccessories}
+          showBenchLighting={showAccessories && features.includes("hydromassageBenchLighting")}
           night={night && showWater}
         >
           {interiorShellKind ? (

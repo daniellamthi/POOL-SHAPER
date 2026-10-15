@@ -6,6 +6,7 @@
  */
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
+import { formatDate, formatNumber, localizeSummaryModel, translateText, type Locale } from "@/lib/i18n";
 import type { ProjectSummaryModel, SummaryRow, SummarySection } from "./summary-model";
 
 export interface ProjectBookInput {
@@ -17,6 +18,8 @@ export interface ProjectBookInput {
   /** The same view by day and by night ("Presentazione" page). */
   presentation?: { day: string | null; night: string | null } | null;
   issuedAt: Date;
+  /** Presentation preference; never stored in the technical project snapshot. */
+  locale?: Locale;
 }
 
 const W = 297;
@@ -110,6 +113,7 @@ function drawPlan(
   y: number,
   w: number,
   h: number,
+  locale: Locale,
 ) {
   const pts = model.plan.outline;
   const xs = pts.map((p) => p[0]);
@@ -148,30 +152,32 @@ function drawPlan(
   const right = ox + (maxX - minX) * scale + 7;
   doc.line(ox, bottom, ox + (maxX - minX) * scale, bottom);
   doc.text(
-    pdfText(`L ${model.plan.length.toFixed(2).replace(".", ",")} m`),
+    pdfText(`L ${formatNumber(model.plan.length, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m`),
     ox + ((maxX - minX) * scale) / 2,
     bottom + 4.5,
     { align: "center" },
   );
   doc.line(right, oy, right, oy + (maxZ - minZ) * scale);
   doc.text(
-    pdfText(`W ${model.plan.width.toFixed(2).replace(".", ",")} m`),
+    pdfText(`W ${formatNumber(model.plan.width, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m`),
     right + 2.5,
     oy + ((maxZ - minZ) * scale) / 2,
   );
   doc.setTextColor(...MUTE);
-  doc.text(pdfText(`Profondità ${model.plan.depthLabel}`), x, y + h + 2);
+  doc.text(pdfText(`${translateText("Profondità", locale)} ${model.plan.depthLabel}`), x, y + h + 2);
 }
 
 export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> {
-  const { model, publicRef, shareUrl, heroDataUrl, presentation, issuedAt } = input;
+  const { publicRef, shareUrl, heroDataUrl, presentation, issuedAt, locale = "it" } = input;
+  const model = localizeSummaryModel(input.model, locale);
+  const t = (text: string) => translateText(text, locale);
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: false });
   doc.setProperties({
     title: `Project Book ${publicRef}`,
     subject: model.headline,
     creator: "POOL-SHAPER · Piscine Wellness",
   });
-  const date = issuedAt.toLocaleDateString("it-IT", {
+  const date = formatDate(issuedAt, locale, {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -206,7 +212,7 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
 
   // 2 · Progetto
   doc.addPage();
-  header(doc, "Il progetto", publicRef, 2);
+  header(doc, t("Il progetto"), publicRef, 2);
   doc.setFontSize(10.5);
   doc.setTextColor(...MUTE);
   doc.text(pdfText(model.subline), M, 40);
@@ -217,13 +223,13 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
 
   // 3 · Materiali
   doc.addPage();
-  header(doc, "Materiali e finiture", publicRef, 3);
+  header(doc, t("Materiali e finiture"), publicRef, 3);
   const materials = byId("materials");
   if (materials) sectionBlock(doc, materials, M, 50, 160);
 
   // 4 · Accesso, comfort e optional
   doc.addPage();
-  header(doc, byId("renovation") ? "Lavori proposti e optional" : "Accesso, comfort e optional", publicRef, 4);
+  header(doc, t(byId("renovation") ? "Lavori proposti e optional" : "Accesso, comfort e optional"), publicRef, 4);
   let leftY = 50,
     rightY = 50;
   for (const id of ["renovation", "comfort", "lighting", "exterior", "scene"] as const) {
@@ -235,8 +241,8 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
 
   // 5 · Pianta e dati tecnici
   doc.addPage();
-  header(doc, "Pianta e scheda tecnica", publicRef, 5);
-  drawPlan(doc, model, M, 44, 130, 120);
+  header(doc, t("Pianta e scheda tecnica"), publicRef, 5);
+  drawPlan(doc, model, M, 44, 130, 120, locale);
   const techY = rows(doc, model.technical, W / 2 + 6, 50, 120);
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTE);
@@ -248,7 +254,7 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
   if (model.deferred.length) {
     doc.text(
       doc.splitTextToSize(
-        pdfText(`Da definire con il consulente: ${model.deferred.join(" · ")}`),
+        pdfText(`${t("Da definire con il consulente")}: ${model.deferred.join(" · ")}`),
         120,
       ) as string[],
       W / 2 + 6,
@@ -260,7 +266,7 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
   let page = 6;
   if (presentation?.day && presentation.night) {
     doc.addPage();
-    header(doc, "Presentazione", publicRef, page++);
+    header(doc, t("Presentazione"), publicRef, page++);
     const gap = 8;
     const boxW = (W - 2 * M - gap) / 2;
     const boxH = 118;
@@ -276,12 +282,12 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
       coverImage(doc, url, x, top, boxW, boxH, Boolean(byId("renovation")));
       doc.setFontSize(8);
       doc.setTextColor(...VIOLET);
-      doc.text(label.toUpperCase(), x, top + boxH + 8);
+      doc.text(t(label).toUpperCase(), x, top + boxH + 8);
     }
     doc.setFontSize(9);
     doc.setTextColor(...MUTE);
     doc.text(
-      "Stessa piscina, stessa vista: la luce del giorno e l'atmosfera della sera.",
+      t("Stessa piscina, stessa vista: la luce del giorno e l'atmosfera della sera."),
       M,
       top + boxH + 18,
     );
@@ -289,7 +295,7 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
 
   // 7 · Riferimento, QR e proposta
   doc.addPage();
-  header(doc, "Il tuo progetto, sempre con te", publicRef, page);
+  header(doc, t("Il tuo progetto, sempre con te"), publicRef, page);
   const qr = await QRCode.toDataURL(shareUrl, { margin: 1, width: 512, errorCorrectionLevel: "M" });
   doc.addImage(qr, "PNG", M, 48, 62, 62);
   doc.setFontSize(8);
@@ -300,19 +306,19 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
   doc.text(publicRef, M + 76, 68);
   doc.setFontSize(10);
   doc.setTextColor(...INK);
-  doc.text("Inquadra il codice o apri il link per rivedere il progetto in 3D:", M + 76, 82);
+  doc.text(t("Inquadra il codice o apri il link per rivedere il progetto in 3D:"), M + 76, 82);
   doc.setTextColor(...VIOLET);
   doc.textWithLink(pdfText(shareUrl), M + 76, 89, { url: shareUrl });
   doc.setFillColor(...VIOLET);
   doc.roundedRect(M + 76, 100, 92, 13, 6, 6, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10.5);
-  doc.textWithLink("Richiedi la tua proposta", M + 122, 108.2, { url: shareUrl, align: "center" });
+  doc.textWithLink(t("Richiedi la tua proposta"), M + 122, 108.2, { url: shareUrl, align: "center" });
   doc.setFontSize(8);
   doc.setTextColor(...MUTE);
   doc.text(
     doc.splitTextToSize(
-      "Un consulente Piscine Wellness verifica configurazione, fattibilità e investimento. Cita il Project ID in ogni comunicazione.",
+      t("Un consulente Piscine Wellness verifica configurazione, fattibilità e investimento. Cita il Project ID in ogni comunicazione."),
       150,
     ) as string[],
     M + 76,

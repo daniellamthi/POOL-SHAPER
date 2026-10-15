@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { Droplets, Paintbrush, Layers, Wrench, Settings, RefreshCw } from "lucide-react";
 import { ChoiceCard, ChoiceGrid, GroupLabel, StepTabs } from "@/components/pool/wizard/ChoiceCard";
 import { ShapeTray, type TrayContext } from "@/components/pool/wizard/StepTrays";
@@ -26,6 +27,7 @@ const toggle = <T extends string>(items: readonly T[], id: T): readonly T[] =>
 const body = "flex flex-col gap-5";
 
 export function RenovationScopeStep() {
+  const { t } = useI18n();
   const { renovation: r, updateRenovation } = useConfigurator();
   const icons = { interiorFinish: Paintbrush, filtration: Droplets, coping: Layers, structure: Wrench, equipment: Settings, complete: RefreshCw };
   const descriptions = {
@@ -37,7 +39,7 @@ export function RenovationScopeStep() {
     complete: "Valutazione di tutte le aree della piscina.",
   };
   return <div className={body}>
-    <ChoiceGrid label="Interventi di ristrutturazione">
+    <ChoiceGrid label={t("Interventi di ristrutturazione")}>
       {Object.entries(RENOVATION_AREA_LABEL).map(([key, title]) => {
         const id = key as keyof typeof RENOVATION_AREA_LABEL;
         const Icon = icons[id];
@@ -45,11 +47,12 @@ export function RenovationScopeStep() {
           selected={r.areas.includes(id)} onSelect={() => updateRenovation({ areas: toggle(r.areas, id) })} />;
       })}
     </ChoiceGrid>
-    <p className="text-[12px] font-light text-muted-foreground">Puoi scegliere più interventi. Optional e dettagli vengono richiesti nei passaggi successivi.</p>
+    <p className="text-[12px] font-light text-muted-foreground">{t("Puoi scegliere più interventi. Optional e dettagli vengono richiesti nei passaggi successivi.")}</p>
   </div>;
 }
 
 function FinishCatalogue({ existing = false }: { existing?: boolean }) {
+  const { t } = useI18n();
   const { config, renovation: r, updateRenovation, setFinish, setLinerColor, setMosaicFinish } = useConfigurator();
   const finish = existing ? r.existing?.finish ?? r.currentFinish : config.finish;
   const choose = (value: Partial<NonNullable<RenovationConfig["existing"]>>) => updateRenovation({ existing: { ...r.existing, ...value } });
@@ -61,7 +64,7 @@ function FinishCatalogue({ existing = false }: { existing?: boolean }) {
         onSelect={() => existing ? updateRenovation({ currentFinish: f.id, existing: { ...r.existing, finish: f.id,
           linerColor: r.existing?.linerColor ?? config.linerColor, mosaicFinish: r.existing?.mosaicFinish ?? config.mosaicFinish } }) : setFinish(f.id)} />)}
     </ChoiceGrid>
-    {allowed.length === 1 ? <p className="text-[12px] text-muted-foreground">La struttura a pannelli è compatibile con Liner PVC, non con il mosaico.</p> : null}
+    {allowed.length === 1 ? <p className="text-[12px] text-muted-foreground">{t("La struttura a pannelli è compatibile con Liner PVC, non con il mosaico.")}</p> : null}
     <GroupLabel>{existing ? "Finitura attuale" : "Finitura proposta"}</GroupLabel>
     <ChoiceGrid label={finish === "mosaic" ? "Mosaici del catalogo" : "Liner del catalogo"} dense>
       {finish === "mosaic" ? MOSAIC_FINISHES.map(m => <ChoiceCard compact key={m.id} title={renovationMosaicLabel(m.id)} image={m.preview}
@@ -71,25 +74,26 @@ function FinishCatalogue({ existing = false }: { existing?: boolean }) {
           selected={(existing ? r.existing?.linerColor ?? config.linerColor : config.linerColor) === l.id}
           onSelect={() => existing ? choose({ linerColor: l.id }) : setLinerColor(l.id)} />)}
     </ChoiceGrid>
-    {finish === "mosaic" ? <p className="text-[12px] text-muted-foreground">Campioni reali del catalogo. Il catalogo non fornisce nomi commerciali: gli identificativi tecnici restano nei dati del progetto.</p> : null}
+    {finish === "mosaic" ? <p className="text-[12px] text-muted-foreground">{t("Campioni reali del catalogo. Il catalogo non fornisce nomi commerciali: gli identificativi tecnici restano nei dati del progetto.")}</p> : null}
   </div>;
 }
 
 export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & DecisionProps) {
+  const { t } = useI18n();
   const { config, renovation: r, updateRenovation } = useConfigurator();
   const e = r.existing;
   const choose = (patch: Partial<NonNullable<RenovationConfig["existing"]>>) => updateRenovation({ existing: { ...e, ...patch } });
   return <div className={body}>
-    <StepTabs label="Dati della piscina esistente" tabs={renovationDecisions("renovation-pool", r)} value={tab} onChange={setTab} />
-    <p className="text-[12px] text-muted-foreground">Stato esistente · il 3D mostra la vasca attuale, non i lavori futuri.</p>
+    <StepTabs label={t("Dati della piscina esistente")} tabs={renovationDecisions("renovation-pool", r)} value={tab} onChange={setTab} />
+    <p className="text-[12px] text-muted-foreground">{t("Stato esistente · il 3D mostra la vasca attuale, non i lavori futuri.")}</p>
     {["shape", "plan", "depth"].includes(tab) ? <ShapeTray ctx={ctx} tab={tab} setTab={setTab} showTabs={false} /> : null}
     {tab === "structure" ? <>
-      <ChoiceGrid label="Installazione esistente">
+      <ChoiceGrid label={t("Installazione esistente")}>
         {([ ["in-ground", "Interrata"], ["above-ground", "Fuori terra"] ] as const).map(([id, title]) =>
           <ChoiceCard key={id} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={e?.poolType === id}
             onSelect={() => choose({ poolType: id, ...(id === "above-ground" ? { structure: "modular-steel-panels", finish: "liner" } : {}) })} />)}
       </ChoiceGrid>
-      <ChoiceGrid label="Struttura esistente">
+      <ChoiceGrid label={t("Struttura esistente")}>
         {([ ["reinforced-concrete", "Calcestruzzo armato"], ["modular-steel-panels", "Pannelli in acciaio"] ] as const)
           .filter(([id]) => e?.poolType !== "above-ground" || id === "modular-steel-panels")
           .map(([id, title]) => <ChoiceCard key={id} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={e?.structure === id}
@@ -97,30 +101,30 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
       </ChoiceGrid>
     </> : null}
     {tab === "system" ? <>
-      <ChoiceGrid label="Sistema idraulico esistente">
+      <ChoiceGrid label={t("Sistema idraulico esistente")}>
         {([ ["skimmer", "Skimmer"], ["overflow", "Sfioro"] ] as const).map(([id, title]) =>
           <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />} selected={e?.system === id} onSelect={() => choose({ system: id })} />)}
       </ChoiceGrid>
-      {e?.system === "overflow" ? <ChoiceGrid label="Sfioro esistente">
+      {e?.system === "overflow" ? <ChoiceGrid label={t("Sfioro esistente")}>
         {([ ["visible", "Sfioro a vista"], ["hidden", "Sfioro nascosto"] ] as const).map(([id, title]) =>
           <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />} selected={e.overflowType === id} onSelect={() => choose({ overflowType: id })} />)}
       </ChoiceGrid> : null}
     </> : null}
     {tab === "finish" ? <>
       <FinishCatalogue existing />
-      <GroupLabel>Bordo esistente</GroupLabel>
-      <ChoiceGrid label="Bordo attuale" dense>{COPING_MATERIALS.map(c => <ChoiceCard compact key={c.id} title={c.title}
+      <GroupLabel>{t("Bordo esistente")}</GroupLabel>
+      <ChoiceGrid label={t("Bordo attuale")} dense>{COPING_MATERIALS.map(c => <ChoiceCard compact key={c.id} title={c.title}
         image={<span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />}
         selected={(e?.copingMaterial ?? "travertine") === c.id} onSelect={() => choose({ copingMaterial: c.id })} />)}</ChoiceGrid>
     </> : null}
     {tab === "access" ? <>
-      <ChoiceGrid label="Accesso esistente">
+      <ChoiceGrid label={t("Accesso esistente")}>
         {([ [null, "Senza scala interna"], ["internalSteps", "Scala interna"], ["stainlessSteelLadder", "Scaletta inox"] ] as const)
           .filter(([id]) => e?.poolType !== "above-ground" || id !== "stainlessSteelLadder")
           .map(([id, title]) => <ChoiceCard key={id ?? "none"} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={e?.poolAccess === id}
             onSelect={() => choose({ poolAccess: id })} />)}
       </ChoiceGrid>
-      {e?.poolAccess === "internalSteps" ? <ChoiceGrid label="Scala interna esistente">
+      {e?.poolAccess === "internalSteps" ? <ChoiceGrid label={t("Scala interna esistente")}>
         {([ ["linear", "Scala rettilinea"], ["corner", "Scala angolare"] ] as const)
           .filter(([id]) => !configuredAccessPlan(renovationPreviewConfig(config, { ...r, existing: { ...e, internalStairType: id } }, true)).reason)
           .map(([id, title]) =>
@@ -128,56 +132,57 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
             onSelect={() => choose({ internalStairType: id })} />)}
       </ChoiceGrid> : null}
       {e?.poolAccess && configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason ? <p role="alert" className="text-[12px] text-destructive">
-        {configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason} Scegli un accesso compatibile o indica una vasca senza scala interna.
-      </p> : null}
+        {t(configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason ?? "")} {t("Scegli un accesso compatibile o indica una vasca senza scala interna.")}{" "}</p> : null}
     </> : null}
   </div>;
 }
 
 export function RenovationDetailsStep({ tab, setTab, before, setBefore }: DecisionProps & { before: boolean; setBefore: (v: boolean) => void }) {
+  const { t } = useI18n();
   const { config, renovation: r, updateRenovation, setOverflowType } = useConfigurator();
   return <div className={body}>
-    <StepTabs label="Lavori proposti" tabs={renovationDecisions("renovation-details", r)} value={tab} onChange={setTab} />
-    <StepTabs label="Confronto piscina" tabs={[{ id: "before", label: "Prima · esistente" }, { id: "after", label: "Dopo · proposta" }]}
+    <StepTabs label={t("Lavori proposti")} tabs={renovationDecisions("renovation-details", r)} value={tab} onChange={setTab} />
+    <StepTabs label={t("Confronto piscina")} tabs={[{ id: "before", label: "Prima · esistente" }, { id: "after", label: "Dopo · proposta" }]}
       value={before ? "before" : "after"} onChange={v => setBefore(v === "before")} />
-    <p className="text-[12px] text-muted-foreground">Anteprima indicativa: gli interventi su impianti e ripristini richiedono verifica in cantiere.</p>
+    <p className="text-[12px] text-muted-foreground">{t("Anteprima indicativa: gli interventi su impianti e ripristini richiedono verifica in cantiere.")}</p>
     {tab === "interiorFinish" ? <FinishCatalogue /> : null}
-    {tab === "filtration" ? <><ChoiceGrid label="Lavori impianto">
+    {tab === "filtration" ? <><ChoiceGrid label={t("Lavori impianto")}>
       {Object.entries(FILTRATION_WORK_LABEL).filter(([id]) => r.existing?.system !== "overflow" || (id !== "skimmers" && id !== "overflow")).map(([key, title]) => {
         const id = key as keyof typeof FILTRATION_WORK_LABEL;
         return <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />} selected={r.filtrationWorks.includes(id)}
           onSelect={() => updateRenovation({ filtrationWorks: toggle(r.filtrationWorks.filter(v => id === "overflow" ? v !== "skimmers" : id === "skimmers" ? v !== "overflow" : true), id) })} />;
       })}
     </ChoiceGrid>
-      {r.filtrationWorks.includes("overflow") ? <ChoiceGrid label="Sfioro proposto">
+      {r.filtrationWorks.includes("overflow") ? <ChoiceGrid label={t("Sfioro proposto")}>
         {([ ["visible", "Sfioro a vista"], ["hidden", "Sfioro nascosto"] ] as const).map(([id, title]) =>
           <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />}
             selected={config.overflowType === id} onSelect={() => setOverflowType(id)} />)}
       </ChoiceGrid> : null}
     </> : null}
     {tab === "coping" ? <>
-      <ChoiceGrid label="Sostituzione bordo">
+      <ChoiceGrid label={t("Sostituzione bordo")}>
         {([ [true, "Sostituire il bordo"], [false, "Conservare il bordo"] ] as const).map(([value, title]) => <ChoiceCard key={String(value)} compact title={title}
           image={<Layers className="size-12" strokeWidth={1} />} selected={r.replaceCoping === value} onSelect={() => updateRenovation({ replaceCoping: value })} />)}
       </ChoiceGrid>
-      {r.replaceCoping ? <ChoiceGrid label="Nuovo bordo" dense>{COPING_MATERIALS.map(c => <ChoiceCard compact key={c.id} title={c.title}
+      {r.replaceCoping ? <ChoiceGrid label={t("Nuovo bordo")} dense>{COPING_MATERIALS.map(c => <ChoiceCard compact key={c.id} title={c.title}
         image={<span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />} selected={r.copingMaterial === c.id}
         onSelect={() => updateRenovation({ copingMaterial: c.id })} />)}</ChoiceGrid> : null}
     </> : null}
-    {tab === "structure" ? <ChoiceGrid label="Ripristini richiesti">
+    {tab === "structure" ? <ChoiceGrid label={t("Ripristini richiesti")}>
       {Object.entries(STRUCTURE_ISSUE_LABEL).map(([key, title]) => { const id = key as keyof typeof STRUCTURE_ISSUE_LABEL;
         return <ChoiceCard compact key={id} title={title} image={<Wrench className="size-12" strokeWidth={1} />} selected={r.structureIssues.includes(id)}
           onSelect={() => updateRenovation({ structureIssues: toggle(r.structureIssues, id) })} />; })}
     </ChoiceGrid> : null}
-    {tab === "equipment" ? <ChoiceGrid label="Optional impianto">
+    {tab === "equipment" ? <ChoiceGrid label={t("Optional impianto")}>
       {Object.entries(EQUIPMENT_UPGRADE_LABEL).map(([key, title]) => { const id = key as keyof typeof EQUIPMENT_UPGRADE_LABEL;
-        return <ChoiceCard optional key={id} title={title} description="Da dimensionare con il consulente" image={<Settings className="size-8" strokeWidth={1} />}
+        return <ChoiceCard optional key={id} title={title} description={t("Da dimensionare con il consulente")} image={<Settings className="size-8" strokeWidth={1} />}
           selected={r.equipmentUpgrades.includes(id)} onSelect={() => updateRenovation({ equipmentUpgrades: toggle(r.equipmentUpgrades, id) })} />; })}
     </ChoiceGrid> : null}
   </div>;
 }
 
 export function RenovationCustomerStep() {
+  const { t } = useI18n();
   const { config, setCustomerField } = useConfigurator();
   const validation = getCustomerValidation(config.customer);
   return <div className={body}>
@@ -188,22 +193,27 @@ export function RenovationCustomerStep() {
             error={key === "email" && config.customer.email.length > 0 && !validation.emailValid ? "Inserisci un indirizzo email valido." : undefined}
             onChange={v => setCustomerField(key, v)} />)}
     </div>
-    <div><Label htmlFor="renovation-notes">Note cliente (facoltative)</Label><Textarea id="renovation-notes" className="mt-2" maxLength={2000}
+    <div><Label htmlFor="renovation-notes">{t("Note cliente (facoltative)")}</Label><Textarea id="renovation-notes" className="mt-2" maxLength={2000}
       value={config.customer.notes} onChange={e => setCustomerField("notes", e.target.value)} /></div>
-    <FileDrop category="site" label="Foto o planimetrie (facoltative)" hint="JPG, PNG, WebP o PDF. Gli allegati non sono inclusi nel link pubblico." />
+    <FileDrop category="site" label={t("Foto o planimetrie (facoltative)")} hint={t("JPG, PNG, WebP o PDF. Gli allegati non sono inclusi nel link pubblico.")} />
   </div>;
 }
 
 export function RenovationReviewStep({ ctx }: { ctx: TrayContext }) {
+  const { t } = useI18n();
   const { config, projectConfiguration } = useConfigurator();
   const delivery = useProjectDelivery();
   return <div className={body}>
     <ProjectDeliveryPanel delivery={delivery} captureHero={ctx.captureHero} captureDayNight={ctx.captureDayNight} />
     <ProjectSummary publicRef={delivery.link?.publicRef} heroUrl={delivery.heroUrl} />
     <section className="flex flex-col gap-3 border-t border-hairline pt-5">
-      <h3 className="text-[20px] font-light">Richiedi una proposta di ristrutturazione</h3>
-      <p className="text-[12px] font-light text-muted-foreground">Un consulente verifica lavori, fattibilità e investimento. Nessun prezzo automatico.</p>
+      <h3 className="text-[20px] font-light">{t("Richiedi una proposta di ristrutturazione")}</h3>
+      <p className="text-[12px] font-light text-muted-foreground">{t("Un consulente verifica lavori, fattibilità e investimento. Nessun prezzo automatico.")}</p>
       <LeadRequestDialog projectConfiguration={projectConfiguration} projectReference={delivery.link?.publicRef}
+        prepareProject={async () => {
+          const saved = await delivery.save();
+          return saved ? { projectConfiguration: saved.projectConfiguration, projectReference: saved.publicRef } : null;
+        }}
         defaultCustomer={{ name: [config.customer.name, config.customer.surname].filter(Boolean).join(" "), email: config.customer.email, phone: config.customer.phone,
           projectLocation: [config.customer.city, config.customer.country].filter(Boolean).join(", "), notes: config.customer.notes }} />
     </section>

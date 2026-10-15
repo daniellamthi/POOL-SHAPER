@@ -15,6 +15,7 @@
  */
 import { exteriorPanelFinish, externalStairSide } from "./above-ground";
 import { normalizeComfortFeatures } from "./comfort-selection";
+import { normalizeSunShelfLoungers } from "./sun-shelf-loungers";
 import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
@@ -69,12 +70,12 @@ export function toProjectConfiguration(
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
-    config: {
+    config: normalizeSunShelfLoungers({
       ...config,
       ...(config.poolType === "above-ground" ? { externalStairPlatformExtended: true } : {}),
       structure,
       finish: normaliseFinishForStructure(structure, config.finish),
-    },
+    }),
     renovation,
   };
 }
@@ -182,7 +183,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // "infinity") -- a project that never touched Infinity must round-trip
   // byte-for-byte identical, never gain a new field it didn't have before.
   const infinityEdge = system === "infinity"
-    ? resolveInfinitySelection(outline, restored.shape, restored.poolType, restored.infinityEdge?.side)
+    ? resolveInfinitySelection(outline, restored.shape, restored.poolType, restored.infinityEdge?.side, restored.infinityEdge?.wallType)
     : undefined;
   const {
     infinityEdge: _savedInfinityEdge,
@@ -196,7 +197,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
-    config: {
+    config: normalizeSunShelfLoungers({
       ...restoredWithoutEdge,
       ...(restored.paving !== undefined ? { paving: pavingId(restored.paving) } : {}),
       ...(restored.pavingFormat !== undefined ? { pavingFormat: pavingFormatId(restored.paving, restored.pavingFormat) } : {}),
@@ -251,7 +252,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       finish,
       system,
       ...(infinityEdge !== undefined ? { infinityEdge } : {}),
-    },
+    }),
     renovation: renovation as RenovationConfig,
   };
 }

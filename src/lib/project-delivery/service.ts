@@ -94,10 +94,10 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
     "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
     "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "sceneTime", "infinityEdge", "poolAccess",
     "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
-    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended",
+    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount",
   ]);
   config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
-  if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection"]);
+  if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection", "wallType"]);
   config.customer = DEFAULT_CUSTOMER;
   config.uploads = [];
   const renovation = pick(project.renovation, ["areas", "currentFinish", "filtrationWorks", "replaceCoping", "copingMaterial", "structureIssues", "equipmentUpgrades"]);

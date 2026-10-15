@@ -74,12 +74,15 @@ export function PoolComfortModel({
   floorProfile,
   children,
   showJets = true,
+  showBenchLighting = false,
   night = false,
 }: {
   plan: ComfortPlan;
   floorProfile: FloorProfileModel;
   children: ReactNode;
   showJets?: boolean;
+  /** Optional LED micro-spots, independent from the hydromassage jets. */
+  showBenchLighting?: boolean;
   /** Night scene: the hydromassage micro-spots glow softly. */
   night?: boolean;
 }) {
@@ -117,7 +120,7 @@ export function PoolComfortModel({
             <HydroJet key={`${element.kind}-jet-${index}`} jet={jet} />
           )),
         )}
-      {showJets &&
+      {showJets && showBenchLighting &&
         plan.elements.flatMap((element) =>
           (element.spots ?? []).map((spot, index) => (
             <HydroSpot key={`${element.kind}-spot-${index}`} spot={spot} night={night} />
@@ -150,7 +153,7 @@ export function HydroSpot({
         <meshStandardMaterial
           color="#f3ead8"
           emissive="#ffd9a0"
-          emissiveIntensity={night ? 2.2 : 0.08}
+          emissiveIntensity={night ? 2.2 : 0}
           roughness={0.2}
           toneMapped
         />

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useMemo } from "react";
 import { technicalRows, TECHNICAL_NOTE } from "@/lib/project-delivery/summary-model";
 import { useConfigurator } from "@/lib/pool/context";
@@ -14,9 +15,10 @@ export function useTechnicalData(): { technical: TechnicalPlan; cover: CoverPlan
 }
 
 function Row({ label, value, note }: { label: string; value: string; note?: string | undefined }) {
+  const { t } = useI18n();
   return <div className="flex justify-between gap-4 border-b border-hairline/60 py-2 last:border-0">
-    <span className="text-muted-foreground">{label}</span>
-    <span className="max-w-[58%] text-right text-foreground" title={note}>{value}</span>
+    <span className="text-muted-foreground">{t(label)}</span>
+    <span className="max-w-[58%] text-right text-foreground" title={note ? t(note) : undefined}>{t(value)}</span>
   </div>;
 }
 
@@ -27,11 +29,12 @@ export function TechnicalDataPanel({ technical, cover, compact = false }: {
   cover: CoverPlan;
   compact?: boolean;
 }) {
+  const { t, locale } = useI18n();
   return <div className="rounded-2xl border border-hairline bg-card/95 p-4 text-xs shadow-sm" data-testid="technical-data-panel">
-    <h3 className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Scheda tecnica indicativa</h3>
-    {technicalRows(technical, cover, compact).map((row) => (
+    <h3 className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{t("Scheda tecnica indicativa")}</h3>
+    {technicalRows(technical, cover, compact, locale).map((row) => (
       <Row key={row.label} label={row.label} value={row.value} note={row.hint} />
     ))}
-    {!compact ? <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{TECHNICAL_NOTE}</p> : null}
+    {!compact ? <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{t(TECHNICAL_NOTE)}</p> : null}
   </div>;
 }

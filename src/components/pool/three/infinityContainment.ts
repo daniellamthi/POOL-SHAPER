@@ -37,6 +37,7 @@ export function insetInfinityWaterZone(zone: RectangleInfinityZone, inset: numbe
 export function createInfinityContainmentGeometry(
   zone: RectangleInfinityZone, dims: InfinityEdgeDimensions, waterY: number,
   returnWidth: number, copingY: number, outline?: Outline,
+  part: "all" | "receiver" | "glass" = "all",
 ) {
   const levels = infinityContainmentLevels(dims, waterY);
   type Station = { point: readonly [number, number]; normal: readonly [number, number]; solid: boolean; terminal: boolean };
@@ -84,6 +85,8 @@ export function createInfinityContainmentGeometry(
   for (let i = 0; i < stations.length - 1; i++) {
     const a = stations[i]!, b = stations[i + 1]!, pa = profile(a), pb = profile(b);
     for (let j = 0; j < pa.length; j++) {
+      const glassFace = !a.solid && !b.solid && [0, 1, 2, 8].includes(j);
+      if (part === "glass" ? !glassFace : part === "receiver" && glassFace) continue;
       const k = (j + 1) % pa.length;
       const v0 = vertex(a, pa[j]!), v1 = vertex(b, pb[j]!), v2 = vertex(b, pb[k]!), v3 = vertex(a, pa[k]!);
       const wetRole = (j === 1 || j === 2) && !a.solid && !b.solid ? 1 : (j === 3 || j === 4) ? 2 : 0;
@@ -91,6 +94,7 @@ export function createInfinityContainmentGeometry(
     }
   }
   for (const [s, reverse] of [[stations[0]!, false], [stations[stations.length - 1]!, true]] as const) {
+    if (part === "glass") continue;
     const points = profile(s).filter((p, i, all) => i === 0 || p[0] !== all[i - 1]![0] || p[1] !== all[i - 1]![1]);
     const triangles = THREE.ShapeUtils.triangulateShape(points.map(p => new THREE.Vector2(...p)), []);
     for (const [a, b, c] of triangles) {

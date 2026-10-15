@@ -143,6 +143,7 @@ assert(!projectLinkIsDirty(ownerLink,projectA),"legacy saved snapshot stays clea
 assert(!projectLinkIsDirty({...ownerLink,savedSnapshot:projectSnapshotFingerprint(projectA)},JSON.parse(JSON.stringify(stable(projectA)))),"jsonb property order does not create false dirty state");
 assert(projectLinkIsDirty(ownerLink,{...projectA,config:{...base,dimensions:{...base.dimensions,length:10}}}),"real configuration edit remains dirty");
 assert(!projectLinkIsDirty({...ownerLink,editToken:undefined},projectA),"read-only share has no owner dirty marker");
+assert(projectLinkIsDirty({...ownerLink,editToken:undefined},{...projectA,config:{...base,dimensions:{...base.dimensions,length:10}}}),"editing a shared snapshot must create a copy before Share/PDF");
 
 // Reference project B: 12 x 5 rectangle, Infinity on a real candidate side.
 const dimsB = { length: 12, width: 5, depth: 1.6, cornerRadius: 0, floorProfile: "flat" as const };

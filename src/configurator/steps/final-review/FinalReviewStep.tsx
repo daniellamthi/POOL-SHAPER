@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
 import { PavingOptions } from "@/components/pool/PresentationOptions";
 import { StepSection } from "@/components/pool/StepSection";
@@ -12,23 +13,22 @@ import { LeadRequestDialog } from "./LeadRequestDialog";
  * collected once, here, only if the customer chooses to request a
  * consultation. */
 export function FinalReviewStep() {
+  const { t } = useI18n();
   const { projectConfiguration } = useConfigurator();
 
   return (
     <StepSection
-      title="Il tuo progetto"
-      subtitle="Ecco la sintesi della piscina che hai progettato, pronta per essere valutata con un consulente."
+      title={t("Il tuo progetto")}
+      subtitle={t("Ecco la sintesi della piscina che hai progettato, pronta per essere valutata con un consulente.")}
     >
       <ProjectSummary />
       <PavingOptions />
 
       <section className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-card/40 p-8 text-center">
         <h3 className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">
-          Vuoi trasformare questo progetto in una proposta reale?
-        </h3>
+          {t("Vuoi trasformare questo progetto in una proposta reale?")}{" "}</h3>
         <p className="max-w-[46ch] text-[13px] leading-[1.8] font-light text-muted-foreground">
-          Un nostro consulente può verificare configurazione, fattibilità e investimento.
-        </p>
+          {t("Un nostro consulente può verificare configurazione, fattibilità e investimento.")}{" "}</p>
         <LeadRequestDialog projectConfiguration={projectConfiguration} />
       </section>
     </StepSection>

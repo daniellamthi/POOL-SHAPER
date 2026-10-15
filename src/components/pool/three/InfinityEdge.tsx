@@ -37,16 +37,18 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
     // Millimetric stand-off prevents coplanar film/wall flicker. Receiver
     // water stops inside the end walls and below every containing rim.
     const filmOffset = dims.lipWidth + 0.003;
+    const glass = infinityEdge?.wallType === "glass";
     return {
       dims, levels,
-      structure: createInfinityContainmentGeometry(zone, dims, waterLevel, copingOuterOffsetDistance, copingSurfaceY, outline),
+      structure: createInfinityContainmentGeometry(zone, dims, waterLevel, copingOuterOffsetDistance, copingSurfaceY, outline, glass ? "receiver" : "all"),
+      glass: glass ? createInfinityContainmentGeometry(zone, dims, waterLevel, copingOuterOffsetDistance, copingSurfaceY, outline, "glass") : null,
       film: createInfinityWaterFilmGeometry(flowZone, filmOffset, waterLevel),
       cascade: createInfinityCascadeGeometry(flowZone, { ...dims, lipWidth: filmOffset }, waterLevel),
       receiver: createInfinityWaterFilmGeometry(flowZone, dims.lipWidth + dims.catchBasinWidth - 0.004, levels.receiverY, filmOffset),
     };
   }, [outline, shape, infinityEdge, waterLevel, copingSurfaceY, copingOuterOffsetDistance]);
   useEffect(() => () => {
-    if (assembly) for (const g of [assembly.structure, assembly.film, assembly.cascade, assembly.receiver]) g.dispose();
+    if (assembly) for (const g of [assembly.structure, assembly.glass, assembly.film, assembly.cascade, assembly.receiver]) g?.dispose();
   }, [assembly]);
   if (!assembly) return null;
   const rawKind = rawStructure === "REINFORCED_CONCRETE"
@@ -75,6 +77,11 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
           `).replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, max(0.14, roughnessFactor * 0.32), wetted);");
         }} customProgramCacheKey={() => `infinity-grey-wet-containment-v5-${assembly.levels.receiverY}-${showWater}`} />}
     </mesh>
+    {assembly.glass ? <mesh name="infinity-glass-wall" geometry={assembly.glass} renderOrder={1}>
+      <meshPhysicalMaterial color="#f5fcfa" transmission={0.98} thickness={assembly.dims.lipWidth - 0.004}
+        roughness={0.035} metalness={0} ior={1.5} attenuationColor="#b9ded8" attenuationDistance={4}
+        envMapIntensity={1} side={THREE.DoubleSide} />
+    </mesh> : null}
     {showWater ? <><mesh name="infinity-crest-water" geometry={assembly.film} renderOrder={2}>
       <WaterSurfaceMaterial waterLevel={waterLevel} reflections={false} depth={0.006} flowing />
     </mesh>

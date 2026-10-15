@@ -1,3 +1,4 @@
+import { localizeSummaryModel, useI18n } from "@/lib/i18n";
 import { useMemo, type ReactNode } from "react";
 import { STEPS, RENOVATION_STEPS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
@@ -10,13 +11,14 @@ import {
 const stepIndex = (id: string) => STEPS.findIndex((step) => step.id === id);
 
 function EditLink({ label = "Modifica", onEdit }: { label?: string; onEdit: () => void }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
       onClick={onEdit}
       className="shrink-0 text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
     >
-      {label}
+      {t(label)}
     </button>
   );
 }
@@ -30,11 +32,12 @@ function Section({
   onEdit?: (() => void) | undefined;
   children: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <section className="flex flex-col gap-4 border-t border-hairline pt-7 first:border-0 first:pt-0">
       <div className="flex items-baseline justify-between gap-4">
         <h3 className="text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-          {title}
+          {t(title)}
         </h3>
         {onEdit ? <EditLink onEdit={onEdit} /> : null}
       </div>
@@ -82,8 +85,9 @@ export function ProjectSummary({
   /** Clean hero capture of the configured pool, when taken. */
   heroUrl?: string | null | undefined;
 } = {}) {
+  const { t, locale } = useI18n();
   const { projectConfiguration, goToStep } = useConfigurator();
-  const model = useMemo(() => buildProjectSummary(projectConfiguration), [projectConfiguration]);
+  const model = useMemo(() => localizeSummaryModel(buildProjectSummary(projectConfiguration, locale), locale), [projectConfiguration, locale]);
   const editStep = (id: string) => {
     const index = projectConfiguration.config.projectType === "renovation"
       ? RENOVATION_STEPS.findIndex(step => step.id === id) : stepIndex(id);
@@ -98,14 +102,13 @@ export function ProjectSummary({
       {heroUrl ? (
         <img
           src={heroUrl}
-          alt="La tua piscina configurata"
+          alt={t("La tua piscina configurata")}
           className="-mx-7 -mt-7 aspect-[16/9] w-[calc(100%+3.5rem)] max-w-none rounded-t-2xl bg-viewport object-cover"
         />
       ) : null}
       <header className="flex flex-col gap-3">
         <p className="text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-          Il tuo progetto
-        </p>
+          {t("Il tuo progetto")}{" "}</p>
         <h2 className="text-[26px] leading-[1.08] font-extralight tracking-[-0.02em] text-foreground sm:text-[30px]">
           {model.headline}
         </h2>
@@ -113,21 +116,20 @@ export function ProjectSummary({
         <p className="text-[11px] font-light tracking-[0.08em] text-muted-foreground">
           {publicRef ? (
             <>
-              Project ID{" "}
+              {t("Project ID")}{" "}
               <span className="font-normal text-brand" data-testid="summary-project-ref">
                 {publicRef}
               </span>
             </>
           ) : (
-            "Project ID assegnato al salvataggio"
+            t("Project ID assegnato al salvataggio")
           )}
         </p>
         <a
           href="#pool-viewport"
           className="w-fit text-[11px] font-light text-muted-foreground underline-offset-4 hover:text-foreground hover:underline lg:hidden"
         >
-          ↑ Espandi piscina
-        </a>
+          {t("↑ Espandi piscina")}{" "}</a>
       </header>
 
       {model.sections.map((section) => (
@@ -141,8 +143,7 @@ export function ProjectSummary({
       {model.deferred.length > 0 ? (
         <section className="flex flex-col gap-4 border-t border-hairline pt-7">
           <h3 className="text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-            Da definire con il consulente
-          </h3>
+            {t("Da definire con il consulente")}{" "}</h3>
           <ul className="flex flex-col gap-2.5">
             {model.deferred.map((item) => (
               <li
@@ -159,8 +160,7 @@ export function ProjectSummary({
 
       <details className="group border-t border-hairline pt-7">
         <summary className="cursor-pointer list-none text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground">
-          Scopri i dettagli tecnici
-        </summary>
+          {t("Scopri i dettagli tecnici")}{" "}</summary>
         <dl className="mt-5 flex flex-col gap-3.5">
           {model.technical.map((row) => (
             <Row key={row.label} row={row} />

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { Check, Copy, FileDown, Link2, Loader2, Save } from "lucide-react";
@@ -18,6 +19,7 @@ export function ProjectDeliveryPanel({
   captureHero?: (() => Promise<string | null>) | undefined;
   captureDayNight?: (() => Promise<DayNightCapture>) | undefined;
 }) {
+  const { t, locale } = useI18n();
   const { projectConfiguration, sharedProject } = useConfigurator();
   const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -36,11 +38,8 @@ export function ProjectDeliveryPanel({
   }, [shareUrl]);
 
   const copy = async () => {
-    const target =
-      shareUrl ??
-      (await delivery
-        .save()
-        .then((l) => (l ? projectShareUrl(window.location.origin, l.publicRef) : null)));
+    const saved = delivery.dirty || !link ? await delivery.save() : link;
+    const target = saved ? projectShareUrl(window.location.origin, saved.publicRef) : null;
     if (!target) return;
     try {
       await navigator.clipboard.writeText(target);
@@ -54,7 +53,7 @@ export function ProjectDeliveryPanel({
   const projectBook = async () => {
     setBookStatus("working");
     try {
-      const saved = delivery.dirty || !link ? await delivery.save() : link;
+      const saved = delivery.dirty || !link ? await delivery.save() : { ...link, projectConfiguration };
       if (!saved) throw new Error("not saved");
       // Same view by day and by night; the cover is the chosen time of day.
       const presentation = captureDayNight ? await captureDayNight() : null;
@@ -64,12 +63,13 @@ export function ProjectDeliveryPanel({
       if (hero) delivery.setHeroUrl(hero);
       const { buildProjectBook } = await import("@/lib/project-delivery/projectBook");
       const doc = await buildProjectBook({
-        model: buildProjectSummary(projectConfiguration),
+        model: buildProjectSummary(saved.projectConfiguration, locale),
         publicRef: saved.publicRef,
         shareUrl: projectShareUrl(window.location.origin, saved.publicRef),
         heroDataUrl: hero,
         presentation,
         issuedAt: new Date(),
+        locale,
       });
       doc.save(`Project-Book-${saved.publicRef}.pdf`);
       setBookStatus("idle");
@@ -81,51 +81,50 @@ export function ProjectDeliveryPanel({
   const viewer = Boolean(link && !delivery.owner);
   return (
     <section
-      aria-label="Salva e condividi"
+      aria-label={t("Salva e condividi")}
       data-testid="project-delivery"
       className="flex flex-col gap-4 rounded-2xl border border-hairline bg-card p-5"
     >
       {sharedProject?.status === "error" ? (
-        <p className="text-[12px] text-destructive">{sharedProject.message}</p>
+        <p className="text-[12px] text-destructive">{t(sharedProject.message ?? "")}</p>
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="label-xs">Il tuo progetto</p>
+          <p className="label-xs">{t("Il tuo progetto")}</p>
           {link ? (
             <p className="flex items-center gap-2 text-[15px] font-light text-foreground">
               <Check className="size-4 text-brand" strokeWidth={1.75} />
-              {viewer ? "Progetto condiviso" : "Salvato"} ·{" "}
+              {t(viewer ? "Progetto condiviso" : "Salvato")} ·{" "}
               <span className="tabular-nums text-brand" data-testid="delivery-project-ref">
                 {link.publicRef}
               </span>
             </p>
           ) : (
-            <p className="text-[15px] font-light text-foreground">Non ancora salvato</p>
+            <p className="text-[15px] font-light text-foreground">{t("Non ancora salvato")}</p>
           )}
           <p className="text-[12px] font-light text-muted-foreground">
-            {viewer
+            {t(viewer
               ? "Sola lettura: salvando crei una tua copia, l’originale non cambia."
               : link
                 ? delivery.dirty
                   ? "Hai modifiche non salvate."
                   : "Riprendilo quando vuoi, anche da un altro dispositivo, con il link."
-                : "Salva per ricevere un Project ID, riprenderlo e condividerlo."}
+                : "Salva per ricevere un Project ID, riprenderlo e condividerlo.")}
           </p>
           {delivery.durable === false ? (
             <p className="text-[11px] text-muted-foreground">
-              Archivio cloud non configurato in questo ambiente: salvataggio temporaneo.
-            </p>
+              {t("Archivio cloud non configurato in questo ambiente: salvataggio temporaneo.")}{" "}</p>
           ) : null}
           {delivery.message ? (
             <p className="text-[12px] text-destructive" role="alert">
-              {delivery.message}
+              {t(delivery.message)}
             </p>
           ) : null}
         </div>
         {qr && link ? (
           <img
             src={qr}
-            alt={`QR del progetto ${link.publicRef}`}
+            alt={t("QR del progetto {ref}", { ref: link.publicRef })}
             className="size-[72px] rounded-md border border-hairline bg-white p-1"
           />
         ) : null}
@@ -143,23 +142,24 @@ export function ProjectDeliveryPanel({
           ) : (
             <Save className="size-3.5" />
           )}
-          {viewer
+          {t(viewer
             ? "Salva una copia"
             : link
               ? delivery.dirty
                 ? "Salva modifiche"
                 : "Salvato"
-              : "Salva progetto"}
+              : "Salva progetto")}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => void copy()}
+          disabled={status === "saving"}
           className="rounded-full px-4"
           data-testid="delivery-share"
         >
           {copied ? <Copy className="size-3.5" /> : <Link2 className="size-3.5" />}
-          {copied ? "Link copiato" : "Condividi"}
+          {t(copied ? "Link copiato" : "Condividi")}
         </Button>
         <Button
           type="button"
@@ -174,8 +174,7 @@ export function ProjectDeliveryPanel({
           ) : (
             <FileDown className="size-3.5" />
           )}
-          Project Book PDF
-        </Button>
+          {t("Project Book PDF")}{" "}</Button>
       </div>
       {shareUrl ? (
         <p className="truncate text-[11px] text-muted-foreground" data-testid="delivery-share-url">
@@ -183,7 +182,7 @@ export function ProjectDeliveryPanel({
         </p>
       ) : null}
       {bookStatus === "error" ? (
-        <p className="text-[12px] text-destructive">Project Book non generato. Riprova.</p>
+        <p className="text-[12px] text-destructive">{t("Project Book non generato. Riprova.")}</p>
       ) : null}
     </section>
   );

@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
+import { normalizeSunShelfLoungers } from "./sun-shelf-loungers";
 import { focusForAction, nextFocusRequest, type FocusRequest } from "./contextual-camera";
 import {
   DEFAULT_CONTROL_POINTS,
@@ -43,6 +44,7 @@ import {
 import { loadSharedProjectFn } from "@/lib/project-delivery/projectDelivery.server";
 import {
   getProjectLink,
+  projectLinkIsDirty,
   projectSnapshotFingerprint,
   setProjectLink,
   sharedRefFromLocation,
@@ -105,15 +107,17 @@ type Action =
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
   | { type: "setInfinitySide"; value: number }
+  | { type: "setInfinityWall"; value: "traditional" | "glass" }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
   | { type: "setSkimmerType"; value: SkimmerTypeId }
   | { type: "setFinish"; value: FinishMaterial }
   | { type: "setLinerColor"; value: LinerColor }
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
+  | { type: "setSunShelfLoungerCount"; value: number }
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
-  | { type: "setSceneTime"; value: "day" | "night" }
+  | { type: "setSceneTime"; value: "day" | "night"; preserveCamera?: boolean }
   | { type: "setPaving"; value: PavingId }
   | { type: "setPavingFormat"; value: PavingFormatId }
   | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
@@ -146,6 +150,7 @@ type Action =
   | { type: "restoreProject"; value: ProjectConfiguration };
 
 interface State {
+  sunShelfNotice?: string | null;
   visualFocus?: FocusRequest | null;
   /** Session preference; inactive Infinity never leaks into saved configuration. */
   lastInfinitySide?: number | undefined;
@@ -214,13 +219,32 @@ function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
   const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
   const edge = resolveInfinitySelection(
     outline, config.shape, config.poolType, invalidate ? undefined : config.infinityEdge?.side,
+    config.infinityEdge?.wallType,
   );
   return edge ? { ...config, infinityEdge: edge } : withoutInfinityEdge({ ...config, system: "skimmer" });
 }
 
 function configurationReducer(state: State, action: Action): State {
+  const next = reduceConfiguration(state, action);
+  if (next.config === state.config) return next;
+  const config = normalizeSunShelfLoungers(next.config);
+  const removed = state.config.features.includes("sunShelfLoungers") && !config.features.includes("sunShelfLoungers")
+    && !(action.type === "togglePoolFeature" && action.value === "sunShelfLoungers");
+  const reduced = config.sunShelfLoungerCount !== next.config.sunShelfLoungerCount && config.features.includes("sunShelfLoungers");
+  const explicitLoungerToggle = action.type === "togglePoolFeature" && action.value === "sunShelfLoungers";
+  return { ...next, config, sunShelfNotice: removed
+    ? "Lettini per spiaggetta rimossi: la spiaggetta non è più disponibile o compatibile."
+    : reduced ? "Quantità lettini aggiornata allo spazio disponibile."
+    : explicitLoungerToggle ? null : next.sunShelfNotice ?? null };
+}
+
+function reduceConfiguration(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
+    case "setSunShelfLoungerCount":
+      return config.features.includes("sunShelfLoungers") && Number.isFinite(action.value)
+        ? { ...state, sunShelfNotice: null, config: { ...config, sunShelfLoungerCount: Math.max(1, Math.trunc(action.value)) } }
+        : state;
     case "setLedColor":
       return isLedColor(action.value)
         ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
@@ -471,13 +495,17 @@ function configurationReducer(state: State, action: Action): State {
       return { ...state, lastInfinitySide,
         config: system === "infinity"
           ? validateInfinity({ ...nextConfig, ...(typeof lastInfinitySide === "number" ? {
-              infinityEdge: clampInfinityEdgeParams({ enabled: true, side: lastInfinitySide }),
+              infinityEdge: clampInfinityEdgeParams({ ...config.infinityEdge, enabled: true, side: lastInfinitySide }),
             } : {}) })
           : withoutInfinityEdge(nextConfig),
       };
     }
     case "setOverflowType":
       return { ...state, config: { ...config, overflowType: action.value } };
+    case "setInfinityWall":
+      return config.system === "infinity" ? { ...state, config: { ...config,
+        infinityEdge: clampInfinityEdgeParams({ ...config.infinityEdge, wallType: action.value }),
+      } } : state;
     case "setInfinitySide":
       if (!compatibleInfinityZones(buildOutline(config.shape, config.dimensions, config.controlPoints), config.shape, config.poolType).some((zone) => zone.side === action.value)) return state;
       // Rectangle and L-shape, this pass -- the Acqua step never dispatches
@@ -646,6 +674,7 @@ function configurationReducer(state: State, action: Action): State {
  * instead of the provider's own closed-over state, since it needs to run
  * against the just-loaded draft before that state is committed. */
 function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConfig): number {
+  if (config.projectType === null) return 0;
   if (config.projectType === "renovation") {
     for (let i = 1; i < RENOVATION_STEPS.length - 1; i++)
       if (!renovationStepComplete(i, config, renovation)) return i;
@@ -690,15 +719,29 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
   // server/client hydration mismatch to worry about; this effect only ever
   // runs in the browser, after hydration.
   const [justRestoredProject, setJustRestoredProject] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const sharedLoadRevision = useRef(0);
   const [sharedProject, setSharedProject] = useState<ConfiguratorContextValue["sharedProject"]>(null);
   useEffect(() => {
+    const revision = ++sharedLoadRevision.current;
     // Build 2: a share link restores that exact saved snapshot and lands on
     // the presentation; it takes precedence over this browser's local draft.
     const sharedRef = sharedRefFromLocation();
+    const draft = loadProjectDraft();
+    const draftLink = draft ? getProjectLink(draft.projectId) : null;
+    // A saved URL must not discard this owner's newer autosaved edits.
+    if (sharedRef && draft && draftLink?.editToken && draftLink.publicRef === sharedRef && projectLinkIsDirty(draftLink, draft)) {
+      dispatch({ type: "restoreProject", value: draft });
+      dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
+      setJustRestoredProject(true);
+      setDraftReady(true);
+      return undefined;
+    }
     if (sharedRef) {
       setSharedProject({ publicRef: sharedRef, status: "loading" });
       void loadSharedProjectFn({ data: { publicRef: sharedRef } })
         .then((result) => {
+          if (revision !== sharedLoadRevision.current) return;
           if (!result.ok) {
             setSharedProject({ publicRef: sharedRef, status: "error", message: result.message });
             return;
@@ -710,7 +753,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
             ...shared,
             config: {
               ...shared.config,
-              customer: loadProjectDraft()?.config.customer ?? shared.config.customer,
+              customer: draft?.config.customer ?? shared.config.customer,
             },
           };
           const known = getProjectLink(project.projectId);
@@ -729,34 +772,43 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
                 : STEPS.length - 1,
           });
           setSharedProject({ publicRef: sharedRef, status: "ready" });
+          setDraftReady(true);
         })
-        .catch(() =>
+        .catch(() => {
+          if (revision !== sharedLoadRevision.current) return;
           setSharedProject({
             publicRef: sharedRef,
             status: "error",
             message: "Progetto non disponibile in questo momento.",
-          }),
-        );
-      return;
+          });
+        });
+      return () => {
+        if (revision === sharedLoadRevision.current) sharedLoadRevision.current += 1;
+      };
     }
-    const draft = loadProjectDraft();
-    if (!draft) return;
-    dispatch({ type: "restoreProject", value: draft });
-    dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
-    setJustRestoredProject(true);
+    if (draft) {
+      dispatch({ type: "restoreProject", value: draft });
+      dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
+      setJustRestoredProject(true);
+    }
+    setDraftReady(true);
     // Runs once per mount by design -- a later `reset()` starts a fresh
     // project and clears the draft rather than re-triggering this restore.
+    return undefined;
   }, []);
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
+    // Never overwrite a local draft with defaults while a share is loading
+    // or has failed. Explicitly starting a new project releases this gate.
+    if (!draftReady) return;
     // Debounced so a drag/typing burst writes once, not on every change.
     saveTimeoutRef.current = setTimeout(() => saveProjectDraft(projectConfiguration), 800);
     return () => {
       if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
     };
-  }, [projectConfiguration]);
+  }, [projectConfiguration, draftReady]);
 
   const outline = useMemo(
     () => buildOutline(config.shape, config.dimensions, config.controlPoints),
@@ -843,15 +895,18 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
       setInfinitySide: (v) => dispatch({ type: "setInfinitySide", value: v }),
+      setInfinityWall: (v) => dispatch({ type: "setInfinityWall", value: v }),
       setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),
       setSkimmerType: (v) => dispatch({ type: "setSkimmerType", value: v }),
       setFinish: (v) => dispatch({ type: "setFinish", value: v }),
       setLinerColor: (v) => dispatch({ type: "setLinerColor", value: v }),
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
+      setSunShelfLoungerCount: (v) => dispatch({ type: "setSunShelfLoungerCount", value: v }),
+      sunShelfNotice: state.sunShelfNotice ?? null,
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
-      setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
+      setSceneTime: (v, preserveCamera = false) => dispatch({ type: "setSceneTime", value: v, preserveCamera }),
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
       setPavingFormat: (v) => dispatch({ type: "setPavingFormat", value: v }),
       setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),
@@ -886,6 +941,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       next: () => dispatch({ type: "next" }),
       previous: () => dispatch({ type: "previous" }),
       reset: () => {
+        sharedLoadRevision.current += 1;
         for (const upload of config.uploads) {
           if (upload.url) URL.revokeObjectURL(upload.url);
         }
@@ -893,6 +949,11 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         // next visit -- clear it immediately rather than waiting for the
         // debounced autosave to overwrite it with the fresh (blank) state.
         clearProjectDraft();
+        const location = new URL(window.location.href);
+        location.searchParams.delete("p");
+        window.history.replaceState(window.history.state, "", location.href);
+        setSharedProject(null);
+        setDraftReady(true);
         setJustRestoredProject(false);
         dispatch({ type: "reset" });
       },

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useConfigurator } from "@/lib/pool/context";
 import {
   createProjectId,
@@ -8,6 +8,10 @@ import {
 import { saveProjectFn } from "@/lib/project-delivery/projectDelivery.server";
 import { getProjectLink, setProjectLink, projectSnapshotFingerprint, projectLinkIsDirty, savedProjectLocation, type ProjectLink } from "@/lib/project-delivery/client";
 import { projectShareUrl } from "@/lib/project-delivery/reference";
+
+export interface ProjectSaveResult extends ProjectLink {
+  projectConfiguration: ProjectConfiguration;
+}
 
 export interface ProjectDeliveryState {
   link: ProjectLink | null;
@@ -20,7 +24,7 @@ export interface ProjectDeliveryState {
   message: string | null;
   shareUrl: string | null;
   heroUrl: string | null;
-  save: () => Promise<ProjectLink | null>;
+  save: () => Promise<ProjectSaveResult | null>;
   setHeroUrl: (url: string | null) => void;
 }
 
@@ -41,12 +45,13 @@ export function useProjectDelivery(): ProjectDeliveryState {
   const [status, setStatus] = useState<ProjectDeliveryState["status"]>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [heroUrl, setHeroUrl] = useState<string | null>(null);
+  const saving = useRef<Promise<ProjectSaveResult | null> | null>(null);
 
   useEffect(() => {
     setLink(getProjectLink(projectId));
   }, [projectId]);
 
-  const save = useCallback(async (): Promise<ProjectLink | null> => {
+  const saveSnapshot = useCallback(async (): Promise<ProjectSaveResult | null> => {
     setStatus("saving");
     setMessage(null);
     let project = projectConfiguration;
@@ -84,13 +89,24 @@ export function useProjectDelivery(): ProjectDeliveryState {
       setLink(next);
       setDurable(result.durable);
       setStatus("saved");
-      return next;
+      return { ...next, projectConfiguration: project };
     } catch {
       setStatus("error");
       setMessage("Salvataggio non riuscito. Riprova tra poco.");
       return null;
     }
   }, [projectConfiguration, restoreProject]);
+
+  // Save, Share, PDF and quote preparation share one pending write. A double
+  // click on an unsaved project must not create two references racing to win.
+  const save = useCallback((): Promise<ProjectSaveResult | null> => {
+    if (saving.current) return saving.current;
+    const pending = saveSnapshot();
+    saving.current = pending;
+    const release = () => { if (saving.current === pending) saving.current = null; };
+    void pending.then(release, release);
+    return pending;
+  }, [saveSnapshot]);
 
   const shareUrl =
     link && typeof window !== "undefined"

@@ -13,9 +13,10 @@ export function createInfinityDeck(
   outline: Outline,
   zone: RectangleInfinityZone,
   innerOffset: number,
+  outerMargin = 2,
 ) {
   const inner = offsetOutline(outline, innerOffset);
-  const outer = [...offsetOutline(outline, 2)];
+  const outer = [...offsetOutline(outline, outerMargin)];
   const excluded = new Set(
     zone.points.slice(0, -1).map((_, i) => (zone.side + i) % outline.length),
   );

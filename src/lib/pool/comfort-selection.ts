@@ -18,7 +18,7 @@ export function normalizeComfortFeatures<T extends string>(
   const resolved = features.filter((id) => (id as string) !== drop);
   return resolved.includes("sunShelf" as T)
     ? resolved
-    : resolved.filter((id) => (id as string) !== "integratedBench");
+    : resolved.filter((id) => (id as string) !== "integratedBench" && (id as string) !== "sunShelfLoungers");
 }
 
 export function activeFlightKind(

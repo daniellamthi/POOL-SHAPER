@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { lazy, memo, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import {
@@ -85,6 +86,7 @@ function ToolButton({
   icon: React.ReactNode;
   label: string;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -99,17 +101,18 @@ function ToolButton({
       )}
     >
       {icon}
-      {label}
+      {t(label)}
     </button>
   );
 }
 
 function ViewportFallback() {
+  const { t } = useI18n();
   return (
     <div className="flex h-full w-full items-center justify-center bg-viewport">
       <div className="animate-veil flex flex-col items-center gap-5">
         <span className="size-6 animate-spin rounded-full border border-border border-t-foreground/70" />
-        <p className="label-xs">Preparing the 3D studio</p>
+        <p className="label-xs">{t("Preparazione della scena 3D")}</p>
       </div>
     </div>
   );
@@ -141,10 +144,10 @@ function usePhotoModeSamples() {
 }
 
 function PhotoModeStatus({ samples }: { samples: number }) {
+  const { t } = useI18n();
   return (
     <p className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground/70">
-      Refining… {samples} samples
-    </p>
+      {t("Refining…")}{samples} {t("samples")}</p>
   );
 }
 
@@ -155,6 +158,7 @@ function QualityPicker({
   quality: PhotoModeQuality;
   onChange: (quality: PhotoModeQuality) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="pointer-events-auto flex gap-2">
       <Button
@@ -162,19 +166,17 @@ function QualityPicker({
         variant={quality === "standard" ? "viewportActive" : "viewport"}
         size="sm"
         onClick={() => onChange("standard")}
-        title="Faster convergence, tuned bounce count -- see docs/PHOTO_MODE.md"
+        title={t("Faster convergence, tuned bounce count -- see docs/PHOTO_MODE.md")}
       >
-        Standard
-      </Button>
+        {t("Standard")}</Button>
       <Button
         type="button"
         variant={quality === "high" ? "viewportActive" : "viewport"}
         size="sm"
         onClick={() => onChange("high")}
-        title="Path tracer's own defaults -- slower to converge"
+        title={t("Path tracer's own defaults -- slower to converge")}
       >
-        High
-      </Button>
+        {t("High")}</Button>
     </div>
   );
 }
@@ -197,6 +199,7 @@ export const PoolViewport = memo(function PoolViewport({
   onInspectionView,
   ...scene
 }: ViewportProps) {
+  const { t } = useI18n();
   const samples = usePhotoModeSamples();
   const exportReady = scene.photoMode && samples >= PHOTO_MODE_EXPORT_READY_SAMPLES;
   const renderButtonLabel =
@@ -220,17 +223,17 @@ export const PoolViewport = memo(function PoolViewport({
       {scene.construction && <div key={`${scene.construction.stage}-${scene.construction.structure}`}
         aria-hidden className="pointer-events-none absolute inset-0 z-[1] bg-viewport animate-[construction-reveal_240ms_ease-out_both] motion-reduce:hidden" />}
 
-      <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
+      <div data-viewport-view-menu className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              aria-label="Vista della piscina"
+              data-camera-occluder="view-menu"
+              aria-label={t("Vista della piscina")}
               className={cn(CONTROL_SURFACE, "h-9 gap-1.5 pl-3 pr-2.5 text-[12px] text-foreground/85 hover:text-foreground")}
             >
               <Eye className="size-3.5 text-muted-foreground" strokeWidth={1.4} aria-hidden />
-              Vista piscina
-              <ChevronDown className="size-3.5 text-muted-foreground" strokeWidth={1.4} aria-hidden />
+              {t("Vista piscina")}<ChevronDown className="size-3.5 text-muted-foreground" strokeWidth={1.4} aria-hidden />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" sideOffset={6} className="min-w-44 rounded-2xl p-1.5">
@@ -244,7 +247,7 @@ export const PoolViewport = memo(function PoolViewport({
                 onSelect={() => onInspectionView(view.id)}
                 className="rounded-xl px-3 py-2 text-[12.5px]"
               >
-                {view.label}
+                {t(view.label)}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -253,29 +256,29 @@ export const PoolViewport = memo(function PoolViewport({
       {scene.construction?.label && !scene.technicalView ? <div key={scene.construction.label}
         className="pointer-events-none absolute right-3 top-16 z-10 max-w-[75%] animate-veil rounded-xl border border-hairline bg-card/95 px-3 py-2 text-[11px] text-foreground"
         role="status" data-testid="construction-stage">
-        {scene.construction.label}
+        {t(scene.construction.label)}
       </div> : null}
       {scene.technicalView && !scene.photoMode ? <div data-technical-panel className="pointer-events-auto absolute right-3 top-3 z-10 w-36 sm:max-h-[58%] sm:w-[260px] sm:overflow-y-auto sm:rounded-2xl sm:shadow-lg">
         <div className="hidden sm:block"><TechnicalDataPanel technical={technicalPlan} cover={scene.coverPlan} compact /></div>
-        <label className="sr-only" htmlFor="technical-focus">Dettaglio tecnico</label>
-        <select id="technical-focus" aria-label="Dettaglio tecnico" defaultValue="" onChange={(event) => onTechnicalFocus(event.target.value as VisualFocus)} className="mt-1 min-h-11 w-full rounded-xl border border-hairline bg-card px-3 text-xs text-foreground">
-          <option value="" disabled>Esamina componente</option>
-          {scene.system === "skimmer" ? <option value="TECHNICAL_SKIMMER">Skimmer</option> : <option value="TECHNICAL_OVERFLOW">Bordo e raccolta</option>}
-          <option value="TECHNICAL_RETURNS" disabled>Mandate · da progettare</option>
-          <option value="TECHNICAL_DRAINS" disabled>Scarichi · da progettare</option>
-          {scene.coverPlan.enabled && scene.coverPlan.geometry ? <option value="TECHNICAL_COVER">Copertura</option> : null}
+        <label className="sr-only" htmlFor="technical-focus">{t("Dettaglio tecnico")}</label>
+        <select id="technical-focus" aria-label={t("Dettaglio tecnico")} defaultValue="" onChange={(event) => onTechnicalFocus(event.target.value as VisualFocus)} className="mt-1 min-h-11 w-full rounded-xl border border-hairline bg-card px-3 text-xs text-foreground">
+          <option value="" disabled>{t("Esamina componente")}</option>
+          {scene.system === "skimmer" ? <option value="TECHNICAL_SKIMMER">{t("Skimmer")}</option> : <option value="TECHNICAL_OVERFLOW">{t("Bordo e raccolta")}</option>}
+          <option value="TECHNICAL_RETURNS" disabled>{t("Mandate · da progettare")}</option>
+          <option value="TECHNICAL_DRAINS" disabled>{t("Scarichi · da progettare")}</option>
+          {scene.coverPlan.enabled && scene.coverPlan.geometry ? <option value="TECHNICAL_COVER">{t("Copertura")}</option> : null}
         </select>
       </div> : null}
 
       {scene.photoMode ? <PhotoModeStatus samples={samples} /> : null}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-4 sm:p-5">
+      <div data-viewport-toolbar className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-4 sm:p-5">
         <p className="hidden pb-2 text-[10px] tracking-[0.02em] text-muted-foreground/55 sm:block">
-          {scene.photoMode
+          {t(scene.photoMode
             ? "Path-traced preview — camera locked while refining"
             : scene.cameraLocked
               ? "Camera locked · Live 3D"
-              : "Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare"}
+              : "Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare")}
         </p>
         {/* Compact mobile row: only the actions a customer needs on every
             visit stay directly on screen (reframe, expand); Guides, Photo
@@ -283,13 +286,14 @@ export const PoolViewport = memo(function PoolViewport({
             into the "More" menu instead of eating the small viewport. */}
         <div className="pointer-events-auto ml-auto flex items-center justify-end gap-2 sm:hidden">
           <div className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>
-            <ToolButton onClick={onReframe} icon={<Focus />} label="Riquadra" />
+            <ToolButton onClick={onReframe} icon={<Focus />} label={t("Riquadra")} />
             <span aria-hidden className="mx-0.5 h-4 w-px bg-hairline" />
             <button
               type="button"
               onClick={onToggleMobileExpanded}
-              aria-label={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
-              title={mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina"}
+              data-camera-occluder={!mobileExpanded ? "expand" : undefined}
+              aria-label={t(mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina")}
+              title={t(mobileExpanded ? "Chiudi piscina espansa" : "Espandi piscina")}
               className="inline-flex size-8 items-center justify-center rounded-full text-foreground/70 hover:text-foreground [&_svg]:size-3.5 [&_svg]:stroke-[1.4]"
             >
               {mobileExpanded ? <Shrink /> : <Expand />}
@@ -298,14 +302,14 @@ export const PoolViewport = memo(function PoolViewport({
           {scene.photoMode ? (
             <Button type="button" variant="viewportActive" size="sm" onClick={onTogglePhotoMode}>
               <Camera />
-              Live
-            </Button>
+              {t("Live")}</Button>
           ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                aria-label="Altri strumenti"
+                data-camera-occluder="more-tools"
+                aria-label={t("Altri strumenti")}
                 className={cn(CONTROL_SURFACE, "size-10 justify-center text-foreground/70 hover:text-foreground [&_svg]:size-4 [&_svg]:stroke-[1.4]")}
               >
                 <MoreHorizontal />
@@ -315,10 +319,10 @@ export const PoolViewport = memo(function PoolViewport({
               {scene.photoMode ? (
                 <>
                   <DropdownMenuItem onSelect={() => onSetPhotoModeQuality("standard")}>
-                    Qualità standard{scene.photoModeQuality === "standard" ? " ✓" : ""}
+                    {t("Qualità standard")}{t(scene.photoModeQuality === "standard" ? " ✓" : "")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => onSetPhotoModeQuality("high")}>
-                    Qualità alta{scene.photoModeQuality === "high" ? " ✓" : ""}
+                    {t("Qualità alta")}{t(scene.photoModeQuality === "high" ? " ✓" : "")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled={!exportReady}
@@ -326,17 +330,16 @@ export const PoolViewport = memo(function PoolViewport({
                       photoModeState.exportRequestId += 1;
                     }}
                   >
-                    Genera foto
-                    {!exportReady ? ` (ancora ${PHOTO_MODE_EXPORT_READY_SAMPLES}+ campioni)` : ""}
+                    {t("Genera foto")}{t(!exportReady ? ` (ancora ${PHOTO_MODE_EXPORT_READY_SAMPLES}+ campioni)` : "")}
                   </DropdownMenuItem>
                 </>
               ) : (
                 <>
                   <DropdownMenuItem onSelect={onToggleMeasurements}>
-                    {scene.showMeasurements ? "Nascondi guide" : "Mostra guide"}
+                    {t(scene.showMeasurements ? "Nascondi guide" : "Mostra guide")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={onToggleTechnicalView}>
-                    {scene.technicalView ? "Chiudi vista tecnica" : "Vista tecnica"}
+                    {t(scene.technicalView ? "Chiudi vista tecnica" : "Vista tecnica")}
                   </DropdownMenuItem>
                 </>
               )}
@@ -353,37 +356,34 @@ export const PoolViewport = memo(function PoolViewport({
                 variant="viewport"
                 size="sm"
                 disabled={!exportReady}
-                title={
-                  exportReady
+                title={t(exportReady
                     ? "Save the current frame as a PNG"
-                    : `Keep refining -- ${PHOTO_MODE_EXPORT_READY_SAMPLES} samples gives a clean image`
-                }
+                    : `Keep refining -- ${PHOTO_MODE_EXPORT_READY_SAMPLES} samples gives a clean image`)}
                 onClick={() => {
                   photoModeState.exportRequestId += 1;
                 }}
               >
                 <Download />
-                Generate photo
-              </Button>
+                {t("Generate photo")}</Button>
             </>
           ) : null}
-          <div role="toolbar" aria-label="Strumenti vista" className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>
+          <div role="toolbar" data-camera-occluder="view-tools" aria-label={t("Strumenti vista")} className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>
             <ToolButton
               active={scene.showMeasurements}
               onClick={onToggleMeasurements}
               disabled={scene.photoMode}
               icon={<Ruler />}
-              label="Guide"
+              label={t("Guide")}
             />
             <ToolButton
               active={scene.technicalView ?? false}
               onClick={onToggleTechnicalView}
               disabled={scene.photoMode}
               icon={<Layers />}
-              label="Vista tecnica"
+              label={t("Vista tecnica")}
             />
             <span aria-hidden className="mx-0.5 h-4 w-px bg-hairline" />
-            <ToolButton onClick={onReframe} icon={<Focus />} label="Riquadra" />
+            <ToolButton onClick={onReframe} icon={<Focus />} label={t("Riquadra")} />
           </div>
         </div>
       </div>

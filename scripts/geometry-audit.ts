@@ -1183,7 +1183,7 @@ assert(
 );
 assert(
   POOL_FEATURES.map(({ id }) => id).join(",") ===
-    "ledLighting,stairLighting,hydromassage,sunShelf,integratedBench",
+    "ledLighting,stairLighting,hydromassage,hydromassageBenchLighting,sunShelf,integratedBench,sunShelfLoungers",
   "invalid pool features",
 );
 assert(

@@ -1,8 +1,10 @@
+import { useI18n } from "@/lib/i18n";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
+  const { t } = useI18n();
   const { theme, toggle } = useTheme();
   const dark = theme === "dark";
 
@@ -10,7 +12,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={t(dark ? "Switch to light mode" : "Switch to dark mode")}
       className="group relative flex h-9 w-[68px] items-center rounded-full border border-hairline bg-card/60 px-1 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span

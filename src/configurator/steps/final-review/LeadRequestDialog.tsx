@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -51,16 +52,22 @@ function validate(form: FormState): Partial<Record<keyof FormState, string>> {
 export function LeadRequestDialog({
   projectConfiguration,
   projectReference,
+  prepareProject,
   defaultCustomer = { name: "", email: "", phone: "" },
 }: {
   projectConfiguration: ProjectConfiguration;
   /** Public Project ID (PW-XXXX-XXXXXX) of the saved project, when saved. */
   projectReference?: string | null | undefined;
+  prepareProject?: (() => Promise<{
+    projectConfiguration: ProjectConfiguration;
+    projectReference?: string | null | undefined;
+  } | null>) | undefined;
   /** Optional -- with Customer Details no longer a mandatory earlier step,
    * this dialog is normally the first and only place contact details are
    * collected, so it starts blank unless a caller has something to prefill. */
   defaultCustomer?: { name: string; email: string; phone: string; projectLocation?: string; notes?: string };
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -97,6 +104,10 @@ export function LeadRequestDialog({
     setStatus("submitting");
     setErrorMessage(null);
     try {
+      const prepared = prepareProject
+        ? await prepareProject()
+        : { projectConfiguration, projectReference };
+      if (!prepared) throw new Error("Salvataggio del progetto non riuscito. Riprova prima di inviare la richiesta.");
       const result = await submitLeadFn({
         data: {
           customer: {
@@ -111,8 +122,8 @@ export function LeadRequestDialog({
           privacy: { accepted: true, marketingConsent: form.marketingConsent },
           website: form.website,
           idempotencyKey,
-          ...(projectReference ? { projectReference } : {}),
-          project: projectConfiguration,
+          ...(prepared.projectReference ? { projectReference: prepared.projectReference } : {}),
+          project: prepared.projectConfiguration,
         },
       });
       setRequestRef(result.requestId);
@@ -130,8 +141,7 @@ export function LeadRequestDialog({
   return (
     <>
       <Button type="button" size="lg" className="mt-1" onClick={() => setOpen(true)}>
-        Valuta il progetto con un consulente
-      </Button>
+        {t("Valuta il progetto con un consulente")}{" "}</Button>
 
       <Dialog
         open={open}
@@ -142,36 +152,30 @@ export function LeadRequestDialog({
             <div className="flex flex-col items-center gap-4 py-4 text-center">
               <DialogHeader className="gap-2">
                 <DialogTitle className="text-[20px] font-extralight tracking-[-0.015em] text-foreground">
-                  Progetto inviato
-                </DialogTitle>
+                  {t("Progetto inviato")}{" "}</DialogTitle>
                 <DialogDescription className="text-[13px] leading-[1.8] font-light text-muted-foreground">
-                  Abbiamo ricevuto la tua configurazione. Un consulente Piscine Wellness la
-                  esaminerà per verificare fattibilità, soluzioni tecniche e investimento.
-                </DialogDescription>
+                  {t("Abbiamo ricevuto la tua configurazione. Un consulente Piscine Wellness la esaminerà per verificare fattibilità, soluzioni tecniche e investimento.")}{" "}</DialogDescription>
               </DialogHeader>
               {requestRef ? (
                 <p className="text-[11px] font-light tracking-[0.08em] text-muted-foreground/70">
-                  Riferimento richiesta: {requestRef.slice(0, 8).toUpperCase()}
+                  {t("Riferimento richiesta:")}{" "}{requestRef.slice(0, 8).toUpperCase()}
                 </p>
               ) : null}
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Chiudi
-              </Button>
+                {t("Chiudi")}{" "}</Button>
             </div>
           ) : (
             <>
               <DialogHeader className="gap-1.5">
                 <DialogTitle className="text-[19px] font-extralight tracking-[-0.015em] text-foreground">
-                  Valuta il progetto con un consulente
-                </DialogTitle>
+                  {t("Valuta il progetto con un consulente")}{" "}</DialogTitle>
                 <DialogDescription className="text-[12.5px] leading-[1.7] font-light text-muted-foreground">
-                  Pochi dati per farti ricontattare da un consulente Piscine Wellness.
-                </DialogDescription>
+                  {t("Pochi dati per farti ricontattare da un consulente Piscine Wellness.")}{" "}</DialogDescription>
               </DialogHeader>
 
               <div className="flex flex-col gap-5">
                 <TextField
-                  label="Nome"
+                  label={t("Nome")}
                   type="text"
                   autoComplete="name"
                   required
@@ -180,7 +184,7 @@ export function LeadRequestDialog({
                   error={errors.name}
                 />
                 <TextField
-                  label="Email"
+                  label={t("Email")}
                   type="email"
                   autoComplete="email"
                   required
@@ -189,7 +193,7 @@ export function LeadRequestDialog({
                   error={errors.email}
                 />
                 <TextField
-                  label="Telefono"
+                  label={t("Telefono")}
                   type="tel"
                   autoComplete="tel"
                   required
@@ -198,7 +202,7 @@ export function LeadRequestDialog({
                   error={errors.phone}
                 />
                 <TextField
-                  label="Località del progetto"
+                  label={t("Località del progetto")}
                   type="text"
                   autoComplete="address-level2"
                   required
@@ -209,7 +213,7 @@ export function LeadRequestDialog({
 
                 <div className="flex flex-col gap-2.5">
                   <span className="label-xs">
-                    Quando vuoi realizzarla? <span className="text-brand">*</span>
+                    {t("Quando vuoi realizzarla?")}{" "}<span className="text-brand">*</span>
                   </span>
                   <RadioGroup
                     value={form.timing}
@@ -223,19 +227,18 @@ export function LeadRequestDialog({
                         className="flex items-center gap-2.5 text-[13px] font-light text-foreground"
                       >
                         <RadioGroupItem value={option.id} id={`timing-${option.id}`} />
-                        {option.label}
+                        {t(option.label)}
                       </label>
                     ))}
                   </RadioGroup>
                   {errors.timing ? (
-                    <span className="text-[11px] font-light text-destructive">{errors.timing}</span>
+                    <span className="text-[11px] font-light text-destructive">{t(errors.timing)}</span>
                   ) : null}
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="lead-notes" className="label-xs">
-                    Note (opzionale)
-                  </Label>
+                    {t("Note (opzionale)")}{" "}</Label>
                   <Textarea
                     id="lead-notes"
                     className="min-h-20"
@@ -263,21 +266,19 @@ export function LeadRequestDialog({
                       onCheckedChange={(v) => set("privacyAccepted", v === true)}
                       className="mt-0.5"
                     />
-                    Ho letto e accetto l&apos;
-                    <a
+                    {t("Ho letto e accetto l’")}{" "}<a
                       href="/privacy"
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(event) => event.stopPropagation()}
                       className="underline underline-offset-2 hover:text-foreground"
                     >
-                      informativa sulla privacy
-                    </a>
+                      {t("informativa sulla privacy")}{" "}</a>
                     . <span className="text-brand">*</span>
                   </label>
                   {errors.privacyAccepted ? (
                     <span className="text-[11px] font-light text-destructive">
-                      {errors.privacyAccepted}
+                      {t(errors.privacyAccepted)}
                     </span>
                   ) : null}
                   <label className="flex items-start gap-2.5 text-[12px] leading-[1.6] font-light text-muted-foreground">
@@ -286,8 +287,7 @@ export function LeadRequestDialog({
                       onCheckedChange={(v) => set("marketingConsent", v === true)}
                       className="mt-0.5"
                     />
-                    Desidero ricevere comunicazioni commerciali (opzionale).
-                  </label>
+                    {t("Desidero ricevere comunicazioni commerciali (opzionale).")}{" "}</label>
                 </div>
 
                 {status === "error" ? (
@@ -295,9 +295,7 @@ export function LeadRequestDialog({
                     role="alert"
                     className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-[12.5px] font-light text-destructive"
                   >
-                    {errorMessage ?? "Invio non riuscito. Riprova tra poco."} La tua configurazione
-                    resta salvata: puoi riprovare senza perdere nulla.
-                  </div>
+                    {t(errorMessage ?? "Invio non riuscito. Riprova tra poco.")} {t("La tua configurazione resta salvata: puoi riprovare senza perdere nulla.")}{" "}</div>
                 ) : null}
 
                 <Button
@@ -306,11 +304,11 @@ export function LeadRequestDialog({
                   disabled={status === "submitting"}
                   onClick={handleSubmit}
                 >
-                  {status === "submitting"
+                  {t(status === "submitting"
                     ? "Invio in corso…"
                     : status === "error"
                       ? "Riprova"
-                      : "Invia richiesta"}
+                      : "Invia richiesta")}
                 </Button>
               </div>
             </>

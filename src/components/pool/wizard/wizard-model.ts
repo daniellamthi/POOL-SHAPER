@@ -168,7 +168,7 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       return config.system === "skimmer"
         ? `Skimmer · ${title(SKIMMER_TYPES, config.skimmerType) ?? ""}`
         : config.system === "overflow"
-          ? `Sfioro ${config.overflowType === "hidden" ? "nascosto" : "a vista"}`
+          ? `Sfioro ${config.overflowType === "hidden" ? "nascosto" : "a griglia"}`
           : config.infinityEdge?.enabled
             ? "Infinity · lato scelto"
             : "Infinity · scegli il lato";
