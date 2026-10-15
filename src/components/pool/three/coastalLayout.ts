@@ -105,21 +105,20 @@ export function coastalCamera(
     Math.max(fov, (2 * Math.atan(Math.tan(neededHorizontal / 2) / safeAspect) * 180) / Math.PI),
   );
   const halfVertical = (fittedFov * Math.PI) / 360;
-  // Near coping in the lower frame, the vanishing edge mid-frame, horizon and
-  // landscape in the upper third: the eye sits high enough to see into the
-  // basin and pitches down by a fixed share of the vertical field of view.
+  // Keep a low architectural eye line towards the vanishing edge. The metric
+  // framing floor still lifts the eye when needed to retain the real rim.
   const outset = coping?.outset ?? 0;
   const bottomAngle = Math.atan(0.72 * Math.tan(halfVertical));
   const nearDistance = standoff - outset;
   const halfWidth = Math.max(...local.map(p => Math.abs(p.u))) + outset;
   const requiredDepth = halfWidth / (0.96 * Math.cos(bottomAngle) * Math.tan(halfVertical) * safeAspect);
-  const height = Math.max(1.6, standoff * Math.tan(Math.min(1.45 * halfVertical, 1.2)),
+  const height = Math.max(1.6, standoff * Math.tan(0.75 * halfVertical),
     (coping?.y ?? waterY) - waterY + Math.sqrt(Math.max(0, requiredDepth ** 2 - nearDistance ** 2)));
   const distance = length + standoff;
   const y = waterY + height;
-  // Keep the near coping above the view toolbar without backing beyond the
-  // photographic apron. Fit the real rim vertically, not just pool width.
-  const pitch = Math.max(0.62 * halfVertical, ...local.map(p =>
+  // Aim at the overflow crest where framing permits. Portrait framing must
+  // not turn into a steeper top-down view to centre a wide Infinity side.
+  const pitch = Math.max(Math.min(0.62 * halfVertical, Math.atan2(height, distance)), ...local.map(p =>
     Math.atan2(y - (coping?.y ?? waterY), distance + p.v - (coping?.outset ?? 0))
       - bottomAngle));
   return {

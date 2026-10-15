@@ -111,6 +111,12 @@ for(const [length,width] of [[6,3],[8,4],[12,5],[16,4.5],[20,4.5],[25,5]]) {
   for(const aspect of [2.406,1.7,1,0.6,0.5]) {
    const outset=copingOuterOffset("infinity","hidden");
    const hero=coastalCamera(outline,zone,layout.waterY,aspect,34,{outset,y:layout.copingY}), limits=infinityNavigationLimits(hero,false,layout.waterY);
+   if(length!<=12&&aspect>=1.7) {
+    ok(hero.position[1]-layout.waterY<3.5,`Infinity low eye height ${length}x${width}, side${zone.side}, aspect${aspect}`);
+    const horizontalDistance=Math.hypot(hero.position[0]-hero.target[0],hero.position[2]-hero.target[2]);
+    const pitch=Math.atan2(hero.position[1]-hero.target[1],horizontalDistance);
+    ok(pitch<Math.PI/10,`Infinity low architectural pitch ${length}x${width}, side${zone.side}, aspect${aspect}`);
+   }
    const heroCamera=new PerspectiveCamera(hero.fov,aspect,0.05,1000);heroCamera.position.set(...hero.position);heroCamera.lookAt(new Vector3(...hero.target));heroCamera.updateMatrixWorld();
    for(const [x,z] of offsetOutline(outline,outset)) { const corner=new Vector3(x,layout.copingY,z).project(heroCamera);ok(Math.abs(corner.x)<0.98&&corner.y>-.73&&corner.y<0.98,`Infinity Hero coping fit ${length}x${width}, side${zone.side}, aspect${aspect}: ${corner.toArray()}`); }
    ok(limits.minDistance<=limits.maxDistance,"navigation remains nonempty");
