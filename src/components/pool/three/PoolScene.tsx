@@ -1339,7 +1339,7 @@ export default function PoolScene({
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
   const deckFurnitureEnvelope = useMemo(() => system !== "infinity" && (construction?.showEnvironment ?? true)
     ? deckFurnitureCameraPoints(planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType),
-      studioDeckBand(outline,true),deckObstacles,{loungers,shower:solarShower,coverHousing})) : [],
+      studioDeckBand(outline,true,loungers),deckObstacles,{loungers,shower:solarShower,coverHousing})) : [],
   [system,construction?.showEnvironment,outline,poolType,overflowType,deckObstacles,loungers,solarShower,coverHousing]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
@@ -1519,6 +1519,7 @@ export default function PoolScene({
             paving={paving ?? "gres"}
             pavingFormat={pavingFormat}
             environment={construction?.showEnvironment ?? true}
+            loungers={loungers}
             decking={construction?.showDecking ?? true}
             waterY={verticalLayout.waterY}
           />
@@ -1539,7 +1540,7 @@ export default function PoolScene({
         <DeckLoungers
           outline={outline}
           innerOffset={studioDeckInnerOffset(poolType, system, overflowType)}
-          band={studioDeckBand(outline, true)}
+          band={studioDeckBand(outline, true, loungers)}
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
           shower={solarShower}

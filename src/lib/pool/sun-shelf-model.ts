@@ -27,6 +27,14 @@ export const DECK_CHAISE_MODEL = {
   cushionAllowance: 0.055,
 } as const;
 
+/** Presentation spacing in metres, not certified installation clearances. */
+export const DECK_CHAISE_LAYOUT = {
+  walkway: 1,
+  between: 0.7,
+  betweenPairs: 0.8,
+  rearMargin: 0.4,
+} as const;
+
 /** Owner's preliminary layout criteria, not certified installation clearances.
  * The real stair/landing strip is reserved separately from these margins. */
 export const SUN_SHELF_LOUNGER_LAYOUT = {

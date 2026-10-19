@@ -140,6 +140,7 @@ export function StudioPaving({
   paving = "gres",
   pavingFormat,
   environment = true,
+  loungers = false,
   decking = true,
   waterY,
 }: {
@@ -151,6 +152,8 @@ export function StudioPaving({
   pavingFormat?: PavingFormatId | undefined;
   /** Late-stage context: wide terrace and lawn instead of the compact band. */
   environment?: boolean;
+  /** Reserve the furniture footprint plus a clear poolside passage. */
+  loungers?: boolean;
   /** Progressive reveal: before Bordo e decking the basin sits in a plain
    * ground plane, with no paving around the coping yet. */
   decking?: boolean;
@@ -169,7 +172,7 @@ export function StudioPaving({
   const geometry = useMemo(() => {
     const started = import.meta.env.DEV ? performance.now() : 0;
     const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
-    const outer = offsetOutline(inner, studioDeckBand(outline, environment));
+    const outer = offsetOutline(inner, studioDeckBand(outline, environment, loungers));
     const far: Outline = [
       [-150, -150],
       [150, -150],
@@ -184,7 +187,7 @@ export function StudioPaving({
       // that showed the basin shell at low cameras.
       ground: createSurfaceGeometry(
         far,
-        decking ? offsetOutline(inner, studioDeckBand(outline, environment) - 0.04) : inner,
+        decking ? offsetOutline(inner, studioDeckBand(outline, environment, loungers) - 0.04) : inner,
       ),
     };
     if (import.meta.env.DEV) console.debug("[Pool3D paving build]", JSON.stringify({
@@ -192,7 +195,7 @@ export function StudioPaving({
       durationMs: Number((performance.now() - started).toFixed(2)),
     }));
     return result;
-  }, [outline, poolType, system, overflowType, module, gap, thickness, boards, aboveGroundLayout, environment, decking]);
+  }, [outline, poolType, system, overflowType, module, gap, thickness, boards, aboveGroundLayout, environment, loungers, decking]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {

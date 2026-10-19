@@ -53,3 +53,17 @@ Riproduzione locale: `node scripts/prepare-lympha-photos.mjs [cartella-originali
 | esterno | `0a57908b4a52b6e5b6f3c33fa2404b4a9b410474e1d3145aecf49e64322bb720` | `f9b94396421cee4c922795a71c7b0cd9623852e54ee8f501da9a121b4bc05ef1` |
 
 Rendering: geometrie memoizzate e smaltite; una scocca condivisa per gli immersi, batch per materiale per gli esterni (quattro come prima), nessuna nuova libreria né lavoro per-frame. Questo è un controllo del costo strutturale, non una misura FPS prima/dopo.
+
+## Disposizione esterna — richiesta successiva del proprietario
+
+Base di questa correzione: `d8cd4f15c3a47bc05435152519ba8df223045724`. Solo layout esterno: misure dei prodotti, lettini immersi, piscina e materiali invariati.
+
+- Passaggio dal bordo esterno della piscina al piede dei lettini: **1,00 m** (prima 0,50 m).
+- Distanza libera fra lettini nella stessa coppia: **0,70 m**; fra le coppie **0,80 m**, con il tavolino esistente al centro.
+- Pavimentazione con optional esterno ON: fascia minima **3,25 m**, derivata da passaggio + lettino 1,85 m + margine posteriore 0,40 m. Per la 12×5 resta 3,60 m. Optional OFF e prime fasi conservano le fasce precedenti.
+- Stesso calcolo condiviso da pavimentazione, apertura nel prato, arredi e inviluppo delle camere. Nessun aggiornamento per-frame o cambio di schema/configurazione.
+- Sono scelte di composizione dell’anteprima, non attestazioni normative o distanze d’installazione certificate.
+
+`node scripts/deck-lounger-spacing-audit.mjs`: **584 controlli PASS**, 6×3 / 8×4 / 12×5 / 4×8, interrata/fuori terra, Skimmer e Sfioro; appoggio dell’intera impronta, gap, corridoio, margine posteriore, rimozione OFF e rispetto dell’accesso. Audit immersi ancora **1.152 PASS**; typecheck e diff-check PASS. Nessun nuovo build completo o audit generale, non necessari per questi soli parametri di disposizione.
+
+Browser integrato: confronto diretto della medesima 8×4 con entrambi gli optional ON: [prima](evidence/lympha-20261019/both-on.jpg) / [dopo](evidence/lympha-20261019/deck-spacing-after.jpg). Confermati quattro lettini esterni separati, fascia di passaggio libera, intero arredo appoggiato sulla pavimentazione ampliata e due lettini immersi immutati. Revisione React mirata: dipendenza `loungers` aggiunta alla geometria memoizzata; disposal e cache ombre esistenti preservati.

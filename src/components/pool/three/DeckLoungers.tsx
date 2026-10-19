@@ -6,7 +6,7 @@ import { pointInBasin } from "@/lib/pool/boundary-placement";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import { SolarShower, SOLAR_SHOWER_SIZE } from "./SolarShower";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { DECK_CHAISE_MODEL } from "@/lib/pool/sun-shelf-model";
+import { DECK_CHAISE_MODEL, DECK_CHAISE_LAYOUT } from "@/lib/pool/sun-shelf-model";
 import { createLymphaShellGeometry, createLymphaFrameGeometry, createLymphaCushionGeometry } from "./LymphaChaiseGeometry";
 
 /**
@@ -28,13 +28,14 @@ const LOUNGER = {
   length: DECK_CHAISE_MODEL.length,
   width: DECK_CHAISE_MODEL.width,
   /** Clear walkway kept between the coping edge and the foot of the lounger. */
-  walkway: 0.5,
+  walkway: DECK_CHAISE_LAYOUT.walkway,
 } as const;
 
-/** Lounger centres along the row (metres from the row centre). Two pairs,
- * 0.21 m apart within a pair, a side table in the 0.86 m gap between pairs. */
-const ROW_OF_FOUR = [-1.75, -0.8, 0.8, 1.75] as const;
-const PAIR = [-0.48, 0.48] as const;
+/** Metric edge-to-edge gaps, independent of pool size and model scale. */
+const pairPitch = LOUNGER.width + DECK_CHAISE_LAYOUT.between;
+const innerCentre = (LOUNGER.width + DECK_CHAISE_LAYOUT.betweenPairs) / 2;
+const ROW_OF_FOUR = [-innerCentre - pairPitch, -innerCentre, innerCentre, innerCentre + pairPitch] as const;
+const PAIR = [-pairPitch / 2, pairPitch / 2] as const;
 
 /** Clearance of any lounger row or shower from an access point (ladder,
  * stair landing): the exit from the water must stay a free walkway. */
