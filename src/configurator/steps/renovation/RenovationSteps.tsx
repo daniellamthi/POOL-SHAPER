@@ -7,7 +7,9 @@ import { TextField } from "@/components/pool/TextField";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FINISHES, LINER_COLORS } from "@/lib/pool/config";
-import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
+import { copingMaterialsForPool } from "@/lib/pool/coping-materials";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { ReferenceFinishSwatch } from "@/components/pool/ReferenceFinishSwatch";
 import { useConfigurator } from "@/lib/pool/context";
 import { allowedFinishesForStructure } from "@/lib/pool/structure-finish";
 import { renovationDecisions, renovationPreviewConfig, renovationMosaicLabel, renovationLinerLabel } from "@/lib/pool/renovation";
@@ -113,8 +115,8 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
     {tab === "finish" ? <>
       <FinishCatalogue existing />
       <GroupLabel>{t("Bordo esistente")}</GroupLabel>
-      <ChoiceGrid label={t("Bordo attuale")} dense>{COPING_MATERIALS.map(c => <ChoiceCard compact key={c.id} title={c.title}
-        image={<span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />}
+      <ChoiceGrid label={t("Bordo attuale")} dense>{copingMaterialsForPool(e?.poolType ?? config.poolType).map(c => <ChoiceCard compact key={c.id} title={t(c.title)}
+        image={isReferenceFinish(c.id) ? <ReferenceFinishSwatch id={c.id} /> : <span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />}
         selected={(e?.copingMaterial ?? "travertine") === c.id} onSelect={() => choose({ copingMaterial: c.id })} />)}</ChoiceGrid>
     </> : null}
     {tab === "access" ? <>
@@ -164,8 +166,8 @@ export function RenovationDetailsStep({ tab, setTab, before, setBefore }: Decisi
         {([ [true, "Sostituire il bordo"], [false, "Conservare il bordo"] ] as const).map(([value, title]) => <ChoiceCard key={String(value)} compact title={title}
           image={<Layers className="size-12" strokeWidth={1} />} selected={r.replaceCoping === value} onSelect={() => updateRenovation({ replaceCoping: value })} />)}
       </ChoiceGrid>
-      {r.replaceCoping ? <ChoiceGrid label={t("Nuovo bordo")} dense>{COPING_MATERIALS.map(c => <ChoiceCard compact key={c.id} title={c.title}
-        image={<span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />} selected={r.copingMaterial === c.id}
+      {r.replaceCoping ? <ChoiceGrid label={t("Nuovo bordo")} dense>{copingMaterialsForPool(r.existing?.poolType ?? config.poolType).map(c => <ChoiceCard compact key={c.id} title={t(c.title)}
+        image={isReferenceFinish(c.id) ? <ReferenceFinishSwatch id={c.id} /> : <span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />} selected={r.copingMaterial === c.id}
         onSelect={() => updateRenovation({ copingMaterial: c.id })} />)}</ChoiceGrid> : null}
     </> : null}
     {tab === "structure" ? <ChoiceGrid label={t("Ripristini richiesti")}>

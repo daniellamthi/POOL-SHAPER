@@ -11,6 +11,8 @@ import {
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
 import { normalizeSunShelfLoungers } from "./sun-shelf-loungers";
 import { focusForAction, nextFocusRequest, type FocusRequest } from "./contextual-camera";
+import { copingMaterialForPool } from "./coping-materials";
+import { isReferenceFinish } from "./reference-finishes";
 import {
   DEFAULT_CONTROL_POINTS,
   DEFAULT_CUSTOMER,
@@ -266,6 +268,7 @@ function reduceConfiguration(state: State, action: Action): State {
     case "setSceneTime":
       return { ...state, config: { ...config, sceneTime: action.value } };
     case "setPaving":
+      if (config.poolType !== "in-ground" && isReferenceFinish(action.value)) return state;
       return { ...state, config: { ...config, paving: pavingId(action.value), pavingFormat: pavingFormatId(action.value, config.pavingFormat) } };
     case "setPavingFormat":
       return { ...state, config: { ...config, pavingFormat: pavingFormatId(config.paving, action.value) } };
@@ -317,6 +320,10 @@ function reduceConfiguration(state: State, action: Action): State {
         finish: normaliseFinishForStructure(structure, config.finish),
         features,
         system,
+        ...(aboveGround && isReferenceFinish(config.copingMaterial)
+          ? { copingMaterial: copingMaterialForPool(config.copingMaterial, action.value) } : {}),
+        ...(aboveGround && isReferenceFinish(config.paving)
+          ? { paving: "gres" as const, pavingFormat: pavingFormatId("gres", config.pavingFormat) } : {}),
         // Above ground the internal entry steps are included by default; the
         // customer can still remove them in Accesso & comfort.
         ...(aboveGround && (config.poolAccess === null || config.poolAccess === "stainlessSteelLadder")
@@ -396,6 +403,7 @@ function reduceConfiguration(state: State, action: Action): State {
       };
     }
     case "setCopingMaterial":
+      if (config.poolType !== "in-ground" && isReferenceFinish(action.value)) return state;
       return { ...state, config: { ...config, copingMaterial: action.value } };
     case "setCustomMode":
       return { ...state, config: { ...config, customMode: action.value } };

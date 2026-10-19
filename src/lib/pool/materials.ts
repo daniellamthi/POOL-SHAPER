@@ -1,5 +1,5 @@
 import { FINISHES, LINER_COLORS, SKIMMER_FINISHES } from "./config";
-import { COPING_MATERIALS } from "./coping-materials";
+import { COPING_MATERIALS, copingMaterialForPool } from "./coping-materials";
 import {
   POOL_SURFACE_PRESET,
   WATER_VISUAL_PRESET,
@@ -53,7 +53,7 @@ export function resolveMaterials(
   config: Pick<
     PoolConfig,
     "finish" | "linerColor" | "mosaicFinish" | "skimmerFinish" | "skimmerType" | "copingMaterial"
-  >,
+  > & { poolType?: PoolConfig["poolType"] },
 ): ResolvedMaterials {
   // Visible-inox pools do not use these finish maps in the scene, but the
   // common water pipeline still requires a stable fallback descriptor.
@@ -144,7 +144,7 @@ export function resolveMaterials(
     },
     water: "#ffffff",
     coping:
-      COPING_MATERIALS.find((item) => item.id === config.copingMaterial) ?? COPING_MATERIALS[2],
+      COPING_MATERIALS.find((item) => item.id === copingMaterialForPool(config.copingMaterial, config.poolType)) ?? COPING_MATERIALS[2],
     skimmer: {
       color: skimmerFinish.hex,
       roughness: skimmerFinish.roughness,

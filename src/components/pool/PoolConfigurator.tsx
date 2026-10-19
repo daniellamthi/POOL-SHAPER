@@ -171,6 +171,7 @@ function ConfiguratorLayout() {
         skimmerFinish: config.skimmerFinish,
         skimmerType: config.skimmerType,
         copingMaterial: config.copingMaterial ?? "travertine",
+        poolType: config.poolType,
       }),
     [
       config.finish,
@@ -179,6 +180,7 @@ function ConfiguratorLayout() {
       config.skimmerFinish,
       config.skimmerType,
       config.copingMaterial,
+      config.poolType,
     ],
   );
 

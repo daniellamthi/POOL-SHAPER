@@ -48,11 +48,13 @@ import {
 } from "./stoneTextures";
 import type { CopingMaterialId } from "@/lib/pool/coping-materials";
 import { configureDeckCopingGrain } from "./deckCopingGrain";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { configureReferenceCoping, loadReferenceFinishMaps } from "./referenceFinishTexture";
 
 /** Each premium coping finish gets its own procedural stone bake (distinct
  * structural DNA -- vein/grain/pore character), never a shared texture with
  * only color/roughness retinted -- see stoneTextures.ts. */
-const COPING_STONE_BUILDERS: Record<CopingMaterialId, (size?: number) => StoneMaps> = {
+const COPING_STONE_BUILDERS: Partial<Record<CopingMaterialId, (size?: number) => StoneMaps>> = {
   travertine: createTravertineMaps,
   limestone: createLimestoneMaps,
   prun: createPrunMaps,
@@ -691,9 +693,11 @@ export function PoolModel({
       : 1;
   const copingDetail = useMemo(
     () =>
-      copingAssetDir
+      isReferenceFinish(materials.coping.id)
+        ? loadReferenceFinishMaps(materials.coping.id)
+        : copingAssetDir
         ? loadCopingTextureMaps(copingAssetDir, copingAssetHasRoughness, copingAssetHasNormal, copingAssetMirrored)
-        : COPING_STONE_BUILDERS[materials.coping.id](),
+        : COPING_STONE_BUILDERS[materials.coping.id]!(),
     [materials.coping.id, copingAssetDir, copingAssetHasRoughness, copingAssetHasNormal, copingAssetMirrored],
   );
   useEffect(() => {
@@ -859,6 +863,11 @@ export function PoolModel({
     () => new THREE.Color(materials.coping.color).multiplyScalar(0.9),
     [materials.coping.color],
   );
+  // Reference selections share shader programs, but own their source/crop
+  // uniforms. A fresh material installs those uniforms even at the same scale.
+  const referenceCoping = isReferenceFinish(materials.coping.id);
+  const copingMaterialKey = referenceCoping ? `${materials.coping.id}-photographic-v2` : materials.coping.moduleSize;
+  const referenceProgramKey = referenceCoping ? (materials.coping.id === "reference-ipe" ? "-reference-ipe-v7-four-boards" : "-reference-stone-v6-shared-sampler") : "";
   const configureCopingTriplanar = useCallback(
     (shader: TriplanarShader) => {
       shader.uniforms.triplanarScale = {
@@ -895,6 +904,7 @@ export function PoolModel({
           ),
         );
       if (materials.coping.id === "deck-marrone") configureDeckCopingGrain(shader);
+      if (isReferenceFinish(materials.coping.id)) configureReferenceCoping(shader, materials.coping.id);
     },
     [copingDetail, materials.coping.moduleSize, materials.coping.id, copingAssetAspect],
   );
@@ -1284,17 +1294,18 @@ export function PoolModel({
                   <RawShellMaterial kind={rawShellKind} />
                 ) : (
                   <meshPhysicalMaterial
-                    key={materials.coping.moduleSize}
+                    key={copingMaterialKey}
                     color={materials.coping.color}
                     normalMap={copingDetail.normalMap}
                     normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
                     roughnessMap={copingDetail.roughnessMap}
                     roughness={materials.coping.roughness * 0.8}
+                    specularIntensity={materials.coping.id === "reference-ipe" ? 0.35 : 1}
                     onBeforeCompile={(shader) => {
                       configureCopingTriplanar(shader);
                       excludeSubmergedDirectLights(shader, waterLevel);
                     }}
-                    customProgramCacheKey={() => `overflow-stone-continuity-v4-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}`}
+                    customProgramCacheKey={() => `overflow-stone-continuity-v4-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}${referenceProgramKey}`}
                     clearcoat={0}
                     clearcoatRoughness={0.12}
                     side={DoubleSide}
@@ -1425,18 +1436,19 @@ export function PoolModel({
               <RawShellMaterial kind={rawShellKind} />
             ) : (
               <meshPhysicalMaterial
-                key={`bed-${materials.coping.moduleSize}`}
+                key={`bed-${copingMaterialKey}`}
                 color={copingJointColor}
                 normalMap={copingDetail.normalMap}
                 normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
                 roughnessMap={copingDetail.roughnessMap}
                 roughness={Math.min(1, materials.coping.roughness + 0.08)}
+                specularIntensity={materials.coping.id === "reference-ipe" ? 0.35 : 1}
                 metalness={0}
                 onBeforeCompile={(shader) => {
                   configureCopingTriplanar(shader);
                   excludeSubmergedDirectLights(shader, waterLevel);
                 }}
-                customProgramCacheKey={() => `coping-bed-triplanar-v2-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}`}
+                customProgramCacheKey={() => `coping-bed-triplanar-v2-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}${referenceProgramKey}`}
                 side={DoubleSide}
               />
             )}
@@ -1446,13 +1458,14 @@ export function PoolModel({
               <RawShellMaterial kind={rawShellKind} />
             ) : (
               <meshPhysicalMaterial
-                key={materials.coping.moduleSize}
+                key={copingMaterialKey}
                 color={materials.coping.color}
                 vertexColors
                 normalMap={copingDetail.normalMap}
                 normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
                 roughnessMap={copingDetail.roughnessMap}
                 roughness={materials.coping.roughness}
+                specularIntensity={materials.coping.id === "reference-ipe" ? 0.35 : 1}
                 metalness={0}
                 clearcoat={0}
                 clearcoatRoughness={0.45}
@@ -1461,7 +1474,7 @@ export function PoolModel({
                   // Dry stone: a submerged LED cannot light it through the shell.
                   excludeSubmergedDirectLights(shader, waterLevel);
                 }}
-                customProgramCacheKey={() => `coping-triplanar-v6-slab-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}`}
+                customProgramCacheKey={() => `coping-triplanar-v6-slab-dry-${waterLevel}${materials.coping.id === "deck-marrone" ? "-continuous-deck-v3" : ""}${referenceProgramKey}`}
                 side={DoubleSide}
               />
             )}

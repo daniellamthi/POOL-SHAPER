@@ -10,7 +10,7 @@ import { FINISHES, LINER_COLORS } from "@/lib/pool/config";
 import { useConfigurator } from "@/lib/pool/context";
 import type { SelectableFinishMaterial } from "@/lib/pool/types";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
-import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
+import { COPING_MATERIALS, copingMaterialsForPool, type CopingMaterialId } from "@/lib/pool/coping-materials";
 import { getCopingSwatchDataUrl } from "@/components/pool/copingSwatchPreview";
 import {
   Dialog,
@@ -148,7 +148,7 @@ export function InteriorFinishStep() {
         <div className="flex flex-col gap-3 border-t border-hairline pt-8">
           <p className="label-xs">Materiale del bordo</p>
           <div role="group" aria-label="Materiale del bordo" className="grid grid-cols-2 gap-3">
-            {COPING_MATERIALS.map((option) => (
+            {copingMaterialsForPool(config.poolType).map((option) => (
               <MaterialSwatch
                 key={option.id}
                 title={option.title}

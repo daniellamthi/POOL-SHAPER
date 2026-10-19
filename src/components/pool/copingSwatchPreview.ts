@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { COPING_MATERIALS, type CopingMaterialId } from "@/lib/pool/coping-materials";
+import { referenceFinish } from "@/lib/pool/reference-finishes";
 import {
   createAnthraciteMaps,
   createLimestoneMaps,
@@ -10,7 +11,7 @@ import {
   createWPCMaps,
 } from "./three/stoneTextures";
 
-const BUILDERS: Record<CopingMaterialId, (size?: number) => { colorMap: THREE.Texture }> = {
+const BUILDERS: Partial<Record<CopingMaterialId, (size?: number) => { colorMap: THREE.Texture }>> = {
   travertine: createTravertineMaps,
   limestone: createLimestoneMaps,
   prun: createPrunMaps,
@@ -33,6 +34,8 @@ const cache = new Map<CopingMaterialId, string>();
  * material id and cached as a data URL for the lifetime of the session.
  */
 export function getCopingSwatchDataUrl(id: CopingMaterialId): string {
+  const reference = referenceFinish(id);
+  if (reference) return reference.asset.url;
   const cached = cache.get(id);
   if (cached) return cached;
 

@@ -170,7 +170,7 @@ export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedP
 }
 
 /** Only subtract UI that really overlaps the canvas; trays below it cost no area. */
-export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>) {
+export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>, preferredAspect?: number) {
   let candidates = [{ left: 0, top: 0, right: canvas.width, bottom: canvas.height }];
   for (const overlay of overlays) {
     const fullWidth = overlay.width >= canvas.width * 0.55;
@@ -189,7 +189,10 @@ export function visibleCameraFrame(canvas: { left: number; top: number; width: n
       other.left <= r.left && other.right >= r.right && other.top <= r.top && other.bottom >= r.bottom &&
       (j < i || other.left < r.left || other.right > r.right || other.top < r.top || other.bottom > r.bottom)));
   }
-  const best = candidates.reduce((a,b) => (b.right-b.left)*(b.bottom-b.top) > (a.right-a.left)*(a.bottom-a.top) ? b : a,
+  const score = (r: typeof candidates[number]) => preferredAspect && preferredAspect > 0
+    ? Math.min((r.right - r.left) / preferredAspect, r.bottom - r.top)
+    : (r.right - r.left) * (r.bottom - r.top);
+  const best = candidates.reduce((a,b) => score(b) > score(a) ? b : a,
     {left:0,top:0,right:1,bottom:1});
   return { left:best.left, top:best.top, width:best.right-best.left, height:best.bottom-best.top };
 }

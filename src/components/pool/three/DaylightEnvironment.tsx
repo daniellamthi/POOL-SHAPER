@@ -87,6 +87,7 @@ export function DaylightEnvironment({
   timeOfDay = "day",
   sunDirection,
   outdoor = false,
+  showBackdrop = true,
   coastalRotation = 0,
   onCoastalStatus,
   onCoastalMap,
@@ -95,6 +96,8 @@ export function DaylightEnvironment({
   timeOfDay?: SceneTimeOfDay;
   sunDirection: [number, number, number];
   outdoor?: boolean;
+  /** Architectural plan hides only the visible sky, not the reflection environment. */
+  showBackdrop?: boolean;
   coastalRotation?: number;
   onCoastalStatus?: (status: "loading" | "ready" | "error") => void;
   onCoastalMap?: (map: Texture | null) => void;
@@ -177,9 +180,9 @@ export function DaylightEnvironment({
           <SkyDome {...skyProps} radius={50} />
         </Environment>
       )}
-      {photographicSky && panorama
+      {showBackdrop ? photographicSky && panorama
         ? <CoastalPhotoBackdrop map={panorama} rotation={coastalRotation} timeOfDay={timeOfDay}/>
-        : <SkyDome {...skyProps}/>}
+        : <SkyDome {...skyProps}/> : null}
     </>
   );
 }

@@ -12,7 +12,9 @@ import {
 import type { WebGLProgramParametersWithUniforms } from "three";
 import type { Outline, OverflowType, PoolType, SystemType } from "@/lib/pool/types";
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
-import { PAVING, pavingId, pavingLayout, type PavingId, type PavingFormatId } from "@/lib/pool/presentation";
+import { PAVING, pavingForPool, pavingLayout, type PavingId, type PavingFormatId } from "@/lib/pool/presentation";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { ReferencePavingMaterial } from "./ReferencePavingMaterial";
 import { createPavingModules } from "./pavingGeometry";
 import { samplePavingWood, samplePavingGres, WOOD_GRAIN_SCALE } from "./pavingTexture";
 import { createSurfaceGeometry } from "./poolGeometry";
@@ -26,9 +28,10 @@ const PRUN_PAVING_ASSET = { dir: "/textures/coping/prun", aspect: 365 / 547,
   normalMap: false, roughnessMap: false, mirroredRepeat: true } as const;
 
 export function PavingMaterial(props: { id: PavingId; waterY: number; joint?: boolean; vertexColors?: boolean }) {
-  if (props.joint) return <meshStandardMaterial color={props.id === "wood" || props.id === "wpc" ? "#4c443b" : "#aaa69f"} roughness={1}
+  if (props.joint) return <meshStandardMaterial color={props.id === "wood" || props.id === "wpc" || props.id === "reference-ipe" ? "#4c443b" : "#aaa69f"} roughness={1}
     onBeforeCompile={shader => excludeSubmergedDirectLights(shader, props.waterY)}
     customProgramCacheKey={() => `paving-bed-${props.waterY}`} />;
+  if (isReferenceFinish(props.id)) return <ReferencePavingMaterial id={props.id} waterY={props.waterY} vertexColors={props.vertexColors ?? true} />;
   return ["gres", "wood", "istria"].includes(props.id)
     ? <OriginalPavingMaterial {...props} /> : <CatalogPavingMaterial {...props} />;
 }
@@ -157,9 +160,14 @@ export function StudioPaving({
 }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
-  const id = pavingId(paving);
+  const id = pavingForPool(paving, poolType);
   const layout = useMemo(() => pavingLayout(id, pavingFormat), [id, pavingFormat]);
+  const { module, gap, thickness, boards } = layout;
+  // Material-only changes do not alter a single paving vertex. Preserve the
+  // above-ground lifecycle; reuse the in-ground mesh for equal metric modules.
+  const aboveGroundLayout = poolType === "above-ground" ? layout : null;
   const geometry = useMemo(() => {
+    const started = import.meta.env.DEV ? performance.now() : 0;
     const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
     const outer = offsetOutline(inner, studioDeckBand(outline, environment));
     const far: Outline = [
@@ -168,8 +176,8 @@ export function StudioPaving({
       [150, 150],
       [-150, 150],
     ];
-    return {
-      slabs: createPavingModules(inner, outer, layout.module, layout),
+    const result = {
+      slabs: createPavingModules(inner, outer, module, { gap, thickness, boards }),
       grout: createSurfaceGeometry(outer, inner),
       // The lawn's opening is 4 cm smaller than the paving so its edge always
       // sits under the slabs: an exactly matching edge left a hairline crack
@@ -179,7 +187,12 @@ export function StudioPaving({
         decking ? offsetOutline(inner, studioDeckBand(outline, environment) - 0.04) : inner,
       ),
     };
-  }, [outline, poolType, system, overflowType, layout, environment, decking]);
+    if (import.meta.env.DEV) console.debug("[Pool3D paving build]", JSON.stringify({
+      module, boards, vertices: result.slabs.getAttribute("position").count,
+      durationMs: Number((performance.now() - started).toFixed(2)),
+    }));
+    return result;
+  }, [outline, poolType, system, overflowType, module, gap, thickness, boards, aboveGroundLayout, environment, decking]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
@@ -259,7 +272,7 @@ export function StudioPaving({
             <PavingMaterial key={`${id}-joint`} id={id} waterY={waterY} joint />
           </mesh>
           <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
-            <PavingMaterial key={id} id={id} waterY={waterY} />
+            <PavingMaterial key={isReferenceFinish(id) ? "reference" : id} id={id} waterY={waterY} />
           </mesh>
         </>
       ) : null}

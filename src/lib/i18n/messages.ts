@@ -1,5 +1,14 @@
+import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
+
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ...REFERENCE_FINISHES.flatMap(finish => [
+    [finish.title, finish.titleEn] as const,
+    [finish.subtitle, finish.subtitleEn] as const,
+  ]),
+  ["Finitura minerale di riferimento", "Reference mineral finish"],
+  ["Campione fotografico", "Photographic sample"],
+  ["Finitura fotografica di riferimento · selezione indipendente", "Photographic reference finish · independent selection"],
   ["Lingua", "Language"],
   ["Italiano", "Italian"],
   ["Inglese", "English"],

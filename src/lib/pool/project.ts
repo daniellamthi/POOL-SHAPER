@@ -23,7 +23,8 @@ import { clampLShapeDimensions } from "./l-shape";
 import { compatiblePoolSystem, resolveInfinitySelection } from "./infinity-edge";
 import { buildOutline } from "./geometry";
 import { isRenovationConfig } from "./renovation";
-import { pavingId, pavingFormatId, premiumEnvironment } from "./presentation";
+import { pavingId, pavingForPool, pavingFormatId, premiumEnvironment } from "./presentation";
+import { copingMaterialForPool } from "./coping-materials";
 import {
   normaliseFinishForStructure,
   normalisePoolStructure,
@@ -199,7 +200,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     projectId,
     config: normalizeSunShelfLoungers({
       ...restoredWithoutEdge,
-      ...(restored.paving !== undefined ? { paving: pavingId(restored.paving) } : {}),
+      ...(restored.copingMaterial !== undefined ? { copingMaterial: copingMaterialForPool(restored.copingMaterial, restored.poolType) } : {}),
+      ...(restored.paving !== undefined ? { paving: pavingForPool(restored.paving, restored.poolType) } : {}),
       ...(restored.pavingFormat !== undefined ? { pavingFormat: pavingFormatId(restored.paving, restored.pavingFormat) } : {}),
       ...(restored.premiumEnvironment !== undefined ? { premiumEnvironment: premiumEnvironment(restored.premiumEnvironment) } : {}),
       // External access is only built above ground. Restore the same valid

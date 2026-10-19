@@ -14,8 +14,10 @@ import {
   SKIMMER_FINISHES,
   SELECTABLE_SKIMMER_TYPES,
 } from "@/lib/pool/config";
-import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
-import { PAVING, pavingId, pavingFormats, pavingLayout, PAVING_FORMATS } from "@/lib/pool/presentation";
+import { copingMaterialsForPool } from "@/lib/pool/coping-materials";
+import { pavingMaterialsForPool, pavingId, pavingFormats, pavingLayout, PAVING_FORMATS } from "@/lib/pool/presentation";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { ReferenceFinishSwatch } from "@/components/pool/ReferenceFinishSwatch";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
@@ -1082,13 +1084,13 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
       />
       {tab === "coping" && copingVisible ? (
         <ChoiceGrid label={t("Materiale del bordo")} dense>
-          {COPING_MATERIALS.map((option) => (
+          {copingMaterialsForPool(config.poolType).map((option) => (
             <ChoiceCard
               compact
               key={option.id}
               title={t(option.title)}
               description={t(COPING_COPY[option.id] ?? option.subtitle)}
-              image={getCopingSwatchDataUrl(option.id)}
+              image={isReferenceFinish(option.id) ? <ReferenceFinishSwatch id={option.id} /> : getCopingSwatchDataUrl(option.id)}
               selected={(config.copingMaterial ?? "travertine") === option.id}
               onSelect={() => setCopingMaterial(option.id)}
             />
@@ -1097,14 +1099,14 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
       ) : (
         <div className="space-y-5">
         <ChoiceGrid label={t("Pavimentazione")} dense>
-          {PAVING.map((p) => (
+          {pavingMaterialsForPool(config.poolType).map((p) => (
             <ChoiceCard
               key={p.id}
               compact
               title={t(p.label)}
               description={t(p.note)}
               image={
-                PAVING_IMAGES[p.id] ?? (p.id !== "gres" && p.id !== "wood" && p.id !== "istria" ? getCopingSwatchDataUrl(p.id) : (
+                isReferenceFinish(p.id) ? <ReferenceFinishSwatch id={p.id} /> : PAVING_IMAGES[p.id] ?? (p.id !== "gres" && p.id !== "wood" && p.id !== "istria" ? getCopingSwatchDataUrl(p.id) : (
                   <span
                     className="block h-full w-full rounded-xl"
                     style={{ background: p.color }}

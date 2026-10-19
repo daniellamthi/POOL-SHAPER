@@ -26,6 +26,7 @@ import type { CoverPlan } from "@/lib/pool/cover-plan";
 import { StudioPaving, PavingMaterial } from "./StudioPaving";
 import { createPavingOnSurface } from "./pavingGeometry";
 import { pavingLayout, type PavingFormatId } from "@/lib/pool/presentation";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
 import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
 import { DeckLoungers } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
@@ -319,14 +320,23 @@ function DevelopmentRendererMetrics() {
   const gl = useThree((state) => state.gl);
   const elapsed = useRef(0);
   const frames = useRef(0);
+  const frameTimes = useRef<number[]>([]);
   const inspectedPrograms = useRef(new Set<number>());
   const peakSamplers = useRef(0);
+  const renderer = useMemo(() => {
+    const context = gl.getContext();
+    const debug = context.getExtension("WEBGL_debug_renderer_info");
+    return debug ? String(context.getParameter(debug.UNMASKED_RENDERER_WEBGL)) : "unavailable";
+  }, [gl]);
 
   useFrame((_, delta) => {
     elapsed.current += delta;
     frames.current += 1;
+    frameTimes.current.push(delta * 1000);
     if (elapsed.current < 2) return;
     const frameTime = (elapsed.current / frames.current) * 1000;
+    const sorted = frameTimes.current.sort((a, b) => a - b);
+    const percentile = (p: number) => Number(sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))]!.toFixed(2));
     const context = gl.getContext() as WebGL2RenderingContext;
     for (const program of gl.info.programs ?? []) {
       if (inspectedPrograms.current.has(program.id)) continue;
@@ -349,6 +359,11 @@ function DevelopmentRendererMetrics() {
       JSON.stringify({
         fps: Number((1000 / frameTime).toFixed(1)),
         frameTimeMs: Number(frameTime.toFixed(2)),
+        medianFrameTimeMs: percentile(0.5),
+        p95FrameTimeMs: percentile(0.95),
+        frameCount: sorted.length,
+        renderer,
+        visibility: document.visibilityState,
         calls: gl.info.render.calls,
         triangles: gl.info.render.triangles,
         geometries: gl.info.memory.geometries,
@@ -363,6 +378,7 @@ function DevelopmentRendererMetrics() {
     );
     elapsed.current = 0;
     frames.current = 0;
+    frameTimes.current = [];
   });
   return null;
 }
@@ -433,6 +449,7 @@ function CameraRig({
   ledRow,
   includeExternalStaircase,
   planBounds,
+  compactPlan,
   photoMode,
   cleanCapture,
   infinityZone,
@@ -454,6 +471,7 @@ function CameraRig({
   ledRow: readonly PoolLightPosition[];
   includeExternalStaircase: boolean;
   planBounds: Outline;
+  compactPlan: boolean;
   photoMode: boolean;
   cleanCapture: boolean;
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
@@ -534,11 +552,13 @@ function CameraRig({
   const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping",
     ...(!infinityZone ? ["paving","exterior-panel","external-stairs","pellicano","stair-lighting","skimmer-detail","overflow-hidden","overflow-visible","features"] : [])].includes(focus);
   const coastalHero = !!infinityZone && ["infinity", "review", "overview"].includes(focus);
+  const topBounds = focus === "top" ? outlineBounds(planBounds) : null;
+  const topAspect = topBounds ? topBounds.spanX / Math.max(0.01, topBounds.spanZ) : undefined;
   const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[data-config-summary]')?.getBoundingClientRect() : null;
   const visibleFrame = cleanCapture ? { left: 0, top: 0, width: viewportSize.width, height: viewportSize.height } : visibleCameraFrame(canvas.getBoundingClientRect(), [
     ...Array.from(occluderRoot.querySelectorAll(occluderSelector)).map(element => element.getBoundingClientRect()),
     ...(summaryRect ? [summaryRect] : []),
-  ]);
+  ], topAspect);
   const visibleFrameKey = `${visibleFrame.left}:${visibleFrame.top}:${visibleFrame.width}:${visibleFrame.height}`;
   const fitFov = cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov;
   let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (coastalHero && infinityZone
@@ -564,7 +584,8 @@ function CameraRig({
     pose = editingPose.current.pose;
   } else editingPose.current = null;
   if (focus === "top") {
-    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, visibleFrame) };
+    const planFrame = { ...visibleFrame, left: (viewportSize.width - visibleFrame.width) / 2 };
+    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, planFrame, compactPlan) };
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
   } else planFit.current = null;
@@ -745,16 +766,17 @@ function StudioFloor({
     [premiumInfinity, infinityZone, outline, system, overflowType],
   );
   useEffect(() => () => pavingGeometry?.dispose(), [pavingGeometry]);
+  const terraceLayout = useMemo(() => pavingLayout(paving, pavingFormat), [paving, pavingFormat]);
+  const { module: terraceModule, gap: terraceGap, thickness: terraceThickness, boards: terraceBoards } = terraceLayout;
   const terrace = useMemo(() => {
     if (!pavingGeometry) return null;
-    const layout = pavingLayout(paving, pavingFormat);
-    const slabs = createPavingOnSurface(pavingGeometry, layout.module, layout);
+    const slabs = createPavingOnSurface(pavingGeometry, terraceModule, { gap: terraceGap, thickness: terraceThickness, boards: terraceBoards });
     const bed = pavingGeometry.clone();
     const p = bed.getAttribute("position");
-    for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) < 1e-6) p.setY(i, -layout.thickness);
+    for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) < 1e-6) p.setY(i, -terraceThickness);
     bed.computeVertexNormals();
     return { slabs, bed };
-  }, [pavingGeometry, paving, pavingFormat]);
+  }, [pavingGeometry, terraceModule, terraceGap, terraceThickness, terraceBoards]);
   useEffect(() => () => { terrace?.slabs.dispose(); terrace?.bed.dispose(); }, [terrace]);
   const geometry = useMemo(() => {
     if (premiumInfinity && infinityZone) {
@@ -804,7 +826,7 @@ function StudioFloor({
           <PavingMaterial key={paving} id={paving} waterY={waterY} joint />
         </mesh>
         <mesh name="infinity-paving-modules" geometry={terrace.slabs} receiveShadow castShadow>
-          <PavingMaterial key={paving} id={paving} waterY={waterY} />
+          <PavingMaterial key={isReferenceFinish(paving) ? "reference" : paving} id={paving} waterY={waterY} />
         </mesh>
         </>
       ) : null}
@@ -1055,7 +1077,7 @@ export default function PoolScene({
   // that the pool sits in the same studio context as every other system,
   // never a vast empty tiled plane with a stray panorama.
   const infinityStage = system === "infinity" && !!infinityZone;
-  const background = infinityStage
+  const background = infinityStage && (focus !== "top" || photoMode)
     ? sceneTime === "night"
       ? "#101b28"
       : "#cee0ec"
@@ -1285,7 +1307,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} showBackdrop={!planView} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
 
       <SceneMood
         dusk={dusk}
@@ -1603,6 +1625,7 @@ export default function PoolScene({
         // skimmers, centred, from inside looking out) always wins.
         includeExternalStaircase={false}
         planBounds={planBounds}
+        compactPlan={!showMeasurements}
         externalStairPlan={externalStairs ? planExternalStaircase({outline, side:externalStairSide,
           platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
           copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,

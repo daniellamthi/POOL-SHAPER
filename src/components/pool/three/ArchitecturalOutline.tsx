@@ -2,45 +2,46 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import { Group, Mesh } from "three";
-import { architecturalEdges, type PlanPoint } from "./architecturalPlan";
+import { architecturalEdges, architecturalLineWeight, mergeArchitecturalEdges, type PlanEdgeSet, type PlanLineWeight, type PlanPoint } from "./architecturalPlan";
 import { heroCaptureState } from "@/lib/project-delivery/heroCapture";
 
 export const ARCHITECTURAL_OUTLINE_NAME = "pool-architectural-outlines";
 
 /** Only semantic construction meshes; never water, scenery, jets or LED halos. */
 export function isArchitecturalMesh(mesh: Mesh) {
-  return mesh.name.startsWith("plan-") ||
-    mesh.name.startsWith("pool-comfort-") ||
-    mesh.parent?.name.startsWith("pool-access-internalSteps-") ||
-    // Grille slats are already real geometry. Outlining every 14 mm bar
-    // collapses into a black band at mobile scale; trace their seats instead.
-    ["overflow-kerb", "overflow-edge-without-grille",
-      "infinity-closed-grey-containment", "external-stair-tread"].includes(mesh.name);
+  return architecturalLineWeight(mesh.name, mesh.parent?.name) !== null;
 }
 
 export function ArchitecturalOutline({ revision }: { revision: string }) {
   const scene = useThree(s => s.scene);
   const group = useRef<Group>(null);
-  const [points, setPoints] = useState<PlanPoint[]>([]);
+  const [lines, setLines] = useState<Record<PlanLineWeight, PlanPoint[]>>({ primary: [], secondary: [] });
   useLayoutEffect(() => {
     scene.updateMatrixWorld(true);
-    const next: PlanPoint[] = [];
+    const next: PlanEdgeSet[] = [];
     scene.traverseVisible(object => {
-      if (object instanceof Mesh && isArchitecturalMesh(object))
-        next.push(...architecturalEdges(object.geometry, object.matrixWorld));
+      if (!(object instanceof Mesh)) return;
+      const weight = architecturalLineWeight(object.name, object.parent?.name);
+      if (weight) next.push({ points: architecturalEdges(object.geometry, object.matrixWorld), weight });
     });
-    setPoints(next);
+    setLines(mergeArchitecturalEdges(next));
   }, [scene, revision]);
   useFrame(() => {
     if (group.current) group.current.visible = !heroCaptureState.pending;
   });
-  if (!points.length) return null;
+  if (!lines.primary.length && !lines.secondary.length) return null;
   return <group ref={group} name={ARCHITECTURAL_OUTLINE_NAME}>
     {/* Pale halo separates dark stone; graphite hairline stays readable on PVC.
-        Depth testing hides lower edges under real opaque coping/benches. */}
-    <Line points={points} segments color="#eeeae2" lineWidth={1.8} transparent opacity={0.55}
-      depthTest depthWrite={false} toneMapped={false} renderOrder={90} />
-    <Line points={points} segments color="#39494b" lineWidth={0.85} transparent opacity={0.8}
-      depthTest depthWrite={false} toneMapped={false} renderOrder={91} />
+        Depth testing hides lower edges under real opaque coping/benches.
+        A full pixel core stays readable at DPR 1; secondary hierarchy comes
+        from the lighter tone rather than a fragile subpixel stroke. */}
+    {(["secondary", "primary"] as const).map(weight => lines[weight].length ?
+      <group key={weight}>
+        <Line points={lines[weight]} segments color="#eeeae2" lineWidth={weight === "primary" ? 1.9 : 1.8}
+          transparent opacity={0.5} alphaToCoverage={weight === "primary"} depthTest depthWrite={false} toneMapped={false} renderOrder={90} />
+        <Line points={lines[weight]} segments color={weight === "primary" ? "#304548" : "#44595c"}
+          lineWidth={1} transparent opacity={weight === "primary" ? 0.84 : 0.9}
+          alphaToCoverage={weight === "primary"} depthTest depthWrite={false} toneMapped={false} renderOrder={91} />
+      </group> : null)}
   </group>;
 }
