@@ -5,6 +5,12 @@ import { createSurfaceGeometry } from "./poolGeometry";
 type Point = [number, number];
 export type PavingOptions = { gap?: number; thickness?: number; boards?: boolean };
 function clip(poly: Point[], axis: 0 | 1, limit: number, greater: boolean): Point[] {
+  // Most cells lie wholly inside/outside a clipping half-plane. Keep their
+  // existing point order and avoid allocating another polygon in those cases.
+  let inside = 0;
+  for (const point of poly) if (greater ? point[axis] >= limit : point[axis] <= limit) inside++;
+  if (inside === poly.length) return poly;
+  if (inside === 0) return [];
   const out: Point[] = [];
   for (let i = 0; i < poly.length; i++) {
     const a = poly[i]!, b = poly[(i + 1) % poly.length]!;
@@ -23,16 +29,25 @@ function clip(poly: Point[], axis: 0 | 1, limit: number, greater: boolean): Poin
  * Full modules never scale. Rectangular edge cuts are balanced; oblique
  * custom outlines still receive the exact architectural cut. */
 export function pavingGridOrigin(bounds: number[], pitch: number, stagger = false) {
-  const candidates = Array.from({ length: 256 }, (_, i) => pitch * i / 256);
   // Only numerical equality counts as an aligned edge; accepting a few
   // millimetres here would deliberately create thin perimeter slivers.
   const tolerance = 1e-6;
-  const score = (origin: number) => Math.min(...bounds.flatMap(value =>
-    (stagger ? [0, pitch / 2] : [0]).map(offset => {
+  const score = (origin: number) => {
+    let minimum = Infinity;
+    for (const value of bounds) for (let course = 0; course < (stagger ? 2 : 1); course++) {
+      const offset = course * pitch / 2;
       const d = ((value - origin - offset) % pitch + pitch) % pitch;
-      return Math.min(d, pitch - d) < tolerance ? pitch : Math.min(d, pitch - d);
-    })));
-  return candidates.reduce((best, candidate) => score(candidate) > score(best) ? candidate : best, 0);
+      const cut = Math.min(d, pitch - d);
+      minimum = Math.min(minimum, cut < tolerance ? pitch : cut);
+    }
+    return minimum;
+  };
+  let best = 0, bestScore = score(0);
+  for (let i = 1; i < 256; i++) {
+    const candidate = pitch * i / 256, candidateScore = score(candidate);
+    if (candidateScore > bestScore) { best = candidate; bestScore = candidateScore; }
+  }
+  return best;
 }
 
 /** One merged mesh, including recessed module edges. Only horizontal top

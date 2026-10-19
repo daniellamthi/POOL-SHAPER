@@ -1,0 +1,73 @@
+{
+  "result": "PASS",
+  "checks": 672,
+  "baselineCommit": "70ec9390bba606b017a31cc22ba5c0ca8a461e1a",
+  "cases": 54,
+  "benchmarks": [
+    {
+      "shape": "rectangle",
+      "material": "stone",
+      "baselineMedianMs": 3.7985829999997804,
+      "candidateMedianMs": 3.4027500000001965,
+      "baselineRunsMs": [
+        4.033124999999927,
+        3.7985829999997804,
+        3.53650000000016
+      ],
+      "candidateRunsMs": [
+        3.451542000000245,
+        3.4027500000001965,
+        3.0559159999997974
+      ]
+    },
+    {
+      "shape": "rectangle",
+      "material": "boards",
+      "baselineMedianMs": 8.68887500000028,
+      "candidateMedianMs": 7.819875000000138,
+      "baselineRunsMs": [
+        8.68887500000028,
+        8.718875000000025,
+        8.194915999999921
+      ],
+      "candidateRunsMs": [
+        8.68454200000042,
+        7.819875000000138,
+        7.345291000000088
+      ]
+    },
+    {
+      "shape": "organic",
+      "material": "stone",
+      "baselineMedianMs": 29.61608299999989,
+      "candidateMedianMs": 14.304583999999977,
+      "baselineRunsMs": [
+        30.756333999999697,
+        29.23149999999987,
+        29.61608299999989
+      ],
+      "candidateRunsMs": [
+        14.304583999999977,
+        14.987291999999798,
+        14.06616699999995
+      ]
+    },
+    {
+      "shape": "organic",
+      "material": "boards",
+      "baselineMedianMs": 51.21483400000034,
+      "candidateMedianMs": 31.536833000000115,
+      "baselineRunsMs": [
+        51.21483400000034,
+        51.841457999999875,
+        50.31616699999995
+      ],
+      "candidateRunsMs": [
+        31.536833000000115,
+        31.390832999999475,
+        33.09704099999999
+      ]
+    }
+  ],
+  "limits": "CPU geometry generation only; exact same output. Not FPS/GPU or physical-mobile measurements."
+}

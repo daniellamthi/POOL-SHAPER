@@ -104,3 +104,28 @@ Tre confronti CPU dopo warm-up, medesima 12×5 e stessi moduli: **solo costruzio
 | Doghe | 8.784 → 0 | 4,401 → 0,004 ms | 5,166 / 4,059 / 4,401 → 0,004 / 0,004 / 0,005 |
 
 Nel browser, il log esistente di costruzione su dimensioni 12×5 registrava 4.704 vertici ancora nascosti e circa 3,0–5,7 ms; dopo la correzione registra 0 vertici e 0–0,2 ms. La scena finale continua a costruire integralmente lastre e fughe. Questi dati dimostrano la rimozione di lavoro CPU inutile, **non** un aumento FPS/GPU o prestazioni mobile reali: nessuna di queste misure aggiuntive viene dichiarata verificata.
+
+## Fluidità delle modifiche — ottimizzazione successiva, stesso giorno
+
+Base `70ec9390bba606b017a31cc22ba5c0ca8a461e1a`; backup dei 39 file WIP precedenti: `pool-shaper-wip-backups/residual-gates-20261015-rBzxz5`. Skill impiegate: vb-orchestrator, realtime-performance-profiler, threejs-performance. Un solo obiettivo: ridurre il lavoro CPU della posa visibile durante cambi forma/formato/materiale, senza alterarne il risultato.
+
+- `pavingGridOrigin`: punteggio del candidato migliore conservato anziché ricalcolato ad ogni confronto; eliminati array temporanei `flatMap/map` per ciascuna delle 256 origini. Stessi candidati, tolleranza, ordine e gestione dei pareggi.
+- Clipping: un poligono interamente dentro un semipiano conserva direttamente i suoi punti; uno interamente fuori termina subito. Le intersezioni continuano a usare esattamente l'algoritmo precedente.
+- Nessun cambiamento a shader, risoluzione, riflessi, ombre, materiali, disegno dei giunti, numero di moduli, geometrie approvate, opzioni o persistenza.
+
+`node scripts/paving-performance-audit.mjs docs/qa/evidence/lympha-20261019/paving-performance.json`: **672 controlli PASS**; 54 casi, rettangolare/L/organica, 6×3 / 8×4 / 12×5 e sei moduli di lastre/doghe. Confronto con il sorgente effettivo del commit base: posizioni, normali, UV, colori, indici e metadata **identici byte per byte**. Include 294 confronti di origini, corsi sfalsati e superficie vuota. Nessuna perdita di dettagli o quantità selezionate.
+
+Tre confronti alternati, dopo warm-up, sette generazioni per campione. Mediane CPU delle tre coppie sulla stessa 12×5:
+
+| Forma/materiale | Prima → dopo | Riduzione CPU |
+|---|---|---|
+| Rettangolare/lastre | 3,799 → 3,403 ms | 10% |
+| Rettangolare/doghe | 8,689 → 7,820 ms | 10% |
+| Organica/lastre | 29,616 → 14,305 ms | 52% |
+| Organica/doghe | 51,215 → 31,537 ms | 38% |
+
+Tempi completi e limiti nel [risultato JSON](evidence/lympha-20261019/paving-performance.json). È un confronto di generazione geometrica CPU, non FPS/GPU o latenza end-to-end; nessuna promessa di incremento universale FPS. Il log della scena IAB prima dell'intervento rilevava Apple M1 Pro/ANGLE Metal, viewport 831×931, DPR 1,819, circa 30,4–30,5 FPS, mediana 33 ms: questi dati non sono usati come benchmark prima/dopo, perché non è stato isolato il carico GPU delle altre schede.
+
+Browser integrato: cambio reale 60×120 → 30×60 cm, poi WPC; posa e finiture si aggiornano, bordo Ipè distinto e invariato. [Screenshot WPC dopo](evidence/lympha-20261019/paving-speed-wpc.jpg). Log della generazione WPC visibile 12×5: 11.388 vertici, circa 5,1–5,4 ms; non un confronto temporale normalizzato con il precedente Node. [Ritorno in Presentazione](evidence/lympha-20261019/paving-speed-presentation.jpg) verificato, arredi presenti e pannello utilizzabile. Nella sessione dopo HMR/riapertura sono comparsi avvisi Three.Clock deprecato e texture senza image data: nessuna modifica a texture o gestione risorse in questo commit; non sono dichiarati risolti né usati come evidenza PASS.
+
+Typecheck PASS; audit dipendente disposizione/pavimentazione **1.312 PASS**; diff-check PASS. Nessun nuovo build completo richiesto per questa sola modifica algoritmica locale: riutilizzato il build precedente come evidenza storica, non descritto come un nuovo build del candidato. WIP non pertinente preservato integralmente.
