@@ -3,6 +3,7 @@ import { useLoader, useThree } from "@react-three/fiber";
 import {
   DirectionalLight,
   SpotLight,
+  BufferGeometry,
   RepeatWrapping,
   MirroredRepeatWrapping,
   DataTexture,
@@ -15,17 +16,29 @@ import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { PAVING, pavingForPool, pavingLayout, type PavingId, type PavingFormatId } from "@/lib/pool/presentation";
 import { isReferenceFinish } from "@/lib/pool/reference-finishes";
 import { ReferencePavingMaterial } from "./ReferencePavingMaterial";
-import { createPavingModules } from "./pavingGeometry";
+import { createPavingModules, type PavingOptions } from "./pavingGeometry";
 import { samplePavingWood, samplePavingGres, WOOD_GRAIN_SCALE } from "./pavingTexture";
 import { createSurfaceGeometry } from "./poolGeometry";
-import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
+import { studioDeckBand, studioDeckInnerOffset, studioDeckOutline, type DeckFurnitureSide } from "./studioDeck";
 import { createLimestoneMaps, createPrunMaps, createWPCMaps } from "./stoneTextures";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 
 export { createPavingModules } from "./pavingGeometry";
+const NO_FURNITURE_ROWS: readonly DeckFurnitureSide[] = [];
 const PRUN_PAVING_ASSET = { dir: "/textures/coping/prun", aspect: 365 / 547,
   normalMap: false, roughnessMap: false, mirroredRepeat: true } as const;
+
+/** While editing shape/dimensions the paving is not rendered. Avoid cutting
+ * thousands of invisible modules on every input; build the exact same full
+ * geometry only when the exterior stage actually displays it. */
+export function createVisiblePavingGeometry(inner: Outline, outer: Outline,
+  module: readonly [number, number], options: PavingOptions, visible: boolean) {
+  return {
+    slabs: visible ? createPavingModules(inner, outer, module, options) : new BufferGeometry(),
+    grout: visible ? createSurfaceGeometry(outer, inner) : new BufferGeometry(),
+  };
+}
 
 export function PavingMaterial(props: { id: PavingId; waterY: number; joint?: boolean; vertexColors?: boolean }) {
   if (props.joint) return <meshStandardMaterial color={props.id === "wood" || props.id === "wpc" || props.id === "reference-ipe" ? "#4c443b" : "#aaa69f"} roughness={1}
@@ -141,6 +154,7 @@ export function StudioPaving({
   pavingFormat,
   environment = true,
   loungers = false,
+  furnitureRows = NO_FURNITURE_ROWS,
   decking = true,
   waterY,
 }: {
@@ -154,6 +168,7 @@ export function StudioPaving({
   environment?: boolean;
   /** Reserve the furniture footprint plus a clear poolside passage. */
   loungers?: boolean;
+  furnitureRows?: readonly DeckFurnitureSide[] | undefined;
   /** Progressive reveal: before Bordo e decking the basin sits in a plain
    * ground plane, with no paving around the coping yet. */
   decking?: boolean;
@@ -172,7 +187,8 @@ export function StudioPaving({
   const geometry = useMemo(() => {
     const started = import.meta.env.DEV ? performance.now() : 0;
     const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
-    const outer = offsetOutline(inner, studioDeckBand(outline, environment, loungers));
+    const band = studioDeckBand(outline, environment, loungers);
+    const outer = studioDeckOutline(inner, band, furnitureRows);
     const far: Outline = [
       [-150, -150],
       [150, -150],
@@ -180,22 +196,21 @@ export function StudioPaving({
       [-150, 150],
     ];
     const result = {
-      slabs: createPavingModules(inner, outer, module, { gap, thickness, boards }),
-      grout: createSurfaceGeometry(outer, inner),
+      ...createVisiblePavingGeometry(inner, outer, module, { gap, thickness, boards }, decking),
       // The lawn's opening is 4 cm smaller than the paving so its edge always
       // sits under the slabs: an exactly matching edge left a hairline crack
       // that showed the basin shell at low cameras.
       ground: createSurfaceGeometry(
         far,
-        decking ? offsetOutline(inner, studioDeckBand(outline, environment, loungers) - 0.04) : inner,
+        decking ? (furnitureRows.length ? offsetOutline(outer, -0.04) : offsetOutline(inner, band - 0.04)) : inner,
       ),
     };
     if (import.meta.env.DEV) console.debug("[Pool3D paving build]", JSON.stringify({
-      module, boards, vertices: result.slabs.getAttribute("position").count,
+      module, boards, visible: decking, vertices: result.slabs.getAttribute("position")?.count ?? 0,
       durationMs: Number((performance.now() - started).toFixed(2)),
     }));
     return result;
-  }, [outline, poolType, system, overflowType, module, gap, thickness, boards, aboveGroundLayout, environment, loungers, decking]);
+  }, [outline, poolType, system, overflowType, module, gap, thickness, boards, aboveGroundLayout, environment, loungers, furnitureRows, decking]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {

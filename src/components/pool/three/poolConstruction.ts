@@ -176,7 +176,7 @@ export function createCopingSlabGeometry(
    * `null`/`undefined` (every pre-Infinity call site) is byte-identical to
    * before. */
   excludeSection: number | ReadonlySet<number> | null = null,
-  /** Deck Marrone alone: one solid run between real corners. */
+  /** Continuous timber coping: one solid run between real corners. */
   continuousSides = false,
 ) {
   if (inner.length !== outer.length || inner.length < 3)

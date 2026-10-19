@@ -19,6 +19,8 @@ export interface ConstructionPresentation {
    * solar shower). Never shown while the customer is still choosing the
    * structure, system, access or finish. */
   showEnvironment: boolean;
+  /** Selected exterior chaise longues appear only in the final presentation. */
+  showLoungers: boolean;
   /** Coping-level paving around the basin: from Bordo e decking on. */
   showDecking: boolean;
   label: string | null;
@@ -42,6 +44,7 @@ export function constructionPresentation(
       showAccessories: false,
       showLighting: false,
       showEnvironment: false,
+      showLoungers: false,
       showDecking: false,
       label: structure === "STEEL_PANELS"
         ? "Vista tecnica · pannelli strutturali in acciaio"
@@ -78,6 +81,7 @@ export function constructionPresentation(
       ["deck", "technology", "review"].includes(stepId ?? ""),
     showEnvironment:
       config.projectType === "new" && ["technology", "review"].includes(stepId ?? ""),
+    showLoungers: stepId === "review",
     label: raw
       ? structure === "STEEL_PANELS"
         ? "Struttura · Pannelli in acciaio"

@@ -153,6 +153,17 @@ export function mergeArchitecturalEdges(sets: PlanEdgeSet[]): Record<PlanLineWei
   return result;
 }
 
+/** Keep a top editing view centred without placing it beneath real UI. */
+export function centeredArchitecturalFrame(frame: { left: number; top: number; width: number; height: number }, canvasWidth: number) {
+  const inset = Math.max(frame.left, canvasWidth - frame.left - frame.width);
+  // Use a symmetric subset of the genuinely free rectangle. Peripheral HUD
+  // badges must not pull the editing plan towards one side of the canvas.
+  // A real sidebar covering the centre cannot be recentered without overlap.
+  return inset < canvasWidth / 2
+    ? { ...frame, left: inset, width: canvasWidth - 2 * inset }
+    : frame;
+}
+
 /** Fit actual construction bounds into the unobscured viewport, in metres.
  * A minimum pixel margin keeps small/mobile pools legible without clipping. */
 export function architecturalFrustum(outline: Outline, width: number, height: number,

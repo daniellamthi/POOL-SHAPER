@@ -1157,6 +1157,7 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
       description={t(id === "loungers" ? "Esse · Lyxo, con telaio e cuscino per la pavimentazione." : item(id).description)}
       image={id === "loungers" ? "/product-previews/lympha-deck.jpg" : ill(`equipment-${id}`)}
       imageFit={id === "loungers" ? "contain" : "cover"}
+      {...(id === "loungers" ? { footer: t("Visibili nella presentazione finale.") } : {})}
       selected={config.equipment.includes(id)}
       onSelect={onSelect ?? (() => toggleEquipment(id))}
     />

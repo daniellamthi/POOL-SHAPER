@@ -153,8 +153,10 @@ export const LEGACY_COPING_MATERIALS = [
 ] as const;
 export const COPING_MATERIALS = [...LEGACY_COPING_MATERIALS, ...REFERENCE_FINISHES] as const;
 export type CopingMaterialId = (typeof COPING_MATERIALS)[number]["id"];
-/** References are an in-ground collection; existing above-ground choices stay intact. */
+/** References remain in-ground only. Retired brown timber stays in the full
+ * catalogue for old snapshots, but is no longer offered as a coping choice. */
 export const copingMaterialsForPool = (poolType: unknown) =>
-  poolType === "in-ground" ? COPING_MATERIALS : LEGACY_COPING_MATERIALS;
+  (poolType === "in-ground" ? COPING_MATERIALS : LEGACY_COPING_MATERIALS)
+    .filter(material => material.id !== "deck-marrone");
 export const copingMaterialForPool = <T extends CopingMaterialId | undefined>(id: T, poolType: unknown): T | "travertine" =>
   poolType === "above-ground" && isReferenceFinish(id) ? "travertine" : id;

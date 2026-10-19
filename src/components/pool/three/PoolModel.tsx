@@ -879,7 +879,7 @@ export function PoolModel({
   // uniforms. A fresh material installs those uniforms even at the same scale.
   const referenceCoping = isReferenceFinish(materials.coping.id);
   const copingMaterialKey = referenceCoping ? `${materials.coping.id}-photographic-v2` : materials.coping.moduleSize;
-  const referenceProgramKey = referenceCoping ? (materials.coping.id === "reference-ipe" ? "-reference-ipe-v7-four-boards" : "-reference-stone-v6-shared-sampler") : "";
+  const referenceProgramKey = referenceCoping ? (materials.coping.id === "reference-ipe" ? "-reference-ipe-v8-continuous-single-board" : "-reference-stone-v6-shared-sampler") : "";
   const configureCopingTriplanar = useCallback(
     (shader: TriplanarShader) => {
       shader.uniforms.triplanarScale = {
@@ -976,7 +976,8 @@ export function PoolModel({
     () =>
       isVisibleOverflow
         ? new THREE.BufferGeometry()
-        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection, materials.coping.id === "deck-marrone"),
+        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection,
+            materials.coping.id === "deck-marrone" || materials.coping.id === "reference-ipe"),
     [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, infinitySection, materials.coping.id],
   );
   const overflowLip = useDisposable(
@@ -1474,7 +1475,7 @@ export function PoolModel({
               <meshPhysicalMaterial
                 key={copingMaterialKey}
                 color={materials.coping.color}
-                vertexColors
+                vertexColors={materials.coping.id !== "reference-ipe"}
                 normalMap={copingDetail.normalMap}
                 normalScale={[materials.coping.normalStrength, materials.coping.normalStrength]}
                 roughnessMap={copingDetail.roughnessMap}

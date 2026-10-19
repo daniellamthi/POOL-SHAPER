@@ -156,7 +156,7 @@ export function configureReferenceCoping(shader: THREE.WebGLProgramParametersWit
   installSampler(shader, id);
   const existing = /vec3 stoneColor = texture2D\(stoneColorMap,[\s\S]*?stoneWeights\.z;/;
   shader.fragmentShader = shader.fragmentShader.replace(existing, `
-    ${id === "reference-ipe" ? MODULE_VARIANT : "float referenceVariant = 0.0;"}
+    float referenceVariant = 0.0;
     vec3 referenceNormal = abs(normalize(vTriWorldNormal));
     vec2 referenceMetric = referenceNormal.y >= max(referenceNormal.x, referenceNormal.z)
       ? vTriWorldPosition.xz : referenceNormal.x > referenceNormal.z

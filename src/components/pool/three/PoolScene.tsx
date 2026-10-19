@@ -20,7 +20,7 @@ import { PoolModel } from "./PoolModel";
 import { SunShelfLoungers } from "./SunShelfLoungers";
 import { resolveSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
 import { ArchitecturalOutline, ARCHITECTURAL_OUTLINE_NAME } from "./ArchitecturalOutline";
-import { architecturalFrustum } from "./architecturalPlan";
+import { architecturalFrustum, centeredArchitecturalFrame } from "./architecturalPlan";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
 import { StudioPaving, PavingMaterial } from "./StudioPaving";
@@ -656,9 +656,9 @@ function CameraRig({
     pose = editingPose.current.pose;
   } else editingPose.current = null;
   if (focus === "top") {
-    // Centre in the actual free rectangle, not under a floating control or
-    // technical panel. Preserve the approved above-ground framing.
-    const planFrame = premiumPlan ? visibleFrame : { ...visibleFrame, left: (viewportSize.width - visibleFrame.width) / 2 };
+    // Centre within a symmetric subset of the free rectangle, without
+    // putting the plan under floating controls or a technical panel.
+    const planFrame = centeredArchitecturalFrame(visibleFrame, viewportSize.width);
     planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, planFrame, compactPlan, premiumPlan) };
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
@@ -1337,10 +1337,12 @@ export default function PoolScene({
     [coverPlan.geometry],
   );
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
-  const deckFurnitureEnvelope = useMemo(() => system !== "infinity" && (construction?.showEnvironment ?? true)
-    ? deckFurnitureCameraPoints(planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType),
-      studioDeckBand(outline,true,loungers),deckObstacles,{loungers,shower:solarShower,coverHousing})) : [],
-  [system,construction?.showEnvironment,outline,poolType,overflowType,deckObstacles,loungers,solarShower,coverHousing]);
+  const visibleDeckLoungers = loungers && (construction?.showLoungers ?? true);
+  const deckFurniturePlan = useMemo(() => system !== "infinity" && (construction?.showEnvironment ?? true)
+    ? planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType),
+      studioDeckBand(outline,true,visibleDeckLoungers),deckObstacles,{loungers:visibleDeckLoungers,shower:solarShower,coverHousing}) : null,
+  [system,construction?.showEnvironment,outline,poolType,overflowType,deckObstacles,visibleDeckLoungers,solarShower,coverHousing]);
+  const deckFurnitureEnvelope = useMemo(() => deckFurniturePlan ? deckFurnitureCameraPoints(deckFurniturePlan) : [], [deckFurniturePlan]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
     SCENE_VISUAL_PRESET.lighting.sun.frustumMargin;
@@ -1519,7 +1521,8 @@ export default function PoolScene({
             paving={paving ?? "gres"}
             pavingFormat={pavingFormat}
             environment={construction?.showEnvironment ?? true}
-            loungers={loungers}
+            loungers={visibleDeckLoungers}
+            furnitureRows={deckFurniturePlan?.rows}
             decking={construction?.showDecking ?? true}
             waterY={verticalLayout.waterY}
           />
@@ -1540,11 +1543,11 @@ export default function PoolScene({
         <DeckLoungers
           outline={outline}
           innerOffset={studioDeckInnerOffset(poolType, system, overflowType)}
-          band={studioDeckBand(outline, true, loungers)}
+          band={studioDeckBand(outline, true, visibleDeckLoungers)}
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
           shower={solarShower}
-          loungers={loungers}
+          loungers={visibleDeckLoungers}
           coverHousing={coverHousing}
         />
       ) : null}

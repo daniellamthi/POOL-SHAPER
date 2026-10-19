@@ -30,8 +30,8 @@ export const DECK_CHAISE_MODEL = {
 /** Presentation spacing in metres, not certified installation clearances. */
 export const DECK_CHAISE_LAYOUT = {
   walkway: 1,
-  between: 0.7,
-  betweenPairs: 0.8,
+  between: 0.9,
+  betweenPairs: 1,
   rearMargin: 0.4,
 } as const;
 

@@ -67,3 +67,40 @@ Base di questa correzione: `d8cd4f15c3a47bc05435152519ba8df223045724`. Solo layo
 `node scripts/deck-lounger-spacing-audit.mjs`: **584 controlli PASS**, 6×3 / 8×4 / 12×5 / 4×8, interrata/fuori terra, Skimmer e Sfioro; appoggio dell’intera impronta, gap, corridoio, margine posteriore, rimozione OFF e rispetto dell’accesso. Audit immersi ancora **1.152 PASS**; typecheck e diff-check PASS. Nessun nuovo build completo o audit generale, non necessari per questi soli parametri di disposizione.
 
 Browser integrato: confronto diretto della medesima 8×4 con entrambi gli optional ON: [prima](evidence/lympha-20261019/both-on.jpg) / [dopo](evidence/lympha-20261019/deck-spacing-after.jpg). Confermati quattro lettini esterni separati, fascia di passaggio libera, intero arredo appoggiato sulla pavimentazione ampliata e due lettini immersi immutati. Revisione React mirata: dipendenza `loungers` aggiunta alla geometria memoizzata; disposal e cache ombre esistenti preservati.
+
+## Bordo omogeneo, arredo finale e centratura — richiesta aggiuntiva
+
+Base `afa1c99c450996ba79cbeca46217169764408e78`. WIP precedente (39 file) preservato nel backup locale `pool-shaper-wip-backups/residual-gates-20261015-tPsOQ5`, esclusi segreti. Intervento limitato alle richieste successive del proprietario; nessuna modifica a backend, piscina, luci, lettini immersi o preset Infinity.
+
+| ID | Modifica / criterio | Evidenza | Esito |
+|---|---|---|---|
+| CH-07 | Deck Marrone rimosso dalle sole scelte bordo; ID legacy ancora valido | Picker browser e audit catalogo/retrocompatibilità; pavimentazione invariata | PASS |
+| CH-08 | Ipè omogeneo, stesso legno fotografico, un elemento per lato senza fughe intermedie | [Bordo dopo](evidence/lympha-20261019/ipe-coping-after.jpg); geometria continua e quote invariate su 6×3, 8×4, 12×5; nessuna modifica allo shader di posa della pavimentazione | PASS |
+| CH-09 | Chaise esterne soltanto in Presentazione, selezione conservata | [Optional ON ma arredi non ancora visibili](evidence/lympha-20261019/optional-no-deck-loungers.jpg) → [Presentazione finale 12×5](evidence/lympha-20261019/final-terrace-after.jpg); controllo distinto dagli immersi | PASS |
+| CH-10 | Stesso modello senza ridimensionamenti, più spazio e pavimentazione sul lato effettivamente occupato | 0,90 m fra lettini, 1,00 m fra coppie, passaggio 1,00 m; estensione esterna +0,80 m solo sul lato delle file calcolate; audit impronte/accessi e screenshot finale | PASS |
+| CH-11 | Pianta centrata durante forma/lunghezza/larghezza, senza occultamenti | Stessa 10×4,5 / viewport 1280×720: [prima](evidence/lympha-20261019/top-centering-before.jpg), centro X circa 551 px, [dopo](evidence/lympha-20261019/top-centering-after-10x45.jpg), centro X 640 px; [6×3](evidence/lympha-20261019/top-centering-after-6x3.jpg), [8×4](evidence/lympha-20261019/top-centering-after-8x4.jpg), [12×5](evidence/lympha-20261019/top-centering-after-12x5.jpg) | PASS |
+| CH-12 | Fluidità in modifica dimensioni: eliminare lavoro dimostrato inutile, senza ridurre dettagli visibili | Costruzione differita delle sole lastre/fughe nascoste; array posizioni finali identici al generatore precedente; benchmark CPU sotto | PASS per il collo di bottiglia misurato |
+
+La fascia esterna passa da 3,25 a 4,05 m sul lato occupato nelle taglie piccole e da 3,60 a 4,40 m nella 12×5; gli altri lati restano invariati. Misure compositive dell'anteprima, non distanze normative certificate. I moduli di pavimentazione vengono ritagliati, non stirati. L'Ipè mantiene fotografia e scala originali: eliminati soltanto variazione artificiale fra moduli e giunti intermedi del bordo. [Prima bordo](evidence/lympha-20261019/ipe-coping-before.jpg) è una cattura su configurazione/viewport diversi: non è un confronto numerico a parità di condizioni.
+
+### Verifica mirata conclusiva
+
+- `npx tsc --noEmit`: PASS.
+- `node scripts/deck-lounger-spacing-audit.mjs`: **1.312 controlli PASS**, inclusi 6×3 / 8×4 / 12×5 / 4×8, disposizione, OFF, accessi, continuità bordo e proiezioni 1280/1440/390/430. Proiezioni automatizzate, non prove su telefoni fisici.
+- `node scripts/run-structure-progression-audit.mjs`: **82.457 controlli PASS**, dipendenza pertinente alla comparsa degli arredi nella sola fase finale.
+- `node scripts/finish-guidance-audit.mjs`: **602 controlli PASS**, stato e navigazione interessati; non sono 602 cicli browser.
+- `npm run build`: PASS; avvisi esistenti tsconfig e chunk grandi non modificati.
+- `git diff --check`: PASS.
+- Browser integrato realmente utilizzato a 1280×720: variazioni dimensioni, ritorno alle fasi, bordo Ipè, arredi non visibili negli Optional e presenti in Presentazione; console finale senza warning/errori catturati. Preferenze esistenti conservate. Nessuna nuova verifica cloud/PDF/preventivo live dichiarata per queste modifiche puramente di presentazione.
+- Revisione React mirata: geometrie e piano arredi memoizzati, array default stabile, smaltimento e invalidazione ombre preservati; nessun lavoro aggiuntivo per-frame, libreria o texture.
+
+### Prestazioni: prova limitata e ripetibile
+
+Tre confronti CPU dopo warm-up, medesima 12×5 e stessi moduli: **solo costruzione della pavimentazione che non è ancora visibile**.
+
+| Materiale | Vertici nascosti prima → dopo | Mediana CPU prima → dopo | Tre tempi prima / dopo (ms) |
+|---|---|---|---|
+| Lastre | 3.660 → 0 | 2,335 → 0,004 ms | 2,335 / 2,587 / 2,049 → 0,004 / 0,005 / 0,003 |
+| Doghe | 8.784 → 0 | 4,401 → 0,004 ms | 5,166 / 4,059 / 4,401 → 0,004 / 0,004 / 0,005 |
+
+Nel browser, il log esistente di costruzione su dimensioni 12×5 registrava 4.704 vertici ancora nascosti e circa 3,0–5,7 ms; dopo la correzione registra 0 vertici e 0–0,2 ms. La scena finale continua a costruire integralmente lastre e fughe. Questi dati dimostrano la rimozione di lavoro CPU inutile, **non** un aumento FPS/GPU o prestazioni mobile reali: nessuna di queste misure aggiuntive viene dichiarata verificata.

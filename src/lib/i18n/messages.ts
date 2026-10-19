@@ -347,6 +347,7 @@ export const messages: ReadonlyArray<readonly [string, string]> = [
   ["Solarium sommerso a 20 cm per sdraiarsi in acqua.", "A submerged sun shelf at 20 cm for reclining in the water."],
   ["Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.", "Esse · Lyxo, without frame. For water up to 20 cm deep, with ballast."],
   ["Esse · Lyxo, con telaio e cuscino per la pavimentazione.", "Esse · Lyxo, with frame and cushion for the deck."],
+  ["Visibili nella presentazione finale.", "Visible in the final presentation."],
   ["Zona delimitata da un muretto, panca a L con getti.", "An area enclosed by a low wall, with an L-shaped bench and jets."],
   ["Panca a U con getti, aperta sulla vasca.", "A U-shaped bench with jets, open to the pool."],
   ["Per il tuo Sun shelf", "For your sun shelf"], ["· compare solo con questa scelta", "· available only with this choice"],
