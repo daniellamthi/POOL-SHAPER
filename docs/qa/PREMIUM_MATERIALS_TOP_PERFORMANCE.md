@@ -20,7 +20,7 @@ backend/Supabase, approved pool solids, environments and cameras are protected.
 | U07 | Performance specialist/root | No significant regression, responsive material changes, efficient loading and no needless reconstruction | Three matched main pairs: median8.5→8.5ms/p95 10.2→10.3ms. Final three slate-v3 pairs: median8.2→8.5ms/p95 10.1→9.5ms; unchanged full-pass calls/geometry. Rejected runtime v1/v2 regressions remain recorded, not shipped. Ten actual mosaic reselections per checkout show stable resources | PASS — scoped desktop hardware |
 | U08 | Independent customer reviewer | Real integrated-browser close-up/overview/top, materials, day/night, responsive desktop1440/mobile390/430 emulated | Separate reviewer actually operated the app, reproduced slate FAIL, retested corrections; all9 mosaics/13 paving night families/four panels and390/430 Back/family replay. Detailed coverage artifact below | PASS |
 | U09 | Root | Typecheck/build/targeted material/UX/plan/performance tests and diff/credential checks | Final working candidate typecheck/build/material/Prun/mosaic/reference integration/UX/plan/diff PASS; isolated exact staged source typecheck/build PASS without unrelated WIP or secrets. Credential guard PASS | PASS |
-| U10 | Root | Task-only commit/push on current feature branch only after all mandatory PASS | All quality gates above PASS. Task-only index verified; remote remains f7fe5a2. No merge/deploy; commit/push receipt follows delivery | READY — delivery pending |
+| U10 | Root | Task-only commit/push on current feature branch only after all mandatory PASS | Implementation9c95470259f40bd704b4981ac857024b9777b8b1 pushed; exact local/remote feature SHA verified.147 task files only, pre-goal WIP retained. This receipt adds documentation only | PASS |
 
 New goal evidence is recorded in this section as work progresses; no historical
 PASS is automatically promoted to the current candidate's visual acceptance.
@@ -126,6 +126,14 @@ outside Git at `pool-shaper-wip-backups/residual-gates-20261015-6PwPJS`.
 `final-integrated-preview.jpg` shows the actual final local candidate open in
 the integrated browser at `http://materials-qa.localhost:3003/`; this is a
 working local preview, not a deployment. Temporary QA viewport override reset.
+
+Delivery receipt: implementation commit
+`9c95470259f40bd704b4981ac857024b9777b8b1`, pushed to the existing
+`feat/fullscreen-day-night-hidden-overflow`; `git ls-remote --heads` returned
+the identical SHA.147 task files comprise12 application files,9 test/authoring
+scripts,5 derived-asset/provenance files,1 report and120 evidence files.
+No backend/liner/camera/environment code, main/archive branch, merge or manual
+deployment was changed. The unrelated working tree deliberately remains dirty.
 
 ### Earlier work (historical evidence, not the current upgrade gate)
 
