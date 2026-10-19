@@ -30,9 +30,9 @@ coverage does not imply visual approval or physical-product certification.
 | I04 | Root | Old projects valid and all liner code/appearance unchanged | Source guard + resolved-material comparison + visual | PASS — 48 exact approved liner descriptor comparisons, unchanged liner resolver block, old cloud project reopens; material shader edits scoped to new references |
 | I05 | Root | Above-ground unchanged; reference choices unavailable there | Catalog/config/render guards + regression | PASS — exact legacy catalog/config/material guards and invalid-reference fallback; above-ground geometry retained |
 | Q01 | Independent reviewer | Actual browser review of all 8 finishes and plan, Infinity unchanged | Desktop1440×900; mobile390×844/430×932 (emulated) | PASS for documented representative views — all eight actual selections on all three viewports; targeted Infinity top/perspective restoration retest; limits below remain explicit |
-| Q02 | Root | Typecheck, production build, geometry/material/plan/persistence/export and diff checks | Commands + results | PASS — final typecheck/build, 2,358 material + 5,054 integration + 3,390 plan checks, diff-check; earlier project-config/persistence/export-guard passed |
+| Q02 | Root | Typecheck, production build, geometry/material/plan/persistence/export and diff checks | Commands + results | PASS — typecheck/build, 2,358 material + 5,054 integration; final operational plan 3,396 / isolated scoped plan 3,387 plus 362 architecture checks; diff-check; earlier project-config/persistence/export-guard passed |
 | Q03 | Root | Screenshots before/after at matching size/camera; visible integrated preview | Real captures + paths | PASS — matched paired performance captures, top before/after and settled material close-ups; latest numeric catalogue visible in integrated preview |
-| D01 | Root | Commit/push only after mandatory gates pass; source/remote SHA verified | Git output, no merge/deploy | READY — scoped snapshot validated separately; commit/push and remote verification still pending |
+| D01 | Root | Commit/push only after mandatory gates pass; source/remote SHA verified | Git output, no merge/deploy | PASS — implementation 2fa838cdcf66c3451b2684b0b7a98d304fb6238c pushed to the same feature branch; local/remote SHA equal. Earlier WIP retained locally; no merge or manual deploy |
 
 ## Scope protections
 
@@ -239,3 +239,20 @@ This additional smoke is coordinator verification, not falsely labelled
 independent replay. The separate independent reviews above remain attributed
 to their actual tested operational-WIP snapshot. The temporary QA tab was
 closed and the main integrated preview restored, with no live quote or email.
+
+Delivery integrity: the 39 source/asset index blobs (excluding the evolving QA
+report and equivalent-comment audit file) matched the independently built
+isolated snapshot exactly before commit. The final backup `m1iUMt` credential
+scan passed; all 86 backed-up working files retained the same SHA-256 after
+commit, except this intentionally updated report. The prior WIP remains
+uncommitted and visible in `git status`, not falsely described as a clean
+worktree or silently included in the published feature.
+
+During startup of the isolated development server, dependency reoptimization
+logged an initial `Invalid hook call` diagnostic before its automatic reload.
+The subsequent settled browser smoke and queried runtime error log were clean;
+the separate production build passed. This is recorded as a transient QA
+startup observation, not erased or represented as warning-free operation.
+Both temporary benchmark/isolated servers were stopped after QA; the original
+3003 preview remains running. No production deployment was requested or run;
+external hosting auto-deployment state was not inspected or changed.
