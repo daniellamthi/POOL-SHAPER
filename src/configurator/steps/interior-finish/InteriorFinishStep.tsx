@@ -12,6 +12,8 @@ import type { SelectableFinishMaterial } from "@/lib/pool/types";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { COPING_MATERIALS, copingMaterialsForPool, type CopingMaterialId } from "@/lib/pool/coping-materials";
 import { getCopingSwatchDataUrl } from "@/components/pool/copingSwatchPreview";
+import { isPorcelainReference } from "@/lib/pool/reference-finishes";
+import { PorcelainFinishChoice } from "@/components/pool/PorcelainFinishChoice";
 import {
   Dialog,
   DialogContent,
@@ -148,7 +150,9 @@ export function InteriorFinishStep() {
         <div className="flex flex-col gap-3 border-t border-hairline pt-8">
           <p className="label-xs">Materiale del bordo</p>
           <div role="group" aria-label="Materiale del bordo" className="grid grid-cols-2 gap-3">
-            {copingMaterialsForPool(config.poolType).map((option) => (
+            {copingMaterialsForPool(config.poolType).filter(option => config.poolType === "above-ground" || !isPorcelainReference(option.id)).map((option) => (
+              config.poolType === "in-ground" && option.id === "anthracite-gres" ?
+              <PorcelainFinishChoice key={option.id} value={config.copingMaterial} onSelect={setCopingMaterial} /> :
               <MaterialSwatch
                 key={option.id}
                 title={option.title}

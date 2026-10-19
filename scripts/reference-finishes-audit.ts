@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 import { PNG } from "pngjs";
-import { REFERENCE_FINISHES, referenceSampleMatrix, type ReferencePoint } from "../src/lib/pool/reference-finishes";
+import { REFERENCE_FINISHES, PORCELAIN_FINISHES, isPorcelainReference, isPorcelainSelection, referenceSampleMatrix, type ReferencePoint } from "../src/lib/pool/reference-finishes";
 import { cloneReferenceFinishColorMap, configureReferenceCoping, configureReferencePaving, loadReferenceFinishMaps, projectReferenceSample, subscribeReferenceFinishReady } from "../src/components/pool/three/referenceFinishTexture";
 import { Texture, TextureLoader, type WebGLProgramParametersWithUniforms } from "three";
 
@@ -18,7 +18,24 @@ const provenance = JSON.parse(readFileSync(join(directory, "provenance.json"), "
 
 check(REFERENCE_FINISHES.length === 8, "All eight owner references are represented");
 check(new Set(REFERENCE_FINISHES.map(f => f.id)).size === 8, "No duplicate selection identities");
-check(REFERENCE_FINISHES[0].description.includes("da confermare"), "Unknown first material remains explicitly unidentified");
+const names = [
+  ["reference-light", "Gres porcellanato", "Porcelain stoneware"],
+  ["reference-grigio", "Gres porcellanato · Grigio", "Porcelain stoneware · Grey"],
+  ["reference-avorio", "Gres porcellanato · Avorio", "Porcelain stoneware · Ivory"],
+  ["reference-beige", "Gres porcellanato · Beige", "Porcelain stoneware · Beige"],
+  ["reference-greige", "Gres porcellanato · Greige", "Porcelain stoneware · Greige"],
+  ["reference-ipe", "Legno Ipè", "Ipè wood"],
+  ["reference-travertine-light", "Travertino chiaro", "Light travertine"],
+  ["reference-travertine-veined", "Travertino venato", "Veined travertine"],
+];
+names.forEach(([id, it, en], i) => {
+  const finish = REFERENCE_FINISHES[i]!;
+  check(finish.id === id && finish.title === it && finish.titleEn === en && finish.sourceImage === i + 1, `verified name/image/ID correspondence ${id}`);
+});
+check(PORCELAIN_FINISHES.length === 4 && PORCELAIN_FINISHES.every((f, i) => f.sourceImage === i + 2), "Exactly four owner-confirmed porcelain colours, not five independent materials");
+for (const id of ["gres", "anthracite-gres", "reference-light", ...PORCELAIN_FINISHES.map(f => f.id)])
+  check(isPorcelainSelection(id), `saved porcelain identity remains selectable: ${id}`);
+check(!isPorcelainReference("reference-ipe") && !isPorcelainSelection("travertine"), "Other materials remain independent");
 for (const finish of REFERENCE_FINISHES) {
   const image = readFileSync(join(directory, `image-${finish.sourceImage}.jpeg`));
   check(hash(image) === provenance.images[finish.sourceImage - 1].sha256, `${finish.id}: original image checksum retained`);

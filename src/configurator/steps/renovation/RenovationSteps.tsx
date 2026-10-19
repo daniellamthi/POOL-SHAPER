@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FINISHES, LINER_COLORS } from "@/lib/pool/config";
 import { copingMaterialsForPool } from "@/lib/pool/coping-materials";
-import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { isReferenceFinish, isPorcelainReference } from "@/lib/pool/reference-finishes";
 import { ReferenceFinishSwatch } from "@/components/pool/ReferenceFinishSwatch";
+import { PorcelainFinishChoice } from "@/components/pool/PorcelainFinishChoice";
 import { useConfigurator } from "@/lib/pool/context";
 import { allowedFinishesForStructure } from "@/lib/pool/structure-finish";
 import { renovationDecisions, renovationPreviewConfig, renovationMosaicLabel, renovationLinerLabel } from "@/lib/pool/renovation";
@@ -115,7 +116,10 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
     {tab === "finish" ? <>
       <FinishCatalogue existing />
       <GroupLabel>{t("Bordo esistente")}</GroupLabel>
-      <ChoiceGrid label={t("Bordo attuale")} dense>{copingMaterialsForPool(e?.poolType ?? config.poolType).map(c => <ChoiceCard compact key={c.id} title={t(c.title)}
+      <ChoiceGrid label={t("Bordo attuale")} dense>{copingMaterialsForPool(e?.poolType ?? config.poolType)
+        .filter(c => (e?.poolType ?? config.poolType) === "above-ground" || !isPorcelainReference(c.id))
+        .map(c => (e?.poolType ?? config.poolType) === "in-ground" && c.id === "anthracite-gres" ?
+        <PorcelainFinishChoice key={c.id} value={e?.copingMaterial} onSelect={id => choose({ copingMaterial: id })} /> : <ChoiceCard compact key={c.id} title={t(c.title)}
         image={isReferenceFinish(c.id) ? <ReferenceFinishSwatch id={c.id} /> : <span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />}
         selected={(e?.copingMaterial ?? "travertine") === c.id} onSelect={() => choose({ copingMaterial: c.id })} />)}</ChoiceGrid>
     </> : null}
@@ -166,7 +170,10 @@ export function RenovationDetailsStep({ tab, setTab, before, setBefore }: Decisi
         {([ [true, "Sostituire il bordo"], [false, "Conservare il bordo"] ] as const).map(([value, title]) => <ChoiceCard key={String(value)} compact title={title}
           image={<Layers className="size-12" strokeWidth={1} />} selected={r.replaceCoping === value} onSelect={() => updateRenovation({ replaceCoping: value })} />)}
       </ChoiceGrid>
-      {r.replaceCoping ? <ChoiceGrid label={t("Nuovo bordo")} dense>{copingMaterialsForPool(r.existing?.poolType ?? config.poolType).map(c => <ChoiceCard compact key={c.id} title={t(c.title)}
+      {r.replaceCoping ? <ChoiceGrid label={t("Nuovo bordo")} dense>{copingMaterialsForPool(r.existing?.poolType ?? config.poolType)
+        .filter(c => (r.existing?.poolType ?? config.poolType) === "above-ground" || !isPorcelainReference(c.id))
+        .map(c => (r.existing?.poolType ?? config.poolType) === "in-ground" && c.id === "anthracite-gres" ?
+        <PorcelainFinishChoice key={c.id} value={r.copingMaterial} onSelect={id => updateRenovation({ copingMaterial: id })} /> : <ChoiceCard compact key={c.id} title={t(c.title)}
         image={isReferenceFinish(c.id) ? <ReferenceFinishSwatch id={c.id} /> : <span className="size-16 rounded-lg" style={{ backgroundColor: c.color }} />} selected={r.copingMaterial === c.id}
         onSelect={() => updateRenovation({ copingMaterial: c.id })} />)}</ChoiceGrid> : null}
     </> : null}

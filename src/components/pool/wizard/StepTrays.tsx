@@ -16,7 +16,8 @@ import {
 } from "@/lib/pool/config";
 import { copingMaterialsForPool } from "@/lib/pool/coping-materials";
 import { pavingMaterialsForPool, pavingId, pavingFormats, pavingLayout, PAVING_FORMATS } from "@/lib/pool/presentation";
-import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { isReferenceFinish, isPorcelainReference } from "@/lib/pool/reference-finishes";
+import { PorcelainFinishChoice } from "@/components/pool/PorcelainFinishChoice";
 import { ReferenceFinishSwatch } from "@/components/pool/ReferenceFinishSwatch";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
@@ -1084,7 +1085,9 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
       />
       {tab === "coping" && copingVisible ? (
         <ChoiceGrid label={t("Materiale del bordo")} dense>
-          {copingMaterialsForPool(config.poolType).map((option) => (
+          {copingMaterialsForPool(config.poolType).filter(option => config.poolType === "above-ground" || !isPorcelainReference(option.id)).map((option) => (
+            config.poolType === "in-ground" && option.id === "anthracite-gres" ?
+            <PorcelainFinishChoice key={option.id} value={config.copingMaterial} onSelect={setCopingMaterial} /> :
             <ChoiceCard
               compact
               key={option.id}
@@ -1099,7 +1102,9 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
       ) : (
         <div className="space-y-5">
         <ChoiceGrid label={t("Pavimentazione")} dense>
-          {pavingMaterialsForPool(config.poolType).map((p) => (
+          {pavingMaterialsForPool(config.poolType).filter(p => config.poolType === "above-ground" || !isPorcelainReference(p.id)).map((p) => (
+            config.poolType === "in-ground" && p.id === "gres" ?
+            <PorcelainFinishChoice key={p.id} value={pavingId(config.paving)} onSelect={setPaving} /> :
             <ChoiceCard
               key={p.id}
               compact

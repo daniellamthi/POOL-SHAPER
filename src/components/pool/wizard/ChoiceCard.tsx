@@ -24,6 +24,7 @@ export function ChoiceCard({
   footer,
   compact = false,
   disabled = false,
+  expanded,
 }: {
   title: string;
   description?: string;
@@ -40,6 +41,8 @@ export function ChoiceCard({
   /** Smaller card for secondary choices (finishes, variants). */
   compact?: boolean;
   disabled?: boolean;
+  /** A material family can disclose its variants without changing the project. */
+  expanded?: boolean;
 }) {
   const { t } = useI18n();
   if (optional) {
@@ -116,6 +119,7 @@ export function ChoiceCard({
       aria-label={t(title)}
       disabled={disabled}
       aria-pressed={selected}
+      aria-expanded={expanded}
       className={cn(
         "group relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border bg-card text-left outline-none transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-foreground/40 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50",
         selected

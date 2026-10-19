@@ -12,7 +12,7 @@ export function isArchitecturalMesh(mesh: Mesh) {
   return architecturalLineWeight(mesh.name, mesh.parent?.name) !== null;
 }
 
-export function ArchitecturalOutline({ revision }: { revision: string }) {
+export function ArchitecturalOutline({ revision, premium = false }: { revision: string; premium?: boolean }) {
   const scene = useThree(s => s.scene);
   const group = useRef<Group>(null);
   const [lines, setLines] = useState<Record<PlanLineWeight, PlanPoint[]>>({ primary: [], secondary: [] });
@@ -37,11 +37,11 @@ export function ArchitecturalOutline({ revision }: { revision: string }) {
         from the lighter tone rather than a fragile subpixel stroke. */}
     {(["secondary", "primary"] as const).map(weight => lines[weight].length ?
       <group key={weight}>
-        <Line points={lines[weight]} segments color="#eeeae2" lineWidth={weight === "primary" ? 1.9 : 1.8}
-          transparent opacity={0.5} alphaToCoverage={weight === "primary"} depthTest depthWrite={false} toneMapped={false} renderOrder={90} />
+        <Line points={lines[weight]} segments color="#eeeae2" lineWidth={weight === "primary" ? premium ? 2.2 : 1.9 : 1.8}
+          transparent opacity={0.5} alphaToCoverage={premium || weight === "primary"} depthTest depthWrite={false} toneMapped={false} renderOrder={90} />
         <Line points={lines[weight]} segments color={weight === "primary" ? "#304548" : "#44595c"}
-          lineWidth={1} transparent opacity={weight === "primary" ? 0.84 : 0.9}
-          alphaToCoverage={weight === "primary"} depthTest depthWrite={false} toneMapped={false} renderOrder={91} />
+          lineWidth={premium && weight === "primary" ? 1.3 : 1} transparent opacity={weight === "primary" ? 0.84 : 0.9}
+          alphaToCoverage={premium || weight === "primary"} depthTest depthWrite={false} toneMapped={false} renderOrder={91} />
       </group> : null)}
   </group>;
 }

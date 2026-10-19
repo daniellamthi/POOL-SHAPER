@@ -59,47 +59,48 @@ const stone = { color: "#ffffff", roughness: 0.82, normalStrength: 0,
 
 export const REFERENCE_FINISHES = [
   {
-    ...stone, id: "reference-light", title: "Finitura 1", titleEn: "Finish 1",
-    subtitle: "Campione fotografico chiaro", subtitleEn: "Light photographic sample",
-    description: "Campione chiaro fornito dal cliente. Materiale e nome commerciale da confermare.",
+    ...stone, id: "reference-light", title: "Gres porcellanato", titleEn: "Porcelain stoneware",
+    subtitle: "Quattro finiture", subtitleEn: "Four finishes",
+    category: "Gres porcellanato",
+    description: "Gres porcellanato identificato dal cliente: Grigio, Avorio, Beige e Greige. La prima fotografia rappresenta il materiale; le quattro fotografie successive ne identificano le varianti. Dati di fornitura da confermare.",
     sourceImage: 1, imageSize: [1226, 438],
     sample: { kind: "rectangle", pixels: [8, 8, 1210, 422] },
     textureSize: [1.2, 1.2 * 422 / 1210], asset: asset(1, 1210 / 422),
   },
   {
-    ...stone, id: "reference-grigio", title: "Finitura 2", titleEn: "Finish 2",
-    subtitle: "Campione minerale grigio", subtitleEn: "Grey mineral sample",
-    description: "Finitura grigia dalla fotografia fornita dal cliente; specifiche commerciali da confermare.",
+    ...stone, id: "reference-grigio", title: "Gres porcellanato · Grigio", titleEn: "Porcelain stoneware · Grey",
+    subtitle: "Grigio", subtitleEn: "Grey", category: "Gres porcellanato",
+    description: "Variante Grigio del gres porcellanato, identificata dal cliente. Fotografia originale; dati di fornitura da confermare.",
     sourceImage: 2, imageSize: [1057, 1202],
     sample: { kind: "rectangle", pixels: [20, 10, 1020, 1018] },
     textureSize: [1.2, 1.2 * 1018 / 1020], asset: asset(2, 1020 / 1018),
   },
   {
-    ...stone, id: "reference-avorio", title: "Finitura 3", titleEn: "Finish 3",
-    subtitle: "Campione minerale avorio", subtitleEn: "Ivory mineral sample",
-    description: "Finitura avorio dalla fotografia fornita dal cliente; specifiche commerciali da confermare.",
+    ...stone, id: "reference-avorio", title: "Gres porcellanato · Avorio", titleEn: "Porcelain stoneware · Ivory",
+    subtitle: "Avorio", subtitleEn: "Ivory", category: "Gres porcellanato",
+    description: "Variante Avorio del gres porcellanato, identificata dal cliente. Fotografia originale; dati di fornitura da confermare.",
     sourceImage: 3, imageSize: [571, 665],
     sample: { kind: "rectangle", pixels: [38, 8, 523, 531] },
     textureSize: [1.2, 1.2 * 531 / 523], asset: asset(3, 523 / 531),
   },
   {
-    ...stone, id: "reference-beige", title: "Finitura 4", titleEn: "Finish 4",
-    subtitle: "Campione minerale beige", subtitleEn: "Beige mineral sample",
-    description: "Finitura beige dalla fotografia fornita dal cliente; specifiche commerciali da confermare.",
+    ...stone, id: "reference-beige", title: "Gres porcellanato · Beige", titleEn: "Porcelain stoneware · Beige",
+    subtitle: "Beige", subtitleEn: "Beige", category: "Gres porcellanato",
+    description: "Variante Beige del gres porcellanato, identificata dal cliente. Fotografia originale; dati di fornitura da confermare.",
     sourceImage: 4, imageSize: [548, 692],
     sample: { kind: "rectangle", pixels: [9, 8, 529, 531] },
     textureSize: [1.2, 1.2 * 531 / 529], asset: asset(4, 529 / 531),
   },
   {
-    ...stone, id: "reference-greige", title: "Finitura 5", titleEn: "Finish 5",
-    subtitle: "Campione minerale greige", subtitleEn: "Greige mineral sample",
-    description: "Finitura greige dalla fotografia fornita dal cliente; specifiche commerciali da confermare.",
+    ...stone, id: "reference-greige", title: "Gres porcellanato · Greige", titleEn: "Porcelain stoneware · Greige",
+    subtitle: "Greige", subtitleEn: "Greige", category: "Gres porcellanato",
+    description: "Variante Greige del gres porcellanato, identificata dal cliente. Fotografia originale; dati di fornitura da confermare.",
     sourceImage: 5, imageSize: [557, 662],
     sample: { kind: "rectangle", pixels: [14, 8, 533, 535] },
     textureSize: [1.2, 1.2 * 535 / 533], asset: asset(5, 533 / 535),
   },
   {
-    ...stone, id: "reference-ipe", title: "Finitura 6", titleEn: "Finish 6",
+    ...stone, id: "reference-ipe", title: "Legno Ipè", titleEn: "Ipè wood",
     subtitle: "Doghe longitudinali · scala di visualizzazione", subtitleEn: "Longitudinal boards · visualisation scale",
     category: "Legno decking", roughness: 0.9, moduleSize: 2.4, boards: true,
     photographicExposure: 0.55,
@@ -117,7 +118,7 @@ export const REFERENCE_FINISHES = [
     textureSize: [2.4, 0.14], asset: asset(6, 2.4 / 0.14),
   },
   {
-    ...stone, id: "reference-travertine-light", title: "Finitura 7", titleEn: "Finish 7",
+    ...stone, id: "reference-travertine-light", title: "Travertino chiaro", titleEn: "Light travertine",
     subtitle: "Travertino chiaro · pori naturali", subtitleEn: "Light travertine · natural pores",
     category: "Pietra naturale", roughness: 0.86,
     description: "Travertino chiaro dalla foto di posa fornita. Campionata una sola lastra interna, escludendo fughe e icona fotografica; formato di posa indicativo.",
@@ -126,7 +127,7 @@ export const REFERENCE_FINISHES = [
     textureSize: [1.2, 0.6], asset: asset(7, 2),
   },
   {
-    ...stone, id: "reference-travertine-veined", title: "Finitura 8", titleEn: "Finish 8",
+    ...stone, id: "reference-travertine-veined", title: "Travertino venato", titleEn: "Veined travertine",
     subtitle: "Venatura sedimentaria longitudinale", subtitleEn: "Longitudinal sedimentary veins",
     category: "Pietra naturale", roughness: 0.83,
     description: "Travertino venato dalla fotografia fornita dal cliente. Venatura mantenuta nella direzione originale, senza rotazioni o specchiature casuali.",
@@ -139,6 +140,13 @@ export const REFERENCE_FINISHES = [
 export type ReferenceFinishId = (typeof REFERENCE_FINISHES)[number]["id"];
 export const referenceFinish = (value: unknown) => REFERENCE_FINISHES.find(finish => finish.id === value);
 export const isReferenceFinish = (value: unknown): value is ReferenceFinishId => Boolean(referenceFinish(value));
+
+/** Owner-confirmed material family. Saved generic IDs remain valid: opening
+ * the family never silently replaces an existing finish with a colour. */
+export const PORCELAIN_FINISHES = REFERENCE_FINISHES.filter(finish =>
+  ["reference-grigio", "reference-avorio", "reference-beige", "reference-greige"].includes(finish.id));
+export const isPorcelainReference = (id: unknown) => id === "reference-light" || PORCELAIN_FINISHES.some(finish => finish.id === id);
+export const isPorcelainSelection = (id: unknown) => id === "gres" || id === "anthracite-gres" || isPorcelainReference(id);
 
 /** Design visualisation dimensions, independent of pool size; the supplied
  * photographs contain no ruler or supplier-format certification. */

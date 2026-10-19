@@ -256,3 +256,131 @@ startup observation, not erased or represented as warning-free operation.
 Both temporary benchmark/isolated servers were stopped after QA; the original
 3003 preview remains running. No production deployment was requested or run;
 external hosting auto-deployment state was not inspected or changed.
+
+## Final premium names and architectural plan — 2026-10-19
+
+Separate follow-up to the completed gates above; no earlier checklist is removed.
+Starting branch `feat/fullscreen-day-night-hidden-overflow`, local/remote
+`b3036dcdf8a252058f324b160bcb3dc0c2052982` verified. Before-edit WIP backup:
+`pool-shaper-wip-backups/residual-gates-20261015-Y130kW`; intermediate backup
+`residual-gates-20261015-B4LlYb`, both credential scans PASS. Existing unrelated
+camera, hydromassage, product-photo and other WIP stays outside this delivery.
+
+Owner resolved the identity question: image 1 represents **Gres porcellanato**;
+images 2–5 are its **Grigio, Avorio, Beige, Greige** variants. Images 6–8 are
+**Legno Ipè, Travertino chiaro, Travertino venato**. No manufacturer, commercial
+collection, measured PBR values or certified supply dimensions are inferred.
+
+| ID | Owner / initial defect → targeted change | Test / acceptance | Final evidence / status |
+|---|---|---|---|
+| F01 | Material/UX review + coordinator: provisional numbered names → verified names | Exact ID→IT/EN title→source-image oracle, original image hashes unchanged | 8 mappings, `reference-finishes-audit`; PASS |
+| F02 | Same: five apparent porcelain products → one parent + four variants | Opening parent changes disclosure only; four colours apply their original IDs; legacy generic IDs never auto-converted | Independent real IAB IT/EN captures; PASS |
+| F03 | Coordinator: naming across coping/paving and existing/proposed renovation selectors | Shared family component; independent coping/paving; readable summary/PDF/quote names | 72 configurations, 198 local storage contracts, 16 PDF fixtures; PASS (local, not new cloud/email verification) |
+| F04 | Material reviewer: Italian image alt/tooltip in EN → translated attributes | IT→EN→IT preserves selection, image and camera; exact full summary names | Independent EN image attributes and visible four-colour group; PASS |
+| T01 | Camera reviewer + coordinator: forced canvas-centre ignored HUD → actual free-rectangle centre | Perpendicular orthographic projection, equal metric scale, actual construction bounds; 3 sizes × rectangle/L × 3 viewports | Independent 18-case matrix and projection assertions; PASS |
+| T02 | Same: mobile tools occupied an extra band → top-only shared HUD row | Wizard remains expanded, all commands retained, no menu/pool/dock clipping | 8×4 width ≈219→295 px at 390, ≈760→774 px at 1440; PASS |
+| T03 | Same: equal line hierarchy → 1.3 px primary / 1 px secondary with AA | Actual semantic mesh boundaries, no triangle diagonals or duplicate strokes; four outline calls unchanged | Real screenshots + targeted architectural tests; PASS |
+| T04 | Coordinator: stacked metre/pixel padding → actual guide envelope + label clearance | Ticks at 0.60+0.12 m included once; finite responsive fit without stretching | 48 new framing cases / 432 assertions + actual complete mobile HUD-row regression; PASS |
+| T05 | Independent QA found mobile technical+Guides overlap → dedicated top HUD rows and left-side depth tag | 12×5 technical top 390/430: D/W/L separate; no dropdown/control/dock collision | Retest screenshots below; PASS |
+| P01 | Coordinator: preserve approved texture/geometry/liner/above-ground | Original 8 image hashes and material parameters unchanged; above-ground bypasses new UI/framing/stroke/label flags | 48 liner + 66 paving-geometry cases, approved legacy catalogues; PASS |
+| P02 | Coordinator: no new render cost | Same 8×4 rect, Ipè coping / veined-travertine paving, Day, top, open Scena dock, warm assets, one active scene, 1440×900/DPR1 | Three existing app-telemetry windows before/after; PASS for this desktop comparison, not mobile hardware |
+| V01 | Independent QA, not implementation self-review | Actual IAB, 1440×900 and emulated 390×844/430×932, curves/stairs/comfort/controls readable; state stable | [Independent review](evidence/premium-finishes-top-20261019/independent-review.md), 18 normal cases + 9 comfort cases + straight stairs and guide/technical retests; PASS |
+| D02 | Coordinator: scoped delivery without bundling old WIP | Separate temporary index/snapshot, typecheck/build/material/integration/plan tests/diff-check and credential scan | Verification and delivery integrity recorded below |
+
+### Real browser before/after
+
+Evidence directory: [premium-finishes-top-20261019](evidence/premium-finishes-top-20261019/).
+Representative native browser JPEGs (not lossless pixel-level AA certification):
+
+- [1440 before](evidence/premium-finishes-top-20261019/before-independent-8x4-rect-1440.jpg) / [after](evidence/premium-finishes-top-20261019/after-independent-8x4-rect-1440.jpg).
+- [390 before](evidence/premium-finishes-top-20261019/before-independent-8x4-rect-390.jpg) / [after](evidence/premium-finishes-top-20261019/after-independent-8x4-rect-390.jpg).
+- [430 before](evidence/premium-finishes-top-20261019/before-independent-8x4-rect-430.jpg) / [after](evidence/premium-finishes-top-20261019/after-independent-8x4-rect-430.jpg).
+- Gres parent/four variants: [IT](evidence/premium-finishes-top-20261019/after-materials-gres-greige-it-1440.jpg) / [EN](evidence/premium-finishes-top-20261019/after-materials-gres-greige-en-1440.jpg).
+- Corrected technical+Guides: [390](evidence/premium-finishes-top-20261019/retest-independent-12x5-technical-top-390.jpg) / [430](evidence/premium-finishes-top-20261019/retest-independent-12x5-technical-top-430.jpg).
+
+The full 18-case after matrix and extra material/comfort captures are preserved
+locally in `pool-shaper-wip-backups/goal-20261019-final-premium/`. Mobile is
+viewport emulation on the Mac, not physical iPhone testing. At 390 with both
+technical controls and Guides, the 12×5 plan is necessarily smaller than the
+ordinary uncluttered top view; no controls or wizard were removed to hide this.
+
+### Bounded desktop performance comparison
+
+Existing two-second renderer telemetry, no injected profiler or application
+state access. Three consecutive warm windows per version; one scene only.
+Renderer: **ANGLE Metal / Apple M1 Pro**, actual GPU, 1440×900, DPR1,
+Experience tier, same selected configuration and Day/open dock/top state.
+
+| Metric | Before | After |
+|---|---|---|
+| Median frame time (ms), 3 windows | 8.2 / 8.3 / 8.3 | 8.2 / 8.3 / 8.2 |
+| p95 (ms), 3 windows | 9.9 / 9.6 / 9.9 | 9.5 / 9.4 / 9.3 |
+| Draw calls / triangles | 139 / 66,814 | 139 / 66,814 |
+| Geometry resources | 83 | 83 |
+
+Raw [before](evidence/premium-finishes-top-20261019/before-plan-performance.json)
+and [after](evidence/premium-finishes-top-20261019/after-plan-performance.json)
+logs are authoritative for their individual window values. HMR texture count
+30→31 is recorded, not interpreted as allocated GPU bytes or a cold-load
+memory comparison. WebGL does not expose reliable allocated VRAM here. No
+new shader, texture asset, geometric detail reduction or renderer rewrite was
+introduced. Later changes only affect translated DOM attributes and the
+technical+Guides path, not this measured ordinary top path.
+
+### Verification scope and preserved work
+
+The independent Material/UX reviewer checked only the touched taxonomy/UI:
+no functional mapping defect found; its confirmed English alt/tooltip finding
+was corrected and independently retested. React checks use the existing card
+system, a module-level family list, primitive effect dependency and local
+disclosure state; no renderer/store subscriptions or new library were added.
+
+Targeted verification PASS: TypeScript, production build, 2,374 photographic
+reference assertions, 5,076 configuration/persistence/export assertions and
+3,829 architectural assertions in the operational WIP. The isolated scoped
+snapshot also passes typecheck, production build, 2,374 / 5,076 / 3,820 checks;
+the nine existing dynamic-geometry assertions differ because earlier unrelated
+geometry WIP is intentionally not included. Neither count means skipped tests.
+The 16 generated PDF fixtures exercise names/configuration locally, not a new
+live quote/email/cloud backend check. Build warnings about existing >500 kB
+chunks and redundant tsconfig-paths plugin are recorded, not resolved by an
+unrequested refactor.
+
+Scoped snapshot: `/private/tmp/pool-premium-candidate-20261019`. A temporary
+Git index applies only the goal delta to b3036dc; two overlapping top-view
+functions are ported minimally rather than copying the earlier camera WIP.
+The exact-source smoke caught one required dependency: HEAD marked only the
+mobile Expand/More controls, not the whole row including Reframe. The scoped
+patch now reserves the whole row only for in-ground top view, with a concrete
+390px HUD regression test; other camera/above-ground behaviours are unchanged.
+No source checkout/reset, branch/archive mutation, backend change, merge or
+deployment is performed. Browser verification of this exact scoped source is
+recorded in the final delivery note below.
+
+Local preview tooling observation: the inherited `vite preview` adapter expects
+`dist/server/server.js`, while this project's Nitro build emits `.output/`.
+That command did not serve the app and is not claimed as a successful production
+runtime test. The source smoke uses an isolated Vite development server/cache
+on 3005; the production compilation is separately verified. The approved main
+preview on 3003 is not replaced, and no hosting/deployment readiness is inferred.
+
+### Final independent source-smoke and delivery gate
+
+The reviewer directly retested the **exact isolated source**, after the
+whole-mobile-row dependency fix: [390](evidence/premium-finishes-top-20261019/isolated-source-retest-3005-top-390.jpg),
+[430](evidence/premium-finishes-top-20261019/isolated-source-retest-3005-top-430.jpg),
+[1440](evidence/premium-finishes-top-20261019/isolated-source-retest-3005-top-1440.jpg).
+8×4 rectangle again spans approximately x47–342 at 390 and x18–411 at 430,
+correctly centred, complete and clear of controls. Desktop actual free-space
+framing also passes. Wizard remains open; Ivory/Veined travertine and translated
+names remain selected. The earlier off-centre isolated capture is retained in
+the local review history, not counted as PASS.
+
+All F01–F04 / T01–T05 / P01–P02 / V01 / D02 gates now PASS within their stated
+scope. Seventeen staged code/test blobs match the separately built/tested
+snapshot exactly. Staged credential-pattern and diff-check scans PASS.
+Forty-eight unrelated pre-existing WIP files are SHA-256-identical to the
+initial backup; overlapping WIP remains in the operational files and backup,
+not silently bundled into the goal commit. The feature branch alone is the
+delivery target; no merge, archive change, Supabase mutation, email or deploy.
+Commit/push SHA and remote verification are supplied in the final handoff.

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { BufferGeometry, Float32BufferAttribute, Matrix4 } from "three";
-import { architecturalEdges, architecturalLineWeight, mergeArchitecturalEdges, type PlanPoint } from "../src/components/pool/three/architecturalPlan";
+import { architecturalEdges, architecturalFrustum, architecturalLineWeight, mergeArchitecturalEdges, type PlanPoint } from "../src/components/pool/three/architecturalPlan";
 import { createSurfaceGeometry, createRingGeometry } from "../src/components/pool/three/poolGeometry";
 import { shelfStairGeometry } from "../src/components/pool/three/PoolComfortModel";
 import { stairSolid } from "../src/components/pool/three/PoolAccessModel";
@@ -30,6 +30,48 @@ const planFrame = visibleCameraFrame(canvas, hud, 2);
 check(legacyFrame.width === 792 && legacyFrame.height === 520, "camera helper without aspect preserves the legacy free rectangle");
 check(planFrame.width === 1000 && planFrame.height === 402, "plan aspect selects the wider region fitting the configured pool");
 check(Math.min(planFrame.width / 2, planFrame.height) > Math.min(legacyFrame.width / 2, legacyFrame.height), "preferred frame measurably increases usable metric plan scale");
+const mobileHudFrame = visibleCameraFrame({ left: 0, top: 0, width: 390, height: 844 }, [
+  { left: 8, top: 8, width: 374, height: 119 },
+  { left: 12, top: 143, width: 132, height: 36 },
+  // Include the whole tool row: marking only Expand/More leaves Riquadra
+  // unreserved and falsely favours an off-centre maximal rectangle.
+  { left: 181, top: 143, width: 193, height: 40 },
+  { left: 289, top: 147, width: 32, height: 32 },
+  { left: 334, top: 143, width: 40, height: 40 },
+  { left: 8, top: 365, width: 374, height: 471 },
+], 8.7 / 4.7);
+check(mobileHudFrame.left === 0 && mobileHudFrame.width === 390 && mobileHudFrame.top === 191 && mobileHudFrame.height === 174,
+  "actual complete mobile HUD row yields a full-width centred plan frame");
+
+// Actual asymmetric HUD/dock clearances, not a fixed 8×4/canvas centre.
+for (const [width, height, frame] of [
+  [1440, 900, { left: 0, top: 84, width: 1106, height: 431 }],
+  [390, 844, { left: 0, top: 191, width: 390, height: 174 }],
+  [430, 932, { left: 0, top: 191, width: 430, height: 210 }],
+  [1440, 900, { left: 0, top: 84, width: 1150, height: 430 }],
+] as const)
+for (const shape of ["rectangle", "l-shape"] as const)
+for (const [length, poolWidth] of [[6, 3], [8, 4], [12, 5]] as const)
+for (const guides of [false, true]) {
+  const outline = buildOutline(shape, { length, width: poolWidth, depth: 1.5, cornerRadius: 0 }, []);
+  const xs = outline.map(p => p[0]), zs = outline.map(p => p[1]);
+  const margin = guides ? .72 : .35;
+  const bounds: [number, number][] = [[Math.min(...xs)-margin, Math.min(...zs)-margin], [Math.max(...xs)+margin, Math.max(...zs)+margin]];
+  const fit = architecturalFrustum(bounds, width, height, frame, !guides, true);
+  const scaleX = fit.width / width, scaleZ = fit.height / height;
+  check(close(scaleX, scaleZ), "orthographic metric scale never stretches the plan");
+  const pixels = bounds.map(([x, z]) => [(x-fit.centre[0])/scaleX+width/2, (z-fit.centre[1])/scaleZ+height/2]);
+  const clearX = guides ? 34 : 6, clearY = guides ? 16 : 6;
+  for (const [x, y] of pixels) {
+    check(x! >= frame.left+clearX-1e-5 && x! <= frame.left+frame.width-clearX+1e-5, `${shape} ${length}x${poolWidth}: no horizontal HUD/label clipping`);
+    check(y! >= frame.top+clearY-1e-5 && y! <= frame.top+frame.height-clearY+1e-5, `${shape} ${length}x${poolWidth}: no header/dock clipping`);
+  }
+  check(close((pixels[0]![0]!+pixels[1]![0]!)/2, frame.left+frame.width/2), "plan centred in actual free width, not canvas width");
+  check(close((pixels[0]![1]!+pixels[1]![1]!)/2, frame.top+frame.height/2), "plan centred in actual free height");
+  check(JSON.stringify(fit) === JSON.stringify(architecturalFrustum(bounds, width, height, frame, !guides, true)), "unchanged geometry/frame cannot create a zoom jump");
+  const legacy = architecturalFrustum(bounds, width, height, frame, !guides);
+  check(legacy.width > 0 && legacy.height > 0, "legacy above-ground fit remains available without premium flag");
+}
 
 /** Three top-face patches share a large-to-small T junction. They are a single
  * continuous slab: its subdivision must never turn into a construction line. */

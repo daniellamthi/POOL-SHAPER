@@ -1,10 +1,12 @@
 import { referenceFinish } from "@/lib/pool/reference-finishes";
+import { useI18n } from "@/lib/i18n";
 
 /** A real crop of the supplied colour photograph. The image keeps its native
  * aspect: crop positioning uses percentage translations of the source image,
  * not a stretch to a square. The outer card may clip this sample further.
  * No caption, source icon or invented product photograph is included. */
 export function ReferenceFinishSwatch({ id, className = "" }: { id: unknown; className?: string }) {
+  const { t } = useI18n();
   const finish = referenceFinish(id);
   if (!finish) return null;
   const [sourceWidth, sourceHeight] = finish.imageSize;
@@ -18,7 +20,7 @@ export function ReferenceFinishSwatch({ id, className = "" }: { id: unknown; cla
   const [left, top, width, height] = rectangle;
   return <span className={`relative block overflow-hidden ${className || "h-full w-full"}`}
     style={{ containerType: "size", aspectRatio: width / height }}>
-    <img src={finish.asset.url} alt={finish.title} title="Campione fotografico fornito dal cliente"
+    <img src={finish.asset.url} alt={t(finish.title)} title={t("Campione fotografico fornito dal cliente")}
       loading="lazy" decoding="async" width={sourceWidth} height={sourceHeight}
       className="absolute left-1/2 top-1/2 max-w-none"
       style={{

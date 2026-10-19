@@ -41,6 +41,36 @@
   bottom: calc(var(--pool-dock-height, 110px) + 24px);
 }
 
+/* The orthographic plan uses one HUD row, not a second band above the dock.
+   Keep the wizard open and all controls; perspective/above-ground stay intact. */
+.pool-fullscreen [data-architectural-plan="true"] [data-viewport-toolbar] {
+  top: calc(var(--pool-header-height, 72px) + 24px);
+  bottom: auto;
+  justify-content: flex-end;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.pool-fullscreen [data-architectural-plan="true"] [data-viewport-toolbar] > p {
+  display: none;
+}
+.pool-fullscreen [data-architectural-plan="true"] [data-testid="construction-stage"] {
+  top: calc(var(--pool-header-height, 84px) + 60px);
+}
+
+@media (max-width: 639px) {
+  .pool-fullscreen [data-architectural-plan="technical"] [data-viewport-toolbar] {
+    top: calc(var(--pool-header-height, 72px) + 24px);
+    bottom: auto;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .pool-fullscreen [data-architectural-plan="technical"] [data-technical-panel] {
+    top: calc(var(--pool-header-height, 72px) + 72px);
+    left: 12px;
+    right: auto;
+  }
+}
+
 body:has(.pool-fullscreen) [data-sonner-toaster][data-y-position="bottom"] {
   bottom: calc(var(--pool-floating-dock-height, 110px) + 40px);
 }

@@ -75,6 +75,7 @@ import type { HydromassageVariant, InternalStairType } from "@/lib/pool/types";
 import {
   infinityExclusion,
   clampInfinityEdgeParams,
+  clampInfinityEdgeDimensions,
   infinityZonesForOutline,
 } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams, RectangleInfinityZone } from "@/lib/pool/infinity-edge";
@@ -450,6 +451,7 @@ function CameraRig({
   includeExternalStaircase,
   planBounds,
   compactPlan,
+  premiumPlan,
   photoMode,
   cleanCapture,
   infinityZone,
@@ -472,6 +474,7 @@ function CameraRig({
   includeExternalStaircase: boolean;
   planBounds: Outline;
   compactPlan: boolean;
+  premiumPlan: boolean;
   photoMode: boolean;
   cleanCapture: boolean;
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
@@ -584,8 +587,9 @@ function CameraRig({
     pose = editingPose.current.pose;
   } else editingPose.current = null;
   if (focus === "top") {
-    const planFrame = { ...visibleFrame, left: (viewportSize.width - visibleFrame.width) / 2 };
-    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, planFrame, compactPlan) };
+    // Keep the actual free rectangle; preserve approved above-ground framing.
+    const planFrame = premiumPlan ? visibleFrame : { ...visibleFrame, left: (viewportSize.width - visibleFrame.width) / 2 };
+    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, planFrame, compactPlan, premiumPlan) };
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
   } else planFit.current = null;
@@ -1131,10 +1135,20 @@ export default function PoolScene({
     const b = outlineBounds(outline);
     // Include the actual shell/coping envelope; Infinity's receiver projects
     // beyond it. No furniture/scenery can inflate this architectural fit.
-    const margin = copingOuterOffset(system, overflowType) + (infinityZone ? 0.5 : 0.05);
+    const margin = copingOuterOffset(system, overflowType) + (poolType === "above-ground" ? infinityZone ? 0.5 : 0.05 : 0);
     const points: [number, number][] = [
       [b.minX-margin,b.minZ-margin], [b.maxX+margin,b.maxZ+margin],
     ];
+    // Actual dimension-line/tick envelope, once; labels receive pixel clearance.
+    if (poolType === "in-ground" && showMeasurements)
+      points.push([b.minX-0.72,b.minZ-0.72], [b.maxX+0.72,b.maxZ+0.72]);
+    if (poolType === "in-ground" && infinityZone) {
+      const d = clampInfinityEdgeDimensions(undefined), receiverOut = d.lipWidth + d.catchBasinWidth + d.wallThickness;
+      infinityZone.points.forEach(([x, z], i) => {
+        const normal = infinityZone.pointNormals[i]!;
+        points.push([x + normal[0] * receiverOut, z + normal[1] * receiverOut]);
+      });
+    }
     if (externalStairs) {
       const stairs = planExternalStaircase({ outline, side: externalStairSide,
         platformExtended: externalStairPlatformExtended, accessAnchor: lighting.accessPlan.placement,
@@ -1144,8 +1158,8 @@ export default function PoolScene({
       if (stairs) points.push(...stairs.footprint.map(p => [p[0], p[1]] as [number,number]));
     }
     return points;
-  }, [outline, system, overflowType, infinityZone, externalStairs, externalStairSide,
-    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout]);
+  }, [outline, system, overflowType, infinityZone, poolType, externalStairs, externalStairSide,
+    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout, showMeasurements]);
   const planView = focus === "top" && !photoMode;
   const planRevision = JSON.stringify([outline, depth, features, resolvedLayout, system, overflowType,
     poolType, copingThickness, materials.coping.id, externalStairSide, externalStairPlatformExtended, construction]);
@@ -1516,7 +1530,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {planView ? <ArchitecturalOutline revision={planRevision} /> : null}
+      {planView ? <ArchitecturalOutline revision={planRevision} premium={poolType === "in-ground"} /> : null}
 
       {system === "skimmer" && (construction?.showSystemComponents ?? true) ? (
         <Skimmers
@@ -1538,6 +1552,7 @@ export default function PoolScene({
           They are an editing overlay anyway, not part of a "photo". */}
       {showMeasurements && !photoMode ? (
         <PoolMeasurements
+          architecturalPlan={planView && poolType === "in-ground"}
           outline={outline}
           length={length}
           width={width}
@@ -1626,6 +1641,7 @@ export default function PoolScene({
         includeExternalStaircase={false}
         planBounds={planBounds}
         compactPlan={!showMeasurements}
+        premiumPlan={poolType === "in-ground"}
         externalStairPlan={externalStairs ? planExternalStaircase({outline, side:externalStairSide,
           platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
           copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,

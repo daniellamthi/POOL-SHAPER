@@ -17,6 +17,7 @@ interface Props {
    * ("1,20 → 1,50 m") instead of a single value -- no extra guide line, to
    * keep the overlay from getting cluttered. */
   shallowDepth?: number | undefined;
+  architecturalPlan?: boolean;
 }
 
 // Calm technical annotation: small tabular figures on a soft card chip, no
@@ -52,6 +53,7 @@ export function PoolMeasurements({
   wallTopY,
   color,
   shallowDepth,
+  architecturalPlan = false,
 }: Props) {
   const depthLabel =
     shallowDepth !== undefined && Math.abs(shallowDepth - depth) > 0.001
@@ -113,7 +115,9 @@ export function PoolMeasurements({
         {...LINE}
       />
       <Line points={[[-xLine - TICK, floorY, zLine], [-xLine + TICK, floorY, zLine]]} color={color} {...LINE} />
-      <Html position={[-xLine, (wallTopY + floorY) / 2, zLine]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
+      {/* A plan cannot show a vertical depth ruler. Keep its value on the
+          left side, separate from the horizontal length annotation. */}
+      <Html position={[-xLine, architecturalPlan ? y : (wallTopY + floorY) / 2, architecturalPlan ? 0 : zLine]} center zIndexRange={[10, 0]} calculatePosition={labelPosition}>
         <span className={LABEL_CLASS}>{depthLabel}</span>
       </Html>
     </group>

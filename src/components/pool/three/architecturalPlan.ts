@@ -156,14 +156,18 @@ export function mergeArchitecturalEdges(sets: PlanEdgeSet[]): Record<PlanLineWei
 /** Fit actual construction bounds into the unobscured viewport, in metres.
  * A minimum pixel margin keeps small/mobile pools legible without clipping. */
 export function architecturalFrustum(outline: Outline, width: number, height: number,
-  frame: { left: number; top: number; width: number; height: number }, compact = false) {
+  frame: { left: number; top: number; width: number; height: number }, compact = false, preciseBounds = false) {
   const xs = outline.map(p => p[0]), zs = outline.map(p => p[1]);
   const minX = Math.min(...xs), maxX = Math.max(...xs), minZ = Math.min(...zs), maxZ = Math.max(...zs);
-  const margin = compact ? Math.min(12, Math.max(6, Math.min(frame.width, frame.height) * 0.06))
+  // Real construction bounds already include their physical extent. Without
+  // annotations, reserve pixels rather than another half metre of scenery.
+  const margin = compact ? Math.min(preciseBounds ? 8 : 12, Math.max(6, Math.min(frame.width, frame.height) * 0.06))
     : Math.min(36, Math.max(18, frame.width * 0.06));
-  const padding = compact ? 0 : 0.5;
-  const scale = Math.max((maxX - minX + padding) / Math.max(1, frame.width - 2 * margin),
-    (maxZ - minZ + padding) / Math.max(1, frame.height - 2 * margin));
+  const padding = compact || preciseBounds ? 0 : 0.5;
+  const marginX = preciseBounds && !compact ? 34 : margin;
+  const marginY = preciseBounds && !compact ? 16 : margin;
+  const scale = Math.max((maxX - minX + padding) / Math.max(1, frame.width - 2 * marginX),
+    (maxZ - minZ + padding) / Math.max(1, frame.height - 2 * marginY));
   return { width: width * scale, height: height * scale,
     centre: [(minX + maxX) / 2 - (frame.left + frame.width / 2 - width / 2) * scale,
       (minZ + maxZ) / 2 - (frame.top + frame.height / 2 - height / 2) * scale] as const };
