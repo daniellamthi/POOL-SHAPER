@@ -168,6 +168,8 @@ function drawPlan(
 }
 
 export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> {
+  if (input.model.compatibilityIssues?.length)
+    throw new Error(translateText("Risolvi le scelte comfort non compatibili prima di confermare il progetto.", input.locale ?? "it"));
   const { publicRef, shareUrl, heroDataUrl, presentation, issuedAt, locale = "it" } = input;
   const model = localizeSummaryModel(input.model, locale);
   const t = (text: string) => translateText(text, locale);
@@ -278,8 +280,9 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
       ] as const
     ).entries()) {
       const x = M + index * (boxW + gap);
-      // Preserve the whole renovation comparison, including mobile captures.
-      coverImage(doc, url, x, top, boxW, boxH, Boolean(byId("renovation")));
+      // Preserve the whole configured pool, also when its live capture has
+      // a different aspect from these paired Day/Night presentation boxes.
+      coverImage(doc, url, x, top, boxW, boxH, true);
       doc.setFontSize(8);
       doc.setTextColor(...VIOLET);
       doc.text(t(label).toUpperCase(), x, top + boxH + 8);

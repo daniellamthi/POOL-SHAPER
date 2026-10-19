@@ -30,6 +30,7 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     outline, shape: config.shape, poolType, dimensions: config.dimensions,
     verticalLayout: elevations,
     sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
+    twoLoungerShelf: config.features.includes("sunShelf"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   const bounds = outlineBounds(outline);

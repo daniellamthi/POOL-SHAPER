@@ -90,7 +90,7 @@ export function PoolComfortModel({
     () =>
       plan.elements.map((element) => ({
         element,
-        geometry: element.steps || floorProfile.shelfZone ? shelfStairGeometry(element, floorProfile) : stairSolid(
+        geometry: element.tiers?.length || element.steps || floorProfile.shelfZone ? shelfStairGeometry(element, floorProfile) : stairSolid(
           element.footprint,
           element.topY,
           { x: 0, z: 0, rotation: 0 },

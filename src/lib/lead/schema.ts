@@ -14,6 +14,7 @@ import { buildOutline } from "@/lib/pool/geometry";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "./types";
 import { isRenovationConfig } from "@/lib/pool/renovation";
+import { comfortConfigurationIssues, COMFORT_RESOLUTION_MESSAGE } from "@/lib/pool/comfort-compatibility";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // Kept as a literal tuple (not derived via .map(), which would widen to
@@ -120,7 +121,10 @@ export const leadSubmissionInputSchema = z.object({
     .string()
     .regex(/^PW-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{6}$/)
     .optional(),
-  project: projectConfigurationSchema,
+  project: projectConfigurationSchema.refine(project => {
+    try { return comfortConfigurationIssues(project.config).length === 0; }
+    catch { return false; }
+  }, COMFORT_RESOLUTION_MESSAGE),
 });
 
 export type LeadSubmissionInput = z.infer<typeof leadSubmissionInputSchema>;

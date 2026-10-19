@@ -132,6 +132,10 @@ export function ProjectSummary({
           {t("↑ Espandi piscina")}{" "}</a>
       </header>
 
+      {model.compatibilityIssues?.length ? <div role="alert" className="flex flex-col gap-2 text-sm text-destructive">
+        <p>{t("Risolvi le scelte comfort non compatibili prima di confermare il progetto.")}</p>
+        {model.compatibilityIssues.map(reason => <p key={reason}>{reason}</p>)}
+      </div> : null}
       {model.sections.map((section) => (
         <Section key={section.id} title={section.title} onEdit={editStep(section.stepId)}>
           {section.rows.map((row, index) => (

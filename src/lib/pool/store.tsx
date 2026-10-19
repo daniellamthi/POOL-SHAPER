@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
-import { normalizeSunShelfLoungers } from "./sun-shelf-loungers";
+import { normalizeSunShelfLoungers, configuredSunShelfLoungers } from "./sun-shelf-loungers";
 import { focusForAction, nextFocusRequest, type FocusRequest } from "./contextual-camera";
 import { copingMaterialForPool } from "./coping-materials";
 import { isReferenceFinish } from "./reference-finishes";
@@ -393,10 +393,9 @@ function reduceConfiguration(state: State, action: Action): State {
             shapeSelected: true,
             dimensions,
             system,
-            features:
-              action.value === "rectangle"
-                ? config.features
-                : config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench"),
+            // Keep requested comfort on shape changes. The derived layout hides
+            // impossible geometry and requires explicit resolution, never data loss.
+            features: config.features,
           },
           action.value !== config.shape,
         ),
@@ -547,6 +546,13 @@ function reduceConfiguration(state: State, action: Action): State {
     case "togglePoolFeature": {
       if (action.value === "inoxLadder" && config.poolType === "above-ground") return state;
       if (action.value === "externalStaircase" && config.poolType !== "above-ground") return state;
+      if (!config.features.includes(action.value)) {
+        if (action.value === "sunShelf" || action.value === "hydromassage") {
+          const proposal = { ...config, features: normalizeComfortFeatures([...config.features, action.value], action.value) };
+          if (!configuredComfortPlan(proposal).availability[action.value].available) return state;
+        }
+        if (action.value === "sunShelfLoungers" && !configuredSunShelfLoungers(config).available) return state;
+      }
       const features = config.features.includes(action.value)
         ? normalizeComfortFeatures(config.features.filter((id) => id !== action.value))
         : normalizeComfortFeatures([...config.features, action.value], action.value);
@@ -710,7 +716,7 @@ export function reducer(state: State, action: Action): State {
     const renovation = cleanRenovation(next.renovation);
     next = { ...next, renovation, config: renovationPreviewConfig(next.config, renovation) };
   }
-  return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config)) };
+  return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config, state.visualFocus?.focus)) };
 }
 
 export function ConfiguratorProvider({ children }: { children: ReactNode }) {

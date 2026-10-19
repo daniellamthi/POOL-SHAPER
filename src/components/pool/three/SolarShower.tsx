@@ -19,6 +19,7 @@ const SIZE = {
   armLength: 0.44,
   headRadius: 0.13,
 } as const;
+export { SIZE as SOLAR_SHOWER_SIZE };
 
 export function SolarShower({
   position,

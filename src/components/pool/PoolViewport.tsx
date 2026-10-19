@@ -285,7 +285,7 @@ export const PoolViewport = memo(function PoolViewport({
             visit stay directly on screen (reframe, expand); Guides, Photo
             Mode and the Blender render are advanced/rare here, so they move
             into the "More" menu instead of eating the small viewport. */}
-        <div data-camera-occluder={scene.focus === "top" && scene.poolType === "in-ground" ? "mobile-view-tools" : undefined} className="pointer-events-auto ml-auto flex items-center justify-end gap-2 sm:hidden">
+        <div data-camera-occluder="mobile-view-tools" className="pointer-events-auto ml-auto flex items-center justify-end gap-2 sm:hidden">
           <div className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>
             <ToolButton onClick={onReframe} icon={<Focus />} label={t("Riquadra")} />
             <span aria-hidden className="mx-0.5 h-4 w-px bg-hairline" />

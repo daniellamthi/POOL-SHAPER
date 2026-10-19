@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MacroStep } from "./wizard-model";
@@ -186,6 +186,8 @@ export function ConfiguratorTray({
   onContinue,
   expanded,
   onExpandedChange,
+  onViewPool,
+  nextChoice,
 }: {
   number: number;
   /** Phase count: shows "Fase 03 di 07" when set. */
@@ -205,6 +207,8 @@ export function ConfiguratorTray({
   onContinue: () => void;
   expanded: boolean;
   onExpandedChange: (value: boolean) => void;
+  onViewPool: () => void;
+  nextChoice?: string | undefined;
 }) {
   const { t } = useI18n();
   const optionsId = useId();
@@ -216,9 +220,13 @@ export function ConfiguratorTray({
       className="pool-config-dock"
     >
       <div id={optionsId} hidden={!expanded} className="pool-dock-options">
-        <ScrollCueArea key={`${number}-${substep ?? ""}`} className="flex">
+        <ScrollCueArea decisionKey={`${number}-${substep ?? ""}`} className="flex">
           <p className="pool-dock-description">{t(subtitle)}</p>
           {children}
+          {nextChoice && canContinue ? <button type="button" onClick={onContinue}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-3 py-2 text-xs text-brand">
+            {t("Prossima scelta")}: {t(nextChoice)} <ArrowRight className="size-3.5" aria-hidden />
+          </button> : null}
         </ScrollCueArea>
       </div>
       <div className="pool-dock-bar">
@@ -238,6 +246,11 @@ export function ConfiguratorTray({
             </p>
           </div>
         </header>
+        <div className="flex flex-col items-end gap-0.5 sm:flex-row sm:items-center">
+        <Button type="button" variant="ghost" onClick={onViewPool}
+          className="pool-dock-toggle rounded-full">
+          <Scan aria-hidden />{t("Vedi la piscina")}
+        </Button>
         <Button
           type="button"
           variant="ghost"
@@ -247,8 +260,9 @@ export function ConfiguratorTray({
           className="pool-dock-toggle rounded-full"
         >
           {expanded ? <ChevronDown aria-hidden /> : <ChevronUp aria-hidden />}
-          {t(expanded ? "Vedi la piscina" : "Scegli le opzioni")}
+          {t(expanded ? "Riduci" : "Scegli le opzioni")}
         </Button>
+        </div>
         <footer className="pool-dock-actions">
           <Button
             type="button"
@@ -291,11 +305,17 @@ export function ConfiguratorTray({
  * appears after a choice (e.g. the stair shape, the inox ladder) is never
  * silently hidden under the edge.
  */
-function ScrollCueArea({ className, children }: { className: string; children: ReactNode }) {
+function ScrollCueArea({ className, children, decisionKey }: { className: string; children: ReactNode; decisionKey: string }) {
   const { t } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [moreBelow, setMoreBelow] = useState(false);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    // Decision identity only: changing a finish never repeatedly scrolls.
+  }, [decisionKey]);
   useEffect(() => {
     const scroller = scrollRef.current;
     const content = contentRef.current;

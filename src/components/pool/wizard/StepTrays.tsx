@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import type { DecisionProps } from "./decisions";
+import { decisions, type DecisionProps } from "./decisions";
 import { ArrowRight, Check, Moon, Plus, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfigurator } from "@/lib/pool/context";
@@ -431,7 +431,7 @@ export function SystemTray({ tab, setTab }: {
           />
           <GroupLabel>{t("Parete di sfioro")}</GroupLabel>
           <ChoiceGrid label={t("Parete di sfioro Infinity")}>
-            <ChoiceCard compact title={t("Parete Infinity tradizionale")} description={t("Contenimento pieno.")} image={ill("infinity")}
+            <ChoiceCard compact title={t("Parete Infinity tradizionale")} description={t("Contenimento pieno.")} image={ill("system-infinity")}
               selected={config.infinityEdge?.wallType !== "glass"} onSelect={() => setInfinityWall("traditional")} />
             <ChoiceCard compact title={t("Parete Infinity in vetro")} description={t("Contenimento panoramico trasparente.")}
               image={<svg viewBox="0 0 160 90" className="h-full w-full" aria-hidden="true">
@@ -530,6 +530,12 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
       }),
     [config, hydroOn],
   );
+  const hydroVariants = useMemo(() => (["closed", "open"] as const).map(variant => ({
+    variant,
+    plan: configuredComfortPlan({ ...config, hydromassageVariant: variant,
+      features: normalizeComfortFeatures([...config.features, "hydromassage"], "hydromassage") }),
+  })), [config]);
+  const shelfElement = shelfProposal.elements.find(element => element.kind === "sunShelf");
   const ensureAccess = () => {
     if (config.poolAccess === null) {
       setInternalStairType("linear");
@@ -544,9 +550,11 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     }
     ensureAccess();
     if (choice === "sunShelf") {
+      if (!shelfProposal.availability.sunShelf.available) return;
       if (!shelfOn) togglePoolFeature("sunShelf");
       return;
     }
+    if (!hydroVariants.find(item => item.variant === choice)?.plan.availability.hydromassage.available) return;
     setHydromassageVariant(choice);
     if (!hydroOn) togglePoolFeature("hydromassage");
   };
@@ -561,18 +569,12 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
         label={t("Accesso e comfort")}
         value={tab}
         onChange={setTab}
-        tabs={[
-          { id: "access", label: "Accesso" },
-          // Above ground there is no shelf, bench or hydromassage to choose.
-          ...(config.poolType === "above-ground"
-            ? []
-            : [{ id: "comfort" as const, label: "Comfort in acqua" }]),
-        ]}
+        tabs={decisions("access", config)}
       />
-      {tab === "access" || config.poolType === "above-ground" ? (
+      {tab !== "comfort" && tab !== "shelf-options" ? (
         <div className="flex flex-col gap-5">
           <ChoiceGrid label={t("Accesso alla piscina")}>
-            <ChoiceCard
+            {tab === "access" ? <ChoiceCard
               title={t("Scala interna")}
               description={t("Gradini in muratura, rivestiti come la vasca.")}
               image={ill("access-steps")}
@@ -581,8 +583,8 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                 setStairsJustChosen(!stepsOn);
                 toggleInternalSteps();
               }}
-            />
-            {inoxAvailable ? (
+            /> : null}
+            {tab === "ladder" && inoxAvailable ? (
               <ChoiceCard
                 optional={stepsOn}
                 title={t("Scaletta inox")}
@@ -594,7 +596,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                 onSelect={() => toggleInoxLadder()}
               />
             ) : null}
-            {config.poolType === "above-ground" ? (
+            {tab === "external" && config.poolType === "above-ground" ? (
               <ChoiceCard
                 optional
                 title={t("Scala esterna di accesso")}
@@ -605,7 +607,8 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
               />
             ) : null}
           </ChoiceGrid>
-          {config.poolType === "above-ground" && config.features.includes("externalStaircase") ? (
+          {tab === "ladder" && !inoxAvailable ? <p role="status" className="text-xs text-muted-foreground">{t(inoxPlan?.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
+          {tab === "external" && config.poolType === "above-ground" && config.features.includes("externalStaircase") ? (
             <>
             <ChoiceGrid label={t("Posizione scala esterna")} dense>
               {(["short", "long"] as const).map(side => (
@@ -625,13 +628,13 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             <p className="text-sm text-muted-foreground">{t("Piattaforma prolungata inclusa, con parapetto sui soli lati esterni.")}</p>
             </>
           ) : null}
-          {stepsOn &&
-          !comfort.elements.some((e) => e.kind === "sunShelf" || e.kind === "hydromassage") ? (
+          {tab === "access" && stepsOn &&
+          !comfort.elements.some((e) => e.kind === "sunShelf") ? (
             <RevealSection reveal={stairsJustChosen}>
               <GroupLabel>{t("Forma della scala")}</GroupLabel>
               <ChoiceGrid label={t("Tipo di scala interna")} dense>
                 {(["linear", "corner"] as const)
-                  .filter((type) => !plans[type].reason || stairType === type)
+                  .filter((type) => (type === "linear" && hydroOn) || !plans[type].reason || stairType === type)
                   .map((type) => (
                     <ChoiceCard
                       compact
@@ -658,41 +661,12 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                     footer={option.plan.reason || undefined} />
                 ))}
               </ChoiceGrid> : null}
-              {inoxAvailable ? (
-                <button
-                  type="button"
-                  aria-pressed={inoxOn}
-                  onClick={() => toggleInoxLadder()}
-                  className={cn(
-                    "inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] transition-colors duration-200",
-                    inoxOn
-                      ? "border-brand/30 bg-brand-soft text-foreground"
-                      : "border-hairline bg-card text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {inoxOn ? (
-                    <Check className="size-3.5 text-brand" strokeWidth={1.8} aria-hidden />
-                  ) : (
-                    <Plus className="size-3.5 text-brand" strokeWidth={1.6} aria-hidden />
-                  )}
-                  {t(inoxOn ? "Scaletta inox aggiunta" : "Aggiungi anche la scaletta inox")}
-                </button>
-              ) : null}
             </RevealSection>
           ) : null}
-          {config.poolType === "above-ground" ? null : (
-            <button
-              type="button"
-              onClick={() => setTab("comfort")}
-              className="inline-flex w-fit items-center gap-1.5 self-start rounded-full px-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {t("Prosegui con")}<span className="text-foreground">{t("Comfort in acqua")}</span>
-              <ArrowRight className="size-3.5 text-brand" strokeWidth={1.5} aria-hidden />
-            </button>
-          )}
         </div>
       ) : (
         <div className="flex flex-col gap-5">
+          {tab === "comfort" ? <>
           <ChoiceGrid label={t("Zona comfort")}>
             <ChoiceCard
               title={t("Nessuna zona comfort")}
@@ -707,50 +681,53 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                 description={t("Solarium sommerso a 22 cm per sdraiarsi in acqua.")}
                 image={ill("comfort-sunShelf")}
                 selected={comfortChoice === "sunShelf"}
+                disabled={!shelfProposal.availability.sunShelf.available}
                 onSelect={() => chooseComfort("sunShelf")}
               />
             ) : null}
-            {hydroOn || hydroProposal.availability.hydromassage.available ? (
-              <>
+            {hydroVariants.filter(item => item.plan.availability.hydromassage.available || (hydroOn && hydroVariant === item.variant)).map(({variant,plan}) => (
                 <ChoiceCard
-                  title={t("Idromassaggio A")}
-                  description={t("Zona delimitata da un muretto, panca a L con getti.")}
-                  image={ill("comfort-hydro-closed")}
-                  selected={comfortChoice === "closed"}
-                  onSelect={() => chooseComfort("closed")}
+                  key={variant}
+                  title={t(variant === "closed" ? "Idromassaggio A" : "Idromassaggio B")}
+                  description={t(variant === "closed" ? "Zona delimitata da un muretto, panca a L con getti." : "Panca a U con getti, aperta sulla vasca.")}
+                  image={ill(variant === "closed" ? "comfort-hydro-closed" : "comfort-hydro-open")}
+                  selected={comfortChoice === variant}
+                  disabled={!plan.availability.hydromassage.available}
+                  onSelect={() => chooseComfort(variant)}
                 />
-                <ChoiceCard
-                  title={t("Idromassaggio B")}
-                  description={t("Panca a U con getti, aperta sulla vasca.")}
-                  image={ill("comfort-hydro-open")}
-                  selected={comfortChoice === "open"}
-                  onSelect={() => chooseComfort("open")}
-                />
-              </>
-            ) : null}
+            ))}
           </ChoiceGrid>
-          {shelfOn ? <div className="flex flex-col gap-3">
+          {!shelfProposal.availability.sunShelf.available ? <p role="status" className="text-xs text-muted-foreground">{t("Sun Shelf")}: {t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
+          {!hydroProposal.availability.hydromassage.available ? <p role="status" className="text-xs text-muted-foreground">{t("Idromassaggio")}: {t(hydroProposal.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
+          {shelfOn && shelfElement ? <p className="text-xs text-muted-foreground">{t("Spiaggetta: {run} m. Lunghezza di nuoto residua: {swim} m. Accesso separato di almeno 90 cm.", {
+            run: number(shelfElement.run,{maximumFractionDigits:2}),
+            swim: number(Math.max(config.dimensions.length,config.dimensions.width)-shelfElement.run,{maximumFractionDigits:2}),
+          })}</p> : null}
+          </> : null}
+          {tab === "shelf-options" && shelfOn ? <div className="flex flex-col gap-3">
             <ChoiceGrid label={t("Optional per la spiaggetta")}>
               <ChoiceCard optional title={t("Lettini per spiaggetta")}
                 description={t("Lettini per superfici sommerse, distinti dalle chaise longue esterne.")}
                 image={ill("equipment-sunShelfLoungers")}
-                selected={shelfLoungers.enabled} disabled={!shelfLoungers.available}
+                selected={config.features.includes("sunShelfLoungers")} disabled={!shelfLoungers.available && !config.features.includes("sunShelfLoungers")}
                 onSelect={() => togglePoolFeature("sunShelfLoungers")} />
             </ChoiceGrid>
             {shelfLoungers.available ? <>
               <p className="text-xs text-muted-foreground">{t("Quantità consentite: da 1 a {count}.", { count: number(shelfLoungers.capacity) })}</p>
-              {shelfLoungers.enabled ? <label className="flex items-center gap-3 text-sm">
+              {config.features.includes("sunShelfLoungers") ? <label className="flex items-center gap-3 text-sm">
                 {t("Quantità lettini")}
                 <select aria-label={t("Quantità lettini")} className="rounded-lg border border-hairline bg-card px-3 py-2"
-                  value={shelfLoungers.count} onChange={event => setSunShelfLoungerCount(Number(event.target.value))}>
+                  value={config.sunShelfLoungerCount ?? shelfLoungers.capacity} onChange={event => setSunShelfLoungerCount(Number(event.target.value))}>
+                  {shelfLoungers.adjusted ? <option value={config.sunShelfLoungerCount}>{config.sunShelfLoungerCount} · {t("Da verificare")}</option> : null}
                   {Array.from({length: shelfLoungers.capacity}, (_,i) => i+1).map(count => <option key={count} value={count}>{t(number(count))}</option>)}
                 </select>
               </label> : null}
             </> : <p role="status" className="text-xs text-muted-foreground">{t(shelfLoungers.reason ?? "Non disponibile per questa configurazione.")}</p>}
+            {shelfLoungers.adjusted ? <p role="alert" className="text-xs text-destructive">{t(shelfLoungers.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
             <p className="text-xs text-muted-foreground">{t("Anteprima 3D dimensionale; modello e fornitura da confermare.")} {t(number(SUN_SHELF_LOUNGER_MODEL.length, {maximumFractionDigits:3}))} {t("×")}{t(number(SUN_SHELF_LOUNGER_MODEL.width, {maximumFractionDigits:4}))} {t("m.")}</p>
           </div> : null}
           {sunShelfNotice ? <p role="status" className="text-xs text-muted-foreground">{t(sunShelfNotice)}</p> : null}
-          {benchAvailable ? (
+          {tab === "shelf-options" && benchAvailable ? (
             <div className="flex flex-col gap-3">
               <p className="flex items-center gap-2 text-[12px] text-muted-foreground">
                 <svg
@@ -1093,7 +1070,7 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
               key={option.id}
               title={t(option.title)}
               description={t(COPING_COPY[option.id] ?? option.subtitle)}
-              image={isReferenceFinish(option.id) ? <ReferenceFinishSwatch id={option.id} /> : getCopingSwatchDataUrl(option.id)}
+              image={isReferenceFinish(option.id) ? <ReferenceFinishSwatch id={option.id} /> : hasProductMedia(`coping-${option.id}`) ? <ProductMedia name={`coping-${option.id}`} /> : getCopingSwatchDataUrl(option.id)}
               selected={(config.copingMaterial ?? "travertine") === option.id}
               onSelect={() => setCopingMaterial(option.id)}
             />
@@ -1111,7 +1088,7 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
               title={t(p.label)}
               description={t(p.note)}
               image={
-                isReferenceFinish(p.id) ? <ReferenceFinishSwatch id={p.id} /> : PAVING_IMAGES[p.id] ?? (p.id !== "gres" && p.id !== "wood" && p.id !== "istria" ? getCopingSwatchDataUrl(p.id) : (
+                isReferenceFinish(p.id) ? <ReferenceFinishSwatch id={p.id} /> : hasProductMedia(`paving-${p.id}`) ? <ProductMedia name={`paving-${p.id}`} /> : PAVING_IMAGES[p.id] ?? (p.id !== "gres" && p.id !== "wood" && p.id !== "istria" ? getCopingSwatchDataUrl(p.id) : (
                   <span
                     className="block h-full w-full rounded-xl"
                     style={{ background: p.color }}

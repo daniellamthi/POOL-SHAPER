@@ -205,7 +205,7 @@ for (const [requested, expected] of [
   [0, 1],
   [-8, 1],
   [2.9, 2],
-  [999, capacity],
+  [999, 999],
 ]) {
   const state = reducer(enabled, { type: "setSunShelfLoungerCount", value: requested });
   equal(
@@ -215,7 +215,7 @@ for (const [requested, expected] of [
   );
   equal(
     configuredSunShelfLoungers(state.config).count,
-    expected,
+    requested > capacity ? 0 : expected,
     `clamped quantity ${requested} reaches layout`,
   );
   equal(
@@ -254,29 +254,26 @@ const smaller = run(explicit, [
 ]);
 equal(
   smaller.config,
-  { ...eligible.config, dimensions: { ...eligible.config.dimensions, length: 8, width: 4 } },
-  "8×4 removes only unsupported dependent and count; shelf, bench, external loungers and other selections survive",
+  { ...explicit.config, dimensions: { ...explicit.config.dimensions, length: 8, width: 4 } },
+  "8×4 preserves selected child and independent options",
 );
 equal(
   configuredSunShelfLoungers(smaller.config).count,
-  0,
-  "8×4 has no immersed furniture geometry",
+  2,
+  "8×4 now has two dimensionally valid immersed chaises",
 );
-check(
-  typeof smaller.sunShelfNotice === "string" && smaller.sunShelfNotice.length > 0,
-  "resize explains dependent removal",
-);
+check(smaller.config.features.includes("sunShelfLoungers"), "compatible resize does not remove dependent choice");
 equal(
   restore(smaller).config,
   smaller.config,
-  "unsupported resized selection stays removed after reload",
+  "compatible resized selection survives reload",
 );
 check(
-  !run(smaller, [
+  run(smaller, [
     { type: "setDimension", key: "length", value: 12 },
     { type: "setDimension", key: "width", value: 5 },
   ]).config.features.includes("sunShelfLoungers"),
-  "growing again never silently re-enables furniture",
+  "growing again retains the customer's existing furniture selection",
 );
 
 const removedShelf = reducer(explicit, { type: "togglePoolFeature", value: "sunShelf" });
@@ -318,13 +315,13 @@ equal(
   {
     ...full.config,
     dimensions: { ...full.config.dimensions, width: 4 },
-    sunShelfLoungerCount: narrowedCapacity,
+    sunShelfLoungerCount: capacity,
   },
-  "compatible resize only updates width and caps explicit count",
+  "resize retains requested quantity for explicit resolution",
 );
 check(
-  typeof narrower.sunShelfNotice === "string" && narrower.sunShelfNotice.length > 0,
-  "compatible quantity adjustment has notice",
+  configuredSunShelfLoungers(narrower.config).adjusted && configuredSunShelfLoungers(narrower.config).count === 0,
+  "oversized quantity is unresolved, never a silently capped partial order",
 );
 
 for (const config of [
@@ -336,9 +333,10 @@ for (const config of [
 ]) {
   const normalized = normalizeSunShelfLoungers(config);
   check(
-    !normalized.features.includes("sunShelfLoungers") &&
-      normalized.sunShelfLoungerCount === undefined,
-    "normalize removes impossible dependent/count",
+    config.features.includes("sunShelf")
+      ? normalized.features.includes("sunShelfLoungers") && normalized.sunShelfLoungerCount === 2
+      : !normalized.features.includes("sunShelfLoungers") && normalized.sunShelfLoungerCount === undefined,
+    "normalise only explicit parent removal, retain dimensional intent",
   );
   equal(
     normalized.equipment,
@@ -376,9 +374,9 @@ equal(
 );
 for (const locale of ["it", "en"]) {
   equal(
-    loungerRows(buildProjectSummary(restore(smaller), locale)),
-    [],
-    `${locale}: unavailable child omitted from summary`,
+    loungerRows(buildProjectSummary(restore(smaller), locale)).map(row => row.value),
+    [`${locale === "en" ? "Sun shelf loungers" : "Lettini per spiaggetta"} · 2`],
+    `${locale}: compatible resized child retains truthful quantity in summary`,
   );
   equal(
     loungerRows(buildProjectSummary(restore(eligible), locale)),

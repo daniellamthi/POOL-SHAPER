@@ -4,7 +4,7 @@ import type { CameraIntent } from "./camera";
 /** Ephemeral presentation intent, never part of ProjectConfiguration. */
 export type VisualFocus = "STRUCTURE_OVERVIEW" | "POOL_OVERVIEW" | "DIMENSIONS_TOP" | "DEPTH" | "STAIRS" | "INOX" |
   "SUN_SHELF" | "HYDROMASSAGE" | "BENCH" | "SKIMMER" | "OVERFLOW" | "INFINITY" |
-  "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "STAIR_LIGHTING" | "EXTERIOR_PANEL" | "EXTERNAL_STAIRS" | "PELLICANO" | "COVER" | "TECHNICAL" |
+  "INTERIOR_FINISH" | "COPING" | "PAVING" | "LIGHTING" | "STAIR_LIGHTING" | "BENCH_LIGHTING" | "EXTERIOR_PANEL" | "EXTERNAL_STAIRS" | "PELLICANO" | "COVER" | "TECHNICAL" |
   "TECHNICAL_SKIMMER" | "TECHNICAL_RETURNS" | "TECHNICAL_DRAINS" |
   "TECHNICAL_OVERFLOW" | "TECHNICAL_COMPENSATION" | "TECHNICAL_COVER";
 export interface FocusRequest { focus: VisualFocus; revision: number }
@@ -15,13 +15,13 @@ const accessFocus = (c: PoolConfig): VisualFocus => c.features.includes("sunShel
   : c.poolAccess === "stainlessSteelLadder" ? "INOX" : "POOL_OVERVIEW";
 
 /** Interpret the accepted configuration, not optimistic UI selections. */
-export function focusForAction(action: { type: string; key?: string; value?: unknown; preserveCamera?: boolean }, c: PoolConfig): VisualFocus | null | undefined {
+export function focusForAction(action: { type: string; key?: string; value?: unknown; preserveCamera?: boolean }, c: PoolConfig, previousFocus?: VisualFocus): VisualFocus | null | undefined {
   switch (action.type) {
     case "next": case "previous": case "goToStep": case "reset": case "restoreProject": return null;
     case "setDimension": return action.key === "depth" || action.key === "shallowDepth" ? "DEPTH" : "DIMENSIONS_TOP";
     case "setFloorProfile": case "toggleSlopeReversed": return "DEPTH";
     case "setShape": case "setControlPoint": case "setLShapeOrientation": return "DIMENSIONS_TOP";
-    case "setSystem": case "setOverflowType": case "setInfinitySide": case "setSkimmerType": case "setSkimmerFinish":
+    case "setSystem": case "setOverflowType": case "setInfinitySide": case "setInfinityWall": case "setSkimmerType": case "setSkimmerFinish":
       return c.system === "infinity" ? "INFINITY" : c.system === "overflow" ? "OVERFLOW" : "SKIMMER";
     case "setPoolType": return "POOL_OVERVIEW";
     case "setPoolStructure": return "STRUCTURE_OVERVIEW";
@@ -31,18 +31,25 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
     case "setExteriorPanelFinish": return "EXTERIOR_PANEL";
     case "setExternalStairSide": case "setExternalStairPlatformExtended": return "EXTERNAL_STAIRS";
     case "setLedColor": case "setLedIntensity": return "LIGHTING";
-    case "setSceneTime": return action.preserveCamera ? undefined : c.system !== "infinity" && !c.features.includes("ledLighting") && c.features.includes("stairLighting") ? "STAIR_LIGHTING" : "LIGHTING";
+    case "setSceneTime":
+      if (action.preserveCamera) return undefined;
+      // Optional micro-light controls also request their existing night
+      // preview. That second action must not replace their detail with RGB.
+      if (previousFocus === "STAIR_LIGHTING" || previousFocus === "BENCH_LIGHTING") return previousFocus;
+      return !c.features.includes("ledLighting") && c.features.includes("stairLighting") ? "STAIR_LIGHTING"
+        : !c.features.includes("ledLighting") && c.features.includes("hydromassageBenchLighting") ? "BENCH_LIGHTING" : "LIGHTING";
     case "setInternalStairType": case "setInternalStairMirrored": case "toggleInternalSteps": case "setPoolAccess": return accessFocus(c);
     case "setHydromassageVariant": return accessFocus(c);
     case "toggleInoxLadder": return c.features.includes("inoxLadder") || c.poolAccess === "stainlessSteelLadder" ? "INOX" : accessFocus(c);
     case "togglePoolFeature":
       if (action.value === "ledLighting") return "LIGHTING";
-      if (action.value === "stairLighting") return c.system === "infinity" ? accessFocus(c) : "STAIR_LIGHTING";
+      if (action.value === "stairLighting") return "STAIR_LIGHTING";
+      if (action.value === "hydromassageBenchLighting") return "BENCH_LIGHTING";
       if (action.value === "externalStaircase") return c.features.includes("externalStaircase") ? "EXTERNAL_STAIRS" : "POOL_OVERVIEW";
       if (action.value === "integratedBench" && c.features.includes("integratedBench")) return "BENCH";
       return accessFocus(c);
     case "toggleEquipment": return action.value === "automaticCover" ? "COVER" : action.value === "pellicano" ? c.equipment.includes("pellicano") ? "PELLICANO" : "POOL_OVERVIEW" : "TECHNICAL";
-    case "setCoverPosition": case "setCoverExtension": return "COVER";
+    case "setCoverPosition": case "setCoverExtension": return previousFocus === "COVER" ? undefined : "COVER";
     case "updateRenovation":
       if (action.value && typeof action.value === "object" && ("targetFinish" in action.value || "linerColor" in action.value || "mosaicFinish" in action.value)) return "INTERIOR_FINISH";
       return undefined;
@@ -55,7 +62,7 @@ export function nextFocusRequest(previous: FocusRequest | null, focus: VisualFoc
   if (focus === null) return null;
   // Editing remains in one stable projection. New option selections may reframe
   // after a manual orbit even when they address the same semantic feature.
-  if (previous?.focus === focus && (focus === "DIMENSIONS_TOP" || focus === "DEPTH")) return previous;
+  if (previous?.focus === focus && ["DIMENSIONS_TOP", "DEPTH", "INTERIOR_FINISH", "COPING", "PAVING", "LIGHTING"].includes(focus)) return previous;
   return { focus, revision: (previous?.revision ?? 0) + 1 };
 }
 
@@ -79,7 +86,8 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
     case "EXTERNAL_STAIRS": return "external-stairs";
     case "PELLICANO": return "pellicano";
     case "STAIR_LIGHTING": return "stair-lighting";
-    case "LIGHTING": return c.system === "infinity" ? "infinity" : "features";
+    case "BENCH_LIGHTING": return "bench-lighting";
+    case "LIGHTING": return "features";
     case "COVER": case "TECHNICAL_COVER": return "cover";
     case "TECHNICAL_SKIMMER": return "skimmer-detail";
     case "TECHNICAL_OVERFLOW": return c.system === "infinity" ? "infinity" : c.overflowType === "visible" ? "overflow-visible" : "overflow-hidden";
@@ -88,8 +96,7 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
   }
 }
 
-/** Preserve the previously approved Infinity routing. Other systems keep
- * the selected detail; only final presentation returns to the whole pool. */
+/** Contextual selections stay contextual; final presentation shows the pool. */
 export const WHOLE_POOL_STEP_IDS: ReadonlySet<string> = new Set([
   "system",
   "access",
@@ -112,10 +119,5 @@ const WHOLE_POOL_INTENTS: ReadonlySet<CameraIntent> = new Set<CameraIntent>([
 ]);
 export function wholePoolIntent(intent: CameraIntent, stepId: string | undefined, system?: PoolConfig["system"]): CameraIntent {
   if (system !== "infinity" && stepId === "style" && intent === "structure") return "liner";
-  if (system !== "infinity") return stepId === "review" && !WHOLE_POOL_INTENTS.has(intent) ? "review" : intent;
-  if (system === "infinity" && stepId !== "review" &&
-    ["access", "inox", "shelf", "hydromassage", "bench"].includes(intent)) return intent;
-  return stepId !== undefined && WHOLE_POOL_STEP_IDS.has(stepId) && !WHOLE_POOL_INTENTS.has(intent)
-    ? "review"
-    : intent;
+  return stepId === "review" && !WHOLE_POOL_INTENTS.has(intent) ? "review" : intent;
 }

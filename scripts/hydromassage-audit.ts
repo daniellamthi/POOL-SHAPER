@@ -506,11 +506,16 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
 for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
   for (const side of [0,1,2,3]) for (const sloped of [false,true]) {
     const c = config({length,width,side,sloped,system:"infinity",features:["sunShelf"]});
-    const shelf = configuredPoolLayout(c).comfort.elements.find(e => e.kind === "sunShelf");
-    check(!!shelf, `Infinity shelf ${length}/${width}/${side}/${sloped} available`);
+    const resolvedShelf = configuredPoolLayout(c);
+    const shelf = resolvedShelf.comfort.elements.find(e => e.kind === "sunShelf");
+    if (!shelf) {
+      check(!resolvedShelf.comfort.availability.sunShelf.available && !!resolvedShelf.comfort.availability.sunShelf.reason,
+        `Infinity shelf ${length}/${width}/${side}/${sloped}: unavailable for two chaises/access is explicit`);
+      continue;
+    }
     const outline = buildOutline(c.shape,c.dimensions,c.controlPoints);
     const layout = getPoolVerticalLayout({poolType:"in-ground",system:"infinity",depth:c.dimensions.depth,copingThickness:POOL_BORDER_PRESET.thickness});
-    const floor = buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout:layout,sunShelf:true,infinityEdge:c.infinityEdge!});
+    const floor = buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout:layout,sunShelf:true,twoLoungerShelf:true,infinityEdge:c.infinityEdge!});
     const mesh = shelfStairGeometry(shelf!,floor);
     check(watertight(mesh), "Infinity shelf/landing/steps form one closed floor-supported solid");
     mesh.dispose();

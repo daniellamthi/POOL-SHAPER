@@ -234,10 +234,28 @@ export function StepTabs<T extends string>({
   label: string;
 }) {
   const { t } = useI18n();
+  const tabsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const strip=tabsRef.current;
+    if (!strip) return;
+    const reveal = () => {
+      const active=strip.querySelector<HTMLElement>('[aria-selected="true"]');
+      if (!active) return;
+      const row=strip.getBoundingClientRect(), tab=active.getBoundingClientRect();
+      if(tab.left<row.left || tab.right>row.right)
+        strip.scrollBy({left:tab.left-row.left-(row.width-tab.width)/2,
+          behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+    };
+    reveal();
+    const observer = new ResizeObserver(reveal);
+    observer.observe(strip);
+    return () => observer.disconnect();
+  }, [value]);
   if (tabs.length < 2) return null;
   return (
     <div
       role="tablist"
+      ref={tabsRef}
       aria-label={t(label)}
       className="inline-flex w-fit max-w-full self-start gap-1 overflow-x-auto rounded-full border border-hairline bg-background p-1"
     >
@@ -281,8 +299,14 @@ export function RevealSection({ reveal, children }: { reveal: boolean; children:
     if (!reveal) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const id = window.setTimeout(
-      () =>
-        ref.current?.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" }),
+      () => {
+        const section = ref.current, scroller = section?.closest<HTMLElement>(".pool-dock-scroll");
+        if (!section || !scroller) return;
+        const top = section.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+        // Never scroll the page/canvas or an outer ancestor. Only the options
+        // pane moves, once when a newly disclosed decision first appears.
+        scroller.scrollTo({ top: scroller.scrollTop + top - 12, behavior: reduced ? "auto" : "smooth" });
+      },
       120,
     );
     return () => window.clearTimeout(id);

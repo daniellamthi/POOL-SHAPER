@@ -25,15 +25,17 @@ import { outlineArea, outlineBounds, outlineCentroid, outlinePerimeter } from ".
 import type { PoolVerticalLayout } from "./vertical-layout";
 import type { Dimensions, Outline, PoolMetrics, PoolShapeId, PoolType } from "./types";
 import { infinityExclusion, type InfinityEdgeParams } from "./infinity-edge";
+import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT } from "./sun-shelf-model";
 
 /** Shared shelf/flight dimensions; metres, not a pool-size-specific offset. */
-export function shelfStairDimensions(span: number, topY: number, floorY: number) {
+export function shelfStairDimensions(span: number, topY: number, floorY: number, minimumRun = 0) {
   const tread = 0.3;
   const shelfRun = Math.min(2.2, Math.max(1.2, span * 0.2), span - 2.4);
   for (let rises = 2; rises <= 16; rises++) {
     const riser = (topY - floorY) / rises;
     const run = (rises - 1) * tread;
-    const totalRun = Math.max(shelfRun, run + 1.5 * tread);
+    const landingRun = minimumRun ? SUN_SHELF_LOUNGER_LAYOUT.backPassage + 0.035 : 1.5 * tread;
+    const totalRun = Math.max(shelfRun, minimumRun, run + landingRun);
     if (riser >= 0.15 && riser <= 0.24 && totalRun + 2.4 <= span)
       return { rises, riser, run, totalRun, tread };
   }
@@ -147,6 +149,8 @@ export function buildFloorProfile(params: {
   dimensions: Dimensions;
   verticalLayout: PoolVerticalLayout;
   sunShelf?: boolean;
+  /** Hydro keeps its existing flight; only a two-chaise shelf needs more run. */
+  twoLoungerShelf?: boolean;
   infinityEdge?: InfinityEdgeParams | null | undefined;
 }): FloorProfileModel {
   const { outline, shape, poolType, dimensions, verticalLayout } = params;
@@ -193,7 +197,8 @@ export function buildFloorProfile(params: {
   if (params.sunShelf && exclusion?.axis === axis)
     shallowAtMin = Math.abs(exclusion.coordinate - axisMax) < 0.08;
   const flight = params.sunShelf && shape === "rectangle" && Math.min(spanX, spanZ) >= 2.4
-    ? shelfStairDimensions(span, verticalLayout.waterY - 0.22, shallowFloorY) : null;
+    ? shelfStairDimensions(span, verticalLayout.waterY - 0.22, shallowFloorY,
+      params.twoLoungerShelf ? SUN_SHELF_MIN_RUN : 0) : null;
   const end = (shallowAtMin ? axisMin : axisMax) + (shallowAtMin ? 1 : -1) * (flight?.totalRun ?? 0);
   // One tread-sized level landing AFTER the final riser; the ramp starts here.
   const slopeStart = end + (shallowAtMin ? 1 : -1) * (flight?.tread ?? 0);

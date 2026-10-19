@@ -64,6 +64,7 @@ import { planSkimmers } from "@/lib/pool/engineering";
 import { projectMetrics } from "@/lib/pool/project-metrics";
 import { buildTechnicalPlan } from "@/lib/pool/technical-plan";
 import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
+import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 
 
 /**
@@ -402,9 +403,7 @@ function ConfiguratorLayout() {
                 config,
               )
             : activeStepId === "lighting"
-              ? config.system === "infinity"
-                ? "infinity"
-                : "features"
+              ? "features"
               : "review";
 
   // ---- New wizard navigation: nine macro steps, skipped empty steps ----
@@ -435,18 +434,27 @@ function ConfiguratorLayout() {
   const setDecision = (id: string) => { setDecisionState({ step, id }); };
   const decisionProps = { tab: decision?.id ?? "", setTab: setDecision };
   const nextDecision = currentDecisions[decisionIndex + 1];
+  const comfortIssues = useMemo(() => comfortConfigurationIssues(config), [config]);
   useEffect(() => {
-    if (activeStepId === "system" && decision?.id === "detail" && config.system !== "infinity") {
-      setInspectionView(config.system === "overflow"
+    if (activeStepId === "system" && decision?.id === "detail") {
+      setInspectionView(config.system === "infinity" ? "infinity" : config.system === "overflow"
         ? config.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible"
         : "skimmer-detail");
       reframe();
-    } else if (activeStepId === "deck" && config.system !== "infinity" &&
+    } else if (activeStepId === "deck" &&
       (decision?.id === "coping" || decision?.id === "paving")) {
       setInspectionView(decision.id);
       reframe();
     }
   }, [activeStepId, decision?.id, config.system, config.overflowType, reframe]);
+  useEffect(() => {
+    if (activeStepId === "lighting" && decision?.id === "color") {
+      // Entering colour also requests its night preview. A retained micro-spot
+      // focus can arrive one render later and clear the inspection override.
+      setInspectionView("features");
+      reframe();
+    }
+  }, [activeStepId, decision?.id, visualFocus, reframe]);
   useEffect(() => {
     if (sharedProject?.status === "ready") {
       const reviewStep = activeSteps.findIndex(s => s.id === "review");
@@ -662,7 +670,9 @@ function ConfiguratorLayout() {
               (technicalView
                 ? config.system === "infinity" ? "top" : "review"
                 : wholePoolIntent(
-                    visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus,
+                    visualFocus ? contextualIntent(visualFocus.focus, config)
+                      : activeStepId === "style" && decision?.id === "interior"
+                        ? contextualIntent("INTERIOR_FINISH", config) : cameraFocus,
                     renovationWorkflow ? undefined : activeStepId,
                     config.system,
                   ))
@@ -690,6 +700,7 @@ function ConfiguratorLayout() {
         </main>
 
         <ConfiguratorTray
+          nextChoice={nextDecision?.label}
           number={macroIndex + 1}
           total={macros.length}
           nextLabel={
@@ -710,9 +721,9 @@ function ConfiguratorLayout() {
               : describeSelection(activeStepId, config)
           }
           canBack={step > 0}
-          canContinue={finalRequest || ((Boolean(nextDecision) || !isLast) && (renovationWorkflow && decision
+          canContinue={(finalRequest && !comfortIssues.length) || ((Boolean(nextDecision) || !isLast) && (renovationWorkflow && decision
             ? renovationDecisionComplete(activeStepId, decision.id, projectConfig, renovation) && (Boolean(nextDecision) || canContinue)
-            : canContinue))}
+            : (activeStepId === "access" && Boolean(nextDecision)) || canContinue))}
           continueLabel={
             finalRequest ? "Richiedi proposta" : isLast && !nextDecision ? "Configurazione completa" : "Continua"
           }
@@ -727,7 +738,16 @@ function ConfiguratorLayout() {
           }
           expanded={trayExpanded}
           onExpandedChange={setTrayExpanded}
+          onViewPool={() => { setInspectionView("review"); reframe(); }}
         >
+          {comfortIssues.length ? <div role="alert" className="mb-3 flex flex-col gap-2 rounded-xl border border-brand/20 p-3 text-xs">
+            <p>{t("Le scelte comfort sono conservate, ma richiedono una verifica con le dimensioni attuali.")}</p>
+            {comfortIssues.map(issue => <p key={issue.feature}>{t(issue.reason)}</p>)}
+            <button type="button" className="w-fit text-brand underline underline-offset-4" onClick={() => {
+              const accessStep = activeSteps.findIndex(item => item.id === "access");
+              if (accessStep >= 0) { goToStep(accessStep); setDecisionState({step:accessStep,id:"comfort"}); }
+            }}>{t("Rivedi comfort")}</button>
+          </div> : null}
           <div key={`${step}-${decision?.id ?? ""}`} className="animate-rise">
             {trayContent}
           </div>

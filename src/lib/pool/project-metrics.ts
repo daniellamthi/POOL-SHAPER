@@ -28,6 +28,7 @@ export function projectMetrics(config: PoolConfig, outline: Outline) {
     dimensions: config.dimensions,
     verticalLayout,
     sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
+    twoLoungerShelf: config.features.includes("sunShelf"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   const baseMetrics = floorProfile.sloped

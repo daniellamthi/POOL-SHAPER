@@ -4,7 +4,7 @@ import type { Outline } from "@/lib/pool/types";
 import { offsetOutline, outlineBounds } from "@/lib/pool/geometry";
 import { pointInBasin } from "@/lib/pool/boundary-placement";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { SolarShower } from "./SolarShower";
+import { SolarShower, SOLAR_SHOWER_SIZE } from "./SolarShower";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
 /**
@@ -109,7 +109,7 @@ function toLocal(p: Point, origin: Point, rotation: number) {
   return { u: dx * c - dz * s, v: dx * s + dz * c };
 }
 
-function planDeckFurniture(
+export function planDeckFurniture(
   outline: Outline,
   innerOffset: number,
   band: number,
@@ -214,6 +214,27 @@ function planDeckFurniture(
     }
   }
   return { rows: rows.map(({ half: _half, ...row }) => row), shower };
+}
+
+/** Camera envelope from the same actual placements and model dimensions. No
+ * scene traversal, hidden/future furniture or per-frame geometry allocation. */
+export function deckFurnitureCameraPoints(plan: DeckFurniturePlan): Array<readonly [number,number,number]> {
+  const points: Array<readonly [number,number,number]> = [];
+  const add = (p: Point & {rotation:number}, xs: readonly number[], zs: readonly number[], height: number) => {
+    const c=Math.cos(p.rotation),s=Math.sin(p.rotation);
+    for (const x of xs) for (const z of zs) for (const y of [0,height])
+      points.push([p.x+x*c+z*s,y,p.z-x*s+z*c]);
+  };
+  for (const row of plan.rows) {
+    const half=Math.max(...row.offsets.map(Math.abs))+LOUNGER.width/2+0.1;
+    add(row,[-half,half],[-LOUNGER.length/2-.1,LOUNGER.length/2+.1],
+      LOUNGER.seatHeight+Math.sin(LOUNGER.backAngle)*LOUNGER.backLength+.1);
+  }
+  if (plan.shower) {
+    const r=SOLAR_SHOWER_SIZE.plate/2;
+    add(plan.shower,[-r,r],[-r,r+SOLAR_SHOWER_SIZE.armLength],SOLAR_SHOWER_SIZE.height);
+  }
+  return points;
 }
 
 type FurniturePart = "frame" | "sling" | "cushion" | "table";

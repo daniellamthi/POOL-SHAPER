@@ -2,6 +2,16 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ["Prossima scelta", "Next option"],
+  ["Riduci", "Minimise"],
+  ["Rivedi comfort", "Review comfort"],
+  ["Le scelte comfort sono conservate, ma richiedono una verifica con le dimensioni attuali.", "Your comfort selections are retained, but need review for the current dimensions."],
+  ["Risolvi le scelte comfort non compatibili prima di confermare il progetto.", "Resolve incompatible comfort selections before confirming the project."],
+  ["L’idromassaggio integrato richiede una larghezza nominale superiore a 3,00 m e spazio utile compatibile.", "Integrated hydromassage requires a nominal pool width greater than 3.00 m and compatible usable space."],
+  ["Passaggio di accesso alla spiaggetta insufficiente: richiesti almeno 90 cm liberi.", "Insufficient sun shelf access: at least 90 cm of clear passage is required."],
+  ["Spazio insufficiente per due lettini da 178 × 59 cm con margini di 25 cm e accesso libero.", "Insufficient space for two 178 × 59 cm loungers with 25 cm margins and clear access."],
+  ["Quantità lettini non compatibile con lo spazio attuale. Riduci la quantità o ripristina le dimensioni.", "The requested lounger quantity does not fit the current space. Reduce the quantity or restore the dimensions."],
+  ["Spiaggetta: {run} m. Lunghezza di nuoto residua: {swim} m. Accesso separato di almeno 90 cm.", "Sun shelf: {run} m. Remaining swimming length: {swim} m. Separate access at least 90 cm wide."],
   ...REFERENCE_FINISHES.flatMap(finish => [
     [finish.title, finish.titleEn] as const,
     [finish.subtitle, finish.subtitleEn] as const,
@@ -322,6 +332,7 @@ export const messages: ReadonlyArray<readonly [string, string]> = [
   ["Accostata alla vasca, collegata all’accesso interno.", "Beside the pool, connected to the internal access."],
   ["Piattaforma prolungata inclusa, con parapetto sui soli lati esterni.", "Extended platform included, with railing on the outer sides only."],
   ["Forma della scala", "Stair shape"], ["Tipo di scala interna", "Internal stair type"],
+  ["Rettilinea", "Straight"], ["Angolare", "Corner"],
   ["Gradini dritti sul lato corto.", "Straight steps along the short side."], ["Gradini rettangolari integrati nell’angolo.", "Rectangular steps integrated into the corner."],
   ["Gradini a quarto di cerchio nell’angolo.", "Quarter-circle steps in the corner."], ["Orientamento scala interna", "Internal stair orientation"],
   ["Ingresso integrato nell’angolo del lato corto.", "An entrance integrated into the corner of the short side."],

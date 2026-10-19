@@ -17,6 +17,7 @@ import { RENOVATION_AREA_LABEL, FILTRATION_WORK_LABEL, STRUCTURE_ISSUE_LABEL, EQ
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { localizeSummaryModel, translateText, formatNumericText, formatNumber as localeNumber, type Locale } from "@/lib/i18n";
 import { configuredSunShelfLoungers } from "@/lib/pool/sun-shelf-loungers";
+import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
 import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
@@ -59,6 +60,8 @@ export interface SummarySection {
 }
 
 export interface ProjectSummaryModel {
+  /** Unresolved requests are visible in summary and prevent final PDF/quote. */
+  compatibilityIssues?: string[];
   headline: string;
   subline: string;
   /** Configuration identity (UUID). The public project reference, when the
@@ -233,7 +236,7 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
       : { hex: linerColor?.hex ?? "#dfe9ec", texture: linerColor?.texture };
 
   const comfortItems = [
-    ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${configuredSunShelfLoungers(config).count}`] : []),
+    ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity}`] : []),
     ...(config.poolAccess
       ? [
           config.poolAccess === "internalSteps"
@@ -260,6 +263,7 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
             : POOL_FEATURE_LABEL[id],
       ),
   ];
+  const compatibilityIssues = comfortConfigurationIssues(config).map(issue => t(issue.reason));
 
   const hasLed = config.features.includes("ledLighting");
   const ledColor = config.ledColor ?? "#ffffff";
@@ -438,6 +442,7 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
   }
 
   return localizeSummaryModel({
+    compatibilityIssues,
     headline: config.projectType === "renovation" ? `Ristrutturazione · ${dimensionsSentence}` : dimensionsSentence,
     subline: t("{poolType} · {system} · circa {volume} m³ d'acqua", {poolType:t(poolType),system:t(systemLine),volume:formatNumber(metrics.waterVolume,0)}),
     projectId: project.projectId,

@@ -208,12 +208,9 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // selection in the scene, summary and render export.
       features: normalizeComfortFeatures(restored.poolType === "above-ground"
         ? restored.features.filter((id) => id !== "sunShelf" && id !== "integratedBench" && id !== "inoxLadder")
-        : restored.features.filter(
-            (id) =>
-              id !== "externalStaircase" &&
-              (restored.shape === "rectangle" ||
-                (id !== "sunShelf" && id !== "integratedBench")),
-          )),
+        // A draft may contain an unresolved comfort request after a shape
+        // change. Preserve it through Save/Reload so it can be resolved/restored.
+        : restored.features.filter((id) => id !== "externalStaircase")),
       // Above-ground-only selections never survive on an in-ground project.
       equipment: restored.poolType === "above-ground"
         ? restored.equipment

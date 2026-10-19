@@ -152,10 +152,8 @@ for (const [length, width] of [
   );
   const excessive = normalizeSunShelfLoungers({ ...config, sunShelfLoungerCount: 99 });
   check(
-    plan.capacity
-      ? excessive.sunShelfLoungerCount === plan.capacity
-      : !excessive.features.includes("sunShelfLoungers"),
-    "normalize reduced capacity",
+    excessive.sunShelfLoungerCount === 99 && excessive.features.includes("sunShelfLoungers") && configuredSunShelfLoungers(excessive).count === 0,
+    "retain excessive intent while rendering no unsafe partial order",
   );
 }
 for (const [length, width] of [
@@ -218,11 +216,12 @@ const comfort = {
   elements: [
     {
       kind: "sunShelf",
-      footprint: rect(-5, -2.8, -1, 2),
+      footprint: rect(-5, -2, -0.8, 2),
+      landing: { footprint: rect(-5,-4,-2,-0.8), topY:-0.22 },
       topY: -0.22,
       waterDepth: 0.22,
-      width: 3,
-      run: 2.2,
+      width: 2.8,
+      run: 3,
     },
   ],
   availability: {

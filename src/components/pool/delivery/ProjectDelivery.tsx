@@ -8,6 +8,7 @@ import { projectShareUrl } from "@/lib/project-delivery/reference";
 import { buildProjectSummary } from "@/lib/project-delivery/summary-model";
 import type { DayNightCapture } from "@/lib/project-delivery/heroCapture";
 import type { ProjectDeliveryState } from "./useProjectDelivery";
+import { comfortConfigurationIssues, COMFORT_RESOLUTION_MESSAGE } from "@/lib/pool/comfort-compatibility";
 
 /** Save · Share · Project Book. Sits above the Premium Summary. */
 export function ProjectDeliveryPanel({
@@ -21,6 +22,7 @@ export function ProjectDeliveryPanel({
 }) {
   const { t, locale } = useI18n();
   const { projectConfiguration, sharedProject } = useConfigurator();
+  const incompatible = comfortConfigurationIssues(projectConfiguration.config).length > 0;
   const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [bookStatus, setBookStatus] = useState<"idle" | "working" | "error">("idle");
@@ -51,6 +53,7 @@ export function ProjectDeliveryPanel({
   };
 
   const projectBook = async () => {
+    if (incompatible) return;
     setBookStatus("working");
     try {
       const saved = delivery.dirty || !link ? await delivery.save() : { ...link, projectConfiguration };
@@ -165,7 +168,7 @@ export function ProjectDeliveryPanel({
           type="button"
           variant="outline"
           onClick={() => void projectBook()}
-          disabled={bookStatus === "working"}
+          disabled={bookStatus === "working" || incompatible}
           className="rounded-full px-4"
           data-testid="delivery-pdf"
         >
@@ -176,6 +179,7 @@ export function ProjectDeliveryPanel({
           )}
           {t("Project Book PDF")}{" "}</Button>
       </div>
+      {incompatible ? <p role="status" className="text-xs text-muted-foreground">{t(COMFORT_RESOLUTION_MESSAGE)}</p> : null}
       {shareUrl ? (
         <p className="truncate text-[11px] text-muted-foreground" data-testid="delivery-share-url">
           {shareUrl}

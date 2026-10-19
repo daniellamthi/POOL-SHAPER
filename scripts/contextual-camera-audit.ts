@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { OrthographicCamera, PerspectiveCamera, Vector3 } from "three";
 import { focusForAction, contextualIntent, nextFocusRequest, wholePoolIntent } from "../src/lib/pool/contextual-camera";
-import { contextualAccessCamera, dimensionFrustum, getAccessDetailCamera, getCameraPose, infinityNavigationLimits, visibleCameraFrame, cameraFrameFit, offsetCameraToFrame } from "../src/lib/pool/camera";
+import { contextualAccessCamera, microLightCameraSubject, dimensionFrustum, getAccessDetailCamera, getCameraPose, infinityNavigationLimits, visibleCameraFrame, cameraFrameFit } from "../src/lib/pool/camera";
 import { reducer } from "../src/lib/pool/store";
 import { infinityZonesForOutline } from "../src/lib/pool/infinity-edge";
 import { coastalCamera } from "../src/components/pool/three/coastalLayout";
@@ -130,8 +130,10 @@ for(const [length,width] of [[6,3],[8,4],[12,5],[16,4.5],[20,4.5],[25,5]]) {
      {left: w!*.6,top:10,width: w!*.35,height:20},{left: w!*.6,top: visibleHeight! - 25,width: w!*.35,height:20}]);
     const fit=cameraFrameFit(34,h!,frame);
     const rawPose=contextualAccessCamera(kind==="sunShelf"?"shelf":"hydromassage",resolved,layout,outline,fit.verticalFov,fit.aspect,zone)!;
-    const pose=offsetCameraToFrame(rawPose,34,w!,h!,frame);
+    const pose=rawPose;
     const camera=new PerspectiveCamera(34,w!/h!,0.05,500); camera.position.set(...pose.position);camera.lookAt(new Vector3(...pose.target));camera.updateMatrixWorld();
+    camera.setViewOffset(w!,h!,w!/2-(frame.left+frame.width/2),h!/2-(frame.top+frame.height/2),w!,h!);
+    equal(camera.position.toArray(),rawPose.position);
     const parts=[element,...(element.tiers??[]),...(element.steps??[]),...(element.landing?[element.landing]:[])];
     for(const part of parts) for(const [x,z] of part.footprint) {
      const point=new Vector3(x,part.topY,z).project(camera), px=(point.x+1)*w!/2, py=(1-point.y)*h!/2;
@@ -144,10 +146,17 @@ for(const [length,width] of [[6,3],[8,4],[12,5],[16,4.5],[20,4.5],[25,5]]) {
 }
 ok(!serializeProjectConfiguration(project).includes("visualFocus"),"presentation never persisted");
 const scene=readFileSync("src/components/pool/three/PoolScene.tsx","utf8");
-ok(scene.includes('cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov') && scene.includes('pose = offsetCameraToFrame(pose,'),"rendered camera uses tested visible-frame fitting");
+ok(scene.includes('cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov') && scene.includes('opticalDetail') && scene.includes('camera.setViewOffset('),"rendered detail camera uses tested optical UI-frame fitting without moving its physical eye");
 ok(scene.includes('new OrthographicCamera(')&&scene.includes('.manual = true'),"real manual orthographic camera survives DPR changes");
 ok(scene.includes('maxPolarAngle={focus === "top" ? Math.PI / 2'),"true downward plan cannot tilt under controls");
-ok(scene.includes('if (cameraLocked || infinityZone ||'),"Infinity switches directly");
+const snapGuard=scene.slice(scene.indexOf("renderQualityState.locked = cameraLocked;")).match(/if \(([^\n]+)\) \{/)!;
+const mustSnap=new Function("cameraLocked","infinityZone","focus",`return ${snapGuard[1]}`);
+ok(!mustSnap(false,{},"infinity"),"Infinity detail follows the interruptible transition rather than the obsolete forced snap");
+ok(mustSnap(false,{},"top")&&mustSnap(false,{},"depth")&&mustSnap(true,{},"infinity"),"technical/locked poses retain their deliberate immediate projection");
+const durationExpression=scene.match(/duration\.current = ([^;]+);/)![1]!;
+const transitionDuration=new Function("reducedMotion","largeMove","detail",`return ${durationExpression}`);
+equal(transitionDuration(false,true,true),.24);
+equal(transitionDuration(true,true,true),0);
 ok(scene.includes('if (editingPose.current?.key !== editKey)'),"depth editing freezes pose");
 for (const [length,width] of [[6,3],[8,4],[12,5]]) for (const side of [0,1,2,3]) {
  const c={...base,system:"infinity" as const,dimensions:{...base.dimensions,length:length!,width:width!},features:["inoxLadder" as const],infinityEdge:{enabled:true,side,startT:0,endT:1,dropDirection:"outward" as const}};
@@ -177,8 +186,8 @@ equal(contextualIntent("PELLICANO",base),"pellicano");
 equal(contextualIntent("STAIR_LIGHTING",base),"stair-lighting");
 equal(focusForAction({type:"toggleEquipment",value:"pellicano"},{...base,equipment:["pellicano"]}),"PELLICANO");
 equal(focusForAction({type:"setSceneTime"},{...base,features:["stairLighting"]}),"STAIR_LIGHTING");
-equal(focusForAction({type:"setSceneTime"},{...base,system:"infinity",features:["stairLighting"]}),"LIGHTING");
-equal(focusForAction({type:"togglePoolFeature",value:"stairLighting"},{...base,system:"infinity",features:["stairLighting"]}),focusForAction({type:"setInternalStairType"},{...base,system:"infinity",features:["stairLighting"]}));
+equal(focusForAction({type:"setSceneTime"},{...base,system:"infinity",features:["stairLighting"]}),"STAIR_LIGHTING");
+equal(focusForAction({type:"togglePoolFeature",value:"stairLighting"},{...base,system:"infinity",features:["stairLighting"]}),"STAIR_LIGHTING");
 equal(wholePoolIntent("structure","style","skimmer"),"liner");
 equal(wholePoolIntent("structure","style","infinity"),"structure");
 for(const [length,width,depth] of [[6,3,1.2],[8,4,1.5],[12,5,1.5]])for(const aspect of [1440/419,390/310,430/353]) {
@@ -204,7 +213,9 @@ for(const [length,width,depth] of [[6,3,1.2],[8,4,1.5],[12,5,1.5]])for(const asp
   const pose=contextualAccessCamera("stair-lighting",r,groundLayout,outline,34,aspect)!;
   ok(!!pose,"comfort staircase micro-spots have a dedicated camera");
   const cam=new PerspectiveCamera(34,aspect,.05,500);cam.position.set(...pose.position);cam.lookAt(new Vector3(...pose.target));cam.updateMatrixWorld();
-  for(const spot of r.stairMicroSpots) {const v=new Vector3(spot.x,spot.y,spot.z).project(cam);ok(Math.abs(v.x)<.9&&Math.abs(v.y)<.9,"actual micro-spots fit with margins");}
+  const subject=microLightCameraSubject("stair-lighting",r,groundLayout,outline);
+  ok(subject && subject.points.length>0,"real middle-riser detail has non-empty context; other fittings remain in geometry");
+  for(const point of subject!.points) {const v=new Vector3(...point).project(cam);ok(Math.abs(v.x)<.9&&Math.abs(v.y)<.9,"actual selected micro-spot/riser detail fits with margins");}
  }
 }
 for (const [length,width] of [[6,3],[8,4],[12,5]]) for (const aspect of [1440/419,390/310,430/353]) {

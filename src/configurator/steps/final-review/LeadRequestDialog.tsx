@@ -17,6 +17,7 @@ import { TextField } from "@/components/pool/TextField";
 import type { ProjectConfiguration } from "@/lib/pool/project";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "@/lib/lead/types";
 import { submitLead } from "@/lib/lead/submitLead.server";
+import { comfortConfigurationIssues, COMFORT_RESOLUTION_MESSAGE } from "@/lib/pool/comfort-compatibility";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -68,6 +69,7 @@ export function LeadRequestDialog({
   defaultCustomer?: { name: string; email: string; phone: string; projectLocation?: string; notes?: string };
 }) {
   const { t } = useI18n();
+  const incompatible = comfortConfigurationIssues(projectConfiguration.config).length > 0;
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -96,6 +98,7 @@ export function LeadRequestDialog({
     setForm((current) => ({ ...current, [key]: value }));
 
   const handleSubmit = async () => {
+    if (incompatible) { setErrorMessage(COMFORT_RESOLUTION_MESSAGE); return; }
     setTouched(true);
     const validationErrors = validate(form);
     if (Object.keys(validationErrors).length > 0 || !form.timing) return;
@@ -108,6 +111,8 @@ export function LeadRequestDialog({
         ? await prepareProject()
         : { projectConfiguration, projectReference };
       if (!prepared) throw new Error("Salvataggio del progetto non riuscito. Riprova prima di inviare la richiesta.");
+      if (comfortConfigurationIssues(prepared.projectConfiguration.config).length)
+        throw new Error(COMFORT_RESOLUTION_MESSAGE);
       const result = await submitLeadFn({
         data: {
           customer: {
@@ -140,7 +145,8 @@ export function LeadRequestDialog({
 
   return (
     <>
-      <Button type="button" size="lg" className="mt-1" onClick={() => setOpen(true)}>
+      {incompatible ? <p role="status" className="text-xs text-muted-foreground">{t(COMFORT_RESOLUTION_MESSAGE)}</p> : null}
+      <Button type="button" size="lg" className="mt-1" disabled={incompatible} onClick={() => setOpen(true)}>
         {t("Valuta il progetto con un consulente")}{" "}</Button>
 
       <Dialog

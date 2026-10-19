@@ -18,7 +18,7 @@ import {
 import type { DirectionalLight, HemisphereLight, SpotLight, Texture } from "three";
 import { PoolModel } from "./PoolModel";
 import { SunShelfLoungers } from "./SunShelfLoungers";
-import { resolveSunShelfLoungers } from "@/lib/pool/sun-shelf-loungers";
+import { resolveSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
 import { ArchitecturalOutline, ARCHITECTURAL_OUTLINE_NAME } from "./ArchitecturalOutline";
 import { architecturalFrustum } from "./architecturalPlan";
 import { AutomaticCover } from "./AutomaticCover";
@@ -28,13 +28,13 @@ import { createPavingOnSurface } from "./pavingGeometry";
 import { pavingLayout, type PavingFormatId } from "@/lib/pool/presentation";
 import { isReferenceFinish } from "@/lib/pool/reference-finishes";
 import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
-import { DeckLoungers } from "./DeckLoungers";
+import { DeckLoungers, planDeckFurniture, deckFurnitureCameraPoints } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
 import { createInfinityDeck } from "./infinityLandscape";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { coastalCamera, createCoastalTerrace, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
+import { createCoastalTerrace, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
 import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
 import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
@@ -66,7 +66,7 @@ import {
 } from "@/configurator/3d/scene/visual-preset";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { outlineBounds } from "@/lib/pool/geometry";
-import { getCameraPose, contextualAccessCamera, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
+import { getCameraPose, contextualAccessCamera, sunShelfCameraSubject, accessCameraSubject, accessFlightCameraSubject, comfortCameraSubject, microLightCameraSubject, lightingCameraSubject, externalStairCameraSubject, pavingCameraSubject, coverCameraSubject, overviewCameraSubject, fitInfinityOverviewCamera, pellicanoCameraSubject, waterlineCameraSubject, infinityWaterlineCameraSubject, infinityDetailCameraSubject, infinityCopingCameraSubject, overflowCameraSubject, interiorFinishCameraSubject, componentCameraAspect, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
 import type { ResolvedPoolLayout } from "@/lib/pool/resolved-layout";
 import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
@@ -437,6 +437,7 @@ function PlanCamera({ enabled }: { enabled: boolean }) {
 function CameraRig({
   accessPlan,
   resolvedLayout,
+  floorProfile,
   cameraLocked,
   radius,
   controls,
@@ -456,10 +457,14 @@ function CameraRig({
   cleanCapture,
   infinityZone,
   externalStairPlan,
+  coverSubject,
   pellicanoPlacement,
+  shelfLoungerEnvelope,
+  deckFurnitureEnvelope,
 }: {
   accessPlan: SceneLightingPlan["accessPlan"];
   resolvedLayout: ResolvedPoolLayout;
+  floorProfile: FloorProfileModel;
   cameraLocked: boolean;
   radius: number;
   controls: React.RefObject<OrbitControlsImpl | null>;
@@ -481,7 +486,10 @@ function CameraRig({
    * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
   infinityZone: RectangleInfinityZone | null;
   externalStairPlan: ReturnType<typeof planExternalStaircase>;
+  coverSubject: ReturnType<typeof coverCameraSubject>;
   pellicanoPlacement: ReturnType<typeof planPellicano>;
+  shelfLoungerEnvelope: readonly import("@/lib/pool/camera").CameraPoint[];
+  deckFurnitureEnvelope: readonly import("@/lib/pool/camera").CameraPoint[];
 }) {
   const camera = useThree((state) => state.camera);
   const viewportSize = useThree((state) => state.size);
@@ -493,6 +501,7 @@ function CameraRig({
   const elapsed = useRef(0);
   const duration = useRef(1.15);
   const flying = useRef(false);
+  const navigationLimits = useRef<ReturnType<typeof infinityNavigationLimits> | null>(null);
   // Tracks live OrbitControls dragging (pan/rotate/zoom), separately from
   // `flying` above which tracks this component's own scripted camera
   // transitions -- the stationary-quality mode (see AdaptiveQuality and
@@ -516,6 +525,14 @@ function CameraRig({
     if (!control) return;
     const handleStart = () => {
       interacting.current = true;
+      if (flying.current && navigationLimits.current) {
+        // A manual interruption owns its current viewpoint; do not clamp it
+        // to the unfinished destination's small Infinity orbit window.
+        Object.assign(control, infinityZone ? infinityNavigationLimits({
+          position: camera.position.toArray() as [number, number, number],
+          target: control.target.toArray() as [number, number, number],
+        }, true, layout.waterY) : navigationLimits.current);
+      }
       flying.current = false;
     };
     const handleEnd = () => {
@@ -527,7 +544,7 @@ function CameraRig({
       control.removeEventListener("start", handleStart);
       control.removeEventListener("end", handleEnd);
     };
-  }, [controls, camera]);
+  }, [controls, camera, Boolean(infinityZone), layout.waterY]);
 
   // Stationary-quality bookkeeping, independent of the flight-animation
   // useFrame below: runs every frame (not just mid-flight) so it can notice
@@ -552,20 +569,69 @@ function CameraRig({
     }
   });
 
-  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping",
-    ...(!infinityZone ? ["paving","exterior-panel","external-stairs","pellicano","stair-lighting","skimmer-detail","overflow-hidden","overflow-visible","features"] : [])].includes(focus);
-  const coastalHero = !!infinityZone && ["infinity", "review", "overview"].includes(focus);
-  const topBounds = focus === "top" ? outlineBounds(planBounds) : null;
-  const topAspect = topBounds ? topBounds.spanX / Math.max(0.01, topBounds.spanZ) : undefined;
+  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping", "infinity",
+    "paving", "exterior-panel", "external-stairs", "pellicano", "stair-lighting", "bench-lighting", "skimmer-detail", "overflow-hidden", "overflow-visible", "features", "cover"].includes(focus);
+  const coastalHero = !!infinityZone && ["review", "overview"].includes(focus);
+  const opticalDetail = detail;
+  const interiorSubject = useMemo(() => focus === "liner" || focus === "mosaic"
+    ? interiorFinishCameraSubject(outline, layout, resolvedLayout, floorProfile, infinityZone) : null,
+  [focus, outline, layout, resolvedLayout, floorProfile, infinityZone]);
+  const wholeSubject = useMemo(() => overviewCameraSubject(outline, layout, {
+    infinityZone,
+    // The exterior stair is a substantial part of an above-ground product.
+    // Look from its exposed side instead of hiding its flight behind the shell.
+    exteriorDirection: externalStairPlan ? externalStairCameraSubject(externalStairPlan,layout).direction : undefined,
+    outset: copingOuterOffset(infinityZone ? "infinity" : "skimmer", "hidden") + 0.15,
+    // No invisible below-ground outside corners in the general fit. The rim
+    // encloses all visible interior surfaces; above-ground walls reach grade.
+    baseY: layout.groundY,
+    entrance: resolvedLayout.access.placement,
+    accessories: [
+      ...(accessCameraSubject(resolvedLayout.access,layout,outline)?.points ?? []),
+      ...(resolvedLayout.ladder ? accessCameraSubject(resolvedLayout.ladder.plan,layout,outline)?.points ?? [] : []),
+      ...shelfLoungerEnvelope,
+      ...deckFurnitureEnvelope,
+      ...(externalStairPlan ? externalStairCameraSubject(externalStairPlan,layout).points : []),
+      ...(coverSubject?.points ?? []),
+      ...(pellicanoPlacement ? pellicanoCameraSubject(pellicanoPlacement,layout).points : []),
+    ],
+  }), [outline,layout,resolvedLayout,shelfLoungerEnvelope,deckFurnitureEnvelope,externalStairPlan,coverSubject,pellicanoPlacement,infinityZone]);
+  const localFraming = (focus === "external-stairs" && !!externalStairPlan) || (focus === "cover" && !!coverSubject)
+    || (focus === "bench-lighting" && resolvedLayout.comfort.elements.some(element => element.kind === "hydromassage"))
+    || !!interiorSubject || focus === "waterline" || (focus === "infinity" && !!infinityZone)
+    || coastalHero || (!infinityZone && ["paving", "review", "overview", "shelf", "access", "inox", "hydromassage", "bench"].includes(focus));
+  const subjectAspect = useMemo(() => {
+    if (focus === "top") {
+      const b = outlineBounds(planBounds);
+      return b.spanX / Math.max(0.01, b.spanZ);
+    }
+    const subject = interiorSubject ?? (focus === "shelf" ? sunShelfCameraSubject(resolvedLayout, layout, outline, shelfLoungerEnvelope)
+      : focus === "access" ? accessFlightCameraSubject(resolvedLayout, layout, outline, shelfLoungerEnvelope)
+      : focus === "inox" ? accessCameraSubject(resolvedLayout.ladder?.plan ?? resolvedLayout.access, layout, outline)
+      : focus === "hydromassage" || focus === "bench" ? comfortCameraSubject(focus, resolvedLayout, layout, outline)
+      : focus === "stair-lighting" || focus === "bench-lighting" ? microLightCameraSubject(focus, resolvedLayout, layout, outline)
+      : focus === "features" ? lightingCameraSubject(outline, layout, ledRow)
+      : focus === "external-stairs" && externalStairPlan ? externalStairCameraSubject(externalStairPlan, layout)
+      : focus === "cover" ? coverSubject
+      : focus === "paving" && !infinityZone ? pavingCameraSubject(outline, layout, skimmers)
+      : (focus === "review" || focus === "overview") ? wholeSubject
+      : focus === "waterline" ? (infinityZone ? infinityWaterlineCameraSubject(outline, infinityZone, layout) : waterlineCameraSubject(outline, layout, skimmers))
+      : focus === "infinity" && infinityZone ? infinityDetailCameraSubject(outline, infinityZone, layout)
+      : focus === "coping" && infinityZone ? infinityCopingCameraSubject(outline, infinityZone, layout)
+      : focus === "overflow-hidden" || focus === "overflow-visible" ? overflowCameraSubject(focus, outline, layout, skimmers)
+      : null);
+    return subject ? componentCameraAspect(subject.points, subject.direction) : undefined;
+  }, [focus, resolvedLayout, layout, outline, shelfLoungerEnvelope, infinityZone, skimmers, ledRow, externalStairPlan, coverSubject, planBounds, compactPlan, interiorSubject, wholeSubject]);
   const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[data-config-summary]')?.getBoundingClientRect() : null;
   const visibleFrame = cleanCapture ? { left: 0, top: 0, width: viewportSize.width, height: viewportSize.height } : visibleCameraFrame(canvas.getBoundingClientRect(), [
     ...Array.from(occluderRoot.querySelectorAll(occluderSelector)).map(element => element.getBoundingClientRect()),
     ...(summaryRect ? [summaryRect] : []),
-  ], topAspect);
+  ], subjectAspect);
   const visibleFrameKey = `${visibleFrame.left}:${visibleFrame.top}:${visibleFrame.width}:${visibleFrame.height}`;
-  const fitFov = cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov;
-  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (coastalHero && infinityZone
-    ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov, {outset:copingOuterOffset("infinity", "hidden"), y:layout.copingY})
+  const fitFov = localFraming ? SCENE_VISUAL_PRESET.camera.fov
+    : cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov;
+  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone, shelfLoungerEnvelope) ?? (coastalHero && infinityZone
+    ? fitInfinityOverviewCamera(wholeSubject, outline, SCENE_VISUAL_PRESET.camera.fov, visibleFrame.width / Math.max(1, visibleFrame.height))
     : getCameraPose({
       accessPlan,
       intent: focus,
@@ -579,7 +645,10 @@ function CameraRig({
       includeExternalStaircase,
       infinityZone,
       externalStairPlan,
+      coverSubject,
       pellicanoPlacement,
+      interiorSubject,
+      overviewSubject: wholeSubject,
     }));
   const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${visibleFrameKey}:${frameToken}`;
   if (focus === "depth") {
@@ -587,18 +656,28 @@ function CameraRig({
     pose = editingPose.current.pose;
   } else editingPose.current = null;
   if (focus === "top") {
-    // Keep the actual free rectangle; preserve approved above-ground framing.
+    // Centre in the actual free rectangle, not under a floating control or
+    // technical panel. Preserve the approved above-ground framing.
     const planFrame = premiumPlan ? visibleFrame : { ...visibleFrame, left: (viewportSize.width - visibleFrame.width) / 2 };
     planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, planFrame, compactPlan, premiumPlan) };
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
   } else planFit.current = null;
-  if (focus !== "top" && !coastalHero) {
+  if (focus !== "top" && !coastalHero && !opticalDetail && !localFraming) {
     pose = offsetCameraToFrame(pose, SCENE_VISUAL_PRESET.camera.fov, viewportSize.width, viewportSize.height, visibleFrame);
   }
   // Material changes can recreate plans without moving their geometry.
   // Only a different pose/intent or explicit reframe starts a new flight.
   const poseKey = JSON.stringify(pose);
+  useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera) || !localFraming) return;
+    // This inset projection owns its aspect; R3F's DPR resize otherwise
+    // replaces it with the full canvas aspect after the camera has settled.
+    const owned = camera as PerspectiveCamera & { manual?: boolean };
+    const previous = owned.manual;
+    owned.manual = true;
+    return () => { if (previous === undefined) delete owned.manual; else owned.manual = previous; };
+  }, [camera, localFraming]);
   useLayoutEffect(() => {
     canvas.dataset["cameraProjection"] = camera instanceof OrthographicCamera ? "orthographic" : "perspective";
     canvas.dataset["cameraFocus"] = focus;
@@ -614,35 +693,55 @@ function CameraRig({
       camera.updateProjectionMatrix();
     }
     if (camera instanceof PerspectiveCamera) {
-      if (coastalHero) {
-        // Fit the original coastal image into the unobscured UI rectangle.
-        // Keep its photographic eye/target/FOV and site standoff unchanged.
-        const scale = Math.min(visibleFrame.width / viewportSize.width, visibleFrame.height / viewportSize.height);
-        const width = viewportSize.width * scale, height = viewportSize.height * scale;
-        const left = visibleFrame.left + (visibleFrame.width - width) / 2;
-        const top = visibleFrame.top + (visibleFrame.height - height) / 2;
-        camera.setViewOffset(width, height, -left, -top, viewportSize.width, viewportSize.height);
+      // clearViewOffset does not undo the inset's aspect. Restore the current
+      // canvas ratio on handoff, even if no R3F resize/DPR event follows.
+      if (!localFraming) camera.aspect = viewportSize.width / Math.max(1, viewportSize.height);
+      if (localFraming) {
+        // Keep the component's physical 34° lens close to the installation.
+        // A full-canvas lens fitted into a tiny UI strip pushed it into fog.
+        camera.setViewOffset(visibleFrame.width, visibleFrame.height,
+          -visibleFrame.left, -visibleFrame.top, viewportSize.width, viewportSize.height);
+      } else if (opticalDetail) {
+        // Shift the lens inside the available UI frame, not the installation
+        // viewpoint. Translating the eye/target moved it away from the real
+        // selected surface and could lower the physical architectural eye line.
+        camera.setViewOffset(viewportSize.width, viewportSize.height,
+          viewportSize.width / 2 - (visibleFrame.left + visibleFrame.width / 2),
+          viewportSize.height / 2 - (visibleFrame.top + visibleFrame.height / 2),
+          viewportSize.width, viewportSize.height);
       } else camera.clearViewOffset();
     }
     goal.current.set(...pose.position);
     lookAt.current.set(...pose.target);
     startPosition.current.copy(camera.position);
     startTarget.current.copy(controls.current?.target ?? lookAt.current);
-    // Drain any orbit inertia without changing the visible starting pose.
     const control = controls.current;
+    const goalDistance = goal.current.distanceTo(lookAt.current);
+    navigationLimits.current = infinityZone && focus !== "top" && focus !== "depth"
+      ? infinityNavigationLimits(pose, detail, layout.waterY)
+      : { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: Math.min(2, goalDistance * 0.6), maxDistance: 160,
+          minPolarAngle: focus === "top" ? Math.PI / 2 : 0,
+          maxPolarAngle: focus === "top" ? Math.PI / 2 : Math.PI / 2.05 };
+    // Drain old orbit inertia with open limits, retaining the actual start.
+    // Applying the destination's restricted azimuth during a flight made
+    // OrbitControls snap/clamp the interpolated path on every frame.
     if (control) {
-      Object.assign(control, infinityZone && focus !== "top" && focus !== "depth"
-        ? infinityNavigationLimits(pose, detail, layout.waterY)
-        : { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: 2, maxDistance: 160,
-            minPolarAngle: focus === "top" ? Math.PI / 2 : 0,
-            maxPolarAngle: focus === "top" ? Math.PI / 2 : Math.PI / 2.05 });
+      Object.assign(control, { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: 0.05, maxDistance: Infinity,
+        minPolarAngle: 0, maxPolarAngle: Math.PI });
+      const damping = control.enableDamping;
+      control.enableDamping = false;
+      control.update();
+      camera.position.copy(startPosition.current);
+      control.target.copy(startTarget.current);
+      control.update();
+      control.enableDamping = damping;
     }
     renderQualityState.locked = cameraLocked;
-    if (cameraLocked || infinityZone || focus === "top" || focus === "depth") {
+    if (cameraLocked || focus === "top" || focus === "depth") {
       if (control) {
         const damping = control.enableDamping;
         control.enableDamping = false;
-        control.update();
+        Object.assign(control, navigationLimits.current);
         camera.position.copy(goal.current);
         control.target.copy(lookAt.current);
         control.update();
@@ -655,15 +754,6 @@ function CameraRig({
       renderQualityState.idle = true;
       return;
     }
-    if (control && cameraLocked) {
-      const damping = control.enableDamping;
-      control.enableDamping = false;
-      control.update();
-      camera.position.copy(startPosition.current);
-      control.target.copy(startTarget.current);
-      control.update();
-      control.enableDamping = damping;
-    }
     elapsed.current = 0;
     // AUTO-012 / directive §53: honour prefers-reduced-motion by snapping to
     // the goal pose on the next frame instead of flying the camera there.
@@ -671,10 +761,11 @@ function CameraRig({
     // animations/transitions -- it doesn't reach this Three.js-driven lerp.)
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     const largeMove = startPosition.current.distanceTo(goal.current) > Math.max(2, radius * 0.65);
-    duration.current = reducedMotion || (largeMove && (!detail || infinityZone)) ? 0 : 0.24;
+    duration.current = reducedMotion || (largeMove && !detail) ? 0 : 0.24;
     flying.current =
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;
+    if (!flying.current && control) Object.assign(control, navigationLimits.current);
   }, [
     cameraLocked,
     Boolean(infinityZone),
@@ -684,6 +775,8 @@ function CameraRig({
     focus,
     poseKey,
     coastalHero,
+    localFraming,
+    opticalDetail,
     viewportSize.width,
     viewportSize.height,
     visibleFrame.left,
@@ -716,6 +809,7 @@ function CameraRig({
     if (progress >= 1) {
       camera.position.copy(goal.current);
       if (control) {
+        if (navigationLimits.current) Object.assign(control, navigationLimits.current);
         control.target.copy(lookAt.current);
         control.update();
       }
@@ -1033,6 +1127,7 @@ export default function PoolScene({
         },
         verticalLayout,
         sunShelf: features.includes("sunShelf") || features.includes("hydromassage"),
+        twoLoungerShelf: features.includes("sunShelf"),
         infinityEdge: system === "infinity" ? infinityEdge : null,
       }),
     [
@@ -1096,6 +1191,8 @@ export default function PoolScene({
         poolType,
         features,
         hydromassageVariant,
+        nominalWidth: width,
+        infinityWallType: normalisedInfinityEdge?.wallType,
         system,
         overflowType,
         outline,
@@ -1115,6 +1212,8 @@ export default function PoolScene({
       poolType,
       features,
       hydromassageVariant,
+      width,
+      normalisedInfinityEdge?.wallType,
       system,
       poolAccess,
       internalStairType,
@@ -1126,29 +1225,45 @@ export default function PoolScene({
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
+  const shelfLoungerPlan = useMemo(() => resolveSunShelfLoungers({
+    comfort: resolvedLayout.comfort, outline, waterY: verticalLayout.waterY,
+    enabled: features.includes("sunShelfLoungers"), quantity: sunShelfLoungerCount, infinityExcluded,
+    accessFootprints: [
+      ...(resolvedLayout.access.placement ? [resolvedLayout.access.footprint] : []),
+      ...(resolvedLayout.ladder?.plan.placement ? [resolvedLayout.ladder.plan.footprint] : []),
+    ],
+  }), [resolvedLayout, outline, verticalLayout.waterY, features, sunShelfLoungerCount, infinityExcluded]);
+  const shelfLoungerEnvelope = useMemo(() => shelfLoungerPlan.placements.flatMap(placement =>
+    placement.footprint.flatMap(([x, z]) => [placement.y, placement.y + SUN_SHELF_LOUNGER_MODEL.height]
+      .map(y => [x, y, z] as const))), [shelfLoungerPlan]);
   const lighting = resolvedLayout.lighting;
   // Deck positions the furniture must keep clear of: the inox ladder (deck
   // anchored), the access placement itself and, above ground, both ends of
   // the external staircase.
   const externalStairs = poolType === "above-ground" && features.includes("externalStaircase");
+  const coverSubject = useMemo(() => coverCameraSubject(coverPlan, verticalLayout, outline, copingOuterOffset(system, overflowType)),
+    [coverPlan, verticalLayout, outline, system, overflowType]);
   const planBounds = useMemo(() => {
     const b = outlineBounds(outline);
     // Include the actual shell/coping envelope; Infinity's receiver projects
     // beyond it. No furniture/scenery can inflate this architectural fit.
-    const margin = copingOuterOffset(system, overflowType) + (poolType === "above-ground" ? infinityZone ? 0.5 : 0.05 : 0);
+    const margin = copingOuterOffset(system, overflowType) + (poolType === "above-ground" && showMeasurements ? infinityZone ? 0.5 : 0.05 : 0);
     const points: [number, number][] = [
       [b.minX-margin,b.minZ-margin], [b.maxX+margin,b.maxZ+margin],
     ];
-    // Actual dimension-line/tick envelope, once; labels receive pixel clearance.
+    // Dimension lines sit 0.60 m from the basin, with 0.12 m ticks.
+    // Include their true envelope once; labels receive pixel clearance in fit.
     if (poolType === "in-ground" && showMeasurements)
       points.push([b.minX-0.72,b.minZ-0.72], [b.maxX+0.72,b.maxZ+0.72]);
-    if (poolType === "in-ground" && infinityZone) {
+    if (!showMeasurements && infinityZone) {
       const d = clampInfinityEdgeDimensions(undefined), receiverOut = d.lipWidth + d.catchBasinWidth + d.wallThickness;
       infinityZone.points.forEach(([x, z], i) => {
         const normal = infinityZone.pointNormals[i]!;
         points.push([x + normal[0] * receiverOut, z + normal[1] * receiverOut]);
       });
     }
+    if (!showMeasurements && coverPlan.geometry && coverSubject)
+      points.push(...coverSubject.points.map(([x, , z]) => [x, z] as [number, number]));
     if (externalStairs) {
       const stairs = planExternalStaircase({ outline, side: externalStairSide,
         platformExtended: externalStairPlatformExtended, accessAnchor: lighting.accessPlan.placement,
@@ -1159,7 +1274,7 @@ export default function PoolScene({
     }
     return points;
   }, [outline, system, overflowType, infinityZone, poolType, externalStairs, externalStairSide,
-    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout, showMeasurements]);
+    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout, showMeasurements, coverPlan.geometry, coverSubject]);
   const planView = focus === "top" && !photoMode;
   const planRevision = JSON.stringify([outline, depth, features, resolvedLayout, system, overflowType,
     poolType, copingThickness, materials.coping.id, externalStairSide, externalStairPlatformExtended, construction]);
@@ -1222,6 +1337,10 @@ export default function PoolScene({
     [coverPlan.geometry],
   );
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
+  const deckFurnitureEnvelope = useMemo(() => system !== "infinity" && (construction?.showEnvironment ?? true)
+    ? deckFurnitureCameraPoints(planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType),
+      studioDeckBand(outline,true),deckObstacles,{loungers,shower:solarShower,coverHousing})) : [],
+  [system,construction?.showEnvironment,outline,poolType,overflowType,deckObstacles,loungers,solarShower,coverHousing]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
     SCENE_VISUAL_PRESET.lighting.sun.frustumMargin;
@@ -1454,14 +1573,7 @@ export default function PoolScene({
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />
-      {features.includes("sunShelfLoungers") && (construction?.showAccessories ?? true) ? <SunShelfLoungers plan={resolveSunShelfLoungers({
-        comfort: resolvedLayout.comfort, outline, waterY: verticalLayout.waterY,
-        enabled: true, quantity: sunShelfLoungerCount, infinityExcluded,
-        accessFootprints: [
-          ...(resolvedLayout.access.placement ? [resolvedLayout.access.footprint] : []),
-          ...(resolvedLayout.ladder?.plan.placement ? [resolvedLayout.ladder.plan.footprint] : []),
-        ],
-      })} /> : null}
+      {features.includes("sunShelfLoungers") && (construction?.showAccessories ?? true) ? <SunShelfLoungers plan={shelfLoungerPlan} /> : null}
       {coverPlan.geometry && !photoMode && (construction?.showWater ?? true) ? <AutomaticCover plan={coverPlan} /> : null}
       {technicalView && !photoMode && system === "skimmer" ? skimmers.positions.map((point, index) => (
         <mesh key={`technical-skimmer-${index}`} name="technical-skimmer-marker" position={[point.x, verticalLayout.waterY + 0.075, point.z]}>
@@ -1621,11 +1733,15 @@ export default function PoolScene({
       <CameraRig
         accessPlan={lighting.accessPlan}
         resolvedLayout={resolvedLayout}
+        floorProfile={floorProfile}
         cameraLocked={cameraLocked}
         radius={radius}
         controls={controls}
         frameToken={frameToken}
-        focus={infinityZone && (focus === "overview" || focus === "review") ? "infinity" : construction?.raw && (focus === "overview" || focus === "review") ? "structure" : focus}
+        // Vedi piscina owns its whole-installation projection even while the
+        // current construction stage shows the raw shell. Do not reroute it
+        // to the structure editor's different optical fit.
+        focus={focus}
         shape={shape}
         depth={depth}
         outline={outline}
@@ -1646,7 +1762,10 @@ export default function PoolScene({
           platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
           copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,
           groundY:verticalLayout.groundY, topY:system==="overflow"?verticalLayout.waterY-.001:verticalLayout.copingY}) : null}
+        coverSubject={coverSubject}
         pellicanoPlacement={pellicanoPlacement}
+        shelfLoungerEnvelope={shelfLoungerEnvelope}
+        deckFurnitureEnvelope={deckFurnitureEnvelope}
       />
 
       {/* Premium post pass -- only ever mounts (and only ever fetches its
