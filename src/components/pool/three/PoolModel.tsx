@@ -33,7 +33,7 @@ import { RawShellMaterial, type RawShellKind } from "./RawShellMaterial";
 import type { StructureFamily } from "@/lib/pool/construction-presentation";
 import { subdivideFloorBoundary } from "@/lib/pool/floor-profile";
 import { accessMounting } from "@/lib/pool/access-plan";
-import { applyLedTransmission, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
+import { applyLedTransmission, createMicroSpotTransport, updateMicroSpotTransport, LED_TRANSPORT_CACHE_KEY } from "./ledTransmission";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import {
   createAnthraciteMaps,
@@ -115,6 +115,8 @@ interface PoolModelProps {
   showAccessories?: boolean;
   /** Night scene: hydromassage micro-spots glow. */
   night?: boolean;
+  ledColor?: string | undefined;
+  ledIntensity?: number | undefined;
   skimmers: SkimmerPlan;
   /** Geometry Pass D (Infinity, Rectangle + L-shape). Only meaningful
    * while `system === "infinity"`. */
@@ -456,6 +458,8 @@ export function PoolModel({
   structureFamily = null,
   showAccessories = true,
   night = false,
+  ledColor,
+  ledIntensity,
   skimmers,
   poolAccess,
   internalStairType,
@@ -734,6 +738,14 @@ export function PoolModel({
   );
 
   const causticsShaders = useRef<UnderwaterShader[]>([]);
+  const microSpotTransport = useMemo(() => createMicroSpotTransport(), []);
+  const microSpotSources = useMemo(() => night && showWater && showAccessories ? [
+    ...(features.includes("stairLighting") ? resolvedLayout.stairMicroSpots : []),
+    ...(features.includes("hydromassageBenchLighting") ? resolvedLayout.comfort.elements.flatMap(element => element.spots ?? []) : []),
+  ] : [], [night, showWater, showAccessories, features, resolvedLayout]);
+  // The same uniform objects are held by all compiled liner/comfort materials;
+  // updates reach existing programs even when source count stays unchanged.
+  updateMicroSpotTransport(microSpotTransport, microSpotSources);
   const causticMap = useMemo(() => createCausticsMap(), []);
   useEffect(() => () => causticMap.dispose(), [causticMap]);
   const configureCaustics = useCallback(
@@ -796,10 +808,10 @@ export function PoolModel({
                   : "#include <opaque_fragment>",
           ),
         );
-      applyLedTransmission(shader);
+      applyLedTransmission(shader, microSpotTransport);
       if (!causticsShaders.current.includes(shader)) causticsShaders.current.push(shader);
     },
-    [materials.surface, waterLevel, causticMap, showWater],
+    [materials.surface, waterLevel, causticMap, showWater, microSpotTransport],
   );
   useFrame(({ clock }) => {
     // The path tracer never executes this onBeforeCompile-patched shader --
@@ -1089,7 +1101,7 @@ export function PoolModel({
   // liner: same absorption, scattering and caustics, only once filled.
   const interiorUnderwater =
     showWater && structureFamily === "VISIBLE_STAINLESS_STEEL"
-      ? { configure: configureCaustics, key: `wet-${waterLevel}-${materials.surface.underwaterScatteringContribution}` }
+      ? { configure: configureCaustics, key: `wet-${waterLevel}-${materials.surface.underwaterScatteringContribution}-${LED_TRANSPORT_CACHE_KEY}` }
       : undefined;
   const accessMaterial = interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : (
     <meshPhysicalMaterial
@@ -1125,7 +1137,7 @@ export function PoolModel({
         {showAccessories && features.includes("stairLighting") ? (
           <group name="pool-stair-micro-spots">
             {resolvedLayout.stairMicroSpots.map((spot, i) => (
-              <HydroSpot key={i} spot={spot} night={night && showWater} />
+              <HydroSpot key={i} spot={spot} night={night && showWater} ledColor={ledColor} ledIntensity={ledIntensity} />
             ))}
           </group>
         ) : null}
@@ -1135,6 +1147,8 @@ export function PoolModel({
           showJets={showAccessories}
           showBenchLighting={showAccessories && features.includes("hydromassageBenchLighting")}
           night={night && showWater}
+          ledColor={ledColor}
+          ledIntensity={ledIntensity}
         >
           {interiorShellKind ? (
             <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} />

@@ -35,8 +35,10 @@ export function planStairMicroSpots(
           place(radius, along, y, 1, 0);
           place(along, radius, y, 0, 1);
         } else {
-          for (const a of radius < 0.75 ? [Math.PI / 4] : [Math.PI / 6, Math.PI / 3])
-            place(radius * Math.sin(a), radius * Math.cos(a), y, Math.sin(a), Math.cos(a));
+          // One centred fitting on each curved riser, not a dotted arc of
+          // paired lamps. The real radial normal survives every mirroring.
+          const a = Math.PI / 4;
+          place(radius * Math.sin(a), radius * Math.cos(a), y, Math.sin(a), Math.cos(a));
         }
       } else place(0, (i + 1) * access.tread, y, 0, 1);
     }

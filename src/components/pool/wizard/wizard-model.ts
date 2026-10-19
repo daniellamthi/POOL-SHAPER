@@ -16,7 +16,7 @@ import { pavingLayout } from "@/lib/pool/presentation";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
 import type { PoolConfig } from "@/lib/pool/types";
-import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
+import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 
 /** One numbered entry of the primary navigation (a group of internal steps). */
 export interface MacroStep {
@@ -201,11 +201,16 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       return config.finish === "mosaic"
         ? `Mosaico · ${MOSAIC_FINISHES.find((m) => m.id === config.mosaicFinish)?.name ?? ""}`
         : `${title(FINISHES, "liner")} · ${(title(LINER_COLORS, config.linerColor) ?? "").replace("Motion ", "")}`;
-    case "lighting":
+    case "lighting": {
+      const stairs = config.features.includes("stairLighting");
+      const bench = config.features.includes("hydromassageBenchLighting");
+      const layout = stairs || bench ? configuredPoolLayout(config) : null;
       return `${config.sceneTime === "night" ? "Notte" : "Giorno"} · ${[
         ...(config.features.includes("ledLighting") ? ["LED subacquei"] : []),
-        ...(configuredStairMicroSpots(config).length ? ["micro-spot scale"] : []),
+        ...(stairs && layout?.stairMicroSpots.length ? ["micro-spot scale"] : []),
+        ...(bench && layout?.comfort.elements.some(element => element.kind === "hydromassage" && element.spots?.length) ? ["micro-spot panca"] : []),
       ].join(" + ") || "senza luci"}`;
+    }
     case "deck": {
       const coping =
         COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? "";

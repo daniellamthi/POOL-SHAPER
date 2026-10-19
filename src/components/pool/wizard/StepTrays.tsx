@@ -17,7 +17,9 @@ import {
 import { copingMaterialsForPool } from "@/lib/pool/coping-materials";
 import { pavingMaterialsForPool, pavingId, pavingFormats, pavingLayout, PAVING_FORMATS } from "@/lib/pool/presentation";
 import { isReferenceFinish, isPorcelainReference } from "@/lib/pool/reference-finishes";
-import { PorcelainFinishChoice } from "@/components/pool/PorcelainFinishChoice";
+import { FinishFamilyChoice } from "@/components/pool/PorcelainFinishChoice";
+import { finishFamily, isTravertineReference, type FinishFamily } from "./finish-guide";
+import { GuidedFinishSection, useFinishGuide } from "./GuidedFinishSection";
 import { ReferenceFinishSwatch } from "@/components/pool/ReferenceFinishSwatch";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { isVisibleStainlessStructure } from "@/lib/pool/structure-finish";
@@ -764,6 +766,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
 
 export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionProps) {
   const { t } = useI18n();
+  const finishGuide = useFinishGuide();
   const {
     config,
     setFinish,
@@ -852,13 +855,12 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
                 description={t(option.description)}
                 image={option.image}
                 selected={active === option.id}
-                onSelect={option.select}
+                onSelect={() => { option.select(); finishGuide.request(); }}
               />
             ))}
           </ChoiceGrid>
           {active === "liner" ? (
-            <div className="flex flex-col gap-3">
-              <GroupLabel>{t("Colore del liner")}</GroupLabel>
+            <GuidedFinishSection guide={finishGuide.guide} label={t("Colore del liner")}>
               <ChoiceGrid label={t("Colore liner PVC")} dense>
                 {LINER_COLORS.map((color) => (
                   <ChoiceCard
@@ -872,10 +874,9 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
                   />
                 ))}
               </ChoiceGrid>
-            </div>
+            </GuidedFinishSection>
           ) : active === "mosaic" ? (
-            <div className="flex flex-col gap-3">
-              <GroupLabel>{t("Finitura mosaico")}</GroupLabel>
+            <GuidedFinishSection guide={finishGuide.guide} label={t("Finitura mosaico")}>
               <ChoiceGrid label={t("Finitura mosaico")} dense>
                 {MOSAIC_FINISHES.map((mosaic) => (
                   <ChoiceCard
@@ -889,7 +890,7 @@ export function FinishTray({ tab: finishTab, setTab: setFinishTab }: DecisionPro
                   />
                 ))}
               </ChoiceGrid>
-            </div>
+            </GuidedFinishSection>
           ) : null}
         </>
       )}
@@ -992,7 +993,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
           />
           {stairSpots.length > 0 ? <ChoiceCard
             title={t("+ Micro-spot sulle scale")}
-            description={t("Piccoli LED a luce calda nelle alzate, anche sulla scala angolare. Optional indipendente.")}
+            description={t("Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.")}
             image={ill("led-on")}
             selected={hasStairLed}
             footer={stairSpots.length ? `${stairSpots.length} micro-spot · nelle alzate` : "Seleziona una scala interna o un accesso comfort compatibile"}
@@ -1016,7 +1017,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
           {config.features.includes("hydromassage") ? (
             <ChoiceCard
               title={t("Micro-spot sulla panca")}
-              description={t("Luce calda sotto la seduta dell’idromassaggio. Optional indipendente.")}
+              description={t("Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.")}
               image={ill("led-on")}
               selected={hasBenchLed}
               onSelect={() => {
@@ -1050,6 +1051,14 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
   const { config, setCopingMaterial, setPaving, setPavingFormat } = useConfigurator();
   const layout = pavingLayout(config.paving, config.pavingFormat);
   const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
+  // Disclosure is presentation-only; it must not create a technical selection
+  // or dirty a saved project. Each existing subcategory keeps its own guide.
+  const [openFamilies, setOpenFamilies] = useState<Partial<Record<string, FinishFamily | null>>>({});
+  const formatGuide = useFinishGuide();
+  const openFamily = openFamilies[tab] === undefined
+    ? finishFamily(tab === "coping" ? config.copingMaterial ?? "travertine" : pavingId(config.paving))
+    : openFamilies[tab];
+  const open = (family: FinishFamily | null) => setOpenFamilies(current => ({ ...current, [tab]: family }));
   return (
     <TabBody>
       <StepTabs
@@ -1063,9 +1072,12 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
       />
       {tab === "coping" && copingVisible ? (
         <ChoiceGrid label={t("Materiale del bordo")} dense>
-          {copingMaterialsForPool(config.poolType).filter(option => config.poolType === "above-ground" || !isPorcelainReference(option.id)).map((option) => (
-            config.poolType === "in-ground" && option.id === "anthracite-gres" ?
-            <PorcelainFinishChoice key={option.id} value={config.copingMaterial} onSelect={setCopingMaterial} /> :
+          {copingMaterialsForPool(config.poolType).filter(option => config.poolType === "above-ground" || (!isPorcelainReference(option.id) && !isTravertineReference(option.id))).map((option) => (
+            config.poolType === "in-ground" && (option.id === "anthracite-gres" || option.id === "travertine") ?
+            <FinishFamilyChoice key={option.id} family={option.id === "travertine" ? "travertine" : "porcelain"}
+              value={config.copingMaterial ?? "travertine"} onSelect={setCopingMaterial}
+              open={openFamily === (option.id === "travertine" ? "travertine" : "porcelain")}
+              onOpen={() => open(option.id === "travertine" ? "travertine" : "porcelain")} /> :
             <ChoiceCard
               compact
               key={option.id}
@@ -1073,16 +1085,19 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
               description={t(COPING_COPY[option.id] ?? option.subtitle)}
               image={isReferenceFinish(option.id) ? <ReferenceFinishSwatch id={option.id} /> : hasProductMedia(`coping-${option.id}`) ? <ProductMedia name={`coping-${option.id}`} /> : getCopingSwatchDataUrl(option.id)}
               selected={(config.copingMaterial ?? "travertine") === option.id}
-              onSelect={() => setCopingMaterial(option.id)}
+              onSelect={() => { open(null); setCopingMaterial(option.id); }}
             />
           ))}
         </ChoiceGrid>
       ) : (
         <div className="space-y-5">
         <ChoiceGrid label={t("Pavimentazione")} dense>
-          {pavingMaterialsForPool(config.poolType).filter(p => config.poolType === "above-ground" || !isPorcelainReference(p.id)).map((p) => (
-            config.poolType === "in-ground" && p.id === "gres" ?
-            <PorcelainFinishChoice key={p.id} value={pavingId(config.paving)} onSelect={setPaving} /> :
+          {pavingMaterialsForPool(config.poolType).filter(p => config.poolType === "above-ground" || (!isPorcelainReference(p.id) && !isTravertineReference(p.id))).map((p) => (
+            config.poolType === "in-ground" && (p.id === "gres" || p.id === "travertine") ?
+            <FinishFamilyChoice key={p.id} family={p.id === "travertine" ? "travertine" : "porcelain"}
+              value={pavingId(config.paving)} onSelect={id => { setPaving(id); formatGuide.request(); }}
+              open={openFamily === (p.id === "travertine" ? "travertine" : "porcelain")}
+              onOpen={() => open(p.id === "travertine" ? "travertine" : "porcelain")} /> :
             <ChoiceCard
               key={p.id}
               compact
@@ -1097,11 +1112,11 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
                 ))
               }
               selected={pavingId(config.paving) === p.id}
-              onSelect={() => setPaving(p.id)}
+              onSelect={() => { open(null); setPaving(p.id); formatGuide.request(); }}
             />
           ))}
         </ChoiceGrid>
-        <div className="space-y-3">
+        <GuidedFinishSection guide={formatGuide.guide} label={t("Formato pavimentazione")}>
           <p className="text-xs uppercase tracking-widest text-muted-foreground">{t("Formato ·")}{t(layout.label)}</p>
           <ChoiceGrid label={t("Formato pavimentazione")} dense>
             {pavingFormats(config.paving).map(format => (
@@ -1116,7 +1131,7 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
             ))}
           </ChoiceGrid>
           <p className="text-xs text-muted-foreground">{t("Dimensioni di riferimento della posa. Formati e spessori di fornitura da confermare.")}</p>
-        </div>
+        </GuidedFinishSection>
         </div>
       )}
     </TabBody>

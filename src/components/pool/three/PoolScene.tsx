@@ -1571,6 +1571,8 @@ export default function PoolScene({
         structureFamily={construction?.structure ?? null}
         showAccessories={construction?.showAccessories ?? true}
         night={dusk}
+        ledColor={ledColor}
+        ledIntensity={ledIntensity}
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />

@@ -434,10 +434,9 @@ export function resolveComfortPlan({
       // Micro-spots light the tub from the seat's front face: below the seat
       // edge, facing the legroom, never in the backrest beside the jets.
       const spotY = seatTop - H.spotBelowSeat;
-      const spotsAlong = (from: number, to: number) => {
-        const count = Math.max(1, Math.floor(Math.abs(to - from) / H.spotSpacing));
-        return Array.from({ length: count }, (_, i) => from + ((i + 0.5) * (to - from)) / count);
-      };
+      // One miniature fitting at the centre of each actual seat face: two
+      // for the L and three for the U, never a repeated row of decorative dots.
+      const spotsAlong = (from: number, to: number) => [(from + to) / 2];
       const backFrontDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
       const spots = [
         ...spotsAlong(headStart + side * 0.25, headEnd - side * 0.25).map((c) => ({
