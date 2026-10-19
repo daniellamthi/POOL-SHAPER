@@ -313,7 +313,7 @@ export const messages: ReadonlyArray<readonly [string, string]> = [
   ["Pietra crema con venature naturali.", "Cream stone with natural veining."], ["Pietra italiana calda, venatura naturale.", "Warm Italian stone with natural veining."],
   ["Gres porcellanato opaco, resistente e uniforme.", "Durable, uniform matte porcelain stoneware."],
   ["Ardesia naturale, scura e materica.", "Dark, textured natural slate."], ["Doghe in legno dal tono bruno.", "Brown timber boards."],
-  ["Composito legno-polimero, senza manutenzione.", "Maintenance-free wood-polymer composite."],
+  ["Composito legno-polimero con venatura uniforme.", "Wood-polymer composite with a uniform grain."],
   ["Forma della piscina", "Pool shape"], ["Metodo forma personalizzata", "Custom shape method"],
   ["Disegna perimetro", "Draw outline"], ["Carica planimetria", "Upload plan"],
   ["Riferimento architettonico", "Architectural reference"], ["PDF, planimetria o immagine di riferimento.", "PDF, plan or reference image."],

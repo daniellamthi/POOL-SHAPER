@@ -22,7 +22,8 @@ export function ArchitecturalOutline({ revision, premium = false }: { revision: 
     scene.traverseVisible(object => {
       if (!(object instanceof Mesh)) return;
       const weight = architecturalLineWeight(object.name, object.parent?.name);
-      if (weight) next.push({ points: architecturalEdges(object.geometry, object.matrixWorld), weight });
+      if (weight) next.push({ points: architecturalEdges(object.geometry, object.matrixWorld,
+        { horizontalOnly: object.name === "plan-coping" }), weight });
     });
     setLines(mergeArchitecturalEdges(next));
   }, [scene, revision]);

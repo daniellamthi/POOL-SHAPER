@@ -3,7 +3,7 @@ import { useThree } from "@react-three/fiber";
 import type { Texture } from "three";
 import { referenceFinish, type ReferenceFinishId } from "@/lib/pool/reference-finishes";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { cloneReferenceFinishColorMap, configureReferencePaving, configureReferenceTexture, subscribeReferenceFinishReady } from "./referenceFinishTexture";
+import { cloneReferenceFinishColorMap, configureReferencePaving, configureReferenceTexture, subscribeReferenceFinishReady, REFERENCE_SAMPLER_REVISION } from "./referenceFinishTexture";
 
 const reportedDevelopmentSources = new Set<string>();
 
@@ -41,7 +41,7 @@ export function ReferencePavingMaterial({ id, waterY, vertexColors = true }: {
   }, []);
   const visibleFinish = display ? referenceFinish(display.id)! : finish;
   const Material = visibleFinish.boards ? "meshPhysicalMaterial" : "meshStandardMaterial";
-  return <Material key={`${display?.id ?? "pending"}-four-board-reference`} color="#ffffff" map={display?.texture ?? null}
+  return <Material key={`${display?.id ?? "pending"}-${REFERENCE_SAMPLER_REVISION}`} color="#ffffff" map={display?.texture ?? null}
     vertexColors={vertexColors} roughness={visibleFinish.roughness} metalness={0}
     {...(visibleFinish.boards ? { specularIntensity: 0.35 } : {})}
     onBeforeCompile={shader => {
@@ -61,5 +61,5 @@ export function ReferencePavingMaterial({ id, waterY, vertexColors = true }: {
         }
       }
     }}
-    customProgramCacheKey={() => `reference-paving-v9-four-board-reference-${display?.id ?? "pending"}-${waterY}`} />;
+    customProgramCacheKey={() => `reference-paving-v10-${REFERENCE_SAMPLER_REVISION}-${display?.id ?? "pending"}-${waterY}`} />;
 }

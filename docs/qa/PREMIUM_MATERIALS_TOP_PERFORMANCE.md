@@ -1,5 +1,134 @@
 # Premium materials, architectural plan and performance — 2026-10-19
 
+## Current materials upgrade goal — reopened from f7fe5a2
+
+The sections below this matrix describe earlier completed work, not evidence
+that the newly requested upgrade is complete. Current candidate starts at
+`f7fe5a28f582d21c4fb65fa4e023c7a90a2317c8`, local/origin equal. Backup:
+`pool-shaper-wip-backups/residual-gates-20261015-TYK6hV` (39 WIP files, no secrets).
+Scope: materials/finish UX/architectural outlines/performance only. Liner,
+backend/Supabase, approved pool solids, environments and cameras are protected.
+
+| ID | Responsible | Requirement / acceptance | Current finding / planned verification | Current gate |
+|---|---|---|---|---|
+| U01 | PBR specialist/root | Coping and paving: correct material identity, real metric scale, consistent grain/joints, no plastic or duplicated-slab appearance | Paired before/after and independent close-up/overview day/night, existing module contracts. Qualitative visual acceptance, not certified measured PBR properties | PASS |
+| U02 | PBR specialist/root | All selectable Gres/travertine/limestone/Prun/stone finishes | Four Gres/two travertine/reference families plus limestone/Prun/slate/Istria selected in actual browser; final baked-v3 slate/Prun coping+paving and Prun overview day/night retested independently, original source photographs retained | PASS |
+| U03 | PBR specialist/root | WPC/decking/Ipè and applicable above-ground panels | WPC longitudinal grain/matte response, continuous Ipè and independent paving; wood crop removes photographed cross-joints without rescaling. All four panels selected; 430 WPC night checked | PASS |
+| U04 | Root | Every current mosaic: no identical mirrored sheet, natural tessera variation, same pitch across floor/wall/stairs/comfort | Nine existing originals each selected independently: dry floor/wall close-up, filled overview and night; 73,764 metric/sampling checks, no new photos or tint. Unlit night-wall colour fidelity is not claimed | PASS |
+| U05 | UX specialist | Family action scrolls only the relevant wizard scrollport, clear Gres4/travertine2 variants, wood/WPC distinction | Actual1440/390/430 replay: family disclosure is not material selection, internal focus/scroll, format selection, Back and IT/EN preserve state; 618 checks. Six flow captures in premium-finishes-top-20261019 | PASS |
+| U06 | Top-view specialist | Crisp semantic coping/basin/accessory/tread boundaries, no rough bevel wireframes or export contamination | Actual coping bevel duplicates removed only in plan extraction: 776→152 segments at8×4; unchanged solids/curved stairs/cameras/export masking. Paired top-before/after.jpg; 383 architectural +3,481 premium-plan checks | PASS |
+| U07 | Performance specialist/root | No significant regression, responsive material changes, efficient loading and no needless reconstruction | Three matched main pairs: median8.5→8.5ms/p95 10.2→10.3ms. Final three slate-v3 pairs: median8.2→8.5ms/p95 10.1→9.5ms; unchanged full-pass calls/geometry. Rejected runtime v1/v2 regressions remain recorded, not shipped. Ten actual mosaic reselections per checkout show stable resources | PASS — scoped desktop hardware |
+| U08 | Independent customer reviewer | Real integrated-browser close-up/overview/top, materials, day/night, responsive desktop1440/mobile390/430 emulated | Separate reviewer actually operated the app, reproduced slate FAIL, retested corrections; all9 mosaics/13 paving night families/four panels and390/430 Back/family replay. Detailed coverage artifact below | PASS |
+| U09 | Root | Typecheck/build/targeted material/UX/plan/performance tests and diff/credential checks | Final working candidate typecheck/build/material/Prun/mosaic/reference integration/UX/plan/diff PASS; isolated exact staged source typecheck/build PASS without unrelated WIP or secrets. Credential guard PASS | PASS |
+| U10 | Root | Task-only commit/push on current feature branch only after all mandatory PASS | All quality gates above PASS. Task-only index verified; remote remains f7fe5a2. No merge/deploy; commit/push receipt follows delivery | READY — delivery pending |
+
+New goal evidence is recorded in this section as work progresses; no historical
+PASS is automatically promoted to the current candidate's visual acceptance.
+
+### New implementation evidence (current goal only)
+
+- Materials: retained all original pixels/metric coverage. WPC authored
+  roughness mean .540→.855; legacy travertine's almost-black roughness map
+  receives an explicit dry-honed calibration (.746 mean), not a measured
+  supplier certification. Mineral reference overlap is narrower to retain
+  source detail; approved continuous Ipè sampling is unchanged.
+- Real independent FAIL: Ardesia showed recognisable identical vein bands on
+  neighbouring slabs. Runtime translated-window v1 and its zero-weight v2
+  optimisation failed three paired performance runs each (+11% and +18%
+  median frame time respectively). Both implementations were removed, not
+  hidden by a camera or by reducing chosen geometry.
+- Final baked-mineral-v3 uses a reproducible offline periodic atlas from the
+  original Ardesia albedo/normal and owner-supplied Prun photograph. Integer
+  pixel translations, coherent maps, linear/sRGB-correct overlap, no rotation,
+  reflection, hue change or invented relief. Twice the image coverage and UV
+  multiplier .5 preserve the original texels per metre. Runtime uses the
+  original PBR sampling cost: no added hash, branch, gradients or texture reads.
+  Provenance, original/derived SHA, rights and authoring command are in
+  `public/textures/coping/derived-mineral-v3/`. Original photographs are unchanged.
+  Three PNGs total2,643,326 bytes; additional mipmapped RGBA estimate per
+  independently uploaded map set is3.89MiB Ardesia /3.05MiB Prun, **not measured
+  VRAM**. Coping/paving instances may each upload a set. This modest bounded
+  memory/asset trade-off replaces the failed runtime shader cost.
+- Loading: finite catalogue images share decoded Sources; owned texture
+  disposal remains isolated. Mosaic reselects reuse photo-derived detail
+  maps instead of baking from new Source UUIDs. The unit loader exercise
+  records15→3 load calls for five reselections, **not** measured network or
+  customer latency. Runtime resource/performance evidence remains separate.
+- Wood: source-pixel inspection confirmed that the old photographed strip
+  included cross-joints in albedo, normal and roughness at columns130–133 and
+  300–304. The corrected common crop uses144–286, still inside one source
+  board; crosswise coverage and .057/.14 metric grain density are unchanged.
+  No source image, module dimensions, mesh or board placement was replaced.
+  Shader family identities/revisions are explicit to avoid stale programs.
+- Current automated results after final bake freeze: typecheck and production
+  build PASS; material PBR580,877 plus original-Prun identity/metric audit;
+  mosaic73,764 source-cell/metric checks /81 resize cases /nine originals;
+  paving39,348,023 checks /999 geometry-contract cases; reference
+  integration5,077 (local MemoryProjectStore/synthetic PDF fixtures, not cloud);
+  reference samplers2,374; finish UX618; architectural383; premium plan3,481.
+  Existing Vite chunk-size/plugin warnings remain non-blocking and unchanged.
+- Root paired captures: mosaic, WPC, Gres Avorio, legacy travertine and top
+  `*-before.jpg` / `*-after.jpg`, same1440×900 8×4 Skimmer/corner stair/day.
+  The liner is Blue Sky except the mosaic pair; no liner implementation changed.
+- Preservation check:38 of39 pre-goal WIP files remain byte-identical; only
+  shared PoolModel has new task hunks. Its four existing `seamlessSteel` props
+  remain local and must not be included in the materials commit.
+
+### Current controlled performance and final visual evidence
+
+`evidence/materials-upgrade-20261019/performance.json` contains24 bounded runs:
+three alternating baseline/candidate pairs for the main configuration, three
+for rejected Ardesia-v1, three for rejected Ardesia-v2, and three for final-v3.
+Baseline is an isolated f7fe5a2 archive plus the exact pre-goal39-file WIP,
+candidate is the current preserved workspace. Same integrated browser, Apple
+M1 Pro / ANGLE Metal, viewport1440×900, DPR1.4054567, buffer2023×1264,
+12×5 Skimmer, day, same options/camera, warmed assets; one QA scene active and
+no CPU build/profiler during measurement. Source fingerprints remained stable.
+Only the literal focused-control marker is ignored in supplemental DOM identity;
+raw DOM and its hashes are retained. Technical configuration is not normalised.
+
+| Accepted comparison | Median baseline→candidate ms | p95 baseline→candidate ms | Observed dominant pass baseline/candidate |
+|---|---:|---:|---|
+| Main, three paired runs |8.5→8.5|10.2→10.3|118calls /47,068triangles,72geometries /26textures unchanged |
+| Ardesia baked-v3, three paired runs |8.2→8.5|10.1→9.5|118calls /51,996triangles,72geometries /25textures unchanged |
+
+Aggregation is the median of run medians/window p95s, **not a pooled p95**.
+Final Ardesia median is+0.3ms (~3.7%), not a claimed FPS gain; tail timing
+improves and no significant regression is shown in the bounded tested scene.
+`gl.info` sometimes reports a four-call internal pass: it is never presented
+as a draw-call reduction. Ten actual mosaic reselections per checkout show
+median window-p95 11.5→11.4ms, maximum window-p95 12.8→12.4ms, stable67geometry
+and20texture full-pass counts. This is not a per-interaction latency or network
+benchmark. Actual GPU execution time/VRAM are unavailable;390/430 are viewport
+emulations, not physical-phone performance. No theoretical FPS is promised.
+
+Independent final-v3 visual samples (not the superseded v1/v2 images):
+`performance-ardesia-v3-{coping,paving}-close.jpg`,
+`performance-prun-v3-{coping,paving}-close.jpg` and
+`performance-prun-v3-review-{day,night}.jpg`. Actual coping/paving changes,
+source grain, joints and continuity were inspected. No shader/texture errors;
+only the pre-existing THREE.Clock deprecation warning. The flat ground visible
+beyond the terrace in the close paving preset was checked against the baseline
+and is pre-existing; no protected camera/environment edit was made to mask it.
+
+All other independent material/UX/top samples and their limits are mapped in
+`evidence/materials-upgrade-20261019/independent-customer-coverage.md`.
+Photorealism acceptance is qualitative for the documented views; it does not
+certify product specifications or every material×system×viewport cross-product.
+
+Final release verification: the exact staged source was exported into a fresh
+isolated directory (`materials-release-verified-index-Y9Onx6`) and passed
+`npx tsc --noEmit` and `npm run build` without copying `.env` or unrelated WIP.
+Credential scan and staged diff-check PASS. The pre-existing38 other WIP files
+are byte-identical to the39-file backup; four pre-existing PoolModel props
+remain in the working tree only. A further full184-file safety backup exists
+outside Git at `pool-shaper-wip-backups/residual-gates-20261015-6PwPJS`.
+`final-integrated-preview.jpg` shows the actual final local candidate open in
+the integrated browser at `http://materials-qa.localhost:3003/`; this is a
+working local preview, not a deployment. Temporary QA viewport override reset.
+
+### Earlier work (historical evidence, not the current upgrade gate)
+
 Candidate: `feat/fullscreen-day-night-hidden-overflow`, starting HEAD
 `b40924f7d1f6e61d79c5f586ec007dc3a33bf2de` (origin verified equal).
 Existing WIP remains part of the candidate, not a clean historical baseline.

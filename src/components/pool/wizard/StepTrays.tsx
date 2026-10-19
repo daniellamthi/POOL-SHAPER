@@ -95,7 +95,7 @@ const COPING_COPY: Record<string, string> = {
   "anthracite-gres": "Gres porcellanato opaco, resistente e uniforme.",
   ardesia: "Ardesia naturale, scura e materica.",
   "deck-marrone": "Doghe in legno dal tono bruno.",
-  wpc: "Composito legno-polimero, senza manutenzione.",
+  wpc: "Composito legno-polimero con venatura uniforme.",
 };
 
 function TabBody({ children }: { children: ReactNode }) {

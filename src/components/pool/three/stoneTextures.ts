@@ -11,6 +11,61 @@ export type StoneMaps = {
   roughnessMap: THREE.Texture | null;
 };
 
+type ScannedImage = { source: THREE.Texture; ready: boolean; consumers: Set<THREE.Texture> };
+// The finite coping catalogue reuses these decoded images. A consumer owns its
+// sampler/GPU texture, never the cached original or another material's maps.
+const scannedImages = new Map<string, ScannedImage>();
+const scannedLoader = new THREE.TextureLoader();
+
+function scannedTexture(url: string): THREE.Texture {
+  let entry = scannedImages.get(url);
+  if (!entry) {
+    const next = { ready: false, consumers: new Set<THREE.Texture>() } as ScannedImage;
+    next.source = scannedLoader.load(url, () => {
+      next.ready = true;
+      for (const consumer of next.consumers) consumer.needsUpdate = true;
+    }, undefined, () => {
+      if (scannedImages.get(url) === next) scannedImages.delete(url);
+      next.consumers.clear();
+    });
+    entry = next;
+    scannedImages.set(url, entry);
+  }
+  // Texture.clone() marks the copy dirty before its asynchronous image exists.
+  // Sharing Source explicitly avoids that premature, empty GPU upload.
+  const texture = new THREE.Texture();
+  texture.source = entry.source.source;
+  entry.consumers.add(texture);
+  texture.addEventListener("dispose", () => entry.consumers.delete(texture));
+  if (entry.ready) texture.needsUpdate = true;
+  return texture;
+}
+
+/** Explicit dry-honed calibration, not a replacement measured PBR scan. The
+ * redistributed legacy travertine map is near-black (mean green 0.0368),
+ * which otherwise renders its outdoor coping/paving almost mirror-polished.
+ * Retain its measured channel variations and every original albedo pixel. */
+export function configureExteriorRoughness(shader: Pick<THREE.WebGLProgramParametersWithUniforms, "fragmentShader">, id: string) {
+  if (id !== "travertine") return;
+  shader.fragmentShader = shader.fragmentShader.replace("#include <metalnessmap_fragment>", `
+    #include <metalnessmap_fragment>
+    float dryTravertineRoughness = clamp(roughnessFactor, 0.0, 1.0);
+    roughnessFactor = 0.74 + 0.16 * dryTravertineRoughness;
+  `);
+}
+
+/** Offline atlases retain source texel density over twice the original
+ * physical coverage. No runtime hash, branch, additional fetch or new PBR map. */
+export const LEGACY_MINERAL_SAMPLER_REVISION = "baked-mineral-v3";
+export const legacyMineralTextureScale = (id: string) => id === "ardesia" || id === "prun" ? 0.5 : 1;
+
+export function legacyMineralTextureUrl(dir: string, name: string) {
+  const id = dir === "/textures/coping/prun" ? "prun" : dir === "/textures/coping/ardesia" ? "ardesia" : null;
+  return (id === "prun" && name === "basecolor") || (id === "ardesia" && (name === "basecolor" || name === "normal"))
+    ? `/textures/coping/derived-mineral-v3/${id}-${name}.png`
+    : `${dir}/${name}.png`;
+}
+
 /**
  * Real scanned PBR maps for a coping finish, loaded from `public/textures/coping/<id>/`.
  *
@@ -23,11 +78,12 @@ export type StoneMaps = {
  * are linear data and must NOT be gamma-decoded.
  */
 export function loadCopingTextureMaps(dir: string, hasRoughnessMap = true, hasNormalMap = true, mirroredRepeat = false): StoneMaps {
-  const loader = new THREE.TextureLoader();
   const load = (name: string, srgb: boolean) => {
-    const texture = loader.load(`${dir}/${name}.png`);
+    const url = legacyMineralTextureUrl(dir, name);
+    const texture = scannedTexture(url);
     texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-    texture.wrapS = texture.wrapT = mirroredRepeat ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
+    const atlas = url !== `${dir}/${name}.png`;
+    texture.wrapS = texture.wrapT = mirroredRepeat && !atlas ? THREE.MirroredRepeatWrapping : THREE.RepeatWrapping;
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.generateMipmaps = true;
@@ -462,7 +518,9 @@ export function createWPCMaps(size = 512): StoneMaps {
         color[o + 1] = (value + 0.02) * 255;
         color[o + 2] = value * 255;
         color[o + 3] = 255;
-        const r = (0.52 + Math.abs(ridge) * 0.4 + seam * 0.08) * 255;
+        // Dry brushed composite is matte. Keep the existing colour and shallow
+        // ridges; only its authored roughness is calibrated.
+        const r = (0.84 + Math.abs(ridge) * 0.4 + seam * 0.05) * 255;
         rough[o] = rough[o + 1] = rough[o + 2] = r;
         rough[o + 3] = 255;
       }

@@ -1,0 +1,75 @@
+{
+  "version": "source-derived-periodic-mineral-v3",
+  "generator": "node scripts/bake-legacy-minerals.mjs",
+  "layout": {
+    "period": 2,
+    "cells": 8,
+    "span": 0.25,
+    "jitter": 0.44,
+    "blend": [
+      0.25,
+      0.75
+    ]
+  },
+  "method": "Original grain, integer-pixel translation only; albedo sRGB to linear-light weighted blend to sRGB; normal data blended linearly without color transfer or invented relief. No AI. No new material specification.",
+  "physicalScale": "Atlas covers exactly twice each original texture dimension at unchanged source texels per metre; runtime UV repeat is multiplied by 0.5, with original moduleSize/aspect retained.",
+  "images": [
+    {
+      "id": "ardesia",
+      "map": "basecolor",
+      "sourcePath": "public/textures/coping/ardesia/basecolor.png",
+      "sourceSha256": "02dfd8c68dd4c8e90942599c8df7a7137ee7490d3a8ddea487ca9bb3a49c6255",
+      "sourceDimensions": [
+        512,
+        249
+      ],
+      "source": "ShareTextures Dark Olive Slatefloor, existing CC0-derived source in public/textures/coping/ardesia; see ../CREDITS.md",
+      "license": "CC0 1.0",
+      "path": "public/textures/coping/derived-mineral-v3/ardesia-basecolor.png",
+      "width": 1024,
+      "height": 498,
+      "bytes": 908430,
+      "sha256": "868fe11ffd4fb2b619aa478568e00c206711efd5859602f8c33f087625a43fc0",
+      "singleSourcePixels": 128000,
+      "decodedRgbaBytes": 2039808
+    },
+    {
+      "id": "ardesia",
+      "map": "normal",
+      "sourcePath": "public/textures/coping/ardesia/normal.png",
+      "sourceSha256": "80ee8b7c5d74f1d81036b9652e8bb8eef7faad2b0be3e61c2434768e6d465b36",
+      "sourceDimensions": [
+        512,
+        249
+      ],
+      "source": "ShareTextures Dark Olive Slatefloor, existing CC0-derived source in public/textures/coping/ardesia; see ../CREDITS.md",
+      "license": "CC0 1.0",
+      "path": "public/textures/coping/derived-mineral-v3/ardesia-normal.png",
+      "width": 1024,
+      "height": 498,
+      "bytes": 404319,
+      "sha256": "4e4c703a6f7cb855282c93283ce052b8c52baf584dddcda85dfaae90f84715af",
+      "singleSourcePixels": 128000,
+      "decodedRgbaBytes": 2039808
+    },
+    {
+      "id": "prun",
+      "map": "basecolor",
+      "sourcePath": "public/textures/coping/prun/basecolor.png",
+      "sourceSha256": "2de4ca932f1d015e09e764849a5d4533278b4eb265f83ab3bdffce23a0e8367f",
+      "sourceDimensions": [
+        365,
+        547
+      ],
+      "source": "Owner-supplied Prun photograph, existing unchanged source in public/textures/coping/prun; see ../prun/README.md",
+      "license": "User supplied for this project; no external redistribution license asserted",
+      "path": "public/textures/coping/derived-mineral-v3/prun-basecolor.png",
+      "width": 730,
+      "height": 1094,
+      "bytes": 1330577,
+      "sha256": "97d4958a441664d6347c6860c0ed9b8c18d828e7cdc6a6ea575ef7db48028948",
+      "singleSourcePixels": 199836,
+      "decodedRgbaBytes": 3194480
+    }
+  ]
+}

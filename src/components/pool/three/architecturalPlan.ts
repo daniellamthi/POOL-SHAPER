@@ -73,7 +73,8 @@ function continuousBoundaries(boundaries: Boundary[]): PlanPoint[] {
 /** Upper-face boundaries, not a wireframe. Weld position seams (UVs/normals
  * split vertices), cancel coplanar triangulation and keep real level changes.
  * World Y is retained so opaque higher solids correctly occlude lower edges. */
-export function architecturalEdges(geometry: BufferGeometry, matrix = new Matrix4()): PlanPoint[] {
+export function architecturalEdges(geometry: BufferGeometry, matrix = new Matrix4(),
+  { horizontalOnly = false }: { horizontalOnly?: boolean } = {}): PlanPoint[] {
   const positions = geometry.getAttribute("position");
   if (!positions) return [];
   const index = geometry.index;
@@ -89,7 +90,12 @@ export function architecturalEdges(geometry: BufferGeometry, matrix = new Matrix
     // leaves gaps and exposes the lower edge of the neighbouring riser.
     if (normal.lengthSq() < 1e-20) continue;
     normal.normalize();
-    if (normal.y < 0.65) continue; // no undersides, vertical risers or tiny bevel facets
+    // Eased coping has several upward-facing arris facets less than a
+    // millimetre apart. Their parallel rings become a rough, overprinted
+    // stroke in plan; annotate its real horizontal top, not each bevel.
+    // Sloped floors and other configured construction retain the existing
+    // slope tolerance. Curved tread boundaries are extracted unchanged.
+    if (normal.y < (horizontalOnly ? 1 - 1e-6 : 0.65)) continue;
     vertices.forEach((start, j) => {
       const end = vertices[(j + 1) % 3]!;
       const id = [key(start), key(end)].sort().join("|");

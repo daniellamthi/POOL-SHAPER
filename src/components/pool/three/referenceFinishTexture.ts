@@ -7,6 +7,7 @@ import type { StoneMaps } from "./stoneTextures";
  * No colour tint, invented height, contrast correction or generated pixels. */
 export const REFERENCE_PATCH_HALF_SPAN = 0.24;
 export const REFERENCE_PATCH_JITTER = 0.44;
+export const REFERENCE_SAMPLER_REVISION = "mineral-grain-v2";
 
 type ReferenceImage = {
   source: THREE.Texture;
@@ -62,11 +63,17 @@ export function subscribeReferenceFinishReady(id: ReferenceFinishId, onReady: ()
 
 export function cloneReferenceFinishColorMap(id: ReferenceFinishId): THREE.Texture {
   const entry = referenceImage(id);
-  const colorMap = entry.source.clone();
+  // Texture.clone() itself marks the copy dirty, even while its image is
+  // pending. Share the decoded Source without scheduling an empty GPU upload.
+  const colorMap = new THREE.Texture();
+  colorMap.source = entry.source.source;
   colorMap.colorSpace = THREE.SRGBColorSpace;
+  colorMap.wrapS = colorMap.wrapT = THREE.ClampToEdgeWrapping;
+  colorMap.minFilter = THREE.LinearMipmapLinearFilter;
+  colorMap.magFilter = THREE.LinearFilter;
   entry.consumers.add(colorMap);
   colorMap.addEventListener("dispose", () => entry.consumers.delete(colorMap));
-  if (colorMap.image) colorMap.needsUpdate = true;
+  if (entry.ready) colorMap.needsUpdate = true;
   return colorMap;
 }
 
@@ -91,6 +98,7 @@ const SAMPLER = `
 uniform mat3 referenceSourceProjection;
 REFERENCE_VARIANT_UNIFORMS
 uniform vec2 referenceMetricSize;
+uniform vec2 referencePatchBlend;
 uniform float referenceExposure;
 vec2 referenceHash(vec2 p) {
   return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453);
@@ -111,7 +119,10 @@ vec3 referenceColour(sampler2D sourceMap, vec2 metric, float variant) {
   // original grain does not stretch when pool or paving module sizes change.
   vec2 p = metric / (referenceMetricSize * 0.24);
   vec2 cell = floor(p);
-  vec2 weight = smoothstep(vec2(0.0), vec2(1.0), fract(p));
+  // Mineral interiors keep original fine grain instead of averaging four
+  // unrelated veins everywhere. C1 transitions still join translated source
+  // windows continuously, without tint, mirroring or extra texture fetches.
+  vec2 weight = smoothstep(vec2(referencePatchBlend.x), vec2(referencePatchBlend.y), fract(p));
   vec3 a = referencePatch(sourceMap, cell, p, variant);
   vec3 b = referencePatch(sourceMap, cell + vec2(1.0, 0.0), p, variant);
   vec3 c = referencePatch(sourceMap, cell + vec2(0.0, 1.0), p, variant);
@@ -128,6 +139,9 @@ function installSampler(shader: THREE.WebGLProgramParametersWithUniforms, id: Re
     shader.uniforms[`referenceSourceProjection${index + 1}`] = { value: new THREE.Matrix3().fromArray(referenceSampleMatrix(sample, finish.imageSize)) };
   });
   shader.uniforms["referenceMetricSize"] = { value: new THREE.Vector2(...finish.textureSize) };
+  // Preserve the approved homogeneous wood response unchanged. For stone,
+  // narrow the overlap only; metric derivatives and source crops stay exact.
+  shader.uniforms["referencePatchBlend"] = { value: new THREE.Vector2(finish.boards ? 0 : 0.25, finish.boards ? 1 : 0.75) };
   // A perspective product photograph is already illuminated. This neutral
   // linear-light calibration avoids illuminating that baked exposure twice;
   // it never changes hue/saturation or any other pool material or scene light.

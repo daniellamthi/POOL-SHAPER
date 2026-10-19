@@ -27,6 +27,8 @@ import {
   getDerivedDetailMaps,
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { configureMosaicSampling, MOSAIC_SAMPLING_REVISION } from "./mosaicSampling";
+import { requestMosaicTexture } from "./mosaicTexture";
 import { PoolAccessModel } from "./PoolAccessModel";
 import { PoolComfortModel, HydroSpot } from "./PoolComfortModel";
 import { RawShellMaterial, type RawShellKind } from "./RawShellMaterial";
@@ -44,12 +46,15 @@ import {
   createWoodDeckMaps,
   createWPCMaps,
   loadCopingTextureMaps,
+  configureExteriorRoughness,
+  legacyMineralTextureScale,
+  LEGACY_MINERAL_SAMPLER_REVISION,
   type StoneMaps,
 } from "./stoneTextures";
 import type { CopingMaterialId } from "@/lib/pool/coping-materials";
 import { configureDeckCopingGrain } from "./deckCopingGrain";
 import { isReferenceFinish } from "@/lib/pool/reference-finishes";
-import { configureReferenceCoping, loadReferenceFinishMaps } from "./referenceFinishTexture";
+import { configureReferenceCoping, loadReferenceFinishMaps, REFERENCE_SAMPLER_REVISION } from "./referenceFinishTexture";
 
 /** Each premium coping finish gets its own procedural stone bake (distinct
  * structural DNA -- vein/grain/pore character), never a shared texture with
@@ -137,10 +142,13 @@ function createNeutralSurfaceTexture() {
 }
 
 /** Keeps the current material usable when an optional finish image cannot load. */
-function useSafeSurfaceTexture(url: string) {
+function useSafeSurfaceTexture(url: string, mosaic = false) {
   const [texture, setTexture] = useState<THREE.Texture>(() => createNeutralSurfaceTexture());
 
   useEffect(() => {
+    if (mosaic) return requestMosaicTexture(url, loadedTexture => {
+      setTexture(previous => { previous.dispose(); return loadedTexture; });
+    }, error => console.warn(`[Pool3D] Could not load mosaic texture ${url}; retaining current finish.`, error));
     let active = true;
     const loader = new THREE.TextureLoader();
     loader.load(
@@ -165,7 +173,7 @@ function useSafeSurfaceTexture(url: string) {
     return () => {
       active = false;
     };
-  }, [url]);
+  }, [url, mosaic]);
 
   useEffect(() => () => texture.dispose(), [texture]);
   return texture;
@@ -576,7 +584,7 @@ export function PoolModel({
       bottom: centerY - p.height / 2 + p.bar - 0.004,
     }));
   }, [system, skimmers.positions, materials.skimmer.type, verticalLayout.wallTopY, isInfinity, infinityEdge, outline, shape, waterLevel]);
-  const sourceSurfaceMap = useSafeSurfaceTexture(materials.surface.maps.baseColorMap);
+  const sourceSurfaceMap = useSafeSurfaceTexture(materials.surface.maps.baseColorMap, materials.surface.kind === "mosaic");
   const calibratedSurfaceMap = useMemo(() => materials.surface.calibrateSample
     ? createLinerSampleMap(sourceSurfaceMap) : sourceSurfaceMap,
   [sourceSurfaceMap, materials.surface.calibrateSample]);
@@ -878,12 +886,16 @@ export function PoolModel({
   // Reference selections share shader programs, but own their source/crop
   // uniforms. A fresh material installs those uniforms even at the same scale.
   const referenceCoping = isReferenceFinish(materials.coping.id);
-  const copingMaterialKey = referenceCoping ? `${materials.coping.id}-photographic-v2` : materials.coping.moduleSize;
-  const referenceProgramKey = referenceCoping ? (materials.coping.id === "reference-ipe" ? "-reference-ipe-v8-continuous-single-board" : "-reference-stone-v6-shared-sampler") : "";
+  const legacyMineralKey = materials.coping.id === "ardesia" || materials.coping.id === "prun"
+    ? `-${materials.coping.id}-${LEGACY_MINERAL_SAMPLER_REVISION}-metric` : "";
+  const copingMaterialKey = referenceCoping ? `${materials.coping.id}-photographic-v2-${REFERENCE_SAMPLER_REVISION}`
+    : materials.coping.id === "travertine" ? `${materials.coping.moduleSize}-dry-honed-v1` : `${materials.coping.moduleSize}${legacyMineralKey}`;
+  const referenceProgramKey = referenceCoping ? `-${REFERENCE_SAMPLER_REVISION}-${materials.coping.id === "reference-ipe" ? "reference-ipe-v8-continuous-single-board" : "reference-stone-v6-shared-sampler"}`
+    : materials.coping.id === "travertine" ? "-dry-honed-v1" : legacyMineralKey;
   const configureCopingTriplanar = useCallback(
     (shader: TriplanarShader) => {
       shader.uniforms.triplanarScale = {
-        value: 1 / materials.coping.moduleSize,
+        value: legacyMineralTextureScale(materials.coping.id) / materials.coping.moduleSize,
       };
       shader.uniforms["triplanarAspect"] = { value: copingAssetAspect };
       shader.vertexShader = shader.vertexShader
@@ -917,6 +929,7 @@ export function PoolModel({
         );
       if (materials.coping.id === "deck-marrone") configureDeckCopingGrain(shader);
       if (isReferenceFinish(materials.coping.id)) configureReferenceCoping(shader, materials.coping.id);
+      configureExteriorRoughness(shader, materials.coping.id);
     },
     [copingDetail, materials.coping.moduleSize, materials.coping.id, copingAssetAspect],
   );
@@ -1098,6 +1111,11 @@ export function PoolModel({
     envMapIntensity: 1,
     specularIntensity: 0.58,
   } : {};
+  const mosaicSamplingKey = materials.surface.kind === "mosaic" ? `-${MOSAIC_SAMPLING_REVISION}-${materials.surface.tileSize}` : "";
+  const configureInteriorMaterial = useCallback((shader: UnderwaterShader) => {
+    configureCaustics(shader);
+    if (materials.surface.kind === "mosaic") configureMosaicSampling(shader, materials.surface.tileSize);
+  }, [configureCaustics, materials.surface.kind, materials.surface.tileSize]);
   // A finished stainless basin is seen through the water exactly like a
   // liner: same absorption, scattering and caustics, only once filled.
   const interiorUnderwater =
@@ -1106,7 +1124,7 @@ export function PoolModel({
       : undefined;
   const accessMaterial = interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : (
     <meshPhysicalMaterial
-            key={showWater ? "wet" : "dry"}
+            key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.liner.color}
             map={floorSurfaceMap}
             normalMap={interiorMicroMaps.floorNormal}
@@ -1120,9 +1138,9 @@ export function PoolModel({
             aoMap={interiorMicroMaps.floorAo}
             aoMapIntensity={0.6}
             {...mosaicResponse}
-            onBeforeCompile={configureCaustics}
+            onBeforeCompile={materials.surface.kind === "mosaic" ? configureInteriorMaterial : configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
             }
           />
   );
@@ -1155,7 +1173,7 @@ export function PoolModel({
             <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} />
           ) : (
             <meshPhysicalMaterial
-              key={showWater ? "wet" : "dry"}
+              key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
               color={materials.liner.color}
               map={floorSurfaceMap}
               normalMap={interiorMicroMaps.floorNormal}
@@ -1169,9 +1187,9 @@ export function PoolModel({
               aoMap={interiorMicroMaps.floorAo}
               aoMapIntensity={0.6}
               {...mosaicResponse}
-              onBeforeCompile={configureCaustics}
+              onBeforeCompile={materials.surface.kind === "mosaic" ? configureInteriorMaterial : configureCaustics}
               customProgramCacheKey={() =>
-                `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
+                `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
               }
             />
           )}
@@ -1206,7 +1224,7 @@ export function PoolModel({
         {/* Interior walls */}
         <mesh name="plan-basin-walls" geometry={walls} renderOrder={0} receiveShadow castShadow>
           {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
-            key={showWater ? "wet" : "dry"}
+            key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.liner.color}
             map={wallSurfaceMap}
             normalMap={interiorMicroMaps.wallNormal}
@@ -1226,9 +1244,9 @@ export function PoolModel({
             envMapIntensity={1.0}
             specularIntensity={0.58}
             {...mosaicResponse}
-            onBeforeCompile={configureCaustics}
+            onBeforeCompile={materials.surface.kind === "mosaic" ? configureInteriorMaterial : configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
             }
             side={DoubleSide}
           />}
@@ -1245,7 +1263,7 @@ export function PoolModel({
           receiveShadow
         >
           {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
-            key={showWater ? "wet" : "dry"}
+            key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.floor.color}
             map={floorSurfaceMap}
             normalMap={interiorMicroMaps.floorNormal}
@@ -1264,9 +1282,9 @@ export function PoolModel({
             reflectivity={0.38}
             envMapIntensity={0.95}
             {...mosaicResponse}
-            onBeforeCompile={configureCaustics}
+            onBeforeCompile={materials.surface.kind === "mosaic" ? configureInteriorMaterial : configureCaustics}
             customProgramCacheKey={() =>
-              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}`
+              `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
             }
             side={DoubleSide}
           />}

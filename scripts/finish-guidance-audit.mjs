@@ -55,6 +55,24 @@ for (const family of ["porcelain", "travertine"]) {
   }
 }
 
+// A deliberately opened family can differ from the applied material. Its
+// disclosure is not a replacement/default selection, including after Back.
+for (const family of ["porcelain", "travertine"]) {
+  const variants = family === "porcelain" ? PORCELAIN_FINISHES : TRAVERTINE_FINISHES;
+  for (const [value, open] of [["wpc", true], [variants[0].id, false]]) {
+    let writes = 0;
+    const html = renderToStaticMarkup(React.createElement(FinishFamilyChoice, {
+      family, value, open, onOpen: () => writes++, onSelect: () => writes++,
+    }));
+    equal(writes, 0, "Controlled disclosure never changes the applied material on render");
+    equal((html.match(/<button /g) ?? []).length, open ? variants.length + 1 : 1,
+      "Explicit disclosure state, not the saved material, controls variant visibility");
+    ok(html.includes(`aria-expanded="${open}"`), "Family exposes its actual disclosure state");
+    equal((html.match(/aria-pressed="true"/g) ?? []).length, open ? 0 : 1,
+      "Exploring a different family leaves the old selection untouched");
+  }
+}
+
 // The scroll boundary is tested with an ancestor mock: no window/page scrolling
 // or scrollIntoView is available, so accidental ancestor scrolling fails.
 for (const reduced of [false, true]) for (const sectionTop of [-50, 180, 1200]) {

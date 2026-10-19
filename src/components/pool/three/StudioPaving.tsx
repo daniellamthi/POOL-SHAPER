@@ -20,7 +20,7 @@ import { createPavingModules, type PavingOptions } from "./pavingGeometry";
 import { samplePavingWood, samplePavingGres, WOOD_GRAIN_SCALE } from "./pavingTexture";
 import { createSurfaceGeometry } from "./poolGeometry";
 import { studioDeckBand, studioDeckInnerOffset, studioDeckOutline, type DeckFurnitureSide } from "./studioDeck";
-import { createLimestoneMaps, createPrunMaps, createWPCMaps } from "./stoneTextures";
+import { createLimestoneMaps, createPrunMaps, createWPCMaps, configureExteriorRoughness, legacyMineralTextureUrl, legacyMineralTextureScale, LEGACY_MINERAL_SAMPLER_REVISION } from "./stoneTextures";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 
@@ -57,28 +57,30 @@ function CatalogPavingMaterial({ id, waterY, joint = false, vertexColors = true 
   const asset = id === "prun" ? PRUN_PAVING_ASSET
     : "asset" in definition ? definition.asset : null;
   const hasNormal = !(asset && "normalMap" in asset && asset.normalMap === false);
-  const sources = useLoader(TextureLoader, asset ? ["basecolor", ...(hasNormal ? ["normal"] : []), ...("roughnessMap" in asset && asset.roughnessMap === false ? [] : ["roughness"])].map(name => `${asset.dir}/${name}.png`) : []);
+  const sources = useLoader(TextureLoader, asset ? ["basecolor", ...(hasNormal ? ["normal"] : []), ...("roughnessMap" in asset && asset.roughnessMap === false ? [] : ["roughness"])].map(name => legacyMineralTextureUrl(asset.dir, name)) : []);
   const maps = useMemo(() => {
     const maps = asset
       ? { colorMap: sources[0]!.clone(), normalMap: hasNormal ? sources[1]!.clone() : new DataTexture(new Uint8Array([128, 128, 255, 255]), 1, 1), roughnessMap: sources[hasNormal ? 2 : 1]?.clone() ?? null }
       : id === "prun" ? createPrunMaps() : id === "wpc" ? createWPCMaps() : createLimestoneMaps();
     const aspect = asset && "aspect" in asset ? asset.aspect : 1;
     maps.colorMap.colorSpace = SRGBColorSpace;
-    const wrapping = id === "ardesia" || (asset && "mirroredRepeat" in asset && asset.mirroredRepeat) ? MirroredRepeatWrapping : RepeatWrapping;
+    const textureScale = legacyMineralTextureScale(id);
+    const wrapping = textureScale === 1 && (id === "ardesia" || (asset && "mirroredRepeat" in asset && asset.mirroredRepeat)) ? MirroredRepeatWrapping : RepeatWrapping;
     Object.values(maps).forEach(t => { if (t) {
       t.wrapS = t.wrapT = wrapping;
-      t.repeat.set(id === "wpc" ? 1 / 2.2 : 1 / definition.moduleSize, id === "wpc" ? 0.90 / 0.14 : aspect / definition.moduleSize);
+      t.repeat.set(textureScale * (id === "wpc" ? 1 / 2.2 : 1 / definition.moduleSize), textureScale * (id === "wpc" ? 0.90 / 0.14 : aspect / definition.moduleSize));
       if (id === "wpc") t.offset.y = 0.05;
       t.anisotropy = Math.min(8, maxAnisotropy); t.needsUpdate = true;
     } });
     return maps;
   }, [definition, id, asset, sources, hasNormal, maxAnisotropy]);
   useEffect(() => () => Object.values(maps).forEach(t => t?.dispose()), [maps]);
-  return <meshStandardMaterial vertexColors={vertexColors && !joint} color={id === "prun" ? "#ffffff" : id === "wpc" ? "#e2dbd1" : definition.color}
+  const mineralKey = id === "ardesia" || id === "prun" ? `-${LEGACY_MINERAL_SAMPLER_REVISION}-metric` : "";
+  return <meshStandardMaterial key={`${id}-dry-v2${mineralKey}`} vertexColors={vertexColors && !joint} color={id === "prun" ? "#ffffff" : id === "wpc" ? "#e2dbd1" : definition.color}
     map={maps.colorMap} normalMap={maps.normalMap} roughnessMap={maps.roughnessMap}
     normalScale={[Math.min(0.35, definition.normalStrength), Math.min(0.35, definition.normalStrength)]} roughness={id === "wpc" ? 0.86 : definition.roughness}
-    onBeforeCompile={shader => excludeSubmergedDirectLights(shader, waterY)}
-    customProgramCacheKey={() => `catalog-paving-dry-${waterY}`} />;
+    onBeforeCompile={shader => { excludeSubmergedDirectLights(shader, waterY); configureExteriorRoughness(shader, id); }}
+    customProgramCacheKey={() => `catalog-paving-dry-v2-${id}-${waterY}${mineralKey}`} />;
 }
 
 function OriginalPavingMaterial({
@@ -125,6 +127,7 @@ function OriginalPavingMaterial({
   }, [maps, id, maxAnisotropy]);
   return (
     <meshStandardMaterial
+      key={`studio-paving-v3-${id}`}
       vertexColors={vertexColors && !joint}
       color={
         joint ? (id === "istria" ? "#b1b0a7" : "#bdbdbd") : id === "istria" ? "#deddd1" : "#ffffff"
@@ -140,7 +143,7 @@ function OriginalPavingMaterial({
         if (id === "wood") samplePavingWood(shader);
         if (id === "gres") samplePavingGres(shader);
       }}
-      customProgramCacheKey={() => `studio-paving-${id}-metric-dry-${waterY}`}
+      customProgramCacheKey={() => `studio-paving-v3-${id}-metric-dry-${waterY}`}
     />
   );
 }

@@ -49,7 +49,11 @@ const baseline: PoolConfig = { ...initial.config, projectType: "new", poolType: 
   customer: { ...initial.config.customer, name: "Material QA", email: "material-qa@example.test" } };
 
 equal(LEGACY_COPING_MATERIALS, baselineCoping, "Existing coping catalogue and values unchanged from approved commit");
-equal(copingMaterialsForPool("above-ground"), baselineCoping, "Above-ground has exactly the approved coping catalogue");
+// Owner-approved in 70ec939: retire Deck Marrone from choices, not from saved
+// snapshots. Keep every other original descriptor exact, including WPC/PVC.
+equal(copingMaterialsForPool("above-ground"), baselineCoping.filter(material => material.id !== "deck-marrone"),
+  "Above-ground retains approved choices after the explicit brown-coping retirement");
+ok(LEGACY_COPING_MATERIALS.some(material => material.id === "deck-marrone"), "Retired brown coping still restores historical snapshots");
 ok(pavingMaterialsForPool("above-ground").every(finish => !finish.id.startsWith("reference-")), "Above-ground exposes no new reference paving");
 equal(pavingMaterialsForPool("above-ground"), baselinePaving, "Every above-ground paving descriptor remains exactly approved");
 const materialSource = readFileSync("src/lib/pool/materials.ts", "utf8");
