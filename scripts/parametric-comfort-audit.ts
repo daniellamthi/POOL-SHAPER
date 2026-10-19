@@ -60,16 +60,16 @@ for(const sloped of [false,true]) for(const side of system==="infinity"?[0,1,2,3
   check(r.status!=="UNAVAILABLE" || issues.length>0,"every unavailable actual entrance has an explicit issue");
   if(!r.comfort.availability.hydromassage.available)check(!r.comfort.elements.some(e=>e.kind==="hydromassage"),"incompatible hydro never blocks selected access in scene");
 }
-let state={...base,config:config(12,5,["sunShelf","sunShelfLoungers","ledLighting"],{sunShelfLoungerCount:4})};
+let state={...base,config:config(12,5,["sunShelf","sunShelfLoungers","ledLighting"],{sunShelfLoungerCount:3})};
 const requested=state.config.features;
 state=configuratorTesting.reducer(state,{type:"setDimension",key:"width",value:3});
-check(state.config.features.includes("sunShelfLoungers") && state.config.sunShelfLoungerCount===4,"resize retains lounger intent/quantity");
+check(state.config.features.includes("sunShelfLoungers") && state.config.sunShelfLoungerCount===3,"resize retains lounger intent/quantity");
 check(configuredSunShelfLoungers(state.config).count===0,"unavailable scene has no ghost loungers");
 state=configuratorTesting.reducer(state,{type:"setShape",value:"l-shape"});
 check(state.config.features.includes("sunShelf"),"shape change retains shelf request");
 const saved=toProjectConfiguration(state.projectId,state.config,state.renovation);
 const restored=parseProjectConfiguration(serializeProjectConfiguration(saved));
-check(restored?.config.sunShelfLoungerCount===4 && restored.config.features.includes("sunShelfLoungers"),"snapshot round trip preserves unresolved intent");
+check(restored?.config.sunShelfLoungerCount===3 && restored.config.features.includes("sunShelfLoungers"),"snapshot round trip preserves unresolved intent");
 check(comfortConfigurationIssues(restored.config).length>0,"restored invalid intent has explicit issues");
 const invalidModel=buildProjectSummary(restored);
 check(!!invalidModel.compatibilityIssues?.length,"summary records unresolved request");
@@ -79,7 +79,10 @@ check(!leadSubmissionInputSchema.safeParse(lead).success,"server-side proposal r
 state=configuratorTesting.reducer(state,{type:"setShape",value:"rectangle"});
 state=configuratorTesting.reducer(state,{type:"setDimension",key:"width",value:5});
 check(JSON.stringify(state.config.features)===JSON.stringify(requested),"restore dimensions preserves independent selections");
-check(configuredSunShelfLoungers(state.config).count===4,"compatible scene restored without reselecting");
+check(configuredSunShelfLoungers(state.config).count===3,"compatible scene restored without reselecting");
+const legacyFour={...state.config,sunShelfLoungerCount:4};
+check(normalizedLegacyFour(legacyFour),"previous four-chaise request survives, explicit incompatibility instead of shrinking new product");
+function normalizedLegacyFour(c:PoolConfig){const parsed=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration("legacy-four",c,base.renovation)));return parsed?.config.sunShelfLoungerCount===4 && configuredSunShelfLoungers(parsed.config).count===0 && comfortConfigurationIssues(parsed.config).length>0;}
 const validProject=toProjectConfiguration(state.projectId,state.config,state.renovation);
 check(leadSubmissionInputSchema.safeParse({...lead,project:validProject}).success,"compatible proposal snapshot accepted locally, no send");
 for(const count of [0,-2,2.9]) {

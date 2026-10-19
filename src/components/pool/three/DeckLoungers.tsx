@@ -6,6 +6,8 @@ import { pointInBasin } from "@/lib/pool/boundary-placement";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import { SolarShower, SOLAR_SHOWER_SIZE } from "./SolarShower";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { DECK_CHAISE_MODEL } from "@/lib/pool/sun-shelf-model";
+import { createLymphaShellGeometry, createLymphaFrameGeometry, createLymphaCushionGeometry } from "./LymphaChaiseGeometry";
 
 /**
  * Poolside furniture on the studio deck: the optional four contemporary
@@ -14,22 +16,17 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
  *
  * Presentation only: nothing here enters the configuration geometry, the
  * quote or the technical plan (the shower is an equipment option, but its
- * position is derived here, never stored). The design is deliberately
- * minimal -- a slim powder-coated frame, one flat sling seat and a raked
- * backrest -- so it reads as architecture furniture and never competes with
- * the pool. Every position is derived from the outline on each render, so
+ * position is derived here, never stored). The reference-matched Esse shell,
+ * bent metal frame and cushions share the published lounger footprint.
+ * Every position is derived from the outline on each render, so
  * resizing the pool simply re-plans the deck. Preference order:
  *   1. one row of four on a long side facing the water, clear of the access;
  *   2. two pairs, one on each long side, when a row of four does not fit;
  *   3. nothing, when the paved band cannot hold even a pair.
  */
 const LOUNGER = {
-  length: 2.0,
-  width: 0.74,
-  seatHeight: 0.33,
-  seatLength: 1.38,
-  backLength: 0.62,
-  backAngle: 0.5,
+  length: DECK_CHAISE_MODEL.length,
+  width: DECK_CHAISE_MODEL.width,
   /** Clear walkway kept between the coping edge and the foot of the lounger. */
   walkway: 0.5,
 } as const;
@@ -228,7 +225,7 @@ export function deckFurnitureCameraPoints(plan: DeckFurniturePlan): Array<readon
   for (const row of plan.rows) {
     const half=Math.max(...row.offsets.map(Math.abs))+LOUNGER.width/2+0.1;
     add(row,[-half,half],[-LOUNGER.length/2-.1,LOUNGER.length/2+.1],
-      LOUNGER.seatHeight+Math.sin(LOUNGER.backAngle)*LOUNGER.backLength+.1);
+      DECK_CHAISE_MODEL.height+DECK_CHAISE_MODEL.cushionAllowance);
   }
   if (plan.shower) {
     const r=SOLAR_SHOWER_SIZE.plate/2;
@@ -251,17 +248,13 @@ function buildFurnitureGeometry(rows: RowPlacement[]) {
     cushion: [],
     table: [],
   };
-  const { width, seatHeight, seatLength, backLength, backAngle } = LOUNGER;
-  const pivotZ = -0.38;
-  const seatCentreZ = pivotZ + seatLength / 2;
-  const backY = seatHeight + Math.sin(backAngle) * (backLength / 2);
-  const backZ = pivotZ - Math.cos(backAngle) * (backLength / 2);
-  const cushionY = seatHeight + Math.sin(backAngle) * (backLength - 0.14) + 0.055;
-  const cushionZ = pivotZ - Math.cos(backAngle) * (backLength - 0.14);
-  const legHeight = seatHeight - 0.07;
+  const templates={
+    sling:createLymphaShellGeometry().translate(0,DECK_CHAISE_MODEL.shellLift,0),
+    frame:createLymphaFrameGeometry(),
+    cushion:createLymphaCushionGeometry(),
+  };
   const matrix = new THREE.Matrix4();
   const local = new THREE.Matrix4();
-  const tilt = new THREE.Matrix4().makeRotationX(backAngle);
   const add = (
     part: FurniturePart,
     geometry: THREE.BufferGeometry,
@@ -269,10 +262,8 @@ function buildFurnitureGeometry(rows: RowPlacement[]) {
     x: number,
     y: number,
     z: number,
-    tilted = false,
   ) => {
     local.makeTranslation(x, y, z);
-    if (tilted) local.multiply(tilt);
     geometry.applyMatrix4(matrix.copy(base).multiply(local));
     parts[part].push(geometry);
   };
@@ -282,38 +273,8 @@ function buildFurnitureGeometry(rows: RowPlacement[]) {
       .multiply(new THREE.Matrix4().makeRotationY(row.rotation));
     for (const offset of row.offsets) {
       const base = rowMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(offset, 0, 0));
-      add(
-        "sling",
-        new THREE.BoxGeometry(width, 0.05, seatLength),
-        base,
-        0,
-        seatHeight,
-        seatCentreZ,
-      );
-      add("sling", new THREE.BoxGeometry(width, 0.05, backLength), base, 0, backY, backZ, true);
-      add("cushion", new THREE.BoxGeometry(0.38, 0.07, 0.22), base, 0, cushionY, cushionZ, true);
-      for (const side of [-1, 1]) {
-        const x = side * (width / 2 + 0.012);
-        add(
-          "frame",
-          new THREE.BoxGeometry(0.03, 0.04, seatLength + 0.02),
-          base,
-          x,
-          seatHeight - 0.045,
-          seatCentreZ,
-        );
-        add(
-          "frame",
-          new THREE.BoxGeometry(0.03, 0.04, backLength),
-          base,
-          x,
-          backY - 0.045,
-          backZ,
-          true,
-        );
-        for (const z of [seatCentreZ - 0.55, seatCentreZ + 0.55])
-          add("frame", new THREE.BoxGeometry(0.03, legHeight, 0.03), base, x, legHeight / 2, z);
-      }
+      for(const part of ["sling","frame","cushion"] as const)
+        parts[part].push(templates[part].clone().applyMatrix4(base));
     }
     if (row.table) {
       add("table", new THREE.CylinderGeometry(0.21, 0.21, 0.025, 32), rowMatrix, 0, 0.42, -0.1);
@@ -321,6 +282,7 @@ function buildFurnitureGeometry(rows: RowPlacement[]) {
       add("frame", new THREE.CylinderGeometry(0.15, 0.15, 0.012, 32), rowMatrix, 0, 0.006, -0.1);
     }
   }
+  Object.values(templates).forEach(g=>g.dispose());
   const merged = {} as Record<FurniturePart, THREE.BufferGeometry | null>;
   for (const part of Object.keys(parts) as FurniturePart[]) {
     merged[part] = parts[part].length ? mergeGeometries(parts[part]) : null;
@@ -372,8 +334,8 @@ export function DeckLoungers({
       frame: dry(
         new THREE.MeshStandardMaterial({ color: "#2f3335", roughness: 0.55, metalness: 0.35 }),
       ),
-      sling: dry(new THREE.MeshStandardMaterial({ color: "#d9d2c5", roughness: 0.92 })),
-      cushion: dry(new THREE.MeshStandardMaterial({ color: "#f1ede4", roughness: 0.95 })),
+      sling: dry(new THREE.MeshStandardMaterial({ color: "#59634f", roughness: 0.48 })),
+      cushion: dry(new THREE.MeshStandardMaterial({ color: "#747967", roughness: 0.92 })),
       table: dry(new THREE.MeshStandardMaterial({ color: "#bfb9ad", roughness: 0.7 })),
     };
   }, [waterY]);

@@ -678,7 +678,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             {shelfOn || shelfProposal.availability.sunShelf.available ? (
               <ChoiceCard
                 title={t("Sun shelf")}
-                description={t("Solarium sommerso a 22 cm per sdraiarsi in acqua.")}
+                description={t("Solarium sommerso a 20 cm per sdraiarsi in acqua.")}
                 image={ill("comfort-sunShelf")}
                 selected={comfortChoice === "sunShelf"}
                 disabled={!shelfProposal.availability.sunShelf.available}
@@ -707,8 +707,9 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
           {tab === "shelf-options" && shelfOn ? <div className="flex flex-col gap-3">
             <ChoiceGrid label={t("Optional per la spiaggetta")}>
               <ChoiceCard optional title={t("Lettini per spiaggetta")}
-                description={t("Lettini per superfici sommerse, distinti dalle chaise longue esterne.")}
-                image={ill("equipment-sunShelfLoungers")}
+                description={t("Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.")}
+                image="/product-previews/lympha-immersed.jpg"
+                imageFit="contain"
                 selected={config.features.includes("sunShelfLoungers")} disabled={!shelfLoungers.available && !config.features.includes("sunShelfLoungers")}
                 onSelect={() => togglePoolFeature("sunShelfLoungers")} />
             </ChoiceGrid>
@@ -1138,8 +1139,9 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
       key={id}
       optional
       title={t(item(id).title)}
-      description={t(item(id).description)}
-      image={ill(`equipment-${id}`)}
+      description={t(id === "loungers" ? "Esse · Lyxo, con telaio e cuscino per la pavimentazione." : item(id).description)}
+      image={id === "loungers" ? "/product-previews/lympha-deck.jpg" : ill(`equipment-${id}`)}
+      imageFit={id === "loungers" ? "contain" : "cover"}
       selected={config.equipment.includes(id)}
       onSelect={onSelect ?? (() => toggleEquipment(id))}
     />

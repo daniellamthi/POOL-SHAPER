@@ -25,7 +25,7 @@ import { outlineArea, outlineBounds, outlineCentroid, outlinePerimeter } from ".
 import type { PoolVerticalLayout } from "./vertical-layout";
 import type { Dimensions, Outline, PoolMetrics, PoolShapeId, PoolType } from "./types";
 import { infinityExclusion, type InfinityEdgeParams } from "./infinity-edge";
-import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT } from "./sun-shelf-model";
+import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT, SUN_SHELF_WATER_DEPTH } from "./sun-shelf-model";
 
 /** Shared shelf/flight dimensions; metres, not a pool-size-specific offset. */
 export function shelfStairDimensions(span: number, topY: number, floorY: number, minimumRun = 0) {
@@ -197,7 +197,7 @@ export function buildFloorProfile(params: {
   if (params.sunShelf && exclusion?.axis === axis)
     shallowAtMin = Math.abs(exclusion.coordinate - axisMax) < 0.08;
   const flight = params.sunShelf && shape === "rectangle" && Math.min(spanX, spanZ) >= 2.4
-    ? shelfStairDimensions(span, verticalLayout.waterY - 0.22, shallowFloorY,
+    ? shelfStairDimensions(span, verticalLayout.waterY - (params.twoLoungerShelf ? SUN_SHELF_WATER_DEPTH : 0.22), shallowFloorY,
       params.twoLoungerShelf ? SUN_SHELF_MIN_RUN : 0) : null;
   const end = (shallowAtMin ? axisMin : axisMax) + (shallowAtMin ? 1 : -1) * (flight?.totalRun ?? 0);
   // One tread-sized level landing AFTER the final riser; the ramp starts here.

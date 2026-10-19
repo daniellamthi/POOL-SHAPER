@@ -1,20 +1,30 @@
-const INCH = 0.0254;
-
 /** Published envelope; original procedural illustration, not manufacturer CAD
  * or installation approval. Layout reserves full length, not just contact area. */
 export const SUN_SHELF_LOUNGER_MODEL = {
   id: "immersed-resin-chaise",
-  reference: "Ledge Lounger Signature Chaise",
-  source: "https://ledgeloungers.com/products/signature-chaise",
-  specification: "https://ledgeloungers.com/cdn/shop/files/LL-Spec-Sheet-Signature-Chaise.pdf?v=15147070456672585287",
-  installation: "https://ledgeloungers.com/cdn/shop/files/Installation_Chaise.pdf?v=3181761249778378105",
-  length: 70 * INCH,
-  width: 23 * INCH,
-  height: 22 * INCH,
-  seatHeight: 2.5 * INCH,
-  kneeHeight: 10 * INCH,
-  maxWaterDepth: 9 * INCH,
-  supportLength: 44 * INCH,
+  reference: "Lyxo Esse · LT302-0001M1",
+  source: "https://lyxodesign.com/prod/esse/",
+  specification: "https://www.lyxodesign.com/wp-content/uploads/2025/04/Catalogo_Lyxo_2025.pdf",
+  installation: "https://lyxodesign.com/prod/esse/",
+  length: 1.85,
+  width: 0.73,
+  height: 0.57,
+  // Illustrative profile details measured proportionally from owner photos,
+  // not additional certified manufacturer dimensions.
+  seatHeight: 0.11,
+  kneeHeight: 0.25,
+  maxWaterDepth: 0.2,
+  supportLength: 1.2,
+} as const;
+
+export const SUN_SHELF_WATER_DEPTH = 0.2;
+export const DECK_CHAISE_MODEL = {
+  reference: "Lyxo Esse Frame · LT303-0001M1",
+  length: 1.85,
+  width: 0.73,
+  height: 0.77,
+  shellLift: 0.2,
+  cushionAllowance: 0.055,
 } as const;
 
 /** Owner's preliminary layout criteria, not certified installation clearances.

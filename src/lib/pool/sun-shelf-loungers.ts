@@ -107,7 +107,7 @@ export function resolveSunShelfLoungers({
     waterY - shelf.topY > SUN_SHELF_LOUNGER_MODEL.maxWaterDepth + EPSILON
   ) {
     return unavailable(
-      "Questo lettino immerso richiede una piattaforma piana con acqua fino a 22,86 cm.",
+      "Questo lettino immerso richiede una piattaforma piana con acqua fino a 20 cm e zavorramento secondo il produttore.",
     );
   }
   const shelfBounds = bounds(shelf.footprint);
@@ -210,7 +210,7 @@ export function resolveSunShelfLoungers({
   }
   if (candidates.length < SUN_SHELF_LOUNGER_LAYOUT.minimumCapacity)
     return unavailable(
-      "Spazio insufficiente per due lettini da 178 × 59 cm con margini di 25 cm e accesso libero.",
+      "Spazio insufficiente per due lettini da 185 × 73 cm con margini di 25 cm e accesso libero.",
     );
   // Select central positions first when the requested count is below capacity.
   candidates.sort((a, b) => {

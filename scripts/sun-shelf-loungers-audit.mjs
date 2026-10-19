@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { build } from "rolldown";
+import { Mesh, MeshBasicMaterial, DoubleSide, Raycaster, Vector3 } from "three";
 
 const file = join(process.cwd(), "node_modules/.cache/sun-shelf-loungers-audit.mjs");
 await build({
@@ -19,6 +20,8 @@ await build({
           ? `
       export * from "${join(process.cwd(), "src/lib/pool/sun-shelf-loungers.ts")}";
       export { createSunShelfChaiseGeometry } from "${join(process.cwd(), "src/components/pool/three/SunShelfLoungers.tsx")}";
+      export { createLymphaFrameGeometry, createLymphaCushionGeometry } from "${join(process.cwd(), "src/components/pool/three/LymphaChaiseGeometry.ts")}";
+      export { DECK_CHAISE_MODEL } from "${join(process.cwd(), "src/lib/pool/sun-shelf-model.ts")}";
       export { DEFAULT_DIMENSIONS, DEFAULT_CONTROL_POINTS, DEFAULT_CUSTOMER } from "${join(process.cwd(), "src/lib/pool/config.ts")}";
       export { configuredPoolLayout } from "${join(process.cwd(), "src/lib/pool/resolved-layout.ts")}";
       export { buildOutline } from "${join(process.cwd(), "src/lib/pool/geometry.ts")}";
@@ -36,6 +39,9 @@ const {
   normalizeSunShelfLoungers,
   resolveSunShelfLoungers,
   createSunShelfChaiseGeometry,
+  createLymphaFrameGeometry,
+  createLymphaCushionGeometry,
+  DECK_CHAISE_MODEL,
   DEFAULT_DIMENSIONS,
   DEFAULT_CONTROL_POINTS,
   DEFAULT_CUSTOMER,
@@ -217,9 +223,9 @@ const comfort = {
     {
       kind: "sunShelf",
       footprint: rect(-5, -2, -0.8, 2),
-      landing: { footprint: rect(-5,-4,-2,-0.8), topY:-0.22 },
-      topY: -0.22,
-      waterDepth: 0.22,
+      landing: { footprint: rect(-5,-4,-2,-0.8), topY:-0.2 },
+      topY: -0.2,
+      waterDepth: 0.2,
       width: 2.8,
       run: 3,
     },
@@ -235,7 +241,7 @@ const input = { comfort, outline: rect(-5, 5, -2, 2), waterY: 0, enabled: true }
 check(resolveSunShelfLoungers(input).capacity > 0, "supported flat shelf depth");
 check(
   resolveSunShelfLoungers({ ...input, waterY: 0.009 }).capacity === 0,
-  "reject depth beyond 9 inches",
+  "reject depth beyond manufacturer 20 cm",
 );
 check(resolveSunShelfLoungers({ ...input, quantity: 1 }).count === 1, "requested one");
 check(
@@ -271,8 +277,25 @@ check(
 );
 const positions = geometry.getAttribute("position");
 check(Array.from(positions.array).every(Number.isFinite), "finite mesh");
-check(positions.count / 3 < 8000, "lightweight mesh budget");
+const triangles=(geometry.index?.count ?? positions.count)/3;
+check(triangles < 8000, "lightweight mesh budget, including real inner shell and openings");
+const material = new MeshBasicMaterial({ side: DoubleSide });
+const mesh = new Mesh(geometry, material);
+mesh.updateMatrixWorld();
+const ray = new Raycaster(new Vector3(0, 1, -0.4375), new Vector3(0, -1, 0));
+check(ray.intersectObject(mesh).length === 0, "hand slot is an actual through opening");
+ray.set(new Vector3(0.29, 1, -0.4375), new Vector3(0, -1, 0));
+check(ray.intersectObject(mesh).length > 0, "solid shell remains beside the hand slot");
+for (const [name, part] of [["frame", createLymphaFrameGeometry()], ["cushion", createLymphaCushionGeometry()]]) {
+  const b = part.boundingBox;
+  check(b.min.y >= -1e-7, name + " does not penetrate the paving");
+  check(b.max.y <= DECK_CHAISE_MODEL.height + DECK_CHAISE_MODEL.cushionAllowance, name + " within reserved camera envelope");
+  check(b.min.x >= -model.width / 2 && b.max.x <= model.width / 2 && b.min.z >= -model.length / 2 && b.max.z <= model.length / 2, name + " within reserved footprint");
+  check(Array.from(part.getAttribute("position").array).every(Number.isFinite), name + " finite vertices");
+  part.dispose();
+}
+material.dispose();
 geometry.dispose();
 console.log(
-  JSON.stringify({ checks, meshTriangles: positions.count / 3, capacityReport }, null, 2),
+  JSON.stringify({ checks, meshTriangles: triangles, capacityReport }, null, 2),
 );

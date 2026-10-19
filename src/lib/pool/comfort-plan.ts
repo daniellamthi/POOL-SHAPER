@@ -8,7 +8,7 @@ import type { HydromassageVariant, Outline, PoolConfig, PoolFeatureId, PoolShape
 import type { InfinityExclusion } from "./walls";
 import { clearOfInfinityEdge, INFINITY_ACCESS_CLEARANCE } from "./infinity-access";
 import { infinityCrestY } from "./infinity-edge";
-import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT } from "./sun-shelf-model";
+import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT, SUN_SHELF_WATER_DEPTH } from "./sun-shelf-model";
 import { resolveSunShelfLoungers } from "./sun-shelf-loungers";
 
 export type ComfortKind = "sunShelf" | "integratedBench" | "hydromassage";
@@ -239,7 +239,7 @@ export function resolveComfortPlan({
     const crossMax = longX ? candidate.rect.maxZ : candidate.rect.maxX;
     const stairAtMin = !excludedWall(infinityExcluded, longX ? "z" : "x", longX ? bounds.minZ : bounds.minX);
     const center = stairAtMin ? crossMin + stairWidth / 2 : crossMax - stairWidth / 2;
-    const topY = waterY - 0.22;
+    const topY = waterY - (minimumRun ? SUN_SHELF_WATER_DEPTH : 0.22);
     // Solve against the floor at the actual landing, including its slope.
     for (let rises = 2; rises <= 16; rises++) {
       if (zone && rises !== zone.flight.rises) continue;
@@ -302,8 +302,8 @@ export function resolveComfortPlan({
     const element: ComfortElementPlan = {
       kind: "sunShelf",
       footprint: joinShell(rectOutline(rect)),
-      topY: waterY - 0.22,
-      waterDepth: 0.22,
+      topY: waterY - SUN_SHELF_WATER_DEPTH,
+      waterDepth: SUN_SHELF_WATER_DEPTH,
       width: longX ? rect.maxZ - rect.minZ : rect.maxX - rect.minX,
       run: shelf.totalRun,
       steps: shelf.steps.map(step => ({ ...step, footprint: joinShell(step.footprint) })),

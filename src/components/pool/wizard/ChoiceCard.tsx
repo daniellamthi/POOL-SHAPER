@@ -71,7 +71,7 @@ export function ChoiceCard({
               src={image}
               alt=""
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
+              className={cn("absolute inset-0 h-full w-full", imageFit === "contain" ? "object-contain" : "object-cover")}
             />
           ) : image ? (
             <span className="flex h-full w-full items-center justify-center p-1">{image}</span>
