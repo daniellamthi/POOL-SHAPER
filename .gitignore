@@ -35,3 +35,7 @@ dist-ssr
 # per-run "current" capture and any failure diff images are not).
 test-baselines/visual/*.current.png
 test-baselines/visual/*.diff.png
+
+# Impeccable engine binary and local settings
+.claude/skills/impeccable/scripts/bin/
+.claude/settings.local.json
