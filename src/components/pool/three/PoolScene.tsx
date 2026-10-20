@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { installDevelopmentInteractionTiming } from "@/lib/pool/development-interaction-timing";
+import { installDevelopmentGlDiagnostic } from "@/lib/pool/development-gl-diagnostic";
 import { OrbitControls, ContactShadows, Line, useProgress } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
@@ -84,6 +86,7 @@ import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
 import { renderQualityState, RENDER_QUALITY_IDLE_DELAY } from "@/lib/pool/renderQualityState";
 import { heroCaptureState } from "@/lib/project-delivery/heroCapture";
+import { projectBookHeroFrame } from "@/lib/project-delivery/hero-frame";
 
 export type { PhotoModeQuality };
 
@@ -156,6 +159,7 @@ export interface SceneProps {
   /** Export framing ignores DOM panels without changing the configured pool. */
   cleanCapture?: boolean;
   sunShelfLoungerCount?: number;
+  sunShelfRun?: number;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
 }
@@ -290,35 +294,50 @@ function HeroCaptureListener() {
 
 const HERO_CAPTURE_HEIGHT = 1100;
 const HERO_SETTLE_MS = 1500;
-/** Project Book cover box (297 x 150 mm). */
-const HERO_ASPECT = 297 / 150;
-
 /** Centre crop to the cover aspect, so the PDF never letterboxes. */
 function cropHero(source: HTMLCanvasElement): string {
   const { width, height } = source;
-  const cropW = Math.min(width, Math.round(height * HERO_ASPECT));
-  const cropH = Math.min(height, Math.round(cropW / HERO_ASPECT));
+  const frame = projectBookHeroFrame(width, height);
   const canvas = document.createElement("canvas");
-  canvas.width = cropW;
-  canvas.height = cropH;
+  canvas.width = Math.round(frame.width);
+  canvas.height = Math.round(frame.height);
   canvas
     .getContext("2d")
     ?.drawImage(
       source,
-      (width - cropW) / 2,
-      (height - cropH) / 2,
-      cropW,
-      cropH,
+      frame.left,
+      frame.top,
+      frame.width,
+      frame.height,
       0,
       0,
-      cropW,
-      cropH,
+      canvas.width,
+      canvas.height,
     );
   return canvas.toDataURL("image/jpeg", 0.9);
 }
 
 function DevelopmentRendererMetrics() {
+  useEffect(installDevelopmentInteractionTiming, []);
   const gl = useThree((state) => state.gl);
+  useEffect(() => installDevelopmentGlDiagnostic(gl.getContext()), [gl]);
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("qaGlDiagnostic") === "1") console.debug("[Pool3D GL capability]", JSON.stringify({ KHR_parallel_shader_compile: gl.extensions.has("KHR_parallel_shader_compile") })); }, [gl]);
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has("qaRenderDiagnostics")) return;
+    const original = gl.render;
+    let budget = 12;
+    gl.render = function (...args) {
+      const start = performance.now();
+      try { return original.apply(this, args); }
+      finally {
+        const durationMs = performance.now() - start;
+        if (durationMs > 40 && budget-- > 0) console.debug("[Pool3D render diagnostic]", JSON.stringify({
+          durationMs: Number(durationMs.toFixed(2)), programs: gl.info.programs?.length,
+        }));
+      }
+    };
+    return () => { gl.render = original; };
+  }, [gl]);
   const elapsed = useRef(0);
   const frames = useRef(0);
   const frameTimes = useRef<number[]>([]);
@@ -339,9 +358,12 @@ function DevelopmentRendererMetrics() {
     const sorted = frameTimes.current.sort((a, b) => a - b);
     const percentile = (p: number) => Number(sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))]!.toFixed(2));
     const context = gl.getContext() as WebGL2RenderingContext;
+    const inspectionStarted = performance.now();
+    let newlyInspected = 0;
     for (const program of gl.info.programs ?? []) {
       if (inspectedPrograms.current.has(program.id)) continue;
       inspectedPrograms.current.add(program.id);
+      newlyInspected++;
       const samplers: string[] = [];
       const handle = program.program as WebGLProgram;
       const count = context.getProgramParameter(handle, context.ACTIVE_UNIFORMS) as number;
@@ -355,6 +377,9 @@ function DevelopmentRendererMetrics() {
         console.debug("[Pool3D sampler budget]", JSON.stringify({ count: samplers.length, limit: gl.capabilities.maxTextures, samplers }));
       }
     }
+    if (new URLSearchParams(window.location.search).has("qaRenderDiagnostics") && newlyInspected) console.debug("[Pool3D sampler diagnostic]", JSON.stringify({
+      durationMs: Number((performance.now() - inspectionStarted).toFixed(2)), newlyInspected,
+    }));
     console.debug(
       "[Pool3D performance]",
       JSON.stringify({
@@ -623,7 +648,7 @@ function CameraRig({
     return subject ? componentCameraAspect(subject.points, subject.direction) : undefined;
   }, [focus, resolvedLayout, layout, outline, shelfLoungerEnvelope, infinityZone, skimmers, ledRow, externalStairPlan, coverSubject, planBounds, compactPlan, interiorSubject, wholeSubject]);
   const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[data-config-summary]')?.getBoundingClientRect() : null;
-  const visibleFrame = cleanCapture ? { left: 0, top: 0, width: viewportSize.width, height: viewportSize.height } : visibleCameraFrame(canvas.getBoundingClientRect(), [
+  const visibleFrame = cleanCapture ? projectBookHeroFrame(viewportSize.width, viewportSize.height) : visibleCameraFrame(canvas.getBoundingClientRect(), [
     ...Array.from(occluderRoot.querySelectorAll(occluderSelector)).map(element => element.getBoundingClientRect()),
     ...(summaryRect ? [summaryRect] : []),
   ], subjectAspect);
@@ -1078,6 +1103,7 @@ export default function PoolScene({
   photoMode,
   cleanCapture = false,
   sunShelfLoungerCount,
+  sunShelfRun,
   photoModeQuality,
   onPhotoModeUnsupported,
 }: SceneProps) {
@@ -1124,6 +1150,7 @@ export default function PoolScene({
           floorProfile: floorProfileSetting,
           ...(shallowDepth !== undefined ? { shallowDepth } : {}),
           ...(slopeReversed !== undefined ? { slopeReversed } : {}),
+          ...(sunShelfRun !== undefined ? { sunShelfRun } : {}),
         },
         verticalLayout,
         sunShelf: features.includes("sunShelf") || features.includes("hydromassage"),
@@ -1140,6 +1167,7 @@ export default function PoolScene({
       floorProfileSetting,
       shallowDepth,
       slopeReversed,
+      sunShelfRun,
       verticalLayout,
       features,
       system,
@@ -1192,6 +1220,7 @@ export default function PoolScene({
         features,
         hydromassageVariant,
         nominalWidth: width,
+        sunShelfRun,
         infinityWallType: normalisedInfinityEdge?.wallType,
         system,
         overflowType,
@@ -1213,6 +1242,7 @@ export default function PoolScene({
       features,
       hydromassageVariant,
       width,
+      sunShelfRun,
       normalisedInfinityEdge?.wallType,
       system,
       poolAccess,

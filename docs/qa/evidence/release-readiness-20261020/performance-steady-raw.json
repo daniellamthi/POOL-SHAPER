@@ -1,0 +1,264 @@
+{
+  "createdAt": "2026-10-20T12:57:59.671Z",
+  "method": "Existing DEV two-second telemetry, three alternating matched pairs; no profiler, no browser-native EventTiming exposed",
+  "samples": [
+    {
+      "checkout": "baseline",
+      "pair": 1,
+      "configurationDOM": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "camera": {
+        "data": {
+          "cameraFocus": "review",
+          "cameraProjection": "perspective",
+          "engine": "three.js r185"
+        },
+        "dpr": 1,
+        "rect": {
+          "bottom": 900,
+          "height": 900,
+          "left": 0,
+          "right": 1440,
+          "top": 0,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        }
+      },
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.8,\"frameTimeMs\":8.21,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":9,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":55,\"textures\":36,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:54:12.129Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.8,\"frameTimeMs\":8.21,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":8.9,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":55,\"textures\":36,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:54:14.159Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":122.1,\"frameTimeMs\":8.19,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":9.2,\"frameCount\":245,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":55,\"textures\":36,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:54:16.201Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        }
+      ]
+    },
+    {
+      "checkout": "candidate",
+      "pair": 1,
+      "configurationDOM": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "camera": {
+        "data": {
+          "cameraFocus": "review",
+          "cameraProjection": "perspective",
+          "engine": "three.js r185"
+        },
+        "dpr": 1,
+        "rect": {
+          "bottom": 900,
+          "height": 900,
+          "left": 0,
+          "right": 1440,
+          "top": 0,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        }
+      },
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.7,\"frameTimeMs\":8.22,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9.8,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":55,\"textures\":36,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:55:45.355Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":122,\"frameTimeMs\":8.2,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":10.9,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":55,\"textures\":36,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:55:47.390Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.7,\"frameTimeMs\":8.22,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":8.9,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":55,\"textures\":36,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:55:49.421Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        }
+      ]
+    },
+    {
+      "checkout": "baseline",
+      "pair": 2,
+      "configurationDOM": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "camera": {
+        "data": {
+          "cameraFocus": "review",
+          "cameraProjection": "perspective",
+          "engine": "three.js r185"
+        },
+        "dpr": 1,
+        "rect": {
+          "bottom": 900,
+          "height": 900,
+          "left": 0,
+          "right": 1440,
+          "top": 0,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        }
+      },
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.3,\"frameTimeMs\":8.25,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:56:19.467Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.4,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":4,\"triangles\":3088,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:56:21.493Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.5,\"frameTimeMs\":8.23,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:56:23.520Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        }
+      ]
+    },
+    {
+      "checkout": "candidate",
+      "pair": 2,
+      "configurationDOM": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "camera": {
+        "data": {
+          "cameraFocus": "review",
+          "cameraProjection": "perspective",
+          "engine": "three.js r185"
+        },
+        "dpr": 1,
+        "rect": {
+          "bottom": 900,
+          "height": 900,
+          "left": 0,
+          "right": 1440,
+          "top": 0,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        }
+      },
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.4,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":8.6,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:56:47.533Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.5,\"frameTimeMs\":8.23,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:56:49.570Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.5,\"frameTimeMs\":8.23,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9,\"frameCount\":244,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:56:51.601Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        }
+      ]
+    },
+    {
+      "checkout": "baseline",
+      "pair": 3,
+      "configurationDOM": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "camera": {
+        "data": {
+          "cameraFocus": "review",
+          "cameraProjection": "perspective",
+          "engine": "three.js r185"
+        },
+        "dpr": 1,
+        "rect": {
+          "bottom": 900,
+          "height": 900,
+          "left": 0,
+          "right": 1440,
+          "top": 0,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        }
+      },
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.4,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":9.2,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:57:14.908Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.4,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":4,\"triangles\":3088,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:57:16.934Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.5,\"frameTimeMs\":8.23,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":8.9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":53,\"textures\":29,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:57:18.961Z",
+          "url": "http://127.0.0.1:3018/src/components/pool/three/PoolScene.tsx"
+        }
+      ]
+    },
+    {
+      "checkout": "candidate",
+      "pair": 3,
+      "configurationDOM": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "camera": {
+        "data": {
+          "cameraFocus": "review",
+          "cameraProjection": "perspective",
+          "engine": "three.js r185"
+        },
+        "dpr": 1,
+        "rect": {
+          "bottom": 900,
+          "height": 900,
+          "left": 0,
+          "right": 1440,
+          "top": 0,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        }
+      },
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.4,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9.2,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":52,\"textures\":27,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:57:54.904Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.4,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":8.9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":52,\"textures\":27,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:57:56.929Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        },
+        {
+          "level": "debug",
+          "message": "[Pool3D performance] {\"fps\":121.3,\"frameTimeMs\":8.24,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":9,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":79,\"triangles\":35558,\"geometries\":52,\"textures\":27,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":8,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+          "timestamp": "2026-10-20T12:57:58.955Z",
+          "url": "http://release-perf.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792498960436"
+        }
+      ]
+    }
+  ]
+}

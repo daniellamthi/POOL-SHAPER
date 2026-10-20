@@ -41,6 +41,7 @@ type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   hydromassageVariant?: HydromassageVariant | undefined;
   infinityWallType?: "traditional" | "glass" | undefined;
   nominalWidth?: number;
+  sunShelfRun?: number | undefined;
 };
 
 export function comfortFootprints(plan: ComfortPlan) {
@@ -191,6 +192,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     features: config.features,
     hydromassageVariant: config.hydromassageVariant,
     nominalWidth: config.dimensions.width,
+    sunShelfRun: config.dimensions.sunShelfRun,
     infinityWallType: config.system === "infinity" ? config.infinityEdge?.wallType : undefined,
     access: config.poolAccess,
     stairType: config.internalStairType ?? "linear",

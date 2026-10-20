@@ -1,0 +1,19 @@
+{
+  "source": "/Users/danielelamthi/Downloads/Project-Book-PW-VSWP-051E0V (1).pdf",
+  "project": "PW-VSWP-051E0V",
+  "sha256": "9dd2e988be2c39b3c8bf5247fd6a856d377fbb39b3bd83b2fd8241525fb9fed0",
+  "bytes": 1048141,
+  "pages": 7,
+  "allPagesHaveProjectIdentity": true,
+  "privateTokenTextMatches": 0,
+  "pageTexts": [
+    "PISCINE WELLNESS · POOL-SHAPER\nProject Book\nRistrutturazione · Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\nPROJECT ID\nPW-VSWP-051E0V\n20 ottobre 2026",
+    "PISCINE WELLNESS · PROJECT BOOK PW-VSWP-051E0V · 2\nIl progetto\nPiscina interrata · Skimmer — bordo classico · circa 48 m³ d'acqua\nPISCINA ESISTENTE\nTipologia Piscina interrata\nStruttura Cemento armato\nDimensioni Piscina rettangolare 8,00 × 4,00 m, profondità\n1,50 m\nFondo Piano\nAccesso esistente Scala interna angolare\nIMPIANTO ESISTENTE E PROPOSTA\nSistema esistente Skimmer — bordo classico\nSistema proposto Skimmer — bordo classico\nFattibilità Verifica tecnica in cantiere",
+    "PISCINE WELLNESS · PROJECT BOOK PW-VSWP-051E0V · 3\nMateriali e finiture\nRIVESTIMENTI E BORDO\nRivestimento esistente Liner PVC · Motion Sand Beach\nRivestimento proposto Mosaico 1\nBordo Conservato",
+    "PISCINE WELLNESS · PROJECT BOOK PW-VSWP-051E0V · 4\nLavori proposti e optional\nLAVORI PROPOSTI E OPTIONAL\nInterventi richiesti Rivestimento interno\nPRESENTAZIONE\nAnteprima Proposta indicativa, non progetto esecutivo\nMomento Notte",
+    "PISCINE WELLNESS · PROJECT BOOK PW-VSWP-051E0V · 5\nPianta e scheda tecnica\nL 8,00 m\nW 4,00 m\nProfondità 1,50 m\nSistema Skimmer\nStruttura Cemento armato\nVolume acqua 48,0 m³\nCalcolato\nSuperficie acqua 32,0 m²\nCalcolato\nSuperficie vasca base 68,0 m²\nCalcolata sul guscio base; comfort e dettagli esclusi.\nFinitura interna ca. 68,0 m² · stima\nSuperficie interna come stima iniziale; sfridi e dettagli di posa\nesclusi.\nLED 2 · disposizione automatica\nDa layout\nSkimmer 2 · posizionati\nDa layout\nMandate / scarichi Posizionamento da progettare\nPosizione e numero delle mandate richiedono il progetto\nidraulico. Scarichi di fondo e requisiti di aspirazione richiedono\nil progetto idraulico.\nCopertura Non selezionata\nDati di configurazione, non progetto esecutivo. Portate, aspirazioni, compensazione e compatibilità di\ncantiere richiedono verifica tecnica.\nDa definire con il consulente: Fattibilità degli interventi e sopralluogo · Preventivo su valutazione del\nconsulente, senza prezzi automatici",
+    "PISCINE WELLNESS · PROJECT BOOK PW-VSWP-051E0V · 6\nPresentazione\nGIORNO\n NOTTE\nStessa piscina, stessa vista: la luce del giorno e l'atmosfera della sera.",
+    "PISCINE WELLNESS · PROJECT BOOK PW-VSWP-051E0V · 7\nIl tuo progetto, sempre con te\nPROJECT ID\nPW-VSWP-051E0V\nInquadra il codice o apri il link per rivedere il progetto in 3D:\nhttp://release-fixtures-data.localhost:3003/?p=PW-VSWP-051E0V\nRichiedi la tua proposta\nUn consulente Piscine Wellness verifica configurazione, fattibilità e investimento. Cita il Project ID in ogni\ncomunicazione."
+  ],
+  "visualReview": "PASS scoped retest: root inspected all seven rendered pages plus full-resolution Day/Night page. Existing liner versus proposed Mosaico1/work scope and 8x4 geometry are distinctly reported; full pool/internal corner stair visible in both images, identity and local public link coherent. No invented automatic price or executable-engineering claim."
+}

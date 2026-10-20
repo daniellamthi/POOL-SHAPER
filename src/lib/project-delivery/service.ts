@@ -96,7 +96,7 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
     "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
     "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount",
   ]);
-  config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
+  config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "sunShelfRun", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
   if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection", "wallType"]);
   config.customer = DEFAULT_CUSTOMER;
   config.uploads = [];

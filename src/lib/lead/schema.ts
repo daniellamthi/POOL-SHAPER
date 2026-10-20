@@ -71,6 +71,8 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (!isFiniteNumberInRange(dimensions["length"], 0, 60)) return false;
   if (!isFiniteNumberInRange(dimensions["width"], 0, 60)) return false;
   if (!isFiniteNumberInRange(dimensions["depth"], 0, 10)) return false;
+  if (dimensions["sunShelfRun"] !== undefined &&
+    (!isFiniteNumberInRange(dimensions["sunShelfRun"], 0, Math.max(dimensions["length"] as number, dimensions["width"] as number)) || dimensions["sunShelfRun"] === 0)) return false;
   const cornerRadius = dimensions["cornerRadius"];
   if (typeof cornerRadius !== "number" || cornerRadius < 0 || cornerRadius > 1) return false;
   if (config["system"] === "infinity") {

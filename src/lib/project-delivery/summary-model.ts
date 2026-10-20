@@ -183,12 +183,13 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
   const formatNumber = (value: number, digits = 2) => localeNumber(value, locale, {minimumFractionDigits: digits, maximumFractionDigits: digits});
   const { config } = project;
   const { outline, metrics, skimmers } = projectGeometry(config);
+  const resolvedLayout = configuredPoolLayout(config);
   const technical = buildTechnicalPlan({
     config,
     outline,
     metrics,
     skimmers,
-    layout: configuredPoolLayout(config),
+    layout: resolvedLayout,
   });
   const cover = resolveAutomaticCover(config);
 
@@ -260,7 +261,9 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
             : "Idromassaggio A"
           : id === "externalStaircase" && config.poolType === "above-ground"
             ? `${POOL_FEATURE_LABEL[id]} — ${config.externalStairSide === "long" ? "lato lungo" : "lato corto"} · piattaforma prolungata inclusa`
-            : POOL_FEATURE_LABEL[id],
+            : id === "sunShelf" ? t("Sun Shelf · lunghezza complessiva {run} m", {
+                run: formatNumber(config.dimensions.sunShelfRun ?? resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.run ?? 0, 3),
+              }) : POOL_FEATURE_LABEL[id],
       ),
   ];
   const compatibilityIssues = comfortConfigurationIssues(config).map(issue => t(issue.reason));

@@ -1,0 +1,142 @@
+[
+  {
+    "name": "final-review-retest-en-mosaic-header-fixed",
+    "state": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool Reinforced concrete · 8.0 × 4.0 m\":\n        - generic: Pool\n        - generic: Reinforced concrete · 8.0 × 4.0 m\n      - button \"Water system Skimmer · High water level\":\n        - generic: Water system\n        - generic: Skimmer · High water level\n      - button \"Access & comfort Internal stairs · Sun shelf\":\n        - generic: Access & comfort\n        - generic: Internal stairs · Sun shelf\n      - button \"Finishes Mosaic · Mosaic 5\":\n        - generic: Finishes\n        - generic: Mosaic · Mosaic 5\n      - button \"Exterior Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm\":\n        - generic: Exterior\n        - generic: Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm\n      - button \"Options Heat pump\":\n        - generic: Options\n        - generic: Heat pump\n      - button \"Presentation In progress\":\n        - generic: Presentation\n        - generic: In progress\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [active] [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\" [pressed]:\n      - generic: Day\n    - button \"Night\":\n      - generic: Night\n  - button \"Start again\":\n    - generic: Start again\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan\n  - toolbar \"View tools\":\n    - button \"Guides\":\n      - text: Guides\n    - button \"Technical view\":\n      - text: Technical view\n    - button \"Reframe\":\n      - text: Reframe\n- 'region \"Step 7: Presentation\"':\n  - paragraph: \"Your finished pool: scene, summary and proposal request.\"\n  - tablist \"Presentation\":\n    - tab \"Scene\"\n    - tab \"Summary\" [selected]\n    - tab \"Request a proposal\"\n  - region \"Save and share\":\n    - paragraph: Your project\n    - paragraph:\n      - text: Shared project ·\n      - generic: PW-CNKX-R0VP19\n    - paragraph: \"Read-only: saving creates your own copy and preserves the original.\"\n    - img \"QR code for project PW-CNKX-R0VP19\"\n    - button \"Save a copy\":\n      - text: Save a copy\n    - button \"Share\":\n      - text: Share\n    - button \"Project Book PDF\":\n      - text: Project Book PDF\n    - paragraph: http://release-final-retest.localhost:3003/?p=PW-CNKX-R0VP19\n  - img \"Your configured pool\"\n  - paragraph: Your project\n  - heading \"rectangular pool 8.00 × 4.00 m, depth 1.50 m\" [level=2]\n  - paragraph: In-ground pool · Skimmer — classic edge · approx. 34 m³ of water\n  - paragraph: Project ID PW-CNKX-R0VP19\n  - heading \"Your pool\" [level=3]\n  - button \"Edit\"\n  - term: Type\n  - definition:\n    - generic: In-ground pool\n  - term: Structure\n  - definition:\n    - generic: Reinforced concrete\n  - term: Dimensions\n  - definition:\n    - generic: rectangular pool 8.00 × 4.00 m, depth 1.50 m\n  - heading \"Waterline\" [level=3]\n  - button \"Edit\"\n  - term: Hydraulic system\n  - definition:\n    - generic: Skimmer — classic edge\n  - term: Skimmer\n  - definition:\n    - generic: High water level · Satin steel\n  - heading \"Materials\" [level=3]\n  - button \"Edit\"\n  - term: Lining\n  - definition:\n    - generic: Mosaic 5\n    - generic: The water colour will reflect the selected mosaic shade\n  - term: Coping\n  - definition:\n    - generic: Pietra di Prun\n  - term: Paving\n  - definition:\n    - generic: Porcelain stoneware · Greige\n  - term: Paving size\n  - definition:\n    - generic: 60 × 60 cm\n    - generic: Reference dimensions for the visualisation; supply to be confirmed.\n  - heading \"Access and comfort\" [level=3]\n  - button \"Edit\"\n  - term: Included\n  - definition:\n    - generic: Sun shelf loungers · 2\n  - term: Included\n  - definition:\n    - generic: Integrated internal stairs — Straight internal stairs\n  - term: Included\n  - definition:\n    - generic: Sun shelf · total length 3.200 m\n  - heading \"Lighting\" [level=3]\n  - button \"Edit\"\n  - term: Stair options\n  - definition:\n    - generic: LED spotlights in the internal stair risers\n  - heading \"Options\" [level=3]\n  - button \"Edit\"\n  - term: Included\n  - definition:\n    - generic: Heat pump\n  - heading \"Presentation\" [level=3]\n  - button \"Edit\"\n  - term: Time of day\n  - definition:\n    - generic: Day\n  - heading \"To be agreed with your consultant\" [level=3]\n  - list:\n    - listitem: Heating capacity sizing\n    - listitem: Final equipment sizing\n  - generic \"View technical details\"\n  - 'button \"Next option: Request a proposal\"':\n    - text: \"Next option: Request a proposal\"\n  - button \"More options\":\n    - text: More options\n  - paragraph:\n    - text: Phase 07 of 07\n    - generic: · 2/3 · Summary\n  - heading \"Presentation\" [level=2]\n  - paragraph: 8.0 × 4.0 m · ready for a proposal\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue · Request a proposal\":\n    - text: Continue\n    - generic: · Request a proposal\n- region \"Notifications alt+T\"",
+    "data": {
+      "canvas": [
+        {
+          "data": {
+            "cameraFocus": "review",
+            "cameraProjection": "perspective",
+            "engine": "three.js r185"
+          },
+          "rect": {
+            "bottom": 900,
+            "height": 900,
+            "left": 0,
+            "right": 1440,
+            "top": 0,
+            "width": 1440,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "h1": "3D Pool Configurator",
+      "lang": "en",
+      "title": "Pool Studio — 3D Pool Configurator"
+    }
+  },
+  {
+    "name": "final-review-retest-en-led-intensity-fixed",
+    "state": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool Reinforced concrete · 8.0 × 4.0 m\":\n        - generic: Pool\n        - generic: Reinforced concrete · 8.0 × 4.0 m\n      - button \"Water system Skimmer · High water level\":\n        - generic: Water system\n        - generic: Skimmer · High water level\n      - button \"Access & comfort Internal stairs · Sun shelf\":\n        - generic: Access & comfort\n        - generic: Internal stairs · Sun shelf\n      - button \"Finishes In progress\":\n        - generic: Finishes\n        - generic: In progress\n      - button \"Exterior\":\n        - generic: Exterior\n      - button \"Options\":\n        - generic: Options\n      - button \"Presentation\":\n        - generic: Presentation\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\":\n      - generic: Day\n    - button \"Night\" [pressed]:\n      - generic: Night\n  - button \"Start again\":\n    - generic: Start again\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan\n  - toolbar \"View tools\":\n    - button \"Guides\":\n      - text: Guides\n    - button \"Technical view\":\n      - text: Technical view\n    - button \"Reframe\":\n      - text: Reframe\n- 'region \"Step 4: Finishes\"':\n  - paragraph: Underwater lights and their colour, with a night preview to assess them.\n  - tablist \"Water and lighting\":\n    - tab \"Lighting\"\n    - tab \"LED colour\" [selected]\n  - radiogroup \"Lighting preview\":\n    - generic: Preview\n    - radio \"Day\":\n      - text: Day\n    - radio \"Night\" [checked]:\n      - text: Night\n  - region \"LED colour\":\n    - heading \"LED colour\" [level=4]\n    - slider \"LED hue\"\n    - button \"White\" [pressed]: White\n    - status \"Selected LED colour\": Neutral white\n    - paragraph: Drag to choose a hue. Use the arrow keys for precise adjustment.\n    - generic \"LED colour presets\":\n      - button \"LED Blue\"\n      - button \"LED Cyan\"\n      - button \"LED Green\"\n      - button \"LED Red\"\n      - button \"LED Orange\"\n      - button \"LED Purple\"\n  - region \"LED brightness\":\n    - heading \"Light brightness\" [level=4]\n    - status: 75%\n    - slider \"LED brightness\": \"75\"\n    - group \"Quick levels\":\n      - button \"25%\"\n      - button \"50%\"\n      - button \"75%\" [active] [pressed]\n      - button \"100%\"\n    - paragraph: \"Adjust the actual light output: lens, beam and light in the water. Default 60%, for a typical evening scene.\"\n  - paragraph:\n    - text: Phase 04 of 07\n    - generic: · 2/2 · LED colour\n  - heading \"Finishes\" [level=2]\n  - paragraph: Night · Underwater LEDs + stair spotlights\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue · Exterior\":\n    - text: Continue\n    - generic: · Exterior\n- region \"Notifications alt+T\"",
+    "data": {
+      "canvas": [
+        {
+          "data": {
+            "cameraFocus": "features",
+            "cameraProjection": "perspective",
+            "engine": "three.js r185"
+          },
+          "rect": {
+            "bottom": 900,
+            "height": 900,
+            "left": 0,
+            "right": 1440,
+            "top": 0,
+            "width": 1440,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "h1": "3D Pool Configurator",
+      "lang": "en",
+      "title": "Pool Studio — 3D Pool Configurator"
+    }
+  },
+  {
+    "name": "final-review-retest-en-it-en-led-state",
+    "state": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool Reinforced concrete · 8.0 × 4.0 m\":\n        - generic: Pool\n        - generic: Reinforced concrete · 8.0 × 4.0 m\n      - button \"Water system Skimmer · High water level\":\n        - generic: Water system\n        - generic: Skimmer · High water level\n      - button \"Access & comfort Internal stairs · Sun shelf\":\n        - generic: Access & comfort\n        - generic: Internal stairs · Sun shelf\n      - button \"Finishes In progress\":\n        - generic: Finishes\n        - generic: In progress\n      - button \"Exterior\":\n        - generic: Exterior\n      - button \"Options\":\n        - generic: Options\n      - button \"Presentation\":\n        - generic: Presentation\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [active] [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\":\n      - generic: Day\n    - button \"Night\" [pressed]:\n      - generic: Night\n  - button \"Start again\":\n    - generic: Start again\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan\n  - toolbar \"View tools\":\n    - button \"Guides\":\n      - text: Guides\n    - button \"Technical view\":\n      - text: Technical view\n    - button \"Reframe\":\n      - text: Reframe\n- 'region \"Step 4: Finishes\"':\n  - paragraph: Underwater lights and their colour, with a night preview to assess them.\n  - tablist \"Water and lighting\":\n    - tab \"Lighting\"\n    - tab \"LED colour\" [selected]\n  - radiogroup \"Lighting preview\":\n    - generic: Preview\n    - radio \"Day\":\n      - text: Day\n    - radio \"Night\" [checked]:\n      - text: Night\n  - region \"LED colour\":\n    - heading \"LED colour\" [level=4]\n    - slider \"LED hue\"\n    - button \"White\" [pressed]: White\n    - status \"Selected LED colour\": Neutral white\n    - paragraph: Drag to choose a hue. Use the arrow keys for precise adjustment.\n    - generic \"LED colour presets\":\n      - button \"LED Blue\"\n      - button \"LED Cyan\"\n      - button \"LED Green\"\n      - button \"LED Red\"\n      - button \"LED Orange\"\n      - button \"LED Purple\"\n  - region \"LED brightness\":\n    - heading \"Light brightness\" [level=4]\n    - status: 75%\n    - slider \"LED brightness\": \"75\"\n    - group \"Quick levels\":\n      - button \"25%\"\n      - button \"50%\"\n      - button \"75%\" [pressed]\n      - button \"100%\"\n    - paragraph: \"Adjust the actual light output: lens, beam and light in the water. Default 60%, for a typical evening scene.\"\n  - paragraph:\n    - text: Phase 04 of 07\n    - generic: · 2/2 · LED colour\n  - heading \"Finishes\" [level=2]\n  - paragraph: Night · Underwater LEDs + stair spotlights\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue · Exterior\":\n    - text: Continue\n    - generic: · Exterior\n- region \"Notifications alt+T\"",
+    "data": {
+      "canvas": [
+        {
+          "data": {
+            "cameraFocus": "features",
+            "cameraProjection": "perspective",
+            "engine": "three.js r185"
+          },
+          "rect": {
+            "bottom": 900,
+            "height": 900,
+            "left": 0,
+            "right": 1440,
+            "top": 0,
+            "width": 1440,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "h1": "3D Pool Configurator",
+      "lang": "en",
+      "title": "Pool Studio — 3D Pool Configurator"
+    }
+  },
+  {
+    "name": "final-review-retest-it-led-state",
+    "state": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [active] [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - tablist \"Acqua e luci\":\n    - tab \"Illuminazione\"\n    - tab \"Colore LED\" [selected]\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - region \"Colore LED\":\n    - heading \"Colore LED\" [level=4]\n    - slider \"Tonalità LED\"\n    - button \"Bianco\" [pressed]: Bianco\n    - status \"Colore LED selezionato\": Bianco neutro\n    - paragraph: Trascina per scegliere una tonalità. Le frecce regolano con precisione.\n    - generic \"Colori LED predefiniti\":\n      - button \"LED Blu\"\n      - button \"LED Ciano\"\n      - button \"LED Verde\"\n      - button \"LED Rosso\"\n      - button \"LED Arancio\"\n      - button \"LED Viola\"\n  - region \"Intensità luce LED\":\n    - heading \"Intensità luce\" [level=4]\n    - status: 75%\n    - slider \"Intensità luce LED\": \"75\"\n    - group \"Livelli rapidi\":\n      - button \"25%\"\n      - button \"50%\"\n      - button \"75%\" [pressed]\n      - button \"100%\"\n    - paragraph: \"Regola la resa reale dei fari: lente, fascio e luce nell'acqua. Predefinito 60%, come una serata tipo.\"\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 2/2 · Colore LED\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · LED subacquei + micro-spot scale\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+    "data": {
+      "canvas": [
+        {
+          "data": {
+            "cameraFocus": "features",
+            "cameraProjection": "perspective",
+            "engine": "three.js r185"
+          },
+          "rect": {
+            "bottom": 900,
+            "height": 900,
+            "left": 0,
+            "right": 1440,
+            "top": 0,
+            "width": 1440,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "h1": "Configuratore piscine 3D",
+      "lang": "it",
+      "title": "Pool Studio — Configuratore piscine 3D"
+    }
+  },
+  {
+    "name": "final-review-retest-renovation-mosaic5-stable-after",
+    "state": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Progetto\":\n        - generic: Progetto\n      - button \"Interventi\":\n        - generic: Interventi\n      - button \"Esistente\":\n        - generic: Esistente\n      - button \"Proposta\":\n        - generic: Proposta\n      - button \"Contatti\":\n        - generic: Contatti\n      - button \"Riepilogo\" [disabled]:\n        - generic: Riepilogo\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Lavori proposti\"':\n  - paragraph: Solo le lavorazioni richieste, con materiali dal nostro catalogo. Nessun prezzo automatico.\n  - tablist \"Confronto piscina\":\n    - tab \"Prima · esistente\"\n    - tab \"Dopo · proposta\" [selected]\n  - paragraph: \"Anteprima indicativa: gli interventi su impianti e ripristini richiedono verifica in cantiere.\"\n  - group \"Nuovo rivestimento\":\n    - button \"Liner PVC\":\n      - generic: Liner PVC\n    - button \"Mosaico\" [pressed]:\n      - generic: Mosaico\n  - paragraph: Finitura proposta\n  - group \"Mosaici del catalogo\":\n    - button \"Mosaico 1\":\n      - generic: Mosaico 1\n    - button \"Mosaico 2\":\n      - generic: Mosaico 2\n    - button \"Mosaico 3\":\n      - generic: Mosaico 3\n    - button \"Mosaico 4\":\n      - generic: Mosaico 4\n    - button \"Mosaico 5\" [pressed]:\n      - generic: Mosaico 5\n    - button \"Mosaico 6\":\n      - generic: Mosaico 6\n    - button \"Mosaico 7\":\n      - generic: Mosaico 7\n    - button \"Mosaico 8\":\n      - generic: Mosaico 8\n    - button \"Mosaico 9\":\n      - generic: Mosaico 9\n  - paragraph: \"Campioni reali del catalogo. Il catalogo non fornisce nomi commerciali: gli identificativi tecnici restano nei dati del progetto.\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 06\n    - generic: · 1/1 · Nuovo rivestimento\n  - heading \"Lavori proposti\" [level=2]\n  - paragraph: Proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Contatti e località\":\n    - text: Continua\n    - generic: · Contatti e località\n- region \"Notifications alt+T\"",
+    "data": {
+      "canvas": [
+        {
+          "data": {
+            "cameraFocus": "mosaic",
+            "cameraProjection": "perspective",
+            "engine": "three.js r185"
+          },
+          "rect": {
+            "bottom": 900,
+            "height": 900,
+            "left": 0,
+            "right": 1440,
+            "top": 0,
+            "width": 1440,
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "h1": "Configuratore piscine 3D",
+      "lang": "it",
+      "title": "Pool Studio — Configuratore piscine 3D"
+    }
+  }
+]

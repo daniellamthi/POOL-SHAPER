@@ -141,6 +141,9 @@ export interface Dimensions {
    * outline's minimum-X wall. true: swapped via "Inverti pendenza" without
    * changing the two depth values themselves. */
   slopeReversed?: boolean;
+  /** Requested Sun Shelf + flight run in metres. Absent on legacy projects:
+   * keep the approved derived layout. Never silently clamp after a resize. */
+  sunShelfRun?: number;
   /** L-shape only (`shape === "l-shape"`): `length`/`width` above are read as
    * the OUTER bounding rectangle for the L, and these three fields describe
    * the corner rectangle removed from it. Absent for every other shape --

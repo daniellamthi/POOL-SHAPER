@@ -59,10 +59,10 @@ function PrivacyPolicy() {
       <div className="flex flex-col gap-8">
         <Section title="1. Titolare del trattamento">
           <p>
-            <Placeholder>Ragione sociale completa di Piscine Wellness</Placeholder>{t(", con sede in")}{" "}{" "}
-            <Placeholder>indirizzo sede legale</Placeholder>{t(", P.IVA/C.F.")}{" "}{" "}
-            <Placeholder>numero P.IVA</Placeholder>{t(", contattabile all'indirizzo")}{" "}{" "}
-            <Placeholder>email privacy/DPO</Placeholder>.
+            PISCINE WELLNESS SRL{t(", con sede in")}{" "}{" "}
+            Via Caduti sul Lavoro 7, 37012 Bussolengo (VR){t(", P.IVA/C.F.")}{" "}{" "}
+            04764920239{t(", contattabile all'indirizzo")}{" "}{" "}
+            <a className="underline" href="mailto:info@piscinewellness.com">info@piscinewellness.com</a>.
           </p>
         </Section>
 
@@ -97,7 +97,7 @@ function PrivacyPolicy() {
 
         <Section title="6. I tuoi diritti">
           <p>
-            {t("Puoi richiedere in qualsiasi momento l'accesso, la rettifica, la cancellazione o la limitazione del trattamento dei tuoi dati, opporti al trattamento o richiederne la portabilità, scrivendo a")}{" "}<Placeholder>email privacy/DPO</Placeholder>{t(". Hai inoltre diritto di proporre reclamo al Garante per la Protezione dei Dati Personali.")}{" "}</p>
+            {t("Puoi richiedere in qualsiasi momento l'accesso, la rettifica, la cancellazione o la limitazione del trattamento dei tuoi dati, opporti al trattamento o richiederne la portabilità, scrivendo a")}{" "}<a className="underline" href="mailto:info@piscinewellness.com">info@piscinewellness.com</a>{t(". Hai inoltre diritto di proporre reclamo al Garante per la Protezione dei Dati Personali.")}{" "}</p>
         </Section>
 
         <Section title="7. Aggiornamenti">

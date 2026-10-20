@@ -1,0 +1,155 @@
+{
+  "status": "PASS",
+  "checks": 14760,
+  "cases": 7360,
+  "metricPointsChecked": 410320,
+  "beforeClippedCases": 3407,
+  "unavailableSides": 46,
+  "minimumFixedMarginPx": 16.110727097141364,
+  "coverage": "All integer-metre length3–25/width2–12 combinations, depths0.8/1.15/1.5, both valid external sides, five portrait/landscape viewports; not every0.1m slider tick",
+  "repro": [
+    {
+      "dimensions": [
+        8,
+        4,
+        1.5
+      ],
+      "side": "long",
+      "internalAccess": "corner",
+      "viewport": [
+        430,
+        932
+      ],
+      "crop": {
+        "left": 0,
+        "top": 357.4141414141414,
+        "width": 430,
+        "height": 217.17171717171718
+      },
+      "before": {
+        "completeSubject": {
+          "left": 37.20709272779713,
+          "right": 394.9825787867677,
+          "top": 382.78668070860135,
+          "bottom": 594.0495803239244,
+          "outsideCrop": 2,
+          "minimumMarginPx": -19.46372173806583
+        },
+        "exteriorEnvelope": {
+          "left": 103.21479032773645,
+          "right": 394.9825787867677,
+          "top": 423.2671472287691,
+          "bottom": 594.0495803239244,
+          "outsideCrop": 1,
+          "minimumMarginPx": -19.46372173806583
+        },
+        "metricTreads": {
+          "left": 106.59172075657828,
+          "right": 392.725560133367,
+          "top": 453.7594724410404,
+          "bottom": 589.8796552854408,
+          "outsideCrop": 8,
+          "minimumMarginPx": -15.29379669958223
+        }
+      },
+      "after": {
+        "completeSubject": {
+          "left": 106.92355681767577,
+          "right": 331.6372491386213,
+          "top": 420.4848512431807,
+          "bottom": 556.2266700858644,
+          "outsideCrop": 0,
+          "minimumMarginPx": 18.35918849999416
+        },
+        "exteriorEnvelope": {
+          "left": 134.065255589204,
+          "right": 331.6372491386213,
+          "top": 439.1974782959405,
+          "bottom": 556.2266700858644,
+          "outsideCrop": 0,
+          "minimumMarginPx": 18.35918849999416
+        },
+        "metricTreads": {
+          "left": 141.20750718898188,
+          "right": 327.6583043559689,
+          "top": 458.479213300135,
+          "bottom": 553.6090214653626,
+          "outsideCrop": 0,
+          "minimumMarginPx": 20.97683712049593
+        }
+      }
+    },
+    {
+      "dimensions": [
+        8,
+        4,
+        1.5
+      ],
+      "side": "short",
+      "internalAccess": "corner",
+      "viewport": [
+        430,
+        932
+      ],
+      "crop": {
+        "left": 0,
+        "top": 357.4141414141414,
+        "width": 430,
+        "height": 217.17171717171718
+      },
+      "before": {
+        "completeSubject": {
+          "left": 35.145719972518954,
+          "right": 373.2964115637547,
+          "top": 358.0498020988217,
+          "bottom": 635.6597965208312,
+          "outsideCrop": 5,
+          "minimumMarginPx": -61.073937934972605
+        },
+        "exteriorEnvelope": {
+          "left": 35.145719972518954,
+          "right": 230.3072068678736,
+          "top": 472.99116281981344,
+          "bottom": 635.6597965208312,
+          "outsideCrop": 3,
+          "minimumMarginPx": -61.073937934972605
+        },
+        "metricTreads": {
+          "left": 37.862718851828305,
+          "right": 229.76876624579887,
+          "top": 508.85147911914754,
+          "bottom": 630.8765632487433,
+          "outsideCrop": 40,
+          "minimumMarginPx": -56.290704662884764
+        }
+      },
+      "after": {
+        "completeSubject": {
+          "left": 120.48763783334498,
+          "right": 285.2580054250947,
+          "top": 419.84705458279177,
+          "bottom": 556.3424413530072,
+          "outsideCrop": 0,
+          "minimumMarginPx": 18.243417232851357
+        },
+        "exteriorEnvelope": {
+          "left": 120.48763783334498,
+          "right": 223.31655639921394,
+          "top": 469.5731710678621,
+          "bottom": 556.3424413530072,
+          "outsideCrop": 0,
+          "minimumMarginPx": 18.243417232851357
+        },
+        "metricTreads": {
+          "left": 123.64758629235884,
+          "right": 222.66498067211415,
+          "top": 487.52189237426836,
+          "bottom": 554.0343638487539,
+          "outsideCrop": 0,
+          "minimumMarginPx": 20.55149473710469
+        }
+      }
+    }
+  ],
+  "limitation": "Offline geometric projection and crop plumbing only; not a new PDF/browser capture, cloud verification, or performance PASS."
+}

@@ -119,6 +119,13 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // commercial email, quotation -- sees a real number instead of each having
   // to guess a fallback of its own.
   const restored = config as PoolConfig;
+  // Preserve a positive requested run even when a later resize makes it
+  // incompatible; malformed persisted values must never reach numeric UI.
+  const shelfRun = restored.dimensions?.sunShelfRun;
+  if (shelfRun !== undefined &&
+      (typeof shelfRun !== "number" || !Number.isFinite(shelfRun) || shelfRun <= 0)) {
+    throw new Error("ProjectConfiguration: invalid sunShelfRun");
+  }
   // Do not silently redesign a retired product on restore.
   if (restored.shape === "organic") throw new Error("Progetto con forma organica non più supportato. Il file originale resta invariato.");
   const slopeNormalisedDimensions =

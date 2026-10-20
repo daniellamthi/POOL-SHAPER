@@ -55,6 +55,7 @@ import { EXTERIOR_PANEL_FINISHES, exteriorPanelFinish } from "@/lib/pool/above-g
 import { Illustration } from "./illustrations";
 import { ProductMedia, hasProductMedia } from "./product-media";
 import { configuredSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
+import { configuredSunShelfRange, sunShelfRunWithinRange } from "@/lib/pool/sun-shelf-range";
 import { useI18n } from "@/lib/i18n";
 
 /** What a tray may ask of the shell: point the camera at what is being edited,
@@ -466,6 +467,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     toggleInoxLadder,
     setExternalStairSide,
     setSunShelfLoungerCount,
+    setSunShelfRun,
     sunShelfNotice,
   } = useConfigurator();
   // Set when the customer turns the internal stair on in this visit, so the
@@ -538,6 +540,11 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
       features: normalizeComfortFeatures([...config.features, "hydromassage"], "hydromassage") }),
   })), [config]);
   const shelfElement = shelfProposal.elements.find(element => element.kind === "sunShelf");
+  // Include the complete configuration so a new layout dependency cannot
+  // leave the advertised interval stale. Locale-only renders reuse this value.
+  const shelfRange = useMemo(() => configuredSunShelfRange(config), [config]);
+  const requestedShelfRun = config.dimensions.sunShelfRun ?? shelfElement?.run ?? (shelfRange.available ? shelfRange.defaultRun : 0);
+  const shelfRunInvalid = shelfOn && !sunShelfRunWithinRange(shelfRange, requestedShelfRun);
   const ensureAccess = () => {
     if (config.poolAccess === null) {
       setInternalStairType("linear");
@@ -701,6 +708,23 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
           </ChoiceGrid>
           {!shelfProposal.availability.sunShelf.available ? <p role="status" className="text-xs text-muted-foreground">{t("Sun Shelf")}: {t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
           {!hydroProposal.availability.hydromassage.available ? <p role="status" className="text-xs text-muted-foreground">{t("Idromassaggio")}: {t(hydroProposal.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
+          {shelfOn && shelfRange.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions>
+            <DimensionControl label="Lunghezza spiaggetta e gradini" unit="m" step={0.005} precision={3}
+              value={requestedShelfRun} min={shelfRange.min} max={shelfRange.max} onChange={setSunShelfRun} />
+            <p className="text-xs text-muted-foreground">{t("Intervallo utile: {min}–{max} m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.", {
+              min: number(shelfRange.min, { maximumFractionDigits: 3 }), max: number(shelfRange.max, { maximumFractionDigits: 3 }),
+            })}</p>
+            <p className="text-xs text-muted-foreground">{t("Larghezza utile della spiaggetta: {width} m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.", {
+              width: number(shelfRange.width, { maximumFractionDigits: 3 }),
+            })}</p>
+            {shelfRunInvalid ? <div role="alert" className="flex flex-col items-start gap-2 text-xs text-destructive">
+              <p>{t("La misura della spiaggetta è conservata, ma non è compatibile con la vasca attuale. Modifica la misura o ripristina le dimensioni della piscina.")}</p>
+              <button type="button" className="underline underline-offset-4" onClick={() => setSunShelfRun(Math.min(shelfRange.max, Math.max(shelfRange.min, requestedShelfRun)))}>
+                {t("Applica una misura compatibile")}
+              </button>
+            </div> : null}
+          </div> : null}
+          {shelfOn && !shelfRange.available ? <p role="alert" className="text-xs text-destructive">{t(shelfRange.reason)}</p> : null}
           {shelfOn && shelfElement ? <p className="text-xs text-muted-foreground">{t("Spiaggetta: {run} m. Lunghezza di nuoto residua: {swim} m. Accesso separato di almeno 90 cm.", {
             run: number(shelfElement.run,{maximumFractionDigits:2}),
             swim: number(Math.max(config.dimensions.length,config.dimensions.width)-shelfElement.run,{maximumFractionDigits:2}),

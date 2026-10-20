@@ -140,6 +140,7 @@ export function resolveComfortPlan({
   hydromassageVariant = "closed",
   separateHydroAccess = false,
   nominalWidth,
+  sunShelfRun,
 }: {
   outline: Outline;
   shape: PoolShapeId;
@@ -156,6 +157,7 @@ export function resolveComfortPlan({
   separateHydroAccess?: boolean;
   /** Commercial width, independent of outline rotation/principal axis. */
   nominalWidth?: number;
+  sunShelfRun?: number | undefined;
 }): ComfortPlan {
   const unsupported =
     poolType !== "in-ground"
@@ -245,9 +247,10 @@ export function resolveComfortPlan({
       if (zone && rises !== zone.flight.rises) continue;
       const run = (rises - 1) * 0.3;
       const landingRun = minimumRun ? SUN_SHELF_LOUNGER_LAYOUT.backPassage + EDGE_INSET : 0.45;
-      const totalRun = zone?.flight.totalRun ?? Math.max(shelfRun, minimumRun, run + landingRun);
-      if (totalRun < minimumRun - 1e-7) continue;
-      if (totalRun + 2.4 > longSpan) continue;
+      const requiredRun = Math.max(shelfRun, minimumRun, run + landingRun);
+      const totalRun = minimumRun && sunShelfRun !== undefined ? sunShelfRun : zone?.flight.totalRun ?? requiredRun;
+      if (!Number.isFinite(totalRun) || totalRun < requiredRun - 1e-7) continue;
+      if (totalRun + 2.4 > longSpan + 1e-7) continue;
       const end = candidate.coordinate + direction * totalRun;
       const start = end - direction * run;
       const floorY = longX ? floorProfile.floorYAt(end, center) : floorProfile.floorYAt(center, end);
@@ -288,7 +291,9 @@ export function resolveComfortPlan({
       clearOfInfinityEdge(outline, infinityExcluded, rectOutline(candidate.rect)))
     .map(candidate => withSteps(candidate, minimumRun)).find(candidate => candidate !== null);
   const shelf = flightCandidate(SUN_SHELF_MIN_RUN);
-  if (!shelf) availability.sunShelf = { available: false, reason: "Nessuna testata libera da scala, accessi o bordo Infinity." };
+  if (!shelf) availability.sunShelf = { available: false, reason: sunShelfRun !== undefined
+    ? "Lunghezza della spiaggetta non compatibile con gradini, accessi e spazio residuo. Modifica la misura o ripristina le dimensioni della piscina."
+    : "Nessuna testata libera da scala, accessi o bordo Infinity." };
   else {
     const rect = shelf.rect;
     // Join the Infinity shelf and flight to the shell, not an inset floating block.

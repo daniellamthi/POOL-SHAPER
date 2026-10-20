@@ -48,9 +48,11 @@ export interface MosaicFinishDefinition {
 }
 
 export const MOSAIC_FINISHES: ReadonlyArray<MosaicFinishDefinition> = MOSAIC_ASSETS.map(
-  ({ id, name, filename }) => ({
+  ({ id, filename }, index) => ({
     id: id as MosaicFinishId,
-    name,
+    // Provisional customer numbering, not an invented commercial collection.
+    // The original technical ID and photographic asset remain unchanged.
+    name: `Mosaico ${index + 1}`,
     preview: mosaicTextureUrl(filename),
     texture: mosaicTextureUrl(filename),
     tileSize: mosaicModuleSize(filename),

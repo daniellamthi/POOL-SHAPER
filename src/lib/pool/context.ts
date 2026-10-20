@@ -83,6 +83,7 @@ export interface ConfiguratorContextValue {
   setMosaicFinish: (value: MosaicFinishId) => void;
   togglePoolFeature: (value: PoolFeatureId) => void;
   setSunShelfLoungerCount: (value: number) => void;
+  setSunShelfRun: (value: number) => void;
   sunShelfNotice: string | null;
   setLedColor: (value: string) => void;
   setLedIntensity: (value: number) => void;

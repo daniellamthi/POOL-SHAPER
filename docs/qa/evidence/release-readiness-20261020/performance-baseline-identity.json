@@ -1,0 +1,265 @@
+{
+  "status": "PASS",
+  "baseline": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-baseline-20261020-RtqXZ8",
+  "expectedHead": "0665d3b44bb0d25319f273397dea14825ff5f64a",
+  "archiveFiles": 853,
+  "backupManifestSHA256": "6739186be82781c53cdd59027ad5f6c3e5c00c4dae57876758a03c15af86b3ff",
+  "overlayCount": 40,
+  "verifiedOverlay": [
+    {
+      "name": "docs/qa/CUSTOMER_QA_20261015.md",
+      "bytes": 44412,
+      "sha256": "6694d650786f855d3430bde551ca41d44183ffbf3056e032fc14dd056479067c"
+    },
+    {
+      "name": "docs/qa/PREMIUM_CAMERA_QA.md",
+      "bytes": 124192,
+      "sha256": "1ab62bf19d93e1dfcd3235d6a111850af295e94294c17172c93e916ba92fb15c"
+    },
+    {
+      "name": "scripts/product-media-audit.mjs",
+      "bytes": 6274,
+      "sha256": "73a6367f93d125d070e7c5abd4fea90483d7515310a76a7da3ae858149138cfd"
+    },
+    {
+      "name": "src/components/pool/three/PoolModel.tsx",
+      "bytes": 69159,
+      "sha256": "a344c144a57bc1eb59b8ccc26667fd78d93df0964fa4db9fcf19bc6a7b8463d8"
+    },
+    {
+      "name": "src/components/pool/three/RawShellMaterial.tsx",
+      "bytes": 7621,
+      "sha256": "4957c6f1fcf146293c623e400e5a7958e2212e92227a3ee6c6fbf6c6972b1e40"
+    },
+    {
+      "name": "src/components/pool/wizard/product-media.tsx",
+      "bytes": 3664,
+      "sha256": "1687c83a8f74e277ab2c95ec15a14aa6b445e1f93b879e3a7b3052129c9a6135"
+    },
+    {
+      "name": "docs/qa/evidence/release-readiness-20261020/ux-matrix.md",
+      "bytes": 2959,
+      "sha256": "e42a7b994b77b37d0bcce0d15ececffe8f8461d976b6b003d9881908297eba9d"
+    },
+    {
+      "name": "public/product-photos/README.md",
+      "bytes": 2527,
+      "sha256": "8f15641d402c65c3d2448f691415377d0bfc81523fc8def79b7d6e8071478893"
+    },
+    {
+      "name": "public/product-photos/inox-ladder-480.jpg",
+      "bytes": 32654,
+      "sha256": "5c28b03fd6e11ad328c3414b42adf6cc8c942e885a571bbb90f39125048bb824"
+    },
+    {
+      "name": "public/product-photos/inox-ladder-960.jpg",
+      "bytes": 97826,
+      "sha256": "7b6ba0aac357d60694cf1935e012f42c1bea06e0f9514488489d657e61549723"
+    },
+    {
+      "name": "public/product-photos/manifest.json",
+      "bytes": 20635,
+      "sha256": "00fa7fe605440ad8e52ad0c1276b48cc12d7c45677a7b911b2a8787ba3063c09"
+    },
+    {
+      "name": "public/product-photos/outdoor-chaise-480.jpg",
+      "bytes": 39096,
+      "sha256": "f72c58ae0e68a3019006ae3a75476e021326d8e20c00bc3e126898c923e31b36"
+    },
+    {
+      "name": "public/product-photos/outdoor-chaise-960.jpg",
+      "bytes": 127379,
+      "sha256": "28c79d0abe3a9053467ac970588c0f5971806b62f30a4ba6dc611dce891a6004"
+    },
+    {
+      "name": "public/product-photos/prepared-files.json",
+      "bytes": 1812,
+      "sha256": "c2a9d29a401a4671cf4663a6470791f5727ef7898947cc2e96272719e8a1ed11"
+    },
+    {
+      "name": "public/product-photos/prun-256.jpg",
+      "bytes": 34625,
+      "sha256": "8c653bb69808559a1748e5335d9cc5c79bc9e374a103c553df3728e57cb2c3c0"
+    },
+    {
+      "name": "public/product-photos/prun-365.jpg",
+      "bytes": 57704,
+      "sha256": "c2ace8e7576c11b80a3547b7c4e6e4aada32af0695b4f4136a630ef6f2f7b779"
+    },
+    {
+      "name": "public/product-photos/sources.json",
+      "bytes": 8259,
+      "sha256": "454a0cb7cef081083f06ece364841f8b8d3be85988f7b2586e87d17b581c5315"
+    },
+    {
+      "name": "scripts/bench-lighting-regression.ts",
+      "bytes": 35464,
+      "sha256": "c21342e4b92710909dae71c14c283fae018d2cd27539c530df78a1dd9e61c540"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-access-h.ts",
+      "bytes": 2166,
+      "sha256": "5f352ce41020974ebf7c49c9c04d01c0f57abce50a2b735d624c482d68dc5e23"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-bench-ab.ts",
+      "bytes": 2532,
+      "sha256": "e35466f6e4565f64bd2bb85e4a86d13675cfd0582be50700ebc8f47259488913"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-bench-s.ts",
+      "bytes": 11062,
+      "sha256": "e1e2399a9d81f5c6806f99236aa6f4238c5bfe3c80920e1c218fe0a0ecc42576"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-bench-u.ts",
+      "bytes": 6988,
+      "sha256": "163ffa65dee1a50f62d640ffe94e126f78391544f5ecf334c37db3ad11d05537"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-infinity-waterline-r.ts",
+      "bytes": 7641,
+      "sha256": "d88dd48ef825341bc4a85fb7e0628028d2eded4e4d0ccdb311a3fe2af4e9c827"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-infinity-y.ts",
+      "bytes": 9608,
+      "sha256": "8a7db298a3a00e132baf93923ff939f8e486cdbfbb787829ef5c215cca247e52"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-interior-v.ts",
+      "bytes": 4217,
+      "sha256": "77968edb5b685e07fd1e010da35250e1cd3d59145d0529287b913ee11f5ec081"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-overview-o.ts",
+      "bytes": 8086,
+      "sha256": "790e5d689d9bc9a0d015789b57e9802a298e0f7672c5d8b3902989e7ee15d9e8"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-paving-m.ts",
+      "bytes": 2331,
+      "sha256": "0f5e81dace14d6f9894463e097c35986b311e346c8fe9ad152248390c45e0c8b"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-top-l.ts",
+      "bytes": 4637,
+      "sha256": "6795e2cc78f27f24d1c8fa516a9c4ab00ac8484817c4baacb0ea6a4b4a0948c5"
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-waterline-q.ts",
+      "bytes": 4969,
+      "sha256": "2ddcf9ca30bf70d94fee69ab20da0594343f0acc53d99f1572a20f7f8139b4b6"
+    },
+    {
+      "name": "scripts/hydro-glass-corner-audit.ts",
+      "bytes": 9100,
+      "sha256": "1c752277cf37d47435f2c75a83332e0de993b78931c00f3287cd1821df290554"
+    },
+    {
+      "name": "scripts/independent-photo-access-label-recheck.mjs",
+      "bytes": 5740,
+      "sha256": "63a9425ab633877da42e7af57ff3f5adcbd130325a257241b7f4502db7ecd31f"
+    },
+    {
+      "name": "scripts/independent-product-photo-qa.mjs",
+      "bytes": 17365,
+      "sha256": "cba316e0688e1c50e1ad83a4c9d618eeb6f63d8c3f40fc538f75f269fcefe556"
+    },
+    {
+      "name": "scripts/infinity-waterline-regression.ts",
+      "bytes": 14068,
+      "sha256": "a6b1d9f9c766242dac00364e5f8e5bee1e7269a7fcae783bdc0fe511ef4b14d0"
+    },
+    {
+      "name": "scripts/premium-camera-regression.ts",
+      "bytes": 246755,
+      "sha256": "d93f2fcbc30c53c8e644c5c2e088cbda37d7702fc30e1766b3959a625ab8c0b2"
+    },
+    {
+      "name": "scripts/prepare-product-photos.mjs",
+      "bytes": 5145,
+      "sha256": "72510674f4c3c60e110efa109881363a3b8198de8d9b9c402ec583aac1c89dac"
+    },
+    {
+      "name": "scripts/product-photo-mobile-diagnosis.mjs",
+      "bytes": 4521,
+      "sha256": "56ded080449bd1d0181f8a1e6b77e66f64295628293375df4a7e4968758391f4"
+    },
+    {
+      "name": "scripts/product-photo-performance.mjs",
+      "bytes": 8135,
+      "sha256": "d9b8b1335f38333155c3e774dc05aa7cebbe554b5622aec4065cc00000a4c25c"
+    },
+    {
+      "name": "scripts/run-hydro-glass-corner-audit.mjs",
+      "bytes": 513,
+      "sha256": "eac64c75f6b992315216842cff783f982c1ffcccfab951ad1d5554e075e4f9df"
+    },
+    {
+      "name": "scripts/run-premium-camera-regression.mjs",
+      "bytes": 5429,
+      "sha256": "3f1f1491308c053dff49dba63baf5af12492f430ee4914db46755f9724f2cd13"
+    },
+    {
+      "name": "src/lib/pool/product-photography.ts",
+      "bytes": 7435,
+      "sha256": "fbdff6b4c6d4b87a2c0a5b229cf1c7934425dc8687f08ee58bc826997532ff3f"
+    }
+  ],
+  "sourceFingerprints": [
+    {
+      "name": "src/components/pool/three/PoolScene.tsx",
+      "bytes": 80208,
+      "sha256": "7d4e8d00b5b3e6ff95425e7a59195262ffaaf359db25a32c5f033d022c345010"
+    },
+    {
+      "name": "src/lib/pool/camera.ts",
+      "bytes": 77847,
+      "sha256": "2e0bcb84332f335891992eb111816c8a7649b9ada568702c584e8e926843a746"
+    },
+    {
+      "name": "src/lib/pool/contextual-camera.ts",
+      "bytes": 7362,
+      "sha256": "b0f672b0529778044e35643e1e7910417ccb4a813a32e209e086aa95367ce338"
+    },
+    {
+      "name": "src/lib/pool/comfort-plan.ts",
+      "bytes": 27424,
+      "sha256": "087d7e311e41f146d18c3a7f380dad027a3aebde90429fd236fdf2a46e01b504"
+    },
+    {
+      "name": "src/lib/pool/sun-shelf-loungers.ts",
+      "bytes": 12236,
+      "sha256": "adf906cc959e2e6e81e2d566810ba720f5872f1430ad47f3004bc81a839109a9"
+    },
+    {
+      "name": "src/lib/pool/store.tsx",
+      "bytes": 44072,
+      "sha256": "9785f8874f4465f54f9e705f39f454c4c0e212550bf795825066170f20b116e6"
+    },
+    {
+      "name": "src/lib/pool/types.ts",
+      "bytes": 11231,
+      "sha256": "c05fff80b0189d465d69c08deb74623d221b0001dd1e5aba98c3edfdc6e49bd8"
+    },
+    {
+      "name": "src/lib/pool/project.ts",
+      "bytes": 13316,
+      "sha256": "32bb5e1fee7d22d5beeb323ec23b00fd93c0440257c26b93abbb44c3d2e1a759"
+    },
+    {
+      "name": "package.json",
+      "bytes": 4608,
+      "sha256": "1d317ca281c9eb7c7b451a1861c820c89d294533206617be2a0602233859ab34"
+    },
+    {
+      "name": "vite.config.ts",
+      "bytes": 1466,
+      "sha256": "07f34bee66359ad0fb103e50ec387b102307eeff8a3b0a0b53da015f812cfc15"
+    }
+  ],
+  "nodeModules": "/Users/danielelamthi/Documents/Codex/2026-09-14/rendi-la-immagine-1-piu-relistica-4/pool-shaper-build2-recovered-20261010/node_modules",
+  "secretsCopied": false,
+  "archiveMethod": "git archive piped to tar; no archive buffered"
+}

@@ -1,0 +1,627 @@
+[
+  {
+    "name": "camera-shelf-min-two-loungers-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort In corso\":\n        - generic: Accesso & comfort\n        - generic: In corso\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\"\n    - tab \"Optional per la spiaggetta\" [selected]\n  - group \"Optional per la spiaggetta\":\n    - button \"Lettini per spiaggetta\" [active] [pressed]:\n      - generic: Lettini per spiaggetta\n      - generic: Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.\n      - text: Aggiunto\n  - paragraph: \"Quantità consentite: da 1 a 2.\"\n  - text: Quantità lettini\n  - combobox \"Quantità lettini\":\n    - option \"1\"\n    - option \"2\" [selected]\n  - paragraph: Anteprima 3D dimensionale; modello e fornitura da confermare. 1,85 ×0,73 m.\n  - paragraph:\n    - generic: Per il tuo Sun shelf · compare solo con questa scelta\n  - group \"Panca integrata\":\n    - button \"Panca integrata\":\n      - generic: Panca integrata\n      - generic: Seduta sommersa lungo parete.\n      - text: Aggiungi\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 4/4 · Optional per la spiaggetta\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Finiture\":\n    - text: Continua\n    - generic: · Finiture\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "shelf",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-shelf-max-two-loungers-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort In corso\":\n        - generic: Accesso & comfort\n        - generic: In corso\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n    - tab \"Optional per la spiaggetta\"\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\" [pressed]:\n      - generic \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - img \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - generic: Foto non disponibile\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\":\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - generic: Lunghezza spiaggetta e gradini\n  - spinbutton \"Lunghezza spiaggetta e gradini\" [active]: \"5.6\"\n  - generic: m\n  - generic \"Lunghezza spiaggetta e gradini\":\n    - slider\n  - generic: 3,035 m\n  - generic: 5,6 m\n  - paragraph: \"Intervallo utile: 3,035–5,6 m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.\"\n  - paragraph: \"Larghezza utile della spiaggetta: 2,73 m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.\"\n  - paragraph: \"Spiaggetta: 5,6 m. Lunghezza di nuoto residua: 2,4 m. Accesso separato di almeno 90 cm.\"\n  - 'button \"Prossima scelta: Optional per la spiaggetta\"':\n    - text: \"Prossima scelta: Optional per la spiaggetta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/4 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Optional per la spiaggetta\":\n    - text: Continua\n    - generic: · Optional per la spiaggetta\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "shelf",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-shelf-min-two-loungers-390",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n    - tab \"Optional per la spiaggetta\"\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\" [pressed]:\n      - generic \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - img \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - generic: Foto non disponibile\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\":\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - generic: Lunghezza spiaggetta e gradini\n  - spinbutton \"Lunghezza spiaggetta e gradini\" [active]: \"3.035\"\n  - generic: m\n  - generic \"Lunghezza spiaggetta e gradini\":\n    - slider\n  - generic: 3,035 m\n  - generic: 5,6 m\n  - paragraph: \"Intervallo utile: 3,035–5,6 m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.\"\n  - paragraph: \"Larghezza utile della spiaggetta: 2,73 m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.\"\n  - paragraph: \"Spiaggetta: 3,04 m. Lunghezza di nuoto residua: 4,97 m. Accesso separato di almeno 90 cm.\"\n  - 'button \"Prossima scelta: Optional per la spiaggetta\"':\n    - text: \"Prossima scelta: Optional per la spiaggetta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/4 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 844,
+        "height": 844,
+        "left": 0,
+        "right": 390,
+        "top": 0,
+        "width": 390,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "shelf",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  },
+  {
+    "name": "camera-shelf-max-two-loungers-390",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n    - tab \"Optional per la spiaggetta\"\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\" [pressed]:\n      - generic \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - img \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - generic: Foto non disponibile\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\":\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - generic: Lunghezza spiaggetta e gradini\n  - spinbutton \"Lunghezza spiaggetta e gradini\" [active]: \"5.6\"\n  - generic: m\n  - generic \"Lunghezza spiaggetta e gradini\":\n    - slider\n  - generic: 3,035 m\n  - generic: 5,6 m\n  - paragraph: \"Intervallo utile: 3,035–5,6 m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.\"\n  - paragraph: \"Larghezza utile della spiaggetta: 2,73 m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.\"\n  - paragraph: \"Spiaggetta: 5,6 m. Lunghezza di nuoto residua: 2,4 m. Accesso separato di almeno 90 cm.\"\n  - 'button \"Prossima scelta: Optional per la spiaggetta\"':\n    - text: \"Prossima scelta: Optional per la spiaggetta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/4 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 844,
+        "height": 844,
+        "left": 0,
+        "right": 390,
+        "top": 0,
+        "width": 390,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "shelf",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  },
+  {
+    "name": "camera-shelf-max-two-loungers-430",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n    - tab \"Optional per la spiaggetta\"\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\" [pressed]:\n      - generic \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - img \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - generic: Foto non disponibile\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\":\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - generic: Lunghezza spiaggetta e gradini\n  - spinbutton \"Lunghezza spiaggetta e gradini\" [active]: \"5.6\"\n  - generic: m\n  - generic \"Lunghezza spiaggetta e gradini\":\n    - slider\n  - generic: 3,035 m\n  - generic: 5,6 m\n  - paragraph: \"Intervallo utile: 3,035–5,6 m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.\"\n  - paragraph: \"Larghezza utile della spiaggetta: 2,73 m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.\"\n  - paragraph: \"Spiaggetta: 5,6 m. Lunghezza di nuoto residua: 2,4 m. Accesso separato di almeno 90 cm.\"\n  - 'button \"Prossima scelta: Optional per la spiaggetta\"':\n    - text: \"Prossima scelta: Optional per la spiaggetta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/4 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 932,
+        "height": 932,
+        "left": 0,
+        "right": 430,
+        "top": 0,
+        "width": 430,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "shelf",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        430,
+        932
+      ]
+    }
+  },
+  {
+    "name": "camera-shelf-min-two-loungers-430",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n    - tab \"Optional per la spiaggetta\"\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\" [pressed]:\n      - generic \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - img \"Foto non disponibile. Manca una fotografia del prodotto corretto con diritti d’uso verificati. L’eventuale disegno è schematico, non una fotografia.\":\n        - generic: Foto non disponibile\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\":\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - generic: Lunghezza spiaggetta e gradini\n  - spinbutton \"Lunghezza spiaggetta e gradini\" [active]: \"3.035\"\n  - generic: m\n  - generic \"Lunghezza spiaggetta e gradini\":\n    - slider\n  - generic: 3,035 m\n  - generic: 5,6 m\n  - paragraph: \"Intervallo utile: 3,035–5,6 m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.\"\n  - paragraph: \"Larghezza utile della spiaggetta: 2,73 m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.\"\n  - paragraph: \"Spiaggetta: 3,04 m. Lunghezza di nuoto residua: 4,97 m. Accesso separato di almeno 90 cm.\"\n  - 'button \"Prossima scelta: Optional per la spiaggetta\"':\n    - text: \"Prossima scelta: Optional per la spiaggetta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/4 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 932,
+        "height": 932,
+        "left": 0,
+        "right": 430,
+        "top": 0,
+        "width": 430,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "shelf",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        430,
+        932
+      ]
+    }
+  },
+  {
+    "name": "camera-general-shelf-430-open",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\":\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\" [active]:\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 932,
+        "height": 932,
+        "left": 0,
+        "right": 430,
+        "top": 0,
+        "width": 430,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "review",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        430,
+        932
+      ]
+    }
+  },
+  {
+    "name": "camera-general-shelf-430-collapsed",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 932,
+        "height": 932,
+        "left": 0,
+        "right": 430,
+        "top": 0,
+        "width": 430,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "review",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        430,
+        932
+      ]
+    }
+  },
+  {
+    "name": "camera-general-shelf-390-collapsed",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\" [active]:\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\":\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 844,
+        "height": 844,
+        "left": 0,
+        "right": 390,
+        "top": 0,
+        "width": 390,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "review",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-traditional-side1-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\" [active] [pressed]\n    - button \"Lato 2\"\n    - button \"Lato 3\"\n    - button \"Lato 4\"\n    - paragraph: Lato 1\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\" [pressed]:\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\":\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-traditional-side2-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\"\n    - button \"Lato 2\" [active] [pressed]\n    - button \"Lato 3\"\n    - button \"Lato 4\"\n    - paragraph: Lato 2\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\" [pressed]:\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\":\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-traditional-side3-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\"\n    - button \"Lato 2\"\n    - button \"Lato 3\" [active] [pressed]\n    - button \"Lato 4\"\n    - paragraph: Lato 3\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\" [pressed]:\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\":\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-traditional-side4-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\"\n    - button \"Lato 2\"\n    - button \"Lato 3\"\n    - button \"Lato 4\" [active] [pressed]\n    - paragraph: Lato 4\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\" [pressed]:\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\":\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-glass-side4-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\"\n    - button \"Lato 2\"\n    - button \"Lato 3\"\n    - button \"Lato 4\" [pressed]\n    - paragraph: Lato 4\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\":\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\" [active] [pressed]:\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-glass-side3-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\"\n    - button \"Lato 2\"\n    - button \"Lato 3\" [active] [pressed]\n    - button \"Lato 4\"\n    - paragraph: Lato 3\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\":\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\" [pressed]:\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-glass-side2-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\"\n    - button \"Lato 2\" [active] [pressed]\n    - button \"Lato 3\"\n    - button \"Lato 4\"\n    - paragraph: Lato 2\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\":\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\" [pressed]:\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-glass-side1-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\":\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\"\n    - tab \"Lato Infinity\" [selected]\n  - group \"Selezione lato Infinity\":\n    - paragraph: Scegli il lato Infinity\n    - img \"Pianta della piscina con 4 lati selezionabili\"\n    - button \"Lato 1\" [active] [pressed]\n    - button \"Lato 2\"\n    - button \"Lato 3\"\n    - button \"Lato 4\"\n    - paragraph: Lato 1\n  - paragraph: Parete di sfioro\n  - group \"Parete di sfioro Infinity\":\n    - button \"Parete Infinity tradizionale\":\n      - generic: Parete Infinity tradizionale\n      - generic: Contenimento pieno.\n    - button \"Parete Infinity in vetro\" [pressed]:\n      - generic: Parete Infinity in vetro\n      - generic: Contenimento panoramico trasparente.\n  - paragraph: Soluzione progettuale soggetta a verifica strutturale.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 2/2 · Lato Infinity\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Accesso & comfort\":\n    - text: Continua\n    - generic: · Accesso & comfort\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "infinity",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-glass-general-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Infinity · lato scelto\":\n        - generic: Sistema acqua\n        - generic: Infinity · lato scelto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\" [active]:\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "review",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-infinity-glass-general-390",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\" [active]:\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\":\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 844,
+        "height": 844,
+        "left": 0,
+        "right": 390,
+        "top": 0,
+        "width": 390,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "review",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  },
+  {
+    "name": "camera-technical-infinity-390",
+    "snapshot": "- heading [level=1]: Configuratore piscine 3D\n- banner:\n  - navigation:\n    - list:\n      - button:\n        - generic: Piscina\n      - button:\n        - generic: Sistema acqua\n      - button:\n        - generic: Accesso & comfort\n      - button:\n        - generic: Finiture\n      - button:\n        - generic: Esterno\n      - button:\n        - generic: Optional\n      - button:\n        - generic: Presentazione\n  - button [pressed]: IT\n  - button: EN\n  - button [pressed]:\n    - generic: Giorno\n  - button:\n    - generic: Notte\n  - button:\n- main:\n  - generic: L 8.00 m\n  - generic: W 4.00 m\n  - generic: D 1.50 m\n  - button:\n    - text: Vista piscina\n  - generic: Dettaglio tecnico\n  - combobox\n  - button:\n    - text: Riquadra\n  - button:\n  - button:\n- region:\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading [level=2]: Presentazione\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button:\n    - text: Vedi la piscina\n  - button:\n    - text: Scegli le opzioni\n  - button:\n    - text: Indietro\n  - button:\n    - text: Continua\n- region \"Notifications alt+T\"\n- menu \"Altri strumenti\" [active]:\n  - menuitem \"Nascondi guide\"\n  - menuitem \"Chiudi vista tecnica\"",
+    "camera": {
+      "canvas": {
+        "bottom": 844,
+        "height": 844,
+        "left": 0,
+        "right": 390,
+        "top": 0,
+        "width": 390,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "top",
+        "cameraProjection": "orthographic",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  },
+  {
+    "name": "camera-technical-infinity-430",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - generic: L 8.00 m\n  - generic: W 4.00 m\n  - generic: D 1.50 m\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - generic: Dettaglio tecnico\n  - combobox \"Dettaglio tecnico\":\n    - option \"Esamina componente\" [disabled] [selected]\n    - option \"Bordo e raccolta\"\n    - option \"Mandate · da progettare\" [disabled]\n    - option \"Scarichi · da progettare\" [disabled]\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\" [active]:\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\":\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 932,
+        "height": 932,
+        "left": 0,
+        "right": 430,
+        "top": 0,
+        "width": 430,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "top",
+        "cameraProjection": "orthographic",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        430,
+        932
+      ]
+    }
+  },
+  {
+    "name": "camera-technical-infinity-390",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - generic: L 8.00 m\n  - generic: W 4.00 m\n  - generic: D 1.50 m\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - generic: Dettaglio tecnico\n  - combobox \"Dettaglio tecnico\":\n    - option \"Esamina componente\" [disabled] [selected]\n    - option \"Bordo e raccolta\"\n    - option \"Mandate · da progettare\" [disabled]\n    - option \"Scarichi · da progettare\" [disabled]\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\" [active]:\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Scegli le opzioni\":\n    - text: Scegli le opzioni\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 844,
+        "height": 844,
+        "left": 0,
+        "right": 390,
+        "top": 0,
+        "width": 390,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "top",
+        "cameraProjection": "orthographic",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  },
+  {
+    "name": "camera-led-short-side-infinity-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Infinity · lato scelto\":\n        - generic: Sistema acqua\n        - generic: Infinity · lato scelto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - tablist \"Acqua e luci\":\n    - tab \"Illuminazione\"\n    - tab \"Colore LED\" [selected]\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - region \"Colore LED\":\n    - heading \"Colore LED\" [level=4]\n    - slider \"Tonalità LED\"\n    - button \"Bianco\" [pressed]: Bianco\n    - status \"Colore LED selezionato\": Bianco neutro\n    - paragraph: Trascina per scegliere una tonalità. Le frecce regolano con precisione.\n    - generic \"Colori LED predefiniti\":\n      - button \"LED Blu\"\n      - button \"LED Ciano\"\n      - button \"LED Verde\"\n      - button \"LED Rosso\"\n      - button \"LED Arancio\"\n      - button \"LED Viola\"\n  - region \"Intensità luce LED\":\n    - heading \"Intensità luce\" [level=4]\n    - status: 60%\n    - slider \"Intensità luce LED\": \"60\"\n    - generic \"Livelli rapidi\":\n      - button \"25%\"\n      - button \"50%\"\n      - button \"75%\"\n      - button \"100%\"\n    - paragraph: \"Regola la resa reale dei fari: lente, fascio e luce nell'acqua. Predefinito 60%, come una serata tipo.\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 2/2 · Colore LED\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · LED subacquei\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "features",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-led-blue-short-side-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Infinity · lato scelto\":\n        - generic: Sistema acqua\n        - generic: Infinity · lato scelto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - tablist \"Acqua e luci\":\n    - tab \"Illuminazione\"\n    - tab \"Colore LED\" [selected]\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - region \"Colore LED\":\n    - heading \"Colore LED\" [level=4]\n    - slider \"Tonalità LED\"\n    - button \"Bianco\": Bianco\n    - status \"Colore LED selezionato\": \"#0040FF\"\n    - paragraph: Trascina per scegliere una tonalità. Le frecce regolano con precisione.\n    - generic \"Colori LED predefiniti\":\n      - button \"LED Blu\" [active] [pressed]\n      - button \"LED Ciano\"\n      - button \"LED Verde\"\n      - button \"LED Rosso\"\n      - button \"LED Arancio\"\n      - button \"LED Viola\"\n  - region \"Intensità luce LED\":\n    - heading \"Intensità luce\" [level=4]\n    - status: 60%\n    - slider \"Intensità luce LED\": \"60\"\n    - generic \"Livelli rapidi\":\n      - button \"25%\"\n      - button \"50%\"\n      - button \"75%\"\n      - button \"100%\"\n    - paragraph: \"Regola la resa reale dei fari: lente, fascio e luce nell'acqua. Predefinito 60%, come una serata tipo.\"\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 2/2 · Colore LED\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · LED subacquei\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "features",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  },
+  {
+    "name": "camera-micro-spots-infinity-1440",
+    "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Infinity · lato scelto\":\n        - generic: Sistema acqua\n        - generic: Infinity · lato scelto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - tablist \"Acqua e luci\":\n    - tab \"Illuminazione\" [selected]\n    - tab \"Colore LED\"\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\":\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\" [active] [pressed]:\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 6 micro-spot · nelle alzate\n    - button \"LED subacquei\" [pressed]:\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n      - generic: 2 fari · 32,0 m²\n  - 'button \"Prossima scelta: Colore LED\"':\n    - text: \"Prossima scelta: Colore LED\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/2 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · LED subacquei + micro-spot scale\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Colore LED\":\n    - text: Continua\n    - generic: · Colore LED\n- region \"Notifications alt+T\"",
+    "camera": {
+      "canvas": {
+        "bottom": 900,
+        "height": 900,
+        "left": 0,
+        "right": 1440,
+        "top": 0,
+        "width": 1440,
+        "x": 0,
+        "y": 0
+      },
+      "data": {
+        "cameraFocus": "stair-lighting",
+        "cameraProjection": "perspective",
+        "engine": "three.js r185"
+      },
+      "viewport": [
+        1440,
+        900
+      ]
+    }
+  }
+]

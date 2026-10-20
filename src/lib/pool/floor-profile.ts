@@ -28,15 +28,16 @@ import { infinityExclusion, type InfinityEdgeParams } from "./infinity-edge";
 import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT, SUN_SHELF_WATER_DEPTH } from "./sun-shelf-model";
 
 /** Shared shelf/flight dimensions; metres, not a pool-size-specific offset. */
-export function shelfStairDimensions(span: number, topY: number, floorY: number, minimumRun = 0) {
+export function shelfStairDimensions(span: number, topY: number, floorY: number, minimumRun = 0, requestedRun?: number) {
   const tread = 0.3;
   const shelfRun = Math.min(2.2, Math.max(1.2, span * 0.2), span - 2.4);
   for (let rises = 2; rises <= 16; rises++) {
     const riser = (topY - floorY) / rises;
     const run = (rises - 1) * tread;
     const landingRun = minimumRun ? SUN_SHELF_LOUNGER_LAYOUT.backPassage + 0.035 : 1.5 * tread;
-    const totalRun = Math.max(shelfRun, minimumRun, run + landingRun);
-    if (riser >= 0.15 && riser <= 0.24 && totalRun + 2.4 <= span)
+    const requiredRun = Math.max(shelfRun, minimumRun, run + landingRun);
+    const totalRun = requestedRun ?? requiredRun;
+    if (Number.isFinite(totalRun) && totalRun >= requiredRun - 1e-7 && riser >= 0.15 && riser <= 0.24 && totalRun + 2.4 <= span + 1e-7)
       return { rises, riser, run, totalRun, tread };
   }
   return null;
@@ -198,7 +199,8 @@ export function buildFloorProfile(params: {
     shallowAtMin = Math.abs(exclusion.coordinate - axisMax) < 0.08;
   const flight = params.sunShelf && shape === "rectangle" && Math.min(spanX, spanZ) >= 2.4
     ? shelfStairDimensions(span, verticalLayout.waterY - (params.twoLoungerShelf ? SUN_SHELF_WATER_DEPTH : 0.22), shallowFloorY,
-      params.twoLoungerShelf ? SUN_SHELF_MIN_RUN : 0) : null;
+      params.twoLoungerShelf ? SUN_SHELF_MIN_RUN : 0,
+      params.twoLoungerShelf ? dimensions.sunShelfRun : undefined) : null;
   const end = (shallowAtMin ? axisMin : axisMax) + (shallowAtMin ? 1 : -1) * (flight?.totalRun ?? 0);
   // One tread-sized level landing AFTER the final riser; the ramp starts here.
   const slopeStart = end + (shallowAtMin ? 1 : -1) * (flight?.tread ?? 0);

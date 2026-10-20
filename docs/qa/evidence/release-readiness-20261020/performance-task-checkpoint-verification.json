@@ -1,0 +1,386 @@
+{
+  "createdAt": "2026-10-20T14:45:29.532Z",
+  "isolated": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-Di1XXi",
+  "results": [
+    {
+      "name": "tsc",
+      "exitCode": 0,
+      "durationMs": 7962,
+      "log": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-Di1XXi/checkpoint-tsc.log"
+    },
+    {
+      "name": "production-build",
+      "exitCode": 0,
+      "durationMs": 3974,
+      "log": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-Di1XXi/checkpoint-production-build.log"
+    },
+    {
+      "name": "sun-shelf-range",
+      "exitCode": 0,
+      "durationMs": 1039,
+      "log": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-Di1XXi/checkpoint-sun-shelf-range.log"
+    },
+    {
+      "name": "interaction-helper",
+      "exitCode": 0,
+      "durationMs": 270,
+      "log": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-Di1XXi/checkpoint-interaction-helper.log"
+    },
+    {
+      "name": "gl-helper",
+      "exitCode": 0,
+      "durationMs": 247,
+      "log": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-Di1XXi/checkpoint-gl-helper.log"
+    }
+  ],
+  "status": "PASS",
+  "sourceTreeSha256": "98940294369eefccbde893e43296b5f0fe25c165f3fbf1e33977a2c752d940d5",
+  "primaryGuardUnchanged": true,
+  "primaryGitStatusUnchanged": true,
+  "sourceGuardAfter": [
+    {
+      "name": "docs/qa/CUSTOMER_QA_20261015.md",
+      "sha256": "6694d650786f855d3430bde551ca41d44183ffbf3056e032fc14dd056479067c",
+      "unchanged": true
+    },
+    {
+      "name": "docs/qa/PREMIUM_CAMERA_QA.md",
+      "sha256": "1ab62bf19d93e1dfcd3235d6a111850af295e94294c17172c93e916ba92fb15c",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/product-media-audit.mjs",
+      "sha256": "73a6367f93d125d070e7c5abd4fea90483d7515310a76a7da3ae858149138cfd",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/three/PoolModel.tsx",
+      "sha256": "a344c144a57bc1eb59b8ccc26667fd78d93df0964fa4db9fcf19bc6a7b8463d8",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/three/RawShellMaterial.tsx",
+      "sha256": "4957c6f1fcf146293c623e400e5a7958e2212e92227a3ee6c6fbf6c6972b1e40",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/wizard/product-media.tsx",
+      "sha256": "1687c83a8f74e277ab2c95ec15a14aa6b445e1f93b879e3a7b3052129c9a6135",
+      "unchanged": true
+    },
+    {
+      "name": "docs/qa/evidence/release-readiness-20261020/ux-matrix.md",
+      "sha256": "9c67aec5d2c113b930b975bce6c5c486144319245c45e917846e9ae7ca8a37c2",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/README.md",
+      "sha256": "8f15641d402c65c3d2448f691415377d0bfc81523fc8def79b7d6e8071478893",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/inox-ladder-480.jpg",
+      "sha256": "5c28b03fd6e11ad328c3414b42adf6cc8c942e885a571bbb90f39125048bb824",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/inox-ladder-960.jpg",
+      "sha256": "7b6ba0aac357d60694cf1935e012f42c1bea06e0f9514488489d657e61549723",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/manifest.json",
+      "sha256": "00fa7fe605440ad8e52ad0c1276b48cc12d7c45677a7b911b2a8787ba3063c09",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/outdoor-chaise-480.jpg",
+      "sha256": "f72c58ae0e68a3019006ae3a75476e021326d8e20c00bc3e126898c923e31b36",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/outdoor-chaise-960.jpg",
+      "sha256": "28c79d0abe3a9053467ac970588c0f5971806b62f30a4ba6dc611dce891a6004",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/prepared-files.json",
+      "sha256": "c2a9d29a401a4671cf4663a6470791f5727ef7898947cc2e96272719e8a1ed11",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/prun-256.jpg",
+      "sha256": "8c653bb69808559a1748e5335d9cc5c79bc9e374a103c553df3728e57cb2c3c0",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/prun-365.jpg",
+      "sha256": "c2ace8e7576c11b80a3547b7c4e6e4aada32af0695b4f4136a630ef6f2f7b779",
+      "unchanged": true
+    },
+    {
+      "name": "public/product-photos/sources.json",
+      "sha256": "454a0cb7cef081083f06ece364841f8b8d3be85988f7b2586e87d17b581c5315",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/bench-lighting-regression.ts",
+      "sha256": "c21342e4b92710909dae71c14c283fae018d2cd27539c530df78a1dd9e61c540",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-access-h.ts",
+      "sha256": "5f352ce41020974ebf7c49c9c04d01c0f57abce50a2b735d624c482d68dc5e23",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-bench-ab.ts",
+      "sha256": "e35466f6e4565f64bd2bb85e4a86d13675cfd0582be50700ebc8f47259488913",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-bench-s.ts",
+      "sha256": "e1e2399a9d81f5c6806f99236aa6f4238c5bfe3c80920e1c218fe0a0ecc42576",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-bench-u.ts",
+      "sha256": "163ffa65dee1a50f62d640ffe94e126f78391544f5ecf334c37db3ad11d05537",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-infinity-waterline-r.ts",
+      "sha256": "d88dd48ef825341bc4a85fb7e0628028d2eded4e4d0ccdb311a3fe2af4e9c827",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-infinity-y.ts",
+      "sha256": "8a7db298a3a00e132baf93923ff939f8e486cdbfbb787829ef5c215cca247e52",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-interior-v.ts",
+      "sha256": "77968edb5b685e07fd1e010da35250e1cd3d59145d0529287b913ee11f5ec081",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-overview-o.ts",
+      "sha256": "790e5d689d9bc9a0d015789b57e9802a298e0f7672c5d8b3902989e7ee15d9e8",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-paving-m.ts",
+      "sha256": "0f5e81dace14d6f9894463e097c35986b311e346c8fe9ad152248390c45e0c8b",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-top-l.ts",
+      "sha256": "6795e2cc78f27f24d1c8fa516a9c4ab00ac8484817c4baacb0ea6a4b4a0948c5",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/fixtures/premium-camera-waterline-q.ts",
+      "sha256": "2ddcf9ca30bf70d94fee69ab20da0594343f0acc53d99f1572a20f7f8139b4b6",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/hydro-glass-corner-audit.ts",
+      "sha256": "1c752277cf37d47435f2c75a83332e0de993b78931c00f3287cd1821df290554",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/independent-photo-access-label-recheck.mjs",
+      "sha256": "63a9425ab633877da42e7af57ff3f5adcbd130325a257241b7f4502db7ecd31f",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/independent-product-photo-qa.mjs",
+      "sha256": "cba316e0688e1c50e1ad83a4c9d618eeb6f63d8c3f40fc538f75f269fcefe556",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/infinity-waterline-regression.ts",
+      "sha256": "a6b1d9f9c766242dac00364e5f8e5bee1e7269a7fcae783bdc0fe511ef4b14d0",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/premium-camera-regression.ts",
+      "sha256": "d93f2fcbc30c53c8e644c5c2e088cbda37d7702fc30e1766b3959a625ab8c0b2",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/prepare-product-photos.mjs",
+      "sha256": "72510674f4c3c60e110efa109881363a3b8198de8d9b9c402ec583aac1c89dac",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/product-photo-mobile-diagnosis.mjs",
+      "sha256": "56ded080449bd1d0181f8a1e6b77e66f64295628293375df4a7e4968758391f4",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/product-photo-performance.mjs",
+      "sha256": "d9b8b1335f38333155c3e774dc05aa7cebbe554b5622aec4065cc00000a4c25c",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/run-hydro-glass-corner-audit.mjs",
+      "sha256": "eac64c75f6b992315216842cff783f982c1ffcccfab951ad1d5554e075e4f9df",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/run-premium-camera-regression.mjs",
+      "sha256": "3f1f1491308c053dff49dba63baf5af12492f430ee4914db46755f9724f2cd13",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/product-photography.ts",
+      "sha256": "fbdff6b4c6d4b87a2c0a5b229cf1c7934425dc8687f08ee58bc826997532ff3f",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/development-gl-diagnostic-audit.mjs",
+      "sha256": "c8ae526da4b54f18384ef1999e31f1383cf4ceecd65a4da9fdda790b697d0caa",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/development-interaction-timing-audit.mjs",
+      "sha256": "e4d0ae455693a67dcccebc46390fac7816d7fed371022a36743a128cb722a220",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/final-cleanup-state-audit.ts",
+      "sha256": "f56109b7d522d0be85c55581ab18291482f8f89af19306e963ab00099f4720c8",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/run-sun-shelf-range-audit.mjs",
+      "sha256": "b17c99cdbc02869d05c5477d0646fdf1964457a8415cfbc8226c3e08a40b2ef8",
+      "unchanged": true
+    },
+    {
+      "name": "scripts/sun-shelf-range-audit.ts",
+      "sha256": "ae2ad0c9f76a7275d6b73a48c76e60e285130c24965edcc1d791fb0f5542a3c9",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/DimensionControl.tsx",
+      "sha256": "42ff1189273872df41aafbf0fe6f71880ab0d88f5ac9dd80fe8f19052ec87b08",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/PoolConfigurator.tsx",
+      "sha256": "eba97ffaa983cba56f97528e5102ddb4a0252330c80e7cfa45e299de22aac34b",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/three/PoolScene.tsx",
+      "sha256": "1ed41d0d6d0ceadc81dc4a98ecf7a9620a50986d95861d0420ae8daff2ff00d1",
+      "unchanged": true
+    },
+    {
+      "name": "src/components/pool/wizard/StepTrays.tsx",
+      "sha256": "7adbf12c7168ea07923fa64b0dc39e0606233ab612fb228c442862993fda9eb4",
+      "unchanged": true
+    },
+    {
+      "name": "src/configurator/materials/interior-textures.ts",
+      "sha256": "8a4aa38af14e1b1fbff4152b1815c60b61ac66d61713ab78c2fee7aa623df513",
+      "unchanged": true
+    },
+    {
+      "name": "src/configurator/steps/pool-features/LedColorWheel.tsx",
+      "sha256": "1b2d40a296d69f7fc23be372dbfd78f924926ef3da4b6be289de0dc81da2d4f9",
+      "unchanged": true
+    },
+    {
+      "name": "src/configurator/steps/pool-features/LedIntensityControl.tsx",
+      "sha256": "f89a0949365d2dd14a5e1dd48a8afbd2801e16bb05cb883d1ff05b3f2326f0ce",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/i18n/messages.ts",
+      "sha256": "f70300309edc411466fe17d05aee1edbacb89b3d0410b7cdd0af6fd40b3c2c94",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/lead/schema.ts",
+      "sha256": "b18478cfae198b97ec7a05e8214ca9c9eefaf1f0152fbf94e64865e65427814f",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/comfort-plan.ts",
+      "sha256": "634567d8b437bb0145e4dbe50858231ecb7d31759ed3c2b8168a5ad697f45695",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/context.ts",
+      "sha256": "e3eb2fd8b94a30cc36f86d2fae56d370b2c4e7b13e815ade6210a65be48c47cc",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/development-gl-diagnostic.ts",
+      "sha256": "8fe916930157ac2f1d06722dbf835edcf99185ccaab634f6fe5c245bd22399cc",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/development-interaction-timing.ts",
+      "sha256": "fdd791e12fd933bb12025e257b8ab442b7a146c965e022616eeb0bd868fc04d9",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/floor-profile.ts",
+      "sha256": "1b0ab4d945b6ab006bb238750b4c8a567703c168b3a3b58cc4e582bdbdfe45b2",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/project.ts",
+      "sha256": "de57c9ad233dc4d931a78dfec9bd1264d0978060f925bb870b13402225710bd5",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/resolved-layout.ts",
+      "sha256": "b54c578879347e68a89469126a86fd26e0ac482382655dacf2b8699c34af9d0c",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/store.tsx",
+      "sha256": "384bccf6651336b5cfcaa9df81c48f0c57aa3a769e49a6aab5c9c2b247f1012b",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/sun-shelf-range.ts",
+      "sha256": "5321d67574d6c948f2d04509fd9abb1fec764d6fc6c8ec1a001ec38bbfb90dd9",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/pool/types.ts",
+      "sha256": "834d796f3041b67a2d416e38e73d3c8ce76f1518725fd11b1e6151e096594cb1",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/project-delivery/service.ts",
+      "sha256": "3982821478c2b3e07676af1e7bdc22b4c050839108b87cd7f79d83fad090d77f",
+      "unchanged": true
+    },
+    {
+      "name": "src/lib/project-delivery/summary-model.ts",
+      "sha256": "5b7e432a5117d0405d7c6e877dbcb7992b516c11f0ac86abf1c859274f31c6e9",
+      "unchanged": true
+    },
+    {
+      "name": "src/routes/privacy.tsx",
+      "sha256": "bd6abff3a3ed4fff3e5eedfcf480cd46bd24332efb20d2a37a736c596c2d3e28",
+      "unchanged": true
+    }
+  ],
+  "privateCaches": {
+    ".vite": true,
+    ".nitro": true,
+    ".cache": true,
+    ".vite-temp": true,
+    ".bin": true
+  },
+  "afterBuildSourceChanges": [],
+  "noLiveRuntimeOrProductionDeployment": true
+}

@@ -10,13 +10,14 @@ interface Props {
   max: number;
   step: number;
   unit: string;
+  precision?: number;
   onChange: (value: number) => void;
 }
 
-export function DimensionControl({ label, hint, value, min, max, step, unit, onChange }: Props) {
+export function DimensionControl({ label, hint, value, min, max, step, unit, precision, onChange }: Props) {
   const { t, number, locale } = useI18n();
   const id = useId();
-  const decimals = step < 0.1 ? 2 : step < 1 ? 1 : 0;
+  const decimals = precision ?? (step < 0.1 ? 2 : step < 1 ? 1 : 0);
 
   return (
     <div className="group flex flex-col gap-3.5 border-b border-hairline pb-6 last:border-0 last:pb-0">

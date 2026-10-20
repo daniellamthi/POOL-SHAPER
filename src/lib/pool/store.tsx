@@ -82,6 +82,7 @@ import type {
   RenovationConfig,
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
+import { configuredSunShelfRange, sunShelfRunWithinRange } from "./sun-shelf-range";
 import { clampOrganicShapeParams } from "./organic-shape";
 import { pavingId, pavingFormatId, premiumEnvironment, type PavingId, type PavingFormatId, type PremiumEnvironment } from "./presentation";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline, resolveInfinitySelection } from "./infinity-edge";
@@ -117,6 +118,7 @@ type Action =
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
   | { type: "setSunShelfLoungerCount"; value: number }
+  | { type: "setSunShelfRun"; value: number }
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
   | { type: "setSceneTime"; value: "day" | "night"; preserveCamera?: boolean }
@@ -243,6 +245,12 @@ function configurationReducer(state: State, action: Action): State {
 function reduceConfiguration(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
+    case "setSunShelfRun": {
+      if (!config.features.includes("sunShelf") || !sunShelfRunWithinRange(configuredSunShelfRange(config), action.value)) return state;
+      const candidate = { ...config, dimensions: { ...config.dimensions, sunShelfRun: action.value } };
+      if (!configuredComfortPlan(candidate).availability.sunShelf.available) return state;
+      return { ...state, config: candidate };
+    }
     case "setSunShelfLoungerCount":
       return config.features.includes("sunShelfLoungers") && Number.isFinite(action.value)
         ? { ...state, sunShelfNotice: null, config: { ...config, sunShelfLoungerCount: Math.max(1, Math.trunc(action.value)) } }
@@ -917,6 +925,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
       setSunShelfLoungerCount: (v) => dispatch({ type: "setSunShelfLoungerCount", value: v }),
+      setSunShelfRun: (v) => dispatch({ type: "setSunShelfRun", value: v }),
       sunShelfNotice: state.sunShelfNotice ?? null,
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),

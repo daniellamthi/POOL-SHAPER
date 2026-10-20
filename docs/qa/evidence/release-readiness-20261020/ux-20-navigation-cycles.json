@@ -1,0 +1,168 @@
+{
+  "browser": "Actual Chrome via CUA",
+  "viewport": "1440×900",
+  "scope": "20 actual Continue/Back cycles between system and skimmer model; UI selection snapshot only, canonical storage unavailable in read-only evaluate scope",
+  "before": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+  "cycles": [
+    {
+      "cycle": 1,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 2,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 3,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 4,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 5,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 6,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 7,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 8,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 9,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 10,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 11,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 12,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 13,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 14,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 15,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 16,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 17,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 18,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 19,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 20,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { useId, useRef, type PointerEvent } from "react";
 import { hueToLedHex, ledHexToHue } from "@/lib/pool/led-optics";
+import { useI18n } from "@/lib/i18n";
 
 const PRESETS = [
   { name: "Blu", hue: 225 },
@@ -17,6 +18,7 @@ export function LedColorWheel({
   value: string;
   onChange: (color: string) => void;
 }) {
+  const { t, number } = useI18n();
   const helpId = useId();
   const activePointer = useRef<number | null>(null);
   const hue = ledHexToHue(value);
@@ -35,17 +37,17 @@ export function LedColorWheel({
       event.currentTarget.releasePointerCapture(event.pointerId);
   };
   return (
-    <section aria-label="Colore LED" className="rounded-2xl border border-hairline px-5 py-5">
-      <h4 className="label-xs mb-4">Colore LED</h4>
+    <section aria-label={t("Colore LED")} className="rounded-2xl border border-hairline px-5 py-5">
+      <h4 className="label-xs mb-4">{t("Colore LED")}</h4>
       <div className="flex flex-wrap items-center gap-6">
         <div
           role="slider"
           tabIndex={0}
-          aria-label="LED hue"
+          aria-label={t("Tonalità LED")}
           aria-valuemin={0}
           aria-valuemax={359}
           aria-valuenow={Math.round(hue) % 360}
-          aria-valuetext={white ? "Bianco neutro" : `${Math.round(hue)} gradi, ${value}`}
+          aria-valuetext={white ? t("Bianco neutro") : t("{degrees} gradi, {color}", { degrees: number(Math.round(hue)), color: value })}
           aria-describedby={helpId}
           className="relative size-36 shrink-0 cursor-crosshair touch-none select-none rounded-full outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
           style={{
@@ -109,29 +111,29 @@ export function LedColorWheel({
             className="flex min-h-11 items-center gap-2 rounded-full border border-hairline px-4 text-sm focus-visible:outline-2 focus-visible:outline-ring"
           >
             <span className="size-4 rounded-full border border-black/20 bg-white" />
-            Bianco
+            {t("Bianco")}
           </button>
           <output
-            aria-label="Colore LED selezionato"
+            aria-label={t("Colore LED selezionato")}
             className="font-mono text-xs text-muted-foreground"
           >
-            {white ? "Bianco neutro" : value.toUpperCase()}
+            {white ? t("Bianco neutro") : value.toUpperCase()}
           </output>
           <p id={helpId} className="max-w-40 text-xs leading-relaxed text-muted-foreground">
-            Trascina per scegliere una tonalità. Le frecce regolano con precisione.
+            {t("Trascina per scegliere una tonalità. Le frecce regolano con precisione.")}
           </p>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-1" aria-label="Colori LED predefiniti">
+      <div className="mt-4 flex flex-wrap gap-1" aria-label={t("Colori LED predefiniti")}>
         {PRESETS.map((preset) => {
           const color = hueToLedHex(preset.hue);
           return (
             <button
               key={preset.name}
               type="button"
-              aria-label={`LED ${preset.name}`}
+              aria-label={`LED ${t(preset.name)}`}
               aria-pressed={value.toLowerCase() === color}
-              title={preset.name}
+              title={t(preset.name)}
               onClick={() => onChange(color)}
               className="flex size-11 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-ring"
             >
