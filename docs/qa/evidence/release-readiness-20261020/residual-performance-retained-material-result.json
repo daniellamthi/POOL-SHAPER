@@ -1,0 +1,67 @@
+{
+  "status": "PARTIAL; FIX REQUIRED; NOT PASS",
+  "scope": "Isolated production3020 only, commit6ad89bd runtime without39pre-existingWIP plus identical passive timing/opt-inGL instrumentation and coordinator's water/material-retention prototype. Primary app unchanged by C.",
+  "noGlTimingMs": {
+    "dryToWet": [458.4, 430.6, 359.9],
+    "wetToDry": [244.2, 187.1, 293.8],
+    "method": "Trusted click→second requestAnimationFrame; not GPU completion/final3Dpaint.",
+    "viewport": "Chrome, CSS1440x900, observed drawing buffer1440x900 before/after; adaptive quality unchanged.",
+    "configuration": "Same persisted8x4Infinityglass/Shelf2Esse/SandBeach179/Travertine/Gres60x120/review/openpanel draft as previous run. E left Day selected; C switched header to Night before measuring.2BluewallLED60%, microOFF retained.",
+    "glLogsDuringTiming": 0,
+    "consoleErrors": 0
+  },
+  "comparison": {
+    "waterOnlyPrototypeDryToWetMs": [525.2, 595.9, 367.8],
+    "baselineReplayDryToWetMs": [1335.1, 1437.7, 1142.7],
+    "earlierBaselineDryToWetMs": [829, 759, 778.8],
+    "limit": "Sequential nonrandomized runs with substantial baseline drift; driver/thermal/cache/background state not controlled. No precise causal speedup percentage or final readiness claim. Warm stalls remain."
+  },
+  "oneSeparateOptInGlWindow": {
+    "dryToWetInputToSecondRafMs": 617.7,
+    "compileShaderCount": 40,
+    "linkProgramCount": 20,
+    "getProgramInfoLog": {"count": 20, "totalMs": 172.1, "maxMs": 17.8},
+    "getShaderInfoLog": {"count": 40, "totalMs": 2.5},
+    "getProgramParameter": {"count": 60, "totalMs": 2.3},
+    "bufferData": {"count": 64, "totalMs": 0.3},
+    "baselineWarmLinkCount": 28,
+    "conclusion": "Repeated program creation is reduced but not eliminated. Selected query time174.6ms for program/shader logs,176.9ms including getProgramParameter. Remaining time not attributed by this bounded probe. Upload costs in selected wrappers do not dominate this window.",
+    "freshDocumentDryPreparationMs": 2594.6,
+    "limit": "Reload creates a fresh document/context; first dry preparation is not a matched warm sample. Native aggregation adds overhead and captures only trusted-input→second-rAF windows, not all frames or live resource/disposal state. No extra repeat or profiling loop."
+  },
+  "rendererAtMount": {
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+    "version": "WebGL2 Chromium",
+    "KHR_parallel_shader_compile": true,
+    "cssWidth": 1440,
+    "cssHeight": 900,
+    "dpr": 1,
+    "geometries": 42,
+    "textures": 22,
+    "programs": 37,
+    "limit": "Mount metadata only. No hidden/resumed/final-disposal assertion."
+  },
+  "visual": {
+    "dayWet": "residual-performance-retained-material-day-wet.png",
+    "nightWetBefore": "residual-performance-retained-material-night-wet.png",
+    "nightWetAfter": "residual-performance-retained-material-night-wet-after.png",
+    "nightRaw": "residual-performance-retained-material-night-raw.png",
+    "observation": "Water and blue night lighting return after3cycles; raw phase visibly dry, no ghostwater observed. No obvious material change in compared screenshots. Not objective image-equivalence proof; broader Day/Night replay belongs to E's separate evidence."
+  },
+  "buildIdentity": {
+    "buildReceipt": "residual-performance-retained-material-build.json",
+    "buildReceiptSHA256": "e952550e6cc8da4a209f189d454de2937b7c912468021460df380002e43b8a9f",
+    "clientAsset": "PoolScene-CMgwYsQJ.js",
+    "clientAssetSHA256": "eda5dbca08f60406840eb5e726fdcf1121faaf288e04e11d6f81ab924026d9df",
+    "previousWaterOnlyOutputFreeze": "residual-performance-water-prototype-output-freeze.json",
+    "serverSession": 17297,
+    "port": 3020,
+    "backend": "GET/HEAD-only local generated-worker adapter, no backend/secret bindings."
+  },
+  "rawEvidence": [
+    {"file": "residual-performance-retained-material-timing.json", "sha256": "b374e44f594109c189447ffa6094ff61de156783e2d78a4856d01161ac7ed941"},
+    {"file": "residual-performance-retained-material-attribution.json", "sha256": "e81a2f26b10500d434e5ce0c42553276359e5cdce6434a3a4c2daa64de473b6f"},
+    {"file": "residual-performance-retained-material-visual.json"}
+  ],
+  "handoff": "All ownedQA3Dtabs closed, browser viewport reset, root/E notified. CPUfreeze released; no further browser/probes planned.3020 remains an uncommitted isolated prototype, not releasePASS."
+}

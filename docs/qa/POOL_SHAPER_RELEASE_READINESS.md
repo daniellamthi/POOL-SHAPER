@@ -53,9 +53,9 @@ visual and cloud checks remain separate. No untested Cartesian-product claim.
 | M01 | All actual material families at metric scale/day/night/reference identity | Prior material upgrade scoped evidence available | No shader/PBR/asset changes; neutral numbers for9actual mosaics |9mosaic/81cases/73764source-cell checks; A9cards and E stable Mosaic5 floor/wall and renovation before/after; PDF actual liner/mosaic samples. Not every finish has new day/night reference-matched close-ups | NOT VERIFIED — complete photorealism gate not established |
 | M02 | Liner unchanged; in-ground reference finishes absent above-ground | Protected invariant | No liner asset/shader/catalogue edits; only neutral mosaic labels | Source/hash guard; A above-ground exposes liner/inox only,6liner selections sampled; B actual envelopes and material tests | PASS — protected-source invariant and runtime sample |
 | L01 | Small ordered riser/bench spots; independent OFF/ON; coordinated main colour | — | Lighting values/geometry unchanged; translated intensity copy only | B micro5441/224configs/420raycasts; C six actual riser spots/blue short-side; E blue/red/white and mainOFF/stairON/benchON independently,75% retained; PDF Day/Night riser-only | PASS — scoped independence/placement/light sample, not every hue/orientation |
-| L02 | Hydro nozzles never emissive | — | No nozzle/material change | B source/geometry checks; E hydroA night close-up dark nozzles/below-seat spots, hydroB actual wider view | NOT VERIFIED — B nozzle close-up/day-night coverage not complete |
+| L02 | Hydro nozzles never emissive | No emission defect reproduced | No nozzle/material/geometry change | Prior B source/geometry checks retained. E independently replayed production HydroB1440Day/Night: visible rear nozzles dark, optional spots below seat. Bench OFF/ON and riser close-up1440/390/430; source is shared across repeated fittings. [Actual views](evidence/release-readiness-20261020/residual-visual-browser-evidence.json) | PASS — scoped B visible-nozzle/bench sample; every nozzle macro on physical mobile not claimed |
 | I01 | Minimal consistent command icons, contrast and selection states | — | Existing installed icon family preserved | A/E actual labelled navigation/orientation/optional commands and states, LED native-slider ARIA corrected. No complete measured contrast/keyboard audit | NOT VERIFIED — command sample PASS, accessibility remainder explicit |
-| I02 | Correct approved product photos/samples; exact-product claims honest | Existing product-photo WIP is separate | No synthetic photo represented as real, liner untouched | A indicative/missing asset labels;4/55existing photo mappings and51honest unavailable states; owner15sample authorisation. Not all requested product photos available; pre-goal photo WIP excluded from checkpoint | NOT VERIFIED — missing assets not disguised as photographs |
+| I02 | Correct approved product photos/samples; exact-product claims honest | Previous photo-subset QA depends on excluded WIP. Two stale generic previews are dormant | Preserve already-correct direct chaise mapping; no asset replacement needed | D traced committed StepTrays737/1182 and source/provenance. E independently confirmed actual production390cards use lympha-immersed/deck with contain and correct shell/frame identity. [Runtime evidence](evidence/release-readiness-20261020/residual-visual-browser-evidence.json). Owner15sample permission unchanged;4/55photo mappings/51unavailable claims are Mac WIP only | PASS — two disputed live cards; no blanket photographic-rights/full-catalogue claim |
 | C01 | Whole-pool/See pool centred in actual UI-free region | Initial retained detail suspicion not reproduced after explicit See pool | Normal wizard framing unchanged | C full Skimmer/Shelf1440/390/430, Infinity1440/390; E fresh Infinity430 and above-ground390/430 open/collapsed; A6×3above-ground route | PASS — actual stated size/viewport samples |
 | C02 | Detail shelf oblique, Infinity near-front3/4, access/materials readable | Selected-Shelf clipping suspicion withdrawn after settled capture/projection | No cosmetic camera change; preserve approved Infinity | C Shelf min/max1440/390/430 and Infinity each4sides; E fresh selected details; all6Shelf projections0points outside. Some standalone material/skimmer/stair detail combinations not repeated | NOT VERIFIED — selected critical details PASS, universal coverage not claimed |
 | C03 | LED short-side; correct spot details; no clipping/queued transitions | Long cold-light scheduling stalls remain P01 | Do not hide latency with quality cuts | Lighting2862/motion68local assertions; C actual short-side Blue and E White/Red/Blue; full rapid/manual interruption video not obtained | NOT VERIFIED — static/geometry sample PASS, timing/video boundary explicit |
@@ -64,11 +64,11 @@ visual and cloud checks remain separate. No untested Cartesian-product claim.
 | D02 | Share/read-only/copy preserve products/dimensions, isolate identities/PII | — | Whitelist new shelf field | Five actual read-only source→distinct new copy→Reload; full technical JSON equality except projectId, sources unchanged, all public customer/uploads empty. Fresh new-copy A on separate origin read-only/Save Copy control PASS; ephemeral clipboard state not asserted for B/C/R | PASS — scoped cloud identity/privacy/share sample, not unrestricted RLS claim |
 | D03 | PDF and quote snapshot/options/identity, validation/retry/idempotency | Actual C430PDF cropped exterior stair at bottom | Capture-only fit to shared Project Book landscape crop; no geometry/normal wizard camera change | Four new actual7pagePDFs downloaded after fix; root visually inspected every page plus full Day/Night images. C lowest tread now complete.4quotes exact lead=saved config,1lead/1outbox each; hashes unchanged after capture; EMAIL_NOT_CONFIGURED/no provider. Retry/concurrency remain local contracts, not a new live stress test | PASS — stated cloud/PDF sample; deferred email not delivery PASS |
 | D04 | Correct cloud target/storage/credentials/RLS/token protection | D reports correct target/key/private bucket; source review pending root | No migrations/secret changes | Scoped read-only live checks and current runtime identity | NOT VERIFIED |
-| P01 | Three matched before/after samples: frames/interactions/calls/resources | Steady-frame comparison passes; cold wet/dry and optional-light changes stall in actual DEV browser | Bounded native-call attribution only; no unproved render-loop rewrite, disabled shader validation or quality cut | [Three pairs](evidence/release-readiness-20261020/performance-steady-summary.md):8.3→8.3ms, dominant79calls both. [Native cause](evidence/release-readiness-20261020/performance-cause-native-summary.md): wet→dry2698.3ms, dry→wet4100.1ms; first-use shader/program queries2064.8/3866.3ms. MicroON6408.4ms; subsequentOFF113.4ms. KHR true; production/cold baseline attribution still unverified | FAIL — actual DEV responsiveness; production not verified |
+| P01 | Three matched before/after samples: frames/interactions/calls/resources | Production reproduces repeated warm dry→wet stall, not only DEV/first-use | Retain lazy water/reflection and per-mesh finished materials across raw-stage navigation; pause hidden work and dispose on actual ownership end. No shader/quality/error-check changes | Baseline829/759/778.8ms, contemporary1335.1/1437.7/1142.7ms; final458.4/430.6/359.9ms, noGL during timings. Separate aggregate still20links vs28,617.7ms; first transition in fresh GL context2594.6ms. Baseline drift prevents exact speedup%. [Final bounded result](evidence/release-readiness-20261020/residual-performance-retained-material-result.json). Input→secondRAF is not GPU/finalpaint | FAIL — validated partial improvement, recurring latency remains; no further diagnostic loop or physical-mobile performance claim |
 | Q01 |1440×900 and390×844/430×932; physical mobile only if available | No physical phone available | Declare viewport emulation explicitly | A/C/D/E actual Chrome captures and public DOM/canvas dimensions | PASS — desktop and viewport emulation, NOT physical-mobile performance |
 | Q02 | Targeted typecheck/build/lint/geometry/compatibility/camera/state/i18n/export tests | Historical camera harnesses contain obsolete hashes/evaluator gaps | Keep those explicit; no skipped suite counted PASS | Current local checks and final isolated source build below; capture-framing14760 and export guard alsoPASS | NOT VERIFIED — listed current checks PASS; four stale historical camera harness cases not repaired or counted PASS |
 | Q03 | Independent reviewer actually repeats integrated critical paths | E reproduced2English defects, not report-only review | Root corrected; E independently retested affected UI/state/material path | [E browser checklist](evidence/release-readiness-20261020/final-review-checklist.md), actual A/B/C/renovation critical sample, new source retest JSON/screenshots | PASS — independent critical sample, not exhaustive coverage |
-| B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Owner public host/domain not chosen; automatic protected Vercel Preview is not a verified production runtime | No manual deploy/promotion/DNS action | Source checkpoint76d07be automatic GitHub deployment7203669554, environmentPreview/productionfalse/success; browser redirects Vercellogin; connector lacks intended team access. Public backend bindings/HTTPS workflow not tested | BLOCKED |
+| B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Exact Preview lacks durable-storage server configuration; owner public host/domain not chosen | No secret/access changes or manual deploy/promotion | Root actual load+Save failed. Exact deployment runtime logs: Durable project storage is not configured. Project env dashboard: No Environment Variables Added, all filters unfiltered. Known shared QA row exists/unchanged in correct Supabase. [Hosted evidence](evidence/release-readiness-20261020/data-live-hosted-6ad89.md) | BLOCKED — owner must privately configure server variables in Preview; hosted Reload/Share/Copy/PDF/quote not passed |
 | B02 | Privacy information complete and share/customer data protected | Configurator retention/hosting/processor approval incomplete | Fill verified company/VAT/privacy email and owner-confirmed legal address only | Owner expressly confirms Via Caduti sul Lavoro7,37012Bussolengo(VR), retention still to be defined. Do not infer10years from general website policy | BLOCKED |
 | B03 | Commercial notification operational or explicit prelaunch block | Live email deliberately postponed | Do not enable/send real messages | Sandbox/code tests, ownerverifiedsender pending | BLOCKED — live email deferred |
 | B04 | Persistent backup and tested restoration/rollback documented | Local backups exist, production restore not evidenced/authorised | Recovery procedure required; no live restore/mutation | D exact isolated-recovery prerequisites; source baseline restore/hash proof is not database recovery | BLOCKED |
@@ -301,6 +301,85 @@ reported in the owner handoff. The exact source checkpoint above is the verified
 automatic preview revision, not a claim that a subsequent docs-only HEAD has
 already deployed. See [machine-readable delivery receipt](evidence/release-readiness-20261020/feature-delivery-receipt.json).
 
+## Residual closeout — current goal, 20 October 2026
+
+Authoritative follow-up: `goal-objective.md` in owner attachment53d8f95a.
+Previous goal turn is **progress**, not an unchanged blocker: it implemented
+and independently retested the language/parser/PDF corrections, completed
+five cloud copy/reload routes/four persisted quotes/four PDF exports, and
+pushed source76d07be plus docs6ad89bd. Those scoped PASS results are retained.
+
+Current local and remote HEAD both6ad89bdd5347017ea9a4ced72caf9783b771bf76.
+All39excluded WIP files are still present; backup
+`pool-shaper-wip-backups/residual-gates-20261015-TBuaCI` contains exactly those
+39files, secret scanPASS. [Per-file classification](evidence/release-readiness-20261020/residual-wip-classification.json)
+is complete:2raw-steel fidelity files,14independent/incomplete photo/report
+files,23local test/tooling files. All39were hash-unchanged through C's final
+isolated benchmark. Root then added only validated resource-lifetime hunks to
+the overlapping PoolModel, preserving all4original seamlessSteel props; those
+remain separate WIP and must not enter the task-only index. No other original
+WIP is intentionally changed/staged. Root remains the only integrator. The
+previous four-photo UI proofs depend on excluded Mac WIP, not exact HEAD.
+
+P01 has now been reproduced on an isolated **production client build**, not
+the user DEV server. The isolated source has385runtime files and30task
+overlays byte-equivalent to committed HEAD, excluding39Mac-only files. A local
+HTTP adapter serves the compiled Cloudflare worker fetch plus static assets;
+this is NOT an online/Cloudflare-edge runtime claim. Measurement adds only the
+same opt-in trusted-input→second-rAF helper in the isolated copy. Actual
+foreground Chrome/AppleM1Pro/ANGLEMetal/WebGL2,1440×900; original adaptive DPR
+retained (about1.405at rest,1while moving), no quality cut.
+
+Three production cycles: wet→dry331.3/83.6/131.4ms; dry→wet829.0/759.0/778.8ms;
+microON689.5/124.4/137.9ms. First water911.3ms and first Night1445.9ms are
+separate initial-use observations. The old DEV2.7–6.4s magnitudes were not
+reproduced, but different WIP/DPR/cache conditions prevent attributing that
+reduction purely to DEV. Repeated warm dry→wet remains a demonstrated FAIL.
+[Production method/raw limits](evidence/release-readiness-20261020/residual-performance-production-method.json).
+
+A single bounded native-call attribution of the warm production action:
+734.3ms feedback,28new program links; info/status queries284.9ms(38.8%).
+About447ms is not attributed by those wrapped calls; uploads are not the
+dominant measured cost. Do NOT equate the whole delay with diagnostic queries
+or disable shader validation. See
+[bounded production attribution](evidence/release-readiness-20261020/residual-performance-production-attribution-method.json).
+The final bounded experiment retains water and individual finished materials.
+Three warm results458.4/430.6/359.9ms; wet→dry244.2/187.1/293.8ms. A separate
+617.7ms aggregate still submitted20links/40compiles; status/info queries176.9ms.
+Thus resource reuse fixes part of the actual cause but does NOT eliminate
+stalling. A fresh-context preparation transition2594.6ms remains separate from
+the3warm samples. No further measurement loop is justified by these results.
+Root integrated only the validated partial lifetime fix, not a responsiveness
+PASS. Source comparison proves8physical-material descriptors,17geometry
+factories and16shader constants identical to6ad89bd; liner unchanged.
+The21hook ownership/pause/disposal assertions,13water contracts,82457structure
+checks and73764mosaic checks pass. These are not GPU disposal/memory tests.
+Independent E used the actual production prototype and found no black/stale
+surface or ghost water in the documented material/Day/Night samples.
+[Final measurement](evidence/release-readiness-20261020/residual-performance-retained-material-result.json),
+[scoped tests](evidence/release-readiness-20261020/residual-render-lifecycle-tests.json),
+[independent visual coverage](evidence/release-readiness-20261020/residual-visual-coverage.json).
+
+The exact automatic online preview still belongs to6ad89bd, environmentPreview,
+productionfalse/success. On the owner's request root opened it in IAB tab9:
+the actual configurator is accessible there (no login page), while independent
+Chrome still requires Vercel authentication. No access controls/secrets changed.
+[Actual online opening](evidence/release-readiness-20261020/residual-hosted-preview-open.png).
+Actual hosted restore of known QA PW-A24Y-7CDSQC failed. Root configured a
+separate synthetic8×4Skimmer/straight-stair case through ordinary UI and made
+exactly1Save attempt: same visible storage-unavailable error, selections retained,
+no saved reference returned. Root read exact deployment logs for those2POSTs:
+Durable project storage is not configured. Unfiltered project env page shows
+No Environment Variables Added; no credential values read or changed. D verified
+the known shared QA row exists, share_enabled=true, exact previous fingerprint
+and no public PII/uploads. This is a missing hosted server configuration, not
+a nonexistent source row or a local-cloud PASS. No unknown-row query or
+unsupported claim of zero partial writes was made.
+Owner was taken directly to project env settings and asked to privately add
+SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for the correct project, ONLY Preview,
+plus LEAD_NOTIFICATIONS_QA_DISABLED=true before testing quotes. No production
+setting, key, access protection or notification changed by the agent.
+
 ## Owner responses / publication limits
 
 Owner20October authorises web use of6liner+9mosaic samples, refers business
@@ -318,6 +397,31 @@ defined. Update only the confirmed address; applicable retention, chosen
 hosting/processors and actual publication date still need owner/privacy
 validation. No public legal readiness or production verification inferred from
 the owner's web referral or address confirmation.
+
+## Validated residual checkpoint (not release approval)
+
+The task-only source is6ad89bd plus exactly3runtime files and3targeted audit
+files. A fresh uninstrumented production checkpoint386runtime files excludes
+all39original WIP files and every local credential. Typecheck, build and the
+scoped tests pass;20client text artifacts have0secret-pattern/0QA-prefix hits.
+Root actually opened that uninstrumented3021build: renderer booted, no console
+errors; this is a smoke check, not hosted-backend or complete performance QA.
+[Build/source receipt](evidence/release-readiness-20261020/residual-performance-final-unprobed-checkpoint.json),
+[preservation/allowlist receipt](evidence/release-readiness-20261020/residual-final-candidate-preservation.json),
+[independent source review](evidence/release-readiness-20261020/residual-final-source-review.json).
+
+Only those6source/audit files, this existing report and current-goal evidence
+are eligible for the feature checkpoint. PoolModel is staged from the tested
+isolated copy, not the Mac working file; its4original seamlessSteel WIP props
+remain local with the other38preserved files. No blanket stage, reset, branch
+checkout, secret change, migration, merge or production deploy.
+
+This is a **partial validated correction**, not P01PASS or public approval.
+Warm production latency remains and hosted server variables are missing.
+The owner must privately configure ONLY Preview for waetxxqdlsuanqescuye and
+disable QA email before a hosted quote. Retention, public hosting/processor
+approval, live email and an authorised isolated restore rehearsal remain
+separate prelaunch decisions. No unverified previous requirement is removed.
 
 Verdict: **FIX REQUIRED**. Code/data/export corrections have scoped evidence;
 performance and explicit unverified/prelaunch requirements remain open.

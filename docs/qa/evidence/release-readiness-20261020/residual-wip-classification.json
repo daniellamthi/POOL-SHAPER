@@ -1,0 +1,602 @@
+{
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "originHead": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "date": "2026-10-20",
+  "scope": "Read-only classification of the exact 39 files in backup TBuaCI. No staging, application edits, deletions, browser operation, credential access or database write.",
+  "categories": {
+    "NECESSARY_APPROVED_FIDELITY": "Two-file raw interior steel continuity change; needed only to retain the locally approved no-joint raw-steel presentation, not to make HEAD compile.",
+    "INDEPENDENT_INCOMPLETE": "Independent photography/report work, preserved but not blanket-staged. Some local UI proofs depend on this unit and are not proofs of exact HEAD.",
+    "LOCAL_TEST_TOOLING": "Preserved regression fixtures/audit/preparation/diagnostic sources, not runtime dependencies or disposable garbage. Historical scripts can be stale or depend on ignored local evidence."
+  },
+  "preview": {
+    "currentCommit": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+    "githubCommitStatus": "Vercel success",
+    "githubDeploymentId": 7204470014,
+    "environment": "Preview",
+    "productionEnvironment": false,
+    "statusCreatedAt": "2026-10-20T15:52:46Z",
+    "url": "https://pool-shaper-9qeaubbxt-daniellamthis-projects.vercel.app",
+    "evidence": "GitHub combined status plus existing authenticated gh read-only deployments/statuses. Ordinary sandbox DNS failed; narrowly approved gh API metadata read succeeded. No token value read/output.",
+    "runtime": "BLOCKED - prior actual IAB Vercel login and intended-team connector403 remain; not retested unchanged.",
+    "alternatives": "vercel/vc absent from PATH; gh exists and is authenticated for GitHub metadata only, not Vercel app authorization. No .vercel/project.json. Vercel web_fetch/get_access tools generate/reuse auth-bypass URLs, so they were not called under no-new-secret/no-access-control-change constraint.",
+    "ownerAction": "Sign in to this exact Preview in the integrated browser using an existing account authorized for daniellamthis-projects, then notify root. Do not disable Deployment Protection.",
+    "oldPreviewBoundary": "8fxhsvtwz belongs to source checkpoint76d07be, not current6ad89bd. The docs-only newer commit has its own verified automatic preview identity above."
+  },
+  "backups": {
+    "status": "NOT VERIFIED",
+    "reason": "Current exposed Supabase tool catalogue has no backup-list/retention/last-success metadata operation. Prior exact get_project returned health/version only. No repeat audit, restore, dump, migration or credential lookup.",
+    "project": "Daniele 2 / waetxxqdlsuanqescuye",
+    "missing": "Exact DB/PITR coverage, retention/last success, private-object backup, operator/RPO/RTO and approved isolated recovery rehearsal. Local source restore hashes do not prove database/object restore."
+  },
+  "coherentUnits": [
+    {
+      "id": "U1",
+      "paths": [
+        "src/components/pool/three/PoolModel.tsx",
+        "src/components/pool/three/RawShellMaterial.tsx"
+      ],
+      "recommendation": "Potential surgical checkpoint only after targeted seam/outer-panel regression and visual check. Four interior call-site props plus optional material flag/cache key/joint guard form one inseparable unit. Exterior callers remain default false. Liner/concrete/stainless pixels not intentionally changed; seam suppression applies kind=steel raw construction only."
+    },
+    {
+      "id": "U2",
+      "paths": [
+        "src/components/pool/wizard/product-media.tsx",
+        "src/lib/pool/product-photography.ts",
+        "public/product-photos/"
+      ],
+      "recommendation": "Do NOT stage this entire incomplete photo unit to repair HEAD. Exact HEAD already has ten labelled3D captures. E found two stale chaise captures versus current Lyxo models; root is preparing a bounded replacement of those two tracked assets/provenance, not wholesale adoption of the four-photo/51-missing WIP."
+    },
+    {
+      "id": "U3",
+      "paths": [
+        "scripts/product-media-audit.mjs",
+        "scripts/prepare-product-photos.mjs",
+        "scripts/independent-product-photo-qa.mjs",
+        "scripts/independent-photo-access-label-recheck.mjs",
+        "scripts/product-photo-mobile-diagnosis.mjs",
+        "scripts/product-photo-performance.mjs"
+      ],
+      "recommendation": "Keep as independent local photo tooling. Do not run direct browser scripts during CUA ownership. Some read ignored customer-additions evidence, set hidden localStorage or imperatively set renderer/camera: historical only, not current approved live-browser verification."
+    },
+    {
+      "id": "U4",
+      "paths": [
+        "scripts/premium-camera-regression.ts",
+        "scripts/bench-lighting-regression.ts",
+        "scripts/infinity-waterline-regression.ts",
+        "scripts/fixtures/",
+        "scripts/run-premium-camera-regression.mjs"
+      ],
+      "recommendation": "Preserve versioned AST/metric fixtures and harnesses. They are not imported by app/package scripts. Known stale source-hash/AST assumptions are test maintenance issues, not product FAIL; don't loosen them simply to claim PASS."
+    },
+    {
+      "id": "U5",
+      "paths": [
+        "scripts/hydro-glass-corner-audit.ts",
+        "scripts/run-hydro-glass-corner-audit.mjs"
+      ],
+      "recommendation": "Preserve local test unit. It tests U1 seamlessSteel and has an unconditional6x3 hydro availability assertion contrary to the existing approved width guard. Not a passing independent release gate in current form; do not remove product guard."
+    }
+  ],
+  "proofBoundaries": [
+    {
+      "proof": "Exact HEAD source completeness/build/core geometry",
+      "status": "SUPPORTED",
+      "evidence": "Existing isolated task-only receipts plus residual-performance-production-source.json:385runtime files/30task files match6ad89bd, zero mismatches; no env source copied. No new full tests run by D."
+    },
+    {
+      "proof": "Local four-photograph subset/51missing labels/photo srcset/error fallback/71grouped photo QA",
+      "status": "MAC_WIP_ONLY",
+      "evidence": "HEAD product-media.tsx has10labelled3D previews and no product-photography import. The local image module and sixJPEGs are absent from HEAD; those exact photo/placeholder claims must not be attached to the deployed candidate."
+    },
+    {
+      "proof": "Raw interior STEEL_PANELS without illustrative joints",
+      "status": "MAC_WIP_ONLY",
+      "evidence": "HEAD lacks seamlessSteel flag/call-sites. Finished liner/mosaic and visible stainless not affected by the conditional steel-joint difference."
+    },
+    {
+      "proof": "Canonical Shelf run/state/SaveShare/Copy/quote identity",
+      "status": "CORE_SOURCE_SUPPORTED_LOCAL_CLOUD",
+      "evidence": "Committed parser/allowlist/schema/store/summary paths carry the data. WIP photo/steel files do not change project JSON. Prior exact scoped cloud results can remain local-cloud proof, not hosted-runtime proof."
+    },
+    {
+      "proof": "PDF final liner/mosaic geometry/export framing",
+      "status": "CORE_SOURCE_SUPPORTED_SCOPED",
+      "evidence": "Current committed capture logic and bounds tests exist; brochure cards not rendered into export. Local PDF A/B/C/R proofs are local-runtime only and do not verify hosted server bindings."
+    },
+    {
+      "proof": "All real-client visual screenshots match exact deployed appearance",
+      "status": "NOT VERIFIED",
+      "evidence": "Some local captures include U1/U2 WIP. Exact HEAD card images differ; two chaise assets confirmed stale by E. Other8capture identities need only pertinent visual checks, not assumed wrong."
+    },
+    {
+      "proof": "Historical untracked regression harness PASS reproducible from clean clone",
+      "status": "NOT VERIFIED",
+      "evidence": "23local test/tooling files excluded; source locks/ignored fixture dependencies documented. Use already committed targeted regressions or prepare a separately validated minimal test unit."
+    },
+    {
+      "proof": "Hosted6ad89bd app SaveReloadShareCopyPDFQuote",
+      "status": "BLOCKED",
+      "evidence": "Deployment success and exact SHA proven; app access/runtime remains protected and untested, no fake online PASS."
+    }
+  ],
+  "backup": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/residual-gates-20261015-TBuaCI",
+  "backupHead": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "classifiedCount": 39,
+  "hashMismatches": [],
+  "counts": {
+    "INDEPENDENT_INCOMPLETE": 14,
+    "LOCAL_TEST_TOOLING": 23,
+    "NECESSARY_APPROVED_FIDELITY": 2
+  },
+  "files": [
+    {
+      "path": "docs/qa/CUSTOMER_QA_20261015.md",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2-docs",
+      "localRuntimeDependency": false,
+      "trackedInHead": true,
+      "bytes": 44412,
+      "backupSha256": "6694d650786f855d3430bde551ca41d44183ffbf3056e032fc14dd056479067c",
+      "currentSha256": "6694d650786f855d3430bde551ca41d44183ffbf3056e032fc14dd056479067c",
+      "backupUnchanged": true,
+      "reason": "Historical appended camera/photo evidence; includes MacWIP-scoped and incomplete checks, not executable runtime."
+    },
+    {
+      "path": "docs/qa/PREMIUM_CAMERA_QA.md",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2-docs",
+      "localRuntimeDependency": false,
+      "trackedInHead": true,
+      "bytes": 124192,
+      "backupSha256": "1ab62bf19d93e1dfcd3235d6a111850af295e94294c17172c93e916ba92fb15c",
+      "currentSha256": "1ab62bf19d93e1dfcd3235d6a111850af295e94294c17172c93e916ba92fb15c",
+      "backupUnchanged": true,
+      "reason": "Historical appended camera/photo evidence; includes MacWIP-scoped and incomplete checks, not executable runtime."
+    },
+    {
+      "path": "scripts/product-media-audit.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U3",
+      "localRuntimeDependency": false,
+      "trackedInHead": true,
+      "bytes": 6274,
+      "backupSha256": "73a6367f93d125d070e7c5abd4fea90483d7515310a76a7da3ae858149138cfd",
+      "currentSha256": "73a6367f93d125d070e7c5abd4fea90483d7515310a76a7da3ae858149138cfd",
+      "backupUnchanged": true,
+      "reason": "Modified static photo audit imports untracked module/assets and writes photo manifest; current PASS depends on MacWIP."
+    },
+    {
+      "path": "src/components/pool/three/PoolModel.tsx",
+      "classification": "NECESSARY_APPROVED_FIDELITY",
+      "unit": "U1",
+      "localRuntimeDependency": true,
+      "trackedInHead": true,
+      "bytes": 69159,
+      "backupSha256": "a344c144a57bc1eb59b8ccc26667fd78d93df0964fa4db9fcf19bc6a7b8463d8",
+      "currentSha256": "a344c144a57bc1eb59b8ccc26667fd78d93df0964fa4db9fcf19bc6a7b8463d8",
+      "backupUnchanged": true,
+      "reason": "Four interior RawShellMaterial seamlessSteel props; HEAD lacks locally approved raw-steel seam suppression."
+    },
+    {
+      "path": "src/components/pool/three/RawShellMaterial.tsx",
+      "classification": "NECESSARY_APPROVED_FIDELITY",
+      "unit": "U1",
+      "localRuntimeDependency": true,
+      "trackedInHead": true,
+      "bytes": 7621,
+      "backupSha256": "4957c6f1fcf146293c623e400e5a7958e2212e92227a3ee6c6fbf6c6972b1e40",
+      "currentSha256": "4957c6f1fcf146293c623e400e5a7958e2212e92227a3ee6c6fbf6c6972b1e40",
+      "backupUnchanged": true,
+      "reason": "Optional seamlessSteel flag, bounded cache key and steel-only joint guard; inseparable from PoolModel call sites."
+    },
+    {
+      "path": "src/components/pool/wizard/product-media.tsx",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": true,
+      "bytes": 3664,
+      "backupSha256": "1687c83a8f74e277ab2c95ec15a14aa6b445e1f93b879e3a7b3052129c9a6135",
+      "currentSha256": "1687c83a8f74e277ab2c95ec15a14aa6b445e1f93b879e3a7b3052129c9a6135",
+      "backupUnchanged": true,
+      "reason": "Local photo/missing states replace HEAD ten labelled3D capture mappings; four-photo subset incomplete, do not blanket-stage."
+    },
+    {
+      "path": "public/product-photos/README.md",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 2527,
+      "backupSha256": "8f15641d402c65c3d2448f691415377d0bfc81523fc8def79b7d6e8071478893",
+      "currentSha256": "8f15641d402c65c3d2448f691415377d0bfc81523fc8def79b7d6e8071478893",
+      "backupUnchanged": true,
+      "reason": "Photo provenance/generated subset metadata; preserve with photo unit, not runtime-required by current HEAD."
+    },
+    {
+      "path": "public/product-photos/inox-ladder-480.jpg",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 32654,
+      "backupSha256": "5c28b03fd6e11ad328c3414b42adf6cc8c942e885a571bbb90f39125048bb824",
+      "currentSha256": "5c28b03fd6e11ad328c3414b42adf6cc8c942e885a571bbb90f39125048bb824",
+      "backupUnchanged": true,
+      "reason": "Optimized local JPEG used only by independent dirty photo unit, not imported/referenced by HEAD media."
+    },
+    {
+      "path": "public/product-photos/inox-ladder-960.jpg",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 97826,
+      "backupSha256": "7b6ba0aac357d60694cf1935e012f42c1bea06e0f9514488489d657e61549723",
+      "currentSha256": "7b6ba0aac357d60694cf1935e012f42c1bea06e0f9514488489d657e61549723",
+      "backupUnchanged": true,
+      "reason": "Optimized local JPEG used only by independent dirty photo unit, not imported/referenced by HEAD media."
+    },
+    {
+      "path": "public/product-photos/manifest.json",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 20635,
+      "backupSha256": "00fa7fe605440ad8e52ad0c1276b48cc12d7c45677a7b911b2a8787ba3063c09",
+      "currentSha256": "00fa7fe605440ad8e52ad0c1276b48cc12d7c45677a7b911b2a8787ba3063c09",
+      "backupUnchanged": true,
+      "reason": "Photo provenance/generated subset metadata; preserve with photo unit, not runtime-required by current HEAD."
+    },
+    {
+      "path": "public/product-photos/outdoor-chaise-480.jpg",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 39096,
+      "backupSha256": "f72c58ae0e68a3019006ae3a75476e021326d8e20c00bc3e126898c923e31b36",
+      "currentSha256": "f72c58ae0e68a3019006ae3a75476e021326d8e20c00bc3e126898c923e31b36",
+      "backupUnchanged": true,
+      "reason": "Optimized local JPEG used only by independent dirty photo unit, not imported/referenced by HEAD media."
+    },
+    {
+      "path": "public/product-photos/outdoor-chaise-960.jpg",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 127379,
+      "backupSha256": "28c79d0abe3a9053467ac970588c0f5971806b62f30a4ba6dc611dce891a6004",
+      "currentSha256": "28c79d0abe3a9053467ac970588c0f5971806b62f30a4ba6dc611dce891a6004",
+      "backupUnchanged": true,
+      "reason": "Optimized local JPEG used only by independent dirty photo unit, not imported/referenced by HEAD media."
+    },
+    {
+      "path": "public/product-photos/prepared-files.json",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 1812,
+      "backupSha256": "c2a9d29a401a4671cf4663a6470791f5727ef7898947cc2e96272719e8a1ed11",
+      "currentSha256": "c2a9d29a401a4671cf4663a6470791f5727ef7898947cc2e96272719e8a1ed11",
+      "backupUnchanged": true,
+      "reason": "Photo provenance/generated subset metadata; preserve with photo unit, not runtime-required by current HEAD."
+    },
+    {
+      "path": "public/product-photos/prun-256.jpg",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 34625,
+      "backupSha256": "8c653bb69808559a1748e5335d9cc5c79bc9e374a103c553df3728e57cb2c3c0",
+      "currentSha256": "8c653bb69808559a1748e5335d9cc5c79bc9e374a103c553df3728e57cb2c3c0",
+      "backupUnchanged": true,
+      "reason": "Optimized local JPEG used only by independent dirty photo unit, not imported/referenced by HEAD media."
+    },
+    {
+      "path": "public/product-photos/prun-365.jpg",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 57704,
+      "backupSha256": "c2ace8e7576c11b80a3547b7c4e6e4aada32af0695b4f4136a630ef6f2f7b779",
+      "currentSha256": "c2ace8e7576c11b80a3547b7c4e6e4aada32af0695b4f4136a630ef6f2f7b779",
+      "backupUnchanged": true,
+      "reason": "Optimized local JPEG used only by independent dirty photo unit, not imported/referenced by HEAD media."
+    },
+    {
+      "path": "public/product-photos/sources.json",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 8259,
+      "backupSha256": "454a0cb7cef081083f06ece364841f8b8d3be85988f7b2586e87d17b581c5315",
+      "currentSha256": "454a0cb7cef081083f06ece364841f8b8d3be85988f7b2586e87d17b581c5315",
+      "backupUnchanged": true,
+      "reason": "Photo provenance/generated subset metadata; preserve with photo unit, not runtime-required by current HEAD."
+    },
+    {
+      "path": "scripts/bench-lighting-regression.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 35464,
+      "backupSha256": "c21342e4b92710909dae71c14c283fae018d2cd27539c530df78a1dd9e61c540",
+      "currentSha256": "c21342e4b92710909dae71c14c283fae018d2cd27539c530df78a1dd9e61c540",
+      "backupUnchanged": true,
+      "reason": "Excluded local camera/lighting/Infinity regression source or runner; historical AST/hash dependencies need scoped validation."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-access-h.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 2166,
+      "backupSha256": "5f352ce41020974ebf7c49c9c04d01c0f57abce50a2b735d624c482d68dc5e23",
+      "currentSha256": "5f352ce41020974ebf7c49c9c04d01c0f57abce50a2b735d624c482d68dc5e23",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-bench-ab.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 2532,
+      "backupSha256": "e35466f6e4565f64bd2bb85e4a86d13675cfd0582be50700ebc8f47259488913",
+      "currentSha256": "e35466f6e4565f64bd2bb85e4a86d13675cfd0582be50700ebc8f47259488913",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-bench-s.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 11062,
+      "backupSha256": "e1e2399a9d81f5c6806f99236aa6f4238c5bfe3c80920e1c218fe0a0ecc42576",
+      "currentSha256": "e1e2399a9d81f5c6806f99236aa6f4238c5bfe3c80920e1c218fe0a0ecc42576",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-bench-u.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 6988,
+      "backupSha256": "163ffa65dee1a50f62d640ffe94e126f78391544f5ecf334c37db3ad11d05537",
+      "currentSha256": "163ffa65dee1a50f62d640ffe94e126f78391544f5ecf334c37db3ad11d05537",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-infinity-waterline-r.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 7641,
+      "backupSha256": "d88dd48ef825341bc4a85fb7e0628028d2eded4e4d0ccdb311a3fe2af4e9c827",
+      "currentSha256": "d88dd48ef825341bc4a85fb7e0628028d2eded4e4d0ccdb311a3fe2af4e9c827",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-infinity-y.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 9608,
+      "backupSha256": "8a7db298a3a00e132baf93923ff939f8e486cdbfbb787829ef5c215cca247e52",
+      "currentSha256": "8a7db298a3a00e132baf93923ff939f8e486cdbfbb787829ef5c215cca247e52",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-interior-v.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 4217,
+      "backupSha256": "77968edb5b685e07fd1e010da35250e1cd3d59145d0529287b913ee11f5ec081",
+      "currentSha256": "77968edb5b685e07fd1e010da35250e1cd3d59145d0529287b913ee11f5ec081",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-overview-o.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 8086,
+      "backupSha256": "790e5d689d9bc9a0d015789b57e9802a298e0f7672c5d8b3902989e7ee15d9e8",
+      "currentSha256": "790e5d689d9bc9a0d015789b57e9802a298e0f7672c5d8b3902989e7ee15d9e8",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-paving-m.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 2331,
+      "backupSha256": "0f5e81dace14d6f9894463e097c35986b311e346c8fe9ad152248390c45e0c8b",
+      "currentSha256": "0f5e81dace14d6f9894463e097c35986b311e346c8fe9ad152248390c45e0c8b",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-top-l.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 4637,
+      "backupSha256": "6795e2cc78f27f24d1c8fa516a9c4ab00ac8484817c4baacb0ea6a4b4a0948c5",
+      "currentSha256": "6795e2cc78f27f24d1c8fa516a9c4ab00ac8484817c4baacb0ea6a4b4a0948c5",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/fixtures/premium-camera-waterline-q.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 4969,
+      "backupSha256": "2ddcf9ca30bf70d94fee69ab20da0594343f0acc53d99f1572a20f7f8139b4b6",
+      "currentSha256": "2ddcf9ca30bf70d94fee69ab20da0594343f0acc53d99f1572a20f7f8139b4b6",
+      "backupUnchanged": true,
+      "reason": "Preserved historical camera AST/metric fixture imported by excluded local regression harness, not app code."
+    },
+    {
+      "path": "scripts/hydro-glass-corner-audit.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U5",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 9100,
+      "backupSha256": "1c752277cf37d47435f2c75a83332e0de993b78931c00f3287cd1821df290554",
+      "currentSha256": "1c752277cf37d47435f2c75a83332e0de993b78931c00f3287cd1821df290554",
+      "backupUnchanged": true,
+      "reason": "Local hydro/seam regression runner/source; requires U1 and stale6x3 availability assumption, not current PASS evidence."
+    },
+    {
+      "path": "scripts/independent-photo-access-label-recheck.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U3",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 5740,
+      "backupSha256": "63a9425ab633877da42e7af57ff3f5adcbd130325a257241b7f4502db7ecd31f",
+      "currentSha256": "63a9425ab633877da42e7af57ff3f5adcbd130325a257241b7f4502db7ecd31f",
+      "backupUnchanged": true,
+      "reason": "Historical direct-Playwright/photo diagnostic or performance harness; some need ignored fixtures/local draft injection; preserve, not run here."
+    },
+    {
+      "path": "scripts/independent-product-photo-qa.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U3",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 17365,
+      "backupSha256": "cba316e0688e1c50e1ad83a4c9d618eeb6f63d8c3f40fc538f75f269fcefe556",
+      "currentSha256": "cba316e0688e1c50e1ad83a4c9d618eeb6f63d8c3f40fc538f75f269fcefe556",
+      "backupUnchanged": true,
+      "reason": "Historical direct-Playwright/photo diagnostic or performance harness; some need ignored fixtures/local draft injection; preserve, not run here."
+    },
+    {
+      "path": "scripts/infinity-waterline-regression.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 14068,
+      "backupSha256": "a6b1d9f9c766242dac00364e5f8e5bee1e7269a7fcae783bdc0fe511ef4b14d0",
+      "currentSha256": "a6b1d9f9c766242dac00364e5f8e5bee1e7269a7fcae783bdc0fe511ef4b14d0",
+      "backupUnchanged": true,
+      "reason": "Excluded local camera/lighting/Infinity regression source or runner; historical AST/hash dependencies need scoped validation."
+    },
+    {
+      "path": "scripts/premium-camera-regression.ts",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 246755,
+      "backupSha256": "d93f2fcbc30c53c8e644c5c2e088cbda37d7702fc30e1766b3959a625ab8c0b2",
+      "currentSha256": "d93f2fcbc30c53c8e644c5c2e088cbda37d7702fc30e1766b3959a625ab8c0b2",
+      "backupUnchanged": true,
+      "reason": "Excluded local camera/lighting/Infinity regression source or runner; historical AST/hash dependencies need scoped validation."
+    },
+    {
+      "path": "scripts/prepare-product-photos.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U3",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 5145,
+      "backupSha256": "72510674f4c3c60e110efa109881363a3b8198de8d9b9c402ec583aac1c89dac",
+      "currentSha256": "72510674f4c3c60e110efa109881363a3b8198de8d9b9c402ec583aac1c89dac",
+      "backupUnchanged": true,
+      "reason": "Source-processing script uses macOS sips, optional source downloads and output writes; not runtime dependency, not executed."
+    },
+    {
+      "path": "scripts/product-photo-mobile-diagnosis.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U3",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 4521,
+      "backupSha256": "56ded080449bd1d0181f8a1e6b77e66f64295628293375df4a7e4968758391f4",
+      "currentSha256": "56ded080449bd1d0181f8a1e6b77e66f64295628293375df4a7e4968758391f4",
+      "backupUnchanged": true,
+      "reason": "Historical direct-Playwright/photo diagnostic or performance harness; some need ignored fixtures/local draft injection; preserve, not run here."
+    },
+    {
+      "path": "scripts/product-photo-performance.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U3",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 8135,
+      "backupSha256": "d9b8b1335f38333155c3e774dc05aa7cebbe554b5622aec4065cc00000a4c25c",
+      "currentSha256": "d9b8b1335f38333155c3e774dc05aa7cebbe554b5622aec4065cc00000a4c25c",
+      "backupUnchanged": true,
+      "reason": "Historical direct-Playwright/photo diagnostic or performance harness; some need ignored fixtures/local draft injection; preserve, not run here."
+    },
+    {
+      "path": "scripts/run-hydro-glass-corner-audit.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U5",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 513,
+      "backupSha256": "eac64c75f6b992315216842cff783f982c1ffcccfab951ad1d5554e075e4f9df",
+      "currentSha256": "eac64c75f6b992315216842cff783f982c1ffcccfab951ad1d5554e075e4f9df",
+      "backupUnchanged": true,
+      "reason": "Local hydro/seam regression runner/source; requires U1 and stale6x3 availability assumption, not current PASS evidence."
+    },
+    {
+      "path": "scripts/run-premium-camera-regression.mjs",
+      "classification": "LOCAL_TEST_TOOLING",
+      "unit": "U4",
+      "localRuntimeDependency": false,
+      "trackedInHead": false,
+      "bytes": 5429,
+      "backupSha256": "3f1f1491308c053dff49dba63baf5af12492f430ee4914db46755f9724f2cd13",
+      "currentSha256": "3f1f1491308c053dff49dba63baf5af12492f430ee4914db46755f9724f2cd13",
+      "backupUnchanged": true,
+      "reason": "Excluded local camera/lighting/Infinity regression source or runner; historical AST/hash dependencies need scoped validation."
+    },
+    {
+      "path": "src/lib/pool/product-photography.ts",
+      "classification": "INDEPENDENT_INCOMPLETE",
+      "unit": "U2",
+      "localRuntimeDependency": true,
+      "trackedInHead": false,
+      "bytes": 7435,
+      "backupSha256": "fbdff6b4c6d4b87a2c0a5b229cf1c7934425dc8687f08ee58bc826997532ff3f",
+      "currentSha256": "fbdff6b4c6d4b87a2c0a5b229cf1c7934425dc8687f08ee58bc826997532ff3f",
+      "backupUnchanged": true,
+      "reason": "Untracked55option photo map imported only by dirty media;4reference/sample mappings,51missing; owner rights update not reflected."
+    }
+  ]
+}

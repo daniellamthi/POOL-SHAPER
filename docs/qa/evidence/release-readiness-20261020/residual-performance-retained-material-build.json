@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-20T18:18:44.708Z",
+  "root": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/residual-water-lifecycle-20261020-UJCepz",
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "prototype": "retained water resources + retained stage materials; coordinator patch only",
+  "build": "npm run build PASS; session81900; client+SSR+worker built; standard plugin/chunk warnings",
+  "server": {
+    "session": 17297,
+    "port": 3020,
+    "adapter": "GET/HEAD-only production worker adapter; no backend bindings"
+  },
+  "source": [
+    {
+      "name": "src/components/pool/three/PoolModel.tsx",
+      "sha256": "5740f81e841a4e8568cbe0be95ee1f800b4937b26c5fe87d7980f4585a121902",
+      "baselineSHA256": "eae9e9d5109e001565a42434f7b5273af8ac31f312f9e160ab40e91cdef6d0e3"
+    },
+    {
+      "name": "src/components/pool/three/WaterSurfaceMaterial.tsx",
+      "sha256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa",
+      "baselineSHA256": "d7f4e5c979babd1f6746fdbe9f1f5236c6fa0fb85bec1a58f2eccee4c9559f30"
+    },
+    {
+      "name": "src/components/pool/three/RetainedStageMaterial.tsx",
+      "sha256": "db0bf71c22666c1048ff9d82a9dfe4086da4652b24ea524e8c08ffd87c4e7cda",
+      "baselineSHA256": null
+    },
+    {
+      "name": "src/components/pool/three/PoolScene.tsx",
+      "sha256": "d0d42113ff79812630367e04b4c2f2b650be4326969e28a30e2b480366f531b0",
+      "baselineSHA256": "d0d42113ff79812630367e04b4c2f2b650be4326969e28a30e2b480366f531b0"
+    }
+  ],
+  "clientPoolSceneAsset": [
+    {
+      "name": "PoolScene-CMgwYsQJ.js",
+      "sha256": "eda5dbca08f60406840eb5e726fdcf1121faaf288e04e11d6f81ab924026d9df"
+    }
+  ],
+  "browserUsedAfterBuild": false
+}

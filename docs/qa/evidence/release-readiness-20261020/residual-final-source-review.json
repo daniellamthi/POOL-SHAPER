@@ -1,0 +1,33 @@
+{
+  "reviewer": "E — independent final integrated reviewer",
+  "scope": "Only retained material/water lifecycle runtime patch and its two focused regression scripts; no broad audit or browser access",
+  "parentCommit": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "verdict": "NO_CRITICAL_DEFECT_FOUND_IN_REVIEWED_PATCH_NOT_UNIVERSAL_RELEASE_APPROVAL",
+  "candidateRuntime": [
+    {"path": "src/components/pool/three/PoolModel.tsx", "candidateSHA256": "5740f81e841a4e8568cbe0be95ee1f800b4937b26c5fe87d7980f4585a121902", "primaryWipSHA256": "510cf99b353d8edfeda80655aaf5043aa313c43397f9af7e1e3be7517fad0b9f", "difference": "Direct no-index diff proves exactly four pre-existing seamlessSteel props in primary WIP; they must remain unstaged. Candidate is isolated UJCepz file already sampled in browser3020."},
+    {"path": "src/components/pool/three/WaterSurfaceMaterial.tsx", "candidateSHA256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa", "primaryWipIdentical": true},
+    {"path": "src/components/pool/three/RetainedStageMaterial.tsx", "candidateSHA256": "db0bf71c22666c1048ff9d82a9dfe4086da4652b24ea524e8c08ffd87c4e7cda", "primaryWipIdentical": true}
+  ],
+  "testSources": [
+    {"path": "scripts/water-lifecycle-audit.mjs", "sha256": "12f7ae117996b63de6597fa10cded166c338f238889e630c0f744972f972a245", "independentRun": "PASS", "checks": 21},
+    {"path": "scripts/retained-pbr-source-audit.mjs", "sha256": "d61df1b99e134001aba0358735592c9abed537d29aec216e847e7d10c8f8eee4", "independentRun": "PASS", "physicalMaterialDescriptors": 8, "geometryFactories": 17, "shaderConstants": 16}
+  ],
+  "reviewedContracts": [
+    "Each mounted RetainedStageMaterial owns its own MeshPhysicalMaterial, including components instantiated from the reused access ReactElement; no global shared mutable finished material was introduced.",
+    "Construction attaches its original raw material. The finished primitive is detached but not automatically disposed by R3F; the owner releases it on a true material-key change or component cleanup.",
+    "Finished child material properties and shader callbacks are forwarded unchanged. Existing shader descriptors, geometry factories and shader constants match the fixed parent source in the targeted AST audit.",
+    "Water is lazy until first shown, then remains mounted but hidden. Both reflection submission and animated uniform updates return immediately when inactive.",
+    "Resuming water invalidates the reflection cache before subsequent capture; existing render-target cleanup, renderer-state restoration and ripple reference counting remain intact.",
+    "Material disposal does not dispose shared external texture maps; existing texture ownership remains with their current loaders/resource owners.",
+    "No network path, personal-data handling, credential access or security boundary was added by these three runtime files."
+  ],
+  "limitations": [
+    "The21-check hook harness uses deterministic React/renderer stubs, not the real R3F reconciler or StrictMode effect replay. It proves its stated ownership/pause/resume contracts, not complete runtime behavior.",
+    "The immediate effect cleanup can dispose a retained material during DEV StrictMode effect replay. Three materials can be reinitialized by the renderer afterward, so this is a possible DEV recompilation concern, not a demonstrated production correctness defect. No unrelated StrictMode rewrite is justified by this review.",
+    "The source AST comparison proves exact authored property/constants equality, not rendered image equality or full shader-program lifecycle equivalence.",
+    "The isolated3020 direct browser samples are recorded separately in residual-visual-browser-evidence.json. Final unprobed3021 artifact identity and final committed SHA remain coordinator/build-receipt responsibilities.",
+    "C still records residual production stalls; this source approval does not mark P01 or the overall release PASS.",
+    "Uncovered universal visual, hosted runtime and owner-decision gates remain in the existing main release report."
+  ],
+  "changesByReviewer": "Evidence only; no app source, build, database, browser or main-report modification in this source-review turn"
+}

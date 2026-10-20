@@ -1,0 +1,99 @@
+{
+  "reviewer": "E — independent integrated review",
+  "candidateAtInventory": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "scope": "Residual coverage supplement to POOL_SHAPER_RELEASE_READINESS.md, not a replacement requirements checklist",
+  "sourceMode": "Committed HEAD inventory; dirty product-photography WIP is not assumed present in the production candidate",
+  "browserStatus": "BOUNDED_INDEPENDENT_REPLAY_COMPLETE_BROWSER_RELEASED_TO_ROOT",
+  "catalogue": {
+    "mosaics": {
+      "count": 9,
+      "labels": ["Mosaico 1", "Mosaico 2", "Mosaico 3", "Mosaico 4", "Mosaico 5", "Mosaico 6", "Mosaico 7", "Mosaico 8", "Mosaico 9"],
+      "ids": ["mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32", "mosaic-3470ea07-2b30-4cce-89f7-664a6460c7df", "mosaic-3a6ff20d-da5e-422e-9296-242af2e6c604", "mosaic-5abdef81-b8c7-4387-af15-21882cc2401d", "mosaic-8ed505ee-f994-46d5-8e0b-3cc8ec770a96", "mosaic-8f6945d0-2e20-41d5-b499-b90527e428fe", "mosaic-c36940e8-5bf5-4568-abe7-5903ef3d5311", "mosaic-dc6e8362-3310-4453-a436-00d14a36ec66", "mosaic-dd99152f-96c9-46f5-b07b-ee7e4e076c04"],
+      "source": "src/configurator/materials/mosaic-assets.generated.ts",
+      "aboveGroundSelectable": false,
+      "note": "No fictional 14-finish acceptance count"
+    },
+    "liners": {
+      "count": 6,
+      "ids": ["motionDeepSea603", "motionBlueSky602", "motionArcticWhite180", "motionSandBeach179", "motionGreyRock798", "motionBlackStone799"],
+      "protected": true,
+      "source": "src/configurator/materials/interior-textures.ts"
+    },
+    "coping": {
+      "legacySelectableIds": ["limestone", "prun", "travertine", "anthracite-gres", "ardesia", "wpc"],
+      "retiredSavedOnly": ["deck-marrone"],
+      "referenceIds": ["reference-light", "reference-grigio", "reference-avorio", "reference-beige", "reference-greige", "reference-ipe", "reference-travertine-light", "reference-travertine-veined"],
+      "uiFamilyRules": "In-ground Gres and Travertino parent cards reveal four porcelain colours and two travertine variants; generic/legacy identities remain restorable, not additional guaranteed products",
+      "aboveGroundReferenceFinishes": false,
+      "source": ["src/lib/pool/coping-materials.ts", "src/lib/pool/reference-finishes.ts", "src/components/pool/wizard/StepTrays.tsx"]
+    },
+    "paving": {
+      "legacyIds": ["gres", "wood", "istria", "limestone", "prun", "travertine", "ardesia", "wpc"],
+      "referenceIds": ["reference-light", "reference-grigio", "reference-avorio", "reference-beige", "reference-greige", "reference-ipe", "reference-travertine-light", "reference-travertine-veined"],
+      "formatIds": ["30x60", "60x60", "60x120", "50x50", "50x100", "wpc-140x2200", "wood-140x2400", "40x60", "90x90"],
+      "note": "Formats are material-specific visualization references, not guaranteed supplier specifications; reference families excluded above ground",
+      "source": "src/lib/pool/presentation.ts"
+    },
+    "exteriorPanels": {
+      "ids": ["steel-satin", "composite-light", "gres", "wpc"],
+      "source": "src/lib/pool/above-ground.ts"
+    },
+    "productPreviews": {
+      "count": 10,
+      "kind": "3d-preview",
+      "ids": ["skimmer-slim", "skimmer-high", "overflow-visible", "overflow-hidden", "access-ladder", "access-external", "comfort-sunShelf", "equipment-pellicano", "equipment-loungers", "equipment-sunShelfLoungers"],
+      "source": "HEAD:src/components/pool/wizard/product-media.tsx",
+      "note": "Do not transfer the dirty WIP's 4/55 photo plus 51 unavailable-state inventory to the committed candidate. StepTrays lines737/1182 bypass the two dormant generic equipment-lounger mappings with /product-previews/lympha-immersed.jpg and lympha-deck.jpg, using contain. Source association is correct; fresh runtime confirmation remains pending."
+    }
+  },
+  "reusedEvidence": [
+    {
+      "requirements": ["M01"],
+      "report": "docs/qa/PREMIUM_MATERIALS_TOP_PERFORMANCE.md#U01–U10",
+      "implementationCommit": "9c9547",
+      "verifiedIdentity": "git diff 9c9547..6ad89bd scoped to src/components/pool/three, material config/assets, coping/reference/presentation: only PoolScene camera/capture code and customer-facing mosaic labels changed; no material/shader/photographic asset change",
+      "covered": "All 9 original mosaics independently selected with dry floor/wall close-ups and filled overview/night; real material-family, paving and four exterior-panel scoped checks",
+      "limitation": "Historical scoped visual PASS, not fresh universal day/night photorealism proof or production performance approval; exact-production smoke still pending"
+    },
+    {
+      "requirements": ["C02", "C04", "G02"],
+      "report": "docs/qa/evidence/release-readiness-20261020/final-review-checklist.md",
+      "covered": "Earlier direct E desktop/mobile shelf min/max ON/OFF; Infinity traditional/glass, above-ground general, renovation, orthographic and export samples",
+      "limitation": "Earlier operational Mac WIP browser; not relabelled as exact-committed production QA"
+    }
+  ],
+  "residualViews": [
+    {"requirement": "L02", "priority": 1, "scenario": "Hydromassage B, day/night, bench OFF/ON, main LEDs OFF", "view": "Actual nozzle and bench-riser close-up; no nozzle emission, spots below seat only", "viewports": ["1440x900", "390x844 emulated", "430x932 emulated"], "state": "PENDING_BROWSER"},
+    {"requirement": "I02", "priority": 1, "scenario": "Committed Sun Shelf and external lounger cards versus actual Lyxo Esse / Esse Frame model", "view": "Correct current-model illustration and honest product identity", "finding": "Two old generic equipment-* preview assets are dormant for these cards: actual StepTrays uses faithful lympha-immersed.jpg and lympha-deck.jpg directly with contain. No customer-facing defect demonstrated. Confirm actual runtime associations only; no asset replacement justified.", "state": "SOURCE_ASSOCIATION_PASS_RUNTIME_PENDING"},
+    {"requirement": "C02", "priority": 2, "scenario": "Skimmer Slim and High Waterline; grille and hidden overflow; straight/corner/inox access; coping/paving; above-ground panels/external stairs/Pellicano", "view": "Only previously uncovered detail focus, complete recognizable selected subject and no clipping", "viewports": ["1440x900", "390x844 emulated", "430x932 emulated"], "state": "PENDING_EXACT_PRODUCTION_RESIDUAL_REPLAY"},
+    {"requirement": "M01", "priority": 2, "scenario": "Reference-family selection, steel basin and sampled material close-up in exact committed production", "view": "Confirm historical unchanged material evidence remains applicable, material updates in 3D, no above-ground in-ground-only families", "state": "PENDING_BROWSER_SMOKE"},
+    {"requirement": "G02", "priority": 2, "scenario": "Four corner-stair orientations", "view": "Reuse geometry assertions; finite residual close-ups where old direct evidence absent", "state": "PENDING_EVIDENCE_MAPPING"},
+    {"requirement": "G04", "priority": 2, "scenario": "Cover closed/open where supported; Pellicano outlet", "view": "Selected geometry/water discharge readable, not all optional combinations", "state": "PENDING_BROWSER"},
+    {"requirement": "I01", "priority": 2, "scenario": "Critical navigation, add/remove, camera and lighting controls", "view": "Visible labels, keyboard access and selected-state icons; distinguish scoped functional access from complete WCAG audit", "state": "PENDING_BROWSER"},
+    {"requirement": "C03", "priority": 2, "scenario": "Brief actual interrupted camera/navigation sequence after performance source freeze", "view": "No stale target/clipping/queued flyby; production timing remains C responsibility", "state": "PENDING_BROWSER"}
+  ],
+  "assetClassification": {
+    "missingPhotoWithAccurateLabelled3dPreview": "Informational; not intrinsically a selection usability blocker",
+    "wrongModelImageForSelectedProduct": "Would be a usability defect, but old generic lounger assets are bypassed by actual StepTrays; no active mismatch demonstrated",
+    "noLegalNewPhotoSource": "Do not replace with generic or synthetic photographs; use accurate actual-model capture if a correction is necessary"
+  },
+  "directReplay": {
+    "operator": "E independently used Chrome through CUA; no app-source edits or database submissions",
+    "hosted": {"status": "BLOCKED_FOR_THIS_BROWSER_SESSION", "url": "https://pool-shaper-9qeaubbxt-daniellamthis-projects.vercel.app/", "evidence": "residual-visual-hosted-auth-blocked.png", "reason": "Chrome redirected to Vercel login. Parent IAB is separately authenticated; its access is not this reviewer's online PASS."},
+    "localCandidate": {"url": "http://final-visual-qa.localhost:3020/", "source": "HEAD6ad89bd plus isolated coordinator retained-water/stage-material prototype, per residual-performance-retained-material-build.json", "status": "LOCAL_PRODUCTION_PARTIAL_VISUAL_PASS_NOT_COMMITTED_OR_HOSTED_RELEASE_PASS"},
+    "viewports": ["1440x900 DPR1", "390x844 DPR1 emulated", "430x932 DPR1 emulated"],
+    "evidenceManifest": "residual-visual-browser-evidence.json",
+    "captures": 23,
+    "results": [
+      {"requirement": "I02", "status": "PASS_SCOPED", "evidence": ["residual-visual-immersed-card-390.png", "residual-visual-deck-card-390.png"], "result": "Runtime image sources are the faithful lympha-immersed.jpg and lympha-deck.jpg with contain. Current Esse shell and cushioned Frame photographs are distinct. Dormant generic equipment-* images are not active; no asset replacement justified."},
+      {"requirement": "L02", "status": "PARTIAL_PASS_REMAINING_MACRO_COVERAGE_EXPLICIT", "evidence": ["residual-visual-hydro-b-night-settled-1440.png", "residual-visual-hydro-b-day-1440.png", "residual-visual-hydro-b-night-bench-off-1440.png", "residual-visual-hydro-b-bench-close-night-1440.png", "residual-visual-hydro-b-bench-close-day-430.png"], "result": "Finished B context shows dark visible rear nozzles; bench OFF/ON independent of main LEDs and stairs. Spot-focused camera clearly shows a fitting in the riser below the seat, not on a nozzle. Day/night controls and spot details exercised at all three viewports. These captures do not establish every B nozzle in macro on mobile."},
+      {"requirement": "C02", "status": "PASS_SELECTED_B_SAMPLE_NOT_UNIVERSAL", "evidence": ["residual-visual-hydro-b-actual-selection-430.png", "residual-visual-hydro-b-actual-selection-night-390.png", "residual-visual-hydro-b-actual-selection-day-390.png"], "result": "Actual selected B has canvas cameraFocus=hydromassage and the U/adjacent stair fits above the open panel. Raw structure stage is explicit. Earlier generic Access-menu framing is not the actual HydroB context and is not classified as a selected-HydroB failure. Mobile subject is small; no universal camera approval."},
+      {"requirement": "M01", "status": "PASS_RETAINED_MATERIAL_SAMPLE_NOT_UNIVERSAL", "evidence": ["residual-visual-retained-liner-dry-1440.png", "residual-visual-retained-mosaic5-dry-1440.png", "residual-visual-retained-mosaic5-return-dry-430.png", "residual-visual-retained-liner-white-switch-430.png", "residual-visual-retained-mosaic9-dry-390.png"], "result": "Actual Blue Sky liner to Mosaic5, wet stage and back, Arctic White liner, then Mosaic9; sampled settled appearance correctly changes, no black/stale material observed. Final Mosaic9-wet capture was immediate/in-transition and is not final-pixel PASS."},
+      {"requirement": "I01", "status": "PASS_KEYBOARD_SAMPLE_ONLY", "evidence": "residual-visual-browser-evidence.json", "result": "Tab from Chaise longue lands on the labelled Doccia solare button with aria-description/aria-pressed. Buttons retain add/remove selected-state indicators. Not a full keyboard/contrast audit."},
+      {"requirement": "P01", "status": "NO_PERFORMANCE_VERDICT_BY_E", "result": "Initial cold bench ON and liner switch produced browser-command timeouts; fresh snapshots confirmed final state and only the uncommitted colour click was retried after inspection. These are observations, not renderer timings. Parent IAB scene remained open by owner request; no E timing claim."}
+    ],
+    "notCompletedInThisBoundedTurn": ["Every HydroB nozzle macro at both mobile sizes", "All standalone skimmer/material/access/coping/paving/panel/Pellicano detail combinations", "Four corner-stair orientation close-ups", "Cover open/closed close-up pair", "Complete measured accessibility/contrast audit", "Rapid-camera/manual-interruption video", "Every configured technical-plan component", "Online authenticated persistence/export/quote chain", "Final committed artifact replay after prototype integration"],
+    "cleanup": "QA Chrome3020 closed and viewport override reset; control handed to ROOT before online chain and C benchmark"
+  },
+  "dependencies": ["Root hosted chain through its authenticated IAB session", "C bounded performance comparison", "Integrate and commit only validated lifecycle patch, then verify exact final artifact", "Do not convert partial/uncovered visual coverage into a universal PASS"]
+}

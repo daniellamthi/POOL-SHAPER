@@ -212,7 +212,7 @@ function isWaterSurfaceMesh(object: THREE.Object3D): object is THREE.Mesh {
  * scene draw calls for the parts visible above the waterline, so
  * Configuration keeps today's exact cost and output.
  */
-function useWaterReflection(waterLevel: number, enabled: boolean) {
+function useWaterReflection(waterLevel: number, enabled: boolean, active: boolean) {
   const { gl, scene, camera } = useThree();
 
   const target = useMemo(() => {
@@ -241,12 +241,19 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
     projection: new THREE.Matrix4(),
     waterLevel: NaN,
   }), []);
+  useEffect(() => {
+    if (active) {
+      captureState.time = -Infinity;
+      captureState.waterLevel = NaN;
+    }
+  }, [active, captureState]);
   const clipping = useMemo(
     () => ({ plane: new THREE.Plane(), vector: new THREE.Vector4(), q: new THREE.Vector4() }),
     [],
   );
 
   useFrame(({ clock }) => {
+    if (!active) return;
     if (!target || !mirrorCamera || !(camera instanceof THREE.PerspectiveCamera)) return;
     mirrorCamera.name = "pool-water-reflection";
     mirrorCamera.layers.enable(1);
@@ -416,6 +423,7 @@ function useWaterReflection(waterLevel: number, enabled: boolean) {
 
 /** Shared physical water surface used by the pool and skimmer tongue. */
 export function WaterSurfaceMaterial({
+  active = true,
   waterLevel = 0,
   reflections = true,
   depth = 0.13,
@@ -424,6 +432,8 @@ export function WaterSurfaceMaterial({
   flowing = false,
   planView = false,
 }: {
+  /** Retain resources while hidden, without reflection or animation work. */
+  active?: boolean;
   waterLevel?: number;
   reflections?: boolean;
   depth?: number;
@@ -436,7 +446,7 @@ export function WaterSurfaceMaterial({
   const { broad: largeNormal, micro: microNormal } = useRippleResources();
   const shaders = useRef<WaterShader[]>([]);
   reflections = reflections && !planView;
-  const reflection = useWaterReflection(waterLevel, reflections);
+  const reflection = useWaterReflection(waterLevel, reflections, active);
   const shoreline = useMemo(() => (outline ? createShorelineField(outline) : null), [outline]);
   useEffect(() => () => shoreline?.texture.dispose(), [shoreline]);
   useEffect(() => {
@@ -563,6 +573,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
 
   const stillness = useRef(0);
   useFrame(({ clock }, delta) => {
+    if (!active) return;
     const time = clock.getElapsedTime();
     // Eases toward "held still" while the camera is settled (see
     // renderQualityState/CameraRig) and snaps back the instant it moves

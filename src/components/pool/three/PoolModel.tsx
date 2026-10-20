@@ -27,6 +27,7 @@ import {
   getDerivedDetailMaps,
 } from "./textures";
 import { WaterSurfaceMaterial } from "./WaterSurfaceMaterial";
+import { RetainedStageMaterial } from "./RetainedStageMaterial";
 import { configureMosaicSampling, MOSAIC_SAMPLING_REVISION } from "./mosaicSampling";
 import { requestMosaicTexture } from "./mosaicTexture";
 import { PoolAccessModel } from "./PoolAccessModel";
@@ -474,6 +475,12 @@ export function PoolModel({
   infinityEdge,
   infinityExcluded = null,
 }: PoolModelProps) {
+  // Prepare water only when first shown, then retain its resources across
+  // construction/finished-stage navigation instead of recompiling on return.
+  const [waterPrepared, setWaterPrepared] = useState(showWater);
+  useEffect(() => {
+    if (showWater) setWaterPrepared(true);
+  }, [showWater]);
   const isInfinity = system === "infinity" && infinityEdge?.enabled === true;
   // Rectangle + L-shape this pass: `infinityZonesForOutline` is honestly
   // empty for Organic (or any outline with no candidate zones), so
@@ -1112,6 +1119,9 @@ export function PoolModel({
     specularIntensity: 0.58,
   } : {};
   const mosaicSamplingKey = materials.surface.kind === "mosaic" ? `-${MOSAIC_SAMPLING_REVISION}-${materials.surface.tileSize}` : "";
+  // Construction stages attach a separate raw material, not a dry version of
+  // the finished basin. Retain that finished program until it is visible again.
+  const finishedProgramKey = `${showWater || interiorShellKind ? "wet" : "dry"}${mosaicSamplingKey}`;
   const configureInteriorMaterial = useCallback((shader: UnderwaterShader) => {
     configureCaustics(shader);
     if (materials.surface.kind === "mosaic") configureMosaicSampling(shader, materials.surface.tileSize);
@@ -1122,7 +1132,8 @@ export function PoolModel({
     showWater && structureFamily === "VISIBLE_STAINLESS_STEEL"
       ? { configure: configureCaustics, key: `wet-${waterLevel}-${materials.surface.underwaterScatteringContribution}-${LED_TRANSPORT_CACHE_KEY}` }
       : undefined;
-  const accessMaterial = interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : (
+  const accessMaterial = (
+    <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : null}>
     <meshPhysicalMaterial
             key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.liner.color}
@@ -1143,6 +1154,7 @@ export function PoolModel({
               `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
             }
           />
+    </RetainedStageMaterial>
   );
 
   return (
@@ -1169,9 +1181,7 @@ export function PoolModel({
           ledColor={ledColor}
           ledIntensity={ledIntensity}
         >
-          {interiorShellKind ? (
-            <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} />
-          ) : (
+          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : null}>
             <meshPhysicalMaterial
               key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
               color={materials.liner.color}
@@ -1192,7 +1202,7 @@ export function PoolModel({
                 `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
               }
             />
-          )}
+          </RetainedStageMaterial>
         </PoolComfortModel>
         {resolvedLayout.effectiveAccess !== "stainlessSteelLadder" || showAccessories ? <PoolAccessModel
           resolvedPlan={resolvedLayout.access}
@@ -1223,7 +1233,7 @@ export function PoolModel({
         ) : null}
         {/* Interior walls */}
         <mesh name="plan-basin-walls" geometry={walls} renderOrder={0} receiveShadow castShadow>
-          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
+          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} underwater={interiorUnderwater} /> : null}><meshPhysicalMaterial
             key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.liner.color}
             map={wallSurfaceMap}
@@ -1249,7 +1259,7 @@ export function PoolModel({
               `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
             }
             side={DoubleSide}
-          />}
+          /></RetainedStageMaterial>
         </mesh>
 
         {/* Floor with animated caustics. Sloped floors bake their absolute
@@ -1262,7 +1272,7 @@ export function PoolModel({
           position={floorProfile.sloped ? [0, 0, 0] : [0, verticalLayout.floorY, 0]}
           receiveShadow
         >
-          {interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : <meshPhysicalMaterial
+          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : null}><meshPhysicalMaterial
             key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.floor.color}
             map={floorSurfaceMap}
@@ -1287,13 +1297,14 @@ export function PoolModel({
               `depth-aware-underwater-optics-v8-${LED_TRANSPORT_CACHE_KEY}-${showWater}${mosaicSamplingKey}`
             }
             side={DoubleSide}
-          />}
+          /></RetainedStageMaterial>
         </mesh>
 
         {/* Water body — animated ripples, refraction, real planar reflection */}
-        {showWater ? (
-          <mesh geometry={water} position={[0, waterLevel, 0]} renderOrder={2}>
+        {showWater || waterPrepared ? (
+          <mesh geometry={water} position={[0, waterLevel, 0]} renderOrder={2} visible={showWater}>
             <WaterSurfaceMaterial
+              active={showWater}
               planView={planView}
               waterLevel={waterLevel}
               depth={waterLevel - verticalLayout.floorY}

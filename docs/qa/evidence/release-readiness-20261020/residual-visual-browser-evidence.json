@@ -1,0 +1,1064 @@
+{
+  "source": "Local production3020:HEAD6ad89bd plus isolated retained-material lifecycle candidate; NOT hosted verification",
+  "hostedAuth": "Chrome blocked, parent IAB separately accessible",
+  "evidence": [
+    {
+      "name": "residual-visual-hosted-auth-blocked",
+      "status": "BLOCKED",
+      "reason": "Chrome session redirects exact hosted preview to Vercel login; no protection changes",
+      "url": "https://pool-shaper-9qeaubbxt-daniellamthis-projects.vercel.app/"
+    },
+    {
+      "name": "residual-visual-retained-liner-dry-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Rivestimento · vasca asciutta\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: Il materiale interno che dà colore all’acqua.\n  - group \"Rivestimento interno\":\n    - button \"Liner / PVC\" [pressed]:\n      - generic: Liner / PVC\n      - generic: Membrana armata, continua e impermeabile.\n    - button \"Mosaico\":\n      - generic: Mosaico\n      - generic: Tessere in vetro posate a mano.\n  - group \"Colore del liner\":\n    - heading \"Colore del liner\" [level=4]\n    - group \"Colore liner PVC\":\n      - button \"Deep Sea [603]\":\n        - generic: Deep Sea [603]\n        - generic: Acqua blu intenso e profondo.\n      - button \"Blue Sky [602]\" [pressed]:\n        - generic: Blue Sky [602]\n        - generic: Acqua azzurra luminosa, classica.\n      - button \"Arctic White [180]\":\n        - generic: Arctic White [180]\n        - generic: Acqua chiarissima, turchese tenue.\n      - button \"Sand Beach [179]\":\n        - generic: Sand Beach [179]\n        - generic: Acqua verde-turchese caraibica.\n      - button \"Grey Rock [798]\":\n        - generic: Grey Rock [798]\n        - generic: Acqua verde-grigia, naturale.\n      - button \"Black Stone [799]\":\n        - generic: Black Stone [799]\n        - generic: Acqua scura a specchio, effetto lago.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Rivestimento interno\n  - heading \"Finiture\" [level=2]\n  - paragraph: Liner PVC · Blue Sky [602]\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Acqua e luci\" [active]:\n    - text: Continua\n    - generic: · Acqua e luci\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "liner",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-blue-sky-602.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/23DD3311-E2C5-4BA3-87BB-D056D3B75F32.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-deep-sea-603.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-blue-sky-602.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-arctic-white-180.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-sand-beach-179.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-grey-rock-798.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-black-stone-799.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-retained-mosaic5-dry-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Rivestimento · vasca asciutta\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: Il materiale interno che dà colore all’acqua.\n  - group \"Rivestimento interno\":\n    - button \"Liner / PVC\":\n      - generic: Liner / PVC\n      - generic: Membrana armata, continua e impermeabile.\n    - button \"Mosaico\" [pressed]:\n      - generic: Mosaico\n      - generic: Tessere in vetro posate a mano.\n  - group \"Finitura mosaico\":\n    - heading \"Finitura mosaico\" [level=4]\n    - group \"Finitura mosaico\":\n      - button \"Mosaico 1\":\n        - generic: Mosaico 1\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 2\":\n        - generic: Mosaico 2\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 3\":\n        - generic: Mosaico 3\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 4\":\n        - generic: Mosaico 4\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 5\" [active] [pressed]:\n        - generic: Mosaico 5\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 6\":\n        - generic: Mosaico 6\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 7\":\n        - generic: Mosaico 7\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 8\":\n        - generic: Mosaico 8\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 9\":\n        - generic: Mosaico 9\n        - generic: Tessere in vetro, posa a mano.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Rivestimento interno\n  - heading \"Finiture\" [level=2]\n  - paragraph: Mosaico · Mosaico 5\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Acqua e luci\":\n    - text: Continua\n    - generic: · Acqua e luci\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "mosaic",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-blue-sky-602.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/23DD3311-E2C5-4BA3-87BB-D056D3B75F32.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/3470EA07-2B30-4CCE-89F7-664A6460C7DF.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/3A6FF20D-DA5E-422E-9296-242AF2E6C604.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/5ABDEF81-B8C7-4387-AF15-21882CC2401D.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8F6945D0-2E20-41D5-B499-B90527E428FE.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/C36940E8-5BF5-4568-ABE7-5903EF3D5311.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DC6E8362-3310-4453-A436-00D14A36EC66.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-night-bench-on-1440",
+      "snapshot": "- heading [level=1]: Configuratore piscine 3D\n- banner:\n  - navigation:\n    - list:\n      - button:\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button:\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button:\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button:\n        - generic: Finiture\n        - generic: In corso\n      - button:\n        - generic: Esterno\n      - button:\n        - generic: Optional\n      - button:\n        - generic: Presentazione\n  - button [pressed]: IT\n  - button: EN\n  - button:\n    - generic: Giorno\n  - button [pressed]:\n    - generic: Notte\n  - button:\n    - generic: Ricomincia\n- main:\n  - button:\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar:\n    - button:\n      - text: Guide\n    - button:\n      - text: Vista tecnica\n    - button:\n      - text: Riquadra\n- region:\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup:\n    - generic: Anteprima\n    - radio:\n      - text: Giorno\n    - radio [checked]:\n      - text: Notte\n  - button [pressed]:\n    - generic: Senza illuminazione\n    - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n  - button:\n    - generic: + Micro-spot sulle scale\n    - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n    - generic: 5 micro-spot · nelle alzate\n  - button:\n    - generic: LED subacquei\n    - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n  - button [pressed]:\n    - generic: Micro-spot sulla panca\n    - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - button:\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading [level=2]: Finiture\n  - paragraph: Notte · micro-spot panca\n  - button:\n    - text: Vedi la piscina\n  - button [expanded]:\n    - text: Riduci\n  - button:\n    - text: Indietro\n  - button:\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"\n- menu \"Vista della piscina\":\n  - menuitem \"Vista d’insieme\"\n  - menuitem \"Linea d’acqua\"\n  - menuitem \"Accesso\" [active]\n  - menuitem \"Dall’alto\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "access",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-night-settled-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\" [active]:\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "access",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-day-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\" [checked]:\n      - text: Giorno\n    - radio \"Notte\":\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Giorno · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "access",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-night-bench-off-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [active]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · senza luci\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-bench-close-night-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [active] [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-bench-close-day-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Slim Moderno\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Slim Moderno\n      - button \"Accesso & comfort Scala interna · Idromassaggio B\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Idromassaggio B\n      - button \"Finiture In corso\":\n        - generic: Finiture\n        - generic: In corso\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\" [checked]:\n      - text: Giorno\n    - radio \"Notte\":\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Giorno · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Esterno\":\n    - text: Continua\n    - generic: · Esterno\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-bench-close-day-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\" [checked]:\n      - text: Giorno\n    - radio \"Notte\":\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Giorno · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-bench-close-night-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [active] [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-context-night-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\" [active]:\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "access",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-bench-close-night-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\":\n      - text: Giorno\n    - radio \"Notte\" [checked]:\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [active] [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Notte · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-bench-close-day-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - radiogroup \"Anteprima luce\":\n    - generic: Anteprima\n    - radio \"Giorno\" [checked]:\n      - text: Giorno\n    - radio \"Notte\":\n      - text: Notte\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n    - button \"Micro-spot sulla panca\" [pressed]:\n      - generic: Micro-spot sulla panca\n      - generic: Micro-spot sotto la seduta, coordinati al colore dei fari piscina. Optional indipendente.\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Giorno · micro-spot panca\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "bench-lighting",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-retained-mosaic5-return-dry-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Rivestimento · vasca asciutta\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: Il materiale interno che dà colore all’acqua.\n  - group \"Rivestimento interno\":\n    - button \"Liner / PVC\":\n      - generic: Liner / PVC\n      - generic: Membrana armata, continua e impermeabile.\n    - button \"Mosaico\" [pressed]:\n      - generic: Mosaico\n      - generic: Tessere in vetro posate a mano.\n  - group \"Finitura mosaico\":\n    - heading \"Finitura mosaico\" [level=4]\n    - group \"Finitura mosaico\":\n      - button \"Mosaico 1\":\n        - generic: Mosaico 1\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 2\":\n        - generic: Mosaico 2\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 3\":\n        - generic: Mosaico 3\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 4\":\n        - generic: Mosaico 4\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 5\" [pressed]:\n        - generic: Mosaico 5\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 6\":\n        - generic: Mosaico 6\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 7\":\n        - generic: Mosaico 7\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 8\":\n        - generic: Mosaico 8\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 9\":\n        - generic: Mosaico 9\n        - generic: Tessere in vetro, posa a mano.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Rivestimento interno\n  - heading \"Finiture\" [level=2]\n  - paragraph: Mosaico · Mosaico 5\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\" [active]:\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "mosaic",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-blue-sky-602.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/23DD3311-E2C5-4BA3-87BB-D056D3B75F32.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/3470EA07-2B30-4CCE-89F7-664A6460C7DF.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/3A6FF20D-DA5E-422E-9296-242AF2E6C604.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/5ABDEF81-B8C7-4387-AF15-21882CC2401D.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8F6945D0-2E20-41D5-B499-B90527E428FE.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/C36940E8-5BF5-4568-ABE7-5903EF3D5311.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DC6E8362-3310-4453-A436-00D14A36EC66.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-retained-liner-white-switch-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Rivestimento · vasca asciutta\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: Il materiale interno che dà colore all’acqua.\n  - group \"Rivestimento interno\":\n    - button \"Liner / PVC\" [pressed]:\n      - generic: Liner / PVC\n      - generic: Membrana armata, continua e impermeabile.\n    - button \"Mosaico\":\n      - generic: Mosaico\n      - generic: Tessere in vetro posate a mano.\n  - group \"Colore del liner\":\n    - heading \"Colore del liner\" [level=4]\n    - group \"Colore liner PVC\":\n      - button \"Deep Sea [603]\":\n        - generic: Deep Sea [603]\n        - generic: Acqua blu intenso e profondo.\n      - button \"Blue Sky [602]\":\n        - generic: Blue Sky [602]\n        - generic: Acqua azzurra luminosa, classica.\n      - button \"Arctic White [180]\" [active] [pressed]:\n        - generic: Arctic White [180]\n        - generic: Acqua chiarissima, turchese tenue.\n      - button \"Sand Beach [179]\":\n        - generic: Sand Beach [179]\n        - generic: Acqua verde-turchese caraibica.\n      - button \"Grey Rock [798]\":\n        - generic: Grey Rock [798]\n        - generic: Acqua verde-grigia, naturale.\n      - button \"Black Stone [799]\":\n        - generic: Black Stone [799]\n        - generic: Acqua scura a specchio, effetto lago.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Rivestimento interno\n  - heading \"Finiture\" [level=2]\n  - paragraph: Liner PVC · Arctic White [180]\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "liner",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-arctic-white-180.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-deep-sea-603.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-blue-sky-602.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-arctic-white-180.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-sand-beach-179.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-grey-rock-798.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-black-stone-799.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-actual-selection-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\":\n      - generic \"Anteprima 3D. Modello 3D indicativo. La finitura mostrata è un esempio; i materiali dipendono dalla configurazione scelta.\":\n        - 'img \"Anteprima 3D: Spiaggetta sommersa in muratura, collegata alla vasca da gradini.\"'\n        - generic: Anteprima 3D\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\" [active] [pressed]:\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/3 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Idromassaggio B\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "hydromassage",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "Anteprima 3D: Spiaggetta sommersa in muratura, collegata alla vasca da gradini.",
+            "src": "/product-previews/comfort-sunShelf.jpg"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-actual-selection-night-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [active] [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\":\n      - generic \"Anteprima 3D. Modello 3D indicativo. La finitura mostrata è un esempio; i materiali dipendono dalla configurazione scelta.\":\n        - 'img \"Anteprima 3D: Spiaggetta sommersa in muratura, collegata alla vasca da gradini.\"'\n        - generic: Anteprima 3D\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\" [pressed]:\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/3 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Idromassaggio B\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "hydromassage",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "Anteprima 3D: Spiaggetta sommersa in muratura, collegata alla vasca da gradini.",
+            "src": "/product-previews/comfort-sunShelf.jpg"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-hydro-b-actual-selection-day-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\" [selected]\n  - group \"Zona comfort\":\n    - button \"Nessuna zona comfort\":\n      - generic: Nessuna zona comfort\n      - generic: Vasca libera, solo la scala scelta.\n    - button \"Spiaggetta\":\n      - generic \"Anteprima 3D. Modello 3D indicativo. La finitura mostrata è un esempio; i materiali dipendono dalla configurazione scelta.\":\n        - 'img \"Anteprima 3D: Spiaggetta sommersa in muratura, collegata alla vasca da gradini.\"'\n        - generic: Anteprima 3D\n      - generic: Spiaggetta\n      - generic: Solarium sommerso a 20 cm per sdraiarsi in acqua.\n    - button \"Idromassaggio A\":\n      - generic: Idromassaggio A\n      - generic: Zona delimitata da un muretto, panca a L con getti.\n    - button \"Idromassaggio B\" [pressed]:\n      - generic: Idromassaggio B\n      - generic: Panca a U con getti, aperta sulla vasca.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 3/3 · Comfort in acqua\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Idromassaggio B\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "hydromassage",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "Anteprima 3D: Spiaggetta sommersa in muratura, collegata alla vasca da gradini.",
+            "src": "/product-previews/comfort-sunShelf.jpg"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-immersed-card-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\"\n    - tab \"Optional per la spiaggetta\" [selected]\n  - group \"Optional per la spiaggetta\":\n    - button \"Lettini per spiaggetta\":\n      - generic: Lettini per spiaggetta\n      - generic: Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.\n      - text: Aggiungi\n  - paragraph: \"Quantità consentite: da 1 a 2.\"\n  - paragraph: Anteprima 3D dimensionale; modello e fornitura da confermare. 1,85 ×0,73 m.\n  - paragraph:\n    - generic: Per il tuo Sun shelf · compare solo con questa scelta\n  - group \"Panca integrata\":\n    - button \"Panca integrata\":\n      - generic: Panca integrata\n      - generic: Seduta sommersa lungo parete.\n      - text: Aggiungi\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 4/4 · Optional per la spiaggetta\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "shelf",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/product-previews/lympha-immersed.jpg"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-deck-card-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\" [active]:\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 6: Optional\"':\n  - paragraph: Copertura, doccia solare e tecnologia dell’impianto.\n  - tablist \"Optional\":\n    - tab \"Esterni\" [selected]\n    - tab \"Trattamento acqua\"\n    - tab \"Temperatura\"\n  - group \"Optional esterni\":\n    - button \"Copertura automatica\":\n      - generic: Copertura automatica\n      - generic: Copertura a doghe; fattibilità e prestazioni da verificare in progetto.\n      - text: Aggiungi\n    - button \"Chaise longue\":\n      - generic: Chaise longue\n      - generic: Esse · Lyxo, con telaio e cuscino per la pavimentazione.\n      - generic: Visibili nella presentazione finale.\n      - text: Aggiungi\n    - button \"Doccia solare\":\n      - generic: Doccia solare\n      - generic: Doccia da esterno a riscaldamento solare, alluminio antracite e acciaio inox.\n      - text: Aggiungi\n  - 'button \"Prossima scelta: Trattamento acqua\"':\n    - text: \"Prossima scelta: Trattamento acqua\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 06 di 07\n    - generic: · 1/3 · Esterni\n  - heading \"Optional\" [level=2]\n  - paragraph: Nessun optional\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "review",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/product-previews/lympha-deck.jpg"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-retained-mosaic9-dry-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Rivestimento · vasca asciutta\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: Il materiale interno che dà colore all’acqua.\n  - group \"Rivestimento interno\":\n    - button \"Liner / PVC\":\n      - generic: Liner / PVC\n      - generic: Membrana armata, continua e impermeabile.\n    - button \"Mosaico\" [pressed]:\n      - generic: Mosaico\n      - generic: Tessere in vetro posate a mano.\n  - group \"Finitura mosaico\":\n    - heading \"Finitura mosaico\" [level=4]\n    - group \"Finitura mosaico\":\n      - button \"Mosaico 1\":\n        - generic: Mosaico 1\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 2\":\n        - generic: Mosaico 2\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 3\":\n        - generic: Mosaico 3\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 4\":\n        - generic: Mosaico 4\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 5\":\n        - generic: Mosaico 5\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 6\":\n        - generic: Mosaico 6\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 7\":\n        - generic: Mosaico 7\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 8\":\n        - generic: Mosaico 8\n        - generic: Tessere in vetro, posa a mano.\n      - button \"Mosaico 9\" [active] [pressed]:\n        - generic: Mosaico 9\n        - generic: Tessere in vetro, posa a mano.\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Rivestimento interno\n  - heading \"Finiture\" [level=2]\n  - paragraph: Mosaico · Mosaico 9\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "mosaic",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/pvc-liner/motion-arctic-white-180.png"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/23DD3311-E2C5-4BA3-87BB-D056D3B75F32.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/3470EA07-2B30-4CCE-89F7-664A6460C7DF.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/3A6FF20D-DA5E-422E-9296-242AF2E6C604.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/5ABDEF81-B8C7-4387-AF15-21882CC2401D.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/8F6945D0-2E20-41D5-B499-B90527E428FE.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/C36940E8-5BF5-4568-ABE7-5903EF3D5311.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DC6E8362-3310-4453-A436-00D14A36EC66.PNG"
+          },
+          {
+            "alt": "",
+            "src": "/textures/mosaico/DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    },
+    {
+      "name": "residual-visual-retained-mosaic9-wet-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 4: Finiture\"':\n  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.\n  - group \"Illuminazione subacquea\":\n    - button \"Senza illuminazione\" [pressed]:\n      - generic: Senza illuminazione\n      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.\n    - button \"+ Micro-spot sulle scale\":\n      - generic: + Micro-spot sulle scale\n      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.\n      - generic: 5 micro-spot · nelle alzate\n    - button \"LED subacquei\":\n      - generic: LED subacquei\n      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 04 di 07\n    - generic: · 1/1 · Illuminazione\n  - heading \"Finiture\" [level=2]\n  - paragraph: Giorno · senza luci\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\" [active]:\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "features",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "images": [
+          {
+            "alt": "Piscine Wellness",
+            "src": "/assets/piscine-wellness-logo-DeEFrFKW.png"
+          }
+        ],
+        "title": "Pool Studio — Configuratore piscine 3D",
+        "url": "http://final-visual-qa.localhost:3020/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+Browser tab: 9, Title: "Pool Studio — Configuratore piscine 3D", URL: "https://pool-shaper-9qeaubbxt-daniellamthis-projects.vercel.app/?p=PW-A24Y-7CDSQC".
+1 AXWebArea Pool Studio — Configuratore piscine 3D, URL: pool-shaper-9qeaubbxt-daniellamthis-projects.vercel.app/?p=PW-A24Y-7CDSQC
+	2 heading Configuratore piscine 3D, Value: 1
+		3 text Configuratore piscine 3D
+	4 container
+		5 image Piscine Wellness
+		6 container Fasi della configurazione
+			7 content list
+				8 button Piscina Cemento armato · 8,0 × 4,0 m, Help: Piscina · Cemento armato · 8,0 × 4,0 m
+					9 text Piscina
+					10 text Cemento armato · 8,0 × 4,0 m
+				11 button Sistema acqua Skimmer · Slim Moderno, Help: Sistema acqua · Skimmer · Slim Moderno
+					124 text Sistema acqua
+					125 text Skimmer · Slim Moderno
+				12 button Accesso & comfort Scala interna, Help: Accesso & comfort · Scala interna
+					126 text Accesso & comfort
+					127 text Scala interna
+				13 button Finiture Liner PVC · Blue Sky [602], Help: Finiture · Liner PVC · Blue Sky [602]
+					128 text Finiture
+					129 text Liner PVC · Blue Sky [602]
+				14 button Esterno Travertino · Gres porcellanato · 60 × 120 cm, Help: Esterno · Travertino · Gres porcellanato · 60 × 120 cm
+					130 text Esterno
+					131 text Travertino · Gres porcellanato · 60 × 120 cm
+				15 button Optional Nessun optional, Help: Optional · Nessun optional
+					132 text Optional
+					133 text Nessun optional
+				16 button Presentazione In corso, Help: Presentazione · In corso
+					134 text Presentazione
+					135 text In corso
+		17 container Lingua
+			18 checkbox Description: Italiano, Value: 1
+			19 checkbox Description: Inglese, Value: 0
+		20 container Ora della scena
+			21 checkbox Giorno, Value: 1
+			22 checkbox Notte, Value: 0
+		23 button Ricomincia
+		24 container
+			26 pop up button (collapsed) Description: Vista della piscina, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			123 text Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+			28 toolbar Strumenti vista
+				29 checkbox Guide, Value: 0
+				30 checkbox Vista tecnica, Value: 0
+				31 checkbox Riquadra, Value: 0
+		32 container Passo 7: Presentazione
+			136 container
+				137 text La tua piscina finita: scena, riepilogo e richiesta di proposta.
+				138 tab group Presentazione
+					139 tab (selectable, settable, boolean) Scena, Value: 0
+					140 tab (selected, settable, boolean) Riepilogo, Value: 1
+					141 tab (selectable, settable, boolean) Richiedi proposta, Value: 0
+				142 container Salva e condividi
+					143 text Il salvataggio non è disponibile in questo momento.
+					144 text IL TUO PROGETTO
+					145 text Non ancora salvato
+					146 text Salva per ricevere un Project ID, riprenderlo e condividerlo.
+					219 text Il salvataggio non è disponibile in questo momento.
+					147 button SALVA PROGETTO
+					148 button CONDIVIDI
+					149 button PROJECT BOOK PDF
+				150 container
+					218 image La tua piscina configurata
+					151 text IL TUO PROGETTO
+					152 heading Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m, Value: 2
+						153 text Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m
+					154 text Piscina interrata · Skimmer — bordo classico · circa 48 m³ d'acqua
+					155 text Project ID assegnato al salvataggio
+					156 heading LA TUA PISCINA, Value: 3
+						157 text LA TUA PISCINA
+					158 button MODIFICA
+					159 definition list
+						160 container Tipologia
+							161 text Tipologia
+						162 text Piscina interrata
+						163 container Struttura
+							164 text Struttura
+						165 text Cemento armato
+						166 container Dimensioni
+							167 text Dimensioni
+						168 text Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m
+					169 heading LINEA D'ACQUA, Value: 3
+						170 text LINEA D'ACQUA
+					171 button MODIFICA
+					172 definition list
+						173 container Sistema idraulico
+							174 text Sistema idraulico
+						175 text Skimmer — bordo classico
+						176 container Skimmer
+							177 text Skimmer
+						178 text Slim / moderno · Bianco ABS
+					179 heading MATERIALI, Value: 3
+						180 text MATERIALI
+					181 button MODIFICA
+					182 definition list
+						183 container Rivestimento
+							184 text Rivestimento
+						185 container
+							186 text Motion Blue Sky [602] Acqua dalle tonalità azzurro cristallino
+						187 container Bordo
+							188 text Bordo
+						189 text Travertino
+						190 container Pavimentazione
+							191 text Pavimentazione
+						192 text Gres porcellanato
+						193 container Formato pavimentazione
+							194 text Formato pavimentazione
+						195 container
+							196 text 60 × 120 cm Dimensioni di riferimento della visualizzazione; fornitura da confermare.
+					197 heading ACCESSO E COMFORT, Value: 3
+						198 text ACCESSO E COMFORT
+					199 button MODIFICA
+					200 definition list
+						201 container Incluso
+							202 text Incluso
+						203 text Scala interna integrata — Scala interna rettilinea
+					204 heading PRESENTAZIONE, Value: 3
+						205 text PRESENTAZIONE
+					206 button MODIFICA
+					207 definition list
+						208 container Momento
+							209 text Momento
+						210 text Giorno
+					211 button (collapsed) SCOPRI I DETTAGLI TECNICI, Secondary Actions: Expand
+						212 text SCOPRI I DETTAGLI TECNICI
+				213 button Prossima scelta: Richiedi proposta
+					214 text Prossima scelta
+					215 text :
+					216 text Richiedi proposta
+				217 button Altre opzioni
+			38 container
+				39 text FASE 07 DI 07 ·  2/3 · Riepilogo
+				40 heading Presentazione, Value: 2
+					41 text Presentazione
+				42 text 8,0 × 4,0 m · pronta per la proposta
+			43 button VEDI LA PISCINA
+			44 button (expanded) RIDUCI, Secondary Actions: Collapse
+			45 container
+				46 button INDIETRO
+				47 button CONTINUA · RICHIEDI PROPOSTA
+					120 text CONTINUA
+					121 text ·
+					122 text RICHIEDI PROPOSTA
+	49 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Pool Studio — Configuratore piscine 3D, URL: pool-shaper-9qeaubbxt-daniellamthis-projects.vercel.app/?p=PW-A24Y-7CDSQC

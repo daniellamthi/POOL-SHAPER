@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-20",
+  "candidate": "6ad89bd plus isolated retained-water/finished-material lifetime patch; primary WIP not included",
+  "copy": "pool-shaper-wip-backups/residual-water-lifecycle-20261020-UJCepz",
+  "sourceReceipt": "residual-performance-retained-material-build.json",
+  "tests": [
+    {"command": "tsc --noEmit", "status": "PASS", "session": 79015},
+    {"command": "npm run build", "status": "PASS", "session": 81900, "scope": "Instrumented isolated production client/SSR/worker; not live edge/backend verification"},
+    {"command": "node scripts/water-lifecycle-audit.mjs", "status": "PASS", "checks": 21, "scope": "Actual source hooks executed with deterministic React/renderer stubs: reflection pause/resume, retained identity, shader-variant replacement, final cleanup and unchanged material props. Not GPU completion or real React/browser disposal instrumentation"},
+    {"command": "node scripts/water-transmission-audit.mjs", "status": "PASS", "checks": 13},
+    {"command": "node scripts/run-structure-progression-audit.mjs", "status": "PASS", "checks": 82457, "testMaintenance": "Obsolete exact key={showWater ? wet : dry} string already absent in HEAD replaced by exact current retained finishedProgramKey guard. Separate dry/wet shader source checks retained; no product compatibility guard removed"},
+    {"command": "node scripts/mosaic-material-audit.mjs", "status": "PASS", "checks": 73764, "cases": 81, "finishes": 9, "scope": "Existing calibration, source-cell/metric/PBR/cache contracts; visual QA separate"},
+    {"command": "eslint three changed TSX files", "status": "FAIL", "scope": "205 formatting errors in compact source, no blanket formatting applied"},
+    {"command": "eslint three changed TSX files --rule prettier/prettier:off", "status": "PASS_WITH_WARNINGS", "errors": 0, "warnings": ["Existing materials.surface.kind useMemo dependency warning", "programKey deliberately invalidates retained material ownership; exhaustive-deps calls it unnecessary"]}
+  ],
+  "limits": ["No full repository lint/test rerun", "No source shader/PBR constants, customer selection, camera or geometry changed by this prototype", "Timing/browser validation and primary integration still separate gates"]
+}
