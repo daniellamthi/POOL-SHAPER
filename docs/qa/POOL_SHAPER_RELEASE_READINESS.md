@@ -68,12 +68,12 @@ visual and cloud checks remain separate. No untested Cartesian-product claim.
 | Q01 |1440×900 and390×844/430×932; physical mobile only if available | No physical phone available | Declare viewport emulation explicitly | A/C/D/E actual Chrome captures and public DOM/canvas dimensions | PASS — desktop and viewport emulation, NOT physical-mobile performance |
 | Q02 | Targeted typecheck/build/lint/geometry/compatibility/camera/state/i18n/export tests | Historical camera harnesses contain obsolete hashes/evaluator gaps | Keep those explicit; no skipped suite counted PASS | Current local checks and final isolated source build below; capture-framing14760 and export guard alsoPASS | NOT VERIFIED — listed current checks PASS; four stale historical camera harness cases not repaired or counted PASS |
 | Q03 | Independent reviewer actually repeats integrated critical paths | E reproduced2English defects, not report-only review | Root corrected; E independently retested affected UI/state/material path | [E browser checklist](evidence/release-readiness-20261020/final-review-checklist.md), actual A/B/C/renovation critical sample, new source retest JSON/screenshots | PASS — independent critical sample, not exhaustive coverage |
-| B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Owner confirms public host/domain not yet chosen; local key is not production proof | No deploy or DNS action | Owner reply20October; exact runtime verification deferred until host chosen | BLOCKED |
+| B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Owner public host/domain not chosen; automatic protected Vercel Preview is not a verified production runtime | No manual deploy/promotion/DNS action | Source checkpoint76d07be automatic GitHub deployment7203669554, environmentPreview/productionfalse/success; browser redirects Vercellogin; connector lacks intended team access. Public backend bindings/HTTPS workflow not tested | BLOCKED |
 | B02 | Privacy information complete and share/customer data protected | Configurator retention/hosting/processor approval incomplete | Fill verified company/VAT/privacy email and owner-confirmed legal address only | Owner expressly confirms Via Caduti sul Lavoro7,37012Bussolengo(VR), retention still to be defined. Do not infer10years from general website policy | BLOCKED |
 | B03 | Commercial notification operational or explicit prelaunch block | Live email deliberately postponed | Do not enable/send real messages | Sandbox/code tests, ownerverifiedsender pending | BLOCKED — live email deferred |
 | B04 | Persistent backup and tested restoration/rollback documented | Local backups exist, production restore not evidenced/authorised | Recovery procedure required; no live restore/mutation | D exact isolated-recovery prerequisites; source baseline restore/hash proof is not database recovery | BLOCKED |
 | B05 | Publishable asset rights documented |15retained liner/mosaic raster permissions initially undocumented | Owner expressly authorises web publication; liner unchanged | Owner reply20October2026: “si autorizzo”, specifically6liner+9mosaic. Other missing product photos remain honestly unavailable | PASS |
-| R03 | Validated task-only feature commit/push, no main/deploy/archive change | — | Check diff/secrets and local/remoteSHA | Final checkpoint receipt, not release approval | NOT VERIFIED |
+| R03 | Validated task-only feature commit/push, no main/manual production deploy/archive change |39unrelated WIP files must stay local | Explicit30source+task evidence allowlist; no reset/force/merge | Source commit76d07be5c01316711b473e0a61b6673fa9a2236b pushed; remote SHA identical;224taskfiles/14110621bytes,0credentialflags;39WIP hashes unchanged. Docs-only closure receipt follows separately | PASS — validated checkpoint, NOT release approval |
 
 ## Completed blocks and evidence boundaries
 
@@ -273,6 +273,33 @@ expanded. Physical-mobile hardware/performance has not been tested.
 The observed P01cold-light responsiveness FAIL and B01–B04publication blockers
 therefore preclude READY. A validated feature checkpoint preserves useful
 corrections without claiming a closed release or deploying to production.
+
+## Feature checkpoint / automatic preview receipt
+
+Validated source/evidence checkpoint:
+`76d07be5c01316711b473e0a61b6673fa9a2236b`, parent0665d3b, branch
+`feat/fullscreen-day-night-hidden-overflow`. Ordinary push succeeded and
+`git ls-remote` returned exactly the local SHA. Explicit224file allowlist
+contains30source/audit files and task-only report/evidence; all39original WIP
+files remain byte-identical and unstaged. No `.env`, key or unrelated photo/
+steel/report WIP included. The working tree is intentionally NOT clean.
+
+GitHub reports Vercel status success and deployment7203669554 at this exactSHA,
+environment **Preview**, `production_environment=false`, status success:
+[protected preview](https://pool-shaper-8fxhsvtwz-daniellamthis-projects.vercel.app).
+Actual IAB navigation reaches **Log in to Vercel**. The Vercel connector returns
+403 for the intended team; neither `vercel` nor `vc` CLI is installed, so no
+existing authenticated CLI fallback is available. No protection was disabled,
+token exposed, account scope changed, manual deployment or promotion requested.
+Runtime/browser/backend tests of that hosted preview remain **BLOCKED** pending
+owner authentication/authorised access. Do not call the protected build
+public-ready or equate its successful build with the locally tested live cloud
+chains. Production domain/host choice remains the owner's deferred decision.
+
+The closure commit changes documentation only; final branch HEAD/push SHA is
+reported in the owner handoff. The exact source checkpoint above is the verified
+automatic preview revision, not a claim that a subsequent docs-only HEAD has
+already deployed. See [machine-readable delivery receipt](evidence/release-readiness-20261020/feature-delivery-receipt.json).
 
 ## Owner responses / publication limits
 
