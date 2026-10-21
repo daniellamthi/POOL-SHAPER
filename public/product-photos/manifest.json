@@ -1,0 +1,477 @@
+{
+  "checkedAt": "2026-10-15",
+  "totalOptions": 55,
+  "approvedPhotoOptions": 4,
+  "note": "4/55 options use three authorized photographs. Other 51 are explicitly MISSING, not PASS. Existing raster/synthetic catalogue swatches remain unchanged and do not prove photographic rights.",
+  "requirements": [
+    {
+      "optionId": "skimmerType=slim",
+      "mediaKey": "skimmer-slim",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "skimmerType=highWaterline",
+      "mediaKey": "skimmer-high",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "overflowType=visible",
+      "mediaKey": "overflow-visible",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "overflowType=hidden",
+      "mediaKey": "overflow-hidden",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "infinityEdge.wallType=traditional",
+      "mediaKey": "infinity-traditional",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "infinityEdge.wallType=glass",
+      "mediaKey": "infinity-glass",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "internalStairType=linear",
+      "mediaKey": "access-steps-linear",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "internalStairType=corner",
+      "mediaKey": "access-steps-corner",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "poolAccess=stainlessSteelLadder",
+      "mediaKey": "access-ladder",
+      "photo": {
+        "src": "/product-photos/inox-ladder-960.jpg",
+        "variants": [
+          {
+            "src": "/product-photos/inox-ladder-480.jpg",
+            "width": 480,
+            "height": 240
+          },
+          {
+            "src": "/product-photos/inox-ladder-960.jpg",
+            "width": 960,
+            "height": 480
+          }
+        ],
+        "match": "reference",
+        "source": "https://www.pexels.com/photo/stainless-swimming-pool-ladder-9119739/",
+        "author": "Pavel Danilyuk / Pexels",
+        "license": "https://www.pexels.com/license/",
+        "authorization": "Pexels License; website/app use and cropping permitted. Checked 2026-10-15. Not a stock collection or endorsement.",
+        "alt": {
+          "it": "Scaletta inox con due corrimano curvi sul bordo di una piscina reale.",
+          "en": "Stainless steel ladder with two curved handrails at a real pool edge."
+        },
+        "note": {
+          "it": "Foto indicativa del tipo di accesso, non del modello o della finitura di fornitura.",
+          "en": "Reference photo of the access type, not the exact supplied model or finish."
+        },
+        "focalPoint": [
+          0.23,
+          0.5
+        ]
+      },
+      "missing": null
+    },
+    {
+      "optionId": "feature=externalStaircase",
+      "mediaKey": "access-external",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "feature=sunShelf",
+      "mediaKey": "comfort-sunShelf",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "hydromassage.variant=closed",
+      "mediaKey": "comfort-hydro-closed",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "hydromassage.variant=open",
+      "mediaKey": "comfort-hydro-open",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "feature=stairLighting",
+      "mediaKey": "stair-micro-spots",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "feature=hydromassageBenchLighting",
+      "mediaKey": "bench-micro-spots",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "feature=sunShelfLoungers",
+      "mediaKey": "equipment-sunShelfLoungers",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "equipment=loungers",
+      "mediaKey": "equipment-loungers",
+      "photo": {
+        "src": "/product-photos/outdoor-chaise-960.jpg",
+        "variants": [
+          {
+            "src": "/product-photos/outdoor-chaise-480.jpg",
+            "width": 480,
+            "height": 240
+          },
+          {
+            "src": "/product-photos/outdoor-chaise-960.jpg",
+            "width": 960,
+            "height": 480
+          }
+        ],
+        "match": "reference",
+        "source": "https://www.pexels.com/photo/lounge-chairs-by-a-swimming-pool-15780455/",
+        "author": "Alina Skazka / Pexels",
+        "license": "https://www.pexels.com/license/",
+        "authorization": "Pexels License; website/app use and cropping permitted. Checked 2026-10-15. Not a stock collection or endorsement.",
+        "alt": {
+          "it": "Quattro chaise longue su telaio con cuscini chiari, sulla pavimentazione asciutta a bordo piscina.",
+          "en": "Four frame loungers with pale cushions on dry poolside paving."
+        },
+        "note": {
+          "it": "Foto indicativa di arredi esterni, non di lettini immersi. Modello e finitura di fornitura possono differire.",
+          "en": "Reference photo of outdoor furniture, not immersed loungers. Supplied model and finish may differ."
+        },
+        "focalPoint": [
+          0.63,
+          0.55
+        ]
+      },
+      "missing": null
+    },
+    {
+      "optionId": "equipment=solarShower",
+      "mediaKey": "equipment-solarShower",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "equipment=pellicano",
+      "mediaKey": "equipment-pellicano",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "equipment=automaticCover",
+      "mediaKey": "equipment-automaticCover",
+      "photo": null,
+      "missing": "Correct model/detail and reusable photo required; original temporary owner photographs are no longer on disk."
+    },
+    {
+      "optionId": "linerColor=motionDeepSea603",
+      "mediaKey": "liner-motionDeepSea603",
+      "photo": null,
+      "missing": "Manufacturer and redistribution permission undocumented; see docs/OWNER_INPUT_REQUIRED.md.",
+      "retainedCatalogAsset": "/textures/pvc-liner/motion-deep-sea-603.png"
+    },
+    {
+      "optionId": "linerColor=motionBlueSky602",
+      "mediaKey": "liner-motionBlueSky602",
+      "photo": null,
+      "missing": "Manufacturer and redistribution permission undocumented; see docs/OWNER_INPUT_REQUIRED.md.",
+      "retainedCatalogAsset": "/textures/pvc-liner/motion-blue-sky-602.png"
+    },
+    {
+      "optionId": "linerColor=motionArcticWhite180",
+      "mediaKey": "liner-motionArcticWhite180",
+      "photo": null,
+      "missing": "Manufacturer and redistribution permission undocumented; see docs/OWNER_INPUT_REQUIRED.md.",
+      "retainedCatalogAsset": "/textures/pvc-liner/motion-arctic-white-180.png"
+    },
+    {
+      "optionId": "linerColor=motionSandBeach179",
+      "mediaKey": "liner-motionSandBeach179",
+      "photo": null,
+      "missing": "Manufacturer and redistribution permission undocumented; see docs/OWNER_INPUT_REQUIRED.md.",
+      "retainedCatalogAsset": "/textures/pvc-liner/motion-sand-beach-179.png"
+    },
+    {
+      "optionId": "linerColor=motionGreyRock798",
+      "mediaKey": "liner-motionGreyRock798",
+      "photo": null,
+      "missing": "Manufacturer and redistribution permission undocumented; see docs/OWNER_INPUT_REQUIRED.md.",
+      "retainedCatalogAsset": "/textures/pvc-liner/motion-grey-rock-798.png"
+    },
+    {
+      "optionId": "linerColor=motionBlackStone799",
+      "mediaKey": "liner-motionBlackStone799",
+      "photo": null,
+      "missing": "Manufacturer and redistribution permission undocumented; see docs/OWNER_INPUT_REQUIRED.md.",
+      "retainedCatalogAsset": "/textures/pvc-liner/motion-black-stone-799.png"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+      "mediaKey": "mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/23DD3311-E2C5-4BA3-87BB-D056D3B75F32.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-3470ea07-2b30-4cce-89f7-664a6460c7df",
+      "mediaKey": "mosaic-3470ea07-2b30-4cce-89f7-664a6460c7df",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/3470EA07-2B30-4CCE-89F7-664A6460C7DF.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-3a6ff20d-da5e-422e-9296-242af2e6c604",
+      "mediaKey": "mosaic-3a6ff20d-da5e-422e-9296-242af2e6c604",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/3A6FF20D-DA5E-422E-9296-242AF2E6C604.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-5abdef81-b8c7-4387-af15-21882cc2401d",
+      "mediaKey": "mosaic-5abdef81-b8c7-4387-af15-21882cc2401d",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/5ABDEF81-B8C7-4387-AF15-21882CC2401D.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-8ed505ee-f994-46d5-8e0b-3cc8ec770a96",
+      "mediaKey": "mosaic-8ed505ee-f994-46d5-8e0b-3cc8ec770a96",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-8f6945d0-2e20-41d5-b499-b90527e428fe",
+      "mediaKey": "mosaic-8f6945d0-2e20-41d5-b499-b90527e428fe",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/8F6945D0-2E20-41D5-B499-B90527E428FE.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-c36940e8-5bf5-4568-abe7-5903ef3d5311",
+      "mediaKey": "mosaic-c36940e8-5bf5-4568-abe7-5903ef3d5311",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/C36940E8-5BF5-4568-ABE7-5903EF3D5311.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-dc6e8362-3310-4453-a436-00d14a36ec66",
+      "mediaKey": "mosaic-dc6e8362-3310-4453-a436-00d14a36ec66",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/DC6E8362-3310-4453-A436-00D14A36EC66.PNG"
+    },
+    {
+      "optionId": "mosaicFinish=mosaic-dd99152f-96c9-46f5-b07b-ee7e4e076c04",
+      "mediaKey": "mosaic-dd99152f-96c9-46f5-b07b-ee7e4e076c04",
+      "photo": null,
+      "missing": "Existing catalogue PNG has no documented author/source or redistribution licence.",
+      "retainedCatalogAsset": "/textures/mosaico/DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG"
+    },
+    {
+      "optionId": "structure=visible-stainless-steel",
+      "mediaKey": "structure-visible-stainless-steel",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "copingMaterial=limestone",
+      "mediaKey": "coping-limestone",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "copingMaterial=prun",
+      "mediaKey": "coping-prun",
+      "photo": {
+        "src": "/product-photos/prun-365.jpg",
+        "variants": [
+          {
+            "src": "/product-photos/prun-256.jpg",
+            "width": 256,
+            "height": 383
+          },
+          {
+            "src": "/product-photos/prun-365.jpg",
+            "width": 365,
+            "height": 547
+          }
+        ],
+        "match": "exact-sample",
+        "source": "public/textures/coping/prun/README.md",
+        "author": "Owner-supplied photograph",
+        "license": "Owner authorization for POOL-SHAPER; not a general third-party licence",
+        "authorization": "User supplied this exact Prun sample and requested its use. Existing project README records permission. Physical sample dimensions and supplier certification were not supplied.",
+        "alt": {
+          "it": "Campione fotografico fornito di Pietra di Prun chiara, con venature e pori naturali.",
+          "en": "Owner-supplied photographic sample of pale Prun stone with natural veining and pores."
+        },
+        "note": {
+          "it": "Fotografia del campione fornito; le variazioni naturali e il lotto di fornitura sono da confermare.",
+          "en": "Photograph of the supplied sample; natural variations and the supplied batch remain to be confirmed."
+        },
+        "focalPoint": [
+          0.5,
+          0.5
+        ]
+      },
+      "missing": null
+    },
+    {
+      "optionId": "copingMaterial=travertine",
+      "mediaKey": "coping-travertine",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "copingMaterial=anthracite-gres",
+      "mediaKey": "coping-anthracite-gres",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "copingMaterial=ardesia",
+      "mediaKey": "coping-ardesia",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "copingMaterial=deck-marrone",
+      "mediaKey": "coping-deck-marrone",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "copingMaterial=wpc",
+      "mediaKey": "coping-wpc",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=gres",
+      "mediaKey": "paving-gres",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=wood",
+      "mediaKey": "paving-wood",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=istria",
+      "mediaKey": "paving-istria",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=limestone",
+      "mediaKey": "paving-limestone",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=prun",
+      "mediaKey": "paving-prun",
+      "photo": {
+        "src": "/product-photos/prun-365.jpg",
+        "variants": [
+          {
+            "src": "/product-photos/prun-256.jpg",
+            "width": 256,
+            "height": 383
+          },
+          {
+            "src": "/product-photos/prun-365.jpg",
+            "width": 365,
+            "height": 547
+          }
+        ],
+        "match": "exact-sample",
+        "source": "public/textures/coping/prun/README.md",
+        "author": "Owner-supplied photograph",
+        "license": "Owner authorization for POOL-SHAPER; not a general third-party licence",
+        "authorization": "User supplied this exact Prun sample and requested its use. Existing project README records permission. Physical sample dimensions and supplier certification were not supplied.",
+        "alt": {
+          "it": "Campione fotografico fornito di Pietra di Prun chiara, con venature e pori naturali.",
+          "en": "Owner-supplied photographic sample of pale Prun stone with natural veining and pores."
+        },
+        "note": {
+          "it": "Fotografia del campione fornito; le variazioni naturali e il lotto di fornitura sono da confermare.",
+          "en": "Photograph of the supplied sample; natural variations and the supplied batch remain to be confirmed."
+        },
+        "focalPoint": [
+          0.5,
+          0.5
+        ]
+      },
+      "missing": null
+    },
+    {
+      "optionId": "paving=travertine",
+      "mediaKey": "paving-travertine",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=ardesia",
+      "mediaKey": "paving-ardesia",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "paving=wpc",
+      "mediaKey": "paving-wpc",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "exteriorPanelFinish=steel-satin",
+      "mediaKey": "panel-steel-satin",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "exteriorPanelFinish=composite-light",
+      "mediaKey": "panel-composite-light",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "exteriorPanelFinish=gres",
+      "mediaKey": "panel-gres",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    },
+    {
+      "optionId": "exteriorPanelFinish=wpc",
+      "mediaKey": "panel-wpc",
+      "photo": null,
+      "missing": "A photograph of this actual finish with documented reuse rights is missing. Synthetic/catalogue swatches are not counted as photographs."
+    }
+  ]
+}

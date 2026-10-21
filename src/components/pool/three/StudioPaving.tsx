@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
 import {
   DirectionalLight,
@@ -23,6 +23,7 @@ import { studioDeckBand, studioDeckInnerOffset, studioDeckOutline, type DeckFurn
 import { createLimestoneMaps, createPrunMaps, createWPCMaps, configureExteriorRoughness, legacyMineralTextureUrl, legacyMineralTextureScale, LEGACY_MINERAL_SAMPLER_REVISION } from "./stoneTextures";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
+import { NaturalGrassMaterial } from "./NaturalGrassMaterial";
 
 export { createPavingModules } from "./pavingGeometry";
 const NO_FURNITURE_ROWS: readonly DeckFurnitureSide[] = [];
@@ -148,6 +149,41 @@ function OriginalPavingMaterial({
   );
 }
 
+type RetainedPavingProps = {
+  active: boolean;
+  descriptor: string;
+  id: PavingId;
+  waterY: number;
+};
+
+function reusePavingSurfaces(previous: RetainedPavingProps, next: RetainedPavingProps) {
+  // The parent hides this group immediately. Keep the last visible resources
+  // without rebuilding invisible modules during raw dimension/shape edits.
+  return !next.active || (previous.descriptor === next.descriptor &&
+    previous.id === next.id && previous.waterY === next.waterY);
+}
+
+const RetainedPavingSurfaces = memo(function RetainedPavingSurfaces({ descriptor, id, waterY }: RetainedPavingProps) {
+  const geometry = useMemo(() => {
+    // Exact physical inputs, not a stage flag or a key for a single pool size.
+    const [inner, outer, module, options] = JSON.parse(descriptor) as
+      [Outline, Outline, readonly [number, number], Required<PavingOptions>];
+    return { ...createVisiblePavingGeometry(inner, outer, module, options, true), thickness: options.thickness };
+  }, [descriptor]);
+  useEffect(() => () => {
+    geometry.slabs.dispose();
+    geometry.grout.dispose();
+  }, [geometry]);
+  return <>
+    <mesh geometry={geometry.grout} position={[0, -geometry.thickness, 0]} receiveShadow>
+      <PavingMaterial key={`${id}-joint`} id={id} waterY={waterY} joint />
+    </mesh>
+    <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
+      <PavingMaterial key={isReferenceFinish(id) ? "reference" : id} id={id} waterY={waterY} />
+    </mesh>
+  </>;
+}, reusePavingSurfaces);
+
 export function StudioPaving({
   outline,
   poolType,
@@ -181,12 +217,15 @@ export function StudioPaving({
 }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
+  const [grassPrepared, setGrassPrepared] = useState(environment);
+  useEffect(() => { if (environment) setGrassPrepared(true); }, [environment]);
+  const [pavingPrepared, setPavingPrepared] = useState(decking);
+  useEffect(() => { if (decking) setPavingPrepared(true); }, [decking]);
   const id = pavingForPool(paving, poolType);
   const layout = useMemo(() => pavingLayout(id, pavingFormat), [id, pavingFormat]);
   const { module, gap, thickness, boards } = layout;
-  // Material-only changes do not alter a single paving vertex. Preserve the
-  // above-ground lifecycle; reuse the in-ground mesh for equal metric modules.
-  const aboveGroundLayout = poolType === "above-ground" ? layout : null;
+  // The ground follows the current hole; the retained paving child owns its
+  // exact metric descriptor independently of construction-stage visibility.
   const geometry = useMemo(() => {
     const started = import.meta.env.DEV ? performance.now() : 0;
     const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
@@ -199,7 +238,8 @@ export function StudioPaving({
       [-150, 150],
     ];
     const result = {
-      ...createVisiblePavingGeometry(inner, outer, module, { gap, thickness, boards }, decking),
+      inner,
+      outer,
       // The lawn's opening is 4 cm smaller than the paving so its edge always
       // sits under the slabs: an exactly matching edge left a hairline crack
       // that showed the basin shell at low cameras.
@@ -208,12 +248,12 @@ export function StudioPaving({
         decking ? (furnitureRows.length ? offsetOutline(outer, -0.04) : offsetOutline(inner, band - 0.04)) : inner,
       ),
     };
-    if (import.meta.env.DEV) console.debug("[Pool3D paving build]", JSON.stringify({
-      module, boards, visible: decking, vertices: result.slabs.getAttribute("position")?.count ?? 0,
+    if (import.meta.env.DEV) console.debug("[Pool3D ground build]", JSON.stringify({
+      module, boards, visible: decking,
       durationMs: Number((performance.now() - started).toFixed(2)),
     }));
     return result;
-  }, [outline, poolType, system, overflowType, module, gap, thickness, boards, aboveGroundLayout, environment, loungers, furnitureRows, decking]);
+  }, [outline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
@@ -223,46 +263,13 @@ export function StudioPaving({
     });
     gl.shadowMap.needsUpdate = true;
   }, [gl, scene, geometry]);
-  useEffect(() => () => Object.values(geometry).forEach((g) => g.dispose()), [geometry]);
+  useEffect(() => () => geometry.ground.dispose(), [geometry]);
+  const pavingDescriptor = JSON.stringify([geometry.inner, geometry.outer, module, { gap, thickness, boards }]);
   const dry = (shader: WebGLProgramParametersWithUniforms) =>
     excludeSubmergedDirectLights(shader, waterY);
   const dryKey = () => `studio-ground-dry-${waterY}`;
-  // Garden lawn around the terrace instead of a flat grey plane running to
-  // the horizon: the single biggest "CG void" cue in the studio. Procedural
-  // (two value-noise octaves plus a fine grain that fades out with distance
-  // so it never shimmers), no texture, no extra sampler; the scene fog
-  // already dissolves it into the background at the horizon.
-  const lawn = (shader: WebGLProgramParametersWithUniforms) => {
-    excludeSubmergedDirectLights(shader, waterY);
-    shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", "#include <common>\nvarying vec2 vLawnPlan;")
-      .replace(
-        "#include <worldpos_vertex>",
-        "#include <worldpos_vertex>\nvLawnPlan = (modelMatrix * vec4(transformed, 1.0)).xz;",
-      );
-    shader.fragmentShader = shader.fragmentShader
-      .replace(
-        "#include <common>",
-        `#include <common>
-        varying vec2 vLawnPlan;
-        float lawnHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-        float lawnNoise(vec2 p) {
-          vec2 i = floor(p), f = fract(p);
-          f = f * f * (3.0 - 2.0 * f);
-          return mix(mix(lawnHash(i), lawnHash(i + vec2(1.0, 0.0)), f.x),
-            mix(lawnHash(i + vec2(0.0, 1.0)), lawnHash(i + vec2(1.0)), f.x), f.y);
-        }`,
-      )
-      .replace(
-        "#include <color_fragment>",
-        `#include <color_fragment>
-        float lawnBroad = 0.65 * lawnNoise(vLawnPlan * 0.21) + 0.35 * lawnNoise(vLawnPlan * 0.83);
-        float lawnGrain = lawnHash(floor(vLawnPlan * 70.0));
-        float lawnNear = 1.0 - smoothstep(0.01, 0.06, max(fwidth(vLawnPlan.x), fwidth(vLawnPlan.y)));
-        vec3 lawnColor = mix(vec3(0.075, 0.105, 0.048), vec3(0.135, 0.16, 0.078), lawnBroad);
-        diffuseColor.rgb *= lawnColor * (1.0 + (lawnGrain - 0.5) * 0.3 * lawnNear);`,
-      );
-  };
+  const plainGround = <meshStandardMaterial color="#ddd9d2" roughness={0.95}
+    onBeforeCompile={dry} customProgramCacheKey={dryKey} />;
   return (
     <group name="premium-configuration-studio">
       <mesh
@@ -271,31 +278,14 @@ export function StudioPaving({
         position={[0, -0.012, 0]}
         receiveShadow
       >
-        {environment ? (
-          <meshStandardMaterial
-            color="#ffffff"
-            roughness={0.97}
-            onBeforeCompile={lawn}
-            customProgramCacheKey={() => `studio-lawn-v1-${waterY}`}
-          />
-        ) : (
-          <meshStandardMaterial
-            color="#ddd9d2"
-            roughness={0.95}
-            onBeforeCompile={dry}
-            customProgramCacheKey={dryKey}
-          />
-        )}
+        <Suspense fallback={plainGround}>
+          {environment || grassPrepared ? <NaturalGrassMaterial active={environment} waterY={waterY} /> : plainGround}
+        </Suspense>
       </mesh>
-      {decking ? (
-        <>
-          <mesh geometry={geometry.grout} position={[0, -layout.thickness, 0]} receiveShadow>
-            <PavingMaterial key={`${id}-joint`} id={id} waterY={waterY} joint />
-          </mesh>
-          <mesh name={`local-paving-${id}`} geometry={geometry.slabs} receiveShadow>
-            <PavingMaterial key={isReferenceFinish(id) ? "reference" : id} id={id} waterY={waterY} />
-          </mesh>
-        </>
+      {decking || pavingPrepared ? (
+        <group visible={decking}>
+          <RetainedPavingSurfaces active={decking} descriptor={pavingDescriptor} id={id} waterY={waterY} />
+        </group>
       ) : null}
     </group>
   );

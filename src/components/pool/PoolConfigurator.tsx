@@ -438,7 +438,7 @@ function ConfiguratorLayout() {
   useEffect(() => {
     if (activeStepId === "system" && decision?.id === "detail") {
       setInspectionView(config.system === "infinity" ? "infinity" : config.system === "overflow"
-        ? config.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible"
+        ? config.overflowType === "continuous" ? "overflow-continuous" : config.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible"
         : "skimmer-detail");
       reframe();
     } else if (activeStepId === "deck" &&

@@ -112,6 +112,7 @@ interface PoolModelProps {
   overflowType: OverflowType;
   poolType: PoolType;
   copingThickness: number;
+  pavingThickness?: number;
   showWater: boolean;
   planView?: boolean;
   /** Above-ground exterior cladding finish. */
@@ -460,6 +461,7 @@ export function PoolModel({
   overflowType,
   poolType,
   copingThickness,
+  pavingThickness = 0.02,
   showWater,
   planView = false,
   exteriorPanelFinish = DEFAULT_EXTERIOR_PANEL_FINISH,
@@ -509,12 +511,17 @@ export function PoolModel({
   const waterLevel = verticalLayout.waterY;
   const isOverflow = system === "overflow";
   const isVisibleOverflow = isOverflow && overflowType === "visible";
+  const isContinuousOverflow = isOverflow && overflowType === "continuous" && poolType !== "above-ground";
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const copingOutline = useMemo(
     () => offsetOutline(outline, copingOuterOffset(system, overflowType)),
     [outline, system, overflowType],
   );
-  const hiddenSection = concealedOverflowSection(verticalLayout.wallTopY, copingThickness);
+  const hiddenSection = isContinuousOverflow
+    ? { ...concealedOverflowSection(verticalLayout.wallTopY, copingThickness),
+        copingInnerOffset: 0, copingTopY: verticalLayout.copingY,
+        copingBottomY: verticalLayout.copingY - pavingThickness }
+    : concealedOverflowSection(verticalLayout.wallTopY, copingThickness);
   // Conceal the collector beneath the solid coping, leaving its narrow intake.
   const concealedCopingEdge = useMemo(
     () => offsetOutline(outline, hiddenSection.copingInnerOffset),
@@ -994,25 +1001,25 @@ export function PoolModel({
   );
   const coping = useDisposable(
     () =>
-      isVisibleOverflow
+      isVisibleOverflow || isContinuousOverflow
         ? new THREE.BufferGeometry()
         : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection,
             materials.coping.id === "deck-marrone" || materials.coping.id === "reference-ipe"),
-    [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, infinitySection, materials.coping.id],
+    [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, isContinuousOverflow, infinitySection, materials.coping.id],
   );
   const overflowLip = useDisposable(
     () =>
-      isOverflow && !isVisibleOverflow
+      isOverflow && !isVisibleOverflow && !isContinuousOverflow
         ? createBeveledRingGeometry(outline, overflowWaterEdge, 0.003, 3)
         : new THREE.BufferGeometry(),
-    [outline, overflowWaterEdge, isOverflow, isVisibleOverflow],
+    [outline, overflowWaterEdge, isOverflow, isVisibleOverflow, isContinuousOverflow],
   );
   const copingBed = useDisposable(
     () =>
-      isVisibleOverflow
+      isVisibleOverflow || isContinuousOverflow
         ? new THREE.BufferGeometry()
         : createRingGeometry(copingInner, terminatedCopingOutline, false, infinitySection),
-    [copingInner, terminatedCopingOutline, isVisibleOverflow, infinitySection],
+    [copingInner, terminatedCopingOutline, isVisibleOverflow, isContinuousOverflow, infinitySection],
   );
   const grilleInnerSeat = useDisposable(
     () => createRingGeometry(overflowKerbOuter, offsetOutline(overflowKerbOuter, 0.012)),
@@ -1133,7 +1140,7 @@ export function PoolModel({
       ? { configure: configureCaustics, key: `wet-${waterLevel}-${materials.surface.underwaterScatteringContribution}-${LED_TRANSPORT_CACHE_KEY}` }
       : undefined;
   const accessMaterial = (
-    <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : null}>
+    <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} seamlessSteel underwater={interiorUnderwater} /> : null}>
     <meshPhysicalMaterial
             key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.liner.color}
@@ -1181,7 +1188,7 @@ export function PoolModel({
           ledColor={ledColor}
           ledIntensity={ledIntensity}
         >
-          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : null}>
+          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} seamlessSteel underwater={interiorUnderwater} /> : null}>
             <meshPhysicalMaterial
               key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
               color={materials.liner.color}
@@ -1233,7 +1240,7 @@ export function PoolModel({
         ) : null}
         {/* Interior walls */}
         <mesh name="plan-basin-walls" geometry={walls} renderOrder={0} receiveShadow castShadow>
-          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} wallSize={wallSize} underwater={interiorUnderwater} /> : null}><meshPhysicalMaterial
+          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} seamlessSteel wallSize={wallSize} underwater={interiorUnderwater} /> : null}><meshPhysicalMaterial
             key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.liner.color}
             map={wallSurfaceMap}
@@ -1272,7 +1279,7 @@ export function PoolModel({
           position={floorProfile.sloped ? [0, 0, 0] : [0, verticalLayout.floorY, 0]}
           receiveShadow
         >
-          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} underwater={interiorUnderwater} /> : null}><meshPhysicalMaterial
+          <RetainedStageMaterial programKey={finishedProgramKey} raw={interiorShellKind ? <RawShellMaterial kind={interiorShellKind} seamlessSteel underwater={interiorUnderwater} /> : null}><meshPhysicalMaterial
             key={`${showWater ? "wet" : "dry"}${mosaicSamplingKey}`}
             color={materials.floor.color}
             map={floorSurfaceMap}
@@ -1327,7 +1334,7 @@ export function PoolModel({
             <mesh geometry={channelInnerWall} receiveShadow>
               {rawShellKind ? <RawShellMaterial kind={rawShellKind} /> : <meshStandardMaterial color="#4b5350" roughness={0.45} side={DoubleSide} />}
             </mesh>
-            {!isVisibleOverflow && (
+            {!isVisibleOverflow && !isContinuousOverflow && (
               <mesh
                 name="overflow-edge-without-grille"
                 geometry={overflowLip}
@@ -1470,7 +1477,7 @@ export function PoolModel({
           space (see configureCopingTriplanar) so the rounded bevel, which
           turns from horizontal to near-vertical, never stretches the way a
           UV projected flat from the ring's XZ footprint would. */}
-      {!isVisibleOverflow && (
+      {!isVisibleOverflow && !isContinuousOverflow && (
         <group name="pool-perimeter-finish">
           {/* Joint bedding seen through the slab joints: the same stone,
               a shade darker and only 3.5mm down, so a joint reads as a fine

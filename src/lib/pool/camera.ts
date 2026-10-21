@@ -73,6 +73,7 @@ export type CameraIntent =
   | "skimmer-detail"
   | "overflow"
   | "overflow-hidden"
+  | "overflow-continuous"
   | "overflow-visible"
   | "liner"
   | "access"
@@ -611,12 +612,14 @@ export function infinityCopingCameraSubject(outline: Outline, zone: RectangleInf
 }
 
 /** The actual grille/slot section and a short water/rim context, not the wall below. */
-export function overflowCameraSubject(intent: "overflow-hidden" | "overflow-visible", outline: Outline, layout: PoolVerticalLayout, skimmers: SkimmerPlan) {
+export function overflowCameraSubject(intent: "overflow-hidden" | "overflow-visible" | "overflow-continuous", outline: Outline, layout: PoolVerticalLayout, skimmers: SkimmerPlan) {
   const reference = getFrontWallReference(outline, skimmers), [x, z] = reference.point;
   const [nx, nz] = reference.inward, [tx, tz] = reference.tangent;
   const section = concealedOverflowSection(layout.wallTopY, POOL_BORDER_PRESET.thickness);
   const g = OVERFLOW_GEOMETRY;
-  const cross = intent === "overflow-visible"
+  const cross = intent === "overflow-continuous"
+    ? [[-0.5, layout.waterY], [0, layout.copingY], [0.9, layout.copingY], [0, layout.copingY - 0.025], [0.105, layout.wallTopY - g.channelDepth]]
+    : intent === "overflow-visible"
     ? [[-0.25, layout.waterY], [0, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY],
       [g.visibleChannelOuterOffset, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY - g.channelDepth],
       [g.visibleChannelOuterOffset, layout.wallTopY - g.channelDepth]]
@@ -1302,6 +1305,7 @@ export function getCameraPose({
     intent === "skimmer-detail" ||
     intent === "overflow" ||
     intent === "overflow-hidden" ||
+    intent === "overflow-continuous" ||
     intent === "overflow-visible" ||
     intent === "liner" ||
     intent === "mosaic"
@@ -1326,7 +1330,7 @@ export function getCameraPose({
         reference = { point: [(edge.a[0] + edge.b[0]) / 2, (edge.a[1] + edge.b[1]) / 2], inward: [-tz * winding, tx * winding], tangent: [tx, tz] };
       }
     }
-    if (intent === "overflow-hidden" || intent === "overflow-visible") {
+    if (intent === "overflow-hidden" || intent === "overflow-visible" || intent === "overflow-continuous") {
       const subject = overflowCameraSubject(intent, outline, layout, skimmers);
       return fitComponentCamera(subject.points, subject.direction, verticalFov, viewportAspect);
     }

@@ -99,7 +99,7 @@ export interface TechnicalPlan {
   };
   access: { status: ResolvedPoolLayout["status"]; anchors: ResolvedAccessAnchor[] };
   overflow: null | {
-    kind: "VISIBLE_CHANNEL" | "HIDDEN_SLOT" | "INFINITY_EDGE";
+    kind: "VISIBLE_CHANNEL" | "HIDDEN_SLOT" | "CONTINUOUS_EDGE" | "INFINITY_EDGE";
     collectionLength: TechnicalField<number>;
     selectedSide: number | null;
     start: readonly [number, number] | null;
@@ -161,7 +161,7 @@ export function buildTechnicalPlan({
           note: "Lunghezza del bordo costruito; dimensionamento della raccolta da verificare.",
         }
       : {
-          kind: config.overflowType === "visible" ? "VISIBLE_CHANNEL" : "HIDDEN_SLOT",
+          kind: config.overflowType === "continuous" ? "CONTINUOUS_EDGE" : config.overflowType === "visible" ? "VISIBLE_CHANNEL" : "HIDDEN_SLOT",
           collectionLength: measured(metrics.perimeter),
           selectedSide: null,
           start: null,

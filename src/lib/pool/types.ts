@@ -23,7 +23,7 @@ export type CustomMode = "draw" | "upload";
  * construction: nothing reads `overflowType` or renders a skimmer wall
  * while `system === "infinity"`. */
 export type SystemType = "skimmer" | "overflow" | "infinity";
-export type OverflowType = "hidden" | "visible";
+export type OverflowType = "hidden" | "visible" | "continuous";
 /** Historical alias kept so any code still importing it keeps compiling. */
 export type FutureOverflowType = OverflowType | "infinity";
 

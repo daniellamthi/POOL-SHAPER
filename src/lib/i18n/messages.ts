@@ -2,6 +2,9 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ["Sfioro a bordo continuo", "Continuous deck-level overflow"],
+  ["Bordo continuo a filo pavimentazione", "Continuous edge flush with the paving"],
+  ["Bordo e pavimentazione sullo stesso piano, acqua leggermente ribassata e raccolta nascosta.", "Edge and paving on one level, with a slightly recessed waterline and concealed collection."],
   ["Prossima scelta", "Next option"],
   ["Mosaico 1", "Mosaic 1"], ["Mosaico 2", "Mosaic 2"], ["Mosaico 3", "Mosaic 3"],
   ["Mosaico 4", "Mosaic 4"], ["Mosaico 5", "Mosaic 5"], ["Mosaico 6", "Mosaic 6"],

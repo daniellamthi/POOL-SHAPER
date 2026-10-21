@@ -328,6 +328,7 @@ function reduceConfiguration(state: State, action: Action): State {
         finish: normaliseFinishForStructure(structure, config.finish),
         features,
         system,
+        ...(aboveGround && config.overflowType === "continuous" ? { overflowType: "hidden" as const } : {}),
         ...(aboveGround && isReferenceFinish(config.copingMaterial)
           ? { copingMaterial: copingMaterialForPool(config.copingMaterial, action.value) } : {}),
         ...(aboveGround && isReferenceFinish(config.paving)
@@ -516,7 +517,8 @@ function reduceConfiguration(state: State, action: Action): State {
       };
     }
     case "setOverflowType":
-      return { ...state, config: { ...config, overflowType: action.value } };
+      return action.value === "continuous" && config.poolType === "above-ground" ? state
+        : { ...state, config: { ...config, overflowType: action.value } };
     case "setInfinityWall":
       return config.system === "infinity" ? { ...state, config: { ...config,
         infinityEdge: clampInfinityEdgeParams({ ...config.infinityEdge, wallType: action.value }),
@@ -825,10 +827,25 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     // Never overwrite a local draft with defaults while a share is loading
     // or has failed. Explicitly starting a new project releases this gate.
     if (!draftReady) return;
+    const flush = () => {
+      if (saveTimeoutRef.current === null) return;
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+      saveProjectDraft(projectConfiguration);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
     // Debounced so a drag/typing burst writes once, not on every change.
-    saveTimeoutRef.current = setTimeout(() => saveProjectDraft(projectConfiguration), 800);
+    // Exit/suspension must not discard the last selection inside that window.
+    saveTimeoutRef.current = setTimeout(flush, 800);
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
     };
   }, [projectConfiguration, draftReady]);
 

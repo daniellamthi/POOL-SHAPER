@@ -168,7 +168,7 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       return config.system === "skimmer"
         ? `Skimmer · ${title(SKIMMER_TYPES, config.skimmerType) ?? ""}`
         : config.system === "overflow"
-          ? `Sfioro ${config.overflowType === "hidden" ? "nascosto" : "a griglia"}`
+          ? `Sfioro ${config.overflowType === "continuous" ? "a bordo continuo" : config.overflowType === "hidden" ? "nascosto" : "a griglia"}`
           : config.infinityEdge?.enabled
             ? "Infinity · lato scelto"
             : "Infinity · scegli il lato";
@@ -215,7 +215,7 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       const coping =
         COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? "";
       const paving = pavingLayout(config.paving, config.pavingFormat);
-      return `${config.system === "overflow" && config.overflowType === "visible" ? "" : `${coping} · `}${paving.label} · ${paving.formatLabel}`;
+      return `${config.system === "overflow" && config.overflowType !== "hidden" ? "" : `${coping} · `}${paving.label} · ${paving.formatLabel}`;
     }
     case "technology": {
       const chosen = EQUIPMENT.filter((e) => config.equipment.includes(e.id)).map((e) => e.title);

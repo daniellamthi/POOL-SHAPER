@@ -31,7 +31,8 @@ export function projectMetrics(config: PoolConfig, outline: Outline) {
     twoLoungerShelf: config.features.includes("sunShelf"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
-  const baseMetrics = floorProfile.sloped
+  const recessedOverflow = config.poolType !== "above-ground" && config.system === "overflow" && config.overflowType === "continuous";
+  const baseMetrics = floorProfile.sloped || recessedOverflow
     ? computeSlopeMetrics(outline, floorProfile, verticalLayout.waterY, verticalLayout.wallTopY)
     : computeMetrics(outline, config.dimensions.depth);
   const comfort = configuredComfortPlan(config);

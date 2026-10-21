@@ -77,7 +77,7 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
     case "HYDROMASSAGE": return "hydromassage";
     case "BENCH": return "bench";
     case "SKIMMER": return "skimmer-detail";
-    case "OVERFLOW": return c.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible";
+    case "OVERFLOW": return c.overflowType === "continuous" ? "overflow-continuous" : c.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible";
     case "INFINITY": return "infinity";
     case "INTERIOR_FINISH": return c.finish === "mosaic" ? "mosaic" : "liner";
     case "COPING": return "coping";
@@ -90,7 +90,7 @@ export function contextualIntent(focus: VisualFocus, c: PoolConfig): CameraInten
     case "LIGHTING": return "features";
     case "COVER": case "TECHNICAL_COVER": return "cover";
     case "TECHNICAL_SKIMMER": return "skimmer-detail";
-    case "TECHNICAL_OVERFLOW": return c.system === "infinity" ? "infinity" : c.overflowType === "visible" ? "overflow-visible" : "overflow-hidden";
+    case "TECHNICAL_OVERFLOW": return c.system === "infinity" ? "infinity" : c.overflowType === "continuous" ? "overflow-continuous" : c.overflowType === "visible" ? "overflow-visible" : "overflow-hidden";
     case "TECHNICAL_RETURNS": case "TECHNICAL_DRAINS": case "TECHNICAL_COMPENSATION": return "top";
     default: return "review";
   }

@@ -28,10 +28,13 @@ export function getPoolVerticalLayout({
   copingThickness: number;
 }): PoolVerticalLayout {
   const safeDepth = Number.isFinite(depth) ? Math.max(0.01, depth) : 0.01;
-  const wallTopY = poolType === "above-ground" ? GROUND_LEVEL + safeDepth : GROUND_LEVEL;
+  // Concealed lateral intake below a single terrace slab. These are visual
+  // section dimensions, not hydraulic/structural installation specifications.
+  const continuous = poolType !== "above-ground" && system === "overflow" && overflowType === "continuous";
+  const wallTopY = poolType === "above-ground" ? GROUND_LEVEL + safeDepth : continuous ? -0.055 : GROUND_LEVEL;
   const floorY = poolType === "above-ground" ? GROUND_LEVEL : GROUND_LEVEL - safeDepth;
   const waterY =
-    system === "skimmer"
+    continuous ? wallTopY + 0.001 : system === "skimmer"
       ? wallTopY - FREEBOARD
       : overflowType === "visible"
         ? wallTopY +
@@ -44,6 +47,6 @@ export function getPoolVerticalLayout({
     floorY,
     wallTopY,
     waterY,
-    copingY: wallTopY + copingThickness,
+    copingY: continuous ? GROUND_LEVEL : wallTopY + copingThickness,
   };
 }

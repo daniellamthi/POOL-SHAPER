@@ -146,7 +146,7 @@ export function InteriorFinishStep() {
         </p>
       ) : null}
 
-      {!(config.system === "overflow" && config.overflowType === "visible") && (
+      {!(config.system === "overflow" && config.overflowType !== "hidden") && (
         <div className="flex flex-col gap-3 border-t border-hairline pt-8">
           <p className="label-xs">Materiale del bordo</p>
           <div role="group" aria-label="Materiale del bordo" className="grid grid-cols-2 gap-3">

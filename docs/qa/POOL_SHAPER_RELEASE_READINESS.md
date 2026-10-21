@@ -47,33 +47,33 @@ visual and cloud checks remain separate. No untested Cartesian-product claim.
 | S05 | Product dimensions and layout assumptions documented, not normative | Manufacturer distinguishes submerged185×73×57 from Frame185×73×77 | Retain correct product distinction, approved20cm water | [B sources/assumptions](evidence/release-readiness-20261020/geometry-findings.md), exact mesh envelopes + A UI design caveat | PASS |
 | S06 | Saved/shared shelf measures must be syntactically valid without erasing unresolved intent | String/null/boolean/zero/negative/object/array/JSONoverflow accepted by parser; control could crash | Finite-positive parser guard only, no span clamp | B before/after11inputs/25assertions; range21176; persistence/delivery rerun | PASS |
 | G01 | Hydro/benches/stairs/platforms existing parametric compatibility | No new arbitrary minimums | New requested Shelf run does not alter independent hydro flight | B3200configs/39040runs, hydro36153; A actual both hydro variants, E A/B night controls; [B findings](evidence/release-readiness-20261020/geometry-findings.md) | PASS — bounded compatibility/geometry sample |
-| G02 | Internal stairs4orientations; external stairs/platforms/guards | No reproduced geometry defect | Approved dimensions unchanged; corrected export crop only | B496configs/2140fittings, stairs188777camera assertions; A mirror/short/long and E external/platform actual views; final external crop14760 | NOT VERIFIED — tests/runtime sample PASS; not every internal orientation close-up repeated |
+| G02 | Internal stairs4orientations; external stairs/platforms/guards | No reproduced geometry defect; sampled Above-ground UI exposes only Standard | Approved dimensions unchanged; corrected export crop only | Prior B496configs/2140fittings and camera/export proofs retained.21October E exact4295 Above-ground8×4 Standard corner: all six treads readable in access camera. Speculare not exposed even after one external Long-side choice; compatibility not established. Root confirmed UI filters by actual plan placement, without changing rules | NOT VERIFIED — Standard sample PASS; no invented four controls or claim that an unavailable mirror is a geometry bug |
 | G03 | Shelf/lounge/hydro/bench: no collisions/floating/out-of-basin components | — | Actual floor/landing/connected-access resolver reused | B independent footprint/vertical/quantity checks; A/E Shelf bounds and2loungers actual screenshots, hydro variants selected; no new body scaling | PASS — documented geometry/runtime sample, not future arbitrary shapes |
-| G04 | Skimmer/grille/hidden/Infinity/glass/cover/Pellicano raccords | — | Existing waterline/optional geometry preserved | A actual system/optional toggles; C4Infinity sides and E both wall variants/mobile; C PDF shows selected Pellicano/stair. Not every cover state/water discharge close-up covered | NOT VERIFIED — remaining close-up combinations explicit |
-| M01 | All actual material families at metric scale/day/night/reference identity | Prior material upgrade scoped evidence available | No shader/PBR/asset changes; neutral numbers for9actual mosaics |9mosaic/81cases/73764source-cell checks; A9cards and E stable Mosaic5 floor/wall and renovation before/after; PDF actual liner/mosaic samples. Not every finish has new day/night reference-matched close-ups | NOT VERIFIED — complete photorealism gate not established |
+| G04 | Skimmer/grille/hidden/Infinity/glass/cover/Pellicano raccords | No reproduced desktop fitting/discharge defect; new Pellicano430 capture is not usable visual evidence | Existing waterline/optional geometry preserved | Prior Infinity/PDF proofs retained.21October E exact4295: two skimmers, grille, hidden430, coverOFF/ON100%/ON0% PASS. Additional Above-ground PellicanoOFF has no ghost; selected ON desktop close-up shows outlet and complete sheet ending inside basin, independently inspected by root. Pellicano430 DOM matches but screenshot raster does not | NOT VERIFIED — listed desktop samples PASS; Pellicano430 and remaining compatibility combinations not silently passed |
+| M01 | All actual material families at metric scale/day/night/reference identity | Prior material upgrade scoped evidence available | No shader/PBR/asset changes; neutral numbers for9actual mosaics | Prior9mosaic/81cases/73764checks retained.21October E exact4295 adds settled Mosaic9 wet floor/wall (closes prior transition-only gap), Prun/Greige/Ipe coping1440 and WPC390 actual material changes/scale-view samples PASS. Root independently inspected Mosaic9 capture. No universal day/night/photometric/reference-match claim | NOT VERIFIED — new scoped samples PASS; complete photorealism gate not established |
 | M02 | Liner unchanged; in-ground reference finishes absent above-ground | Protected invariant | No liner asset/shader/catalogue edits; only neutral mosaic labels | Source/hash guard; A above-ground exposes liner/inox only,6liner selections sampled; B actual envelopes and material tests | PASS — protected-source invariant and runtime sample |
 | L01 | Small ordered riser/bench spots; independent OFF/ON; coordinated main colour | — | Lighting values/geometry unchanged; translated intensity copy only | B micro5441/224configs/420raycasts; C six actual riser spots/blue short-side; E blue/red/white and mainOFF/stairON/benchON independently,75% retained; PDF Day/Night riser-only | PASS — scoped independence/placement/light sample, not every hue/orientation |
 | L02 | Hydro nozzles never emissive | No emission defect reproduced | No nozzle/material/geometry change | Prior B source/geometry checks retained. E independently replayed production HydroB1440Day/Night: visible rear nozzles dark, optional spots below seat. Bench OFF/ON and riser close-up1440/390/430; source is shared across repeated fittings. [Actual views](evidence/release-readiness-20261020/residual-visual-browser-evidence.json) | PASS — scoped B visible-nozzle/bench sample; every nozzle macro on physical mobile not claimed |
 | I01 | Minimal consistent command icons, contrast and selection states | — | Existing installed icon family preserved | A/E actual labelled navigation/orientation/optional commands and states, LED native-slider ARIA corrected. No complete measured contrast/keyboard audit | NOT VERIFIED — command sample PASS, accessibility remainder explicit |
 | I02 | Correct approved product photos/samples; exact-product claims honest | Previous photo-subset QA depends on excluded WIP. Two stale generic previews are dormant | Preserve already-correct direct chaise mapping; no asset replacement needed | D traced committed StepTrays737/1182 and source/provenance. E independently confirmed actual production390cards use lympha-immersed/deck with contain and correct shell/frame identity. [Runtime evidence](evidence/release-readiness-20261020/residual-visual-browser-evidence.json). Owner15sample permission unchanged;4/55photo mappings/51unavailable claims are Mac WIP only | PASS — two disputed live cards; no blanket photographic-rights/full-catalogue claim |
 | C01 | Whole-pool/See pool centred in actual UI-free region | Initial retained detail suspicion not reproduced after explicit See pool | Normal wizard framing unchanged | C full Skimmer/Shelf1440/390/430, Infinity1440/390; E fresh Infinity430 and above-ground390/430 open/collapsed; A6×3above-ground route | PASS — actual stated size/viewport samples |
-| C02 | Detail shelf oblique, Infinity near-front3/4, access/materials readable | Selected-Shelf clipping suspicion withdrawn after settled capture/projection | No cosmetic camera change; preserve approved Infinity | C Shelf min/max1440/390/430 and Infinity each4sides; E fresh selected details; all6Shelf projections0points outside. Some standalone material/skimmer/stair detail combinations not repeated | NOT VERIFIED — selected critical details PASS, universal coverage not claimed |
+| C02 | Detail shelf oblique, Infinity near-front3/4, access/materials readable | Selected-Shelf clipping suspicion withdrawn after settled capture/projection | No cosmetic camera change; preserve approved Infinity | Prior Shelf/Infinity proofs retained.21October E exact4295 actual contextual coping views Prun/Greige/Ipe/WPC readable, panel open; four system details readable using explicitly selected existing Waterline preset, including430hidden. Root inspected hidden430. These do not prove automatic selection camera transitions or every stair/detail combination | NOT VERIFIED — selected detail readability PASS; automatic/universal coverage not claimed |
 | C03 | LED short-side; correct spot details; no clipping/queued transitions | Long cold-light scheduling stalls remain P01 | Do not hide latency with quality cuts | Lighting2862/motion68local assertions; C actual short-side Blue and E White/Red/Blue; full rapid/manual interruption video not obtained | NOT VERIFIED — static/geometry sample PASS, timing/video boundary explicit |
 | C04 | Faithful orthographic plan/legible dimensions/no wireframe or photo contamination | Prior contour upgrade preserved | No semantic-outline/plan changes | C actual orthographic/top390/430 with8×4/depth labels,3481+383plan assertions; actual PDF pages have no wizard/technical contour contamination. Every configured technical component/shimmer not newly covered | NOT VERIFIED — sampled plan/export PASS, remaining visual scope explicit |
 | D01 | Configure→Save→Reload canonical identity for main routes | HistoricalBuild2 not current full proof | Reuse backend only | [D final live chains](evidence/release-readiness-20261020/data-live-current-chains.md): A8×4Skimmer/B12×5Infinity/C8×4above-ground/renovation mosaic AND liner actual new copies/reload, exact scoped SQL equality/source unchanged PASS; A20cycles/language/camera fingerprint unchanged | PASS — five stated current-candidate routes |
 | D02 | Share/read-only/copy preserve products/dimensions, isolate identities/PII | — | Whitelist new shelf field | Five actual read-only source→distinct new copy→Reload; full technical JSON equality except projectId, sources unchanged, all public customer/uploads empty. Fresh new-copy A on separate origin read-only/Save Copy control PASS; ephemeral clipboard state not asserted for B/C/R | PASS — scoped cloud identity/privacy/share sample, not unrestricted RLS claim |
 | D03 | PDF and quote snapshot/options/identity, validation/retry/idempotency | Actual C430PDF cropped exterior stair at bottom | Capture-only fit to shared Project Book landscape crop; no geometry/normal wizard camera change | Four new actual7pagePDFs downloaded after fix; root visually inspected every page plus full Day/Night images. C lowest tread now complete.4quotes exact lead=saved config,1lead/1outbox each; hashes unchanged after capture; EMAIL_NOT_CONFIGURED/no provider. Retry/concurrency remain local contracts, not a new live stress test | PASS — stated cloud/PDF sample; deferred email not delivery PASS |
-| D04 | Correct cloud target/storage/credentials/RLS/token protection | D reports correct target/key/private bucket; source review pending root | No migrations/secret changes | Scoped read-only live checks and current runtime identity | NOT VERIFIED |
+| D04 | Correct cloud target/storage/credentials/RLS/token protection | Hosted bindings now work; fresh authenticated/anonymous security-session campaign not repeated | No migrations or access-control changes; owner entered Preview secrets privately | Root exact-target/token/grant source review retained;68real-session checks remain dated11October.21October exact4295 hosted restore/copy/reload/read-only/quote and independent Daniele2 snapshot/identity/redaction checks PASS, one lead/outbox and no provider ID. Private credential values never read | NOT VERIFIED — scoped current hosted identity/privacy PASS; no new RLS/concurrent-upload stress/session claim |
 | P01 | Three matched before/after samples: frames/interactions/calls/resources | Production reproduces repeated warm dry→wet stall, not only DEV/first-use | Retain lazy water/reflection and per-mesh finished materials across raw-stage navigation; pause hidden work and dispose on actual ownership end. No shader/quality/error-check changes | Baseline829/759/778.8ms, contemporary1335.1/1437.7/1142.7ms; final458.4/430.6/359.9ms, noGL during timings. Separate aggregate still20links vs28,617.7ms; first transition in fresh GL context2594.6ms. Baseline drift prevents exact speedup%. [Final bounded result](evidence/release-readiness-20261020/residual-performance-retained-material-result.json). Input→secondRAF is not GPU/finalpaint | FAIL — validated partial improvement, recurring latency remains; no further diagnostic loop or physical-mobile performance claim |
 | Q01 |1440×900 and390×844/430×932; physical mobile only if available | No physical phone available | Declare viewport emulation explicitly | A/C/D/E actual Chrome captures and public DOM/canvas dimensions | PASS — desktop and viewport emulation, NOT physical-mobile performance |
 | Q02 | Targeted typecheck/build/lint/geometry/compatibility/camera/state/i18n/export tests | Historical camera harnesses contain obsolete hashes/evaluator gaps | Keep those explicit; no skipped suite counted PASS | Current local checks and final isolated source build below; capture-framing14760 and export guard alsoPASS | NOT VERIFIED — listed current checks PASS; four stale historical camera harness cases not repaired or counted PASS |
 | Q03 | Independent reviewer actually repeats integrated critical paths | E reproduced2English defects, not report-only review | Root corrected; E independently retested affected UI/state/material path | [E browser checklist](evidence/release-readiness-20261020/final-review-checklist.md), actual A/B/C/renovation critical sample, new source retest JSON/screenshots | PASS — independent critical sample, not exhaustive coverage |
-| B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Exact Preview lacks durable-storage server configuration; owner public host/domain not chosen | No secret/access changes or manual deploy/promotion | Root actual load+Save failed. Exact deployment runtime logs: Durable project storage is not configured. Project env dashboard: No Environment Variables Added, all filters unfiltered. Known shared QA row exists/unchanged in correct Supabase. [Hosted evidence](evidence/release-readiness-20261020/data-live-hosted-6ad89.md) | BLOCKED — owner must privately configure server variables in Preview; hosted Reload/Share/Copy/PDF/quote not passed |
+| B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Preview server-configuration defect resolved; owner public host/domain not chosen | Owner privately saved Preview-only Supabase variables; root rebuilt only exact4295 Preview, no Production/access change | Ready deploymentD2NKKepZf5nfzEaKxDQwueYQCTbp source4295a89; new7zztmgkaq URL. Actual hosted restore→copyPW-E72A-AB2WDG→reload saved→fresh-origin read-only→quote8C1369EA, exact DB snapshots and one lead/outbox PASS.21October actual hosted7pagePDF download and independent offline layout/config/link review PASS; no latest-WIP deployment claim. Independent Chrome online replay remains unverified/login-gated | BLOCKED — independent hosted replay and public-host decision remain; missing-credential and stated hosted-PDF-sample blockers CLOSED |
 | B02 | Privacy information complete and share/customer data protected | Configurator retention/hosting/processor approval incomplete | Fill verified company/VAT/privacy email and owner-confirmed legal address only | Owner expressly confirms Via Caduti sul Lavoro7,37012Bussolengo(VR), retention still to be defined. Do not infer10years from general website policy | BLOCKED |
 | B03 | Commercial notification operational or explicit prelaunch block | Live email deliberately postponed | Do not enable/send real messages | Sandbox/code tests, ownerverifiedsender pending | BLOCKED — live email deferred |
-| B04 | Persistent backup and tested restoration/rollback documented | Local backups exist, production restore not evidenced/authorised | Recovery procedure required; no live restore/mutation | D exact isolated-recovery prerequisites; source baseline restore/hash proof is not database recovery | BLOCKED |
+| B04 | Persistent backup and tested restoration/rollback documented | Actual dashboard: Free plan excludes scheduled backups; PITR is an unavailable paid add-on. Separate manual/object backups and isolated restore not evidenced | Read-only exact-project Scheduled/PITR observation; prepared recovery procedure, no upgrade/restore/mutation |21October root authenticated UI waetxxqdlsuanqescuye explicitly displays Free-plan backup exclusion and PITR Pro add-on notice; private screenshots/safe receipt retained. No claim that unobserved manual/off-site backups are absent. Owner backup/object strategy, operator/RPO/RTO and approved isolated rehearsal remain missing | BLOCKED — managed backup availability verified absent on current plan; separate backup/recovery NOT VERIFIED |
 | B05 | Publishable asset rights documented |15retained liner/mosaic raster permissions initially undocumented | Owner expressly authorises web publication; liner unchanged | Owner reply20October2026: “si autorizzo”, specifically6liner+9mosaic. Other missing product photos remain honestly unavailable | PASS |
-| R03 | Validated task-only feature commit/push, no main/manual production deploy/archive change |39unrelated WIP files must stay local | Explicit30source+task evidence allowlist; no reset/force/merge | Source commit76d07be5c01316711b473e0a61b6673fa9a2236b pushed; remote SHA identical;224taskfiles/14110621bytes,0credentialflags;39WIP hashes unchanged. Docs-only closure receipt follows separately | PASS — validated checkpoint, NOT release approval |
+| R03 | Validated task-only feature commit/push, no main/manual production deploy/archive change |39unrelated WIP files must stay local | Explicit scoped staging; no reset/force/merge | Latest4295a89e46e37c827155964f1d7bed26f1a2bb6f feature commit/remote verified21October,77files including six runtime/audit files, report/evidence.38original WIP hashes unchanged; PoolModel retains only original4/4seamlessSteel delta. Current report follow-up remains uncommitted and backed up | PASS — validated checkpoint only; follow-up docs not yet committed, NOT release approval |
 
 ## Completed blocks and evidence boundaries
 
@@ -309,7 +309,10 @@ and independently retested the language/parser/PDF corrections, completed
 five cloud copy/reload routes/four persisted quotes/four PDF exports, and
 pushed source76d07be plus docs6ad89bd. Those scoped PASS results are retained.
 
-Current local and remote HEAD both6ad89bdd5347017ea9a4ced72caf9783b771bf76.
+At the start of this residual pass local and remote HEAD were both
+6ad89bdd5347017ea9a4ced72caf9783b771bf76. The validated lifetime correction
+was subsequently committed/pushed as4295a89e46e37c827155964f1d7bed26f1a2bb6f,
+with local/remote equality verified. No history rewrite or main promotion.
 All39excluded WIP files are still present; backup
 `pool-shaper-wip-backups/residual-gates-20261015-TBuaCI` contains exactly those
 39files, secret scanPASS. [Per-file classification](evidence/release-readiness-20261020/residual-wip-classification.json)
@@ -360,8 +363,8 @@ surface or ghost water in the documented material/Day/Night samples.
 [scoped tests](evidence/release-readiness-20261020/residual-render-lifecycle-tests.json),
 [independent visual coverage](evidence/release-readiness-20261020/residual-visual-coverage.json).
 
-The exact automatic online preview still belongs to6ad89bd, environmentPreview,
-productionfalse/success. On the owner's request root opened it in IAB tab9:
+The initial automatic online preview tested here belongs to6ad89bd,
+environmentPreview, productionfalse/success. On the owner's request root opened it in IAB tab9:
 the actual configurator is accessible there (no login page), while independent
 Chrome still requires Vercel authentication. No access controls/secrets changed.
 [Actual online opening](evidence/release-readiness-20261020/residual-hosted-preview-open.png).
@@ -411,7 +414,7 @@ errors; this is a smoke check, not hosted-backend or complete performance QA.
 [independent source review](evidence/release-readiness-20261020/residual-final-source-review.json).
 
 Only those6source/audit files, this existing report and current-goal evidence
-are eligible for the feature checkpoint. PoolModel is staged from the tested
+entered the4295a89feature checkpoint (77files in total). PoolModel was staged from the tested
 isolated copy, not the Mac working file; its4original seamlessSteel WIP props
 remain local with the other38preserved files. No blanket stage, reset, branch
 checkout, secret change, migration, merge or production deploy.
@@ -425,3 +428,1257 @@ separate prelaunch decisions. No unverified previous requirement is removed.
 
 Verdict: **FIX REQUIRED**. Code/data/export corrections have scoped evidence;
 performance and explicit unverified/prelaunch requirements remain open.
+
+## Follow-up evidence and private Preview handoff
+
+The exact4295a89automatic deployment is GitHub deployment7208439690,
+Preview/non-production/success, completed2026-10-20T18:58:06Z:
+[current feature preview](https://pool-shaper-ggzyhb05q-daniellamthis-projects.vercel.app).
+Root opened it in the integrated browser: app boot PASS, known sharedQA not
+restored; no new4295Save or quote attempted. Deployment success is not durable
+runtime verification. The preceding6ad89load/save failure remains the precise
+observed missing-server-configuration evidence, not a new4295backend test.
+
+Owner explicitly authorised LEAD_NOTIFICATIONS_QA_DISABLED=true ONLY Preview.
+Root added it as Config, verified Preview selected and Production/Development
+unselected, then observed Vercel's successful-save row. The dashboard states
+that a new deployment is required. Existing deployment environment is not
+assumed changed, and no hosted quote/email is authorised until runtime safety
+is verified. No redeploy or access-protection change was performed.
+
+Root prepared an UNSUBMITTED Secret-type form with the public SUPABASE_URL
+of waetxxqdlsuanqescuye, key name SUPABASE_SERVICE_ROLE_KEY and an EMPTY
+private value. Scope Preview only. Owner was shown the exact second Value
+field and asked to privately enter/save it; root does not read that form
+during private entry. No key belongs in screenshots, logs, reports or Git.
+The screenshot/owner-handoff receipt and exact-deployment receipt are retained
+in the persistent residual-gates-20261015-TBuaCI backup outside Git.
+
+Root's focused D04 source review is now complete: exact destination assertion,
+fail-closed stores, independent hashed edit token, atomic owner+Project-ID
+updates, shared-read redaction, HttpOnly/SameSite/Secure owner cookie, expiry
+and single-use upload-grant consumption, RLS/client-role privilege revocations.
+The relevant unchanged sources support reuse of dated Build2 security tests;
+they do not prove new authenticated sessions or a successful hosted chain.
+
+Independent E attempted only remaining M01/C02/G02/G04 views on the final
+uninstrumented3021build. Chrome initially showed its landing; navigation to a
+fresh QA origin timed out and reset the browser tool, after which its browser
+inventory was empty. No new configuration, material/stair/cover capture or
+PASS resulted. This is a tool/connection blocker, not a demonstrated app
+failure. Prior settled visual evidence remains valid in its stated scope.
+No repeated HydroB campaign or speculative camera/geometry change was made.
+
+A bounded source-only follow-up found two coping material slots still replaced
+by raw-stage materials in PoolModel1479–1525. This is a deterministic ownership
+gap, not proof that those slots account for all20remaining program links.
+Root prepared ONLY an isolated prototype in
+`pool-shaper-wip-backups/residual-coping-prototype-20261020-crUINl`: reuse the
+existing retained owner for the bed/slab slots, with distinct identities that
+include actual finish, sampler, water level and reference shader identity.
+Typecheck/build,23lifecycle assertions,13water contracts,82457structure checks
+and source identity8PBR/17geometry/16shader PASS. No source integration, server,
+new benchmark or latency/visual PASS follows from these checks. The prototype
+remains outside the primary workspace/feature commit until its remaining
+browser evidence is obtained; no third broad renderer investigation was run.
+Independent E also replayed the actual23hook assertions and descriptor audit
+against that prototype: PASS, no critical source finding. This is an independent
+source review, not the missing independent browser/latency verification.
+
+Root then observed Chrome available in its own inventory and made one bounded
+attempt on a separate visual-only3032server of that prototype. Startup was
+observed (session84126); GET/HEAD only, no backend bindings/credentials, no
+change to the owner's3003server. The browser operation timed out/reset before
+navigation: inventory showed a new QA tab still at about:blank. Binding that
+same tab also timed out. No3032configuration/rendered coping was observed,
+so runtime/visual/latency remains NOT VERIFIED. No further retry or control
+workaround was used; the failure does not establish that the app failed.
+Private IAB tab10 was kept open without reading its AX, screenshot or values.
+The original39WIP remain preserved; no new prototype integration/commit/push.
+
+### Recovery procedure boundary — B04
+
+This is a prepared procedure, NOT an executed recovery or approved RPO/RTO.
+Before any rehearsal the owner must identify an already authorised isolated
+recovery target, a responsible operator, acceptable data loss/recovery time
+and existing backup/object-copy evidence. Never point a restore at the live
+waetxxqdlsuanqescuye project merely to close this QA gate.
+
+1. Observe the authorised project's existing Database→Backups/PITR panel;
+   record retained dates/status or recovery window without starting a restore.
+   Obtain separate private Storage-object backup/version evidence: database
+   backups alone do not contain object bytes.
+2. Select the exact database/object versions and application SHA; document
+   any write-pause/maintenance decision for an actual incident. Do not change
+   live availability during this read-only QA.
+3. Only after explicit isolated-target approval, have the authorised operator
+   restore database and private objects there, bind isolated server credentials
+   privately and keep real notifications disabled. Production keys/data access
+   must not be broadened by an improvised rehearsal.
+4. In that isolated environment verify schema/row/object consistency, RLS and
+   owner-token boundaries, then synthetic Save/Reload/read-only/Copy/PDF/lead
+   identity and interrupted-upload recovery, with no real email. Record exact
+   source versions, outcomes, discrepancies and measured recovery time.
+5. Obtain owner sign-off before any actual reopening/production rollback.
+   Retain recovery evidence securely; a Git checkout or local WIP archive is
+   not evidence of database/object restoration.
+
+Until those prerequisites and the authorised rehearsal exist, B04 remains
+BLOCKED/NOT VERIFIED. Retention is still expressly undefined; email remains
+deferred. No new public-release readiness claim follows from this preparation.
+
+### 21 October — owner configuration and actual hosted cloud replay
+
+This supersedes ONLY the missing Preview-server-configuration blocker above.
+Root observed saved Preview-only rows for SUPABASE_URL and Secret-type
+SUPABASE_SERVICE_ROLE_KEY, plus the previously authorised Preview-only
+LEAD_NOTIFICATIONS_QA_DISABLED configuration. No credential value was read,
+revealed, captured or copied. A Config-value reveal required authentication;
+root cancelled it without requesting an authentication email.
+
+Root cancelled the generic environment-page redeploy dialog because it initially
+targeted main/Production. From the exact4295a89 deployment's own action menu,
+root instead verified and rebuilt ONLY Preview, with the current project settings.
+Actual Vercel dashboard evidence:
+
+- Deployment `dpl_D2NKKepZf5nfzEaKxDQwueYQCTbp`, Ready, 36 seconds.
+- Exact source `4295a89e46e37c827155964f1d7bed26f1a2bb6f`, feature branch unchanged.
+- [Exact rebuilt Preview](https://pool-shaper-7zztmgkaq-daniellamthis-projects.vercel.app).
+- No Production, domain, access-protection or database configuration changed.
+- Correct-team deployment connector remained403; this deployment evidence is
+  the observed authoritative dashboard, not a fabricated successful API check.
+
+Actual hosted UI and independent, read-only Daniele2 database verification:
+
+- Shared synthetic source PW-A24Y-7CDSQC restored from cloud.
+- Save a copy created PW-E72A-AB2WDG / project
+  `97d6440a-8e01-464d-9ba9-3869320e912e`; source unchanged.
+- Complete JSONB snapshot equality after removing ONLY projectId: true;
+  technical fingerprint `128943cf5b242927121a25a0c56785ba` unchanged.
+- Reload restored the copy with SALVATO, no false dirty-state warning.
+- Share UI reported Link copiato. IAB clipboard read returned empty; actual
+  clipboard-content delivery remains NOT VERIFIED, not an asserted app defect.
+- Fresh observed branch-alias origin restored the copy read-only with the same
+  configuration and Save a copy control; no owner token was transferred.
+- Preventivo: required privacy consent blocked submission without losing entered
+  synthetic fields. One subsequent authorised synthetic submission confirmed
+  `8C1369EA`; DB request `8c1369ea-76e9-46d4-b916-51b1fd43c271`.
+- Exactly one lead and one outbox for this new copy. Complete lead project
+  snapshot equals saved snapshot, embedded Project ID/reference consistent.
+- Notification failed/attempt1/EMAIL_NOT_CONFIGURED, provider ID absent.
+  This proves the deferred/no-send result, NOT email delivery or a freshly
+  revealed runtime QA flag value. No real customer email was sent.
+
+Current new evidence is preserved outside Git in
+`pool-shaper-wip-backups/residual-cloud-20261021-Q6cSKL`, including exact-target
+redeploy/Ready captures, cloud reload, quote confirmation and independent safe
+DB receipts. Hosted PDF file inspection is still pending. A requested IAB390
+override left tab14 at actual DOM1440×900; its screenshot was explicitly renamed
+`hosted-quote-confirmation-viewport-still-1440.png`, NOT counted as mobile QA.
+An independent reviewer was handed sole browser control for these remaining
+PDF/mobile checks; root did not operate the browser concurrently.
+
+No primary application source changed. Original39WIP remain preserved. P01
+production latency FAIL, remaining settled visual samples, retention and B04
+recovery prerequisites are NOT closed by this successful cloud replay.
+Fresh preservation check: all38 original files other than PoolModel retain
+their backup SHA256; PoolModel's only uncommitted delta remains the original
+four seamlessSteel call-site additions/four replaced lines. Index empty,
+`git diff --check` PASS. No new full build was needed for this report-only update;
+the exact4295 production build/typecheck evidence remains the applicable result.
+
+Independent E then regained Chrome and directly exercised the isolated3032
+prototype: Prun raw→finished transitions twice at1440, Day/Night; Greige sample
+at DOM-verified390×844 Day and430×932 Night, DPR1, canvas matching. Its eight
+PNG captures (seven local views plus the authentication blocker) and
+`independent-local3032-browser-evidence.json` show no black,
+stale or changed-joint artifact in those samples. No new performance measurement,
+universal material/camera coverage, online mobile or hosted PDF PASS follows.
+The prototype remains isolated/uncommitted: scoped visual/source validation
+does not close the measured production latency FAIL.
+
+E's separate Chrome session really reached Vercel Login on the exact new Preview.
+Its IAB binding was unavailable, unlike root's authenticated IAB session. E left
+Chrome tab651928375 as an owner login handoff; root could not bind it because it
+belongs to E's browser session and did not bypass that boundary. Sole remaining
+owner action for independent hosted PDF/mobile replay is normal Vercel sign-in
+with the already authorised team account. No new key, bypass URL or protection
+change is requested. Root reset its temporary IAB viewport override and kept
+the exact new Preview as the user-facing deliverable.
+
+### Bounded continuation — exact candidate and measurement boundary
+
+Root revalidated the live3021 listener/cwd and all three runtime differences
+between6ad89bd and4295a89: PoolModel, WaterSurfaceMaterial and
+RetainedStageMaterial in the isolated checkpoint match committed HEAD byte for
+byte. The remaining checkpoint manifest already records its unchanged base
+assets. This is the correct candidate for the remaining visual samples, not
+the unintegrated3032 prototype or the owner's WIP3003 draft.
+
+Performance specialist C checked only reuse of the existing passive timing
+protocol.3020 explicitly installs that listener in production; the clean3021
+and3032 outputs exclude it because their diagnostic component is DEV-only.
+A query parameter cannot activate code absent from those client bundles.
+Consequently no matched3-pair comparison on those existing outputs is available
+without new instrumentation/recompilation. No new harness, build, profiler,
+browser measurement or primary-source change was performed. P01 remains FAIL;
+this source-only boundary is not a latency result or performance PASS.
+
+Root then directly inspected the authenticated Supabase Backups page for ONLY
+waetxxqdlsuanqescuye (project title Configuratore piscine wellness). Scheduled
+backups explicitly state that the Free plan does not include project backups.
+The Point in time tab separately presents PITR as a Pro-plan add-on, not a
+configured recovery window. This replaces the prior unknown managed-backup
+availability with actual dashboard evidence; it does not establish whether an
+unobserved manual/off-site database or Storage-object backup exists. No Upgrade,
+Restore or configuration control was clicked. The read-only tab was closed.
+Safe receipt and private dashboard images are retained outside Git in Q6cSKL.
+The [current official backup documentation](https://supabase.com/docs/guides/platform/backups)
+also distinguishes database backups from Storage object bytes; no restore or
+new backup procedure was executed. B04 stays BLOCKED pending owner strategy
+and an authorised isolated rehearsal, not falsely closed by a local Git backup.
+
+Independent E subsequently exercised the exact3021/4295a89 candidate, not the
+3032 prototype: twelve actual captures cover settled Mosaic9 wet floor/wall;
+Prun, Greige, Ipe and WPC coping; Slim/high-water skimmer; grille/hidden overflow;
+and cover OFF, ON fully closed, ON fully open. All twelve are scoped view/state
+samples without a reproduced defect. WPC390 and hidden430 are DOM/canvas-verified
+viewport emulations. System details use the explicitly selected Waterline
+preset and therefore do NOT close every automatic-camera transition. Root
+independently inspected Mosaic9, hidden430 and the closed-cover images. See
+`independent-exact4295-residual-summary.json` and its capture manifest in Q6cSKL.
+Uncovered universal/day-night material calibration, remaining corner orientations,
+Pellicano discharge and automatic-transition combinations remain explicit in
+the matrix; none was silently removed or renamed PASS.
+
+The updated matrix retains all47 original requirement IDs with no duplicates.
+Report-only credential-prefix scan found no private-key value pattern; this is
+not a substitute for the existing exact-build client scan. Diff-check PASS;
+no fresh full build/test replay for unchanged application source. Root left the
+actual new hosted Preview open at Scene, explicitly/voluntarily reduced its
+panel for the user-facing preview, and kept source/configuration unchanged.
+
+Immediate owner action remains normal Vercel sign-in in the prepared Chrome
+tab for independent hosted PDF/mobile QA (unlock the Mac first if needed; the
+native inventory reported it locked). No further Supabase key entry is needed.
+Prelaunch decisions remain separate: retention duration, public hosting and
+database/object backup strategy plus authorised isolated recovery prerequisites.
+Live email remains deliberately deferred. No new app commit, merge or deployment
+was performed during this bounded continuation.
+
+### Current external gate revalidation
+
+In the next bounded continuation the local and remote feature SHA were freshly
+reconfirmed4295a89 (scoped read-only git query; no checkout/push). All38 original
+non-PoolModel WIP hashes still match the backup; PoolModel remains4/4 original
+uncommitted seamlessSteel changes. Diff-check PASS.
+
+The old independent Chrome handoff handle was unavailable, so its state was NOT
+assumed from history. One fresh exact hosted URL then really reached Vercel
+Login again in tab651928379. E saved a heading-only image excluding input fields
+and marked that tab for owner handoff. The same independent-hosted-access
+condition has now recurred across three consecutive goal turns. Root's already
+authenticated IAB Preview remains usable; that is not the reviewer's Chrome
+session or a successful independent hosted PDF/mobile replay.
+
+E completed the remaining bounded independent Above-ground samples on exact3021:
+Standard corner with six visible treads and PellicanoOFF/ON desktop PASS;
+the selected stream terminates inside the basin. Speculare was not exposed in
+the sampled real UI, including one Long-side external-stair change. No state
+injection, new control, compatibility rewrite or geometry modification was used.
+At430×932 DOM/canvas, both screenshot interfaces instead produced a430×216
+raster, so that new mobile visual result remains NOT VERIFIED, not an app FAIL.
+Receipt: `independent-exact4295-aboveground-summary.json` in Q6cSKL. E closed its
+only local QA tab, reset viewport and relinquished browser control. Root kept
+the current hosted IAB preview as a deliverable. No new app source, quote,
+notification, secret, access control or production state changed.
+
+The bounded independent visual work and safe read-only alternatives are now
+documented; no repetitive rebuild/profiling/access-bypass loop is started.
+Completion remains unproven: production latency still FAIL, additional visual
+scope stays explicit, independent hosted PDF/mobile requires the owner's normal
+Vercel login, and backup/recovery/retention/hosting decisions are still missing.
+The goal is blocked on those external prerequisites, not complete or release-ready.
+
+## Reopened goal — photographic lawn and measured stability, 21 October
+
+The owner replaced the previous closeout objective with **FINAL REALISM,
+PERFORMANCE & STABILITY**. The historical blocked assessment above is not the
+status of this reopened work. No backend, database, hosting, recovery or privacy
+changes are part of the new implementation. All47 original IDs and their evidence
+remain intact. Existing material/camera/cloud evidence is reused only at its
+stated scope; missing universal coverage is not silently converted into PASS.
+
+| Requirement | Owner / initial condition | Surgical change / acceptance | Planned or current evidence | Status |
+| --- | --- | --- | --- | --- |
+| GR01 | Root; studio grass is a two-octave procedural olive surface | A licensed photograph, natural colour, metric blade-scale calibration, small coherent normal/roughness, deterministic non-mirrored sampling; no new geometry | Independent E source/licence review; matched BEFORE/AFTER1440/430,390Day/Night and root image inspection in `residual-cloud-20261021-Q6cSKL`; derived channels and estimated footprint disclosed | PASS — scoped photographic appearance, not measured physical scan or every possible close-up |
+| GR02 | Root; no grass texture owner exists | Two bounded samplers, mipmaps, no repeated phase uploads, no per-frame baking or extra lawn draw |23asset/hash/shader/lifecycle contracts;834095bytes,5.67MiB estimated mip storage. Later integrated baseline/candidate18serialized windows: review median8.2ms both, phasewise DPR identical, two added texture counts plateau; actual rendererAppleM1Pro | PASS — bounded warm grass-cost/resource sample; not measured GPU bytes, physical-mobile speed or global-stall resolution |
+| GR03 | Root / E; approved ground is12mm below datum with40mm paving overlap | Preserve the existing contact geometry and shadows; validate the textured contact at close/general views across Skimmer/overflow/above-ground, preserve Infinity | Actual matched boundary crop/general views, grille/hidden/above-ground1440 and390Night. Existing contact/shadow geometry unchanged; no artificial border masking | PASS — sampled contact; no new relief geometry or universal perspective claim |
+| ST01 | Root / E; immediate reload drops last paving choice inside800ms debounce | Flush only a pending local draft on pagehide/hidden visibility; preserve share-load guard, debounce, identity and sanitization | Actual original-effect harness FAIL→12PASS; independent same-call Greige1440/Beige390 selection→reload→pressed control and summary, Back/Continue panel retained. Actual four-variant local-storage roundtrip adds16assertions | PASS — stated local reload/state regression |
+| P01 follow-up | Root / C; repeated production raw→finished stalls remain | Test only demonstrated allocation lifetimes; no quality cuts | Coping experiment inconsistent~4% median gain and removed; separate three-Infinity-water-owner experiment228.4→258.8ms median, rejected/not integrated. Grass baseline review medians8.0/8.5/147.7ms invalidate a matched-cost comparison | FAIL — stutters not demonstrated resolved; grass PERFORMANCE NOT VERIFIED |
+| M01 / M02 follow-up | Root / E; prior scoped material samples retained | Correct only newly demonstrated material defects; keep all liner assets, catalogue and rendering unchanged | Existing9-mosaic/Prun/Greige/Ipe/WPC and system captures retained; no new industrial finish or liner edits | NOT VERIFIED — no universal photorealism claim |
+| Q01 / Q03 follow-up | C / E; desktop and emulation only |1440×900,390×844,430×932; real independent browser inspection, matched camera/config and honest renderer data | Actual AFTER lawn1440/390/430 rasters, source/config/camera metadata and independent rapid reload1440/390 receipts; Infinity glass raster mismatch explicitly excluded | PASS — stated lawn/reload samples; not physical-phone performance or complete material coverage |
+
+The implemented photographic source is Sisters.seamless' own lawn photograph,
+CC0, from Wikimedia Commons. The source explicitly documents photography, but
+not a measured scan area or measured PBR channels. Its one-metre rendering
+footprint and derived conservative surface channels are labelled authored
+calibrations, not photogrammetry certificates. No generated albedo is used.
+`scripts/prepare-natural-grass.mjs` records source and optimized content hashes.
+The original downloaded photograph and previous source backup are outside Git.
+
+Local/remote feature HEAD freshly matched
+`4295a89e46e37c827155964f1d7bed26f1a2bb6f` at this continuation. All original
+WIP is preserved. The rejected two-slot coping experiment was removed; PoolModel
+retains only the original four seamlessSteel WIP props. The performance fixture, source archives,
+GET/HEAD-only servers and passive measurement instrumentation are outside the
+application worktree and have no Supabase/Resend credentials or bindings.
+
+### Photographic lawn implementation and independent visual replay
+
+Only StudioPaving's procedural lawn material is replaced. The same ground mesh,
+12mm datum,40mm under-paving overlap, deck slabs, basin geometry and lights remain.
+The approved separate Infinity coastal scene is unchanged. Two URL-cached sources
+produce locally owned samplers retained after the garden's first reveal, including
+when Back/Continue temporarily returns to plain construction. Actual unmount
+disposes the owned samplers/material without disposing shared source images.
+
+The prepared photographic RGB is1024px, packed normalXY/roughnessB256px;
+combined834095bytes. Mipmaps, bounded8x anisotropy and a shared offset-only
+triangular sampler avoid mirrored tiles or changing blade shape. Normal/roughness
+use the same offsets as colour. Estimated RGBA8+mip storage is5.67MiB, explicitly
+an estimate rather than a GPU-memory measurement. No grass mesh scatter, extra
+draw, new dependency, animated noise or runtime texture baking was added.
+
+`natural-grass-audit.mjs`:23 asset/hash/colour-space/shader/resource lifecycle
+contracts PASS. `water-lifecycle-audit.mjs`:21 PASS after removing the unproven
+coping experiment. Water/shadow source contracts13 PASS; unchanged paving layout
+999cases/39348023assertions PASS. Typecheck and production build PASS. Scoped
+ESLint has0errors/6pre-existing warnings across StudioPaving and store, no new
+NaturalGrass warnings. This is scoped lint with formatting disabled, not full lint.
+The initially attempted nonexistent `water-sampler-audit.mjs` was a command-name
+error, not a passed suite; the actual existing `water-transmission-audit.mjs`
+ran successfully. Diff-check PASS. No liner, geometry or backend source changes.
+
+Independent E actually replayed the new material in Chrome, not just these tests:
+matched8×4Skimmer/straight/BlueSky602/Prun/Greige60×120/Day/review captures at1440
+and430, plus actual390×844, same viewport-raster-checked boundary crop,390Night,
+three actual7↔6 navigation cycles with open panel/configuration preserved,
+grille/hidden overflow and above-ground actual1440 samples. Root independently
+inspected the matched BEFORE/AFTER contact images, general1440 and390Night.
+Photographic blade detail is visibly more natural, muted and non-emissive, with
+no obvious mirrored/coarse tile seam in these sampled views. The contact remains
+the approved flat mown ground, not newly certified grass micro-geometry.
+
+Infinity traditional remains visually unchanged; glass panel transparency was
+observed, but that screenshot API returned1440×725 despite1440×900 DOM/canvas.
+Its exact-resolution QA remains NOT VERIFIED, not silently PASS or an app FAIL.
+Evidence: `grass-after-browser-evidence.json`, `grass-after-independent-review.json`
+and the BEFORE baseline receipt under the persistent Q6cSKL evidence directory.
+Mobile results are viewport emulation, not real-phone performance. E did not
+save/submit/modify a cloud project. Existing unchanged technical snapshot/PDF
+proofs are reused only at their previous scope. Grass performance/resource
+comparison remains NOT VERIFIED; visual improvement alone does not close that gate.
+
+### Rapid-reload defect — reproduced, fixed and independently replayed
+
+C recorded an in-ground Greige selection before an immediate QA-local reload,
+then the actual reopened Greige control was unpressed. This was not the expected
+above-ground reference-finish filter and not merely a shortened header. The real
+provider effect wrote only after800ms, without a page-exit flush. The actual-effect
+AST/VM regression failed before correction; after the pending-timer flush it
+passes12checks, including share-loading guard, latest closure, no extra write on
+visible/idle/duplicate events and exact listener/timer cleanup. No parser, catalogue,
+server, storage schema or database changes were required.
+
+E then selected Greige and requested reload in the same browser-tool call, with
+no deliberate pause; the hydrated summary and actual Greige pressed control both
+survived. A second Beige trial at390 preserved Beige and left Greige unpressed.
+Back/Continue retained Beige and an expanded panel. Actual screenshot rasters
+match1440×900 and390×844; console errors were empty. Root inspected the new390
+review image. Request-to-reload-return totals440/453ms are tool timestamps, not
+instrumented event latency or rendered/GPU performance. Evidence:
+`rapid-reload-independent-evidence.json` and its three images in Q6cSKL.
+
+The existing persistence audit now also exercises actual save/load for all four
+reference Gres variants, checking finish,60×120 format, project identity and
+independent Prun coping:16additional assertions PASS. Typecheck and production
+build after the application fix PASS. Project-config, local project-delivery,
+export-guard, grass23 and lifecycle12 tests PASS. Local project-delivery explicitly
+does not run live PostgREST/RLS. No new cloud or email success is inferred.
+
+### Bounded performance conclusions — no unproven optimisation integrated
+
+Both additional allocation experiments were isolated, built and measured without
+touching the current WIP. Two coping owners yielded raw→wet279.3/280.1/281.0ms
+versus307.0/268.9/255.6ms: inconsistent, insufficient evidence. Retaining only the
+three Infinity edge-water owners then yielded228.4/215.6/228.8ms versus
+258.8/301.5/236.9ms, median228.4→258.8ms. Neither is an accepted latency fix;
+neither remains in primary application source. Receipts:
+`matched-coping-result.json`, `infinity-retention-result.json` in Q6cSKL.
+
+The separate grass-only production candidate was prepared but **not measured**:
+baseline review windows deteriorated from median8.0/8.5ms to147.7ms, p95 from
+16.1/17.0ms to350ms and max617.6ms. The late180-frame window was polled to actual
+completion, not restarted after an observation timeout. Renderer identity was
+real ANGLE/Metal AppleM1Pro, WebGL2,1440×900/DPR1. No software-renderer or physical
+mobile claim. These observations cannot attribute the instability to the app,
+background work or compositor. Only one C-owned scene was active; owner drafts
+were preserved, not assumed paused by a visibility control. Source/build work was
+frozen during timing. Evidence: `grass-performance-result.json` in Q6cSKL.
+
+Geometry/texture/program counters plateaued in the baseline; `gl.info` last-pass
+draws are not total-frame calls or GPU bytes. The two fixture versions differ
+only by a trailing empty line, not runtime code. No diagnostic wrappers or
+instrumentation enter the application commit. No further unchanged benchmark
+loop is performed. **PERFORMANCE NOT VERIFIED**: the single remaining proof is a
+controlled real-GPU foreground baseline/candidate session with a stable baseline,
+one genuinely active scene, warmed identical configuration/camera/viewport/DPR,
+and three brief frame/resource samples. Recurring interaction stalls remain
+unresolved, so the complete realism/stability objective is not achieved and no
+new commit/push is authorised by the all-gates-PASS condition.
+
+### Remaining materials and current external measurement prerequisites
+
+E completed12additional actual paving views plus one PDF guard capture on the
+patched DEV source: Grigio/Avorio, Limestone, Travertino chiaro/venato, Istria and
+Ardesia. Recent independent Greige/Beige reload/control and overview evidence is
+linked, not counted as new duplicate captures. Selection and visible3D updates
+were observed; actual1440×900,390×844 and430×932 rasters match their recorded
+DOM/canvas. No black/stale surface or reproduced module-joint scale failure.
+These are bounded functional/material-view samples, not universal photographic
+identity, every coping variant or complete day/night certification. Steel was
+not exposed in the current concrete palette and was not forced into it.
+
+Root independently inspected Limestone and both Travertino close-ups. The light
+Travertino's pronounced porosity also exists in the unchanged owner photograph
+`public/textures/references/20261018/image-7.jpeg`; no demonstrated mismatch
+justifies arbitrarily smoothing or recolouring that approved finish. No industrial
+material/shader/catalogue or liner edit was made. Receipt:
+`material-residual-independent-evidence.json` and13captures in Q6cSKL.
+
+The local unsaved-draft PDF button was deliberately not clicked: its actual
+handler calls `delivery.save()` before export when no link exists or the project
+is dirty. This is a no-database-write scope constraint, not a product failure.
+A bounded read-only existing-project alternative is being checked separately;
+no new PDF PASS is inferred from source or an unclicked button.
+
+After the owner reported other previews closed/Mac unlocked, root prepared two
+fresh production copies including the **same** four original runtime WIP files
+and product-photo assets on both. BaselineRC2b7c runs3039; candidate6cxC1W runs3038
+with the actual lawn plus autosave fix, byte-matching primary application source.
+Both builds PASS. The passive fixture is now byte-identicalSHA24b59ab269c12c970a8e475689ea14893786aca5524bcbfed41d50d58fa3fe52;
+the identical PoolScene wrapper is isolated-only. Both servers accept only
+GET/HEAD and contain no environment files or backend bindings.
+
+Fresh IAB inventory confirms no3D tabs, but C's fresh Chrome inventory still lists
+owner PoolStudio3003, GoogleEarth and SpaSpace. Open tabs do not prove active
+render loops, nor permission to discard owner drafts. The new comparison has
+**not started**. The owner has been asked to close those exact Chrome previews
+after preserving work. No new numbers or performance PASS are fabricated while
+that controlled-session prerequisite remains unverified.
+
+### Owner browser preference and read-only PDF attempt
+
+The owner then requested previews **only in the integrated Codex browser**.
+Chrome QA was stopped immediately; no new performance fixture was opened there.
+The earlier statement that the owner had closed the IAB3D tabs remains true,
+but it is not evidence that the remaining Chrome renderers were inactive.
+No new matched performance result is claimed. A future controlled comparison
+must respect the integrated-browser-only preference as well as scene isolation.
+
+Root opened primaryDEV3003 in IAB21, verified the restored8×4/BlueSky602/Prun/
+Greige60×120 draft and then loaded existing public projectPW-E72A-AB2WDG without
+Save/Copy/Quote actions. Actual UI showed shared/read-only,8×4×1.5, high-water
+steel skimmer, Mosaic5, Prun/Greige60×60, Shelf3.2m/two loungers/riser lights and
+heat pump. The actual export handler only saves when the project is dirty or
+has no link; its hero setter is local React state. The unchanged restored
+read-only link therefore permits the local export path without a new DB save.
+
+Root clicked ProjectBook once, observed disabled/working→enabled and no visible
+error or error console entries. No exact output file was found by focused
+Downloads/temp/filename checks, and the IAB exposes no download capability.
+The document's seven pages and downloaded bytes remain **NOT VERIFIED**; a
+finished button is not PDF-success evidence. No hidden-state/CDP workaround,
+native Codex control, new save, notification or production action was used.
+E's earlier interrupted read-only attempt also did not click PDF and remains
+explicitly partial (`readonly-project-book-partial-attempt.json` in Q6cSKL).
+
+Root returned to Scene, explicitly chose SeePool and voluntarily collapsed the
+panel for the owner. IAB21 is marked deliverable with current primary source,
+not the older hosted4295 build. Actual screenshots:
+`current-grass-integrated-preview-21.jpg`, `current-readonly-before-pdf.jpg`,
+`current-readonly-new-grass-preview.jpg` in Q6cSKL. No preview deploy was made.
+
+Latest scoped checks: typecheckPASS; grass23/lifecycle12PASS; four-Gres actual
+local-storage roundtrip16newassertionsPASS; diff-checkPASS. Scoped lint has
+0errors/6pre-existing warnings. Credential-value-prefix scan of10pertinent text
+files found0matches, reading no environment file. All38 non-PoolModel original
+WIP hashes still match; PoolModel retains its original4/4 seamlessSteel delta.
+Verified source/assets are backed up in `grass-autosave-verified-source-20261021.tar`
+outsideGit. No new commit/push: unresolved stalls, unverified performance cost
+and uninspected current PDF prevent the required all-gates-PASS conclusion.
+
+### Current PDF file and bounded integrated-browser measurements
+
+The previously missing PDF is now actually recovered. Root read the documented
+`playwright.waitForEvent("download")` API and armed it before a fresh click on
+the unchanged read-only project's PDF button. The SDK returned the actual local
+path `/Users/danielelamthi/Downloads/Project-Book-PW-E72A-AB2WDG.pdf`:
+1624197bytes, SHA2562236c1087146c05ab482cb365764ab49524134fb46483bc6bd2deff81f1d72ed.
+`pdfinfo` confirms7A4landscape pages/noJavaScript/noforms. Root rendered and
+inspected every page, extracted text using bundled pypdf (pdftotext is unavailable)
+and E independently verified the same seven raster pages and identity.
+Poppler completed with noisy local Fontconfig-cache warnings, not an app error;
+the resulting text and images are readable and were actually inspected.
+
+The PDF preserves the shared ProjectID on all seven pages,8×4×1.5, Mosaic5,
+Prun/Greige60×60,3.2mShelf/twochaises, straight stair/riser spots and heat pump.
+The cover and Day/Night presentation show the new photographic grass and the same
+configured pool without wizard overlays/cropped fittings. No contact data or
+invented price appears. The final link/QR correctly retains the **local** origin;
+it is not a publicly reachable release link. This closes the current local
+PDF-download/render regression sample, not hosted-public PDF/mobile delivery.
+Receipt: `current-readonly-pdf-independent-review.json`; all page renders under
+`current-readonly-pdf-render/` in Q6cSKL. No Save/Copy/Quote or DB change occurred.
+
+Root then performed the single bounded comparison **only in IAB21**, navigating
+the same tab between the prepared3039baseline and3038candidate. The old context
+is unloaded on navigation; no second POOL-SHAPER3D scene was opened. The actual
+viewport override now reports1440×900/browserDPR1 and matching canvas. A warmup
+is excluded. Each version has three actual phase-out→phase-back→reframe cycles,
+each action followed by its complete180frame window before the next action.
+Source/build/test CPU work was held still; no native GL wrapper or profiler.
+
+| Metric | Baseline | Lawn + autosave candidate |
+| --- | --- | --- |
+| Review frame median, each cycle |8.2 /8.2 /8.2ms |8.2 /8.2 /8.2ms |
+| Review frame p95 |9.4 /9.8 /9.5ms |9.5 /9.4 /9.7ms |
+| Phase-back frame median |9.1 /9.1 /9.0ms |10.1 /10.2 /10.0ms |
+| Phase-back input→secondRAF |262.2 /259.1 /234.9ms |253.9 /246.4 /230.1ms |
+| RendererDPR raw/back; review |1.405456737852613;1 |identical phasewise |
+| Geometry count raw / finished |27 /59 |27 /59 |
+| Texture count raw / finished |27 /31 |29 /33 |
+
+The renderer is actual ANGLE/Metal AppleM1Pro/WebGL2 on both versions. Resource
+counts plateau across all three cycles. Last-pass calls are13raw and usually89
+finished; one baseline finished reading is4, so these are **not total-frame draw
+calls**. Program-count40→36 is not an optimisation result: compilation/setup
+history differs. GPU bytes are not measured; the extra mip-storage estimate stays
+5.67MiB. Baseline/candidate contain the same preserved original runtime WIP; only
+the lawn and pending-draft flush differ. No quality, geometry or liner cuts.
+
+Eighteen windows are complete and serialized. C independently checked origins,
+timestamps, phasewiseDPR and math, excluding earlier DEV warmup entries and a
+prior-baseline renderer entry in the candidate log. Source receipts and raw
+samples retain this provenance rather than pretending those logs are all current.
+Evidence: `integrated-baseline-production-samples.json`,
+`integrated-candidate-production-samples.json`, renderer/end-state receipts and
+matching1440screenshots; `integrated-performance-independent-review.json`.
+
+Interpretation is scoped: unchanged steady review frame time; approximately1ms
+extra per frame in the180frame post-return window; phase-back DOM-feedback median
+259.1→246.4ms, only4.9% and **not resolved stalls**. The earlier617.6ms instability
+did not recur in this sample; that is not proof it is eliminated. Open Chrome
+Earth/SpaSpace and AutoCAD were inventoried but not assumed paused or blamed.
+Strict isolated-GPU/global performance remains NOT VERIFIED. Physical-mobile
+performance is not claimed. No extra measurement loop is started from these
+results, and the overall objective/commit gate remains open on recurring stalls.
+
+### Paving-resource retention — measured partial gain, integrated 21 October
+
+ST02 preserves the existing visible paving rather than unmounting its two
+materials and regenerating slab/grout buffers whenever a construction stage
+hides the terrace. First reveal remains lazy. While hidden, a memoized child
+keeps the last visible resources; on reveal its exact serialized physical
+outline/module/gap/thickness/board descriptor must match before reuse. The
+ground opening still follows the current raw basin, independently. Actual
+geometry, material calibration, catalogue, cameras and liner are unchanged.
+Owned slab/grout and ground resources retain separate unmount/replacement
+cleanup; this is not proof of measured GPU-byte reclamation.
+
+The isolated prototype and integrated primary StudioPaving have identical
+SHA2563407789f6309f0e37010ff66e5e8de77c005fa98adbe497e80f359e7c9b957db.
+The primary pre-integration source/autosave/grass/report backup is
+`grass-autosave-pre-paving-retention-20261021.tar.gz` in Q6cSKL. Original WIP
+was not reset or replaced. C independently reviewed the integrated source,
+memo comparison and cleanup, finding no substantive blocker in that delta.
+
+Root measured a fresh reload and identical warmup for each version in the
+same IAB tab/origin/1440×900 viewport on ANGLE Metal AppleM1Pro, before any
+functional resize QA. Both versions contain the same grass/autosave/WIP and
+passive measurement fixture. The old context was unloaded between versions.
+Each has nine completed 180-frame windows and matching phasewise renderer DPR.
+The comparison order was prototype, then fresh control, not interleaved;
+unknown background applications remain a limitation. No profiler, build or
+other source activity ran during the windows.
+
+| Metric | Fresh control | Paving retention |
+| --- | --- | --- |
+| Return input→secondRAF, three cycles |256.6 /239.2 /232.9ms |213.6 /197.8 /212.5ms |
+| Median return input→secondRAF |239.2ms |212.5ms (−11.16%) |
+| Review frame median |8.2ms |8.2ms |
+| Median of return frame medians |10.0ms |10.0ms |
+| Raw geometry / texture count |25 /25 |27 /26 |
+| Finished geometry / texture count |57 /29 |57 /29 |
+
+Receipts: `paving-control-production-samples.json` (PoolScene-Bt0vKMUF.js)
+and `paving-retention-production-samples.json` (PoolScene-B883JOBQ.js) in Q6cSKL.
+Raw buffers/textures increase by2/1 as expected for retention; finished counts
+and triangle counts match. Last-pass calls13raw,4or89finished are not total
+frame draws. These are actual scoped observations, not a GPU-memory byte
+measurement, physical-mobile result or proof that recurring stalls are fixed.
+C independently recomputed the improvement and verified all three paired
+return samples improved. The remaining roughly200ms stalls keep ST02 and
+the overall performance gate **FAIL / FIX REQUIRED**, not PASS.
+
+Functional browser replay of this exact prototype: 8×4→raw6×3→finished6×3,
+then raw12×5→finished12×5; Prun coping retained while Greige changes to Avorio
+and paving60×120 changes to60×60; then FuoriTerra12×5/steel. The parent group
+hides all retained slabs in the raw views, latest footprints reappear on
+reveal and no old8×4 silhouette/paving remains. FuoriTerra has no stale ground
+terrace. All controls reflect the selected state, panel stays open until a
+voluntary collapse, browser error log is empty. Screenshots in Q6cSKL:
+`paving-retention-6x3-raw.jpg`, `paving-retention-6x3-reveal.jpg`,
+`paving-retention-12x5-raw.jpg`, `paving-retention-12x5-reveal.jpg`,
+`paving-retention-12x5-avorio-60x60.jpg`, `paving-retention-aboveground-12x5.jpg`.
+Root inspected these actual rasters. The first-raw-start screenshot verifies
+appearance only; lazy allocation is a source/lifecycle contract, not a claimed
+runtime allocation trace.
+
+Primary current-code read-only8×4 replay additionally rendered at390×844 and
+430×932, preserving Mosaic5/Prun/Greige60×60/Shelf/two loungers/riser spots.
+Evidence `current-retained-paving-390.jpg` and
+`current-retained-paving-430-settled.jpg`; actual DOM430×932/docWidth430,
+canvas645×1398 at adaptive rendererDPR1.5/browserDPR1. The immediate
+`current-retained-paving-430.jpg` was captured before resize layout settled
+and is excluded from acceptance. These are emulated viewports, not devices.
+No Save/Copy/Quote or DB write occurred. Existing seven-page PDF evidence
+predates this resource-lifetime-only delta and is retained, not relabelled
+as a newly exported PDF of this later build.
+
+Verification after integration: actual-comparator/lazy/visibility/cleanup14,
+grass23, draft lifecycle12, paving999cases/39348023checks, water lifecycle21,
+water transmission13, typecheck, production build and diff-check PASS. Scoped
+ESLint with the repository's pre-existing formatting noise excluded has
+0errors/2existing FastRefresh warnings; the initial unfiltered lint reported
+formatting errors and is not counted as PASS. New audit script is Prettier
+formatted. Build retains existing chunk-size/tsconfig-paths warnings. No new
+dependency or diagnostic fixture enters primary. Remote feature HEAD read-only
+reverified4295a89e46e37c827155964f1d7bed26f1a2bb6f. No commit/push/deploy:
+mandatory performance objective remains incomplete.
+
+### Skimmer lifecycle — second demonstrated transition bottleneck
+
+ST03 addresses the actual Skimmers unmount/rebuild when returning from a raw
+construction phase. The isolated experiment retained its unchanged assembly,
+three micro/AO textures and shared frame material behind a visible=false parent,
+only after first exposure. Changing system still unmounts it. C's source review
+identified that an initial latch-only experiment did not reset on system exit;
+this was corrected before integration and remeasured as a distinct final build.
+Hidden dimension/variant updates remain live; this is not an inactive memo cache.
+The two small weir-water surfaces still follow their original showWater lifetime.
+No skimmer geometry, material, profile, water level or camera code changed.
+
+Root used the same IAB21/tab/origin3038, actual1440×900/browserDPR1,8×4×1.5,
+Slim ABSwhite/BlueSky602/straight stair/Prun/Greige60×120/nooptional/Day. Each
+version was freshly loaded with assets warmed and the same raw→finished→reframe
+warmup excluded. No profiler or parallel CPU work during measurements. Each
+version has nine complete180frame windows, three identical action cycles;
+renderer is ANGLE Metal AppleM1Pro/WebGL2, DPR1.405456737852613 for raw/return,
+1 for review. Controls, geometry and visible detail stay identical.
+
+| Metric | Paving-retained control | Final skimmer-retained candidate |
+| --- | --- | --- |
+| Return input→secondRAF |217.1 /237.7 /216.9ms |118.5 /124.5 /112.9ms |
+| Median return input→secondRAF |217.1ms |118.5ms (−45.4%) |
+| Return frame median |10.9 /10.8 /10.4ms |10.8 /10.6 /10.4ms |
+| Return frame p95 |14.0 /12.7 /12.2ms |15.2 /12.5 /13.0ms |
+| Largest return frame interval |153.1ms |98.8ms |
+| Review frame median |8.2 /8.2 /8.3ms |8.2 /8.2 /8.3ms |
+| Raw geometry / texture count |27 /26 |55 /29 |
+| Finished geometry / texture count |57 /29 |57 /29 |
+| Program count raw / finished |41 /48 |49 /52 |
+
+All three paired return samples improve; the raw resource retention is bounded
+and every count plateaus across cycles. Peak geometry/texture counts remain
+unchanged, but four additional finished program variants stay cached. Counts
+are not GPU byte measurements; last-pass calls13raw and4/89finished are not
+total-frame draws. There is no claimed steady FPS gain. This is stronger
+evidence for a specific Skimmer transition, not an Infinity/global-stall PASS.
+Residual roughly100ms feedback/frame spikes still require scoped judgement
+and remaining affected-path coverage; no promise of zero long frames is made.
+
+Receipts in Q6cSKL: `skimmer-control-production-samples.json` (B883JOBQ),
+`skimmer-final-production-samples.json` (BAfcRHAY). The earlier DpoZbIvA
+experiment in `skimmer-retention-production-samples.json` measured111.1ms
+median, but it lacks system-reset and is NOT the integrated final candidate.
+Final warmup windows1/2 were completed and recovered after the harness closed
+over an old bundle filter; no app restart or repeated warmup input was used.
+Only final windows4–12 with explicit bundle/timestamp filters count in results.
+C independently checked all18control/final windows, recomputed the median,
+phasewise DPR, serialization, plateau counts and exact primary diff.
+
+Final isolated PoolScene SHA f54ea0d5a7a4d4c3d82da9fbdefc0e710ddb479ce67fd943493927a3b98f3fc8
+includes the existing QA-only passive fixture; integrated primary SHA
+683fec5649d238e6eb94e701a0270b1dc3f2f18af1bf084f73cc6d6f8ba4b726
+excludes that fixture and differs from original by9insertions/1deletion only.
+Primary original PoolScene/paving/report were backed up before application in
+`primary-pre-skimmer-retention-20261021.tar.gz` outsideGit. No measurement
+fixture, backend binding or new dependency enters primary.
+
+Functional root replay of the final isolated candidate: Slim→HighWaterline,
+ABSwhite→steel,12×5 raw resize→finished reveal, hiddenOverflow→Infinityside3→
+Skimmer. Hidden assemblies do not show in raw/overflow/Infinity; high-water
+profile and finish update and the latest positions reappear after resize.
+Panel remains open, preserved selections stay present. Root inspected actual
+screenshots `skimmer-final-highwater-steel.jpg`, `skimmer-final-12x5-raw.jpg`,
+`skimmer-final-12x5-reveal.jpg`, `skimmer-final-overflow-no-ghost.jpg`,
+`skimmer-final-infinity-no-ghost.jpg` in Q6cSKL. Infinity capture is regression
+evidence only, not a new acceptance of the landscape or photographic quality.
+
+Primary current code also actually rendered the unchanged shared project
+PW-E72A-AB2WDG in waterline view at390×844 and settled430×932. Images
+`current-skimmer-retention-waterline-390.jpg` and
+`current-skimmer-retention-waterline-430-settled.jpg` show its real high-water
+skimmer, mosaic and coping, with panel open; browser error log empty. DOM430×932,
+docWidth430 and data-camera-focus=waterline confirmed. This is viewport
+emulation, not physical-mobile performance. No Save/Copy/Quote/DB mutation.
+
+After integration: actual lifecycle effect11checks, paving retention14, grass23,
+water lifecycle21, typecheck, production build and diff-check PASS. Scoped
+ESLint excluding pre-existing formatting noise:0errors/6existing PoolScene
+hook warnings. New lifecycle audit is Prettier formatted. These contracts do
+not assert actual GPU disposal or broad browser delivery. Independent current
+browser replay is assigned separately; overall gate/commit remains open until
+all mandatory coverage is actually proved.
+
+Independent post-integration browser replay attempt: E first tried the existing
+root IAB21 and received Tab not found. Root then actually unloaded its scene
+to about:blank and authorised one new reviewer-owned IAB tab; that creation
+returned Browser not available:iab. No input, other tab, Chrome fallback,
+configuration mutation or scene was created by E. Safe receipt
+`retention-delta-iab-independent-attempt.json` records both failures. This is
+a reviewer-tool **BLOCKED** gate, not application failure, and earlier
+independent browser evidence is not relabelled as this latest-delta replay.
+Root's current primary UI remains usable. A precise owner decision was asked
+for a temporary local Chrome-only reviewer exception; until answered, the
+owner's IAB-only restriction is preserved. No whole-goal completion or
+commit/push is claimed from this partially closed performance gate.
+
+### ST04 — bounded contact-shadow ownership correction, 21 October
+
+| ID | Initial defect / owner | Minimal change | Acceptance / actual evidence | Status |
+|---|---|---|---|---|
+| ST04 | Root/C: each warm 12.0↔12.1m resize leaks one geometry and two textures | Own and release the installed Drei10.7.8 contact-shadow targets, shared plane and three materials; identical shaders, blur, dimensions and resolution | Six matched trusted-input windows before/after; resource counts plateau; actual raw/finished before/after images; independent browser replay | PASS for measured resource lifetime and root visual sample; independent replay pending below |
+
+The exact pre-cleanup final candidate BAfcRHAY grows from82to87 geometries
+and30to40 textures across six warm alternating dimension inputs. The earlier
+4295 baseline also grows40to45 /28to38, so this is a pre-existing leak, not
+attributed to grass or resource retention. Installed ContactShadows owns two
+off-screen render targets and a shared plane but supplies no cleanup effect.
+
+OwnedContactShadows preserves the installed MIT-licensed algorithm and full
+notice. Only its two scene import lines change; all call-site keys, physical
+parameters,1536/2048 resolution, five render passes, depth/blur shaders and
+camera transforms remain unchanged. Six owned resources are disposed on actual
+replacement/unmount. No dependency, scene fixture, water/liner/pool geometry,
+camera, catalogue or backend changes enter primary.
+
+Matched isolated production candidate Bj4S0hI5:79 geometries,24 textures and50
+programs in all six resize windows, same triangles and last-pass24 calls.
+Frame median8.3ms; p95 range9.2–10.5ms. Actual input→secondRAF29.0–37.3ms
+versus pre-cleanup21.4–27.9ms: cleanup costs roughly7–10ms on this input,
+and is NOT a claimed dimension-latency gain. Counts are not measured GPU bytes;
+last-pass calls are not complete-frame draws. AppleM1Pro, same browser/1440×900,
+browserDPR1/orthographic renderDPR1, warm assets and one active scene.
+No profiling or builds ran during measurement.
+
+Receipts in Q6cSKL: contact-shadow-final-control-dimension-samples.json and
+contact-shadow-cleanup-dimension-samples.json. Root actually inspected
+contact-shadow-before/after-raw-12x5.jpg and
+contact-shadow-before/after-finished-12x5.jpg: unchanged framing, geometry,
+materials and shadow appearance; no ghost or black frame; browser errors empty.
+These are real browser captures, not offline generated acceptance pictures.
+
+Before integration, primary PoolScene/report backup:
+primary-pre-contact-shadow-cleanup-20261021.tar.gz. Integrated source hashes:
+OwnedContactShadows206aa8a4ccbeae84263d66400a051212c393eb29adbc52a0702776bc68eb3900;
+PoolScene4bf75cb052b5aaa741f56f74af38afe69e2658b498eec26c9c6ceb23316ee175.
+Actual installed factory/shader/disposal audit55PASS, skimmer11, paving14,
+grass23, autosave12, primary typecheck/build/diff-check PASS; new module/audit
+ESLint0errors/0warnings. This does not assert global stutters resolved.
+
+Owner subsequently explicitly authorised one temporary LOCAL Chrome tab solely
+for the independent reviewer (“Sì, solo per il revisore”), with no cloud saves,
+quotes or emails. Root unloaded IAB21 to about:blank before handing UI to E.
+This supersedes the earlier IAB-only reviewer-tool blocker for this attempt;
+the actual replay result is still pending, not inferred from permission.
+
+C independently recomputed all six control/candidate windows. Actual input
+medians23.85→30.40ms (+6.55ms,+27.46%), slower in all six paired observations.
+This is an observed short-run tradeoff, not universal causal quantification.
+Each click/input/change triplet is correlated, not three independent samples.
+Both have180visible frames/window, serialized actions, DPR1 and programs50;
+identical alternating6446/6662triangles and last-pass24calls. Candidate renderer
+receipt also contains a pooled old entry: exact bundle filtering is mandatory.
+Control lacks a standalone DOM metadata snapshot; operator-identical viewport
+and final renderer1440canvas are documented, not invented control DOM evidence.
+
+Independent Chrome attempt after the explicit owner exception: E created only
+temporary local tab651928415, then viewport binding timed out/reset its kernel.
+One fresh inventory showed the same extension with a remapped browserID; a
+bounded rebind of the SAME owned tab timed out too. No actual latest-delta
+raw/finished, Day/Night, mobile, screenshot or console proof was acquired by E.
+Receipt: owned-shadow-independent-browser-blocked.json in Q6cSKL.
+Therefore this latest independent-browser gate is **BLOCKED by tooling**, not an
+application FAIL and not a PASS inferred from the earlier independent tests.
+The tab may still hold a3D scene. Root's read-only inventory found the exact
+reviewer-owned tab; normal binding refused cross-session ownership. Root did
+not bypass that protection or touch other Chrome tabs. Owner was asked only
+to close the temporary QA tab. No further controlled timings run while that
+additional scene might remain active.
+
+Root separately replayed the INTEGRATED PRIMARY code in IAB21: two Pool→
+Presentation cycles, expanded panel, original8×4/high-water steel/Mosaic5/
+Prun/Greige60×60/shelf/loungers state retained. Actual Day/Night1440 and Night
+390×844/430×932 emulated captures show retained paving/grass, water, real
+skimmer and riser lights without black/ghost shadows.430 DOM/canvas both430×932,
+docWidth430; browser errors empty. Original read-only link and Day restored,
+viewport override reset; no Save/Copy/Quote or DB write. This is explicitly
+ROOT SELF-VERIFICATION, not independent replay.
+Evidence: owned-shadow-primary-browser-replay.json,
+owned-shadow-primary-day-1440.jpg, owned-shadow-primary-night-1440.jpg,
+owned-shadow-primary-night-390.jpg, owned-shadow-primary-night-430.jpg and
+current-owned-shadow-integrated-preview.jpg in Q6cSKL.
+
+Current primary checks:149 targeted ownership/retention/grass/autosave/water
+assertions, typecheck, production build and diff-check PASS;12task source/test
+files scanned with0secret-prefix matches (not a universal security scan).
+Task source/assets/report backup:
+primary-grass-autosave-retention-shadow-verified-20261021.tar.gz.
+No commit/push: independent replay and remaining global performance coverage
+are still open. Local HEAD remains4295a89e46e37c827155964f1d7bed26f1a2bb6f.
+The sandboxed remote check initially failed DNS; an authorised read-only
+network check then succeeded. Fresh origin feature HEAD matches local exactly:
+4295a89e46e37c827155964f1d7bed26f1a2bb6f. No push or branch change occurred.
+
+### Hosted PDF missing sample — completed read-only, 21 October
+
+Existing exact4295 Preview7zztmgkaq was accessible through the normal IAB
+session without protection changes or credential reads. ProjectPW-E72A-AB2WDG
+loaded as saved. Root clicked PROJECT BOOK PDF once, download event completed,
+and the control re-enabled. No Save/Copy/Quote/email or database write.
+The browser command returned after1378.6921seconds wall time; this includes
+uncontrolled browser/tool scheduling and is NOT an application-latency
+measurement. No duplicate export was initiated.
+
+Actual hosted download:
+hosted-4295-ProjectBook-PW-E72A-AB2WDG.pdf in Q6cSKL,1288519bytes,
+SHA256e45a53e3a5964f6ada08bd82c7d5f7e9e603a6c846867cfec791dc2e902cf111.
+SevenA4landscape pages, no encryption/forms/JavaScript. C independently
+inspected ALL7actual rendered pages and extracted text/link annotations.
+Exact8×4×1.5/high-water steel/Mosaic5/Prun/Greige60×60/Shelf3.2/two loungers/
+straight/riser lights/heatpump/34.4m³/mainLED0 and same ProjectID throughout.
+Both link annotations point to the actual hosted project, not localhost.
+No observed text/geometry/image clipping, overlap, missing glyphs or blank
+Day/Night images; no extracted customer contact data. Fontconfig emitted
+warnings during rasterization but inspected glyphs were intact. Cross-viewer
+font equivalence and independent QR decoding are not claimed. Water presence
+in the bright cover is visually ambiguous, not evidence of a dry capture and
+not silently promoted to full water-fidelity PASS.
+
+Root also inspected actual cover/page6 Day/Night rasters; photographic grass/
+resource cleanup WIP is NOT deployed here and this is not latest-candidate
+online verification. Evidence: hosted-pdf-browser-download-receipt.json,
+hosted-pdf-render/page-1.png throughpage-7.png, independent PDF review receipt
+in Q6cSKL. Root restored the local current preview after export.
+
+Owner then confirmed temporary Chrome QA415 closed; root's current inventory
+verified that tab absent. E's next fresh authorised attempt uses only a new
+reviewer-owned tab417 with fresh bindings; settled real AX and screenshot now
+work. Latest-delta desktop/mobile replay was in progress at that observation.
+
+### Current independent replay closed; bounded performance follow-up
+
+- E completed the fresh authorised417 replay and closed that own tab/reset
+  viewport successfully. Two raw→Presentation expanded-panel cycles; real
+  high-water steel close-up and restored grass/paving; actual390×844/430×932
+  Day/Night DOM+raster match. Desktop grille/hidden/traditionalInfinity/
+  Above-ground shadow smokes show no black/ghost. Smoke panel collapses were
+  E's explicit Riduci actions, NOT an always-expanded claim. Original readonly
+  snapshot restored;14captures, errors empty, no cloud writes. Latest independent
+  browser blocker CLOSED for this delta. Receipt:
+  owned-shadow-independent-browser-receipt.json (Q6cSKL).
+- Root measured six warm Avorio/Greige changes per version: frame8.2ms throughout,
+  click median42.45→44.65ms (+2.2), max interval111.1→42.1ms. Three camera
+  waterline/review pairs: overview median8.4→10.1ms (+20.24%,worse3/3);
+  p95 arrays16.5/14.7/10.7→12.6/14.0/14.9, not uniformly better. Waterline
+  median11.0→10.8, third sample worse. All24windows180frames, serialized,
+  viewport1440×900/AppleM1Pro, materialDPR1/cameraDPR1.405 identical. Camera
+  windows arm on menu opening; AX menu selection supplies no input-feedback
+  sample, so camera input latency is NOT measured. Geo72plateaus, texture
+  counts27→26 and program48vs56/54 stable are not GPU bytes or grass-only
+  causality. No blanket no-regression PASS. Raw data:
+  final-baseline/final-candidate-material-camera-samples.json;
+  final-material-camera-independent-review.json (C recomputed all).
+- Latest pre-ALU candidate back112.2/101.1/144.4ms vs fresh matched baseline
+  259.3/262.3/288.3; median262.3→112.2 (−57.22%). Raw-out70.9→95.3ms median
+  (+34.41%,all3worse). Back frame medians8.5/8.6/11.2→10.5/9.9/12.5; worst
+  interval163.6→110.8, but p95 not uniformly better. Counts plateau: raw
+  geo25→69/tex23→29, wet geo72both/tex27→29; retention is not zero-cost.
+  C verified all12windows and equalDPR. Receipts: latest-baseline-phase-samples.json
+  and latest-candidate-phase-samples.json. Native actual drag/wheel also changed
+  the view with panel/state retained and no errors; candidate-native-orbit-zoom.json
+  and three captures are functional proof, NOT per-gesture GPU timing.
+- To address measured overview cost without reducing quality, prototype ONLY
+  shares duplicate stochastic UV calculations for the same six texture reads.
+  Same assets/calibration/blend/normal/roughness/light/geometry. C confirmed
+  algebra conditional on equal UVs; prototype now explicitly normalizes its
+  OWNED clones to channel0/identity metric transform and tests hostile source
+  transforms without mutating URL-cached originals. Main shader UNCHANGED until
+  runtime/visual proof. First prototype tar warned its isolated audit did not
+  exist, but preserved original shader; complete primary shader+audit backup
+  then succeeded. No WIP lost. No new runtime PASS inferred from source tests.
+
+The two final bounded grass experiments were measured, not assumed faster:
+shared footprint DqhMPMZq overview medians9.7/10.0/9.6ms (aggregate9.7);
+shared footprint + planar tangent BiwFUFXU10.3/9.1/11.4ms (aggregate10.3),
+versus current Bj4S0hI5 aggregate10.1 and original4295aggregate8.4. All use
+six180frame camera windows after two warmups, same1440×900/DPR1.405456737852613,
+same12×5physical config. Small mixed changes do not establish a consistent
+recovery of the original performance. Neither experiment enters PRIMARY.
+
+Shared-footprint prototype27contracts and tangent prototype96numeric checks
+PASS; actual browser shader compilation had no errors. Tangent checks preserve
+all ground positions/normals/UVs/indices, adding only the UV basis. These are
+experimental tests, NOT extra primary-PASS counts. Entire experimental sources/
+tests preserved in rejected-grass-footprint-tangent-experiments-20261021.tar.gz.
+Only root-created experimental changes were removed using targeted patches;
+no owner WIP, main/archive branch or approved geometry was reset. Prototype
+source restored to exact primary NaturalGrass9f460217882755efcf3b5d02a30a87d960a165811cfb4805496c2f379571596f
+and StudioPaving3407789f6309f0e37010ff66e5e8de77c005fa98adbe497e80f359e7c9b957db;
+original23grass contracts/typecheck/build PASS after restoration.
+
+Raw receipts: shared-grass-footprint-camera-samples.json and
+tangent-grass-camera-samples.json in Q6cSKL. No infinite benchmark/optimisation
+loop is started. The actual remaining product gate is explicit acceptance of
+the measured current photographic-grass tradeoff: steady review8.2ms unchanged,
+overview transition8.4→10.1ms (+1.7ms,+20.24%), wizard return262.3→112.2ms
+(−57.22%) but raw-out70.9→95.3ms. The owner was asked whether to accept that
+cost or keep the performance gate open. No answer is presumed. Independent
+current browser and hosted7page-PDF sample are now closed; overall performance/
+commit gate stays open until that decision or a demonstrated qualifying fix.
+
+Independent rejection receipt: rejected-grass-experiments-independent-review.json
+(Q6cSKL), SHA256223df496af6965e6aa222868885b2ff100858245e575128490f1071e7198c9a8.
+C independently validated all12experimental180frame windows, identicalDPR,
+bundle identity and serialization. Neither prototype establishes recovery of
+the baseline. Main preview remains on3003; restored experimental QA3038 is
+stopped, not presented as the deliverable. Current integrated screenshot:
+current-integrated-preview-owner-handoff.jpg (Q6cSKL). No commit/push while
+the explicit measured-performance acceptance decision remains unanswered.
+
+### Owner decision and bounded integer-hash diagnostic — 2026-10-21
+
+Owner explicitly selected “Mantieni aperto il gate prestazionale”. The measured
+overview cost is NOT accepted; supersedes the pending-decision wording above.
+No commit/push or performance PASS is authorized by that reply.
+
+One isolated diagnostic replaced only the stochastic cell-offset sine hash
+with integer32 arithmetic (prototype Cc2nNElf). Same six textureGrad reads,
+photographs, calibration, blend, normals, roughness, geometry and resolution.
+Read-only C review found no concrete coordinate/range bug but explicitly did
+not prove distribution quality, visual identity or performance from source.
+Original23contracts/typecheck/build passed; browser shader errors empty.
+
+Six completed180frame windows,1440×900/DPR1.405456737852613, AppleM1Pro:
+waterline medians11.0/11.0/11.2ms; overview10.4/8.3/10.5ms, aggregate10.4.
+Overview p95=11.8/19.5/13.5ms. This does not establish a consistent recovery
+of the original8.4ms baseline or an improvement over current10.1ms candidate.
+Two initial2400ms warmup collection attempts did not complete180frames and
+are excluded, not PASS samples. Subsequent collection allowed7000ms per
+single window;180frame scope unchanged. Resource counts plateau72geo/26tex/
+58program, last-pass48waterline/118overview calls; not GPU bytes or totals.
+Receipt: integer-grass-hash-camera-samples.json; raster:
+integer-grass-hash-overview.jpg (Q6cSKL). No second baseline measurement is
+claimed for this diagnostic. The integer-hash prototype is REJECTED, preserved
+in rejected-integer-grass-hash-prototype-20261021.tar.gz and source restored
+to primary9f460217882755efcf3b5d02a30a87d960a165811cfb4805496c2f379571596f.
+Primary source was never changed. Remaining task is a demonstrated performance
+fix, not another request to accept the rejected cost. Gate remains FAIL/open.
+
+### Separate GPU draw diagnostic — 2026-10-21
+
+Actual M1Pro/ANGLE Metal context exposes EXT_disjoint_timer_query_webgl2;
+grass-gpu-capability.json records it. Both isolated copies now contain the
+identical temporary GrassGpuDiagnostic module (NOT primary, NOT shipped).
+It records60asynchronous elapsed queries around main-camera studio-lawn draw
+callbacks after trusted-click+1200ms. No finish/waits/render override/GL API
+wrappers. Query availability checked before reading results; disjoint aborts;
+owned queries/callbacks cleaned on unmount. Diagnostic intervals are NOT the
+passive benchmark and must not be used as FPS or whole-frame latency evidence.
+
+Three overview batches per copy completed, each with30RT2023×1264 draws and
+30default-target draws, not60frames. Same final camera in all six batches:
+[-13.710437120791205,6.535966711007107,-5.6454741085610864], viewport1440×900,
+endDPR1.405456737852613. Originalgrass RT medians2.2344/2.2728/2.3354ms;
+photographicgrass2.8003/2.7847/2.8536ms. Default medians original4.7667/5.0250/
+4.6869 versus photographic6.6838/6.3458/6.2231ms. Stratified pass samples,
+NOT summable per-frame costs. Console errors empty.
+
+Independent reviewer flags: per-query physical default framebuffer size and
+camera pose were not recorded (only batch-end state), trusted click is not
+proof of settle, and tiledMetal query boundaries may introduce encoder/store/
+load/serialization costs. Thus these are exploratory draw diagnostics, NOT
+pure-fragment/ALU causality, a quantified explanation of the1.7ms frame gap,
+or a performance PASS. Raw data: grass-gpu-baseline-diagnostic.json and
+grass-gpu-candidate-diagnostic.json (Q6cSKL). No main application source changed.
+
+Concrete next hypothesis, not implemented/approved: exterior lawn is included
+in both native Three transmission opaque capture and final scene, even though
+the existing main-basin water uses undisplaced screen-space transmission and
+the lawn lies outside the sealed opaque basin. Investigate whether this dry
+surface can avoid redundant transmission capture without changing output or
+transparent-surface ordering. No render-list/material classification change
+is accepted until source review, browser visuals and uninstrumented comparisons.
+
+### Late-opaque and exact shared-footprint prototypes — 2026-10-21
+
+Temporary3038prototype queues ONLY photographic lawn with transparent=true,
+opacity1, NoBlending, depthWrite=true and mesh renderOrder−1. Final pixels stay
+opaque; native Three excludes this queue from opaque transmission capture.
+Order−1 explicitly precedes current default-order0 translucent dimensions and
+shadows. This is NOT global output-equivalence proof: reviewer identified the
+unbounded skimmer-weir water as an additional required edge test. Nothing from
+this prototype has entered primary. Geometry/assets/light/calibration untouched.
+
+InstalledWebGLRenderLists queue test plus existing grass contracts26PASS,
+typecheck/buildPASS. Latequeue-only uninstrumented180frame comparison:
+fresh original BGepgI98 overview8.7/8.8/9.1ms (median8.8), photo68wPsq4Z
+9.1/9.5/9.4 (median9.4,+6.82%,all3worse). p95 also worse3/3. No PASS.
+Receipts: late-opaque-original-baseline-camera.json and
+late-opaque-candidate-camera.json (Q6cSKL). Two warmups excluded each side.
+
+Then reuse the already-reviewed exact stochastic footprint once per fragment
+for both maps, with explicitly equal owned UV0 metric transforms. Same hash,
+cubic weights, derivatives, SIXtextureGrad reads, photo/PBR decoding, no tangent
+or sampling/detail reduction. Hostile cached-source transform preservation and
+owned-UV equality tests added:28prototypecontracts/typecheck/buildPASS.
+Combined D3R1Rx__ overview8.8/8.8/8.7ms (median8.8), p9510.6/10.2/10.5;
+samefresh original baseline8.7/8.8/9.1, p9510.6/10.8/11.4. Waterline10.5/
+10.5/10.6 versus10.6/10.5/10.6. Worst overviewmax53.9→56.3ms, not improved.
+Counts plateau72geo both, textures24→26/programs56→58; last-passcalls118→117
+or48→47 when that pass is sampled, NOT whole-frame draw-call totals/GPUbytes.
+All12windows180frames, serialized, renderDPR1.405456737852613; qaGrassGpu
+absent so GPU elapsed queries disabled. Raw: combined-grass-candidate-camera.json.
+
+C independently verified scoped median/p95 recovery, NOT universal performance
+or elimination of every stall. Receipt metadata does not itself record browser
+DPR/actual selected-camera value/depth/steel: prior matched-config evidence and
+actual captures support those, but do not silently promote missing metadata
+to direct measurement. Independent visual A/B QA is still required before
+integration, including actual skimmer-weir water, waterline, guides, shadows,
+Day/Night, above-ground and390/430 emulated.
+
+For that visual comparison ONLY, isolated BYiquhtG adds qaGrassOpaqueControl:
+same shader/configuration, fixture restores ONLY lawn's original opaque queue,
+NormalBlending and order0. Absent flag retains prototype. No qaGrassGpu in the
+visual URLs. This extra fixture is never shipped and its results are NOT new
+numerical benchmark samples. Reviewer E is using actual authorized Chrome;
+root IAB3D unloaded first. Main3003 source, backend and original WIP unchanged.
+Overall gate remains open pending these checks and remaining dependencies.
+
+### Independent visual rejection — GQ-V01 / GQ-V02
+
+E actually used fresh authorized Chrome651928421, recreated the12×5×1.5
+high-water/satin-steel/BlueSky602/Prun/Greige60×120 sample through the UI and
+compared same-build control/prototype URLs with actual selected cameras.
+Final verdict FAIL: GQ-V01 prototype removes strong sky/palm/cloud reflections
+from water, reproduced at430×932 and confirmed after CONTROL→prototype reload
+at1440×900. GQ-V02 above-ground review/Guides pair has a broad front-facing
+dark shadow footprint absent from the original opaque control. Root directly
+inspected both1440waterline images and both1440above-ground images and confirms
+the differences. Cause is not reduced to a speculative GPU explanation.
+
+Evidence: grass-queue-independent-visual-review.json with15actualcaptures in
+Q6cSKL. Three initial desktop DOM1440×900/raster1440×725 mismatches excluded;
+later1440pairs and390×844/430×932 DOM+rasterDPR1 match. Browser errors empty,
+no cloud/source/backend writes. Reviewer's own421closed, viewport reset and UI
+released. Guide labels survive, but that does NOT override the two visualFAILs.
+
+Both late-queue-only and combined late-queue/shared-stencil prototypes are
+REJECTED despite recovered median/p95. They do NOT meet the same-quality
+performance gate. No version of the queue optimization entered primary.
+Complete experiment and visual-control sources are recoverable in
+rejected-late-opaque-shared-grass-and-visual-fixture-20261021.tar.gz;
+baseline GPU fixture sources in baseline-grass-gpu-diagnostic-source-20261021.tar.gz.
+Only root-created experiment edits removed using targeted patches. Both copies'
+PassiveReleaseMeasurement restored to original SHA24b59ab269c12c970a8e475689ea14893786aca5524bcbfed41d50d58fa3fe52;
+prototype NaturalGrass9f460217882755efcf3b5d02a30a87d960a165811cfb4805496c2f379571596f
+and StudioPaving3407789f6309f0e37010ff66e5e8de77c005fa98adbe497e80f359e7c9b957db
+again exactly match primary. Restored23grass contractsPASS. Two root-created
+GrassGpuDiagnostic modules removed only from isolated QA copies; archived.
+
+Primary photographic-grass20.24% overview-transition regression is still
+UNACCEPTED/OPEN; owner decision is unchanged. No commit/push. Further fixes
+must preserve the original opaque/reflection/shadow participation, not hide
+its cost by removing visible work. No timing recovery in this rejected branch
+is counted as a qualifying performance improvement.
+
+### Two-sample photographic lawn — isolated, gate still OPEN
+
+Owner explicitly requested keeping the performance gate open; the +20.24%
+overview cost above is NOT accepted. Primary sources remain unchanged.
+New isolated BGhqdxTE prototype keeps the original opaque/NormalBlending queue,
+depth write, order0 and StudioPaving SHA340778. It shares a continuous metric
+footprint between two translated samples per map (four textureGrad reads total),
+instead of six. Same photographic assets, metric scale, PBR calibration and
+geometry; no rotation/mirroring. This changes the stochastic distribution and
+therefore requires new visual QA, not an assumption of equal quality.
+
+Prototype-only29contracts/typecheck/build passed. C reviewed source continuity
+and bounded weights; noted possible blend softness, repeated offset bands and
+intermediate-distance shimmer. Numerical JS continuity checks do not substitute
+for actual GLSL/browser inspection. No prototype source has entered primary.
+
+Fresh same-config baseline RXjPo5k5 and candidate BGhqdxTE each recorded six
+180-frame windows after two excluded warmups: M1 Pro/ANGLE WebGL2,
+1440×900/browserDPR1, settled renderDPR1.405456737852613, twelve-by-five pool,
+depth1.50m/high-water skimmer with satin-steel finish/BlueSky602 PVC liner/
+straight access/Prun/Greige60×120/Day. Satin steel here describes the skimmer,
+NOT the pool's internal finish; actual summary explicitly records the liner.
+Actual UI summary, camera dataset, CSS/backing dimensions are now included.
+Median of overview medians9.2→8.8ms; median p9514.1→10.4ms. Waterline11.6→10.1ms;
+median p9516.3→12.5ms. First pair is worse in both cameras and worst max
+71.9→93.3ms. A173s pause separates candidate cycles1/2. These are favorable
+aggregate observations, NOT robust recovery, a causal shader-only benchmark,
+or elimination of every stall. C independently confirmed these limits.
+
+Resources plateau72geometries;24→26textures is consistent with two photo maps
+versus procedural baseline.56→58programs cannot be uniquely attributed from
+total-only counters. Normal sampled last-pass calls48/118 unchanged; occasional
+4-call samples are intermediate passes, not whole-frame draw-call totals.
+GPU bytes not directly measurable. No invasive profiler/elapsed query enabled.
+Receipts in Q6cSKL: two-sample-original-baseline-camera.json,
+two-sample-candidate-camera.json and actual waterline/overview JPEGs.
+
+An initial candidate SSR/client-entry404 produced no hydrated canvas and was
+excluded before warmup. A serialized rebuild repaired the isolated manifest;
+subsequent browser errors were empty. Parallel isolated builds are avoided;
+the precise shared-cache cause has not been established. No product workaround
+or backend change was made. Independent actual-browser visual review remains
+required; performance gate is OPEN, no commit/push authorized by these data.
+
+### Qualifier correction and final bounded comparison — PERFORMANCE NOT VERIFIED
+
+E independently used actual Chrome425: ten new captures with matching raster
+and DOM1440×900/390×844/430×932DPR1 (portrait emulation). Settled overview and
+contact crop show no obvious new bands/mirroring in four-read grass; the crop
+is NOT a physical close-up. Blade detail and motion shimmer remain unverified.
+Receipt: grass-four-independent-visual-review.json. Same-configuration water
+looked different between production3038 and primaryDEV3003; E explicitly did
+NOT attribute this to the shader. Own425 closed and viewport reset.
+
+Root/C identified a real measurement confound: ACTIVE_RENDERING_QUALITY is
+latched at module import. Resizing later does not change it. Identical final
+1440×900/DPR1.405 does NOT prove equal tier: the fullscreen ceiling clamps
+both Configuration and Experience to that DPR. E confirmed viewport-before-
+import was not recorded in those pairs. Source/HDR hashes match; production
+does not automatically disable reflections, and the debug-water flag is absent.
+
+Identical isolated fixtures now log the actual preset, shadow size, planar
+reflection setting, mounted viewport, coarse pointer and core count once before
+warmup (SHA d215471bc67202f78031d161a96d410aeed77582b867d0461bf7d30224afd0fd).
+This instrumentation is QA-only, never added to primary. Builds serialized.
+Same four-read CGK6JPWP build, unchanged configuration/camera/final1440viewport:
+initial390→Configuration2048/planar=false shows strong HDR palms/clouds;
+fresh initial1440→Experience4096/planar=true shows subdued blue water.
+C inspected both actual images and confirmed that Configuration retains HDR
+IBL while Experience substitutes the actual planar SkyDome reflection. No
+grass edit is needed to produce this difference. Evidence: grass-four-
+{configuration,experience}-tier-observation.json and respective waterline JPGs.
+Therefore earlier unqualified water pairs do NOT establish grass/queue
+causality. Historical GQ-V01 observation is retained, but any implied queue-
+causation claim is withdrawn. This does NOT approve or reinstate the rejected
+queue experiment, nor prove its shadows or quality equivalent.
+
+One final bounded comparison after correcting the fixture (no further looping):
+CRlEt7y2 baseline vs CGK6JPWP candidate; BOTH explicitly Experience4096/planar
+true, M1Pro/ANGLE WebGL2, initial1440×900DPR1, renderDPR1.405456737852613,
+same actual12×5×1.5/high-water satin-steel skimmer/BlueSky602 liner/Prun/
+Greige60×120/straight/Day/open panel. Each two warmups excluded, then three
+waterline/overview pairs of180frames. Candidate measured first, baseline next,
+one active scene, no builds/profilers during samples. Errors empty both.
+
+Overview medians baseline8.3/8.5/9.0 versus candidate8.8/8.9/8.8ms:
+median8.5→8.8 (+3.53%); median p9510.7→11.0ms. Waterline9.9/10.1/10.5
+versus13.5/10.2/10.1: median10.1→10.2; median p9513.4→13.6ms.
+First two overview pairs worse, third better; first candidate waterline is
+an outlier. These do NOT robustly establish recovery versus baseline or
+causality from the shader alone. No claims about elimination of every stall,
+mobile hardware FPS, initial-load latency or full-frame GPU time.
+Resources plateau72geometries/58programs on both; textures24→26 as expected
+for two photographic maps. Normal last-pass counters48/118 unchanged;4-call
+intermediate snapshots not interpreted as full-frame draw calls. GPU bytes
+not measured. Raw: two-sample-qualified-{baseline,candidate}-camera.json.
+
+Status remains PERFORMANCE NOT VERIFIED / gate OPEN as the owner requested.
+No accepted quality/performance tradeoff. Prototype source preserved separately
+in two-sample-opaque-grass-prototype-20261021.tar.gz, not integrated. Primary
+five scoped source hashes still match the pre-experiment values; WIP preserved.
+No commit/push/deploy. Remaining targeted work: resolve the measured performance
+regression with qualifying stable matched-tier evidence and verify physical
+grass close-up/motion quality before promoting any sampling change. No new
+general audit or another unbounded benchmark campaign is authorized by this note.
+
+C independently validated the final qualified receipts: two of three pairs
+worse in each camera; Waterline worst max50.2→71.1ms, Overview76.8→57.3ms.
+Requirement remaining is specifically no Overview regression at matched tier,
+not another general audit. Primary owner read-only project PW-E72A-AB2WDG
+restored in integrated tab21/3003, Scene/Day/open panel, viewport override reset.
+Actual capture: owner-preview-restored-performance-open-20261021.jpg (Q6cSKL).
+Remote feature HEAD rechecked4295a89e46e37c827155964f1d7bed26f1a2bb6f,
+identical local HEAD; no push. Diff-check clean after report update.
+
+## 2026-10-21 — Scoped continuous deck-level overflow addition
+
+Owner request: add a separate overflow subtype, not replace hidden/grille or skimmer.
+Branch remains `feat/fullscreen-day-night-hidden-overflow`, HEAD `4295a89e46e37c827155964f1d7bed26f1a2bb6f`.
+Pre-change WIP preserved in `/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/continuous-overflow-jlT4tX`
+(binary diff plus 56 pertinent WIP files; secrets excluded). No checkout/reset/stash.
+All previous gates remain intact, especially PERFORMANCE NOT VERIFIED.
+
+| ID | Requirement / implementation | Evidence | Result |
+| --- | --- | --- | --- |
+| CO-01 | “Sfioro a bordo continuo” / “Continuous deck-level overflow”; distinct `continuous` subtype under Sfioro. Existing hidden/visible retained. | Actual integrated-browser selection and Back/Next, desktop1440×900 and emulated390×844/430×932. | PASS |
+| CO-02 | No raised coping, visible grille or skimmer; one paving mesh extends to the basin outline. Concealed lateral collector reuses existing channel. | `continuous-overflow-audit`: deck top0m, water−0.054m, collector crest−0.055m, floor unchanged; actual edge screenshots. Collector soffit follows selected paving thickness. | PASS geometry; hydraulic/structural design still requires professional validation |
+| CO-03 | Exactly the same material, UV scale and joint grid at edge and terrace, without a separate coping ring. Stored legacy coping selection retained for switching systems. | Single existing paving renderer; 16 paving entries × 6×3/8×4/12×5 local tests. Browser Avorio60×120; Summary/PDF/email use paving label. | PASS implementation; not a claim that all16 materials received separate browser visual QA |
+| CO-04 | General3/4 and dedicated parametric detail, desktop/mobile occlusion handling. | Rectangle/L/custom frustum tests at1440/390/430; actual final detail screenshots at all3 widths. Infinity presets unchanged. | PASS framing |
+| CO-05 | Wizard/navigation, cloud save/reload/share/copy and project identity. | Saved `PW-42R7-SERSSZ`; reload retained subtype/Avorio/straight stairs, status SALVATO. Different-origin viewer read-only, same ID/config; Save Copy created `PW-FD3Q-FCBWB1`. | PASS real browser with local app + existing authorized cloud backend; not public-production verification |
+| CO-06 | Summary, PDF, commercial pipeline. | Download `/Users/danielelamthi/Downloads/Project-Book-PW-42R7-SERSSZ.pdf`:7pages; correct subtype, Avorio edge/deck,46.3m³, projectID. Pages3/5/6 visually inspected. Actual empty quote form rejected all required fields. Server schema+email formatter exercised locally. | PASS document/config integration; no real lead/email submission performed in this scoped task |
+| CO-07 | Backward compatibility and invalid combinations. | Above-ground+continuous normalizes to hidden in UI/snapshot/parser; lead validator rejects invalid raised combination. Skimmer/Infinity dormant subtype leaves elevations unchanged; project-config/persistence/export/lead/progression audits PASS. | PASS targeted tests; no full repeat of earlier backend audits |
+| CO-08 | Visual match and release gate. | Continuous edge/tiling and absent fixtures visible. Overall water surface still reads too flat/weakly reflective versus supplied photos; no global water/liner shader changed to conceal this. PDF download tool call took~777s including browser/download orchestration, not isolated app render timing. | FIX REQUIRED visual water readability; PDF latency attribution NOT VERIFIED; previous performance gate OPEN |
+
+Independent reviewer C inspected only source and confirmed3 fixes: commercial edge material,
+unsupported restored raised configuration, and flat-floor continuous volume/wall metrics.
+Root also connected the new camera intent to PoolScene detail/aspect handling and derived collector
+soffit from actual paving thickness. No independent-browser review is claimed for this addition.
+
+Automated evidence: `node scripts/run-continuous-overflow-audit.mjs` **742 checks PASS**;
+`npx tsc --noEmit`, production build, project-config, persistence, lead-pipeline,
+export-guard and diff-check PASS. Structure-progression **82457 checks PASS**.
+Expected corrupt-storage/quota negative-test messages are not failures. Existing chunk-size warnings remain.
+External Blender export explicitly rejects the unsupported new section instead of silently rendering
+the old overflow. Browser scene capture and Project Book remain supported.
+
+Screenshots: `docs/qa/evidence/continuous-overflow-20261021/desktop-edge-final.jpg`,
+`mobile-390-final.jpg`, `mobile-430-final.jpg`, `desktop-summary-saved.jpg`,
+`shared-readonly.jpg`; PDF renders `pdf-page3.png`, `pdf-5.png`, `pdf-6.png`.
+Earlier screenshot names retained as intermediate evidence, not relabeled as final.
+Implementation delta against preserved WIP:28source files +2new targeted test files,
+this report and evidence assets. No migrations, production deployments, real emails, commits or pushes.
+Integrated preview retained on the new QA project; original customer project was not overwritten.
+
+**Scoped status: FIX REQUIRED.** Functional/geometry implementation is present and usable in preview;
+do not declare final visual/release PASS until CO-08 and the already-open performance gate are resolved.

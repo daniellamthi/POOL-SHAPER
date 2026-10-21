@@ -29,7 +29,7 @@ export interface ConstructionPresentation {
 /** A presentation of the canonical configuration, not another saved pool.
  * Back/Next recompute this without clearing previously selected options. */
 export function constructionPresentation(
-  config: Pick<PoolConfig, "projectType" | "structure">,
+  config: Pick<PoolConfig, "projectType" | "structure"> & Partial<Pick<PoolConfig, "system" | "overflowType">>,
   stepId?: string,
   technicalView = false,
 ): ConstructionPresentation {
@@ -67,9 +67,13 @@ export function constructionPresentation(
             : ["lighting", "deck", "technology", "review"].includes(stepId ?? "")
               ? "water"
               : "structure";
-  const raw = stage !== "finish" && stage !== "water";
+  const continuous = config.system === "overflow" && config.overflowType === "continuous";
+  // The lateral intake is defined by water + the terrace slab. Show that
+  // section while selecting it, without changing other construction stages.
+  const continuousPreview = continuous && stage === "system";
+  const raw = stage !== "finish" && stage !== "water" && !continuousPreview;
   return {
-    stage, raw, structure, showWater: stage === "water",
+    stage, raw, structure, showWater: stage === "water" || continuousPreview,
     showSystemComponents: stage !== "structure",
     showAccessories: stage === "access" || stage === "finish" || stage === "water",
     showLighting: stage === "water",
@@ -77,6 +81,7 @@ export function constructionPresentation(
     // lifestyle context (wide terrace, lawn, loungers, shower) only with the
     // exterior optionals and the final presentation.
     showDecking:
+      (continuous && stage !== "structure") ||
       config.projectType === "renovation" ||
       ["deck", "technology", "review"].includes(stepId ?? ""),
     showEnvironment:

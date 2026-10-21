@@ -29,7 +29,7 @@ const TIMING_IDS = [
 ] as const satisfies readonly LeadTimingId[];
 
 const SYSTEM_IDS = new Set(["skimmer", "overflow", "infinity"]);
-const OVERFLOW_IDS = new Set(["hidden", "visible"]);
+const OVERFLOW_IDS = new Set(["hidden", "visible", "continuous"]);
 const FINISH_IDS = new Set(["liner", "mosaic"]);
 const PROJECT_TYPE_IDS = new Set([null, "new", "renovation"]);
 const POOL_TYPE_IDS = new Set([null, "in-ground", "above-ground"]);
@@ -58,6 +58,7 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (!["rectangle", "l-shape", "custom"].includes(config["shape"] as string)) return false;
   if (!SYSTEM_IDS.has(config["system"] as string)) return false;
   if (!OVERFLOW_IDS.has(config["overflowType"] as string)) return false;
+  if (config["system"] === "overflow" && config["overflowType"] === "continuous" && config["poolType"] === "above-ground") return false;
   if (!FINISH_IDS.has(config["finish"] as string)) return false;
   const features = config["features"];
   if (!Array.isArray(features) || features.length > 20) return false;

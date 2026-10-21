@@ -1,0 +1,56 @@
+{
+  "preparedAt": "2026-10-15T10:59:23.731Z",
+  "processing": "Only crop, resize and JPEG quality 78. Original product geometry, appearance and colour are not retouched.",
+  "files": [
+    {
+      "photoId": "inox-ladder",
+      "src": "/product-photos/inox-ladder-480.jpg",
+      "width": 480,
+      "height": 240,
+      "bytes": 32654,
+      "sha256": "5c28b03fd6e11ad328c3414b42adf6cc8c942e885a571bbb90f39125048bb824"
+    },
+    {
+      "photoId": "inox-ladder",
+      "src": "/product-photos/inox-ladder-960.jpg",
+      "width": 960,
+      "height": 480,
+      "bytes": 97826,
+      "sha256": "7b6ba0aac357d60694cf1935e012f42c1bea06e0f9514488489d657e61549723"
+    },
+    {
+      "photoId": "outdoor-chaise",
+      "src": "/product-photos/outdoor-chaise-480.jpg",
+      "width": 480,
+      "height": 240,
+      "bytes": 39096,
+      "sha256": "f72c58ae0e68a3019006ae3a75476e021326d8e20c00bc3e126898c923e31b36"
+    },
+    {
+      "photoId": "outdoor-chaise",
+      "src": "/product-photos/outdoor-chaise-960.jpg",
+      "width": 960,
+      "height": 480,
+      "bytes": 127379,
+      "sha256": "28c79d0abe3a9053467ac970588c0f5971806b62f30a4ba6dc611dce891a6004"
+    },
+    {
+      "photoId": "prun",
+      "src": "/product-photos/prun-256.jpg",
+      "width": 256,
+      "height": 383,
+      "bytes": 34625,
+      "sha256": "8c653bb69808559a1748e5335d9cc5c79bc9e374a103c553df3728e57cb2c3c0",
+      "sourceSHA256": "2de4ca932f1d015e09e764849a5d4533278b4eb265f83ab3bdffce23a0e8367f"
+    },
+    {
+      "photoId": "prun",
+      "src": "/product-photos/prun-365.jpg",
+      "width": 365,
+      "height": 547,
+      "bytes": 57704,
+      "sha256": "c2ace8e7576c11b80a3547b7c4e6e4aada32af0695b4f4136a630ef6f2f7b779",
+      "sourceSHA256": "2de4ca932f1d015e09e764849a5d4533278b4eb265f83ab3bdffce23a0e8367f"
+    }
+  ]
+}

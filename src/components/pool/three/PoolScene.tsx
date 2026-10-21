@@ -2,7 +2,8 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState }
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { installDevelopmentInteractionTiming } from "@/lib/pool/development-interaction-timing";
 import { installDevelopmentGlDiagnostic } from "@/lib/pool/development-gl-diagnostic";
-import { OrbitControls, ContactShadows, Line, useProgress } from "@react-three/drei";
+import { OrbitControls, Line, useProgress } from "@react-three/drei";
+import { OwnedContactShadows as ContactShadows } from "./OwnedContactShadows";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   Vector3,
@@ -595,7 +596,7 @@ function CameraRig({
   });
 
   const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping", "infinity",
-    "paving", "exterior-panel", "external-stairs", "pellicano", "stair-lighting", "bench-lighting", "skimmer-detail", "overflow-hidden", "overflow-visible", "features", "cover"].includes(focus);
+    "paving", "exterior-panel", "external-stairs", "pellicano", "stair-lighting", "bench-lighting", "skimmer-detail", "overflow-hidden", "overflow-visible", "overflow-continuous", "features", "cover"].includes(focus);
   const coastalHero = !!infinityZone && ["review", "overview"].includes(focus);
   const opticalDetail = detail;
   const interiorSubject = useMemo(() => focus === "liner" || focus === "mosaic"
@@ -643,7 +644,7 @@ function CameraRig({
       : focus === "waterline" ? (infinityZone ? infinityWaterlineCameraSubject(outline, infinityZone, layout) : waterlineCameraSubject(outline, layout, skimmers))
       : focus === "infinity" && infinityZone ? infinityDetailCameraSubject(outline, infinityZone, layout)
       : focus === "coping" && infinityZone ? infinityCopingCameraSubject(outline, infinityZone, layout)
-      : focus === "overflow-hidden" || focus === "overflow-visible" ? overflowCameraSubject(focus, outline, layout, skimmers)
+      : focus === "overflow-hidden" || focus === "overflow-visible" || focus === "overflow-continuous" ? overflowCameraSubject(focus, outline, layout, skimmers)
       : null);
     return subject ? componentCameraAspect(subject.points, subject.direction) : undefined;
   }, [focus, resolvedLayout, layout, outline, shelfLoungerEnvelope, infinityZone, skimmers, ledRow, externalStairPlan, coverSubject, planBounds, compactPlan, interiorSubject, wholeSubject]);
@@ -1204,6 +1205,12 @@ export default function PoolScene({
   // that the pool sits in the same studio context as every other system,
   // never a vast empty tiled plane with a stray panorama.
   const infinityStage = system === "infinity" && !!infinityZone;
+  const showSkimmers = construction?.showSystemComponents ?? true;
+  const [skimmersPrepared, setSkimmersPrepared] = useState(system === "skimmer" && showSkimmers);
+  useEffect(() => {
+    if (system !== "skimmer") setSkimmersPrepared(false);
+    else if (showSkimmers) setSkimmersPrepared(true);
+  }, [system, showSkimmers]);
   const background = infinityStage && (focus !== "top" || photoMode)
     ? sceneTime === "night"
       ? "#101b28"
@@ -1598,6 +1605,7 @@ export default function PoolScene({
         overflowType={overflowType}
         poolType={poolType}
         copingThickness={copingThickness}
+        pavingThickness={pavingLayout(paving, pavingFormat).thickness}
         showWater={showWater}
         planView={planView}
         rawStructure={construction?.raw ? construction.structure ?? "REINFORCED_CONCRETE" : null}
@@ -1680,7 +1688,8 @@ export default function PoolScene({
 
       {planView ? <ArchitecturalOutline revision={planRevision} premium={poolType === "in-ground"} /> : null}
 
-      {system === "skimmer" && (construction?.showSystemComponents ?? true) ? (
+      {system === "skimmer" && (showSkimmers || skimmersPrepared) ? (
+        <group visible={showSkimmers}>
         <Skimmers
           showWater={showWater}
           plan={skimmers}
@@ -1692,6 +1701,7 @@ export default function PoolScene({
           variant={materials.skimmer.type}
           poolType={poolType}
         />
+        </group>
       ) : null}
 
       {/* Dimension guide lines: drei's <Line> is built on LineSegmentsGeometry,

@@ -80,6 +80,10 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
         };
       })(),
       technicalConfiguration: {
+        ...(config.system === "overflow" && config.overflowType === "continuous" ? {
+          continuousEdge: { paving: pavingLayout(config.paving, config.pavingFormat),
+            topY: elevations.copingY, separateCoping: false, collection: "concealed-lateral-intake" },
+        } : {}),
         systemId: config.system,
         overflowId: config.system === "overflow" ? config.overflowType : null,
         skimmerTypeId: config.system === "skimmer" ? config.skimmerType : null,

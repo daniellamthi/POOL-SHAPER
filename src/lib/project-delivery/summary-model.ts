@@ -107,7 +107,7 @@ export function technicalRows(
       ? "Infinity"
       : technical.system === "skimmer"
         ? "Skimmer"
-        : technical.overflow?.kind === "VISIBLE_CHANNEL"
+        : technical.overflow?.kind === "CONTINUOUS_EDGE" ? "Sfioro a bordo continuo" : technical.overflow?.kind === "VISIBLE_CHANNEL"
           ? "Sfioro visibile"
           : "Sfioro nascosto";
   const rows: SummaryRow[] = [
@@ -325,8 +325,9 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
         { label: "Rivestimento", value: finishTitle, hint: finishHint, swatch: finishSwatch },
         {
           label: "Bordo",
-          value: copingMaterial?.title ?? "Da selezionare",
-          swatch: copingMaterial ? { hex: copingMaterial.color } : undefined,
+          value: config.system === "overflow" && config.overflowType === "continuous" ? paving.label : copingMaterial?.title ?? "Da selezionare",
+          hint: config.system === "overflow" && config.overflowType === "continuous" ? "Bordo continuo a filo pavimentazione" : undefined,
+          swatch: config.system === "overflow" && config.overflowType === "continuous" ? { hex: paving.color } : copingMaterial ? { hex: copingMaterial.color } : undefined,
         },
         ...(config.poolType === "above-ground"
           ? [{ label: "Pannelli esterni", value: exteriorPanelFinishTitle(config) }]

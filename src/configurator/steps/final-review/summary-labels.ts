@@ -38,6 +38,7 @@ export function systemHeadline(
 ): string {
   if (system === "skimmer") return "Skimmer — bordo classico";
   if (system === "infinity") return "Infinity — bordo a sfioro invisibile";
+  if (overflowType === "continuous") return "Sfioro a bordo continuo";
   return overflowType === "visible" ? "Sfioro con griglia" : "Sfioro nascosto — acqua a filo";
 }
 

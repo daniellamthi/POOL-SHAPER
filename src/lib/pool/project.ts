@@ -73,6 +73,7 @@ export function toProjectConfiguration(
     projectId,
     config: normalizeSunShelfLoungers({
       ...config,
+      ...(config.poolType === "above-ground" && config.overflowType === "continuous" ? { overflowType: "hidden" as const } : {}),
       ...(config.poolType === "above-ground" ? { externalStairPlatformExtended: true } : {}),
       structure,
       finish: normaliseFinishForStructure(structure, config.finish),
@@ -207,6 +208,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     projectId,
     config: normalizeSunShelfLoungers({
       ...restoredWithoutEdge,
+      ...(restored.poolType === "above-ground" && restored.overflowType === "continuous" ? { overflowType: "hidden" as const } : {}),
       ...(restored.copingMaterial !== undefined ? { copingMaterial: copingMaterialForPool(restored.copingMaterial, restored.poolType) } : {}),
       ...(restored.paving !== undefined ? { paving: pavingForPool(restored.paving, restored.poolType) } : {}),
       ...(restored.pavingFormat !== undefined ? { pavingFormat: pavingFormatId(restored.paving, restored.pavingFormat) } : {}),

@@ -18,6 +18,7 @@ import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, getShapeDefinition } from "@
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
+import { pavingLayout } from "@/lib/pool/presentation";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { formatNumber } from "@/lib/pool/format";
 import {
@@ -58,8 +59,9 @@ function newPoolLines(submission: LeadSubmission): string[] {
     : isMosaic
       ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
       : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
-  const copingTitle =
-    COPING_MATERIALS.find((c) => c.id === config.copingMaterial)?.title ?? "Non selezionato";
+  const copingTitle = config.system === "overflow" && config.overflowType === "continuous"
+    ? `${pavingLayout(config.paving, config.pavingFormat).label} — bordo continuo filo pavimentazione`
+    : COPING_MATERIALS.find((c) => c.id === config.copingMaterial)?.title ?? "Non selezionato";
   const skimmerDetail =
     config.system === "skimmer"
       ? `${SKIMMER_TYPE_LABEL[config.skimmerType as keyof typeof SKIMMER_TYPE_LABEL] ?? config.skimmerType} · ${SKIMMER_FINISHES.find((s) => s.id === config.skimmerFinish)?.title ?? config.skimmerFinish}`
