@@ -34,7 +34,9 @@ export function getPoolVerticalLayout({
   const wallTopY = poolType === "above-ground" ? GROUND_LEVEL + safeDepth : continuous ? -0.055 : GROUND_LEVEL;
   const floorY = poolType === "above-ground" ? GROUND_LEVEL : GROUND_LEVEL - safeDepth;
   const waterY =
-    continuous ? wallTopY + 0.001 : system === "skimmer"
+    continuous ? wallTopY + 0.001 : system === "overflow" && overflowType === "hidden" && poolType !== "above-ground"
+      // A thin overflowing film above the flush terrace-height intake.
+      ? wallTopY + OVERFLOW_GEOMETRY.visibleWaterAboveLip : system === "skimmer"
       ? wallTopY - FREEBOARD
       : overflowType === "visible"
         ? wallTopY +

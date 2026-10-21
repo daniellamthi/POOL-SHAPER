@@ -38,8 +38,8 @@ export function systemHeadline(
 ): string {
   if (system === "skimmer") return "Skimmer — bordo classico";
   if (system === "infinity") return "Infinity — bordo a sfioro invisibile";
-  if (overflowType === "continuous") return "Sfioro a bordo continuo";
-  return overflowType === "visible" ? "Sfioro con griglia" : "Sfioro nascosto — acqua a filo";
+  if (overflowType === "continuous") return "Sfioro nascosto";
+  return overflowType === "visible" ? "Sfioro con griglia" : "Sfioro a bordo continuo — acqua a filo";
 }
 
 /** A short, non-technical description of how the selected liner reads

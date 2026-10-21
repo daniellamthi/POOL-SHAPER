@@ -11,6 +11,8 @@ import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 export function concealedOverflowSection(wallTopY: number, copingThickness: number) {
   return {
     slotWidth: 0.015,
+    // The exposed crest before the coping shares the terrace/wall-top datum.
+    intakeTopY: wallTopY,
     copingInnerOffset: OVERFLOW_GEOMETRY.waterEdgeOffset + 0.015,
     copingTopY: wallTopY + 0.008,
     // Matches the eased slab's lowest face (see arris/inset below).

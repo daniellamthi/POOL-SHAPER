@@ -410,7 +410,7 @@ export function SystemTray({ tab, setTab }: {
       ) : config.system === "overflow" ? (
         <ChoiceGrid label={t("Tipo di sfioro")}>
           {config.poolType !== "above-ground" && <ChoiceCard
-            title={t("Sfioro a bordo continuo")}
+            title={t("Sfioro nascosto")}
             description={t("Bordo e pavimentazione sullo stesso piano, acqua leggermente ribassata e raccolta nascosta.")}
             image={<svg viewBox="0 0 160 90" className="h-full w-full" aria-hidden="true"><path d="M12 24h136v12H12z" fill="#c9c3b7"/><path d="M30 36v35h100V36" fill="#d1eaed"/><path d="M30 45h100v26H30z" fill="#80b9c3"/><path d="M12 24h136M30 45h100" stroke="currentColor" strokeWidth="1"/></svg>}
             selected={config.overflowType === "continuous"}
@@ -424,7 +424,7 @@ export function SystemTray({ tab, setTab }: {
             onSelect={() => setOverflowType("visible")}
           />
           <ChoiceCard
-            title={t("Sfioro nascosto")}
+            title={t("Sfioro a bordo continuo")}
             description={t("Il canale scompare sotto il bordo in pietra.")}
             image={ill("overflow-hidden")}
             selected={config.overflowType === "hidden"}

@@ -177,7 +177,7 @@ export function serializePoolRenderConfig(
   // The external Blender bridge does not construct the new lateral intake.
   // Browser Photo Mode and Project Book capture the actual scene unchanged.
   if (config.system === "overflow" && config.overflowType === "continuous") {
-    throw new Error("Sfioro a bordo continuo: usa l’immagine della scena 3D o il Project Book. Il renderer esterno non supporta questa sezione.");
+    throw new Error("Sfioro nascosto: usa l’immagine della scena 3D o il Project Book. Il renderer esterno non supporta questa sezione.");
   }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;

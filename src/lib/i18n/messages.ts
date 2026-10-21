@@ -2,7 +2,9 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
-  ["Sfioro a bordo continuo", "Continuous deck-level overflow"],
+  ["Sfioro a bordo continuo", "Continuous-edge overflow"],
+  ["Sfioro a bordo continuo — acqua a filo", "Continuous-edge overflow — flush waterline"],
+  ["Bordo a filo pavimentazione", "Deck-level pool edge"],
   ["Bordo continuo a filo pavimentazione", "Continuous edge flush with the paving"],
   ["Bordo e pavimentazione sullo stesso piano, acqua leggermente ribassata e raccolta nascosta.", "Edge and paving on one level, with a slightly recessed waterline and concealed collection."],
   ["Prossima scelta", "Next option"],

@@ -623,7 +623,7 @@ export function overflowCameraSubject(intent: "overflow-hidden" | "overflow-visi
     ? [[-0.25, layout.waterY], [0, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY],
       [g.visibleChannelOuterOffset, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY - g.channelDepth],
       [g.visibleChannelOuterOffset, layout.wallTopY - g.channelDepth]]
-    : [[-0.25, layout.waterY], [g.waterEdgeOffset, layout.waterY], [section.copingInnerOffset, section.copingTopY],
+    : [[-0.25, layout.waterY], [g.waterEdgeOffset, section.intakeTopY], [section.copingInnerOffset, section.copingTopY],
       [copingOuterOffset("overflow", "hidden"), section.copingTopY], [section.copingInnerOffset, section.copingBottomY],
       [section.channelOuterOffset, section.channelFloorY]];
   const points: CameraPoint[] = [];

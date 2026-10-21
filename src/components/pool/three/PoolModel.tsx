@@ -1338,7 +1338,7 @@ export function PoolModel({
               <mesh
                 name="overflow-edge-without-grille"
                 geometry={overflowLip}
-                position={[0, waterLevel - 0.001, 0]}
+                position={[0, poolType === "above-ground" ? waterLevel - 0.001 : hiddenSection.intakeTopY, 0]}
                 receiveShadow
               >
                 {rawShellKind ? (

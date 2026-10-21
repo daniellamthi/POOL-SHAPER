@@ -60,7 +60,7 @@ function newPoolLines(submission: LeadSubmission): string[] {
       ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
       : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
   const copingTitle = config.system === "overflow" && config.overflowType === "continuous"
-    ? `${pavingLayout(config.paving, config.pavingFormat).label} — bordo continuo filo pavimentazione`
+    ? `${pavingLayout(config.paving, config.pavingFormat).label} — bordo a filo pavimentazione`
     : COPING_MATERIALS.find((c) => c.id === config.copingMaterial)?.title ?? "Non selezionato";
   const skimmerDetail =
     config.system === "skimmer"

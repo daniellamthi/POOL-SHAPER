@@ -1682,3 +1682,11 @@ Integrated preview retained on the new QA project; original customer project was
 
 **Scoped status: FIX REQUIRED.** Functional/geometry implementation is present and usable in preview;
 do not declare final visual/release PASS until CO-08 and the already-open performance gate are resolved.
+
+### 2026-10-21 — Owner-requested checkpoint, intake alignment and label exchange
+
+- Before further changes, preserved all existing scoped WIP in `cd1b973889940a1c05d68682cc3113ee148f9329`; pushed to `feat/fullscreen-day-night-hidden-overflow` and verified identical remote SHA. Credential-pattern scan found no matching staged text files. No merge or manual deployment.
+- Subsequently aligned the exposed intake crest of the legacy `hidden` in-ground section to paving Y=0, leaving its collector recessed. Water overtops that crest by the existing 1mm film datum; above-ground remains unchanged.
+- Only after geometry verification, exchanged commercial labels: technical `hidden` → **Sfioro a bordo continuo**; technical `continuous` → **Sfioro nascosto**. Saved IDs, descriptions of the actual sections and other selections remain unchanged. Wizard, summary/PDF model and email labels updated together.
+- Targeted actual-ring bounds checks on 6×3, 8×4 and 12×5, identity/label roundtrips, typecheck, project-config and diff-check PASS. Integrated-browser selected label, navigation retention and finished-scene waterline inspected. Evidence: `evidence/continuous-overflow-20261021/intake-flush-renamed-detail.jpg`.
+- Geometry/name changes validated for the owner-requested follow-up commit/push (756 targeted checks PASS). No new cloud save, PDF download, email, mobile replay or production verification claimed. Prior visual-water/performance gates remain open; earlier screenshots/PDF retain their historical names. Main promotion remains unresolved pending explicit disposition of those open gates; PR #1 is already merged (2026-10-13), not an open release PR.

@@ -109,7 +109,7 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
           <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />} selected={e?.system === id} onSelect={() => choose({ system: id })} />)}
       </ChoiceGrid>
       {e?.system === "overflow" ? <ChoiceGrid label={t("Sfioro esistente")}>
-        {([ ["visible", "Sfioro a vista"], ["hidden", "Sfioro nascosto"] ] as const).map(([id, title]) =>
+        {([ ["visible", "Sfioro a vista"], ["hidden", "Sfioro a bordo continuo"] ] as const).map(([id, title]) =>
           <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />} selected={e.overflowType === id} onSelect={() => choose({ overflowType: id })} />)}
       </ChoiceGrid> : null}
     </> : null}
@@ -160,7 +160,7 @@ export function RenovationDetailsStep({ tab, setTab, before, setBefore }: Decisi
       })}
     </ChoiceGrid>
       {r.filtrationWorks.includes("overflow") ? <ChoiceGrid label={t("Sfioro proposto")}>
-        {([ ["visible", "Sfioro a vista"], ["hidden", "Sfioro nascosto"] ] as const).map(([id, title]) =>
+        {([ ["visible", "Sfioro a vista"], ["hidden", "Sfioro a bordo continuo"] ] as const).map(([id, title]) =>
           <ChoiceCard key={id} compact title={title} image={<Droplets className="size-12" strokeWidth={1} />}
             selected={config.overflowType === id} onSelect={() => setOverflowType(id)} />)}
       </ChoiceGrid> : null}

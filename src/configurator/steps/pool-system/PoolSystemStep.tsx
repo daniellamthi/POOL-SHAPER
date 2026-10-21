@@ -100,11 +100,11 @@ export function PoolSystemStep({ onSkimmerSelect }: { onSkimmerSelect?: () => vo
         {config.system === "overflow" ? (
           <div className="mt-4 grid gap-4" role="group" aria-label="Tipo di sfioro">
             <p className="label-xs">Tipo di sfioro</p>
-            {config.poolType !== "above-ground" && <OptionCard title="Sfioro a bordo continuo"
+            {config.poolType !== "above-ground" && <OptionCard title="Sfioro nascosto"
               description="Bordo e pavimentazione sullo stesso piano, acqua leggermente ribassata e raccolta nascosta."
               selected={config.overflowType === "continuous"} onSelect={() => setOverflowType("continuous")} />}
             <OptionCard
-              title="Sfioro nascosto"
+              title="Sfioro a bordo continuo"
               description="Canale di sfioro nascosto sotto il bordo perimetrale."
               selected={config.overflowType === "hidden"}
               onSelect={() => setOverflowType("hidden")}

@@ -15,6 +15,9 @@ import { overflowCameraSubject, getCameraPose } from "../src/lib/pool/camera";
 import { PerspectiveCamera, Vector3 } from "three";
 import { projectMetrics } from "../src/lib/pool/project-metrics";
 import { formatLeadEmail } from "../src/lib/lead/formatLeadEmail";
+import { concealedOverflowSection } from "../src/components/pool/three/poolConstruction";
+import { createBeveledRingGeometry } from "../src/components/pool/three/poolGeometry";
+import { OVERFLOW_GEOMETRY } from "../src/lib/pool/config";
 
 let checks = 0;
 const check = (value: unknown, message: string) => { assert.ok(value, message); checks++; };
@@ -49,7 +52,7 @@ for (const [length, width] of [[6,3],[8,4],[12,5]]) {
     const restored = parseProjectConfiguration(serializeProjectConfiguration(project));
     check(restored.config.overflowType === "continuous" && restored.config.paving === material.id, "snapshot roundtrip retains subtype/material");
     const summary = buildProjectSummary(restored);
-    check(JSON.stringify(summary).includes("Sfioro a bordo continuo"), "summary and PDF model identify subtype");
+    check(JSON.stringify(summary).includes("Sfioro nascosto"), "summary and PDF model identify renamed subtype without changing ID");
     const spec = createPhotoSceneSpec(restored);
     check(spec.pool.technicalConfiguration.continuousEdge?.paving.id === material.id, "photo spec has same edge/paving");
     const lead = leadSubmissionInputSchema.safeParse({ customer: {name:"QA",email:"qa@example.invalid",phone:"00000000",projectLocation:"QA"},
@@ -58,7 +61,7 @@ for (const [length, width] of [[6,3],[8,4],[12,5]]) {
     if (lead.success) {
       const email = formatLeadEmail({ ...lead.data, requestId: "local-qa", projectId: project.projectId,
         schemaVersion: 1, createdAt: "2026-10-21T12:00:00Z", attachments: [] });
-      check(email.text.includes(`Bordo/coping: ${layout.label} — bordo continuo`), "commercial notification uses actual paving at edge");
+      check(email.text.includes(`Bordo/coping: ${layout.label} — bordo a filo`), "commercial notification uses actual paving at edge");
     }
   }
 }
@@ -100,5 +103,24 @@ for (const shape of ["rectangle", "l-shape", "custom"] as const) {
       return Math.abs(q.x) < 1 && Math.abs(q.y) < 1 && q.z > -1 && q.z < 1;
     }), `${shape}/${width}: intake, water and paving fit camera frustum`);
   }
+}
+for (const [length,width] of [[6,3],[8,4],[12,5]]) {
+  const layout = getPoolVerticalLayout({poolType:"in-ground",system:"overflow",overflowType:"hidden",depth:1.5,copingThickness:.04});
+  const section = concealedOverflowSection(layout.wallTopY,.04);
+  const outline = buildOutline("rectangle",{...base.dimensions,length,width,depth:1.5},[]);
+  const lip = createBeveledRingGeometry(outline,offsetOutline(outline,OVERFLOW_GEOMETRY.waterEdgeOffset),.003,3);
+  lip.computeBoundingBox();
+  check(Math.abs(lip.boundingBox!.max.y + section.intakeTopY - layout.groundY) < 1e-9, "actual hidden intake crest flush with terrace");
+  check(section.channelFloorY < section.intakeTopY && section.slotWidth > 0, "collector retains depth and open intake");
+  check(layout.waterY > section.intakeTopY && layout.waterY - section.intakeTopY <= .00101, "thin water film overtops flush intake");
+  lip.dispose();
+}
+const raised = getPoolVerticalLayout({poolType:"above-ground",system:"overflow",overflowType:"hidden",depth:1.5,copingThickness:.04});
+check(Math.abs(raised.waterY - (raised.wallTopY - OVERFLOW_GEOMETRY.hiddenWaterTopClearance)) < 1e-9, "raised hidden overflow remains unchanged");
+for (const [id, label] of [["hidden", "Sfioro a bordo continuo"], ["continuous", "Sfioro nascosto"]] as const) {
+  const snapshot = toProjectConfiguration("renamed-overflow-qa", {...base, overflowType:id}, initial.renovation);
+  const restored = parseProjectConfiguration(serializeProjectConfiguration(snapshot));
+  check(restored.config.overflowType === id, "commercial rename preserves saved technical identity");
+  check(JSON.stringify(buildProjectSummary(restored)).includes(label), "PDF and summary follow swapped commercial labels");
 }
 console.log(`Continuous overflow: ${checks} checks PASS (local; no cloud writes or emails).`);
