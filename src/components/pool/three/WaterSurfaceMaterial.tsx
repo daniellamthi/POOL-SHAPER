@@ -647,7 +647,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
   useFrame(({ clock }, delta) => {
     if (!active) return;
     const time = clock.getElapsedTime();
-    if(outline&&!flowing&&!planView) writeCalmWavePhases(wavePhases.current,time);
+    if(outline&&!flowing&&!planView) writeCalmWavePhases(wavePhases.current,time * 0.85);
     // Eases toward "held still" while the camera is settled (see
     // renderQualityState/CameraRig) and snaps back the instant it moves
     // again -- the surface keeps drifting either way (a perfectly static

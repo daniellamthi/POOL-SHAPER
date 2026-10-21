@@ -51,7 +51,7 @@ for(const [length,width] of [[6,3],[8,4],[12,5]]){
 const water=readFileSync("src/components/pool/three/WaterSurfaceMaterial.tsx","utf8");
 check(water.includes("const metricWaves = !!outline && !flowing && !planView"),"New field excluded from Infinity, film/tongue and technical view");
 check(water.includes("material.current.needsUpdate = true")&&water.includes("}, [metricWaves])")&&water.includes("${metricWaves ? 1 : 0}"),"Program identity and invalidation update when switching system/view");
-check(water.includes("if(outline&&!flowing&&!planView) writeCalmWavePhases(wavePhases.current,time)"),"Inactive profiles do not run new phase work");
+check(water.includes("if(outline&&!flowing&&!planView) writeCalmWavePhases(wavePhases.current,time * 0.85)"),"Surface ripples run 15% slower; inactive and Infinity profiles remain unchanged");
 check(water.includes("#ifdef WATER_METRIC_WAVES")&&!water.includes("uniform bool waterMetricWaves"),"Only the selected profile is compiled; no per-fragment profile branch");
 const legacy=water.slice(water.indexOf("#else\ncalmSlope ="),water.indexOf("vec2 combinedSlope = calmSlope"));
 for(const coefficient of ["0.0026","0.0018","0.0008","0.0003"])check(legacy.includes(coefficient),"Exact approved legacy Infinity amplitude retained, not the earlier x3 WIP experiment");
