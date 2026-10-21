@@ -4,6 +4,7 @@ import {
   DoubleSide,
   Mesh,
   MeshBasicMaterial,
+  PerspectiveCamera,
   Raycaster,
   Vector3,
   ShaderChunk,
@@ -98,24 +99,32 @@ const stubShader = () =>
   }) as WebGLProgramParametersWithUniforms;
 const mainShader = stubShader(),
   microShader = stubShader();
+const transportCamera = new PerspectiveCamera();
 applyLedTransmission(mainShader);
-applyLedTransmission(microShader, transport);
+applyLedTransmission(microShader, transport, () => transportCamera);
 check(
   mainShader.fragmentShader.includes(
     `float ledDistance = sqrt(lightDistance * lightDistance + ${LED_OPTICS.nearField ** 2});`,
   ) && !mainShader.fragmentShader.includes("poolMicroSpotCount"),
   "Main PAR transport remains the exact original1.4m path when no micro registry is supplied",
 );
-check(
-  microShader.uniforms["poolMicroSpotCount"] === transport.count &&
-    microShader.uniforms["poolMicroSpotOrigins"] === transport.origins,
-  "Compiled materials hold the same stable per-pool uniform references",
-);
-check(
-  microShader.fragmentShader.includes("if (microIndex >= poolMicroSpotCount) break;") &&
-    microShader.fragmentShader.includes("dot(sourceDelta, sourceDelta) < 0.000001"),
-  "Runtime classification is bounded by actual count and matches explicit emitter origin, never a range/decay sentinel",
-);
+check(!microShader.fragmentShader.includes("for (int microIndex") && microShader.fragmentShader.includes("poolSpotNearFields[UNROLLED_LOOP_INDEX]"), "Emitter search occurs once per draw, not per fragment; actual renderer light ordering is preserved");
+const testEmitter = {x:1,y:-0.6,z:2,dir:[0,1] as const};
+updateMicroSpotTransport(transport, [testEmitter]);
+for (const cameraPosition of [[12,6,8],[-8,3,-12],[4,-3,6]]) {
+  transportCamera.position.set(...cameraPosition as [number,number,number]);
+  transportCamera.lookAt(0,-0.4,0); transportCamera.updateMatrixWorld(true);
+  const mainOrigin = new Vector3(3,-0.6,-2), microOrigin = transport.origins.value[0]!.clone();
+  for (const sorted of [[mainOrigin,microOrigin],[microOrigin,mainOrigin]]) {
+    microShader.uniforms["spotLights"] = {value:sorted.map(position => ({position:position.clone().applyMatrix4(transportCamera.matrixWorldInverse)}))};
+    const fields = microShader.uniforms["poolSpotNearFields"]!.value as Float32Array;
+    sorted.forEach((position,i) => near(fields[i]!,position === microOrigin ? MICRO_SPOT_OPTICS.nearField : LED_OPTICS.nearField,"World emitter identity survives camera changes and renderer reordering"));
+    check(microShader.uniforms["poolSpotNearFields"]!.value === fields, "Steady draws reuse the lookup buffer");
+    updateMicroSpotTransport(transport, []);
+    check([...microShader.uniforms["poolSpotNearFields"]!.value].every(value => Math.abs(value-LED_OPTICS.nearField)<1e-7), "OFF removes micro classification from every existing light");
+    updateMicroSpotTransport(transport,[testEmitter]);
+  }
+}
 
 for (const colour of [
   "#ffffff",

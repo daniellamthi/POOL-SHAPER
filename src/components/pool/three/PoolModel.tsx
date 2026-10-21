@@ -114,6 +114,7 @@ interface PoolModelProps {
   copingThickness: number;
   pavingThickness?: number;
   showWater: boolean;
+  waterGeometryRevision?: string;
   planView?: boolean;
   /** Above-ground exterior cladding finish. */
   exteriorPanelFinish?: ExteriorPanelFinishId;
@@ -463,6 +464,7 @@ export function PoolModel({
   copingThickness,
   pavingThickness = 0.02,
   showWater,
+  waterGeometryRevision,
   planView = false,
   exteriorPanelFinish = DEFAULT_EXTERIOR_PANEL_FINISH,
   rawStructure = null,
@@ -513,6 +515,7 @@ export function PoolModel({
   const isVisibleOverflow = isOverflow && overflowType === "visible";
   const isContinuousOverflow = isOverflow && overflowType === "continuous" && poolType !== "above-ground";
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
+  const getSceneState = useThree((state) => state.get);
   const copingOutline = useMemo(
     () => offsetOutline(outline, copingOuterOffset(system, overflowType)),
     [outline, system, overflowType],
@@ -830,10 +833,10 @@ export function PoolModel({
                   : "#include <opaque_fragment>",
           ),
         );
-      applyLedTransmission(shader, microSpotTransport);
+      applyLedTransmission(shader, microSpotTransport, () => getSceneState().camera);
       if (!causticsShaders.current.includes(shader)) causticsShaders.current.push(shader);
     },
-    [materials.surface, waterLevel, causticMap, showWater, microSpotTransport],
+    [materials.surface, waterLevel, causticMap, showWater, microSpotTransport, getSceneState],
   );
   useFrame(({ clock }) => {
     // The path tracer never executes this onBeforeCompile-patched shader --
@@ -1312,6 +1315,7 @@ export function PoolModel({
           <mesh geometry={water} position={[0, waterLevel, 0]} renderOrder={2} visible={showWater}>
             <WaterSurfaceMaterial
               active={showWater}
+              geometryRevision={waterGeometryRevision ?? ""}
               planView={planView}
               waterLevel={waterLevel}
               depth={waterLevel - verticalLayout.floorY}

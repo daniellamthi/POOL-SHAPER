@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { ShaderPreparation } from "./ShaderPreparation";
 import { installDevelopmentInteractionTiming } from "@/lib/pool/development-interaction-timing";
 import { installDevelopmentGlDiagnostic } from "@/lib/pool/development-gl-diagnostic";
 import { OrbitControls, Line, useProgress } from "@react-three/drei";
@@ -318,9 +319,26 @@ function cropHero(source: HTMLCanvasElement): string {
   return canvas.toDataURL("image/jpeg", 0.9);
 }
 
-function DevelopmentRendererMetrics() {
+function DevelopmentRendererMetrics({ qaPaused }: { qaPaused: boolean }) {
   useEffect(installDevelopmentInteractionTiming, []);
   const gl = useThree((state) => state.gl);
+  const getRoot = useThree((state) => state.get);
+  // DEV-only pause for matched single-scene measurements in embedded tabs,
+  // whose webviews can all report "visible" even behind another tab.
+  const size = useThree(state => state.size);
+  useLayoutEffect(() => {
+    const state = getRoot();
+    if (qaPaused) { state.setFrameloop("never"); state.internal.frames = 0; }
+    console.debug("[Pool3D QA render pause]", qaPaused ? "paused" : "resumed");
+  }, [qaPaused, size.width, size.height, getRoot]);
+  // Include all passes (mirror, transmission, shadows and main draw), rather
+  // than reporting whichever offscreen render happened to run last. DEV only.
+  useEffect(() => {
+    const previous = gl.info.autoReset;
+    gl.info.autoReset = false;
+    gl.info.reset();
+    return () => { gl.info.autoReset = previous; gl.info.reset(); };
+  }, [gl]);
   useEffect(() => installDevelopmentGlDiagnostic(gl.getContext()), [gl]);
   useEffect(() => { if (new URLSearchParams(window.location.search).get("qaGlDiagnostic") === "1") console.debug("[Pool3D GL capability]", JSON.stringify({ KHR_parallel_shader_compile: gl.extensions.has("KHR_parallel_shader_compile") })); }, [gl]);
   useEffect(() => {
@@ -342,6 +360,31 @@ function DevelopmentRendererMetrics() {
   const elapsed = useRef(0);
   const frames = useRef(0);
   const frameTimes = useRef<number[]>([]);
+  const drawCalls = useRef<number[]>([]);
+  const gpuTimes = useRef<number[]>([]);
+  const gpuProbe = useMemo(() => {
+    if (!new URLSearchParams(window.location.search).has("qaGpuTiming")) return null;
+    const context = gl.getContext() as WebGL2RenderingContext;
+    const extension = context.getExtension("EXT_disjoint_timer_query_webgl2");
+    if (!extension) { console.debug("[Pool3D GPU timing] unavailable"); return null; }
+    return { context, extension, pending: [] as WebGLQuery[], spare: [] as WebGLQuery[] };
+  }, [gl]);
+  useEffect(() => () => {
+    if (gpuProbe) for (const query of [...gpuProbe.pending, ...gpuProbe.spare]) gpuProbe.context.deleteQuery(query);
+  }, [gpuProbe]);
+  useFrame((state) => {
+    if (!gpuProbe) return;
+    const {context, extension, pending, spare} = gpuProbe;
+    while (pending.length && context.getQueryParameter(pending[0]!, context.QUERY_RESULT_AVAILABLE)) {
+      const query = pending.shift()!;
+      if (!context.getParameter(extension.GPU_DISJOINT_EXT)) gpuTimes.current.push(context.getQueryParameter(query, context.QUERY_RESULT) / 1e6);
+      spare.push(query);
+    }
+    const query = spare.pop() ?? (pending.length < 4 ? context.createQuery() : null);
+    if (query) context.beginQuery(extension.TIME_ELAPSED_EXT, query);
+    try { gl.render(state.scene, state.camera); }
+    finally { if (query) { context.endQuery(extension.TIME_ELAPSED_EXT); pending.push(query); } }
+  }, gpuProbe ? 1 : 0);
   const inspectedPrograms = useRef(new Set<number>());
   const peakSamplers = useRef(0);
   const renderer = useMemo(() => {
@@ -351,6 +394,9 @@ function DevelopmentRendererMetrics() {
   }, [gl]);
 
   useFrame((_, delta) => {
+    drawCalls.current.push(gl.info.render.calls);
+    const lastFrameTriangles = gl.info.render.triangles;
+    gl.info.reset();
     elapsed.current += delta;
     frames.current += 1;
     frameTimes.current.push(delta * 1000);
@@ -391,8 +437,10 @@ function DevelopmentRendererMetrics() {
         frameCount: sorted.length,
         renderer,
         visibility: document.visibilityState,
-        calls: gl.info.render.calls,
-        triangles: gl.info.render.triangles,
+        calls: Math.round(drawCalls.current.reduce((sum, count) => sum + count, 0) / drawCalls.current.length),
+        peakCalls: Math.max(...drawCalls.current),
+        callScope: "full frame, all passes",
+        triangles: lastFrameTriangles,
         geometries: gl.info.memory.geometries,
         textures: gl.info.memory.textures,
         dpr: gl.getPixelRatio(),
@@ -401,12 +449,24 @@ function DevelopmentRendererMetrics() {
         peakProgramSamplers: peakSamplers.current,
         shadowMapSize: ACTIVE_RENDERING_QUALITY.shadowMapSize,
         qualityPreset: ACTIVE_RENDERING_QUALITY.id,
+        planarReflection: ACTIVE_RENDERING_QUALITY.planarReflection.enabled,
+        parallelShaderCompile: gl.extensions.has("KHR_parallel_shader_compile"),
+        idle: renderQualityState.idle,
+        camera: _.camera.position.toArray(),
+        projection: _.camera.projectionMatrix.elements.slice(),
+        buffer: [context.drawingBufferWidth, context.drawingBufferHeight],
+        gpuTimeMs: gpuTimes.current.length ? (() => {
+          const values = gpuTimes.current.sort((a,b)=>a-b);
+          return {median: Number(values[Math.floor(values.length*.5)]!.toFixed(3)), p95:Number(values[Math.min(values.length-1,Math.floor(values.length*.95))]!.toFixed(3)), samples:values.length, scope:"main, transmission and shadows; mirror excluded"};
+        })() : null,
       }),
     );
     elapsed.current = 0;
     frames.current = 0;
     frameTimes.current = [];
-  });
+    drawCalls.current = [];
+    gpuTimes.current = [];
+  }, -100);
   return null;
 }
 
@@ -424,7 +484,8 @@ function DevelopmentRendererMetrics() {
 function AdaptiveQuality() {
   const setDpr = useThree((state) => state.setDpr);
   const size = useThree((state) => state.size);
-  const canvas = useThree((state) => state.gl.domElement);
+  const gl = useThree((state) => state.gl);
+  const canvas = gl.domElement;
   // Fullscreen adds pixels, not geometry. Bound interactive supersampling;
   // Photo Mode and locked export cameras retain the original quality tier.
   const fullscreenCeiling = canvas.closest(".pool-fullscreen")
@@ -436,7 +497,10 @@ function AdaptiveQuality() {
   useFrame(() => {
     const tier = renderQualityState.idle ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr[0];
     const dpr = Math.min(tier, Math.max(0.85, fullscreenCeiling));
-    if (dpr === appliedDpr.current) return;
+    // Canvas configuration can restore its device-DPR clamp on a parent
+    // commit. Check the renderer as well as our last request, so switching
+    // Day/Night cannot strand it at a stale resolution until the next orbit.
+    if (dpr === appliedDpr.current && gl.getPixelRatio() === dpr) return;
     appliedDpr.current = dpr;
     setDpr(dpr);
   });
@@ -1109,6 +1173,19 @@ export default function PoolScene({
   onPhotoModeUnsupported,
 }: SceneProps) {
   const controls = useRef<OrbitControlsImpl | null>(null);
+  const renderer = useRef<import("three").WebGLRenderer | null>(null);
+  const [preparingShaders, setPreparingShaders] = useState(false);
+  const [qaRenderPaused, setQaRenderPaused] = useState(false);
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const toggle = (event: KeyboardEvent) => {
+      if (!event.isTrusted || !event.altKey || !event.shiftKey || event.code !== "KeyP") return;
+      event.preventDefault();
+      setQaRenderPaused(paused => !paused);
+    };
+    window.addEventListener("keydown", toggle);
+    return () => window.removeEventListener("keydown", toggle);
+  }, []);
   const [coastalStatus, setCoastalStatus] = useState<"loading" | "ready" | "error">("loading");
   const [coastalMap, setCoastalMap] = useState<Texture | null>(null);
   const radius = Math.hypot(length, width) / 2;
@@ -1122,13 +1199,21 @@ export default function PoolScene({
   const sunLight = useRef<DirectionalLight | null>(null);
   const auxiliaryLight = useRef<SpotLight | null>(null);
 
-  // Pool geometry and the sun are static between configuration commits.
-  // Orbit/ripples do not change their shadow silhouette. Invalidate after
-  // each React commit (including dimensions/access/system changes), rather
-  // than rebuilding the same 4K shadow map every animation frame.
+  // Depth silhouettes change with geometry, not with RGB, language or time
+  // of day. Rebuilding a4K map on those uniform-only commits stalls toggles.
+  // Asset readiness also invalidates so async-mounted casters are included.
+  const assetsLoading=useProgress(state=>state.active);
+  const shadowRevision=JSON.stringify([
+    outline,shape,system,overflowType,poolType,length,width,depth,floorProfileSetting,
+    shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairMirrored,
+    hydromassageVariant,sunShelfRun,sunShelfLoungerCount,infinityEdge,construction,
+    solarShower,loungers,exteriorPanelFinish,externalStairSide,externalStairPlatformExtended,
+    pellicano,coverPlan.geometry,coverPlan.extension,materials.skimmer.type,skimmers.positions,
+    paving,pavingFormat,
+  ]);
   useLayoutEffect(() => {
     if (sunLight.current) sunLight.current.shadow.needsUpdate = true;
-  });
+  },[shadowRevision,assetsLoading]);
 
   const verticalLayout = useMemo(
     () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
@@ -1433,13 +1518,16 @@ export default function PoolScene({
   return (
     <div className="relative h-full w-full">
     <Canvas
+      frameloop={preparingShaders || (import.meta.env.DEV && qaRenderPaused) ? "never" : "always"}
       // PCFSoftShadowMap is deprecated in three.js: WebGLShadowMap silently
       // reassigns it to PCFShadowMap on the very first render anyway (same
       // algorithm, only the enum name changed), so setting it explicitly
       // here is a zero-behaviour-change fix for the console warning, not a
       // visual change.
       shadows={{ type: PCFShadowMap }}
-      dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr}
+      // AdaptiveQuality owns the live ratio. Feeding the original device
+      // clamp back on every React commit resized it twice on Day/Night.
+      dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : renderer.current?.getPixelRatio() ?? ACTIVE_RENDERING_QUALITY.dpr}
       gl={{
         antialias: ACTIVE_RENDERING_QUALITY.antialias,
         // Retaining every WebGL back buffer causes sustained GPU-memory growth
@@ -1454,6 +1542,7 @@ export default function PoolScene({
         toneMappingExposure: SCENE_VISUAL_PRESET.exposure[visualTheme],
       }}
       onCreated={({ gl }) => {
+        renderer.current = gl;
         gl.outputColorSpace = SRGBColorSpace;
       }}
       camera={{
@@ -1607,6 +1696,7 @@ export default function PoolScene({
         copingThickness={copingThickness}
         pavingThickness={pavingLayout(paving, pavingFormat).thickness}
         showWater={showWater}
+        waterGeometryRevision={`${shadowRevision}|${assetsLoading}`}
         planView={planView}
         rawStructure={construction?.raw ? construction.structure ?? "REINFORCED_CONCRETE" : null}
         structureFamily={construction?.structure ?? null}
@@ -1748,7 +1838,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
+      {import.meta.env.DEV ? <DevelopmentRendererMetrics qaPaused={qaRenderPaused} /> : null}
       {!photoMode ? <HeroCaptureListener /> : null}
       {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
 
@@ -1825,6 +1915,14 @@ export default function PoolScene({
           <PremiumPostFX />
         </Suspense>
       ) : null}
+
+      <ShaderPreparation enabled={showWater && !photoMode && !qaRenderPaused} onPreparing={setPreparingShaders} signature={[
+        sceneTime, features.join(","), lighting.plan.count,
+        resolvedLayout.stairMicroSpots.length,
+        resolvedLayout.comfort.elements.reduce((sum,element)=>sum+(element.spots?.length??0),0),
+        construction?.showLighting, construction?.showAccessories, infinityStage,
+        materials.surface.kind, materials.surface.textureUrl, materials.coping.id, paving,
+      ].join("|")} />
 
       {/* Normal configuration is raster-only. Tracing is loaded and mounted
           exclusively in response to the user's explicit Photo Mode toggle. */}

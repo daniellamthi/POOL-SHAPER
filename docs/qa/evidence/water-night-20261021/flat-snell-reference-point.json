@@ -1,0 +1,17 @@
+{
+  "scope": "Reference optical point, not a measured browser pixel",
+  "camera": [8, 6, 5],
+  "cameraTarget": [0, 0, 0],
+  "fovDegrees": 45,
+  "viewport": [1440, 900],
+  "waterY": 0,
+  "receiver": [0, -1.5, 0],
+  "ior": 1.333,
+  "method": "48 bisection iterations on air/water equal optical tangential momentum; actual Three perspective projection",
+  "dryPixel": [720.0000000000003, 564.7280634882349],
+  "snellPixel": [720.0000000000003, 515.5176013540602],
+  "missingFlatShiftPx": 49.21046213417469,
+  "interface": [0.9731496634018839, 0, 0.6082185396261774],
+  "snellResidual": 6.8833827526759706e-15,
+  "applicationStatus": "NOT IMPLEMENTED: the current differential refraction has zero displacement for a flat normal"
+}

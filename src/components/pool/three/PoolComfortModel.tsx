@@ -181,11 +181,11 @@ export function HydroSpot({
           emissive={light.colour} emissiveIntensity={light.emission} />
       </mesh>
       <primitive object={target} />
-      {night && light.output > 0 ? (
+      {/* Retain the light graph. Day/OFF writes zero intensity; mounting the
+          same fitting at night recompiles every lit material in the scene. */}
         <spotLight name="micro-spot-footwell-light" position={[0, 0, MICRO_SPOT_OPTICS.lensCenter + MICRO_SPOT_OPTICS.emitterEpsilon]}
           target={target} color={light.colour} intensity={light.output} distance={beam?.range ?? MICRO_SPOT_OPTICS.range}
           angle={MICRO_SPOT_OPTICS.angle} penumbra={1} decay={2} castShadow={false} />
-      ) : null}
     </group>
   );
 }

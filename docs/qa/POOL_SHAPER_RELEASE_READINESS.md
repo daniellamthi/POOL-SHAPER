@@ -1690,3 +1690,428 @@ do not declare final visual/release PASS until CO-08 and the already-open perfor
 - Only after geometry verification, exchanged commercial labels: technical `hidden` → **Sfioro a bordo continuo**; technical `continuous` → **Sfioro nascosto**. Saved IDs, descriptions of the actual sections and other selections remain unchanged. Wizard, summary/PDF model and email labels updated together.
 - Targeted actual-ring bounds checks on 6×3, 8×4 and 12×5, identity/label roundtrips, typecheck, project-config and diff-check PASS. Integrated-browser selected label, navigation retention and finished-scene waterline inspected. Evidence: `evidence/continuous-overflow-20261021/intake-flush-renamed-detail.jpg`.
 - Geometry/name changes validated for the owner-requested follow-up commit/push (756 targeted checks PASS). No new cloud save, PDF download, email, mobile replay or production verification claimed. Prior visual-water/performance gates remain open; earlier screenshots/PDF retain their historical names. Main promotion remains unresolved pending explicit disposition of those open gates; PR #1 is already merged (2026-10-13), not an open release PR.
+
+### 2026-10-21 — Night/fluidity/water follow-up (WIP, release gate still OPEN)
+
+Scope: the owner's active request to finish Night speed, interaction fluidity and
+water appearance. No backend, geometry, catalog, production deployment or main merge.
+Feature HEAD at intake: `9aa6d13362a6dc00392cdc990f871b4921a33502` (remote verified).
+
+| ID | Change / authoritative evidence | Current result |
+| --- | --- | --- |
+| NW-01 | Skip zero-contribution spot projector/shadow/BRDF work; reject submerged lights before dry-architecture shading. Match each micro emitter to Three's actual sorted view-space light uniforms once per draw instead of up to64 searches per pool fragment. Actual micro audit:5464 checks,224 configurations,420 footwell raycasts. | PASS targeted correctness; final integrated performance replay still required |
+| NW-02 | Retain Day HDR and lazy Night gradient resources across toggles. Keep selected micro-spot lights mounted with zero Day intensity, avoiding a global light-count shader permutation on Night/OFF. Match Night gradient PMREM cube resolution256 to the cube derived from the existing1024px Day HDR (no photographic detail is removed from this gradient). | Actual fresh-origin Infinity first Night467.1ms input-to-second-rAF,424.2ms preparation; subsequent52.3/40.9/40.1/53.6ms. Previous candidate before this cause fix:17253ms input,17207.3ms preparation. Not a final-paint/GPU-duration claim. |
+| NW-03 | Preserve adaptive DPR ownership across React commits; invalidate cached sun shadows for real geometry/asset changes, not RGB/time/language-only edits. Prepare new visible material variants cooperatively, bounded readiness and cancellation/error fallback; keep Photo Mode's loop ownership separate. Actual effect/component harness:28 checks. | PASS local lifecycle/type correctness; new-configuration cold stalls remain (see below) |
+| NW-04 | Desktop planar mirror now sees the same existing photographic Day HDR as mobile IBL, with low-horizon fade; retain Night gradient only at Night. Millimetric surface slopes stay readable after idle damping; transmission/opacity/IOR/material palettes unchanged. | Real close-up Day clouds/palms and Night captures saved. Wide views still read too flat; no claim of completed depth-aware refraction. Raster basin still deliberately uses undisplaced transmission to avoid doubled emerged geometry. Water visual gate OPEN. |
+| NW-05 | Controlled baseline/candidate:24 unique warmed2s windows,3 per condition (overview/waterline × Day/Night × baseline/candidate), single active scene, same actual camera/projection/DPR/buffer/renderer. `final-controlled-gpu-samples.json`. | Valid intermediate implementation evidence, not proof that subsequent changes received a final matched comparison. |
+| NW-06 | Additional final integration captures:desktop1440×900, emulated390×844/430×932; actual integrated-browser Day/Night, Infinity and Fuori Terra. `post-integration-receipts.json`, JPEGs. | Visual/navigation samples exist, not real mobile-device FPS. New sample frusta differ from NW-05 despite same position/DPR/viewport; do NOT combine as another matched before/after comparison. |
+
+NW-05 medians (median of3 window medians; p95 is median of3 window p95s):
+
+| View / light | Baseline frame median / p95 ms | Intermediate candidate frame median / p95 ms | Baseline → candidate GPU median ms |
+| --- | --- | --- | --- |
+| Overview / Day |23.8 /26.2|10.8 /13.3|20.409 →8.226|
+| Overview / Night |45.1 /48.7|14.6 /16.4|39.856 →11.986|
+| Waterline / Day |51.8 /56.7|12.3 /15.9|48.415 →10.094|
+| Waterline / Night |106.4 /113.4|27.4 /33.7|102.618 →25.227|
+
+Hardware: Apple M1 Pro / ANGLE Metal / WebGL2; Experience4096, planar enabled,
+1440×900, actual renderDPR1.405456737852613, buffer2023×1264. Async GPU queries
+cover main/transmission/shadows, NOT the mirror; frame timings include all work.
+No GPU-byte measurement. Three consecutive warm windows are not three independent
+browser relaunches. Heavy Night waterline is not universally60FPS. Earlier
+two-active-webview / pre-DPR / pre-GPU samples are superseded, not accepted evidence.
+
+Later absolute integrated samples (different frusta, NOT a paired comparison):
+overview Day median10.2ms/p9513.1; Night11.6/14.7; waterline Day12.9/16.1,
+Night15.9/19.4. Twenty further light toggles retained121geometries/34textures
+before/after (`twenty-light-toggle-resources.json`); this is a bounded resource
+plateau observation, not a general memory-leak or GPU-memory proof. Six warmed
+Skimmer changes measured38.9–48.7ms before the final stable-light-graph change.
+
+Confirmed remaining issue: entering a new, previously uncompiled final pool
+configuration can still stall. Fuori Terra12×5 first finished Night scene measured
+11936.9ms input feedback /12424.3ms preparation (2026-10-21T19:05:33–34Z).
+This is not a slow steady Night frame, but it prevents a full fluidity PASS.
+The graph fix resolves the separate repeat Day/Night permutation, not all cold
+configuration compilation. Do not hide this behind the successful warm samples.
+
+Rejected experiments: whole-scene/mutable-material compileAsync could strand its
+promise after React disposed a material; per-mesh rAF/timer readiness serialized
+work in background webviews. Replaced with visible variants, raw program readiness,
+one batch and cooperative tasks. A subsequent uniform-indexed non-shadow spot-loop
+prototype timed out the QA webview and was NOT integrated. Its four source files
+are preserved locally at
+`/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/water-night-dynamic-spot-prototype-20261021.tar.gz`.
+The isolated candidate was restored to the primary's verified unrolled shader.
+The temporary QA webview `night-uniform-qa.localhost:3040` was subsequently closed
+through the documented direct tab lifecycle API (its initial AX/focus request was
+unresponsive). The owner need not close anything. Owner preview/project on3003
+was preserved and its paused measurement loop explicitly resumed. No user-tab
+deletion or credential access was performed. Final matched replay remains pending.
+
+Evidence root: `docs/qa/evidence/water-night-20261021/`.
+Key actual screenshots: `final-day-waterline-1440.jpg`,
+`final-night-waterline-1440.jpg`, `final-night-overview-1440.jpg`,
+`final-{day,night}-{390,430}-emulated.jpg`, `infinity-night-stable-lights.jpg`,
+`above-ground-night-regression.jpg`. Filenames containing “final” identify that
+captured iteration only; they do not override the OPEN gate or missing final replay.
+
+Current verification: shader lifecycle/light-graph28 checks, micro-spot5464,
+water lifecycle21, water/transmission/shadow contracts, continuous-overflow756,
+typecheck and diff-check PASS. Production build rerun after these changes PASS
+(client, SSR and server; existing chunk-size and Vite-path-plugin warnings).
+No new cloud/PDF/email end-to-end claim. No commit/push/main promotion in this pass.
+Next bounded work: resolve cold configuration shader preparation, complete wide-view
+water readability without duplicated dry geometry, then matched final browser replay.
+**Goal/release status: FIX REQUIRED; water and complete fluidity gates remain OPEN.**
+
+Post-recovery bounded attribution (same M1, original unrolled shader restored): a
+fresh, dedicated above-ground12×5 origin, no prior saved configuration/HMR, reached
+its first finished Day scene in677.4ms input feedback /572.7ms preparation.
+Opt-in native GL call durations identify `getProgramInfoLog`379.6ms total
+(32calls,max27.3ms), shader logs65.5ms; compile/link submission together0.4ms.
+Receipt: `fresh-above-ground-gl-attribution.json`. This suggests remaining sync
+first-use validation of offscreen/transmission variants, but does NOT prove it
+caused the earlier12s. Fresh context is not a cold driver cache; earlier samples
+included many HMR edits. The12s stall has not yet been reproduced under the final
+fresh-origin setup: cold-configuration gate remains NOT VERIFIED, not silently PASS
+or attributed solely to shader compilation. Next diagnostic should target first
+finished Night and the actual offscreen program variants, not another general audit.
+The temporary attribution tab was closed, owner preview3003 explicitly resumed;
+`owner-preview-restored.jpg` captures the retained customer configuration.
+
+### NW07–NW08 — depth-aware water and environment handoff, 2026-10-21 evening
+
+NW07 implemented an actual opaque first-hit depth capture (bounded1024px,
+cached on camera/projection/geometry/asset revision). Water/glazing/sky/additive
+beams are excluded. The raster water uses a first-order Snell differential
+about its unchanged flat-interface transmission, scaled by the actual submerged
+receiver depth; five conservative depth/domain guards reject dry-edge pixels.
+This is NOT full volumetric ray tracing. Still-render material depth is intact.
+No pool geometry, material identity, LED output or camera preset was changed.
+Actual capture ownership/cache/failure/StrictMode and off-axis reconstruction
+tests:81 PASS. Stable cameras do not recapture on light/ripple changes.
+
+NW08 prepares screen and linear offscreen shader variants cooperatively. More
+importantly, the retained Night cube now publishes from a layout effect, after
+its child attaches the cube but before a no-environment frame can draw. The
+temporary Day loading sky uses the same256px cube/PMREM dimensions as the loaded
+1024px HDR and Night gradient. This avoids temporary no-IBL/different-PMREM
+shader permutations, rather than reducing selected geometry or lights.
+Lifecycle, actual light graph and synchronous capture tests:32 PASS.
+
+New matched runtime comparison: `final-depth-paired-windows.json`,24 warm
+two-second windows, three consecutive windows per variant/view/light state.
+Camera position AND projection, DPR, viewport, backing buffer, renderer,
+quality, shadow size and planar mode were asserted equal. One live3D scene,
+M1 Pro / ANGLE Metal WebGL2,1440×900,DPR1.405456737852613,2023×1264,
+Experience4096; no GL-call wrappers/build during these windows. Medians of
+three window medians / medians of three window p95 values, milliseconds:
+
+| View | Baseline median/p95 | Candidate median/p95 |
+|---|---:|---:|
+| Overview Day |18.7 /20.9|12.3 /14.4|
+| Overview Night |28.4 /32.5|12.6 /14.2|
+| Waterline Day |54.3 /57.5|29.6 /30.8|
+| Waterline Night |110.3 /119.1|34.2 /35.7|
+
+Steady draw calls remain approximately218 Day/216 Night overview and56–57
+waterline. Async GPU timings are in the receipt; their scope excludes the
+planar mirror, while frame timing includes it. No GPU byte count. These are
+three warm windows, NOT three independent cold browser/driver restarts, nor
+real-phone benchmarks. The close Night view remains about29FPS, not a universal
+60FPS PASS. These windows precede only the layout-handoff/fallback-resolution
+correction; the loaded final Day/Night maps, water and light shaders are equal.
+
+Actual screenshots: `final-depth-skimmer-{day,night}-{overview,waterline}.jpg`,
+`depth-{day,night}-{390,430}-emulated.jpg`, `final-above-night-depth.jpg`.
+Mobile image dimensions verified390×844/430×932. No GPU shader errors observed;
+pool/stairs/dry coping and real selected fittings retained. This is targeted
+water/light QA, not a renewed all-material/cloud/PDF approval.
+
+Cold-path findings are NOT hidden by the warm improvements. Before the final
+layout-handoff correction, a fresh Skimmer entry prepared for15752.2ms; simply
+disabling preparation still left its first Night input feedback at10019.3ms
+(`no-preparation-first-night.json`). After the handoff correction, a new Skimmer
+session measured897.2ms first-scene preparation,104.9ms first Night input to
+second rAF /65.5ms preparation; subsequent feedback43.7–62.7ms. Receipt:
+`layout-synchronous-environment-timing.json`. Input-to-second-rAF is NOT final
+GPU paint or download time. Fresh origins are not a cleared driver cache.
+
+The final direct-Night Fuori Terra entry still measured2175.5ms input feedback
+(`final-above-night-entry.json`). An isolated preparation-disabled experiment
+measured1587.3ms entry,77.2ms Day and44.4ms subsequent Night
+(`direct-layout-night-entry.json`); disabling preparation was NOT integrated.
+Both are improvements, not proof of an instant first entry. Remaining acceptance:
+remove/bound first-use latency on a genuinely unprepared finished configuration
+and improve the heavy close-water Night path without losing selected quality.
+Do not close the previously owner-kept-open performance gate on these data alone.
+
+Final targeted checks: shader/environment32, depth81, water lifecycle21,
+water/transmission/shadow contracts, micro-spot5464 PASS; typecheck, production
+client/SSR/server build and diff-check PASS. Existing chunk-size/path-plugin
+warnings remain. No new backend changes, live email or cloud assertions.
+**Goal remains FIX REQUIRED; no commit/push/main promotion in this pass.**
+
+### NW09 — earlier zero-work rejection and queued-frame fix, 2026-10-21
+
+Implemented in primary: test spot range and both BRDF-normal signs before
+normalization/attenuation/absorption, not afterwards. Static sampler unrolling,
+all selected lights, colours, powers and shadows remain. Actual chunk insertion
+and20000 deterministic reference cases:20010 checks PASS (15035 rejected zero
+receivers,1018 genuinely lit cases). No contributing reference case was rejected.
+Water/LED shader cache versions advanced to v20/v8.
+
+R3F's actual installed loop also runs queued `internal.frames` when frameloop
+is `never`. The preparation effect now drains that root-local queue before
+cooperative compilation, then restores its mode and invalidates on release.
+This prevents an already queued draw from synchronously using unready programs.
+Preparation/light graph/environment harness:33 PASS. Fresh integrated-browser
+input-to-second-rAF:150.3ms full scene,153.2ms another Night seed. Fuori Terra
+first Night:162.2ms instead of the earlier2175.5ms feedback; asynchronous
+preparation still takes1411.3ms. This fixes the input stall, NOT all loading time.
+Receipts: `queued-frame-new-night-config.json`,
+`above-ground-queued-frame-fix.json`. Fresh origin is not a cleared driver cache.
+
+`verified-frame-windows.json`:12 final warm windows, three per condition.
+Assertions match camera AND projection/DPR/buffer/renderer/quality to the
+baseline in `final-depth-paired-windows.json`. Same M1 Pro/ANGLE Metal,
+1440×900,Experience4096,DPR1.405456737852613,2023×1264. Median/p95 ms:
+
+| View | Baseline | Primary-equivalent candidate |
+|---|---:|---:|
+| Overview Day |18.7 /20.9|12.2 /13.3|
+| Overview Night |28.4 /32.5|12.3 /13.3|
+| Waterline Day |54.3 /57.5|25.5 /26.3|
+| Waterline Night |110.3 /119.1|26.0 /27.1|
+
+GPU medians (mirror excluded):9.784/9.941ms overview Day/Night,
+23.922/24.474ms waterline Day/Night. Full-frame counts218/56 respectively.
+Not a universal60FPS or real-phone claim. A previous exploratory17ms waterline
+sample was not reproduced in this final set and is NOT the accepted result.
+
+Further water visual work remains necessary. A local-plane Snell prototype and
+then screen-depth ray traversal produced incorrect stair/shelf edges, so neither
+was integrated. Rejected actual image:
+`rejected-screen-space-snell-stair-artifacts.jpg`; recoverable isolated source:
+`/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/rejected-screen-space-snell-20261021.tar.gz`.
+The candidate's depth shader was restored byte-for-byte to primary.
+
+Raw mirror inspection showed dark photographed canopy, while wide water still
+looks too flat. A separate actual-context reflection and existing Pure Sky HDR
+experiment also did not justify visual closure. Both isolated files preserved at
+`/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/water-reflection-context-sky-prototype-20261021.tar.gz`;
+not integrated, candidate restored. Poly Haven's existing Qwantani Noon Pure Sky
+CC0 provenance confirmed at https://polyhaven.com/a/qwantani_noon_puresky and
+https://polyhaven.com/license; no new asset, licence assumption or HDR swap shipped.
+Potential next cause to verify: hiding the entire `pool-basin` during reflection
+also hides its accent lights, changing that pass's shader light-count signature.
+The clipping plane may remove the need for that group-level exclusion, but this
+requires its own visual/performance regression test before integration.
+
+Final primary checks:20010 spot-work,33 preparation/environment,5464 micro-spot,
+21 lifecycle,81 depth checks; water/transmission/shadow contracts, project-config,
+export guard, typecheck, client/SSR/server build and diff-check PASS.
+Existing build warnings unchanged. No backend/cloud/email changes or new live
+Save/PDF claims. **Night responsiveness improved and verified; water-wide visual
+gate and full goal remain OPEN. No commit/push/main promotion.**
+
+### NW10 — metric ripples and static profile selection, 2026-10-21
+
+Added one shared four-mode metric gravity-ripple normal field for non-Infinity
+basin surfaces. Actual canonical UV constructors verified for6×3,8×4,12×5;
+wavelengths0.328–1.115m, bounded phases, no added texture samples/draw calls.
+This is a rendering normal field, not hydraulic simulation or displaced geometry.
+`calm-pool-waves-audit.mjs`:83 PASS. Existing Infinity, film/tongue and technical
+profiles are excluded. Independent narrow code reviewer caught an earlier WIP
+x3 legacy amplitude change: restored all four exact HEAD legacy coefficients.
+Reviewer did not perform independent browser or build verification.
+
+The first uniform-selected version cost more in the close view. Preserved at
+`pool-shaper-wip-backups/water-metric-uniform-before-static-20261021.tar.gz`.
+Replaced the per-fragment profile branch with compile-time specialization;
+program key and layout invalidation change together when system/view changes.
+No selected light, material quality, geometry or reflection resolution removed.
+
+Actual integrated-browser3×2s warm Night windows saved in
+`evidence/water-night-20261021/metric-static-final-windows.json`.
+Camera/projection/renderer/DPR/buffer/quality match NW09's receipt exactly.
+M1Pro/ANGLE Metal,1440×900,Experience4096,DPR1.405456737852613.
+Median of the three windows (frame median /p95; main GPU median):
+
+| View | Original baseline | NW09 | Metric static candidate |
+|---|---:|---:|---:|
+| Overview Night |28.4/32.5ms|12.3/13.3ms|12.7/15.5ms; GPU10.057ms;218calls|
+| Waterline Night |110.3/119.1ms|26.0/27.1ms|27.5/31.4ms; GPU23.033ms;56calls|
+
+GPU timing excludes mirror; frame timing includes all passes. No universal60FPS,
+GPU-byte measurement or real-phone performance claim. New normal profile adds
+no GPU-time regression in the heavy close view relative to NW09, but CPU/frame
+tail variation remains. Uniform prototype was slower (30.4/34.7ms close view).
+
+Actual screenshots: `metric-ripples-sand-{day,night}-{wide,waterline}.jpg`,
+`metric-ripples-blue-night-overview.jpg`, `metric-static-night-390.jpg`,
+`metric-static-night-{430,overview-430}.jpg`,
+`metric-static-infinity-traditional-night.jpg`,
+`metric-static-infinity-glass-day.jpg`.390/430 are desktop viewport emulation.
+No WebGL console errors observed. No owner-project edits or cloud writes.
+The wider water still reads too flat: these captures do NOT close its premium
+visual acceptance. Infinity source guard is verified; screenshots are regression
+observations, not new geometry/material approval.
+
+Final targeted checks: typecheck, production client/SSR/server build,33 shader
+preparation,20010 spot-work,81 depth,83 wave,21 lifecycle,5464 micro-spot,
+project-config, export guard and diff-check PASS. Existing build warnings remain.
+**Full goal remains FIX REQUIRED. No commit/push/main/deploy.**
+
+### NW11 — directional reflection and real context, 2026-10-21
+
+Implemented: metric basin reflections now reproject the world-space reflected
+ray instead of a fixed0.015 normalized-UV ripple. Flat-normal projection is
+identical to the planar lookup (486 numerical cases including raised pools and
+asymmetric frusta, max error3.33e-16).495 numerical/integration checks PASS.
+This direction-only lookup approximates nearby receivers; not ray tracing.
+Infinity/film retain their existing lookup and context exclusions.
+
+Metric mirrors now retain the emerged basin/architecture and selected-light
+graph. The oblique plane clips submerged geometry instead of hiding the whole
+`pool-basin`. Feedback water and baked shadow decals remain excluded; capture
+visibility restored in finally and context changes invalidate the cache.
+Independent read-only source review found no new concrete delta bug, and noted
+the finite-receiver approximation. Independent browser replay was NOT available:
+reviewer's browser inventory exposed Chrome only, not IAB. Root's actual IAB
+observations below are not renamed independent review.
+
+The Pure Sky asset experiment was rejected as unnecessary extra loading; no
+HDR/IBL/palette/geometry change shipped. Isolated source preserved in
+`pool-shaper-wip-backups/water-ray-and-pure-sky-prototype-20261021.tar.gz`.
+
+**Authoritative final matched sample:**
+`evidence/water-night-20261021/ray-context-isolated-final-windows.json`.
+Owner scene explicitly paused at21:14:44Z, no primary-source edits during the
+sample; sole QA scene closed before owner resumed at21:20:16Z. New IAB tab's
+default1280×720 sample rejected; actual viewport set1440×900 before acceptance.
+All12 windows match NW09 camera, projection, buffer, DPR, renderer and quality.
+Earlier `ray-context-final-windows.json` is exploratory: primary HMR may have
+resumed the background owner render, so do not use it as single-scene evidence.
+
+M1Pro/ANGLE Metal, Experience4096, DPR1.405456737852613,2023×1264.
+Median of3 warm2s-window medians / median p95:
+
+| View | Original baseline | Final reflection/context candidate | Main GPU median; full-frame draw calls |
+|---|---:|---:|---:|
+| Overview Day |18.7/20.9ms|11.5/12.3ms|9.034ms;225–226|
+| Overview Night |28.4/32.5ms|11.6/13.0ms|9.246ms;225–226|
+| Waterline Day |54.3/57.5ms|15.7/20.4ms|12.858ms;59|
+| Waterline Night |110.3/119.1ms|15.6/18.4ms|13.210ms;59|
+
+Frame timing includes all passes; GPU timer excludes mirror. More real reflected
+objects, not fewer selected details. No real-phone FPS, GPU-byte or universal60FPS
+claim. Current input/preparation receipts are saved separately; first/second-rAF
+is not final GPU paint. Existing queue-drain and retained-light/env fixes remain.
+
+Root's actual Day/Night wide/radent views plus390/430 emulation:
+`ray-context-{day,night}-{overview,waterline}.jpg`,
+`ray-context-{day,night}-waterline-{390,430}.jpg` where present,
+`ray-context-day-overview-430.jpg`. No new GL errors after clean reload.
+One React effect-dependency-size warning during experimental HMR was resolved
+by clean QA reload; not misreported as a production exception. Owner8×4 project
+identity/selections preserved; no cloud writes.
+
+**Water acceptance still OPEN, not hidden by camera or stronger Fresnel.**
+Reflections/ripples are now legible at grazing angles; wide clear-water views
+still retain the dry receiver projection. Independent optical-source review
+confirmed that `material.thickness=0` plus wave-minus-flat Snell omits the flat
+interface refraction. A single planar-floor reference point quantifies49.21px
+missing displacement at6m camera height/1.5m water depth/IOR1.333:
+`flat-snell-reference-point.json`. This is an optical reference calculation,
+NOT a measured browser pixel. Prior global absolute-refraction prototypes made
+stair/occlusion artifacts; none was reintroduced. Next correction must recover
+the actual receiver projection with occlusion correctness, not fake colour or
+increased reflection energy. No safe one-line correction has been demonstrated.
+
+Final primary typecheck, production client/SSR/server build,33 preparation,
+20010 spot-work,81 depth,83 wave,495 reflection,21 lifecycle,
+water/transmission/shadow contracts and diff-check PASS. Previous unchanged
+micro-spot/project-config/export receipts retained. Existing build warnings remain.
+**Night speed materially improved and measured; full water goal remains
+FIX REQUIRED. No commit/push/main/deploy.**
+
+### NW12 — flat-interface refraction and final targeted gate, 2026-10-22
+
+Implemented optical vertex projection in the existing opaque transmission pass:
+bounded16-step flat Snell solve, actual receiver geometry, unchanged world
+positions/normals/material lighting/configuration. No screen-space lookup of
+occluded dry geometry and no geometry displacement. This is a raster vertex
+approximation, not volumetric ray tracing or manufacturer/engineering analysis.
+The existing cached1024px depth pass now also stores the matching physical-world
+receiver field (HalfFloat). Ripple differentials invert that image's local
+Jacobian; they no longer assume an unrefracted floor image. No extra steady-frame
+draw pass. Water colour, Fresnel energy and IOR were not cosmetically boosted.
+
+Source-review findings fixed and regression-tested: finish-hook cache rekey,
+detached-mesh/material pruning, synchronous callback detach before remount,
+live water elevation for Slim/High changes, shared-material scope exclusion in
+both colour/depth, transparent-group discard in receiver capture. Devices without
+float colour attachments retain supported unsigned-byte depth/canonical optics;
+that fallback has unit evidence, not real-device visual verification.
+
+Camera guard: optical colour uniforms use the final renderer camera. Depth
+captured before a later CameraRig movement is invalidated for that frame rather
+than misapplied. Reflected normals remain animated. An attempted nested render
+inside Scene.onBeforeRender visibly removed the owner8×4 reflections: REJECTED,
+preserved in `water-camera-ready-capture-experiment-20261022.tar.gz` outside Git.
+Capture remains in useFrame; the scene callback only validates. Actual restored
+result: `flat-receiver-owner-verified-day-waterline.jpg`. The earlier
+`flat-receiver-owner-final-day-waterline.jpg` is the FAILED experiment, not PASS.
+
+**Performance evidence correction:** the old DEV QA pause could be resumed by
+Canvas resize/reconfiguration. Therefore NW10/NW11's claims of an authoritative
+single-scene sample must not be relied on. A persistent React/Canvas DEV-only pause
+now survives resize and excludes shader-preparation resume;41 checks include
+four viewport reconfigurations. Root observed owner last frame22:01:25.085Z before
+pause22:01:25.160Z; no later frame on the subsequent inspection. Owner tab later
+disappeared from inventory and was reopened from its saved project, no cloud writes.
+
+Superseding receipts: `flat-receiver-candidate-windows.json` and
+`flat-receiver-baseline-windows.json`, three warm2s windows per view on isolated
+copies. Candidate closed before baseline opened; only one QA3D scene active.
+All windows match camera, projection, viewport1440×900, DPR1.405456737852613,
+2023×1264 buffer, Experience4096 and Apple M1Pro/ANGLE Metal renderer. Median of
+three window medians / median p95:
+
+| View | Baseline | Water/night candidate | Main GPU median |
+|---|---:|---:|---:|
+| Overview Day |17.8/20.0ms|11.9/13.8ms|9.270ms|
+| Overview Night |29.7/33.4ms|12.4/14.4ms|9.902ms|
+| Waterline Day |59.1/64.5ms|15.8/19.1ms|13.580ms|
+| Waterline Night |117.9/126.1ms|16.1/19.4ms|13.741ms|
+
+Candidate full-frame calls226 overview,59–60 close; GPU timer excludes mirror,
+frame time includes all passes. Peak sampler use15/16. Actual GPU byte memory not
+measurable here. Not a universal60FPS, cold-driver timing, or real-phone claim.
+Final camera-validity-only adjustment retains the measured steady-state shader
+and capture path; its changed transition was retested on owner8×4.
+
+Actual browser QA by root, not relabelled as independent replay:12×5 BlueSky
+Skimmer and saved8×4 SandBeach continuous-overflow, wide/access/waterline,
+Day/Night,390×844 and430×932 desktop viewport emulation. Stair/shelf/lounger
+joins and emerged objects observed without the rejected SSR ghost artifacts.
+Infinity traditional/glass observed separately; its legacy optical profile,
+camera and geometry remain protected. Images under `flat-receiver-*` include
+explicitly labelled prototypes/failure above, not all final acceptance images.
+Owner project PW-42R7-SERSSZ restored with selections intact; no saves, quotes,
+email, backend changes, main merge or deployment performed during this fix.
+
+Independent final source review found no further concrete delta bug; no claim
+of independent browser review. Final targeted checks: typecheck, client/SSR/server
+production build,26 projection-hook,122 receiver,83 depth,41 preparation,
+20010 spot-work,83 wave,495 reflection,21 lifecycle,55 shadow ownership,
+project-config, export guard and diff-check PASS. Existing chunk-size,
+tsconfig-paths and THREE.Clock warnings remain, not new shader failures.
+Credential-pattern scan of changed/new text files found no matches; env files
+excluded. No broad repository, backend or customer-data audit repeated.
+
+**Targeted water/night acceptance: KEEP. This does not close unrelated release,
+privacy, hosting or real-phone gates elsewhere in this report.**

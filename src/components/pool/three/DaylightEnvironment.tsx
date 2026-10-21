@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Environment } from "@react-three/drei";
 import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
 import {
@@ -8,6 +8,7 @@ import {
   HalfFloatType,
   MathUtils,
   SRGBColorSpace,
+  Scene,
   TextureLoader,
   type Texture,
   type DataTexture,
@@ -15,11 +16,26 @@ import {
 import { SkyDome } from "./SkyDome";
 import {CoastalPhotoBackdrop} from "./CoastalPhotoBackdrop";
 import {
-  ACTIVE_RENDERING_QUALITY,
   SCENE_VISUAL_PRESET,
 } from "@/configurator/3d/scene/visual-preset";
 import type { Theme } from "@/lib/theme";
 import type { SceneTimeOfDay } from "./PoolScene";
+
+/** Capture the static night gradient once, retaining its cube/PMREM across
+ * Day/Night toggles instead of rendering six1024px faces on every click. */
+function RetainedNightEnvironment({onReady}:{onReady:(map:Texture|null)=>void}) {
+  const [captureScene]=useState(()=>new Scene());
+  const sky=useMemo(()=><SkyDome theme="dark" sunDirection={[0,1,0]}
+    sunColor={SCENE_VISUAL_PRESET.lighting.sun.color} sunVisibility={0} radius={50}/>,[]);
+  // EnvironmentPortal captures/attaches its cube in the child's layout effect.
+  // Publish it before the first draw, not a passive effect one frame later:
+  // a temporary null environment recompiles all physical materials twice.
+  useLayoutEffect(()=>{onReady(captureScene.environment);return()=>onReady(null);},[captureScene,onReady]);
+  // Match the256px cube generated from our1024px equirectangular daylight.
+  // This night sky is only a smooth gradient (no photographic detail). Equal
+  // PMREM dimensions also keep CUBEUV shader defines stable on Day/Night.
+  return <Environment scene={captureScene} resolution={256}>{sky}</Environment>;
+}
 
 // Coastal capture: let the broad sky illuminate metal and shadowed stone;
 // the studio's low IBL / strong key-light ratio crushed steel reflections.
@@ -116,6 +132,10 @@ export function DaylightEnvironment({
   // Night must never light or reflect the daytime capture (its clouds and
   // sun showed up in the night water): it uses the procedural night sky.
   const night = timeOfDay === "night";
+  const [nightPrepared,setNightPrepared]=useState(night);
+  const [nightSky,setNightSky]=useState<Texture|null>(null);
+  useLayoutEffect(()=>{if(night)setNightPrepared(true);},[night]);
+  useEffect(()=>{if(import.meta.env.DEV)console.debug("[Pool3D environment cache]",JSON.stringify({night,prepared:nightPrepared,ready:!!nightSky,nightTexture:nightSky?.uuid,dayTexture:sky?.uuid}));},[night,nightPrepared,nightSky,sky]);
   const assetUrl = photographicSky ? "/hdri/infinity-white-cliff-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
   useLayoutEffect(() => {
     onCoastalStatus?.(!photographicSky ? "loading" : panoramaError || (!night && skyError) ? "error"
@@ -138,7 +158,8 @@ export function DaylightEnvironment({
     let owned: DataTexture | null = null;
     setSky(null);
     setSkyError(false);
-    if (night) return;
+    // Retain the daylight capture across Day/Night changes. It is not applied
+    // at night, but returning to Day must not fetch/decode/upload it again.
     new HDRLoader().load(
       assetUrl,
       (texture) => {
@@ -158,7 +179,7 @@ export function DaylightEnvironment({
       active = false;
       owned?.dispose();
     };
-  }, [assetUrl, photographicSky, night]);
+  }, [assetUrl, photographicSky]);
   const skyProps = {
     theme,
     sunDirection,
@@ -166,23 +187,36 @@ export function DaylightEnvironment({
     sunVisibility: night ? 0 : 1,
     outdoor,
   };
+  // Drei recaptures all six cube faces whenever its children identity changes.
+  // A material/optional edit does not change this static procedural sky.
+  const proceduralSky = useMemo(() => <SkyDome
+    theme={theme} sunDirection={sunDirection} sunColor={SCENE_VISUAL_PRESET.lighting.sun.color}
+    sunVisibility={night ? 0 : 1} outdoor={outdoor} radius={50}
+  />, [theme, sunDirection[0], sunDirection[1], sunDirection[2], night, outdoor]);
   return (
     <>
-      {sky && !night ? (
-        <Environment map={sky} environmentRotation={[0,photographicSky ? coastalRotation : 0,0]} environmentIntensity={photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
-      ) : (
+      {nightPrepared ? <RetainedNightEnvironment onReady={setNightSky}/> : null}
+      {(night ? nightSky : sky) ? (
+        <Environment map={(night ? nightSky : sky)!} environmentRotation={[0,!night && photographicSky ? coastalRotation : 0,0]} environmentIntensity={night ? SCENE_VISUAL_PRESET.environment.night : photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
+      ) : !night ? (
         <Environment
-          resolution={ACTIVE_RENDERING_QUALITY.environmentResolution}
+          // Same PMREM dimensions as the loaded1024px HDR and night cube;
+          // loading the real map must not change every material's shader key.
+          resolution={256}
           environmentIntensity={
             night ? SCENE_VISUAL_PRESET.environment.night : SCENE_VISUAL_PRESET.environment[theme]
           }
         >
-          <SkyDome {...skyProps} radius={50} />
+          {proceduralSky}
         </Environment>
-      )}
+      ) : null}
       {showBackdrop ? photographicSky && panorama
         ? <CoastalPhotoBackdrop map={panorama} rotation={coastalRotation} timeOfDay={timeOfDay}/>
         : <SkyDome {...skyProps}/> : null}
+      {/* Desktop planar water must see the same photographic daylight sky as
+          mobile IBL. The visible studio stays clean; this layer is enabled
+          only by the water mirror, and never displays daylight at night. */}
+      {sky && !night && !photographicSky ? <SkyDome {...skyProps} environmentMap={sky} reflectionOnly /> : null}
     </>
   );
 }

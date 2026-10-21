@@ -1,0 +1,39 @@
+{
+  "input": [
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":2175.5,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T19:53:42.866Z",
+      "url": "http://final-above-night-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    }
+  ],
+  "preparation": [
+    {
+      "level": "debug",
+      "message": "[Pool3D shader preparation] {\"durationMs\":2473.9,\"parallel\":true}",
+      "timestamp": "2026-10-21T19:53:43.274Z",
+      "url": "http://final-above-night-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792610865152"
+    }
+  ],
+  "performance": [
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":86.9,\"frameTimeMs\":11.5,\"medianFrameTimeMs\":11.3,\"p95FrameTimeMs\":12.9,\"frameCount\":174,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":8.741,\"p95\":9.15,\"samples\":174,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T19:53:59.644Z",
+      "url": "http://final-above-night-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792612401012"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":88.4,\"frameTimeMs\":11.31,\"medianFrameTimeMs\":11.2,\"p95FrameTimeMs\":12.6,\"frameCount\":177,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":8.717,\"p95\":9.1,\"samples\":177,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T19:54:01.670Z",
+      "url": "http://final-above-night-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792612401012"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":88.4,\"frameTimeMs\":11.31,\"medianFrameTimeMs\":11.2,\"p95FrameTimeMs\":12.5,\"frameCount\":177,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":8.721,\"p95\":9.095,\"samples\":177,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T19:54:03.696Z",
+      "url": "http://final-above-night-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792612401012"
+    }
+  ],
+  "errors": []
+}

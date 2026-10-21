@@ -49,7 +49,10 @@ void main() {
   outgoing = mix(outgoing, horizonColor * 1.35, veil * 0.32);
   if (hasEnvironmentMap) {
     vec2 uv = vec2(atan(direction.z, direction.x) * 0.159154943 + 0.5, asin(clamp(direction.y, -1.0, 1.0)) * 0.318309886 + 0.5);
-    outgoing = texture2D(environmentMap, uv).rgb;
+    // This photographic layer is used only by the water mirror. Keep the
+    // photographed sky, but fade its low horizon/ground into our sky gradient:
+    // the capture's unrelated pool rail must not become a second coping line.
+    outgoing = mix(sky, texture2D(environmentMap, uv).rgb, smoothstep(0.02, 0.25, direction.y));
   }
 
   gl_FragColor = vec4(outgoing, 1.0);
