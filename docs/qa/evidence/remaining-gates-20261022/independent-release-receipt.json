@@ -1,0 +1,985 @@
+{
+  "reviewer": "E independent final reviewer",
+  "date": "2026-10-21T23:37:18.612Z",
+  "url": "http://independent-release-qa.localhost:3003/",
+  "browser": {
+    "type": "Chrome extension",
+    "tabId": "651928433",
+    "authorizedTemporaryLocalReviewer": true,
+    "integratedUnavailableInOwnInventory": true
+  },
+  "candidate": "Primary DEV with root water15% timing and live HMR slider/LeadRequestDialog accessibility fixes; not claimed as exact hosted production SHA.",
+  "scope": {
+    "sevenPhases": "PASS observed from new pool to final presentation",
+    "configuration": "8×4×1.5 in-ground concrete rectangular, Skimmer high-water satin-steel finish, straight stairs, Shelf3.2, two immersed Esse loungers, BlueSky602 liner, Prun coping, GresGreige60×60, 2mainLED red#FF0000 intensity61%, riser microspotsON, heatpumpON, external loungersOFF",
+    "backContinue": "PASS one scoped Shelf optional back/continue; panel expanded and two loungers retained",
+    "language": "PASS scoped IT→EN→IT complete summary plus dimension/Shelf/control/modal labels; camera and panel preserved",
+    "water": "Observed actual settled waterline Day1440/390, Night390 and overviewDay/Night430; water surface readable in available view; no new black/ghost defect found. No frame-rate/motion-speed proof."
+  },
+  "languageEvidence": {
+    "before": {
+      "camera": "review",
+      "expanded": [
+        "Riduci"
+      ],
+      "htmlLang": "it"
+    },
+    "english": {
+      "camera": "review",
+      "expanded": [
+        "Minimise"
+      ],
+      "htmlLang": "en"
+    },
+    "after": {
+      "camera": "review",
+      "expanded": [
+        "Riduci"
+      ],
+      "htmlLang": "it"
+    }
+  },
+  "summary": {
+    "it": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Blue Sky [602]\":\n        - generic: Finiture\n        - generic: Liner PVC · Blue Sky [602]\n      - button \"Esterno Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\":\n        - generic: Esterno\n        - generic: Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\n      - button \"Optional Pompa di calore\":\n        - generic: Optional\n        - generic: Pompa di calore\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\"\n    - tab \"Riepilogo\" [selected]\n    - tab \"Richiedi proposta\"\n  - region \"Salva e condividi\":\n    - paragraph: Il tuo progetto\n    - paragraph: Non ancora salvato\n    - paragraph: Salva per ricevere un Project ID, riprenderlo e condividerlo.\n    - button \"Salva progetto\":\n      - text: Salva progetto\n    - button \"Condividi\":\n      - text: Condividi\n    - button \"Project Book PDF\":\n      - text: Project Book PDF\n  - img \"La tua piscina configurata\"\n  - paragraph: Il tuo progetto\n  - heading \"Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\" [level=2]\n  - paragraph: Piscina interrata · Skimmer — bordo classico · circa 34 m³ d'acqua\n  - paragraph: Project ID assegnato al salvataggio\n  - heading \"La tua piscina\" [level=3]\n  - button \"Modifica\"\n  - term: Tipologia\n  - definition:\n    - generic: Piscina interrata\n  - term: Struttura\n  - definition:\n    - generic: Cemento armato\n  - term: Dimensioni\n  - definition:\n    - generic: Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\n  - heading \"Linea d'acqua\" [level=3]\n  - button \"Modifica\"\n  - term: Sistema idraulico\n  - definition:\n    - generic: Skimmer — bordo classico\n  - term: Skimmer\n  - definition:\n    - generic: Livello acqua alto · Acciaio satinato\n  - heading \"Materiali\" [level=3]\n  - button \"Modifica\"\n  - term: Rivestimento\n  - definition:\n    - generic: Motion Blue Sky [602]\n    - generic: Acqua dalle tonalità azzurro cristallino\n  - term: Bordo\n  - definition:\n    - generic: Pietra di Prun\n  - term: Pavimentazione\n  - definition:\n    - generic: Gres porcellanato · Greige\n  - term: Formato pavimentazione\n  - definition:\n    - generic: 60 × 60 cm\n    - generic: Dimensioni di riferimento della visualizzazione; fornitura da confermare.\n  - heading \"Accesso e comfort\" [level=3]\n  - button \"Modifica\"\n  - term: Incluso\n  - definition:\n    - generic: Lettini per spiaggetta · 2\n  - term: Incluso\n  - definition:\n    - generic: Scala interna integrata — Scala interna rettilinea\n  - term: Incluso\n  - definition:\n    - generic: Sun Shelf · lunghezza complessiva 3,200 m\n  - heading \"Illuminazione\" [level=3]\n  - button \"Modifica\"\n  - term: Optional scale\n  - definition:\n    - generic: Micro-spot LED nelle alzate delle scale interne\n  - term: Impianto\n  - definition:\n    - generic: Illuminazione subacquea a LED\n  - term: Punti luce\n  - definition:\n    - generic: 2 · automatici, dimensionamento indicativo\n  - term: Colore selezionato\n  - definition:\n    - generic: \"#FF0000\"\n  - term: Intensità luce\n  - definition:\n    - generic: 61%\n  - heading \"Optional\" [level=3]\n  - button \"Modifica\"\n  - term: Incluso\n  - definition:\n    - generic: Pompa di calore\n  - heading \"Presentazione\" [level=3]\n  - button \"Modifica\"\n  - term: Momento\n  - definition:\n    - generic: Notte\n  - heading \"Da definire con il consulente\" [level=3]\n  - list:\n    - listitem: Dimensionamento della potenza di riscaldamento\n    - listitem: Dimensionamento definitivo dell'impianto tecnico\n  - generic \"Scopri i dettagli tecnici\"\n  - 'button \"Prossima scelta: Richiedi proposta\"':\n    - text: \"Prossima scelta: Richiedi proposta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 2/3 · Riepilogo\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Richiedi proposta\" [active]:\n    - text: Continua\n    - generic: · Richiedi proposta\n- region \"Notifications alt+T\"",
+    "en": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool Reinforced concrete · 8.0 × 4.0 m\":\n        - generic: Pool\n        - generic: Reinforced concrete · 8.0 × 4.0 m\n      - button \"Water system Skimmer · High water level\":\n        - generic: Water system\n        - generic: Skimmer · High water level\n      - button \"Access & comfort Internal stairs · Sun shelf\":\n        - generic: Access & comfort\n        - generic: Internal stairs · Sun shelf\n      - button \"Finishes PVC liner · Blue Sky [602]\":\n        - generic: Finishes\n        - generic: PVC liner · Blue Sky [602]\n      - button \"Exterior Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm\":\n        - generic: Exterior\n        - generic: Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm\n      - button \"Options Heat pump\":\n        - generic: Options\n        - generic: Heat pump\n      - button \"Presentation In progress\":\n        - generic: Presentation\n        - generic: In progress\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [active] [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\":\n      - generic: Day\n    - button \"Night\" [pressed]:\n      - generic: Night\n  - button \"Start again\":\n    - generic: Start again\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan\n  - toolbar \"View tools\":\n    - button \"Guides\":\n      - text: Guides\n    - button \"Technical view\":\n      - text: Technical view\n    - button \"Reframe\":\n      - text: Reframe\n- 'region \"Step 7: Presentation\"':\n  - paragraph: \"Your finished pool: scene, summary and proposal request.\"\n  - tablist \"Presentation\":\n    - tab \"Scene\"\n    - tab \"Summary\" [selected]\n    - tab \"Request a proposal\"\n  - region \"Save and share\":\n    - paragraph: Your project\n    - paragraph: Not saved yet\n    - paragraph: Save to receive a Project ID, return to it and share it.\n    - button \"Save project\":\n      - text: Save project\n    - button \"Share\":\n      - text: Share\n    - button \"Project Book PDF\":\n      - text: Project Book PDF\n  - img \"Your configured pool\"\n  - paragraph: Your project\n  - heading \"rectangular pool 8.00 × 4.00 m, depth 1.50 m\" [level=2]\n  - paragraph: In-ground pool · Skimmer — classic edge · approx. 34 m³ of water\n  - paragraph: Project ID assigned when saved\n  - heading \"Your pool\" [level=3]\n  - button \"Edit\"\n  - term: Type\n  - definition:\n    - generic: In-ground pool\n  - term: Structure\n  - definition:\n    - generic: Reinforced concrete\n  - term: Dimensions\n  - definition:\n    - generic: rectangular pool 8.00 × 4.00 m, depth 1.50 m\n  - heading \"Waterline\" [level=3]\n  - button \"Edit\"\n  - term: Hydraulic system\n  - definition:\n    - generic: Skimmer — classic edge\n  - term: Skimmer\n  - definition:\n    - generic: High water level · Satin steel\n  - heading \"Materials\" [level=3]\n  - button \"Edit\"\n  - term: Lining\n  - definition:\n    - generic: Motion Blue Sky [602]\n    - generic: Crystal-blue water tones\n  - term: Coping\n  - definition:\n    - generic: Pietra di Prun\n  - term: Paving\n  - definition:\n    - generic: Porcelain stoneware · Greige\n  - term: Paving size\n  - definition:\n    - generic: 60 × 60 cm\n    - generic: Reference dimensions for the visualisation; supply to be confirmed.\n  - heading \"Access and comfort\" [level=3]\n  - button \"Edit\"\n  - term: Included\n  - definition:\n    - generic: Sun shelf loungers · 2\n  - term: Included\n  - definition:\n    - generic: Integrated internal stairs — Straight internal stairs\n  - term: Included\n  - definition:\n    - generic: Sun shelf · total length 3.200 m\n  - heading \"Lighting\" [level=3]\n  - button \"Edit\"\n  - term: Stair options\n  - definition:\n    - generic: LED spotlights in the internal stair risers\n  - term: Equipment\n  - definition:\n    - generic: Underwater LED lighting\n  - term: Lights\n  - definition:\n    - generic: 2 · automatic, indicative sizing\n  - term: Selected colour\n  - definition:\n    - generic: \"#FF0000\"\n  - term: Light brightness\n  - definition:\n    - generic: 61%\n  - heading \"Options\" [level=3]\n  - button \"Edit\"\n  - term: Included\n  - definition:\n    - generic: Heat pump\n  - heading \"Presentation\" [level=3]\n  - button \"Edit\"\n  - term: Time of day\n  - definition:\n    - generic: Night\n  - heading \"To be agreed with your consultant\" [level=3]\n  - list:\n    - listitem: Heating capacity sizing\n    - listitem: Final equipment sizing\n  - generic \"View technical details\"\n  - 'button \"Next option: Request a proposal\"':\n    - text: \"Next option: Request a proposal\"\n  - button \"More options\":\n    - text: More options\n  - paragraph:\n    - text: Phase 07 of 07\n    - generic: · 2/3 · Summary\n  - heading \"Presentation\" [level=2]\n  - paragraph: 8.0 × 4.0 m · ready for a proposal\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue · Request a proposal\":\n    - text: Continue\n    - generic: · Request a proposal\n- region \"Notifications alt+T\"",
+    "itAfter": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Blue Sky [602]\":\n        - generic: Finiture\n        - generic: Liner PVC · Blue Sky [602]\n      - button \"Esterno Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\":\n        - generic: Esterno\n        - generic: Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\n      - button \"Optional Pompa di calore\":\n        - generic: Optional\n        - generic: Pompa di calore\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [active] [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\"\n    - tab \"Riepilogo\" [selected]\n    - tab \"Richiedi proposta\"\n  - region \"Salva e condividi\":\n    - paragraph: Il tuo progetto\n    - paragraph: Non ancora salvato\n    - paragraph: Salva per ricevere un Project ID, riprenderlo e condividerlo.\n    - button \"Salva progetto\":\n      - text: Salva progetto\n    - button \"Condividi\":\n      - text: Condividi\n    - button \"Project Book PDF\":\n      - text: Project Book PDF\n  - img \"La tua piscina configurata\"\n  - paragraph: Il tuo progetto\n  - heading \"Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\" [level=2]\n  - paragraph: Piscina interrata · Skimmer — bordo classico · circa 34 m³ d'acqua\n  - paragraph: Project ID assegnato al salvataggio\n  - heading \"La tua piscina\" [level=3]\n  - button \"Modifica\"\n  - term: Tipologia\n  - definition:\n    - generic: Piscina interrata\n  - term: Struttura\n  - definition:\n    - generic: Cemento armato\n  - term: Dimensioni\n  - definition:\n    - generic: Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\n  - heading \"Linea d'acqua\" [level=3]\n  - button \"Modifica\"\n  - term: Sistema idraulico\n  - definition:\n    - generic: Skimmer — bordo classico\n  - term: Skimmer\n  - definition:\n    - generic: Livello acqua alto · Acciaio satinato\n  - heading \"Materiali\" [level=3]\n  - button \"Modifica\"\n  - term: Rivestimento\n  - definition:\n    - generic: Motion Blue Sky [602]\n    - generic: Acqua dalle tonalità azzurro cristallino\n  - term: Bordo\n  - definition:\n    - generic: Pietra di Prun\n  - term: Pavimentazione\n  - definition:\n    - generic: Gres porcellanato · Greige\n  - term: Formato pavimentazione\n  - definition:\n    - generic: 60 × 60 cm\n    - generic: Dimensioni di riferimento della visualizzazione; fornitura da confermare.\n  - heading \"Accesso e comfort\" [level=3]\n  - button \"Modifica\"\n  - term: Incluso\n  - definition:\n    - generic: Lettini per spiaggetta · 2\n  - term: Incluso\n  - definition:\n    - generic: Scala interna integrata — Scala interna rettilinea\n  - term: Incluso\n  - definition:\n    - generic: Sun Shelf · lunghezza complessiva 3,200 m\n  - heading \"Illuminazione\" [level=3]\n  - button \"Modifica\"\n  - term: Optional scale\n  - definition:\n    - generic: Micro-spot LED nelle alzate delle scale interne\n  - term: Impianto\n  - definition:\n    - generic: Illuminazione subacquea a LED\n  - term: Punti luce\n  - definition:\n    - generic: 2 · automatici, dimensionamento indicativo\n  - term: Colore selezionato\n  - definition:\n    - generic: \"#FF0000\"\n  - term: Intensità luce\n  - definition:\n    - generic: 61%\n  - heading \"Optional\" [level=3]\n  - button \"Modifica\"\n  - term: Incluso\n  - definition:\n    - generic: Pompa di calore\n  - heading \"Presentazione\" [level=3]\n  - button \"Modifica\"\n  - term: Momento\n  - definition:\n    - generic: Notte\n  - heading \"Da definire con il consulente\" [level=3]\n  - list:\n    - listitem: Dimensionamento della potenza di riscaldamento\n    - listitem: Dimensionamento definitivo dell'impianto tecnico\n  - generic \"Scopri i dettagli tecnici\"\n  - 'button \"Prossima scelta: Richiedi proposta\"':\n    - text: \"Prossima scelta: Richiedi proposta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 2/3 · Riepilogo\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Richiedi proposta\":\n    - text: Continua\n    - generic: · Richiedi proposta\n- region \"Notifications alt+T\"",
+    "final": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\"\n    - tab \"Riepilogo\" [selected]\n    - tab \"Richiedi proposta\"\n  - region \"Salva e condividi\":\n    - paragraph: Il tuo progetto\n    - paragraph: Non ancora salvato\n    - paragraph: Salva per ricevere un Project ID, riprenderlo e condividerlo.\n    - button \"Salva progetto\":\n      - text: Salva progetto\n    - button \"Condividi\":\n      - text: Condividi\n    - button \"Project Book PDF\":\n      - text: Project Book PDF\n  - img \"La tua piscina configurata\"\n  - paragraph: Il tuo progetto\n  - heading \"Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\" [level=2]\n  - paragraph: Piscina interrata · Skimmer — bordo classico · circa 34 m³ d'acqua\n  - paragraph: Project ID assegnato al salvataggio\n  - link \"↑ Espandi piscina\":\n    - /url: \"#pool-viewport\"\n  - heading \"La tua piscina\" [level=3]\n  - button \"Modifica\"\n  - term: Tipologia\n  - definition:\n    - generic: Piscina interrata\n  - term: Struttura\n  - definition:\n    - generic: Cemento armato\n  - term: Dimensioni\n  - definition:\n    - generic: Piscina rettangolare 8,00 × 4,00 m, profondità 1,50 m\n  - heading \"Linea d'acqua\" [level=3]\n  - button \"Modifica\"\n  - term: Sistema idraulico\n  - definition:\n    - generic: Skimmer — bordo classico\n  - term: Skimmer\n  - definition:\n    - generic: Livello acqua alto · Acciaio satinato\n  - heading \"Materiali\" [level=3]\n  - button \"Modifica\"\n  - term: Rivestimento\n  - definition:\n    - generic: Motion Blue Sky [602]\n    - generic: Acqua dalle tonalità azzurro cristallino\n  - term: Bordo\n  - definition:\n    - generic: Pietra di Prun\n  - term: Pavimentazione\n  - definition:\n    - generic: Gres porcellanato · Greige\n  - term: Formato pavimentazione\n  - definition:\n    - generic: 60 × 60 cm\n    - generic: Dimensioni di riferimento della visualizzazione; fornitura da confermare.\n  - heading \"Accesso e comfort\" [level=3]\n  - button \"Modifica\"\n  - term: Incluso\n  - definition:\n    - generic: Lettini per spiaggetta · 2\n  - term: Incluso\n  - definition:\n    - generic: Scala interna integrata — Scala interna rettilinea\n  - term: Incluso\n  - definition:\n    - generic: Sun Shelf · lunghezza complessiva 3,200 m\n  - heading \"Illuminazione\" [level=3]\n  - button \"Modifica\"\n  - term: Optional scale\n  - definition:\n    - generic: Micro-spot LED nelle alzate delle scale interne\n  - term: Impianto\n  - definition:\n    - generic: Illuminazione subacquea a LED\n  - term: Punti luce\n  - definition:\n    - generic: 2 · automatici, dimensionamento indicativo\n  - term: Colore selezionato\n  - definition:\n    - generic: \"#FF0000\"\n  - term: Intensità luce\n  - definition:\n    - generic: 61%\n  - heading \"Optional\" [level=3]\n  - button \"Modifica\"\n  - term: Incluso\n  - definition:\n    - generic: Pompa di calore\n  - heading \"Presentazione\" [level=3]\n  - button \"Modifica\"\n  - term: Momento\n  - definition:\n    - generic: Giorno\n  - heading \"Da definire con il consulente\" [level=3]\n  - list:\n    - listitem: Dimensionamento della potenza di riscaldamento\n    - listitem: Dimensionamento definitivo dell'impianto tecnico\n  - generic \"Scopri i dettagli tecnici\"\n  - 'button \"Prossima scelta: Richiedi proposta\"':\n    - text: \"Prossima scelta: Richiedi proposta\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 2/3 · Riepilogo\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\""
+  },
+  "findings": [
+    {
+      "id": "E-A11Y-01",
+      "original": "Dimension slider thumbs unnamed while numeric inputs labelled",
+      "source": "/src/components/ui/slider.tsx",
+      "status": "FIXED_AND_ACTUAL_RETEST_PASS",
+      "before": [
+        {
+          "ariaLabel": null,
+          "ariaLabelledby": null,
+          "ariaValueNow": "10",
+          "html": "<span role=\"slider\" aria-valuemin=\"3\" aria-valuemax=\"25\" aria-orientation=\"horizontal\" data-orientation=\"horizontal\" tabindex=\"0\" class=\"block size-3.5 rounded-full border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-110 disabled:pointer-events-none disabled:opacity-50\" data-tsd-source=\"/src/components/ui/slider.tsx:18:5\" data-radix-collection-item=\"\" aria-valuenow=\"10\" style=\"\"></span>",
+          "parentLabel": null,
+          "role": "slider"
+        },
+        {
+          "ariaLabel": null,
+          "ariaLabelledby": null,
+          "ariaValueNow": "4.5",
+          "html": "<span role=\"slider\" aria-valuemin=\"2\" aria-valuemax=\"12\" aria-orientation=\"horizontal\" data-orientation=\"horizontal\" tabindex=\"0\" class=\"block size-3.5 rounded-full border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-110 disabled:pointer-events-none disabled:opacity-50\" data-tsd-source=\"/src/components/ui/slider.tsx:18:5\" data-radix-collection-item=\"\" aria-valuenow=\"4.5\" style=\"\"></span>",
+          "parentLabel": null,
+          "role": "slider"
+        }
+      ],
+      "retest": {
+        "dimensionsIt": [
+          "Lunghezza",
+          "Larghezza"
+        ],
+        "widthKeyboard": {
+          "before": 4,
+          "afterRight": 4.1,
+          "restored": 4
+        },
+        "dimensionsEn": [
+          {
+            "label": "Length",
+            "value": "8"
+          },
+          {
+            "label": "Width",
+            "value": "4"
+          }
+        ],
+        "shelfEn": [
+          {
+            "label": "Sun shelf and steps length",
+            "value": "3.2"
+          }
+        ],
+        "shelfIt": [
+          {
+            "label": "Lunghezza spiaggetta e gradini",
+            "value": "3.2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "E-A11Y-02",
+      "original": "Proposal timing radiogroup lacked accessible name and required ARIA",
+      "source": "/src/components/configurator/LeadRequestDialog.tsx",
+      "status": "FIXED_AND_ACTUAL_RETEST_PASS",
+      "retest": {
+        "timingIt": [
+          {
+            "label": "Quando vuoi realizzarla?",
+            "required": "true"
+          }
+        ],
+        "escapeIt": {
+          "label": null,
+          "tag": "INPUT",
+          "text": ""
+        },
+        "timingEn": [
+          {
+            "label": "When would you like to build it?",
+            "required": "true"
+          }
+        ],
+        "escapeEnSettled": {
+          "active": {
+            "label": null,
+            "tag": "BUTTON",
+            "text": "Review your project with a consultant "
+          },
+          "dialogs": []
+        },
+        "closeEnSettled": {
+          "active": {
+            "tag": "BUTTON",
+            "text": "Review your project with a consultant "
+          },
+          "dialogs": 0
+        }
+      }
+    },
+    {
+      "id": "E-A11Y-03",
+      "original": "Pre-change activeElement BODY was observed, but absence/state of dialog after fade was not recorded; a settled pre-fix focus failure is not established.",
+      "source": "/src/components/configurator/LeadRequestDialog.tsx",
+      "status": "HARDENING_WITH_ACTUAL_POST_CHANGE_RETEST_PASS_NOT_CONFIRMED_PRE_FIX_BUG",
+      "before": {
+        "label": null,
+        "role": null,
+        "tag": "BODY",
+        "text": "BODY"
+      },
+      "afterEscape": {
+        "active": {
+          "label": null,
+          "tag": "BUTTON",
+          "text": "Review your project with a consultant "
+        },
+        "dialogs": []
+      },
+      "afterClose": {
+        "active": {
+          "tag": "BUTTON",
+          "text": "Review your project with a consultant "
+        },
+        "dialogs": 0
+      },
+      "note": "Do not count as a third reproduced bug. Actual post-change settled Escape and explicit Close both returned focus to the consultant trigger with no dialog remaining."
+    }
+  ],
+  "localValidation": {
+    "status": "NATIVE_CLIENT_CONSTRAINTS_OBSERVED_NO_SUBMIT",
+    "dom": {
+      "fields": [
+        {
+          "ariaInvalid": "false",
+          "ariaLabel": null,
+          "describedby": null,
+          "name": "",
+          "required": true,
+          "type": "text",
+          "validity": {
+            "typeMismatch": false,
+            "valid": false,
+            "valueMissing": true
+          }
+        },
+        {
+          "ariaInvalid": "false",
+          "ariaLabel": null,
+          "describedby": null,
+          "name": "",
+          "required": true,
+          "type": "email",
+          "validity": {
+            "typeMismatch": true,
+            "valid": false,
+            "valueMissing": false
+          }
+        },
+        {
+          "ariaInvalid": "false",
+          "ariaLabel": null,
+          "describedby": null,
+          "name": "",
+          "required": true,
+          "type": "tel",
+          "validity": {
+            "typeMismatch": false,
+            "valid": false,
+            "valueMissing": true
+          }
+        },
+        {
+          "ariaInvalid": "false",
+          "ariaLabel": null,
+          "describedby": null,
+          "name": "",
+          "required": true,
+          "type": "text",
+          "validity": {
+            "typeMismatch": false,
+            "valid": false,
+            "valueMissing": true
+          }
+        },
+        {
+          "ariaInvalid": null,
+          "ariaLabel": null,
+          "describedby": null,
+          "name": "",
+          "required": false,
+          "type": "textarea",
+          "validity": {
+            "typeMismatch": false,
+            "valid": true,
+            "valueMissing": false
+          }
+        },
+        {
+          "ariaInvalid": null,
+          "ariaLabel": null,
+          "describedby": null,
+          "name": "website",
+          "required": false,
+          "type": "text",
+          "validity": {
+            "typeMismatch": false,
+            "valid": true,
+            "valueMissing": false
+          }
+        }
+      ],
+      "focus": null,
+      "radioGroups": [
+        {
+          "html": "<div role=\"radiogroup\" aria-required=\"false\" dir=\"ltr\" class=\"grid gap-2.5\" data-tsd-source=\"/src/configurator/steps/final-review/LeadRequestDialog.tsx:224:19\" tabindex=\"0\" style=\"outline: none;\"><label for=\"timing-asap\" class=\"flex items-center gap-2.5 text-[13px] font-light text-foreground\" data-tsd-source=\"/src/configurator/steps/final-review/LeadRequestDialog.tsx:230:23\"><button type=\"button\" ",
+          "label": null,
+          "labelledby": null
+        }
+      ]
+    },
+    "input": "Only literal invalid-email; no real contact data entered.",
+    "keyboard": "Enter activation, visible keyboard ring, modal initial Name focus, close-button Tab wraps to Name, Escape and Close focus return verified"
+  },
+  "viewports": {
+    "desktop": {
+      "dom": [
+        1440,
+        900,
+        1
+      ],
+      "raster": [
+        1440,
+        900
+      ]
+    },
+    "mobile390": {
+      "dom": [
+        390,
+        844,
+        1
+      ],
+      "raster": [
+        390,
+        844
+      ],
+      "type": "desktop browser viewport emulation, NOT physical phone"
+    },
+    "mobile430": {
+      "dom": [
+        430,
+        932,
+        1
+      ],
+      "raster": [
+        430,
+        932
+      ],
+      "type": "desktop browser viewport emulation, NOT physical phone"
+    }
+  },
+  "logs": [
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-21T23:27:01.259Z",
+      "url": "http://independent-release-qa.localhost:3003/@vite/client"
+    }
+  ],
+  "evidence": [
+    {
+      "name": "independent-dimensions-keyboard-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina In corso\":\n        - generic: Piscina\n        - generic: In corso\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\" [disabled]:\n        - generic: Finiture\n      - button \"Esterno\" [disabled]:\n        - generic: Esterno\n      - button \"Optional\" [disabled]:\n        - generic: Optional\n      - button \"Presentazione\" [disabled]:\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - generic: L 8.00 m\n  - generic: W 4.00 m\n  - generic: D 1.50 m\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\" [pressed]:\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 1: Piscina\"':\n  - paragraph: Pianta vista dall’alto per lunghezza e larghezza, vista in sezione per la profondità.\n  - tablist \"Forma e dimensioni\":\n    - tab \"Forma\"\n    - tab \"Lunghezza e larghezza\" [selected]\n    - tab \"Profondità\"\n  - generic: Lunghezza\n  - spinbutton \"Lunghezza\": \"8\"\n  - generic: m\n  - generic \"Lunghezza\":\n    - slider\n  - generic: 3 m\n  - generic: 25 m\n  - generic: Larghezza\n  - spinbutton \"Larghezza\": \"4\"\n  - generic: m\n  - generic \"Larghezza\":\n    - slider [active]\n  - generic: 2 m\n  - generic: 12 m\n  - paragraph: \"La vista dall’alto mostra la pianta in scala reale. Trascina i cursori: la vasca si ridimensiona in tempo reale.\"\n  - paragraph: Valori calcolati\n  - term: Volume d’acqua\n  - definition:\n    - text: 48,00\n    - generic: m³\n  - term: Specchio d’acqua\n  - definition:\n    - text: 32,00\n    - generic: m²\n  - term: Superficie interna\n  - definition: 68,00 m²\n  - term: Fondo\n  - definition: 32,00 m²\n  - term: Pareti\n  - definition: 36,00 m²\n  - term: Perimetro\n  - definition: 24,00 m\n  - 'button \"Prossima scelta: Profondità\"':\n    - text: \"Prossima scelta: Profondità\"\n  - paragraph:\n    - text: Fase 01 di 07\n    - generic: · 2/3 · Lunghezza e larghezza\n  - heading \"Piscina\" [level=2]\n  - paragraph: Rettangolare · 8,00 × 4,00 m · prof. 1,50 m\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Profondità\":\n    - text: Continua\n    - generic: · Profondità\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "top",
+              "cameraProjection": "orthographic",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(104, 100, 188) 0px 0px 0px 2px, rgba(0, 0, 0, 0.18) 0px 1px 3px 0px",
+          "outline": "rgb(104, 100, 188) solid 2px",
+          "rect": {
+            "bottom": 700.203125,
+            "height": 14,
+            "left": 223.9921875,
+            "right": 237.9921875,
+            "top": 686.203125,
+            "width": 14,
+            "x": 223.9921875,
+            "y": 686.203125
+          },
+          "tag": "SPAN",
+          "text": ""
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Giorno",
+          "Guide"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      },
+      "raster": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "name": "independent-comfort-state-retained-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort In corso\":\n        - generic: Accesso & comfort\n        - generic: In corso\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 3: Accesso & comfort\"':\n  - paragraph: Come si entra in acqua e le zone relax integrate.\n  - tablist \"Accesso e comfort\":\n    - tab \"Scala interna\"\n    - tab \"Scaletta inox\"\n    - tab \"Comfort in acqua\"\n    - tab \"Optional per la spiaggetta\" [selected]\n  - group \"Optional per la spiaggetta\":\n    - button \"Lettini per spiaggetta\" [pressed]:\n      - generic: Lettini per spiaggetta\n      - generic: Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.\n      - text: Aggiunto\n  - paragraph: \"Quantità consentite: da 1 a 2.\"\n  - text: Quantità lettini\n  - combobox \"Quantità lettini\":\n    - option \"1\"\n    - option \"2\" [selected]\n  - paragraph: Anteprima 3D dimensionale; modello e fornitura da confermare. 1,85 ×0,73 m.\n  - paragraph:\n    - generic: Per il tuo Sun shelf · compare solo con questa scelta\n  - group \"Panca integrata\":\n    - button \"Panca integrata\":\n      - generic: Panca integrata\n      - generic: Seduta sommersa lungo parete.\n      - text: Aggiungi\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 03 di 07\n    - generic: · 4/4 · Optional per la spiaggetta\n  - heading \"Accesso & comfort\" [level=2]\n  - paragraph: Scala interna · Spiaggetta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Finiture\" [active]:\n    - text: Continua\n    - generic: · Finiture\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "shelf",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.79) 0px 0px 0px 2.36321px, oklab(0.248814 0.00112454 -0.00947151 / 0.354482) 0px 0px 0px 3.15095px, rgba(15, 15, 20, 0.35) 0px 8px 18px -14px",
+          "outline": "rgb(104, 100, 188) solid 2px",
+          "rect": {
+            "bottom": 861.75,
+            "height": 44,
+            "left": 1085.9375,
+            "right": 1289,
+            "top": 817.75,
+            "width": 203.0625,
+            "x": 1085.9375,
+            "y": 817.75
+          },
+          "tag": "BUTTON",
+          "text": "Continua· Finiture"
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Giorno",
+          "Lettini per spiaggetta"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      },
+      "raster": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "name": "independent-english-summary-1440",
+      "snapshot": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool Reinforced concrete · 8.0 × 4.0 m\":\n        - generic: Pool\n        - generic: Reinforced concrete · 8.0 × 4.0 m\n      - button \"Water system Skimmer · High water level\":\n        - generic: Water system\n        - generic: Skimmer · High water level\n      - button \"Access & comfort Internal stairs · Sun shelf\":\n        - generic: Access & comfort\n        - generic: Internal stairs · Sun shelf\n      - button \"Finishes PVC liner · Blue Sky [602]\":\n        - generic: Finishes\n        - generic: PVC liner · Blue Sky [602]\n      - button \"Exterior Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm\":\n        - generic: Exterior\n        - generic: Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm\n      - button \"Options Heat pump\":\n        - generic: Options\n        - generic: Heat pump\n      - button \"Presentation In progress\":\n        - generic: Presentation\n        - generic: In progress\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [active] [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\":\n      - generic: Day\n    - button \"Night\" [pressed]:\n      - generic: Night\n  - button \"Start again\":\n    - generic: Start again\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan\n  - toolbar \"View tools\":\n    - button \"Guides\":\n      - text: Guides\n    - button \"Technical view\":\n      - text: Technical view\n    - button \"Reframe\":\n      - text: Reframe\n- 'region \"Step 7: Presentation\"':\n  - paragraph: \"Your finished pool: scene, summary and proposal request.\"\n  - tablist \"Presentation\":\n    - tab \"Scene\"\n    - tab \"Summary\" [selected]\n    - tab \"Request a proposal\"\n  - region \"Save and share\":\n    - paragraph: Your project\n    - paragraph: Not saved yet\n    - paragraph: Save to receive a Project ID, return to it and share it.\n    - button \"Save project\":\n      - text: Save project\n    - button \"Share\":\n      - text: Share\n    - button \"Project Book PDF\":\n      - text: Project Book PDF\n  - img \"Your configured pool\"\n  - paragraph: Your project\n  - heading \"rectangular pool 8.00 × 4.00 m, depth 1.50 m\" [level=2]\n  - paragraph: In-ground pool · Skimmer — classic edge · approx. 34 m³ of water\n  - paragraph: Project ID assigned when saved\n  - heading \"Your pool\" [level=3]\n  - button \"Edit\"\n  - term: Type\n  - definition:\n    - generic: In-ground pool\n  - term: Structure\n  - definition:\n    - generic: Reinforced concrete\n  - term: Dimensions\n  - definition:\n    - generic: rectangular pool 8.00 × 4.00 m, depth 1.50 m\n  - heading \"Waterline\" [level=3]\n  - button \"Edit\"\n  - term: Hydraulic system\n  - definition:\n    - generic: Skimmer — classic edge\n  - term: Skimmer\n  - definition:\n    - generic: High water level · Satin steel\n  - heading \"Materials\" [level=3]\n  - button \"Edit\"\n  - term: Lining\n  - definition:\n    - generic: Motion Blue Sky [602]\n    - generic: Crystal-blue water tones\n  - term: Coping\n  - definition:\n    - generic: Pietra di Prun\n  - term: Paving\n  - definition:\n    - generic: Porcelain stoneware · Greige\n  - term: Paving size\n  - definition:\n    - generic: 60 × 60 cm\n    - generic: Reference dimensions for the visualisation; supply to be confirmed.\n  - heading \"Access and comfort\" [level=3]\n  - button \"Edit\"\n  - term: Included\n  - definition:\n    - generic: Sun shelf loungers · 2\n  - term: Included\n  - definition:\n    - generic: Integrated internal stairs — Straight internal stairs\n  - term: Included\n  - definition:\n    - generic: Sun shelf · total length 3.200 m\n  - heading \"Lighting\" [level=3]\n  - button \"Edit\"\n  - term: Stair options\n  - definition:\n    - generic: LED spotlights in the internal stair risers\n  - term: Equipment\n  - definition:\n    - generic: Underwater LED lighting\n  - term: Lights\n  - definition:\n    - generic: 2 · automatic, indicative sizing\n  - term: Selected colour\n  - definition:\n    - generic: \"#FF0000\"\n  - term: Light brightness\n  - definition:\n    - generic: 61%\n  - heading \"Options\" [level=3]\n  - button \"Edit\"\n  - term: Included\n  - definition:\n    - generic: Heat pump\n  - heading \"Presentation\" [level=3]\n  - button \"Edit\"\n  - term: Time of day\n  - definition:\n    - generic: Night\n  - heading \"To be agreed with your consultant\" [level=3]\n  - list:\n    - listitem: Heating capacity sizing\n    - listitem: Final equipment sizing\n  - generic \"View technical details\"\n  - 'button \"Next option: Request a proposal\"':\n    - text: \"Next option: Request a proposal\"\n  - button \"More options\":\n    - text: More options\n  - paragraph:\n    - text: Phase 07 of 07\n    - generic: · 2/3 · Summary\n  - heading \"Presentation\" [level=2]\n  - paragraph: 8.0 × 4.0 m · ready for a proposal\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue · Request a proposal\":\n    - text: Continue\n    - generic: · Request a proposal\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "review",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "none",
+          "outline": "rgb(170, 166, 237) solid 2px",
+          "rect": {
+            "bottom": 64,
+            "height": 32,
+            "left": 1075.0078125,
+            "right": 1110.515625,
+            "top": 32,
+            "width": 35.5078125,
+            "x": 1075.0078125,
+            "y": 32
+          },
+          "tag": "BUTTON",
+          "text": "English"
+        },
+        "lang": "en",
+        "panelExpanded": [
+          "Minimise"
+        ],
+        "selected": [
+          "English",
+          "Night"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      },
+      "raster": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "name": "independent-local-form-no-submit-1440",
+      "snapshot": "- heading [level=1]: Configuratore piscine 3D\n- banner:\n  - navigation:\n    - list:\n      - button:\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button:\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button:\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button:\n        - generic: Finiture\n        - generic: Liner PVC · Blue Sky [602]\n      - button:\n        - generic: Esterno\n        - generic: Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\n      - button:\n        - generic: Optional\n        - generic: Pompa di calore\n      - button:\n        - generic: Presentazione\n        - generic: In corso\n  - button [pressed]: IT\n  - button: EN\n  - button:\n    - generic: Giorno\n  - button [pressed]:\n    - generic: Notte\n  - button:\n    - generic: Ricomincia\n- main:\n  - button:\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar:\n    - button:\n      - text: Guide\n    - button:\n      - text: Vista tecnica\n    - button:\n      - text: Riquadra\n- region:\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist:\n    - tab: Scena\n    - tab: Riepilogo\n    - tab [selected]: Richiedi proposta\n  - heading [level=3]: Vuoi trasformare questo progetto in una proposta reale?\n  - paragraph: Un consulente verifica configurazione, fattibilità e investimento.\n  - button: Valuta il progetto con un consulente\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 3/3 · Richiedi proposta\n  - heading [level=2]: Presentazione\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button:\n    - text: Vedi la piscina\n  - button [expanded]:\n    - text: Riduci\n  - button:\n    - text: Indietro\n  - button:\n    - text: Richiedi proposta\n- region \"Notifications alt+T\"\n- dialog \"Valuta il progetto con un consulente\":\n  - heading \"Valuta il progetto con un consulente\" [level=2]\n  - paragraph: Pochi dati per farti ricontattare da un consulente Piscine Wellness.\n  - generic: Nome *\n  - textbox \"Nome *\" [active]\n  - generic: Email *\n  - textbox \"Email *\": <redacted>\n  - generic: Telefono *\n  - textbox \"Telefono *\"\n  - generic: Località del progetto *\n  - textbox \"Località del progetto *\"\n  - generic: Quando vuoi realizzarla? *\n  - radiogroup:\n    - radio \"Appena possibile\"\n    - text: Appena possibile\n    - radio \"Entro 3 mesi\"\n    - text: Entro 3 mesi\n    - radio \"3–6 mesi\"\n    - text: 3–6 mesi\n    - radio \"6–12 mesi\"\n    - text: 6–12 mesi\n    - radio \"Sto valutando\"\n    - text: Sto valutando\n  - generic: Note (opzionale)\n  - textbox \"Note (opzionale)\"\n  - checkbox \"Ho letto e accetto l’ informativa sulla privacy . *\"\n  - text: Ho letto e accetto l’\n  - link \"informativa sulla privacy\":\n    - /url: /privacy\n  - text: .\n  - generic: \"*\"\n  - checkbox \"Desidero ricevere comunicazioni commerciali (opzionale).\"\n  - text: Desidero ricevere comunicazioni commerciali (opzionale).\n  - button \"Invia richiesta\"\n  - button \"Chiudi\":\n    - generic: Chiudi",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "review",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(170, 166, 237) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+          "outline": "rgb(241, 241, 244) none 3px",
+          "rect": {
+            "bottom": 239.0234375,
+            "height": 44,
+            "left": 525,
+            "right": 915,
+            "top": 195.0234375,
+            "width": 390,
+            "x": 525,
+            "y": 195.0234375
+          },
+          "tag": "INPUT",
+          "text": ""
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Notte"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      },
+      "raster": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "name": "independent-waterline-day-1440",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Blue Sky [602]\":\n        - generic: Finiture\n        - generic: Liner PVC · Blue Sky [602]\n      - button \"Esterno Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\":\n        - generic: Esterno\n        - generic: Pietra di Prun · Gres porcellanato · Greige · 60 × 60 cm\n      - button \"Optional Pompa di calore\":\n        - generic: Optional\n        - generic: Pompa di calore\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\" [active]:\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\":\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "waterline",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 900,
+              "height": 900,
+              "left": 0,
+              "right": 1440,
+              "top": 0,
+              "width": 1440,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(16, 16, 24, 0.05) 0px 1px 2px 0px, rgba(16, 16, 24, 0.18) 0px 8px 24px -12px",
+          "outline": "rgb(104, 100, 188) solid 2px",
+          "rect": {
+            "bottom": 132,
+            "height": 36,
+            "left": 16,
+            "right": 147.9140625,
+            "top": 96,
+            "width": 131.9140625,
+            "x": 16,
+            "y": 96
+          },
+          "tag": "BUTTON",
+          "text": "Vista della piscina"
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Giorno",
+          "Giorno"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          1440,
+          900,
+          1
+        ]
+      },
+      "raster": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "name": "independent-waterline-day-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\" [active]:\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\":\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "waterline",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(16, 16, 24, 0.05) 0px 1px 2px 0px, rgba(16, 16, 24, 0.18) 0px 8px 24px -12px",
+          "outline": "rgb(104, 100, 188) solid 2px",
+          "rect": {
+            "bottom": 168,
+            "height": 36,
+            "left": 12,
+            "right": 143.9140625,
+            "top": 132,
+            "width": 131.9140625,
+            "x": 12,
+            "y": 132
+          },
+          "tag": "BUTTON",
+          "text": "Vista della piscina"
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Giorno",
+          "Giorno"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      },
+      "raster": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "independent-waterline-night-390",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [active] [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\":\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "waterline",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 844,
+              "height": 844,
+              "left": 0,
+              "right": 390,
+              "top": 0,
+              "width": 390,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "none",
+          "outline": "rgb(170, 166, 237) none 3px",
+          "rect": {
+            "bottom": 55,
+            "height": 34,
+            "left": 261.1953125,
+            "right": 325,
+            "top": 21,
+            "width": 63.8046875,
+            "x": 261.1953125,
+            "y": 21
+          },
+          "tag": "BUTTON",
+          "text": "Notte"
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Notte",
+          "Notte"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          390,
+          844,
+          1
+        ]
+      },
+      "raster": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "independent-overview-night-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\" [active]:\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\":\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "review",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(16, 16, 24, 0.05) 0px 1px 2px 0px, rgba(16, 16, 24, 0.18) 0px 8px 24px -12px",
+          "outline": "oklab(0.95899 0.00116497 -0.00380927 / 0.85) none 3px",
+          "rect": {
+            "bottom": 168,
+            "height": 36,
+            "left": 12,
+            "right": 143.9140625,
+            "top": 132,
+            "width": 131.9140625,
+            "x": 12,
+            "y": 132
+          },
+          "tag": "BUTTON",
+          "text": "Vista della piscina"
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Notte",
+          "Notte"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      },
+      "raster": {
+        "width": 430,
+        "height": 932
+      }
+    },
+    {
+      "name": "independent-slider-fixed-english-430",
+      "snapshot": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool\":\n        - generic: Pool\n      - button \"Water system\":\n        - generic: Water system\n      - button \"Access & comfort\":\n        - generic: Access & comfort\n      - button \"Finishes\":\n        - generic: Finishes\n      - button \"Exterior\":\n        - generic: Exterior\n      - button \"Options\":\n        - generic: Options\n      - button \"Presentation\":\n        - generic: Presentation\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [active] [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\":\n      - generic: Day\n    - button \"Night\" [pressed]:\n      - generic: Night\n  - button \"Start again\":\n- main:\n  - generic: L 8.00 m\n  - generic: W 4.00 m\n  - generic: D 1.50 m\n  - button \"Pool view\":\n    - text: Pool view\n  - status: Structure · Reinforced concrete\n  - button \"Reframe\":\n    - text: Reframe\n  - button \"Expand pool\":\n  - button \"More tools\":\n- 'region \"Step 1: Pool\"':\n  - paragraph: A plan view for length and width, and a section view for depth.\n  - tablist \"Shape and dimensions\":\n    - tab \"Shape\"\n    - tab \"Length and width\" [selected]\n    - tab \"Depth\"\n  - generic: Length\n  - spinbutton \"Length\": \"8\"\n  - generic: m\n  - generic \"Length\":\n    - slider \"Length\"\n  - generic: 3 m\n  - generic: 25 m\n  - generic: Width\n  - spinbutton \"Width\": \"4\"\n  - generic: m\n  - generic \"Width\":\n    - slider \"Width\"\n  - generic: 2 m\n  - generic: 12 m\n  - paragraph: The overhead view shows the plan to scale. Drag the sliders to resize the pool in real time.\n  - paragraph: Calculated values\n  - term: Water volume\n  - definition:\n    - text: \"34.44\"\n    - generic: m³\n  - term: Water surface area\n  - definition:\n    - text: \"32.00\"\n    - generic: m²\n  - term: Interior surface area\n  - definition: 68.00 m²\n  - term: Floor\n  - definition: 32.00 m²\n  - term: Walls\n  - definition: 36.00 m²\n  - term: Perimeter\n  - definition: 24.00 m\n  - 'button \"Next option: Depth\"':\n    - text: \"Next option: Depth\"\n  - button \"More options\":\n    - text: More options\n  - paragraph:\n    - text: Phase 01 of 07\n    - generic: · 2/3 · Length and width\n  - heading \"Pool\" [level=2]\n  - paragraph: Rectangular · 8.00 × 4.00 m · depth 1.50 m\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue\":\n    - text: Continue\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "top",
+              "cameraProjection": "orthographic",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "none",
+          "outline": "rgb(21, 22, 26) none 3px",
+          "rect": {
+            "bottom": 54,
+            "height": 32,
+            "left": 197.7890625,
+            "right": 233.296875,
+            "top": 22,
+            "width": 35.5078125,
+            "x": 197.7890625,
+            "y": 22
+          },
+          "tag": "BUTTON",
+          "text": "English"
+        },
+        "lang": "en",
+        "panelExpanded": [
+          "Minimise"
+        ],
+        "selected": [
+          "English",
+          "Night",
+          "Guides"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      },
+      "raster": {
+        "width": 430,
+        "height": 932
+      }
+    },
+    {
+      "name": "independent-dialog-focus-return-fixed-430",
+      "snapshot": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool\":\n        - generic: Pool\n      - button \"Water system\":\n        - generic: Water system\n      - button \"Access & comfort\":\n        - generic: Access & comfort\n      - button \"Finishes\":\n        - generic: Finishes\n      - button \"Exterior\":\n        - generic: Exterior\n      - button \"Options\":\n        - generic: Options\n      - button \"Presentation\":\n        - generic: Presentation\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\":\n      - generic: Day\n    - button \"Night\" [pressed]:\n      - generic: Night\n  - button \"Start again\":\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - button \"Reframe\":\n    - text: Reframe\n  - button \"Expand pool\":\n  - button \"More tools\":\n- 'region \"Step 7: Presentation\"':\n  - paragraph: \"Your finished pool: scene, summary and proposal request.\"\n  - tablist \"Presentation\":\n    - tab \"Scene\"\n    - tab \"Summary\"\n    - tab \"Request a proposal\" [selected]\n  - heading \"Ready to turn this project into a proposal?\" [level=3]\n  - paragraph: A consultant reviews the configuration, feasibility and investment.\n  - button \"Review your project with a consultant\" [active]\n  - paragraph:\n    - text: Phase 07 of 07\n    - generic: · 3/3 · Request a proposal\n  - heading \"Presentation\" [level=2]\n  - paragraph: 8.0 × 4.0 m · ready for a proposal\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Request a proposal\":\n    - text: Request a proposal\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "review",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(21, 22, 26) 0px 0px 0px 3px, oklab(0.95899 0.00116497 -0.00380927 / 0.45) 0px 0px 0px 4px, rgba(15, 15, 20, 0.35) 0px 8px 18px -14px",
+          "outline": "rgb(170, 166, 237) solid 2px",
+          "rect": {
+            "bottom": 645.984375,
+            "height": 52,
+            "left": 25,
+            "right": 384.6171875,
+            "top": 593.984375,
+            "width": 359.6171875,
+            "x": 25,
+            "y": 593.984375
+          },
+          "tag": "BUTTON",
+          "text": "Review your project with a consultant "
+        },
+        "lang": "en",
+        "panelExpanded": [
+          "Minimise"
+        ],
+        "selected": [
+          "English",
+          "Night"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      },
+      "raster": {
+        "width": 430,
+        "height": 932
+      }
+    },
+    {
+      "name": "independent-overview-day-430",
+      "snapshot": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina\":\n        - generic: Piscina\n      - button \"Sistema acqua\":\n        - generic: Sistema acqua\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [active] [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - button \"Riquadra\":\n    - text: Riquadra\n  - button \"Espandi piscina\":\n  - button \"Altri strumenti\":\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\":\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua\":\n    - text: Continua\n- region \"Notifications alt+T\"",
+      "dom": {
+        "canvas": [
+          {
+            "data": {
+              "cameraFocus": "review",
+              "cameraProjection": "perspective",
+              "engine": "three.js r185"
+            },
+            "rect": {
+              "bottom": 932,
+              "height": 932,
+              "left": 0,
+              "right": 430,
+              "top": 0,
+              "width": 430,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ],
+        "focus": {
+          "boxShadow": "none",
+          "outline": "rgb(104, 100, 188) none 3px",
+          "rect": {
+            "bottom": 55,
+            "height": 34,
+            "left": 227.421875,
+            "right": 299.1953125,
+            "top": 21,
+            "width": 71.7734375,
+            "x": 227.421875,
+            "y": 21
+          },
+          "tag": "BUTTON",
+          "text": "Giorno"
+        },
+        "lang": "it",
+        "panelExpanded": [
+          "Riduci"
+        ],
+        "selected": [
+          "Italiano",
+          "Giorno",
+          "Giorno"
+        ],
+        "url": "http://independent-release-qa.localhost:3003/",
+        "viewport": [
+          430,
+          932,
+          1
+        ]
+      },
+      "raster": {
+        "width": 430,
+        "height": 932
+      }
+    }
+  ],
+  "notVerified": [
+    "Physical smartphone/GPU performance",
+    "Exhaustive all copy and all seven-phase variants in both languages",
+    "Clean saved project false-dirty indicator after language change (this was fresh unsaved local draft)",
+    "Submit/error backend pipeline, consent submission, cloud Save/Share/Copy/PDF/quote/email (intentionally not invoked)",
+    "All pool types/material/camera combinations and frame timing; no repeat broad audit"
+  ],
+  "cloudWrites": 0,
+  "sourceEdits": 0,
+  "status": "SCOPED_INDEPENDENT_REPLAY_COMPLETE; no remaining reproducible blocker in tested subset; not universal release PASS",
+  "clarification": "Two reproduced accessible-name/required findings fixed and actually retested. Focus-return change is hardening, not a proven settled pre-fix regression."
+}

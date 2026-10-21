@@ -2115,3 +2115,56 @@ excluded. No broad repository, backend or customer-data audit repeated.
 
 **Targeted water/night acceptance: KEEP. This does not close unrelated release,
 privacy, hosting or real-phone gates elsewhere in this report.**
+
+## RG — remaining release gates, 22 October 2026
+
+This continuation preserves the full seven-item goal. NW12 is scoped water/night
+evidence, not general release approval. No new broad audit or database mutation.
+
+| ID | Requirement | Current evidence / next acceptance proof | Status |
+|---|---|---|---|
+| RG01 | Commit/push the additional15% ripple slowdown | `0e1b5aa189329fd1e177cc3c8df81a98f6637413`; push completed and exact feature SHA independently read with `git ls-remote`.83wave checks/typecheck/diff PASS. Changes only metric calm-wave time, not amplitude or Infinity flow. | PASS |
+| RG02 | General/grass performance gate retained by owner | Existing qualified three-pair comparison above remains authoritative but inconclusive; NW12 does not isolate grass. No sampling prototype promoted, no quality reduction or repeated unbounded campaign. Requires qualified proof, not baseline low-FPS justification. | NOT VERIFIED / OPEN |
+| RG03 | Independent latest browser QA, IT/EN/errors/accessibility, real phone | E actually replayed seven phases, IT→EN→IT and state, keyboard, water Day/Night,1440/390/430. Two confirmed ARIA defects fixed/retested. Focus restoration verified as hardening, not a proven settled pre-fix defect. Native invalid-input constraints only; no submit/cloud/email. [Actual receipt](evidence/remaining-gates-20261022/independent-release-receipt.json) and11real screenshots. | SCOPED REPLAY PASS; exhaustive language/errors and real phone NOT VERIFIED |
+| RG04 | Hosted Preview on final exact commit | Authenticated Vercel UI confirms Ready Preview `E9q7yc51uJ935TnhmSPFcbro857X`, source0e1b5aa, `https://pool-shaper-lbvkvt36c-daniellamthis-projects.vercel.app`. MCP team access403; existing UI session provides authoritative scope/commit instead, without weakening protection. Final accessibility follow-up not yet deployed/tested. | CHECKPOINT PASS; final runtime NOT VERIFIED |
+| RG05 | Approved configurator request/attachment retention | Owner previously explicitly left duration undefined; precise approval requested again. No invented10year rule. | BLOCKED — owner/consultant decision |
+| RG06 | Backup and actual restoration rehearsal | Source0e1b5aa archived outside Git, restored into isolated persistent folder;1329files/157457509bytes match original Git blob hashes. Exact authorised cloud recovery target requested; none inferred or created. Existing B04 procedure remains. | CODE RESTORE PASS; cloud rows/objects NOT VERIFIED |
+| RG07 | Definitive hosting and real email | Expressly postponed by owner. No production deployment, DNS, sender/domain change or real email during these checks. | DEFERRED, not a production PASS |
+
+Accessibility delta is confined to the existing Radix controls and quote dialog.
+Slider labels/references now reach the interactive thumb, rather than only its
+wrapper. Timing remains the same already-required field; required semantics and
+its translated group name are exposed. A stable ref returns focus to the exact
+opener on close; no form values, validation rules, network handlers, geometry,
+materials, cameras or design are rewritten. React checklist applied to these
+two components only: unconditional stable ref, event-only focus, no new listener,
+state subscription, dependency or render loop. Targeted
+`node scripts/slider-accessibility-audit.mjs`:21markup/wiring checks PASS;
+typecheck/diff-check PASS. Independent actual HMR revalidation confirms dimension
+and Shelf slider IT/EN names, keyboard4→4.1→4 and3.2→3.205→3.2, timing group name
+and required semantics, and completed Escape/Close returning focus to the opener.
+The pre-fix focus reading did not prove the dialog fade had completed: explicitly
+NOT counted as a third confirmed bug. One existing THREE.Clock warning, no console
+error in this sample. E closed its only temporary Chrome QA tab and reset viewport.
+This is not an exhaustive locale, clean-saved dirty-state, backend failure/retry,
+all-system or physical-mobile campaign; historical requirements remain on record.
+
+Persistent source archive:
+`pool-shaper-wip-backups/source-0e1b5aa-20261022.tar.gz`, SHA256
+`870ad595cb899d557d8492f5d1632604d01b5888f20269cc68356cfb65000bb5`.
+Actual extraction: `pool-shaper-wip-backups/source-restore-20261022-e9ZYaY`.
+Every restored tracked blob verified, including symlink handling; no tracked.env
+file allowed. Local ignored credentials were not archived. Accessibility WIP
+separately preserved in `release-accessibility-wip-20261022.tar.gz`.
+Neither this local code rehearsal nor GitHub replaces database/private-object
+backups, an off-device strategy, approved RPO/RTO or an isolated cloud rehearsal.
+
+Independent read-only performance interpretation confirms no further proven
+eliminable bottleneck from existing receipts. The historical+20.24% is not a
+measurement of current HEAD, and the qualified8.5→8.8ms comparison tests an
+unpromoted prototype, not recovery by the primary six-read material. Next bounded
+diagnostic, if executed: same current production code/overlay/qualified fixture,
+change only photographic versus original procedural grass material, three warm
+Overview Day pairs, identical Experience4096/planar tier/camera/viewport, one scene
+active and no GPU query. That would isolate material cost, not automatically close
+P01raw→wet latency. No new performance PASS inferred or appearance reduced.

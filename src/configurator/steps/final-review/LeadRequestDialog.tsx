@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -69,6 +69,7 @@ export function LeadRequestDialog({
   defaultCustomer?: { name: string; email: string; phone: string; projectLocation?: string; notes?: string };
 }) {
   const { t } = useI18n();
+  const requestTrigger = useRef<HTMLButtonElement>(null);
   const incompatible = comfortConfigurationIssues(projectConfiguration.config).length > 0;
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
@@ -146,14 +147,20 @@ export function LeadRequestDialog({
   return (
     <>
       {incompatible ? <p role="status" className="text-xs text-muted-foreground">{t(COMFORT_RESOLUTION_MESSAGE)}</p> : null}
-      <Button type="button" size="lg" className="mt-1" disabled={incompatible} onClick={() => setOpen(true)}>
+      <Button ref={requestTrigger} type="button" size="lg" className="mt-1" disabled={incompatible} onClick={() => setOpen(true)}>
         {t("Valuta il progetto con un consulente")}{" "}</Button>
 
       <Dialog
         open={open}
         onOpenChange={(next) => !next && status !== "submitting" && setOpen(next)}
       >
-        <DialogContent className="max-w-md gap-6 rounded-2xl border-hairline p-7">
+        <DialogContent
+          className="max-w-md gap-6 rounded-2xl border-hairline p-7"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            requestTrigger.current?.focus();
+          }}
+        >
           {status === "success" ? (
             <div className="flex flex-col items-center gap-4 py-4 text-center">
               <DialogHeader className="gap-2">
@@ -222,6 +229,8 @@ export function LeadRequestDialog({
                     {t("Quando vuoi realizzarla?")}{" "}<span className="text-brand">*</span>
                   </span>
                   <RadioGroup
+                    aria-label={t("Quando vuoi realizzarla?")}
+                    required
                     value={form.timing}
                     onValueChange={(v) => set("timing", v as LeadTimingId)}
                     className="gap-2.5"
