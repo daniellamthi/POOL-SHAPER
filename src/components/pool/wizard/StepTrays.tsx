@@ -55,7 +55,6 @@ import { EXTERIOR_PANEL_FINISHES, exteriorPanelFinish } from "@/lib/pool/above-g
 import { Illustration } from "./illustrations";
 import { ProductMedia, hasProductMedia } from "./product-media";
 import { configuredSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
-import { sunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
 import { SUN_SHELF_WATER_DEPTH } from "@/lib/pool/sun-shelf-model";
 import { SunShelfLoungerColorPicker } from "./SunShelfLoungerColorPicker";
 import { configuredSunShelfRange, sunShelfRunWithinRange } from "@/lib/pool/sun-shelf-range";
@@ -746,7 +745,8 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             <ChoiceGrid label={t("Optional per la spiaggetta")}>
               <ChoiceCard optional title={t("Lettini per spiaggetta")}
                 description={t("Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.")}
-                image={<span aria-hidden="true" className="size-8 rounded-full border border-foreground/20" style={{backgroundColor: sunShelfLoungerColor(config.sunShelfLoungerColor).hex}} />}
+                image="/product-previews/esse-white.jpg"
+                imageFit="contain"
                 selected={config.features.includes("sunShelfLoungers")} disabled={!shelfLoungers.available && !config.features.includes("sunShelfLoungers")}
                 onSelect={() => togglePoolFeature("sunShelfLoungers")} />
             </ChoiceGrid>

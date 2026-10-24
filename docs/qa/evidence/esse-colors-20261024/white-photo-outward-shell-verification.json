@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-24",
+  "scope": "White product thumbnail and faithful outward rendering of owner-supplied Esse CAD",
+  "cause": "Source closed shell had inward triangle winding and normals; front-face culling exposed its underside",
+  "fix": "Reverse triangle winding and vertex normals only; retain every vertex position and UV",
+  "sourceSignedVolumeM3": -0.13219237627060187,
+  "dimensionsMetresWidthHeightLength": [0.7319631576538086, 0.5701819062232971, 1.8456166982650757],
+  "preserved": ["CAD shape and dimensions", "lounger placements", "10 cm shelf immersion", "six colour swatches", "exterior loungers", "unrelated WIP"],
+  "tests": {
+    "cadSourceComparison": "PASS: 84 checks, original source compared, outward FrontSide seating surface raycast",
+    "statePersistence": "PASS: 202 offline checks",
+    "typecheck": "PASS: tsc --noEmit",
+    "diffCheck": "PASS",
+    "browser": "Integrated browser: white photo remains fixed, white and aquamarine change actual CAD colour, quantity remains 2; corrected shell visible with water in Presentation; no console errors"
+  },
+  "screenshots": ["white-product-wizard.jpg", "outward-shell-white.jpg"],
+  "photoProvenance": "public/product-previews/esse-white.source.json",
+  "limitations": "Targeted desktop browser verification; no new mobile, cloud or performance claim"
+}

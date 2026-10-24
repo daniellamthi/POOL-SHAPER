@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { build } from "rolldown";
-import { Matrix4 } from "three";
+import { Matrix4, Vector3, Mesh, MeshBasicMaterial, Raycaster } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "meshoptimizer";
 import { readEsseSource } from "./prepare-esse-chaise.mjs";
@@ -35,14 +35,32 @@ for (let i = 0; i < position.count; i++) {
   if (position.getZ(i) > 0.7) foot = Math.max(foot, position.getY(i));
 }
 check(head > foot + 0.3, "+Z points to feet, not backrest");
+// Independent rendering regression: the outward seating surface must survive
+// default front-face culling, rather than showing the inside of the shell.
+const a = new Vector3(), b = new Vector3(), c = new Vector3(), cross = new Vector3();
+let signedVolume = 0;
+for (let i = 0; i < geometry.index.count; i += 3) {
+  a.fromBufferAttribute(position, geometry.index.getX(i));
+  b.fromBufferAttribute(position, geometry.index.getX(i + 1));
+  c.fromBufferAttribute(position, geometry.index.getX(i + 2));
+  signedVolume += a.dot(cross.crossVectors(b, c)) / 6;
+}
+check(signedVolume > 0.13 && signedVolume < 0.14, "closed shell faces outward");
+const testMaterial = new MeshBasicMaterial();
+const testMesh = new Mesh(geometry, testMaterial);
+testMesh.updateMatrixWorld();
+const ray = new Raycaster(new Vector3(0.12, 2, -0.65), new Vector3(0, -1, 0));
+const surface = ray.intersectObject(testMesh)[0];
+check(surface && surface.point.y > 0.42 && surface.point.y < 0.43 && surface.face.normal.y > 0.8, "FrontSide renders the backrest seating face, not the underside");
+testMaterial.dispose();
 if (process.argv[2]) {
   const source = readEsseSource(process.argv[2]);
   check(source.sourceSha256 === receipt.sourceSha256, "owner source identity");
   for (const [name, attribute] of Object.entries(source.geometry.attributes)) {
     const decoded = geometry.attributes[name];
-    check(decoded?.array.length === attribute.array.length && attribute.array.every((value, index) => value === decoded.array[index]), `${name}: exact lossless round trip, no shape/smoothing/UV changes`);
+    check(decoded?.array.length === attribute.array.length && attribute.array.every((value, index) => (name === "normal" ? -value : value) === decoded.array[index]), `${name}: exact source values, normals outward, no shape/smoothing/UV changes`);
   }
-  check(source.geometry.index.array.every((value, index) => value === geometry.index.array[index]), "all original triangles and winding preserved exactly");
+  check(source.geometry.index.array.every((value, index) => value === geometry.index.array[index % 3 === 0 ? index : index % 3 === 1 ? index + 1 : index - 1]), "all original triangles retained with outward winding");
   source.geometry.dispose();
 }
 const component = readFileSync("src/components/pool/three/SunShelfLoungers.tsx", "utf8");

@@ -436,7 +436,7 @@ for (const invalid of ["unknown", "#ff0000", "", null, 42, {}]) {
 }
 equal(SUN_SHELF_WATER_DEPTH, 0.1, "actual shelf uses approved water depth, not only copy");
 const tray = readFileSync("src/components/pool/wizard/StepTrays.tsx", "utf8");
-check(!tray.includes("lympha-immersed.jpg"), "no chaise photograph in wizard");
+check(tray.includes('image="/product-previews/esse-white.jpg"') && !tray.includes("lympha-immersed.jpg"), "owner-requested white product photo in wizard");
 const picker = readFileSync("src/components/pool/wizard/SunShelfLoungerColorPicker.tsx", "utf8");
 check(!picker.includes("<img") && picker.includes("aria-pressed") && picker.includes('size-11'), "accessible colour chips only, with touch-size controls");
 console.log(

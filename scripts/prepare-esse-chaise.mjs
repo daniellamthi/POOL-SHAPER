@@ -1,4 +1,4 @@
-/** Owner-supplied CAD. Rigid axis change + uniform cm-to-m conversion only.
+/** Owner-supplied CAD. Metric conversion and outward surface orientation.
  * Meshopt is lossless: no decimation, quantization, smoothing or remodelling. */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
@@ -33,6 +33,28 @@ export function readEsseSource(path) {
 
 export async function prepareEsse(path) {
   const { geometry, sourceSha256, sourceBytes } = readEsseSource(path);
+  // The supplied closed shell is wound inward. FrontSide otherwise culls the
+  // seating surface and exposes the underside. Preserve every vertex/UV and
+  // triangle, correcting only winding and the corresponding normal direction.
+  const position = geometry.attributes.position;
+  const a = new Vector3(), b = new Vector3(), c = new Vector3(), cross = new Vector3();
+  let sourceSignedVolume = 0;
+  for (let i = 0; i < geometry.index.count; i += 3) {
+    a.fromBufferAttribute(position, geometry.index.getX(i));
+    b.fromBufferAttribute(position, geometry.index.getX(i + 1));
+    c.fromBufferAttribute(position, geometry.index.getX(i + 2));
+    sourceSignedVolume += a.dot(cross.crossVectors(b, c)) / 6;
+  }
+  const reversedSurfaceOrientation = sourceSignedVolume < 0;
+  if (reversedSurfaceOrientation) {
+    for (let i = 0; i < geometry.index.count; i += 3) {
+      const second = geometry.index.getX(i + 1);
+      geometry.index.setX(i + 1, geometry.index.getX(i + 2));
+      geometry.index.setX(i + 2, second);
+    }
+    const normals = geometry.attributes.normal.array;
+    for (let i = 0; i < normals.length; i++) normals[i] = -normals[i];
+  }
   await MeshoptEncoder.ready;
   const parts = [], views = [], accessors = [];
   let packedOffset = 0, unpackedOffset = 0;
@@ -78,7 +100,8 @@ export async function prepareEsse(path) {
     vertices: geometry.attributes.position.count, triangles: geometry.index.count / 3,
     dimensionsMetres: geometry.boundingBox.getSize(new Vector3()).toArray(), min: geometry.boundingBox.min.toArray(), max: geometry.boundingBox.max.toArray(),
     transform: "Uniform 0.01 scale, proper rigid axis rotation, horizontal centering and grounding; +Z feet",
-    geometryChanges: "None beyond unit/axis/origin conversion; all triangles, source normals and UVs retained", compression: "EXT_meshopt_compression, lossless, no filters" };
+    geometryChanges: "Unit/axis/origin conversion and inward-to-outward winding/normal correction only; all vertex positions, triangles and UVs retained",
+    sourceSignedVolume, reversedSurfaceOrientation, compression: "EXT_meshopt_compression, lossless, no filters" };
   writeFileSync("public/models/esse-sun-shelf.json", JSON.stringify(receipt, null, 2) + "\n");
   console.log(JSON.stringify(receipt, null, 2));
   geometry.dispose();
