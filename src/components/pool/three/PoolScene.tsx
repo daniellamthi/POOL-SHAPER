@@ -161,6 +161,7 @@ export interface SceneProps {
   /** Export framing ignores DOM panels without changing the configured pool. */
   cleanCapture?: boolean;
   sunShelfLoungerCount?: number;
+  sunShelfLoungerColor?: import("@/lib/pool/sun-shelf-lounger-colors").SunShelfLoungerColorId;
   sunShelfRun?: number;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
@@ -1168,6 +1169,7 @@ export default function PoolScene({
   photoMode,
   cleanCapture = false,
   sunShelfLoungerCount,
+  sunShelfLoungerColor = "white",
   sunShelfRun,
   photoModeQuality,
   onPhotoModeUnsupported,
@@ -1707,7 +1709,7 @@ export default function PoolScene({
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />
-      {features.includes("sunShelfLoungers") && (construction?.showAccessories ?? true) ? <SunShelfLoungers plan={shelfLoungerPlan} /> : null}
+      {features.includes("sunShelfLoungers") && (construction?.showAccessories ?? true) ? <SunShelfLoungers plan={shelfLoungerPlan} color={sunShelfLoungerColor} /> : null}
       {coverPlan.geometry && !photoMode && (construction?.showWater ?? true) ? <AutomaticCover plan={coverPlan} /> : null}
       {technicalView && !photoMode && system === "skimmer" ? skimmers.positions.map((point, index) => (
         <mesh key={`technical-skimmer-${index}`} name="technical-skimmer-marker" position={[point.x, verticalLayout.waterY + 0.075, point.z]}>

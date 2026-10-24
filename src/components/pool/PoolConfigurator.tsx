@@ -638,6 +638,7 @@ function ConfiguratorLayout() {
             technicalView={technicalView && !cleanCapture}
             cleanCapture={cleanCapture}
             {...(config.sunShelfLoungerCount !== undefined ? {sunShelfLoungerCount: config.sunShelfLoungerCount} : {})}
+            {...(config.sunShelfLoungerColor !== undefined ? {sunShelfLoungerColor: config.sunShelfLoungerColor} : {})}
             {...(config.dimensions.sunShelfRun !== undefined ? {sunShelfRun: config.dimensions.sunShelfRun} : {})}
             technicalPlan={technical}
             onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}

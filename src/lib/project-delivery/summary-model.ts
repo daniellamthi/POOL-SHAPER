@@ -17,6 +17,8 @@ import { RENOVATION_AREA_LABEL, FILTRATION_WORK_LABEL, STRUCTURE_ISSUE_LABEL, EQ
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { localizeSummaryModel, translateText, formatNumericText, formatNumber as localeNumber, type Locale } from "@/lib/i18n";
 import { configuredSunShelfLoungers } from "@/lib/pool/sun-shelf-loungers";
+import { sunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
+import { SUN_SHELF_WATER_DEPTH } from "@/lib/pool/sun-shelf-model";
 import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
@@ -237,7 +239,7 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
       : { hex: linerColor?.hex ?? "#dfe9ec", texture: linerColor?.texture };
 
   const comfortItems = [
-    ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity}`] : []),
+    ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity} · ${t(sunShelfLoungerColor(config.sunShelfLoungerColor).label)}`] : []),
     ...(config.poolAccess
       ? [
           config.poolAccess === "internalSteps"
@@ -261,7 +263,8 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
             : "Idromassaggio A"
           : id === "externalStaircase" && config.poolType === "above-ground"
             ? `${POOL_FEATURE_LABEL[id]} — ${config.externalStairSide === "long" ? "lato lungo" : "lato corto"} · piattaforma prolungata inclusa`
-            : id === "sunShelf" ? t("Sun Shelf · lunghezza complessiva {run} m", {
+            : id === "sunShelf" ? t("Sun Shelf · lunghezza complessiva {run} m · acqua {depth} cm", {
+                depth: localeNumber((resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.waterDepth ?? SUN_SHELF_WATER_DEPTH) * 100, locale),
                 run: formatNumber(config.dimensions.sunShelfRun ?? resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.run ?? 0, 3),
               }) : POOL_FEATURE_LABEL[id],
       ),

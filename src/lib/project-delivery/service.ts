@@ -94,7 +94,7 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
     "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
     "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "sceneTime", "infinityEdge", "poolAccess",
     "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
-    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount",
+    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount", "sunShelfLoungerColor",
   ]);
   config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "sunShelfRun", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
   if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection", "wallType"]);

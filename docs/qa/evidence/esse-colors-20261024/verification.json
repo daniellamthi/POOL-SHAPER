@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-24",
+  "scope": "Esse sun-shelf lounger colours and owner-approved 10 cm water depth only",
+  "baseCommit": "a25314abf95bea4b9cfe129e552549240f182a33",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "ownerApproval": "Sì, spiaggetta a 10 cm d’acqua",
+  "implementation": {
+    "default": "white",
+    "colourIds": ["white", "agt", "amb", "aqm", "fer", "gda"],
+    "colourSource": "Owner-supplied LT302-0001M1 colour photographs; descriptive labels and display approximations, not certified swatches",
+    "wizard": "Native labelled 44 px colour buttons; selected state; no lounger photograph",
+    "actualShelfWaterDepthMetres": 0.1,
+    "productMaximumWaterDepthMetres": 0.2,
+    "support": "CAD base remains on the actual platform; no floating offset or rescaling",
+    "assetSha256Unchanged": "ee3ed89f13a4ef203df3f80e6857cf4c738b8dff640035fe9d0e2c13bac1bcf8",
+    "materialUpdate": "Shared geometry and material; colour uniform changes only",
+    "unrelatedExteriorLoungers": "unchanged"
+  },
+  "browser": {
+    "url": "http://esse-qa.localhost:3003/",
+    "configuration": "Local synthetic 10 x 4.5 m Skimmer, internal stairs, Sun Shelf, two loungers, day",
+    "desktop": "Six actual button clicks and six visually inspected 3D colours; finished-pool 10 cm immersion inspected separately",
+    "mobile": "390 x 844 and 430 x 932 viewport emulation, not physical phones; chips fit, selected colour updates real model, quantity retained",
+    "persistence": "IT to EN, local reload, restored selected Light green and quantity 2; returned to IT and white",
+    "summary": "Observed Italian summary with quantity 2, Bianco, and actual water depth 10 cm",
+    "errors": [],
+    "screenshots": {
+      "0.jpg": "White",
+      "1.jpg": "Lime green",
+      "2.jpg": "Taupe grey",
+      "3.jpg": "Aquamarine",
+      "4.jpg": "Blue grey",
+      "5.jpg": "Light green",
+      "mobile-390.jpg": "Aquamarine colour picker, mobile viewport emulation",
+      "mobile-430.jpg": "White colour picker, mobile viewport emulation",
+      "white-water-10cm.jpg": "Finished pool, white CAD loungers and 10 cm water above the platform"
+    }
+  },
+  "targetedChecks": {
+    "node scripts/sun-shelf-state-audit.mjs": "PASS: 202 production reducer, colour, canonical persistence, shared snapshot, Photo Spec, IT/EN summary and quote-schema checks; offline",
+    "node scripts/esse-chaise-audit.mjs <owner-supplied 3ds>": "PASS: 82 checks including unchanged source geometry and seven placements",
+    "node scripts/run-sun-shelf-range-audit.mjs": "PASS: 22392 checks, 288 cases, 980 rendered geometry samples",
+    "tsc --noEmit": "PASS",
+    "eslint new colour picker and SunShelfLoungers components": "PASS",
+    "git diff --check": "PASS"
+  },
+  "limits": [
+    "No live cloud writes, email submissions, or fresh PDF download; shared canonical data, PDF summary model and quote validation verified offline",
+    "No new GPU performance claim or physical-phone verification; existing release/performance gates remain unchanged",
+    "No full build or broad audit repeated for this targeted task",
+    "Pre-existing unrelated WIP is preserved separately from this task commit"
+  ]
+}

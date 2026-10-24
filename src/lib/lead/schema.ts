@@ -14,6 +14,7 @@ import { buildOutline } from "@/lib/pool/geometry";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "./types";
 import { isRenovationConfig } from "@/lib/pool/renovation";
+import { isSunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
 import { comfortConfigurationIssues, COMFORT_RESOLUTION_MESSAGE } from "@/lib/pool/comfort-compatibility";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -53,6 +54,7 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (typeof configValue !== "object" || configValue === null) return false;
 
   const config = configValue as Record<string, unknown>;
+  if (config["sunShelfLoungerColor"] !== undefined && !isSunShelfLoungerColor(config["sunShelfLoungerColor"])) return false;
   if (!PROJECT_TYPE_IDS.has(config["projectType"] as string | null)) return false;
   if (!POOL_TYPE_IDS.has(config["poolType"] as string | null)) return false;
   if (!["rectangle", "l-shape", "custom"].includes(config["shape"] as string)) return false;

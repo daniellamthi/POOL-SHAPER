@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
 import { normalizeSunShelfLoungers, configuredSunShelfLoungers } from "./sun-shelf-loungers";
+import { isSunShelfLoungerColor, sunShelfLoungerColor, type SunShelfLoungerColorId } from "./sun-shelf-lounger-colors";
 import { focusForAction, nextFocusRequest, type FocusRequest } from "./contextual-camera";
 import { copingMaterialForPool } from "./coping-materials";
 import { isReferenceFinish } from "./reference-finishes";
@@ -118,6 +119,7 @@ type Action =
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
   | { type: "setSunShelfLoungerCount"; value: number }
+  | { type: "setSunShelfLoungerColor"; value: SunShelfLoungerColorId }
   | { type: "setSunShelfRun"; value: number }
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
@@ -254,6 +256,11 @@ function reduceConfiguration(state: State, action: Action): State {
     case "setSunShelfLoungerCount":
       return config.features.includes("sunShelfLoungers") && Number.isFinite(action.value)
         ? { ...state, sunShelfNotice: null, config: { ...config, sunShelfLoungerCount: Math.max(1, Math.trunc(action.value)) } }
+        : state;
+    case "setSunShelfLoungerColor":
+      return config.features.includes("sunShelfLoungers") && isSunShelfLoungerColor(action.value)
+        && sunShelfLoungerColor(config.sunShelfLoungerColor).id !== action.value
+        ? { ...state, config: { ...config, sunShelfLoungerColor: action.value } }
         : state;
     case "setLedColor":
       return isLedColor(action.value)
@@ -942,6 +949,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
       setSunShelfLoungerCount: (v) => dispatch({ type: "setSunShelfLoungerCount", value: v }),
+      setSunShelfLoungerColor: (v) => dispatch({ type: "setSunShelfLoungerColor", value: v }),
       setSunShelfRun: (v) => dispatch({ type: "setSunShelfRun", value: v }),
       sunShelfNotice: state.sunShelfNotice ?? null,
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),

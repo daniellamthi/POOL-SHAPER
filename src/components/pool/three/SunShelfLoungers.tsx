@@ -1,11 +1,15 @@
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import type {} from "@react-three/fiber";
 import { Mesh, MeshPhysicalMaterial } from "three";
 import { type SunShelfLoungerPlan } from "@/lib/pool/sun-shelf-loungers";
+import {
+  sunShelfLoungerColor,
+  type SunShelfLoungerColorId,
+} from "@/lib/pool/sun-shelf-lounger-colors";
 const ESSE_ASSET = "/models/esse-sun-shelf.glb";
 
-function useChaiseResources() {
+function useChaiseResources(color?: SunShelfLoungerColorId) {
   // Cached once, requested only when a chaise is actually rendered. The asset
   // is already metric/grounded: no per-placement scaling or geometry changes.
   const { scene } = useGLTF(ESSE_ASSET, false, true);
@@ -13,7 +17,7 @@ function useChaiseResources() {
   const material = useMemo(
     () =>
       new MeshPhysicalMaterial({
-        color: "#a9cfca",
+        color: "#ffffff",
         roughness: 0.48,
         metalness: 0,
         clearcoat: 0.18,
@@ -21,6 +25,11 @@ function useChaiseResources() {
       }),
     [],
   );
+  const hex = sunShelfLoungerColor(color).hex;
+  // Colour is a uniform-only update: no geometry, shadow-map or shader rebuild.
+  useLayoutEffect(() => {
+    material.color.set(hex);
+  }, [material, hex]);
   useEffect(
     () => () => {
       // useGLTF owns the shared geometry cache; disposing it here would break
@@ -49,16 +58,28 @@ function SunShelfChaiseMesh() {
 }
 
 /** Independent from exterior DeckLoungers. No scale, lights or animation. */
-export function SunShelfLoungers({ plan }: { plan: SunShelfLoungerPlan }) {
+export function SunShelfLoungers({
+  plan,
+  color = "white",
+}: {
+  plan: SunShelfLoungerPlan;
+  color?: SunShelfLoungerColorId;
+}) {
   return plan.enabled ? (
     <Suspense fallback={null}>
-      <SunShelfLoungerMeshes plan={plan} />
+      <SunShelfLoungerMeshes plan={plan} color={color} />
     </Suspense>
   ) : null;
 }
 
-function SunShelfLoungerMeshes({ plan }: { plan: SunShelfLoungerPlan }) {
-  const resources = useChaiseResources();
+function SunShelfLoungerMeshes({
+  plan,
+  color,
+}: {
+  plan: SunShelfLoungerPlan;
+  color: SunShelfLoungerColorId;
+}) {
+  const resources = useChaiseResources(color);
   return (
     <group name="sun-shelf-loungers">
       {plan.placements.map((placement, index) => (

@@ -55,6 +55,9 @@ import { EXTERIOR_PANEL_FINISHES, exteriorPanelFinish } from "@/lib/pool/above-g
 import { Illustration } from "./illustrations";
 import { ProductMedia, hasProductMedia } from "./product-media";
 import { configuredSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
+import { sunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
+import { SUN_SHELF_WATER_DEPTH } from "@/lib/pool/sun-shelf-model";
+import { SunShelfLoungerColorPicker } from "./SunShelfLoungerColorPicker";
 import { configuredSunShelfRange, sunShelfRunWithinRange } from "@/lib/pool/sun-shelf-range";
 import { useI18n } from "@/lib/i18n";
 
@@ -474,6 +477,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     toggleInoxLadder,
     setExternalStairSide,
     setSunShelfLoungerCount,
+    setSunShelfLoungerColor,
     setSunShelfRun,
     sunShelfNotice,
   } = useConfigurator();
@@ -694,7 +698,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             {shelfOn || shelfProposal.availability.sunShelf.available ? (
               <ChoiceCard
                 title={t("Sun shelf")}
-                description={t("Solarium sommerso a 20 cm per sdraiarsi in acqua.")}
+                description={t("Solarium sommerso a {depth} cm per sdraiarsi in acqua.", {depth: number(SUN_SHELF_WATER_DEPTH * 100)})}
                 image={ill("comfort-sunShelf")}
                 selected={comfortChoice === "sunShelf"}
                 disabled={!shelfProposal.availability.sunShelf.available}
@@ -721,7 +725,8 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             <p className="text-xs text-muted-foreground">{t("Intervallo utile: {min}–{max} m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.", {
               min: number(shelfRange.min, { maximumFractionDigits: 3 }), max: number(shelfRange.max, { maximumFractionDigits: 3 }),
             })}</p>
-            <p className="text-xs text-muted-foreground">{t("Larghezza utile della spiaggetta: {width} m. Acqua: 20 cm. Criteri progettuali preliminari, da verificare tecnicamente.", {
+            <p className="text-xs text-muted-foreground">{t("Larghezza utile della spiaggetta: {width} m. Acqua: {depth} cm. Criteri progettuali preliminari, da verificare tecnicamente.", {
+              depth: number(SUN_SHELF_WATER_DEPTH * 100),
               width: number(shelfRange.width, { maximumFractionDigits: 3 }),
             })}</p>
             {shelfRunInvalid ? <div role="alert" className="flex flex-col items-start gap-2 text-xs text-destructive">
@@ -741,11 +746,11 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             <ChoiceGrid label={t("Optional per la spiaggetta")}>
               <ChoiceCard optional title={t("Lettini per spiaggetta")}
                 description={t("Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.")}
-                image="/product-previews/lympha-immersed.jpg"
-                imageFit="contain"
+                image={<span aria-hidden="true" className="size-8 rounded-full border border-foreground/20" style={{backgroundColor: sunShelfLoungerColor(config.sunShelfLoungerColor).hex}} />}
                 selected={config.features.includes("sunShelfLoungers")} disabled={!shelfLoungers.available && !config.features.includes("sunShelfLoungers")}
                 onSelect={() => togglePoolFeature("sunShelfLoungers")} />
             </ChoiceGrid>
+            {config.features.includes("sunShelfLoungers") ? <SunShelfLoungerColorPicker value={config.sunShelfLoungerColor} onChange={setSunShelfLoungerColor} /> : null}
             {shelfLoungers.available ? <>
               <p className="text-xs text-muted-foreground">{t("Quantità consentite: da 1 a {count}.", { count: number(shelfLoungers.capacity) })}</p>
               {config.features.includes("sunShelfLoungers") ? <label className="flex items-center gap-3 text-sm">

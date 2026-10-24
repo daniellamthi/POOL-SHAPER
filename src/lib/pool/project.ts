@@ -16,6 +16,7 @@
 import { exteriorPanelFinish, externalStairSide } from "./above-ground";
 import { normalizeComfortFeatures } from "./comfort-selection";
 import { normalizeSunShelfLoungers } from "./sun-shelf-loungers";
+import { isSunShelfLoungerColor } from "./sun-shelf-lounger-colors";
 import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
@@ -120,6 +121,9 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // commercial email, quotation -- sees a real number instead of each having
   // to guess a fallback of its own.
   const restored = config as PoolConfig;
+  if (restored.sunShelfLoungerColor !== undefined && !isSunShelfLoungerColor(restored.sunShelfLoungerColor)) {
+    throw new Error("ProjectConfiguration: invalid sunShelfLoungerColor");
+  }
   // Preserve a positive requested run even when a later resize makes it
   // incompatible; malformed persisted values must never reach numeric UI.
   const shelfRun = restored.dimensions?.sunShelfRun;

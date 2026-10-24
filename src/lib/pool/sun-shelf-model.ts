@@ -17,7 +17,9 @@ export const SUN_SHELF_LOUNGER_MODEL = {
   supportLength: 1.2,
 } as const;
 
-export const SUN_SHELF_WATER_DEPTH = 0.2;
+/** Owner-approved 10 cm immersion, with the chaise supported on the platform.
+ * The manufacturer's maximum admissible water depth above remains 20 cm. */
+export const SUN_SHELF_WATER_DEPTH = 0.1;
 export const DECK_CHAISE_MODEL = {
   reference: "Lyxo Esse Frame · LT303-0001M1",
   length: 1.85,
