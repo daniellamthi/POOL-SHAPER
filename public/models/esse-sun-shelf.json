@@ -1,0 +1,28 @@
+{
+  "source": "ESSE lettino.3ds",
+  "provenance": "Owner-supplied CAD, 24 October 2026; original retained privately, not modified",
+  "sourceSha256": "19aaea95ac58294254f07468ec32c2153e23909b1ee37f7f0ad0b69aa9cf9ccf",
+  "sourceBytes": 1473126,
+  "assetSha256": "ee3ed89f13a4ef203df3f80e6857cf4c738b8dff640035fe9d0e2c13bac1bcf8",
+  "assetBytes": 868156,
+  "vertices": 34663,
+  "triangles": 55658,
+  "dimensionsMetres": [
+    0.7319631576538086,
+    0.5701819062232971,
+    1.8456166982650757
+  ],
+  "min": [
+    -0.3659815788269043,
+    0,
+    -0.9228083491325378
+  ],
+  "max": [
+    0.3659815788269043,
+    0.5701819062232971,
+    0.9228083491325378
+  ],
+  "transform": "Uniform 0.01 scale, proper rigid axis rotation, horizontal centering and grounding; +Z feet",
+  "geometryChanges": "None beyond unit/axis/origin conversion; all triangles, source normals and UVs retained",
+  "compression": "EXT_meshopt_compression, lossless, no filters"
+}

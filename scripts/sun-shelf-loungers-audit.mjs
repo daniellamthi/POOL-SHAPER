@@ -19,7 +19,8 @@ await build({
         id === "sun-shelf-loungers-audit-entry"
           ? `
       export * from "${join(process.cwd(), "src/lib/pool/sun-shelf-loungers.ts")}";
-      export { createSunShelfChaiseGeometry } from "${join(process.cwd(), "src/components/pool/three/SunShelfLoungers.tsx")}";
+      // Legacy procedural shell remains the exterior Frame model only.
+      export { createLymphaShellGeometry } from "${join(process.cwd(), "src/components/pool/three/LymphaChaiseGeometry.ts")}";
       export { createLymphaFrameGeometry, createLymphaCushionGeometry } from "${join(process.cwd(), "src/components/pool/three/LymphaChaiseGeometry.ts")}";
       export { DECK_CHAISE_MODEL } from "${join(process.cwd(), "src/lib/pool/sun-shelf-model.ts")}";
       export { DEFAULT_DIMENSIONS, DEFAULT_CONTROL_POINTS, DEFAULT_CUSTOMER } from "${join(process.cwd(), "src/lib/pool/config.ts")}";
@@ -38,7 +39,7 @@ const {
   configuredSunShelfLoungers,
   normalizeSunShelfLoungers,
   resolveSunShelfLoungers,
-  createSunShelfChaiseGeometry,
+  createLymphaShellGeometry,
   createLymphaFrameGeometry,
   createLymphaCushionGeometry,
   DECK_CHAISE_MODEL,
@@ -266,14 +267,14 @@ check(
   !missing.features.includes("sunShelfLoungers") && missing.sunShelfLoungerCount === undefined,
   "clear dependent selection",
 );
-const geometry = createSunShelfChaiseGeometry(),
+const geometry = createLymphaShellGeometry(),
   box = geometry.boundingBox;
 check(
   Math.abs(box.max.x - box.min.x - model.width) < 1e-6 &&
     Math.abs(box.max.y - box.min.y - model.height) < 1e-6 &&
     Math.abs(box.max.z - box.min.z - model.length) < 1e-6 &&
     Math.abs(box.min.y) < 1e-7,
-  "fixed mesh envelope rests at zero",
+  "legacy exterior shell envelope rests at zero (imported immersed CAD audited separately)",
 );
 const positions = geometry.getAttribute("position");
 check(Array.from(positions.array).every(Number.isFinite), "finite mesh");

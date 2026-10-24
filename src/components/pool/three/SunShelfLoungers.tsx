@@ -1,15 +1,15 @@
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
+import { useGLTF } from "@react-three/drei";
 import type {} from "@react-three/fiber";
-import { MeshPhysicalMaterial } from "three";
+import { Mesh, MeshPhysicalMaterial } from "three";
 import { type SunShelfLoungerPlan } from "@/lib/pool/sun-shelf-loungers";
-import { createLymphaShellGeometry } from "./LymphaChaiseGeometry";
-
-/** Original schematic in-pool resin chaise. Published outer dimensions are
- * fixed; the ergonomic profile is illustrative, not manufacturer CAD. */
-export const createSunShelfChaiseGeometry = createLymphaShellGeometry;
+const ESSE_ASSET = "/models/esse-sun-shelf.glb";
 
 function useChaiseResources() {
-  const geometry = useMemo(createSunShelfChaiseGeometry, []);
+  // Cached once, requested only when a chaise is actually rendered. The asset
+  // is already metric/grounded: no per-placement scaling or geometry changes.
+  const { scene } = useGLTF(ESSE_ASSET, false, true);
+  const geometry = (scene.getObjectByName("esse-owner-cad") as Mesh).geometry;
   const material = useMemo(
     () =>
       new MeshPhysicalMaterial({
@@ -23,7 +23,8 @@ function useChaiseResources() {
   );
   useEffect(
     () => () => {
-      geometry.dispose();
+      // useGLTF owns the shared geometry cache; disposing it here would break
+      // subsequent OFF/ON and multiple instances. Only our material is owned.
       material.dispose();
     },
     [geometry, material],
@@ -33,13 +34,27 @@ function useChaiseResources() {
 
 /** A single fixed-size product for honest product previews. Base sits at Y=0. */
 export function SunShelfChaise() {
-  const resources = useChaiseResources();
-  return <mesh name="sun-shelf-immersed-chaise" {...resources} castShadow receiveShadow />;
+  return (
+    <Suspense fallback={null}>
+      <SunShelfChaiseMesh />
+    </Suspense>
+  );
 }
 
-/** Independent from exterior DeckLoungers. No scale, lights, animation or assets. */
+function SunShelfChaiseMesh() {
+  const resources = useChaiseResources();
+  return (
+    <mesh name="sun-shelf-immersed-chaise" {...resources} dispose={null} castShadow receiveShadow />
+  );
+}
+
+/** Independent from exterior DeckLoungers. No scale, lights or animation. */
 export function SunShelfLoungers({ plan }: { plan: SunShelfLoungerPlan }) {
-  return plan.enabled ? <SunShelfLoungerMeshes plan={plan} /> : null;
+  return plan.enabled ? (
+    <Suspense fallback={null}>
+      <SunShelfLoungerMeshes plan={plan} />
+    </Suspense>
+  ) : null;
 }
 
 function SunShelfLoungerMeshes({ plan }: { plan: SunShelfLoungerPlan }) {
@@ -51,6 +66,7 @@ function SunShelfLoungerMeshes({ plan }: { plan: SunShelfLoungerPlan }) {
           key={index}
           name={`sun-shelf-immersed-chaise-${index + 1}`}
           {...resources}
+          dispose={null}
           position={[placement.x, placement.y, placement.z]}
           rotation={[0, placement.rotation, 0]}
           castShadow
