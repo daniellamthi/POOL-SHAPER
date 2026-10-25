@@ -1,4 +1,5 @@
 import { isPorcelainSelection, REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
+import { claimWizardGuidance } from "./wizard-guidance";
 
 export type FinishFamily = "porcelain" | "travertine";
 export const TRAVERTINE_FINISHES = REFERENCE_FINISHES.filter(finish =>
@@ -12,6 +13,7 @@ export const finishFamily = (id: unknown): FinishFamily | null =>
 export function revealWizardFinish(section: HTMLElement, reducedMotion: boolean): boolean {
   const scroller = section.closest<HTMLElement>(".pool-dock-scroll");
   if (!scroller) return false;
+  claimWizardGuidance(scroller);
   const targetTop = scroller.scrollTop + section.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 12;
   const top = Math.max(0, Math.min(targetTop, scroller.scrollHeight - scroller.clientHeight));
   section.focus({ preventScroll: true });

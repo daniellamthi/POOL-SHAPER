@@ -90,11 +90,11 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
   const pick = <T extends object>(value: T, keys: readonly (keyof T)[]): T =>
     Object.fromEntries(keys.filter((key) => Object.hasOwn(value, key)).map((key) => [key, value[key]])) as T;
   const config = pick(project.config, [
-    "projectType", "poolType", "structure", "shape", "shapeSelected", "copingMaterial", "paving", "pavingFormat", "premiumEnvironment",
+    "projectType", "poolType", "structure", "shape", "shapeSelected", "copingMaterial", "copingStyle", "copingEdge", "paving", "pavingFormat", "premiumEnvironment",
     "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
     "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "sceneTime", "infinityEdge", "poolAccess",
     "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
-    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount", "sunShelfLoungerColor",
+    "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount", "sunShelfLoungerColor", "integratedBenchStations",
   ]);
   config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "sunShelfRun", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
   if (config.infinityEdge) config.infinityEdge = pick(config.infinityEdge, ["enabled", "side", "startT", "endT", "dropDirection", "wallType"]);

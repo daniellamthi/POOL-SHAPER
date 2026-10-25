@@ -3,7 +3,8 @@ import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
 import { accessMounting } from "./access-plan";
 import { planSceneLighting, type SceneLightingPlan } from "./lighting-plan";
 import { buildFloorProfile } from "./floor-profile";
-import { buildOutline, computeMetrics, outlineBounds } from "./geometry";
+import { computeMetrics, outlineBounds } from "./geometry";
+import { configuredOutline } from "./configured-outline";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { planSkimmers } from "./engineering";
 import { infinityExclusion } from "./infinity-edge";
@@ -42,6 +43,7 @@ type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   infinityWallType?: "traditional" | "glass" | undefined;
   nominalWidth?: number;
   sunShelfRun?: number | undefined;
+  integratedBenchStations?: number | undefined;
 };
 
 export function comfortFootprints(plan: ComfortPlan) {
@@ -162,7 +164,7 @@ export function configuredStairMicroSpots(config: PoolConfig): ReadonlyArray<Sta
 }
 
 export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const poolType = config.poolType ?? "in-ground";
   const layout = getPoolVerticalLayout({
     poolType,
@@ -170,6 +172,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     overflowType: config.overflowType,
     depth: config.dimensions.depth,
     copingThickness: POOL_BORDER_PRESET.thickness,
+    copingStyle: config.copingStyle,
   });
   const floorProfile = buildFloorProfile({
     outline,
@@ -193,6 +196,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     hydromassageVariant: config.hydromassageVariant,
     nominalWidth: config.dimensions.width,
     sunShelfRun: config.dimensions.sunShelfRun,
+    integratedBenchStations: config.integratedBenchStations,
     infinityWallType: config.system === "infinity" ? config.infinityEdge?.wallType : undefined,
     access: config.poolAccess,
     stairType: config.internalStairType ?? "linear",

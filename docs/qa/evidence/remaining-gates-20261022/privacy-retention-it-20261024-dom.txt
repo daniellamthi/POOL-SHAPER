@@ -1,0 +1,55 @@
+Browser tab: 5, Title: "Informativa sulla Privacy — Piscine Wellness", URL: "http://esse-qa.localhost:3003/privacy".
+1 AXWebArea Informativa sulla Privacy — Piscine Wellness, URL: esse-qa.localhost:3003/privacy
+	2 container
+		3 link Description: ← TORNA AL CONFIGURATORE, Value: esse-qa.localhost:3003/
+		4 heading Informativa sulla Privacy, Value: 1
+			5 text Informativa sulla Privacy
+		6 text Questa informativa descrive come Piscine Wellness tratta i dati personali raccolti tramite il configuratore piscine, in conformità al Regolamento (UE) 2016/679 (GDPR).
+		7 text Documento predisposto per lo sviluppo del prodotto. I campi evidenziati devono essere completati e la pagina deve essere validata da un consulente legale/privacy prima della pubblicazione in produzione.
+		8 heading 1. Titolare del trattamento, Value: 2
+			9 text 1. Titolare del trattamento
+		10 container
+			11 text PISCINE WELLNESS SRL , con sede in Via Caduti sul Lavoro 7, 37012 Bussolengo (VR) , P.IVA/C.F. 04764920239 , contattabile all'indirizzo
+			12 link Description: info@piscinewellness.com, Value: mailto:info@piscinewellness.com
+			13 text .
+		14 heading 2. Dati raccolti, Value: 2
+			15 text 2. Dati raccolti
+		16 text Quando invii una richiesta di valutazione dal configuratore raccogliamo:
+		17 content list
+			18 container
+				19 AXListMarker • 
+				20 text Dati di contatto: nome, email, telefono, località del progetto;
+			21 container
+				22 AXListMarker • 
+				23 text Tempistica desiderata e note facoltative che scegli di aggiungere;
+			24 container
+				25 AXListMarker • 
+				26 text La configurazione completa della piscina che hai progettato (forma, dimensioni, sistema idraulico, rivestimento, bordo, accesso, illuminazione, dotazioni);
+			27 container
+				28 AXListMarker • 
+				29 text La tua scelta di accettazione della presente informativa e del consenso al marketing (se dato).
+		30 heading 3. Finalità e base giuridica, Value: 2
+			31 text 3. Finalità e base giuridica
+		32 text Utilizziamo questi dati per valutare la fattibilità del progetto e predisporre una proposta commerciale (esecuzione di misure precontrattuali su tua richiesta, art. 6.1.b GDPR). Se hai dato il consenso facoltativo, potremo inviarti comunicazioni commerciali (consenso, art. 6.1.a GDPR) — puoi revocarlo in qualsiasi momento.
+		33 heading 4. Conservazione dei dati, Value: 2
+			34 text 4. Conservazione dei dati
+		35 text Per le richieste di preventivo che non danno luogo a un contratto, il periodo di conservazione previsto per i dati personali e gli eventuali allegati è di 12 mesi dall'ultimo contatto relativo alla richiesta.
+		36 text Se viene concluso un contratto, conserviamo i dati necessari alla sua esecuzione e all'adempimento degli obblighi di legge per i termini applicabili. Eventuali conservazioni ulteriori devono essere motivate e documentate.
+		37 heading 5. Destinatari dei dati, Value: 2
+			38 text 5. Destinatari dei dati
+		39 container
+			40 text I dati sono trattati dal nostro personale autorizzato e da fornitori tecnici che agiscono come responsabili del trattamento, tra cui il servizio utilizzato per l'invio delle email di notifica (Resend) e [ fornitore di hosting/archiviazione dati ] . Non vendiamo né condividiamo i tuoi dati con terzi per finalità diverse da quelle indicate.
+		41 heading 6. I tuoi diritti, Value: 2
+			42 text 6. I tuoi diritti
+		43 container
+			44 text Puoi richiedere in qualsiasi momento l'accesso, la rettifica, la cancellazione o la limitazione del trattamento dei tuoi dati, opporti al trattamento o richiederne la portabilità, scrivendo a
+			45 link Description: info@piscinewellness.com, Value: mailto:info@piscinewellness.com
+			46 text . Hai inoltre diritto di proporre reclamo al Garante per la Protezione dei Dati Personali.
+		47 heading 7. Aggiornamenti, Value: 2
+			48 text 7. Aggiornamenti
+		49 text Questa informativa può essere aggiornata; la versione corrente è sempre disponibile a questo indirizzo.
+		50 container
+			51 text Ultimo aggiornamento: [ data di pubblicazione ]
+	52 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Informativa sulla Privacy — Piscine Wellness, URL: esse-qa.localhost:3003/privacy

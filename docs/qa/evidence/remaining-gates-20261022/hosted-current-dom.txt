@@ -1,0 +1,77 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina In corso":
+        - generic: Piscina
+        - generic: In corso
+      - button "Sistema acqua" [disabled]:
+        - generic: Sistema acqua
+      - button "Accesso & comfort" [disabled]:
+        - generic: Accesso & comfort
+      - button "Finiture" [disabled]:
+        - generic: Finiture
+      - button "Esterno" [disabled]:
+        - generic: Esterno
+      - button "Optional" [disabled]:
+        - generic: Optional
+      - button "Presentazione" [disabled]:
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno" [pressed]:
+      - generic: Giorno
+    - button "Notte":
+      - generic: Notte
+  - button "Ricomincia":
+    - generic: Ricomincia
+- main:
+  - generic: L 10.00 m
+  - generic: W 4.50 m
+  - generic: D 1.50 m
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - status: Struttura · Cemento armato
+  - toolbar "Strumenti vista":
+    - button "Guide" [pressed]:
+      - text: Guide
+    - button "Vista tecnica":
+      - text: Vista tecnica
+    - button "Riquadra":
+      - text: Riquadra
+- 'region "Passo 1: Piscina"':
+  - paragraph: Pianta vista dall’alto per lunghezza e larghezza, vista in sezione per la profondità.
+  - tablist "Forma e dimensioni":
+    - tab "Forma" [selected]
+    - tab "Lunghezza e larghezza"
+    - tab "Profondità"
+  - group "Forma della piscina":
+    - button "Rettangolare":
+      - generic: Rettangolare
+      - generic: Geometria architettonica a corsia, con spigoli puramente rettilinei.
+    - button "Angolare":
+      - generic: Angolare
+      - generic: Due bracci rettangolari uniti ad angolo retto, per planimetrie articolate.
+    - button "Forma personalizzata":
+      - generic: Forma personalizzata
+      - generic: Disegna il perimetro con punti di controllo modificabili, o carica una planimetria.
+  - button "Altre opzioni":
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 01 di 07
+    - generic: · 1/3 · Forma
+  - heading "Piscina" [level=2]
+  - paragraph: Scegli la forma
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua" [disabled]:
+    - text: Continua
+  - paragraph: Completa la scelta per continuare
+- region "Notifications alt+T"

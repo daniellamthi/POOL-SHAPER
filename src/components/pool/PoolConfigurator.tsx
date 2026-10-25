@@ -638,6 +638,9 @@ function ConfiguratorLayout() {
             technicalView={technicalView && !cleanCapture}
             cleanCapture={cleanCapture}
             {...(config.sunShelfLoungerCount !== undefined ? {sunShelfLoungerCount: config.sunShelfLoungerCount} : {})}
+            {...(config.integratedBenchStations !== undefined ? {integratedBenchStations: config.integratedBenchStations} : {})}
+            {...(config.copingStyle !== undefined ? {copingStyle: config.copingStyle} : {})}
+            {...(config.copingEdge !== undefined ? {copingEdge: config.copingEdge} : {})}
             {...(config.sunShelfLoungerColor !== undefined ? {sunShelfLoungerColor: config.sunShelfLoungerColor} : {})}
             {...(config.dimensions.sunShelfRun !== undefined ? {sunShelfRun: config.dimensions.sunShelfRun} : {})}
             technicalPlan={technical}

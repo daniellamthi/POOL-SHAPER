@@ -1,0 +1,3 @@
+Browser tab: 2, Title: "Pool Studio — Configuratore piscine 3D", URL: "http://esse-qa.localhost:3003/?p=PW-4QFG-QQ485X".
+There has been no change in the accessibility tree.
+The focused UI element is 16 checkbox Description: Italiano, Value: 1

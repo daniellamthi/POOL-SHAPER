@@ -1,5 +1,6 @@
 import type { PoolConfig } from "./types";
-import { buildOutline, outlineBounds } from "./geometry";
+import { outlineBounds } from "./geometry";
+import { configuredOutline } from "./configured-outline";
 import { configuredPoolLayout } from "./resolved-layout";
 import { normalizeComfortFeatures } from "./comfort-selection";
 import { buildFloorProfile, shelfStairDimensions } from "./floor-profile";
@@ -19,11 +20,11 @@ export function configuredSunShelfRange(config: PoolConfig): SunShelfRange {
   const unavailable = (reason: string): SunShelfRange => ({ available: false, reason });
   if (config.poolType !== "in-ground") return unavailable("Disponibile per piscine interrate.");
   if (config.shape !== "rectangle") return unavailable("Disponibile per la forma rettangolare in questa versione.");
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const bounds = outlineBounds(outline);
   const span = Math.max(bounds.spanX, bounds.spanZ);
   const vertical = getPoolVerticalLayout({ poolType: config.poolType, system: config.system,
-    overflowType: config.overflowType, depth: config.dimensions.depth, copingThickness: POOL_BORDER_PRESET.thickness });
+    overflowType: config.overflowType, depth: config.dimensions.depth, copingThickness: POOL_BORDER_PRESET.thickness, copingStyle: config.copingStyle });
   const floorY = buildFloorProfile({ outline, shape: config.shape, poolType: config.poolType,
     dimensions: config.dimensions, verticalLayout: vertical }).shallowFloorY;
   const flight = shelfStairDimensions(span, vertical.waterY - SUN_SHELF_WATER_DEPTH, floorY, SUN_SHELF_MIN_RUN);

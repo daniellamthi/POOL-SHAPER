@@ -244,23 +244,25 @@ export async function buildProjectBook(input: ProjectBookInput): Promise<jsPDF> 
   // 5 · Pianta e dati tecnici
   doc.addPage();
   header(doc, t("Pianta e scheda tecnica"), publicRef, 5);
-  drawPlan(doc, model, M, 44, 130, 120, locale);
-  const techY = rows(doc, model.technical, W / 2 + 6, 50, 120);
+  const planY = 44;
+  const planHeight = 120;
+  drawPlan(doc, model, M, planY, 130, planHeight, locale);
+  rows(doc, model.technical, W / 2 + 6, 50, 120);
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTE);
-  doc.text(
-    doc.splitTextToSize(pdfText(model.technicalNote), 120) as string[],
-    W / 2 + 6,
-    techY + 4,
-  );
+  // The overflow table can fill the right column. Keep its explanatory notes
+  // below the plan instead of letting them spill beyond the page's bottom.
+  const noteLines = doc.splitTextToSize(pdfText(model.technicalNote), 120) as string[];
+  const notesY = planY + planHeight + 12;
+  doc.text(noteLines, M, notesY);
   if (model.deferred.length) {
     doc.text(
       doc.splitTextToSize(
         pdfText(`${t("Da definire con il consulente")}: ${model.deferred.join(" · ")}`),
         120,
       ) as string[],
-      W / 2 + 6,
-      techY + 16,
+      M,
+      notesY + (noteLines.length * doc.getLineHeight()) / doc.internal.scaleFactor + 4,
     );
   }
 

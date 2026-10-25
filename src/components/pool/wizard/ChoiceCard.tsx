@@ -2,6 +2,7 @@ import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { claimWizardGuidance, wizardGuidanceVersion } from "./wizard-guidance";
 
 /**
  * The one option card of the configurator: an image area that explains the
@@ -53,6 +54,7 @@ export function ChoiceCard({
     return (
       <button
         type="button"
+        data-wizard-choice
         onClick={onSelect}
         aria-label={t(title)}
         aria-description={t(selected ? "Rimuovi questo optional" : "Aggiungi questo optional")}
@@ -115,6 +117,7 @@ export function ChoiceCard({
   return (
     <button
       type="button"
+      data-wizard-choice
       onClick={onSelect}
       aria-label={t(title)}
       disabled={disabled}
@@ -207,6 +210,7 @@ export function ChoiceGrid({
   return (
     <div
       role="group"
+      data-wizard-choice-grid
       aria-label={t(label)}
       className={cn(
         "grid gap-3",
@@ -297,11 +301,15 @@ export function RevealSection({ reveal, children }: { reveal: boolean; children:
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!reveal) return;
+    const scroller = ref.current?.closest<HTMLElement>(".pool-dock-scroll");
+    if (scroller) claimWizardGuidance(scroller);
+    const version = scroller ? wizardGuidanceVersion(scroller) : 0;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const id = window.setTimeout(
       () => {
         const section = ref.current, scroller = section?.closest<HTMLElement>(".pool-dock-scroll");
         if (!section || !scroller) return;
+        if (version !== wizardGuidanceVersion(scroller)) return;
         const top = section.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
         // Never scroll the page/canvas or an outer ancestor. Only the options
         // pane moves, once when a newly disclosed decision first appears.

@@ -10,6 +10,7 @@ import { clearOfInfinityEdge, INFINITY_ACCESS_CLEARANCE } from "./infinity-acces
 import { infinityCrestY } from "./infinity-edge";
 import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT, SUN_SHELF_WATER_DEPTH } from "./sun-shelf-model";
 import { resolveSunShelfLoungers } from "./sun-shelf-loungers";
+import { integratedBenchStations, INTEGRATED_BENCH } from "./integrated-bench";
 
 export type ComfortKind = "sunShelf" | "integratedBench" | "hydromassage";
 
@@ -26,8 +27,9 @@ export interface ComfortElementPlan {
   landing?: { footprint: Outline; topY: number };
   /** Hydromassage only: non-overlapping levels that tile `footprint`. */
   tiers?: ReadonlyArray<{ footprint: Outline; topY: number; role: HydroTierRole }>;
-  /** Hydromassage only: nozzle faces; `dir` is the unit outward normal in plan. */
-  jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
+  /** Massage nozzle faces; `dir` is the unit outward normal in plan. */
+  jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number]; diameter?: number }>;
+  stations?: ReturnType<typeof integratedBenchStations>;
   /** Hydromassage only: LED micro-spots set into the seat's front vertical
    * face, under the seat edge; `dir` is the unit outward normal in plan. */
   spots?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
@@ -141,6 +143,7 @@ export function resolveComfortPlan({
   separateHydroAccess = false,
   nominalWidth,
   sunShelfRun,
+  integratedBenchStations: requestedBenchStations,
 }: {
   outline: Outline;
   shape: PoolShapeId;
@@ -158,6 +161,7 @@ export function resolveComfortPlan({
   /** Commercial width, independent of outline rotation/principal axis. */
   nominalWidth?: number;
   sunShelfRun?: number | undefined;
+  integratedBenchStations?: number | undefined;
 }): ComfortPlan {
   const unsupported =
     poolType !== "in-ground"
@@ -508,17 +512,49 @@ export function resolveComfortPlan({
           : { ...candidate.rect, minZ: centre-length/2, maxZ: centre+length/2 } });
     }
   }
-  const bench = benchOptions.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
-  if (!bench) availability.integratedBench = { available: false, reason: "Nessuna parete lunga libera da scala, solarium o bordo Infinity." };
+  const previousBench = benchOptions.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
+  // Resolve against the legacy placement first, then use its opposite wall.
+  // Search all permitted lengths/positions there before declaring a conflict.
+  const bench = previousBench && benchOptions.find(candidate =>
+    candidate.coordinate !== previousBench.coordinate && valid(candidate.rect, candidate.axis, candidate.coordinate) &&
+    rectOutline(candidate.rect).every(([x, z]) => floorProfile.floorYAt(x, z) <= waterY - HYDRO_DIMENSIONS.seatWaterDepth - HYDRO_DIMENSIONS.minSeatHeight));
+  if (!bench) availability.integratedBench = { available: false, reason: "Parete opposta non disponibile: verifica scala, spiaggetta e lato Infinity." };
   else if (enabled.includes("integratedBench")) {
-    const rect = bench.rect;
+    const rect = { ...bench.rect };
+    const H = HYDRO_DIMENSIONS;
+    const direction = bench.coordinate < (bench.axis === "x" ? bounds.maxX : bounds.maxZ) ? 1 : -1;
+    // The pool wall is the backrest: close the former 35 mm gap behind the seat.
+    if (bench.axis === "z") {
+      if (direction > 0) rect.minZ = bench.coordinate - H.wallOverlap;
+      else rect.maxZ = bench.coordinate + H.wallOverlap;
+    } else {
+      if (direction > 0) rect.minX = bench.coordinate - H.wallOverlap;
+      else rect.maxX = bench.coordinate + H.wallOverlap;
+    }
+    const topY = waterY - H.seatWaterDepth;
+    const start = longX ? rect.minX : rect.minZ;
+    const end = longX ? rect.maxX : rect.maxZ;
+    const stations = integratedBenchStations(end - start, requestedBenchStations);
+    const dir = (bench.axis === "z" ? [0, direction] : [direction, 0]) as readonly [number, number];
+    const front = bench.axis === "z" ? direction > 0 ? rect.maxZ : rect.minZ : direction > 0 ? rect.maxX : rect.minX;
+    const point = (along: number, across: number) => bench.axis === "z" ? { x: along, z: across } : { x: across, z: along };
+    const jets: NonNullable<ComfortElementPlan["jets"]>[number][] = [];
+    for (let i = 0; i < stations.count; i++) for (const side of [-1, 1]) {
+      const along = start + (end - start) * (i + 0.5) / stations.count + side * INTEGRATED_BENCH.jetPairSpacing / 2;
+      jets.push({ ...point(along, bench.coordinate), y: topY + H.jetAboveSeat, dir, diameter: INTEGRATED_BENCH.jetDiameter });
+      const leg = point(along, front);
+      const y = topY - H.jetAboveSeat;
+      jets.push({ ...leg, y, dir, diameter: INTEGRATED_BENCH.jetDiameter });
+    }
     const element: ComfortElementPlan = {
       kind: "integratedBench",
       footprint: rectOutline(rect),
-      topY: waterY - 0.48,
-      waterDepth: 0.48,
-      width: benchProjection,
+      topY,
+      waterDepth: H.seatWaterDepth,
+      width: benchProjection + EDGE_INSET + H.wallOverlap,
       run: longX ? rect.maxX - rect.minX : rect.maxZ - rect.minZ,
+      jets,
+      stations,
     };
     elements.push(element);
     selectedRects.push(rect);

@@ -1,0 +1,92 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina":
+        - generic: Piscina
+      - button "Sistema acqua":
+        - generic: Sistema acqua
+      - button "Accesso & comfort":
+        - generic: Accesso & comfort
+      - button "Finiture":
+        - generic: Finiture
+      - button "Esterno":
+        - generic: Esterno
+      - button "Optional":
+        - generic: Optional
+      - button "Presentazione":
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [active] [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno" [pressed]:
+      - generic: Giorno
+    - button "Notte":
+      - generic: Notte
+  - button "Ricomincia":
+- main:
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - status: Struttura · Cemento armato
+  - button "Riquadra":
+    - text: Riquadra
+  - button "Espandi piscina":
+  - button "Altri strumenti":
+- 'region "Passo 3: Accesso & comfort"':
+  - paragraph: Come si entra in acqua e le zone relax integrate.
+  - tablist "Accesso e comfort":
+    - tab "Scala interna"
+    - tab "Scaletta inox"
+    - tab "Comfort in acqua"
+    - tab "Optional per la spiaggetta" [selected]
+  - group "Optional per la spiaggetta":
+    - button "Lettini per spiaggetta" [pressed]:
+      - generic: Lettini per spiaggetta
+      - generic: Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.
+      - text: Aggiunto
+  - group "Colore lettini · Acquamarina":
+    - text: Colore lettini
+    - generic: · Acquamarina
+    - button "Bianco"
+    - button "Verde lime"
+    - button "Grigio tortora"
+    - button "Acquamarina" [pressed]:
+    - button "Grigio azzurro"
+    - button "Verde chiaro"
+  - paragraph: "Quantità consentite: da 1 a 3."
+  - text: Quantità lettini
+  - combobox "Quantità lettini":
+    - option "1"
+    - option "2"
+    - option "3" [selected]
+  - paragraph: Anteprima 3D dimensionale; modello e fornitura da confermare. 1,85 ×0,73 m.
+  - paragraph:
+    - generic: Per il tuo Sun shelf · compare solo con questa scelta
+  - group "Panca integrata":
+    - button "Panca integrata" [pressed]:
+      - generic: Panca integrata
+      - generic: Seduta sommersa lungo parete.
+      - text: Aggiunto
+  - text: Postazioni panca
+  - combobox "Postazioni panca":
+    - option "1"
+    - option "2" [selected]
+    - option "3"
+    - option "4"
+  - paragraph: "Per postazione: 2 bocchette schiena e 2 bocchette gambe."
+  - paragraph:
+    - text: Fase 03 di 07
+    - generic: · 4/4 · Optional per la spiaggetta
+  - heading "Accesso & comfort" [level=2]
+  - paragraph: Scala interna · Spiaggetta · Panca
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua":
+    - text: Continua
+- region "Notifications alt+T"

@@ -1,0 +1,51 @@
+{
+  "projectRef": "waetxxqdlsuanqescuye",
+  "connection": "Daniele 2",
+  "method": "Read-only catalog metadata via explicitly selected Supabase connection, cross-checked against current application server modules and seven existing migrations",
+  "tables": [
+    "public.attachment_owners",
+    "public.attachment_uploads",
+    "public.lead_notifications",
+    "public.leads",
+    "public.notification_events",
+    "public.projects"
+  ],
+  "allListedTablesRlsEnabled": true,
+  "outboundForeignKeys": [
+    "attachment_uploads.project_id -> attachment_owners.project_id",
+    "lead_notifications.request_id -> leads.request_id"
+  ],
+  "nonInternalTriggers": [
+    "public.projects: projects_touch_updated_at -> public.projects_touch_updated_at"
+  ],
+  "verifiedApplicationFunctions": [
+    "claim_attachment_owner",
+    "claim_lead_notification",
+    "consume_attachment_grant",
+    "projects_touch_updated_at",
+    "record_notification_event",
+    "release_failed_attachment",
+    "reserve_attachment",
+    "sync_lead_notification_status"
+  ],
+  "allListedFunctionsSecurityInvoker": true,
+  "attachmentBucketFromCurrentCode": "pool-shaper-attachments",
+  "bucketObjectsExported": false,
+  "excluded": ["wellness_*", "pw8_*", "unrelated public tables", "global auth users", "credentials"],
+  "customerRowsReadOrExported": false,
+  "sourceWrites": false,
+  "nativePasswordFieldLastVerified": {
+    "assignments": 1,
+    "line": 10,
+    "wholeConnectionUri": true,
+    "unfilledPasswordPlaceholder": true,
+    "networkAttemptedByThisCheck": false
+  },
+  "gate": "BLOCKED — actual PostgreSQL password still absent from saved field",
+  "limitations": [
+    "This is an export-scope inventory, not a database dump or successful restore.",
+    "RLS enabled metadata does not prove policy or role behavior after restoration.",
+    "Function bodies, managed-role/extension dependencies and storage object bytes must be validated during the real isolated rehearsal.",
+    "Native PostgreSQL does not itself reproduce Supabase Auth, Storage API or application integration."
+  ]
+}

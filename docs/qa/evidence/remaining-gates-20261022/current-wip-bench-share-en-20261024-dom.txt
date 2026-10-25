@@ -1,0 +1,179 @@
+Browser tab: 4, Title: "Pool Studio — 3D Pool Configurator", URL: "http://release-readonly-qa.localhost:3003/?p=PW-4QFG-QQ485X".
+0 AXWebArea Pool Studio — 3D Pool Configurator, URL: release-readonly-qa.localhost:3003/?p=PW-4QFG-QQ485X
+	1 heading 3D Pool Configurator, Value: 1
+		2 text 3D Pool Configurator
+	3 container
+		4 image Piscine Wellness
+		5 container Configuration phases
+			6 content list
+				7 button Pool Reinforced concrete · 10.0 × 4.5 m, Help: Pool · Reinforced concrete · 10.0 × 4.5 m
+					8 text Pool
+					9 text Reinforced concrete · 10.0 × 4.5 m
+				10 button Water system Hidden overflow, Help: Water system · Hidden overflow
+					49 text Water system
+					50 text Hidden overflow
+				11 button Access & comfort Internal stairs · Sun shelf · Bench, Help: Access & comfort · Internal stairs · Sun shelf · Bench
+					51 text Access & comfort
+					52 text Internal stairs · Sun shelf · Bench
+				12 button Finishes PVC liner · Arctic White [180], Help: Finishes · PVC liner · Arctic White [180]
+					53 text Finishes
+					54 text PVC liner · Arctic White [180]
+				13 button Exterior Deck-level pool edge · Porcelain stoneware · 60 × 120 cm, Help: Exterior · Deck-level pool edge · Porcelain stoneware · 60 × 120 cm
+					55 text Exterior
+					56 text Deck-level pool edge · Porcelain stoneware · 60 × 120 cm
+				14 button Options Chaise longue, Help: Options · Chaise longue
+					57 text Options
+					58 text Chaise longue
+				15 button Presentation In progress, Help: Presentation · In progress
+					59 text Presentation
+					60 text In progress
+		16 container Language
+			17 checkbox Description: Italian, Value: 0
+			18 checkbox Description: English, Value: 1
+		19 container Scene time
+			20 checkbox Day, Value: 1
+			21 checkbox Night, Value: 0
+		22 button Start again
+		23 container
+			25 pop up button (collapsed) Description: Pool view, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			26 text Drag to rotate · Scroll to zoom · Right-click to pan
+			27 toolbar View tools
+				28 checkbox Guides, Value: 0
+				29 checkbox Technical view, Value: 0
+				30 checkbox Reframe, Value: 0
+		31 container Step 7: Presentation
+			32 container
+				33 text Your finished pool: scene, summary and proposal request.
+				61 tab group Presentation
+					62 tab (selectable, settable, boolean) Scene, Value: 0
+					63 tab (selected, settable, boolean) Summary, Value: 1
+					64 tab (selectable, settable, boolean) Request a proposal, Value: 0
+				65 container Save and share
+					66 text YOUR PROJECT
+					67 text Shared project  · PW-4QFG-QQ485X
+					68 text Read-only: saving creates your own copy and preserves the original.
+					69 image QR code for project PW-4QFG-QQ485X
+					70 button SAVE A COPY
+					71 button SHARE
+					72 button PROJECT BOOK PDF
+					73 text http://release-readonly-qa.localhost:3003/?p=PW-4QFG-QQ485X
+				74 container
+					75 image Your configured pool
+					76 text YOUR PROJECT
+					77 heading rectangular pool 10.00 × 4.50 m, depth 1.50 m, Value: 2
+						78 text rectangular pool 10.00 × 4.50 m, depth 1.50 m
+					79 text In-ground pool · Hidden overflow · approx. 45 m³ of water
+					80 container
+						81 text Project ID PW-4QFG-QQ485X
+					82 heading YOUR POOL, Value: 3
+						83 text YOUR POOL
+					84 button EDIT
+					85 definition list
+						181 container Type
+							182 text Type
+						183 text In-ground pool
+						184 container Structure
+							185 text Structure
+						186 text Reinforced concrete
+						187 container Dimensions
+							188 text Dimensions
+						189 text rectangular pool 10.00 × 4.50 m, depth 1.50 m
+					95 heading WATERLINE, Value: 3
+						96 text WATERLINE
+					97 button EDIT
+					98 definition list
+						190 container Hydraulic system
+							191 text Hydraulic system
+						192 text Hidden overflow
+					102 heading MATERIALS, Value: 3
+						103 text MATERIALS
+					104 button EDIT
+					105 definition list
+						193 container Lining
+							194 text Lining
+						195 container
+							196 text Motion Arctic White [180] Water with turquoise reflections
+						197 container Coping
+							198 text Coping
+						199 container
+							200 text Porcelain stoneware Deck-level pool edge
+						201 container Paving
+							202 text Paving
+						203 text Porcelain stoneware
+						204 container Paving size
+							205 text Paving size
+						206 container
+							207 text 60 × 120 cm Reference dimensions for the visualisation; supply to be confirmed.
+					121 heading ACCESS AND COMFORT, Value: 3
+						122 text ACCESS AND COMFORT
+					123 button EDIT
+					124 definition list
+						208 container Included
+							209 text Included
+						210 text Integrated internal stairs — Straight internal stairs
+						211 container Included
+							212 text Included
+						213 text Sun shelf · total length 3.400 m · water 10 cm
+						214 container Included
+							215 text Included
+						216 text Integrated bench · 3 seats · 12 jets
+					134 heading LIGHTING, Value: 3
+						135 text LIGHTING
+					136 button EDIT
+					137 definition list
+						217 container Stair options
+							218 text Stair options
+						219 text LED spotlights in the internal stair risers
+						220 container Equipment
+							221 text Equipment
+						222 text Underwater LED lighting
+						223 container Lights
+							224 text Lights
+						225 text 3 · automatic, indicative sizing
+						226 container Selected colour
+							227 text Selected colour
+						228 text #FFFFFF
+						229 container Light brightness
+							230 text Light brightness
+						231 text 26%
+					153 heading OPTIONS, Value: 3
+						154 text OPTIONS
+					155 button EDIT
+					156 definition list
+						232 container Included
+							233 text Included
+						234 text Chaise longue · 4 loungers
+					160 heading PRESENTATION, Value: 3
+						161 text PRESENTATION
+					162 button EDIT
+					163 definition list
+						235 container Time of day
+							236 text Time of day
+						237 text Day
+					167 heading TO BE AGREED WITH YOUR CONSULTANT, Value: 3
+						168 text TO BE AGREED WITH YOUR CONSULTANT
+					169 content list
+						238 text Final equipment sizing
+					171 button (collapsed) VIEW TECHNICAL DETAILS, Secondary Actions: Expand
+						172 text VIEW TECHNICAL DETAILS
+				173 button Next option: Request a proposal
+					174 text Next option
+					175 text : 
+					176 text Request a proposal
+				177 button More options
+			37 container
+				38 text PHASE 07 OF 07 ·  2/3 · Summary
+				39 heading Presentation, Value: 2
+					40 text Presentation
+				41 text 10.0 × 4.5 m · ready for a proposal
+			42 button VIEW THE POOL
+			43 button (expanded) MINIMISE, Secondary Actions: Collapse
+			44 container
+				45 button BACK
+				46 button CONTINUE · REQUEST A PROPOSAL
+					178 text CONTINUE
+					179 text · 
+					180 text REQUEST A PROPOSAL
+	48 container Notifications alt+T
+
+The focused UI element is 18 checkbox Description: English, Value: 1

@@ -14,6 +14,8 @@ export function comfortConfigurationIssues(config: PoolConfig) {
     feature: kind,
     reason: comfort?.availability[kind].reason ?? "Non disponibile per questa configurazione.",
   }]);
+  if (config.features.includes("integratedBench") && comfort.elements.find(element => element.kind === "integratedBench")?.stations?.adjusted)
+    issues.push({ feature: "integratedBench", reason: "Conferma le postazioni della panca: la richiesta supera lo spazio disponibile." });
   if (resolved.effectiveAccess && !resolved.access.placement) issues.push({
     feature: "access", reason: resolved.access.reason ?? "Accesso incompatibile con la zona comfort selezionata.",
   });

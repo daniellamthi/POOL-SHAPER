@@ -1,4 +1,5 @@
 import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
+import { integratedCoping } from "@/lib/pool/coping-style";
 import {
   EQUIPMENT,
   FINISHES,
@@ -215,7 +216,7 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       const coping =
         COPING_MATERIALS.find((c) => c.id === (config.copingMaterial ?? "travertine"))?.title ?? "";
       const paving = pavingLayout(config.paving, config.pavingFormat);
-      return `${config.system === "overflow" && config.overflowType !== "hidden" ? "" : `${coping} · `}${paving.label} · ${paving.formatLabel}`;
+      return `${integratedCoping(config) ? "Bordo a filo pavimentazione · " : config.system === "overflow" && config.overflowType === "visible" ? "" : `${coping} · `}${paving.label} · ${paving.formatLabel}`;
     }
     case "technology": {
       const chosen = EQUIPMENT.filter((e) => config.equipment.includes(e.id)).map((e) => e.title);

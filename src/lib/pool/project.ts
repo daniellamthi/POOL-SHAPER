@@ -26,6 +26,7 @@ import { buildOutline } from "./geometry";
 import { isRenovationConfig } from "./renovation";
 import { pavingId, pavingForPool, pavingFormatId, premiumEnvironment } from "./presentation";
 import { copingMaterialForPool } from "./coping-materials";
+import { isCopingStyle, isCopingEdge } from "./coping-style";
 import {
   normaliseFinishForStructure,
   normalisePoolStructure,
@@ -121,6 +122,10 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // commercial email, quotation -- sees a real number instead of each having
   // to guess a fallback of its own.
   const restored = config as PoolConfig;
+  if (restored.copingStyle !== undefined && !isCopingStyle(restored.copingStyle)) throw new Error("ProjectConfiguration: invalid copingStyle");
+  if (restored.copingEdge !== undefined && !isCopingEdge(restored.copingEdge)) throw new Error("ProjectConfiguration: invalid copingEdge");
+  if (restored.integratedBenchStations !== undefined && (!Number.isSafeInteger(restored.integratedBenchStations) || restored.integratedBenchStations < 1 || restored.integratedBenchStations > 4))
+    throw new Error("ProjectConfiguration: invalid integratedBenchStations");
   if (restored.sunShelfLoungerColor !== undefined && !isSunShelfLoungerColor(restored.sunShelfLoungerColor)) {
     throw new Error("ProjectConfiguration: invalid sunShelfLoungerColor");
   }

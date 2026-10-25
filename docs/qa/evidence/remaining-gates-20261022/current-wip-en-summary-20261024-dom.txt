@@ -1,0 +1,167 @@
+Browser tab: 2, Title: "Pool Studio — 3D Pool Configurator", URL: "http://esse-qa.localhost:3003/".
+0 AXWebArea Pool Studio — 3D Pool Configurator, URL: esse-qa.localhost:3003/
+	1 heading 3D Pool Configurator, Value: 1
+		2 text 3D Pool Configurator
+	3 container
+		4 image Piscine Wellness
+		5 container Configuration phases
+			6 content list
+				7 button Pool, Help: Pool · Reinforced concrete · 10.0 × 4.5 m
+				8 button Water system, Help: Water system · Skimmer · Modern slim
+				9 button Access & comfort, Help: Access & comfort · Internal stairs · Hydromassage A
+				10 button Finishes, Help: Finishes · PVC liner · Arctic White [180]
+				11 button Exterior, Help: Exterior · Travertine · Porcelain stoneware · 60 × 120 cm
+				12 button Options, Help: Options · Chaise longue
+				13 button Presentation, Help: Presentation · In progress
+		14 container Language
+			15 checkbox Description: Italian, Value: 0
+			16 checkbox Description: English, Value: 1
+		17 container Scene time
+			18 checkbox Day, Value: 1
+			19 checkbox Night, Value: 0
+		20 button Start again
+		21 container
+			22 pop up button (collapsed) Description: Pool view, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			23 text Drag to rotate · Scroll to zoom · Right-click to pan
+			24 toolbar View tools
+				25 checkbox Guides, Value: 0
+				26 checkbox Technical view, Value: 0
+				27 checkbox Reframe, Value: 0
+		28 container Step 7: Presentation
+			29 container
+				30 text Your finished pool: scene, summary and proposal request.
+				55 tab group Presentation
+					56 tab (selectable, settable, boolean) Scene, Value: 0
+					57 tab (selected, settable, boolean) Summary, Value: 1
+					58 tab (selectable, settable, boolean) Request a proposal, Value: 0
+				59 container Save and share
+					60 text YOUR PROJECT
+					61 text Not saved yet
+					62 text Save to receive a Project ID, return to it and share it.
+					63 button SAVE PROJECT
+					64 button SHARE
+					65 button PROJECT BOOK PDF
+				66 container
+					171 image Your configured pool
+					67 text YOUR PROJECT
+					68 heading rectangular pool 10.00 × 4.50 m, depth 1.50 m, Value: 2
+						69 text rectangular pool 10.00 × 4.50 m, depth 1.50 m
+					70 text In-ground pool · Skimmer — classic edge · approx. 61 m³ of water
+					71 text Project ID assigned when saved
+					72 link Description: ↑ Expand pool, Value: esse-qa.localhost:3003/#pool-viewport
+					73 heading YOUR POOL, Value: 3
+						74 text YOUR POOL
+					75 button EDIT
+					76 definition list
+						172 container Type
+							173 text Type
+						174 text In-ground pool
+						175 container Structure
+							176 text Structure
+						177 text Reinforced concrete
+						178 container Dimensions
+							179 text Dimensions
+						180 text rectangular pool 10.00 × 4.50 m, depth 1.50 m
+					86 heading WATERLINE, Value: 3
+						87 text WATERLINE
+					88 button EDIT
+					89 definition list
+						181 container Hydraulic system
+							182 text Hydraulic system
+						183 text Skimmer — classic edge
+						93 container Skimmer
+							94 text Skimmer
+						95 text Slim / modern · White ABS
+					96 heading MATERIALS, Value: 3
+						97 text MATERIALS
+					98 button EDIT
+					99 definition list
+						184 container Lining
+							185 text Lining
+						186 container
+							187 text Motion Arctic White [180] Water with turquoise reflections
+						188 container Coping
+							189 text Coping
+						190 container
+							191 text Travertine Separate coping
+						192 container Pool corners
+							193 text Pool corners
+						194 container
+							195 text Rounded Rounded pool corners: 20 cm radius.
+						196 container Paving
+							197 text Paving
+						198 text Porcelain stoneware
+						199 container Paving size
+							200 text Paving size
+						201 container
+							202 text 60 × 120 cm Reference dimensions for the visualisation; supply to be confirmed.
+					119 heading ACCESS AND COMFORT, Value: 3
+						120 text ACCESS AND COMFORT
+					121 button EDIT
+					122 definition list
+						203 container Included
+							204 text Included
+						205 text Integrated internal stairs — Straight internal stairs
+						206 container Included
+							207 text Included
+						208 text Hydromassage A
+					129 heading LIGHTING, Value: 3
+						130 text LIGHTING
+					131 button EDIT
+					132 definition list
+						209 container Stair options
+							210 text Stair options
+						211 text LED spotlights in the internal stair risers
+						212 container Bench options
+							213 text Bench options
+						214 text LED spotlights on the hydromassage bench
+						215 container Equipment
+							216 text Equipment
+						217 text Underwater LED lighting
+						218 container Lights
+							219 text Lights
+						220 text 3 · automatic, indicative sizing
+						221 container Selected colour
+							222 text Selected colour
+						223 text #FFFFFF
+						224 container Light brightness
+							225 text Light brightness
+						226 text 26%
+					151 heading OPTIONS, Value: 3
+						152 text OPTIONS
+					153 button EDIT
+					154 definition list
+						227 container Included
+							228 text Included
+						229 text Chaise longue · 4 loungers
+					158 heading PRESENTATION, Value: 3
+						159 text PRESENTATION
+					160 button EDIT
+					161 definition list
+						230 container Time of day
+							231 text Time of day
+						232 text Day
+					165 heading TO BE AGREED WITH YOUR CONSULTANT, Value: 3
+						166 text TO BE AGREED WITH YOUR CONSULTANT
+					167 content list
+						233 text Final equipment sizing
+					169 button (collapsed) VIEW TECHNICAL DETAILS, Secondary Actions: Expand
+						170 text VIEW TECHNICAL DETAILS
+				39 button Next option: Request a proposal
+					40 text Next option
+					41 text : 
+					42 text Request a proposal
+				43 button More options
+			44 container
+				45 text PHASE 07 OF 07 ·  2/3 · Summary
+				46 heading Presentation, Value: 2
+					47 text Presentation
+				48 text 10.0 × 4.5 m · ready for a proposal
+			49 button VIEW THE POOL
+			50 button (expanded) MINIMISE, Secondary Actions: Collapse
+			51 container
+				52 button BACK
+				53 button CONTINUE
+	54 container Notifications alt+T
+
+The focused UI element is 16 checkbox Description: English, Value: 1

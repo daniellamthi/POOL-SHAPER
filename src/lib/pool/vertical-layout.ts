@@ -20,12 +20,14 @@ export function getPoolVerticalLayout({
   overflowType = "hidden",
   depth,
   copingThickness,
+  copingStyle,
 }: {
   poolType: PoolType;
   system: SystemType;
   overflowType?: OverflowType;
   depth: number;
   copingThickness: number;
+  copingStyle?: import("./coping-style").CopingStyle | undefined;
 }): PoolVerticalLayout {
   const safeDepth = Number.isFinite(depth) ? Math.max(0.01, depth) : 0.01;
   // Concealed lateral intake below a single terrace slab. These are visual

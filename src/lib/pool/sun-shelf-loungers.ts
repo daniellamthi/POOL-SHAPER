@@ -1,6 +1,6 @@
 import type { ComfortPlan } from "./comfort-plan";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
-import { buildOutline } from "./geometry";
+import { configuredOutline } from "./configured-outline";
 import { infinityExclusion } from "./infinity-edge";
 import { clearOfInfinityEdge } from "./infinity-access";
 import { configuredPoolLayout } from "./resolved-layout";
@@ -246,7 +246,7 @@ type SunShelfLoungerConfig = PoolConfig & { sunShelfLoungerCount?: number };
 
 /** Reconstruct from the same comfort/access geometry used by the pool scene. */
 export function configuredSunShelfLoungers(config: SunShelfLoungerConfig): SunShelfLoungerPlan {
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const resolved = configuredPoolLayout(config);
   const layout = getPoolVerticalLayout({
     poolType: config.poolType ?? "in-ground",
@@ -254,6 +254,7 @@ export function configuredSunShelfLoungers(config: SunShelfLoungerConfig): SunSh
     overflowType: config.overflowType,
     depth: config.dimensions.depth,
     copingThickness: POOL_BORDER_PRESET.thickness,
+    copingStyle: config.copingStyle,
   });
   return resolveSunShelfLoungers({
     comfort: resolved.comfort,

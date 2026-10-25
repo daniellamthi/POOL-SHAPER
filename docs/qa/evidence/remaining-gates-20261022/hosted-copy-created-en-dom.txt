@@ -1,0 +1,157 @@
+- heading "3D Pool Configurator" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Configuration phases":
+    - list:
+      - button "Pool Reinforced concrete · 8.0 × 4.0 m":
+        - generic: Pool
+        - generic: Reinforced concrete · 8.0 × 4.0 m
+      - button "Water system Skimmer · High water level":
+        - generic: Water system
+        - generic: Skimmer · High water level
+      - button "Access & comfort Internal stairs · Sun shelf":
+        - generic: Access & comfort
+        - generic: Internal stairs · Sun shelf
+      - button "Finishes Mosaic · Mosaic 5":
+        - generic: Finishes
+        - generic: Mosaic · Mosaic 5
+      - button "Exterior Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm":
+        - generic: Exterior
+        - generic: Pietra di Prun · Porcelain stoneware · Greige · 60 × 60 cm
+      - button "Options Heat pump":
+        - generic: Options
+        - generic: Heat pump
+      - button "Presentation In progress":
+        - generic: Presentation
+        - generic: In progress
+  - group "Language":
+    - button "Italian": IT
+    - button "English" [pressed]: EN
+  - group "Scene time":
+    - button "Day" [pressed]:
+      - generic: Day
+    - button "Night":
+      - generic: Night
+  - button "Start again":
+    - generic: Start again
+- main:
+  - button "Pool view":
+    - text: Pool view
+  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan
+  - toolbar "View tools":
+    - button "Guides":
+      - text: Guides
+    - button "Technical view":
+      - text: Technical view
+    - button "Reframe":
+      - text: Reframe
+- 'region "Step 7: Presentation"':
+  - paragraph: "Your finished pool: scene, summary and proposal request."
+  - tablist "Presentation":
+    - tab "Scene"
+    - tab "Summary" [selected]
+    - tab "Request a proposal"
+  - region "Save and share":
+    - paragraph: Your project
+    - paragraph:
+      - text: Saved ·
+      - generic: PW-MBE5-RA7M6Z
+    - paragraph: Use the link to return to it whenever you like, on any device.
+    - img "QR code for project PW-MBE5-RA7M6Z"
+    - button "Saved":
+      - text: Saved
+    - button "Share":
+      - text: Share
+    - button "Project Book PDF":
+      - text: Project Book PDF
+    - paragraph: https://pool-shaper-ens6jxl5t-daniellamthis-projects.vercel.app/?p=PW-MBE5-RA7M6Z
+  - img "Your configured pool"
+  - paragraph: Your project
+  - heading "rectangular pool 8.00 × 4.00 m, depth 1.50 m" [level=2]
+  - paragraph: In-ground pool · Skimmer — classic edge · approx. 34 m³ of water
+  - paragraph: Project ID PW-MBE5-RA7M6Z
+  - heading "Your pool" [level=3]
+  - button "Edit"
+  - term: Type
+  - definition:
+    - generic: In-ground pool
+  - term: Structure
+  - definition:
+    - generic: Reinforced concrete
+  - term: Dimensions
+  - definition:
+    - generic: rectangular pool 8.00 × 4.00 m, depth 1.50 m
+  - heading "Waterline" [level=3]
+  - button "Edit"
+  - term: Hydraulic system
+  - definition:
+    - generic: Skimmer — classic edge
+  - term: Skimmer
+  - definition:
+    - generic: High water level · Satin steel
+  - heading "Materials" [level=3]
+  - button "Edit"
+  - term: Lining
+  - definition:
+    - generic: Mosaic 5
+    - generic: The water colour will reflect the selected mosaic shade
+  - term: Coping
+  - definition:
+    - generic: Pietra di Prun
+  - term: Paving
+  - definition:
+    - generic: Porcelain stoneware · Greige
+  - term: Paving size
+  - definition:
+    - generic: 60 × 60 cm
+    - generic: Reference dimensions for the visualisation; supply to be confirmed.
+  - heading "Access and comfort" [level=3]
+  - button "Edit"
+  - term: Included
+  - definition:
+    - generic: Sun shelf loungers · 2
+  - term: Included
+  - definition:
+    - generic: Integrated internal stairs — Straight internal stairs
+  - term: Included
+  - definition:
+    - generic: Sun shelf · total length 3.200 m
+  - heading "Lighting" [level=3]
+  - button "Edit"
+  - term: Stair options
+  - definition:
+    - generic: LED spotlights in the internal stair risers
+  - heading "Options" [level=3]
+  - button "Edit"
+  - term: Included
+  - definition:
+    - generic: Heat pump
+  - heading "Presentation" [level=3]
+  - button "Edit"
+  - term: Time of day
+  - definition:
+    - generic: Day
+  - heading "To be agreed with your consultant" [level=3]
+  - list:
+    - listitem: Heating capacity sizing
+    - listitem: Final equipment sizing
+  - generic "View technical details"
+  - 'button "Next option: Request a proposal"':
+    - text: "Next option: Request a proposal"
+  - button "More options":
+    - text: More options
+  - paragraph:
+    - text: Phase 07 of 07
+    - generic: · 2/3 · Summary
+  - heading "Presentation" [level=2]
+  - paragraph: 8.0 × 4.0 m · ready for a proposal
+  - button "View the pool":
+    - text: View the pool
+  - button "Minimise" [expanded]:
+    - text: Minimise
+  - button "Back":
+    - text: Back
+  - button "Continue · Request a proposal":
+    - text: Continue
+    - generic: · Request a proposal
+- region "Notifications alt+T"

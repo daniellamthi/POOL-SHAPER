@@ -1,0 +1,66 @@
+Browser tab: 8, Title: "Pool Studio — Configuratore piscine 3D", URL: "http://192.168.1.109:3004/".
+0 AXWebArea Pool Studio — Configuratore piscine 3D, URL: 192.168.1.109:3004/
+	1 heading Configuratore piscine 3D, Value: 1
+		2 text Configuratore piscine 3D
+	3 container
+		4 image Piscine Wellness
+		5 container Fasi della configurazione
+			6 content list
+				7 button Piscina Cemento armato · 10,0 × 4,5 m, Help: Piscina · Cemento armato · 10,0 × 4,5 m
+					8 text Piscina
+					9 text Cemento armato · 10,0 × 4,5 m
+				10 button Sistema acqua Skimmer · Slim Moderno, Help: Sistema acqua · Skimmer · Slim Moderno
+					49 text Sistema acqua
+					50 text Skimmer · Slim Moderno
+				11 button Accesso & comfort In corso, Help: Accesso & comfort · In corso
+					51 text Accesso & comfort
+					52 text In corso
+				12 button (disabled) Finiture
+				13 button (disabled) Esterno
+				14 button (disabled) Optional
+				15 button (disabled) Presentazione
+		16 container Lingua
+			17 checkbox Description: Italiano, Value: 1
+			18 checkbox Description: Inglese, Value: 0
+		19 container Ora della scena
+			20 checkbox Giorno, Value: 1
+			21 checkbox Notte, Value: 0
+		22 button Ricomincia
+		23 container
+			25 pop up button (collapsed) Description: Vista della piscina, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			53 text Struttura · Cemento armato
+			26 text Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+			27 toolbar Strumenti vista
+				28 checkbox Guide, Value: 0
+				29 checkbox Vista tecnica, Value: 0
+				30 checkbox Riquadra, Value: 0
+		31 container Passo 3: Accesso & comfort
+			54 container
+				55 text Come si entra in acqua e le zone relax integrate.
+				56 tab group Accesso e comfort
+					57 tab (selected, settable, boolean) Scala interna, Value: 1
+					58 tab (selectable, settable, boolean) Scaletta inox, Value: 0
+					59 tab (selectable, settable, boolean) Comfort in acqua, Value: 0
+				60 container Accesso alla piscina
+					61 checkbox Description: Scala interna, Value: 0
+				62 button Prossima scelta: Scaletta inox
+					63 text Prossima scelta
+					64 text : 
+					65 text Scaletta inox
+				66 button Altre opzioni
+			37 container
+				38 text FASE 03 DI 07 ·  1/3 · Scala interna
+				39 heading Accesso & comfort, Value: 2
+					40 text Accesso & comfort
+				41 text Accesso da scegliere
+			42 button VEDI LA PISCINA
+			43 button (expanded) RIDUCI, Secondary Actions: Collapse
+			44 container
+				45 button INDIETRO
+				46 button CONTINUA · SCALETTA INOX
+					67 text CONTINUA
+					68 text · 
+					69 text SCALETTA INOX
+	48 container Notifications alt+T
+
+The focused UI element is 0 AXWebArea Pool Studio — Configuratore piscine 3D, URL: 192.168.1.109:3004/

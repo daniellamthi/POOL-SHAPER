@@ -1,6 +1,7 @@
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { copingOuterOffset } from "@/components/pool/three/poolConstruction";
-import { buildOutline, outlineBounds } from "./geometry";
+import { outlineBounds } from "./geometry";
+import { configuredOutline } from "./configured-outline";
 import { planSkimmers } from "./engineering";
 import { configuredPoolLayout } from "./resolved-layout";
 import { getPoolVerticalLayout } from "./vertical-layout";
@@ -45,7 +46,7 @@ export function resolveAutomaticCover(config: PoolConfig): CoverPlan {
   const enabled = config.equipment.includes("automaticCover");
   const position = enabled && config.coverPosition === "closed" ? "closed" : "open";
   const extension = enabled ? normalisedCoverExtension(config.coverExtension, position) : 0;
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const bounds = outlineBounds(outline);
   const footprint = { minX: bounds.minX, maxX: bounds.maxX, minZ: bounds.minZ, maxZ: bounds.maxZ };
   const poolType = config.poolType ?? "in-ground";
@@ -55,6 +56,7 @@ export function resolveAutomaticCover(config: PoolConfig): CoverPlan {
     overflowType: config.overflowType,
     depth: config.dimensions.depth,
     copingThickness: POOL_BORDER_PRESET.thickness,
+    copingStyle: config.copingStyle,
   });
   const waterY = elevations.waterY;
   const housingY = elevations.copingY + 0.115;

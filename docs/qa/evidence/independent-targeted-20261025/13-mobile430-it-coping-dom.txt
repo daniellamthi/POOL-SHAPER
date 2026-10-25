@@ -1,0 +1,68 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina":
+        - generic: Piscina
+      - button "Sistema acqua":
+        - generic: Sistema acqua
+      - button "Accesso & comfort":
+        - generic: Accesso & comfort
+      - button "Finiture":
+        - generic: Finiture
+      - button "Esterno":
+        - generic: Esterno
+      - button "Optional":
+        - generic: Optional
+      - button "Presentazione":
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [active] [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno" [pressed]:
+      - generic: Giorno
+    - button "Notte":
+      - generic: Notte
+  - button "Ricomincia":
+- main:
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - button "Riquadra":
+    - text: Riquadra
+  - button "Espandi piscina":
+  - button "Altri strumenti":
+- 'region "Passo 5: Esterno"':
+  - paragraph: "Il bordo della vasca e la pavimentazione attorno: qui compare l’esterno."
+  - tablist "Bordo e decking":
+    - tab "Bordo vasca" [selected]
+    - tab "Pavimentazione"
+  - group "Tipo di bordo":
+    - button "Bordo dedicato":
+      - generic: Bordo dedicato
+      - generic: Angoli vasca arrotondati R20 cm, finitura del bordo indipendente.
+    - button "Bordo filo pavimentazione" [pressed]:
+      - generic: Bordo filo pavimentazione
+      - generic: Un unico piano e la stessa finitura della pavimentazione.
+  - paragraph: Il bordo segue materiale, formato e posa della pavimentazione.
+  - button "Scegli pavimentazione":
+    - text: Scegli pavimentazione
+  - 'button "Prossima scelta: Pavimentazione"':
+    - text: "Prossima scelta: Pavimentazione"
+  - button "Altre opzioni":
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 05 di 07
+    - generic: · 1/2 · Bordo vasca
+  - heading "Esterno" [level=2]
+  - paragraph: Bordo a filo pavimentazione · Gres porcellanato · Avorio · 30 × 60 cm
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua":
+    - text: Continua
+- region "Notifications alt+T"

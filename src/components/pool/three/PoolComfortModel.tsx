@@ -6,11 +6,13 @@ import { stairSolid } from "./PoolAccessModel";
 import { BufferGeometry, Float32BufferAttribute, Object3D } from "three";
 import { HYDRO_DIMENSIONS } from "@/lib/pool/comfort-plan";
 import type { ComfortElementPlan } from "@/lib/pool/comfort-plan";
+import { INTEGRATED_BENCH } from "@/lib/pool/integrated-bench";
 import { benchMicroSpotBeam, MICRO_SPOT_OPTICS, microSpotPresentation, type MicroSpotBeam } from "@/lib/pool/micro-spot-optics";
 
 /** Union of shelf and treads: emit only exterior faces, never touching box faces.
  * The small rectilinear grid also retains metric UVs and a floor-following base. */
 export function shelfStairGeometry(element: ComfortElementPlan, floor: FloorProfileModel) {
+  const baseY = (x: number, z: number) => floor.floorYAt(x, z) - (element.kind === "integratedBench" ? INTEGRATED_BENCH.floorOverlap : 0);
   const patches = [...(element.tiers ?? [element]), ...(element.landing ? [element.landing] : []), ...(element.steps ?? [])].map(part => ({
     minX: Math.min(...part.footprint.map(p => p[0])), maxX: Math.max(...part.footprint.map(p => p[0])),
     minZ: Math.min(...part.footprint.map(p => p[1])), maxZ: Math.max(...part.footprint.map(p => p[1])),
@@ -36,15 +38,15 @@ export function shelfStairGeometry(element: ComfortElementPlan, floor: FloorProf
     const y=heights[i]?.[j]; if(y===undefined) continue;
     const x0=xs[i]!,x1=xs[i+1]!,z0=zs[j]!,z1=zs[j+1]!;
     quad([x0,y,z0],[x0,y,z1],[x1,y,z1],[x1,y,z0]);
-    quad([x0,floor.floorYAt(x0,z0),z0],[x1,floor.floorYAt(x1,z0),z0],
-      [x1,floor.floorYAt(x1,z1),z1],[x0,floor.floorYAt(x0,z1),z1]);
+    quad([x0,baseY(x0,z0),z0],[x1,baseY(x1,z0),z0],
+      [x1,baseY(x1,z1),z1],[x0,baseY(x0,z1),z1]);
     const edges: [number|undefined,[number,number],[number,number]][] = [
       [heights[i-1]?.[j],[x0,z0],[x0,z1]], [heights[i+1]?.[j],[x1,z1],[x1,z0]],
       [heights[i]?.[j-1],[x1,z0],[x0,z0]], [heights[i]?.[j+1],[x0,z1],[x1,z1]],
     ];
     for(const [neighbor,a,b] of edges) {
       if(neighbor!==undefined && neighbor>=y-1e-8) continue;
-      const lowA=neighbor ?? floor.floorYAt(...a), lowB=neighbor ?? floor.floorYAt(...b);
+      const lowA=neighbor ?? baseY(...a), lowB=neighbor ?? baseY(...b);
       const polygon:V[]=[ [a[0],y,a[1]],
         ...levels.filter(level=>level<y-1e-8 && level>lowA+1e-8).map(level=>[a[0],level,a[1]] as V),
         [a[0],lowA,a[1]],[b[0],lowB,b[1]],
@@ -95,7 +97,7 @@ export function PoolComfortModel({
     () =>
       plan.elements.map((element) => ({
         element,
-        geometry: element.tiers?.length || element.steps || floorProfile.shelfZone ? shelfStairGeometry(element, floorProfile) : stairSolid(
+        geometry: element.kind === "integratedBench" || element.tiers?.length || element.steps || floorProfile.shelfZone ? shelfStairGeometry(element, floorProfile) : stairSolid(
           element.footprint,
           element.topY,
           { x: 0, z: 0, rotation: 0 },
@@ -193,7 +195,7 @@ export function HydroSpot({
 /** Flush stainless nozzle set into the seat riser: chrome bezel + dark orifice.
  * Protrusion is a few mm so it never z-fights with the liner face. */
 function HydroJet({ jet }: { jet: NonNullable<ComfortElementPlan["jets"]>[number] }) {
-  const d = HYDRO_DIMENSIONS.jetDiameter;
+  const d = jet.diameter ?? HYDRO_DIMENSIONS.jetDiameter;
   const rotY = Math.atan2(jet.dir[0], jet.dir[1]);
   return (
     <group name="pool-hydro-jet" position={[jet.x, jet.y, jet.z]} rotation={[0, rotY, 0]}>

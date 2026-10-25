@@ -24,6 +24,7 @@ import { createLimestoneMaps, createPrunMaps, createWPCMaps, configureExteriorRo
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import { NaturalGrassMaterial } from "./NaturalGrassMaterial";
+import { copingEdgeRadius, type CopingEdge } from "@/lib/pool/coping-style";
 
 export { createPavingModules } from "./pavingGeometry";
 const NO_FURNITURE_ROWS: readonly DeckFurnitureSide[] = [];
@@ -167,7 +168,7 @@ const RetainedPavingSurfaces = memo(function RetainedPavingSurfaces({ descriptor
   const geometry = useMemo(() => {
     // Exact physical inputs, not a stage flag or a key for a single pool size.
     const [inner, outer, module, options] = JSON.parse(descriptor) as
-      [Outline, Outline, readonly [number, number], Required<PavingOptions>];
+      [Outline, Outline, readonly [number, number], PavingOptions & {thickness: number}];
     return { ...createVisiblePavingGeometry(inner, outer, module, options, true), thickness: options.thickness };
   }, [descriptor]);
   useEffect(() => () => {
@@ -196,6 +197,10 @@ export function StudioPaving({
   furnitureRows = NO_FURNITURE_ROWS,
   decking = true,
   waterY,
+  integratedEdge = false,
+  topY = 0,
+  copingStyle,
+  copingEdge,
 }: {
   outline: Outline;
   poolType: PoolType;
@@ -214,6 +219,10 @@ export function StudioPaving({
   /** Submerged LEDs are linked out of every dry deck material (they cannot
    * shine through the shell), so the beam stays inside the basin. */
   waterY: number;
+  integratedEdge?: boolean | undefined;
+  topY?: number | undefined;
+  copingStyle?: import("@/lib/pool/coping-style").CopingStyle | undefined;
+  copingEdge?: CopingEdge | undefined;
 }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -228,9 +237,13 @@ export function StudioPaving({
   // exact metric descriptor independently of construction-stage visibility.
   const geometry = useMemo(() => {
     const started = import.meta.env.DEV ? performance.now() : 0;
-    const inner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType));
+    const originalInner = offsetOutline(outline, studioDeckInnerOffset(poolType, system, overflowType, copingStyle));
+    // A 2 mm bedding overlap beneath the dedicated stone closes the junction
+    // without overlapping any visible upper surface or widening its joint.
+    const inner = integratedEdge ? outline : poolType === "in-ground"
+      ? offsetOutline(outline, Math.max(0, studioDeckInnerOffset(poolType, system, overflowType, copingStyle) - .002)) : originalInner;
     const band = studioDeckBand(outline, environment, loungers);
-    const outer = studioDeckOutline(inner, band, furnitureRows);
+    const outer = studioDeckOutline(originalInner, band, furnitureRows);
     const far: Outline = [
       [-150, -150],
       [150, -150],
@@ -245,7 +258,7 @@ export function StudioPaving({
       // that showed the basin shell at low cameras.
       ground: createSurfaceGeometry(
         far,
-        decking ? (furnitureRows.length ? offsetOutline(outer, -0.04) : offsetOutline(inner, band - 0.04)) : inner,
+        decking ? (furnitureRows.length || integratedEdge ? offsetOutline(outer, -0.04) : offsetOutline(inner, band - 0.04)) : inner,
       ),
     };
     if (import.meta.env.DEV) console.debug("[Pool3D ground build]", JSON.stringify({
@@ -253,7 +266,7 @@ export function StudioPaving({
       durationMs: Number((performance.now() - started).toFixed(2)),
     }));
     return result;
-  }, [outline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking]);
+  }, [outline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking, integratedEdge, copingStyle]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
@@ -264,7 +277,8 @@ export function StudioPaving({
     gl.shadowMap.needsUpdate = true;
   }, [gl, scene, geometry]);
   useEffect(() => () => geometry.ground.dispose(), [geometry]);
-  const pavingDescriptor = JSON.stringify([geometry.inner, geometry.outer, module, { gap, thickness, boards }]);
+  const pavingDescriptor = JSON.stringify([geometry.inner, geometry.outer, module, { gap, thickness, boards,
+    ...(integratedEdge ? {edgeRadius: copingEdgeRadius({poolType, system, overflowType, copingEdge})} : {}) }]);
   const dry = (shader: WebGLProgramParametersWithUniforms) =>
     excludeSubmergedDirectLights(shader, waterY);
   const dryKey = () => `studio-ground-dry-${waterY}`;
@@ -283,7 +297,7 @@ export function StudioPaving({
         </Suspense>
       </mesh>
       {decking || pavingPrepared ? (
-        <group visible={decking}>
+        <group visible={decking} position={[0, topY, 0]}>
           <RetainedPavingSurfaces active={decking} descriptor={pavingDescriptor} id={id} waterY={waterY} />
         </group>
       ) : null}

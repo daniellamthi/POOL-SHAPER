@@ -1,0 +1,170 @@
+Browser tab: 2, Title: "Pool Studio — Configuratore piscine 3D", URL: "http://esse-qa.localhost:3003/?p=PW-4QFG-QQ485X".
+1 AXWebArea Pool Studio — Configuratore piscine 3D, URL: esse-qa.localhost:3003/?p=PW-4QFG-QQ485X
+	2 heading Configuratore piscine 3D, Value: 1
+		3 text Configuratore piscine 3D
+	4 container
+		5 image Piscine Wellness
+		6 container Fasi della configurazione
+			7 content list
+				8 button Piscina, Help: Piscina · Cemento armato · 10,0 × 4,5 m
+				9 button Sistema acqua, Help: Sistema acqua · Skimmer · Slim Moderno
+				10 button Accesso & comfort, Help: Accesso & comfort · Scala interna · Idromassaggio A
+				11 button Finiture, Help: Finiture · Liner PVC · Arctic White [180]
+				12 button Esterno, Help: Esterno · Travertino · Gres porcellanato · 60 × 120 cm
+				13 button Optional, Help: Optional · Chaise longue
+				14 button Presentazione, Help: Presentazione · In corso
+		15 container Lingua
+			16 checkbox Description: Italiano, Value: 1
+			17 checkbox Description: Inglese, Value: 0
+		18 container Ora della scena
+			19 checkbox Giorno, Value: 1
+			20 checkbox Notte, Value: 0
+		21 button Ricomincia
+		22 container
+			23 pop up button (collapsed) Description: Vista della piscina, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			24 text Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+			25 toolbar Strumenti vista
+				26 checkbox Guide, Value: 0
+				27 checkbox Vista tecnica, Value: 0
+				28 checkbox Riquadra, Value: 0
+		29 container Passo 7: Presentazione
+			30 container
+				31 text La tua piscina finita: scena, riepilogo e richiesta di proposta.
+				32 tab group Presentazione
+					33 tab (selectable, settable, boolean) Scena, Value: 0
+					34 tab (selected, settable, boolean) Riepilogo, Value: 1
+					35 tab (selectable, settable, boolean) Richiedi proposta, Value: 0
+				36 container Salva e condividi
+					37 text IL TUO PROGETTO
+					38 text Salvato  · PW-4QFG-QQ485X
+					39 text Riprendilo quando vuoi, anche da un altro dispositivo, con il link.
+					40 image QR del progetto PW-4QFG-QQ485X
+					41 button SALVATO
+					42 button CONDIVIDI
+					43 button PROJECT BOOK PDF
+					44 text http://esse-qa.localhost:3003/?p=PW-4QFG-QQ485X
+				45 container
+					46 image La tua piscina configurata
+					47 text IL TUO PROGETTO
+					48 heading Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m, Value: 2
+						49 text Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m
+					50 text Piscina interrata · Skimmer — bordo classico · circa 61 m³ d'acqua
+					51 container
+						52 text Project ID PW-4QFG-QQ485X
+					53 link Description: ↑ Espandi piscina, Value: esse-qa.localhost:3003/?p=PW-4QFG-QQ485X#pool-viewport
+					54 heading LA TUA PISCINA, Value: 3
+						55 text LA TUA PISCINA
+					56 button MODIFICA
+					57 definition list
+						58 container Tipologia
+							59 text Tipologia
+						60 text Piscina interrata
+						61 container Struttura
+							62 text Struttura
+						63 text Cemento armato
+						64 container Dimensioni
+							65 text Dimensioni
+						66 text Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m
+					67 heading LINEA D'ACQUA, Value: 3
+						68 text LINEA D'ACQUA
+					69 button MODIFICA
+					70 definition list
+						71 container Sistema idraulico
+							72 text Sistema idraulico
+						73 text Skimmer — bordo classico
+						74 container Skimmer
+							75 text Skimmer
+						76 text Slim / moderno · Bianco ABS
+					77 heading MATERIALI, Value: 3
+						78 text MATERIALI
+					79 button MODIFICA
+					80 definition list
+						81 container Rivestimento
+							82 text Rivestimento
+						83 container
+							84 text Motion Arctic White [180] Acqua dai riflessi turchese
+						85 container Bordo
+							86 text Bordo
+						87 container
+							88 text Travertino Bordo dedicato
+						89 container Angoli della vasca
+							90 text Angoli della vasca
+						91 container
+							92 text Arrotondato Angoli vasca arrotondati: raggio 20 cm.
+						93 container Pavimentazione
+							94 text Pavimentazione
+						95 text Gres porcellanato
+						96 container Formato pavimentazione
+							97 text Formato pavimentazione
+						98 container
+							99 text 60 × 120 cm Dimensioni di riferimento della visualizzazione; fornitura da confermare.
+					100 heading ACCESSO E COMFORT, Value: 3
+						101 text ACCESSO E COMFORT
+					102 button MODIFICA
+					103 definition list
+						104 container Incluso
+							105 text Incluso
+						106 text Scala interna integrata — Scala interna rettilinea
+						107 container Incluso
+							108 text Incluso
+						109 text Idromassaggio A
+					110 heading ILLUMINAZIONE, Value: 3
+						111 text ILLUMINAZIONE
+					112 button MODIFICA
+					113 definition list
+						114 container Optional scale
+							115 text Optional scale
+						116 text Micro-spot LED nelle alzate delle scale interne
+						117 container Optional panca
+							118 text Optional panca
+						119 text Micro-spot LED sulla panca idromassaggio
+						120 container Impianto
+							121 text Impianto
+						122 text Illuminazione subacquea a LED
+						123 container Punti luce
+							124 text Punti luce
+						125 text 3 · automatici, dimensionamento indicativo
+						126 container Colore selezionato
+							127 text Colore selezionato
+						128 text #FFFFFF
+						129 container Intensità luce
+							130 text Intensità luce
+						131 text 26%
+					132 heading OPTIONAL, Value: 3
+						133 text OPTIONAL
+					134 button MODIFICA
+					135 definition list
+						136 container Incluso
+							137 text Incluso
+						138 text Chaise longue · 4 lettini
+					139 heading PRESENTAZIONE, Value: 3
+						140 text PRESENTAZIONE
+					141 button MODIFICA
+					142 definition list
+						143 container Momento
+							144 text Momento
+						145 text Giorno
+					146 heading DA DEFINIRE CON IL CONSULENTE, Value: 3
+						147 text DA DEFINIRE CON IL CONSULENTE
+					148 content list
+						149 text Dimensionamento definitivo dell'impianto tecnico
+					150 button (collapsed) SCOPRI I DETTAGLI TECNICI, Secondary Actions: Expand
+						151 text SCOPRI I DETTAGLI TECNICI
+				152 button Prossima scelta: Richiedi proposta
+					153 text Prossima scelta
+					154 text : 
+					155 text Richiedi proposta
+				156 button Altre opzioni
+			157 container
+				158 text FASE 07 DI 07 ·  2/3 · Riepilogo
+				159 heading Presentazione, Value: 2
+					160 text Presentazione
+				161 text 10,0 × 4,5 m · pronta per la proposta
+			162 button VEDI LA PISCINA
+			163 button (expanded) RIDUCI, Secondary Actions: Collapse
+			164 container
+				165 button INDIETRO
+				166 button CONTINUA
+	167 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Pool Studio — Configuratore piscine 3D, URL: esse-qa.localhost:3003/?p=PW-4QFG-QQ485X

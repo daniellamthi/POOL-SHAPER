@@ -54,6 +54,9 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (typeof configValue !== "object" || configValue === null) return false;
 
   const config = configValue as Record<string, unknown>;
+  if (config["copingStyle"] !== undefined && config["copingStyle"] !== "dedicated" && config["copingStyle"] !== "flush") return false;
+  if (config["copingEdge"] !== undefined && config["copingEdge"] !== "square" && config["copingEdge"] !== "rounded") return false;
+  if (config["integratedBenchStations"] !== undefined && (!Number.isSafeInteger(config["integratedBenchStations"]) || Number(config["integratedBenchStations"]) < 1 || Number(config["integratedBenchStations"]) > 4)) return false;
   if (config["sunShelfLoungerColor"] !== undefined && !isSunShelfLoungerColor(config["sunShelfLoungerColor"])) return false;
   if (!PROJECT_TYPE_IDS.has(config["projectType"] as string | null)) return false;
   if (!POOL_TYPE_IDS.has(config["poolType"] as string | null)) return false;

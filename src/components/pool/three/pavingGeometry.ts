@@ -1,9 +1,11 @@
 import { BufferGeometry, Float32BufferAttribute } from "three";
 import type { Outline } from "@/lib/pool/types";
 import { createSurfaceGeometry } from "./poolGeometry";
+import { offsetOutline } from "@/lib/pool/geometry";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
 type Point = [number, number];
-export type PavingOptions = { gap?: number; thickness?: number; boards?: boolean };
+export type PavingOptions = { gap?: number; thickness?: number; boards?: boolean; edgeRadius?: number };
 function clip(poly: Point[], axis: 0 | 1, limit: number, greater: boolean): Point[] {
   // Most cells lie wholly inside/outside a clipping half-plane. Keep their
   // existing point order and avoid allocating another polygon in those cases.
@@ -53,7 +55,7 @@ export function pavingGridOrigin(bounds: number[], pitch: number, stagger = fals
 /** One merged mesh, including recessed module edges. Only horizontal top
  * triangles participate, so the same metric bond fits the existing Infinity
  * terrace without adding paving across its channel or changing its outline. */
-export function createPavingOnSurface(surface: BufferGeometry, module: readonly [number, number], options: PavingOptions = {}) {
+export function createPavingOnSurface(surface: BufferGeometry, module: readonly [number, number], options: PavingOptions = {}, edgeOutline?: Outline, gridOutline?: Outline) {
   const { gap = 0.003, thickness = 0.02, boards = false } = options;
   const ring = surface.index ? surface.toNonIndexed() : surface.clone();
   const p = ring.getAttribute("position"), [sx, sz] = module;
@@ -63,8 +65,8 @@ export function createPavingOnSurface(surface: BufferGeometry, module: readonly 
     if ([0, 1, 2].some(j => Math.abs(p.getY(i + j)) > 1e-6)) continue;
     triangles.push([0, 1, 2].map(j => [p.getX(i + j), p.getZ(i + j)]));
   }
-  const xs = [...new Set(triangles.flatMap(t => t.map(v => v[0])))];
-  const zs = [...new Set(triangles.flatMap(t => t.map(v => v[1])))];
+  const xs = [...new Set(gridOutline ? gridOutline.map(v => Math.fround(v[0])) : triangles.flatMap(t => t.map(v => v[0])))];
+  const zs = [...new Set(gridOutline ? gridOutline.map(v => Math.fround(v[1])) : triangles.flatMap(t => t.map(v => v[1])))];
   const ox = pavingGridOrigin(xs, sx, boards), oz = pavingGridOrigin(zs, sz);
   const pos: number[] = [], uv: number[] = [], colors: number[] = [];
   const cells = new Map<string, { x: number; z: number; minX: number; minZ: number; polygons: Point[][] }>();
@@ -95,6 +97,17 @@ export function createPavingOnSurface(surface: BufferGeometry, module: readonly 
     const rnd = seed - Math.floor(seed), tone = 0.965 + rnd * 0.035;
     const offU = Math.floor(rnd * 997) * 0.37, offV = Math.floor(((rnd * 7919) % 1) * 991) * 0.41;
     const vertex = (v: Point, y: number) => {
+      if (y === 0 && edgeOutline && options.edgeRadius) {
+        const r = options.edgeRadius;
+        let distance = Infinity;
+        for (let i = 0; i < edgeOutline.length; i++) {
+          const a = edgeOutline[i]!, b = edgeOutline[(i + 1) % edgeOutline.length]!;
+          const dx = b[0] - a[0], dz = b[1] - a[1];
+          const t = Math.max(0, Math.min(1, ((v[0] - a[0]) * dx + (v[1] - a[1]) * dz) / (dx * dx + dz * dz)));
+          distance = Math.min(distance, Math.hypot(v[0] - a[0] - t * dx, v[1] - a[1] - t * dz));
+        }
+        if (distance < r) y = -r + Math.sqrt(Math.max(0, r * r - (r - distance) ** 2));
+      }
       pos.push(v[0], y, v[1]);
       // Board-local crosswise coordinate aligns the grain with every course;
       // stone UVs remain metric and independent from the selected slab size.
@@ -132,8 +145,16 @@ export function createPavingOnSurface(surface: BufferGeometry, module: readonly 
 }
 
 export function createPavingModules(inner: Outline, outer: Outline, module: readonly [number, number], options: PavingOptions = {}) {
-  const surface = createSurfaceGeometry(outer, inner);
-  const result = createPavingOnSurface(surface, module, options);
+  // Only the real water-facing upper strip is subdivided. All pieces still
+  // share the original metric module grid, UV window, material and draw call.
+  const radius = Math.min(options.edgeRadius ?? 0, (options.thickness ?? .02) * .4);
+  const rings = radius > 0 ? Array.from({length: 7}, (_, i) =>
+    offsetOutline(inner, radius * (1 - Math.cos(i / 6 * Math.PI / 2)))) : [inner];
+  const parts = [createSurfaceGeometry(outer, rings[rings.length - 1]!)];
+  for (let i = 1; i < rings.length; i++) parts.push(createSurfaceGeometry(rings[i]!, rings[i - 1]!));
+  const surface = parts.length === 1 ? parts[0]! : mergeGeometries(parts)!;
+  if (parts.length > 1) parts.forEach(part => part.dispose());
+  const result = createPavingOnSurface(surface, module, {...options, edgeRadius: radius}, radius > 0 ? inner : undefined, radius > 0 ? [...inner, ...outer] : undefined);
   surface.dispose();
   return result;
 }

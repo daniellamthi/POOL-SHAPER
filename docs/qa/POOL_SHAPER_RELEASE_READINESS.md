@@ -1,5 +1,12 @@
 # POOL-SHAPER — final customer QA / release readiness
 
+**Current closeout: 25 October 2026 — BLOCKED on release prerequisites, not publication approval.**
+Feature HEAD and remote are both `e27fe46903811b7b0f91f33259847115bb08f5ae`;
+the later local WIP is not a deployed/committed release. The dated records below
+are historical checkpoints, not interchangeable candidate proofs. See the final
+25 October addendum for the current backup, independent browser replay and
+semantic camera checks. Remaining requirements are retained, not waived.
+
 ## Candidate and controls — 20 October 2026
 
 Workspace: `/Users/danielelamthi/Documents/Codex/pool-shaper-fullscreen-20261013`.
@@ -36,10 +43,10 @@ visual and cloud checks remain separate. No untested Cartesian-product claim.
 | U05 | Renovation all supported choices/subcategories | Actual renovation has6phases, not7new-pool phases | No inherited stale new-pool state | A in-ground and above-ground6-phase replay;7existing+5proposed decisions | PASS |
 | U06 | Continue completes relevant subcategories; Back retains selections/panel | — | — | A20real UI cycles; D20additional saved-cloud cycles, expanded at every boundary; subsequent Save retained full technical fingerprint128943cf5b242927121a25a0c56785ba | PASS for sampled saved Skimmer route |
 | U07 | Optional visible, removable and not mandatory; no fake controls | — | Existing controls preserved | A UX09/11/13 actual ON/OFF stairs/comfort/lighting/cover/loungers/shower/water/heat/Pellicano; conditional Shelf control independently retested by E | PASS — stated supported-route samples |
-| U08 | Guided scroll only on intentional progression; no colour/typing scroll loops | — | — | Colour, dimension input, family/variant/format actual UI | NOT VERIFIED |
-| U09 | Complete config edited once changes only relevant fields/dependencies | — | — | Before/after canonical snapshot diff | NOT VERIFIED |
+| U08 | Guided scroll only on intentional progression; no colour/typing scroll loops | No application loop reproduced in25October bounded replay; browser-tool scrolling separated from direct-pointer result | No speculative scroll patch | Independent1440dimension/colour/porcelain/format and390direct-pointer colour checks; [actual receipt](evidence/independent-targeted-20261025/REVIEW.md) | Sampled interactions PASS; remaining input/family combinations NOT VERIFIED |
+| U09 | Complete config edited once changes only relevant fields/dependencies | No rendered-summary loss reproduced in25October12→11m fixture | No configuration/reducer change | Independent before/after Summary DOM differs only in displayed length and derived volume; shelf/bench/finish/system retained, panel expanded | UI sample PASS; whole canonical snapshot diff NOT VERIFIED |
 | U10 | IT/EN complete; language/camera/navigation do not dirty project | Mixed Mosaic header and Italian LED intensity region independently reproduced |9explicit numbered translations; localized intensity heading/help/presets/native slider ARIA; no locale-provider/technical-state rewrite | [E independent correction retest](evidence/release-readiness-20261020/final-review-retest-evidence.json): full intensity EN,75%/3.2m/2loungers/panel retained IT→EN→IT. D same cloud fingerprint after navigation/language/camera | NOT VERIFIED — known defects/state preservation PASS; exhaustive customer/PDF copy coverage not claimed |
-| U11 | Errors/loading/retry/confirmations clear; no duplicate submission/data loss | — | — | Controlled client/server failure paths | NOT VERIFIED |
+| U11 | Errors/loading/retry/confirmations clear; no duplicate submission/data loss |25October actual failed save falsely followed by “configuration remains saved” in IT/EN | Correct only recovery text: choices/details remain on this page, not an assertion of cloud persistence | Actual isolated production before/after, independent desktop1440/emulated390 IT/EN Submit/Retry/state evidence;12copy assertions, typecheck/build PASS | Failed-save wording/retry sample PASS; successful live quote/email, duplicate-submission and remaining failure paths NOT VERIFIED |
 | S01 | Parametric shelf measures with usable min/max, not fixed across pools | Confirmed missing requested run/control | Shared metric range/flight resolver, run field, scoped control; actual floor normalization |21165checks/288cases/980rendered runs; A UI6×3 unavailable,8×4:3.035–5.6,12×5:3.035–9.6m | PASS |
 | S02 | Two real dedicated loungers fit even optionalOFF; no automatic purchase | Existing placement resolver already reserves2 | Preserve actual footprints, connected access and deep residual zone | Root range audit; B independent3200configs/39040run samples/30720quantity checks; A optionalON/OFF | PASS |
 | S03 | Min/max use real shape/orientation/access/Infinity obstacles | Rectangle supported; other shapes explicitly unavailable | Same actual layout resolver, no bounding-box compatibility fiction | B axis/slope/depth/access/allInfinity side probes, no interval holes; ±.001m bounds | PASS |
@@ -65,11 +72,11 @@ visual and cloud checks remain separate. No untested Cartesian-product claim.
 | D03 | PDF and quote snapshot/options/identity, validation/retry/idempotency | Actual C430PDF cropped exterior stair at bottom | Capture-only fit to shared Project Book landscape crop; no geometry/normal wizard camera change | Four new actual7pagePDFs downloaded after fix; root visually inspected every page plus full Day/Night images. C lowest tread now complete.4quotes exact lead=saved config,1lead/1outbox each; hashes unchanged after capture; EMAIL_NOT_CONFIGURED/no provider. Retry/concurrency remain local contracts, not a new live stress test | PASS — stated cloud/PDF sample; deferred email not delivery PASS |
 | D04 | Correct cloud target/storage/credentials/RLS/token protection | Hosted bindings now work; fresh authenticated/anonymous security-session campaign not repeated | No migrations or access-control changes; owner entered Preview secrets privately | Root exact-target/token/grant source review retained;68real-session checks remain dated11October.21October exact4295 hosted restore/copy/reload/read-only/quote and independent Daniele2 snapshot/identity/redaction checks PASS, one lead/outbox and no provider ID. Private credential values never read | NOT VERIFIED — scoped current hosted identity/privacy PASS; no new RLS/concurrent-upload stress/session claim |
 | P01 | Three matched before/after samples: frames/interactions/calls/resources | Production reproduces repeated warm dry→wet stall, not only DEV/first-use | Retain lazy water/reflection and per-mesh finished materials across raw-stage navigation; pause hidden work and dispose on actual ownership end. No shader/quality/error-check changes | Baseline829/759/778.8ms, contemporary1335.1/1437.7/1142.7ms; final458.4/430.6/359.9ms, noGL during timings. Separate aggregate still20links vs28,617.7ms; first transition in fresh GL context2594.6ms. Baseline drift prevents exact speedup%. [Final bounded result](evidence/release-readiness-20261020/residual-performance-retained-material-result.json). Input→secondRAF is not GPU/finalpaint | FAIL — validated partial improvement, recurring latency remains; no further diagnostic loop or physical-mobile performance claim |
-| Q01 |1440×900 and390×844/430×932; physical mobile only if available | No physical phone available | Declare viewport emulation explicitly | A/C/D/E actual Chrome captures and public DOM/canvas dimensions | PASS — desktop and viewport emulation, NOT physical-mobile performance |
-| Q02 | Targeted typecheck/build/lint/geometry/compatibility/camera/state/i18n/export tests | Historical camera harnesses contain obsolete hashes/evaluator gaps | Keep those explicit; no skipped suite counted PASS | Current local checks and final isolated source build below; capture-framing14760 and export guard alsoPASS | NOT VERIFIED — listed current checks PASS; four stale historical camera harness cases not repaired or counted PASS |
+| Q01 |1440×900 and390×844/430×932; physical mobile only if available | Physical phone subsequently available to owner, not agent | Declare viewport emulation and owner feedback separately | A/C/D/E Chrome captures;25October scoped1440/390/430replay. Owner24October iPhone17ProMax/GoogleChrome reports opens/fluid | Desktop/emulated samples PASS; owner-reported real-phone usability PASS; quantitative physical-mobile performance NOT VERIFIED |
+| Q02 | Targeted typecheck/build/lint/geometry/compatibility/camera/state/i18n/export tests | Four historical camera runners reproduce obsolete SHA/evaluator/oracle failures; not treated as product defects or green tests | Preserve historical failures; use current semantic checks without modifying camera/fixtures |25October contextual27479, parametric camera91551 and hero framing14760checks PASS on current WIP. Latest source typecheck/build and other targeted checks remain dated24October; no app source changed in this continuation | Listed current semantic tests PASS; four historical camera runners remain FAIL/inapplicable oracles, not silently counted PASS; full release gate NOT VERIFIED |
 | Q03 | Independent reviewer actually repeats integrated critical paths | E reproduced2English defects, not report-only review | Root corrected; E independently retested affected UI/state/material path | [E browser checklist](evidence/release-readiness-20261020/final-review-checklist.md), actual A/B/C/renovation critical sample, new source retest JSON/screenshots | PASS — independent critical sample, not exhaustive coverage |
 | B01 | Production runtime durable storage/server bindings/domain/HTTPS verified | Preview server-configuration defect resolved; owner public host/domain not chosen | Owner privately saved Preview-only Supabase variables; root rebuilt only exact4295 Preview, no Production/access change | Ready deploymentD2NKKepZf5nfzEaKxDQwueYQCTbp source4295a89; new7zztmgkaq URL. Actual hosted restore→copyPW-E72A-AB2WDG→reload saved→fresh-origin read-only→quote8C1369EA, exact DB snapshots and one lead/outbox PASS.21October actual hosted7pagePDF download and independent offline layout/config/link review PASS; no latest-WIP deployment claim. Independent Chrome online replay remains unverified/login-gated | BLOCKED — independent hosted replay and public-host decision remain; missing-credential and stated hosted-PDF-sample blockers CLOSED |
-| B02 | Privacy information complete and share/customer data protected | Configurator retention/hosting/processor approval incomplete | Fill verified company/VAT/privacy email and owner-confirmed legal address only | Owner expressly confirms Via Caduti sul Lavoro7,37012Bussolengo(VR), retention still to be defined. Do not infer10years from general website policy | BLOCKED |
+| B02 | Privacy information complete and share/customer data protected | Operational retention, legal validation and hosting/provider/date incomplete | Verified company/VAT/email/address; delegated proposed12month pre-contract retention now present in IT/EN notice |24October actual bilingual notice/text evidence; duration is a proposed business policy, not universal legal compliance. No erasure job implemented or run | DURATION DECISION RESOLVED; overall privacy BLOCKED |
 | B03 | Commercial notification operational or explicit prelaunch block | Live email deliberately postponed | Do not enable/send real messages | Sandbox/code tests, ownerverifiedsender pending | BLOCKED — live email deferred |
 | B04 | Persistent backup and tested restoration/rollback documented | Actual dashboard: Free plan excludes scheduled backups; PITR is an unavailable paid add-on. Separate manual/object backups and isolated restore not evidenced | Read-only exact-project Scheduled/PITR observation; prepared recovery procedure, no upgrade/restore/mutation |21October root authenticated UI waetxxqdlsuanqescuye explicitly displays Free-plan backup exclusion and PITR Pro add-on notice; private screenshots/safe receipt retained. No claim that unobserved manual/off-site backups are absent. Owner backup/object strategy, operator/RPO/RTO and approved isolated rehearsal remain missing | BLOCKED — managed backup availability verified absent on current plan; separate backup/recovery NOT VERIFIED |
 | B05 | Publishable asset rights documented |15retained liner/mosaic raster permissions initially undocumented | Owner expressly authorises web publication; liner unchanged | Owner reply20October2026: “si autorizzo”, specifically6liner+9mosaic. Other missing product photos remain honestly unavailable | PASS |
@@ -2125,10 +2132,10 @@ evidence, not general release approval. No new broad audit or database mutation.
 |---|---|---|---|
 | RG01 | Commit/push the additional15% ripple slowdown | `0e1b5aa189329fd1e177cc3c8df81a98f6637413`; push completed and exact feature SHA independently read with `git ls-remote`.83wave checks/typecheck/diff PASS. Changes only metric calm-wave time, not amplitude or Infinity flow. | PASS |
 | RG02 | General/grass performance gate retained by owner | Existing qualified three-pair comparison above remains authoritative but inconclusive; NW12 does not isolate grass. No sampling prototype promoted, no quality reduction or repeated unbounded campaign. Requires qualified proof, not baseline low-FPS justification. | NOT VERIFIED / OPEN |
-| RG03 | Independent latest browser QA, IT/EN/errors/accessibility, real phone | E actually replayed seven phases, IT→EN→IT and state, keyboard, water Day/Night,1440/390/430. Two confirmed ARIA defects fixed/retested. Focus restoration verified as hardening, not a proven settled pre-fix defect. Native invalid-input constraints only; no submit/cloud/email. [Actual receipt](evidence/remaining-gates-20261022/independent-release-receipt.json) and11real screenshots. | SCOPED REPLAY PASS; exhaustive language/errors and real phone NOT VERIFIED |
+| RG03 | Independent latest browser QA, IT/EN/errors/accessibility, real phone | E actually replayed seven phases, IT→EN→IT and state, keyboard, water Day/Night,1440/390/430. Two confirmed ARIA defects fixed/retested. Focus restoration verified as hardening, not a proven settled pre-fix defect. Native invalid-input constraints only; no submit/cloud/email. [Actual receipt](evidence/remaining-gates-20261022/independent-release-receipt.json) and11real screenshots. Updated24October: owner reports the isolated LAN preview opens and is fluid on iPhone17ProMax, and subsequently confirms Google Chrome; see scoped result below. | SCOPED REPLAY PASS; OWNER-REPORTED REAL-PHONE LOAD/FLUIDITY PASS; exhaustive language/errors, browser/iOS versions and quantitative performance NOT VERIFIED |
 | RG04 | Hosted Preview on final exact commit | Authenticated Vercel UI confirms Ready Preview `E9q7yc51uJ935TnhmSPFcbro857X`, source0e1b5aa, `https://pool-shaper-lbvkvt36c-daniellamthis-projects.vercel.app`. MCP team access403; existing UI session provides authoritative scope/commit instead, without weakening protection. Final accessibility follow-up not yet deployed/tested. | CHECKPOINT PASS; final runtime NOT VERIFIED |
-| RG05 | Approved configurator request/attachment retention | Owner previously explicitly left duration undefined; precise approval requested again. No invented10year rule. | BLOCKED — owner/consultant decision |
-| RG06 | Backup and actual restoration rehearsal | Source0e1b5aa archived outside Git, restored into isolated persistent folder;1329files/157457509bytes match original Git blob hashes. Exact authorised cloud recovery target requested; none inferred or created. Existing B04 procedure remains. | CODE RESTORE PASS; cloud rows/objects NOT VERIFIED |
+| RG05 | Approved configurator request/attachment retention | Updated24October: owner delegated the duration choice; IT/EN notice now proposes12months from the last request-related contact for quotations without a contract, including attachments. Contract/legal criteria distinguished. Actual browser/text checks PASS; operational enforcement, legal validation and hosting/date remain open (see addendum). | DURATION DECISION RESOLVED; overall privacy NOT VERIFIED |
+| RG06 | Backup and actual restoration rehearsal | Code restore verified at recorded checkpoints. Updated24October: isolated local PostgreSQL17 target authorised/prepared/stopped, exact application scope resolved; original source password unavailable. No native dump or private-object restore performed. Managed-backup alternative checked as below; no credential reset or paid plan enabled. | CODE RESTORE PASS; actual data/object recovery BLOCKED |
 | RG07 | Definitive hosting and real email | Expressly postponed by owner. No production deployment, DNS, sender/domain change or real email during these checks. | DEFERRED, not a production PASS |
 
 Accessibility delta is confined to the existing Radix controls and quote dialog.
@@ -2168,3 +2175,691 @@ change only photographic versus original procedural grass material, three warm
 Overview Day pairs, identical Experience4096/planar tier/camera/viewport, one scene
 active and no GPU query. That would isolate material cost, not automatically close
 P01raw→wet latency. No new performance PASS inferred or appearance reduced.
+
+### RG checkpoint after accessibility commit
+
+Feature commit `f594b6d8189ee5480e7ce0fdacc20efae0dbbffb` pushed and exact remote
+SHA read back; worktree clean at that checkpoint. Vercel's authenticated existing
+UI then confirmed Ready,18s build, environment Preview, same exact source SHA,
+deployment `BELcJnTY9DT9Kby5J34cd8h93L5D`:
+`https://pool-shaper-ens6jxl5t-daniellamthis-projects.vercel.app/`.
+Actual online1440×900 page hydrated and rendered3D; New Pool→In-ground→Concrete
+selection observed. Input automation subsequently timed out for native click,
+DOM click and keyboard dispatch. No page-console error was observed. This does
+NOT prove an application defect or a full online PASS: complete hosted replay,
+invalid-submit/error/retry, and physical phone remain NOT VERIFIED. Current
+screenshots/DOM: `vercel-accessibility-deployment.jpg`,
+`hosted-current-initial-runtime.jpg`, `hosted-current-dom.txt` in the RG folder.
+Only root's new unsaved QA tab51 closed; no cloud save, quote or email.
+Owner local preview resumed at23:48:06.245Z, viewport override reset.
+
+Additional actual backup/restore of the accessibility checkpoint:
+`pool-shaper-wip-backups/source-f594b6d-20261022.tar.gz`, SHA256
+`075b11794d1c8c61668f49cd25ca1b4ac129f2d0cec82b572a5cf65791ffe29d`.
+Extracted to `source-restore-f594b6d-20261022-HCrT4q`; all1342tracked blobs,
+158205219bytes match their original Git hashes. Local.env excluded. This remains
+code/assets-only, NOT a database/private-object rehearsal or off-device backup.
+Precise owner requests remain pending: approved configurator retention duration,
+existing authorised isolated recovery target, and physical-phone replay/model.
+Hosting and real notification email remain expressly deferred. Goal remains OPEN.
+
+### RG controlled grass diagnostic / QA pause correction
+
+Two isolated production copies from the exactf594b6d source were prepared under
+`pool-shaper-wip-backups/grass-current-ab-20261022-5u2evH`. Same synthetic12×5×1.5
+flat/HighWatersteel/BlueSky602/Prun/Greige60×120/linear/Day/open panel. Primary
+photographic material SHA256 remains
+`9f460217882755efcf3b5d02a30a87d960a165811cfb4805496c2f379571596f`.
+Only the control's retained grass owner substitutes the original4295a89
+procedural callback/roughness; StudioPaving/geometry and all other product code
+remain identical. Common source overlay: passive fixture and synthetic draft
+loading only. No.env copied; local bridge serves compiled artifacts, permits
+GET/HEAD only and rejects writes before invoking application handlers.
+An initial `vite preview` missing-dist error is harness bootstrap, not product
+or performance evidence. Corrected via identical local production-artifact bridge.
+
+Initial owner DEV pause did not survive Scene remounts while changing embedded
+tabs: real logs later showed `qaPaused:false, frameloop:always`. Those concurrent
+samples are EXCLUDED. React-state-only source tests were too narrow to establish
+remount isolation. QA pause now initializes from a DEV-only tab-session key,
+persists separately from project data, clears on resume, and safely handles
+unavailable storage. Diagnostic logs expose actual pause/loop/queue state.
+Actual owner last frame08:18:46.353Z preceded pause08:18:48.089Z and remained the
+last frame throughout the subsequent qualified attempt. This corrects the
+test infrastructure; it does not itself improve product FPS. New lifecycle/
+session tests49PASS, typecheck/build PASS, all15production JS assets contain
+neither the QA session key nor pause log prefix. Production rendering unchanged.
+
+The new six-read material attempt is still **PERFORMANCE NOT VERIFIED**:
+candidate measured10.9ms median/12.4ms p95, but unchanged procedural control
+warm8.5ms/10.0ms later became32.7ms/36.4ms and35.9ms/252.6ms. The latter window
+finished after the observation deadline and was recovered from its actual log,
+not restarted or silently passed. Same camera matrices,1440×900,DPR1.405456737852613,
+2023×1264 buffer, Experience4096/planar512 and AppleM1Pro/ANGLE Metal were observed;
+the pacing shift defeats stable matched-condition attribution. Three complete
+qualified pairs were NOT achieved. No causal grass regression, speedup or
+accepted quality tradeoff is inferred from these numbers. All-pass draw counts
+118/171 are individual completed-frame snapshots, not window mean/peak; GPU-byte
+memory remains unavailable. Raw accepted/excluded observations preserved as
+`grass-ab-inconclusive-*.json`. No sampling change promoted. Foreground Chrome
+availability is being checked by the independently authorised local reviewer;
+no further root-IAB measurement loop. General P01 remains OPEN independently.
+
+### RG actual error and hosted-read-only checks
+
+Root actually exercised the unchanged f594b6d form UI in the isolated compiled
+copy (control grass is unrelated to the form). Empty submit produced all six
+Italian required-field messages. Synthetic contact/location/notes, timing and
+privacy choice were then entered; POST was intentionally rejected locally,
+without reaching a database or provider. Save failure displayed clear Italian
+recovery text and Riprova; retry retained fields. Closing, switching EN and
+reopening retained nonempty fields, timing/privacy and displayed fully English
+save-failure/retry text. See `local-form-error-receipt.json` and three actual
+`local-form-*.jpg`. This is local client/recovery evidence, NOT live lead
+persistence, duplicate-email or Supabase failure verification. No real email.
+
+The exact hostedf594b6d Preview subsequently restored existing QA project
+PW-A24Y-7CDSQC from the authorised cloud:8×4×1.5, HighWatersteel, Mosaico5,
+Shelf3.2/two immersed loungers, Prun/Greige60×60, riser spots/heat pump.
+Read-only identity, Summary, SaveCopy/Share/PDF entry points and IT→EN preserved;
+ordinary reload restored the same ID/choices and English preference. No console
+error in the sample, no customer contacts displayed, no edit token in the public
+link. Actual screenshot/DOM `hosted-readonly-en-*` and reload DOM retained.
+This closes the earlier complete lack of current hosted cloud-read evidence;
+fresh SaveCopy, PDF download and quote were NOT invoked here. Existing earlier
+cloud/export evidence remains dated and scoped, not relabelled current. Owner
+local preview resumed11:01:02.111Z with its current Night selection retained.
+
+### RG independent performance conclusion and actual hosted PDF
+
+Independent reviewer E completed the single bounded foreground-Chrome campaign
+on the isolated f594b6d production copies: six180-frame measured windows, eight
+excluded warmups, one temporary tab435,1440×900, AppleM1Pro/ANGLE Metal,
+Experience4096/planar512, buffer2023×1264, effective DPR1.405456737852613.
+Root independently checked six180-frame receipts, identical camera start/end,
+cross-window camera/frustum, viewport and buffer. Candidate/control median/p95ms:
+7.8/13.3 versus33.4/66.2;53.8/78.3 versus32.0/101.3;49.9/291.5 versus44.0/62.0.
+Same-candidate drift prevents causal attribution or non-regression PASS.
+**PERFORMANCE NOT VERIFIED**, not an accepted grass tradeoff. Draw118/171 are
+single completed-frame snapshots, not window averages; GPU bytes unavailable.
+OS foreground focus was not independently established by the DOM sandbox.
+No further automated sampling loop or speculative material change is promoted.
+Remaining proof: a stable, foreground real-hardware comparison with repeatable
+baseline and the same fixture/quality; separate P01raw-to-wet latency remains
+open. Evidence: `independent-grass-performance-ab-receipt.json` and two
+`independent-grass-{candidate,control}-1440.jpg`. E closed its tab/reset viewport.
+
+The actual exact-f594b6d hosted Preview generated and downloaded an English
+Project Book for existing read-only QA project PW-A24Y-7CDSQC. The initial native
+input observation timed out without a download; uppercase AX text was not the
+DOM accessible name. A fresh DOM-grounded `Project Book PDF` click subsequently
+completed a real browser download. No product defect inferred from the tool
+timeouts, and no duplicate save/quote/email was attempted.
+Retained PDF `hosted-project-book-f594b6d-en.pdf`:1456691bytes, SHA256
+`df3b0444d2ece60e1b74bbb570e1158ec181aea59c59b4707df1f3cbd9e81d5e`.
+All seven pages rendered and visually inspected: no clipped/overlapping text,
+same configured pool in Day/Night, correct two shelf loungers/riser lights and
+materials/options. Project ID appears on all seven pages; both PDF URI actions
+point only to the same public read-only Preview project URL, without edit tokens
+or customer contact data. This is actual hosted PDF evidence for this fixture,
+not an exhaustive all-variant export, fresh-copy or quote PASS. Poppler emitted
+local font-cache warnings but finished successfully with all seven page rasters.
+DOM/screenshot retained as `hosted-pdf-download-en*`; QA tab54 closed. Owner
+tab49 resumed17:51:43.030Z with Night/current selections unchanged.
+
+Owner confirms no existing isolated cloud recovery destination. Do not create a
+project, incur charges or restore into the canonical database: database/private
+object recovery rehearsal remains BLOCKED pending an authorised isolated target.
+Physical-phone evidence is still pending; owner requested the current verified
+Preview link again. Retention duration remains undefined. Code/assets recovery
+remains verified separately; definitive hosting and live email remain deferred.
+
+### RG fresh-copy/reload result and WIP preservation
+
+Current exact-f594b6d hosted Preview: actual Save a copy from synthetic shared
+PW-A24Y-7CDSQC completed as PW-MBE5-RA7M6Z. Waiting on the same operation showed
+Saved; no duplicate click after its initial pending state. Ordinary reload kept
+the new ID, Saved status,8×4×1.5/HighWatersteel/Mosaic5/Prun/Greige60×60,
+Shelf3.200/two immersed loungers/riser lights/heat pump. No false unsaved warning.
+Share displayed Link copied, but the documented IAB clipboard read was empty:
+clipboard-content delivery remains NOT VERIFIED, not a claimed product defect.
+Navigating the same QA tab back to the original showed its original ID,
+read-only status and the same visible selections. Actual DOMs and screenshot:
+`hosted-copy-created-en*`, `hosted-copy-reload-en-dom.txt`,
+`hosted-source-after-copy-en-dom.txt`. This is actual UI save/reload evidence,
+not a fresh independent JSONB equality/database-row audit or anonymous access
+test of the new copy. No quote/email, schema, credentials or database settings
+changed; this authorised QA copy is retained, not deleted. QA tab56 closed;
+owner tab49 resumed18:49:24.930Z with Night/current selections unchanged.
+Existing authenticated Vercel deployment-details tab subsequently showed a
+dashboard data-loading error. This is not evidence of a failed deployment or a
+new commit: the exact-f594b6d application Preview itself served the tests.
+
+Local WIP backup outside Git:
+`pool-shaper-wip-backups/remaining-gates-20261022-jQ07rw/files.tar.gz`, SHA256
+`9c47011ebafdd0c78405daba7987321ecd8546fc6e13dfcf0d8c96b60bf02e23`;
+patch SHA256 `8ee8e117a870cc933b13910c55c3305cb1a066b69c12bea296aa9eb0eb92e277`.
+Actual isolated extraction `remaining-gates-restored-20261022-TilDjj`:
+34files/3385784bytes hash-identical, no.env or unsafe archive paths. Twelve
+modified/untracked text files scanned: zero potential credential-value patterns.
+Targeted preparation audit49PASS and diff-check PASS; no new product-source
+change since the recorded passing typecheck/build. Post-copy evidence and this
+report are additionally preserved in `files-post-copy.tar.gz` and
+`wip-post-copy.patch` in the same backup folder. No closing push while mandatory
+performance/physical-phone/privacy/cloud-recovery gates remain open. Existing
+water-slowdown commit0e1b5aa and remote checkpointf594b6d are not re-created.
+
+### 23 October — resumed gate, exact remote and local recovery feasibility
+
+Fresh read-only `git ls-remote` confirms feature-branch remote/local HEAD both
+`f594b6d8189ee5480e7ce0fdacc20efae0dbbffb`; ancestry check confirms the existing
+15% calm-water slowdown commit0e1b5aa is included. No duplicate commit/push.
+Primary WIP/evidence remain present and untouched. Native Homebrew PostgreSQL
+tools are available (`initdb`, `pg_ctl`, `pg_dump`/`psql`17.11); Docker's Colima
+socket is absent, so no container service is assumed or started. A native local
+isolated recovery destination is a feasible alternative to a new cloud project.
+Owner approval for that specific destination has been requested and is pending;
+no database has been initialized, no customer-data backup exported and no
+canonical Supabase mutation performed. This is feasibility, not a successful
+database/private-object restoration. Physical-phone result, approved retention
+and stable performance evidence remain pending; no repeated benchmark campaign.
+
+### 23 October — authorised local recovery destination executed
+
+Owner explicitly approved: “Sì, prova locale isolata”. This resolves only the
+isolated-target approval blocker, not backup availability or full recovery.
+Correct source independently re-identified through explicit-account Daniele2
+MCP get_project and the same authenticated Connect UI: waetxxqdlsuanqescuye,
+Configuratore piscine wellness, ACTIVE_HEALTHY, PostgreSQL17.11.0.003.
+No default/unrelated account, remote SQL write, migration, password reset,
+paid service, Docker startup or source availability change.
+
+Native PostgreSQL17.11 cluster was actually initialized in private persistent
+`pool-shaper-wip-backups/local-restore-20261023-tFOjne/data`; database
+`pool_shaper_restore` created there. Exact local query verified Unix-socket-only
+connection, empty listen_addresses, checksums ON, zero unsafe auth rules and
+zero user tables. Cluster/socket directories0700; local auth peer, host auth
+reject. No password invented. `lsof` found no TCP55439 listener. Sandbox denied
+the initial fresh initdb shared-memory allocation; initdb cleaned its own
+incomplete new directory. The explicitly reviewed native retry succeeded.
+After verification, orderly shutdown completed and pg_ctl reported no running
+server. Data files remain for the authorised rehearsal; no idle service left.
+See `local-recovery-target-20261023.json` for the non-sensitive actual receipt.
+
+**TARGET PREPARATION PASS; DATA RESTORATION STILL BLOCKED.** No native database
+dump was found in the designated task backup area. Existing ignored app.env
+contains only Supabase API URL/service-role names, not a PostgreSQL connection
+password; no default.pgpass exists. No credential value was displayed. The
+same-project Connect panel exposes the session-pooler URI with YOUR-PASSWORD
+placeholder, not an existing password. A new private0600 file outside any Git
+worktree, `.env.recovery-source` under the isolated recovery folder, contains
+only verified non-secret connection parameters and an empty SOURCE_DB_PASSWORD
+field. Its directory has a deny-all.gitignore. Owner is asked only to supply
+the EXISTING PostgreSQL password privately, not another API key and not a reset.
+The editor open request is queued; Connect is open in the integrated browser.
+No customer data exported or restored yet; no storage object bytes copied.
+
+Native database backup/restore, object verification, restored RLS/application
+replay and RPO/RTO remain unproven. A fresh export/rehearsal will not establish
+historical retention or an off-device backup policy. Database dumps alone do
+not include Storage object bytes: see the official
+[Supabase backup scope](https://supabase.com/docs/guides/platform/backups).
+No new build or broad application audit: no application source was changed.
+The other performance/physical-phone/privacy gates remain unchanged.
+
+### 24 October — actual credential-readiness/TLS checks, no restore claim
+
+Owner replied that they would enter the existing password privately. A local
+boolean-only check found an owner-only file, correct fixed source parameters
+and a nonempty password field; no value printed. First source probe encountered
+sandbox DNS restrictions. Reviewed native networking reached the exact project
+pooler but rejected its certificate under the system trust roots. Verification
+was NOT weakened. From the same authenticated project's Database Settings,
+downloaded the official Supabase Root2021CA via Download certificate, kept only
+as a job-local trust file; no global trust store or SSL enforcement change.
+Certificate SHA256 fingerprint
+`807025ad50d4ed219d2c9c7d299c004f824eb00cf7f65afef607d07b72e6cafa`, valid2021–2031.
+With verify-full still enabled, TLS succeeded and PostgreSQL returned an
+authentication failure, before any SELECT/export/restore.
+
+Local-only format classification then established the precise cause: the field
+contains a WHOLE connection URI with the unfilled YOUR-PASSWORD placeholder,
+not an actual PostgreSQL password. The owner's file is not changed or echoed.
+No retry with guessed/decoded passwords. Private helper now rejects any whole
+URI or this placeholder anywhere in the password field BEFORE networking;
+node syntax check PASS and the actual local guard returned expected exit2,
+sourceConnectionAttempted:false. This was not another database login attempt.
+Owner requested to insert only the existing raw password; no password reset.
+Evidence: `local-recovery-source-readiness-20261024.json`. Local database remains
+stopped; no rows or objects exported. **REAL DATA RESTORE REMAINS BLOCKED.**
+
+The same-project Schema Visualizer also exposes wellness_* and pw8_* names:
+these are not assumed to belong to this configurator. No rows of those tables
+were read, exported or altered. Any eventual POOL-SHAPER logical export must
+first resolve its exact application objects/dependencies from the current code
+and source metadata, not indiscriminately dump other applications' public data.
+The local native helper/certificate stay outside Git; private credential file
+is excluded from evidence archives. No application source, main/archive branch,
+database schema, security setting or notification configuration changed.
+Official procedure followed:
+[Supabase psql TLS certificate](https://supabase.com/docs/guides/database/psql)
+and [PostgreSQL17 certificate verification](https://www.postgresql.org/docs/17/libpq-connect.html).
+
+### 24 October — scoped recovery inventory, credential gate still open
+
+After the owner's new password-entered reply, the guarded local helper again
+returned exit2 before networking. A separate boolean-only read of the saved
+file found one assignment at line10 containing a whole connection URI and the
+unfilled password placeholder. No value was printed or overwritten; requested
+the exact private file be saved after entering only the existing password.
+
+Continued the independent recovery preparation without a native login retry:
+current server modules/migrations and a read-only catalog query through the
+explicit Daniele2 connection confirm six application tables (projects, leads,
+attachment_owners, attachment_uploads, lead_notifications, notification_events),
+all RLS-enabled, their two outbound foreign keys, one noninternal project
+timestamp trigger and eight application functions, all security invoker.
+The existing application bucket is pool-shaper-attachments. Unrelated
+wellness_*/pw8_* data and global Auth users are excluded from the planned export.
+Evidence: `local-recovery-scope-20261024.json`.
+
+This inventory closes only the application export-scope ambiguity. It is not
+a dump, Storage copy, dependency-complete native restore, behavioral RLS test
+or application recovery. No customer rows read/exported and no source writes.
+Actual database/object recovery remains BLOCKED on the saved password field;
+other release gates remain unchanged. No application source changes or new
+build/test campaign. Existing WIP remains uncommitted and preserved.
+
+### 24 October — owner confirms original database password unavailable
+
+Owner explicitly answered that they do not remember the original PostgreSQL
+password. The saved field was last verified to contain the connection template,
+not a usable password. This is no longer treated as an unsaved-editor issue.
+No password reset, credential guessing, further native login, source mutation
+or security downgrade is authorised or performed. The prepared isolated local
+database remains stopped. Code/WIP backups remain preserved; they do not
+substitute for the still-unexecuted real database and private-object recovery.
+Native logical export/rehearsal remains BLOCKED pending an existing valid
+database credential or a suitable existing database backup supplied securely
+by an authorised operator. No partial REST/table export is represented as a
+transaction-consistent native database backup or full Supabase recovery.
+
+### 24 October — current WIP: authorised cloud replay and bilingual PDF
+
+The owner authorised exactly one new QA project, without changing existing
+projects or sending quotes/email. The configured server URL was verified as
+`waetxxqdlsuanqescuye.supabase.co` (Daniele 2). The actual integrated-browser
+Save created **PW-4QFG-QQ485X**; a read-only SQL query restricted to that public
+reference independently confirmed the row. No second project/Save Copy was
+created and no source-code, environment, schema, main or deployment changes
+were made by this verification. Existing overlapping WIP remains preserved.
+
+Candidate: the current WIP based on `e27fe46903811b7b0f91f33259847115bb08f5ae`.
+The production `node_modules/.bin/vite build` completed successfully for client,
+SSR and Nitro server output. Large-chunk and redundant path-plugin warnings
+remain warnings, not a performance PASS. This supersedes the narrower receipts'
+earlier statement that no full build had run after these local changes.
+
+| Current-candidate check | Observed evidence / limit |
+|---|---|
+| IT → EN → IT summary | All extracted Italian summary text matched before/after; model selections, dimensions, scene Day and expanded panel retained. |
+| Language on a clean saved project | Same Project ID and SAVED/SALVATO state; no unsaved-change warning. |
+| Save and real Reload | Cloud row created, then actual browser reload restored the selected Skimmer, rounded corners, Travertino, Gres60×120, liner, stairs, hydromassage and lighting. |
+| New canonical fields | SQL confirms `copingStyle=dedicated`, `copingEdge=rounded`, `integratedBenchStations=4`. The bench was OFF in this fixture: this does not prove active bench geometry or all overflow styles through cloud replay. |
+| Share | Actual button reported LINK COPIATO. A fresh local origin opened the same reference and explicitly showed read-only sharing and SAVE A COPY. The copy button was not clicked. |
+| Unchanged persisted configuration | Before/after database configuration hash: `f96307d264d1a8d07860edde6d709cb5`, identical after language changes, reload, sharing and exports. |
+| PDF IT and EN | Both files actually downloaded from the current app. Seven pages each, text extracted and every rendered page visually inspected; selected rounded corners/materials and Day/Night images present, no clipped text observed. |
+| Proposal form EN | Actual blank dialog opened, labels/privacy link/timing choices checked, then closed without entering personal data, accepting privacy or submitting. Not a quote-delivery test. |
+
+Evidence in `evidence/remaining-gates-20261022/`:
+`current-wip-project-book-20261024-it.pdf`,
+`current-wip-project-book-20261024-en.pdf`,
+`current-wip-saved-summary-20261024.jpg`,
+`current-wip-share-readonly-20261024.jpg`,
+`current-wip-en-form-20261024.jpg` and corresponding DOM receipts.
+The PDF QR/link deliberately points to the local QA origin, not a public launch
+URL. The temporary shared-view tab was closed; the owner QA preview remains
+open in Italian. One QA database record remains; no existing record was changed.
+
+The PDF skill required actual rendered-page inspection, not download-only PASS.
+The bundled Poppler renderer emitted local fontconfig/cache warnings, but
+completed; its resulting pages and extracted text were inspected. Tool/download
+wall time is not attributed to app frame rate or used as a performance benchmark.
+
+Still open: stable matched real-hardware performance and raw-to-wet latency;
+physical-phone results; approved privacy retention/hosting/date; native DB plus
+private-object recovery; exact committed/deployed final candidate; definitive
+public hosting/email. This sample does not replace all-catalogue IT/EN QA,
+current-WIP Save Copy, active bench/other-system cloud fixtures, quote delivery
+or the remaining release gates. No commit/push, merge or deploy performed.
+
+### 24 October — active bench and both concealed-overflow coping styles
+
+Bounded follow-up on the **same authorised QA record PW-4QFG-QQ485X**. No
+additional project was created. All writes used the normal owner Save button;
+independent SQL checks were SELECT-only and restricted to this reference in
+Daniele 2. No existing non-QA project, source code, environment or schema changed.
+
+| Case | Actual UI / cloud / reload result |
+|---|---|
+| Concealed overflow + dedicated coping + active bench | Selected Sun Shelf, enabled integrated bench, set three stations. Save/Reload restored `system=overflow`, `overflowType=continuous`, `copingStyle=dedicated`, active shelf/bench and three stations. Real summary: **3 postazioni · 12 bocchette**. Stored config hash `591b335e101f1aef4aa7a34a5b4f9df1`. |
+| Same fixture + flush coping | Selected the actual flush card. UI reported that edge follows paving material/format/laying; summary showed Gres for both edge and paving. Save/Reload retained `copingStyle=flush`, three stations and the same selected features. Stored config hash `7f79d14364d2e82ec7c22f261b7d9de3`. |
+| Read-only shared replay | A separate local origin loaded that updated record, explicitly showed read-only mode, flush coping and **3 seats · 12 jets** in English. No Save Copy or PDF action in the viewer. Temporary viewer closed. |
+| Restore initial QA choices | Restored bench request4 while still eligible, dedicated coping, Hydromassage A and Skimmer, then normal Save. Original lighting selection returned without toggling it: it had been hidden while hydro was inactive, not removed. Sun Shelf/bench OFF, exterior loungers and other initial selections retained. |
+
+The restored feature set is exactly the original four IDs. Reinserting
+`hydromassage` changes array order, so the raw config hash is now
+`553fce7ef3f7a2a1937369a573926b82`. Replacing only that array's order with its
+initial order for a read-only comparison yields the original whole-config hash
+`f96307d264d1a8d07860edde6d709cb5`. Thus the technical selections are restored;
+this is explicitly **not** a byte-identical snapshot claim. No DB normalisation
+or direct SQL update was performed.
+
+New evidence beside the earlier receipts: `current-wip-bench-dedicated-reload-20261024`,
+`current-wip-bench-flush-reload-20261024`, `current-wip-bench-share-en-20261024`
+and `current-wip-restored-after-bench-20261024` (JPG and DOM); also
+`current-wip-overflow-flush-selection-20261024.jpg`. The integrated preview is
+left on the restored Italian owner summary, panel expanded and project saved.
+
+This closes the **sampled active-bench/both-coping cloud Save/Reload and flush
+Share** gap from the previous addendum. It does not claim active-bench PDF,
+Save Copy (not authorised as a second record), quote submission, every pool
+combination, physical mobile or performance PASS. Earlier seven-page IT/EN
+PDFs describe the initial Skimmer fixture. No application change required a new
+build/test suite; documentation diff-check remains the relevant final check.
+Privacy decisions, stable real-hardware/phone proof, native data recovery and
+the exact committed/deployed release candidate remain open. No commit/push,
+merge, email or deploy performed.
+
+### 24 October — delegated pre-contractual retention decision
+
+The owner asked to select a reasonable duration. The IT/EN privacy notice now
+specifies **12 months from the last contact relating to a quotation request
+that does not become a contract**, including personal data and attachments.
+Contract performance and applicable statutory periods are distinguished;
+longer retention must be justified and documented. This is a proposed business
+policy chosen under that delegation, **not** a legally mandated universal term.
+The [European Commission's GDPR principles](https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/principles-gdpr_en)
+require purpose-based limits and erasure/review deadlines, not this particular
+number of months. Legal/privacy validation remains required.
+
+Only the retention copy in `src/routes/privacy.tsx` and its two English
+dictionary entries changed. Pre-edit copies were preserved privately in
+`/private/tmp/pool-shaper-privacy-jyumDn/`. No deletion job, database, storage,
+consent mechanism, marketing policy, pool configuration or renderer changed.
+**Operational enforcement/erasure is not implemented or verified by this text
+change.** Hosting/provider and publication-date placeholders remain explicit.
+
+Targeted retention/translation assertions, TypeScript `--noEmit` and whole-WIP
+diff-check PASS. Actual integrated-browser IT and EN rendering checked, with
+JPG/DOM receipts `privacy-retention-it-20261024` and
+`privacy-retention-en-20261024` under `evidence/remaining-gates-20261022/`.
+The owner's language was restored to IT without changing technical choices;
+the temporary 2D privacy tab was closed, leaving the configurator open.
+No full build or unrelated audit repeated for this copy-only change.
+
+The missing-duration decision is resolved; the complete privacy/release gate
+is **not** PASS. Operational retention, legal validation, hosting/date,
+performance, physical-phone evidence, native data recovery and the exact final
+committed/deployed candidate remain open. No commit/push, merge or deploy.
+
+### 24 October — bounded active-bench PDF regression and clipping fix
+
+| ID | Expected / sampled scenario | Reproduction and minimal correction | Evidence / status |
+|---|---|---|---|
+| PDF-B01 | Readable technical notice in IT/EN Project Book;10×4.5m concealed overflow, flush coping, shelf10cm,3white loungers and4bench stations/16jets | Before: page5's technical notice starts beyond the bottom of A4 in both languages. Move only explanatory notes below the left-hand plan, computing subsequent text position from actual line height. Technical rows, data, wording and other pages unchanged. | Actual generated before/after PDF character bounds and rendered pages inspected. Scoped offline PASS. |
+| PDF-B02 | Canonical active-bench content, language and non-mutation | New `node scripts/bench-pdf-audit.mjs <local-output-directory>` uses the real parser/normaliser, summary and PDF generator without importing the store/server or making network calls.4stations/16jets, shelf10cm,3white loungers, compatible configuration and unchanged canonical snapshot asserted.107actual PDF text anchors checked per language. | Two6-page offline fixtures PASS. All12pages rendered/visually inspected; no out-of-page characters after the correction. Not a captured-3D or saved-project fixture. |
+| PDF-B03 | Preserve owner's current unsaved work | Current integrated preview independently shows **Hai modifiche non salvate**, active shelf/bench and changed materials/time. The actual PDF handler would save those changes automatically, so neither PDF nor Share/Save was clicked. Returned to the original Scene tab in IT/Night, panel expanded. | DOM receipt `remaining-gates-20261022/unsaved-active-bench-export-boundary-20261024-dom.txt`. Live active-bench download remains NOT VERIFIED; no cloud record changed. |
+
+Evidence: `evidence/bench-pdf-20261024/bench-offline-it.pdf`,
+`bench-offline-en.pdf`, and `before-{it,en}-page5.png` /
+`after-{it,en}-page5.png`. **QA-OFFLINE** / example.invalid deliberately identify
+these as offline regression documents, not real share links. Grey cover/no
+Day/Night capture is intentional for this data/layout test, not photo-export PASS.
+The PDF skill required rendered-page inspection in addition to extraction;
+both were completed. Initial Poppler font-cache warnings were isolated with a
+task-local font configuration/cache for the final renders; no system settings
+changed. An early harness attempt imported the store and reached unresolved
+TanStack virtual entrypoints; the harness now imports pure config/project modules
+only. Relative multiline PDF text offsets were correctly excluded from absolute
+anchor checks; extracted character bounds provide the independent full-page check.
+
+Source change: only `src/lib/project-delivery/projectBook.ts` plus the focused
+regression script; existing WIP preserved. Pre-edit generator/report copies:
+`pool-shaper-wip-backups/bench-pdf-layout-20261024-gj79at/` outside Git.
+Targeted PDF audit, TypeScript `--noEmit`, production client/SSR/Nitro build and
+diff-check PASS. Scoped ESLint comparison:9existing formatting findings in the
+pre-edit PDF generator, the same9afterwards, **zero new findings**; the new
+regression script is clean. Existing formatting was not broadly rewritten.
+No renderer, geometry, material, camera, consent, database or
+notification behavior changed. This closes a confirmed PDF layout defect, not
+performance/real-phone/privacy/recovery/deployment gates. No commit/push,
+merge, real email or deploy.
+
+### 24 October — managed-backup alternative, read-only boundary
+
+Fresh explicit **Daniele2** MCP project lookup confirms the authorised source
+`waetxxqdlsuanqescuye` is ACTIVE_HEALTHY, PostgreSQL17.11.0.003. No backup-list
+tool is currently exposed. The exact project's Scheduled Backups dashboard
+route was opened read-only, but the existing browser session redirected to a
+different account/organisation; no unrelated project was selected or queried.
+**Backup inventory/availability remains unverified**, not “no backups exist”.
+
+Current [Supabase backup documentation](https://supabase.com/docs/guides/platform/backups)
+confirms physical backups are not directly downloadable for a local logical
+restore and database backups exclude Storage object bytes. No managed restore,
+upgrade, new project, credential reset, API export or data copy was attempted.
+The temporary dashboard tab was closed; the owner's unsaved configurator stays
+open. Native recovery still needs an existing valid database credential or a
+suitable existing logical backup supplied securely by an authorised operator;
+the isolated rehearsal alone cannot prove historical/off-device backup coverage.
+
+This exhausts the additional non-mutating recovery alternative inspected here.
+No new source change or broad audit/test run. Stable matched real-hardware
+performance, physical-phone proof, privacy operation/validation and definitive
+hosting/email/exact-final deployment also remain open. WIP preserved; no
+commit/push, merge or deploy. Release completion remains unproven.
+
+### 24 October — owner-authorised temporary Wi-Fi preview for real-phone QA
+
+The owner explicitly approved a separate temporary LAN preview. The existing
+server remains on127.0.0.1:3003/PID28356, unchanged. A fresh production build of
+the current feature-branch WIP completed successfully; this is not a remote
+commit/deployment claim. A private Node adapter outside Git
+(`/private/tmp/pool-shaper-phone-lan-GHCxKe/server.mjs`) runs that exact local
+Cloudflare-format bundle on the Mac's private Wi-Fi address, port3004 only
+(PID61665, exec session34348). No wildcard/public bind, tunnel, firewall change,
+DNS, hosting, source change or package installation.
+
+The process starts with a cleared/allowlisted environment, no cloud credentials
+or environment-file loading, and QA notifications disabled. The temporary
+adapter rejects all non-GET/HEAD methods before app dispatch; POST probe503.
+Unexpected Host probe403; root GET200. Static files are restricted to real
+files beneath `.output/public`. No customer data entered, cloud action or
+email sent. HTTP on this LAN is **not** HTTPS/public-hosting verification.
+
+Actual integrated-browser hydration, project/installation/structure selections
+and rendered3D were checked. Evidence:
+`remaining-gates-20261022/phone-lan-current-build-20261024.jpg` and DOM receipt.
+The temporary smoke-test tab was closed; a separate LAN preview tab is left
+visible beside the chat. The old tab2 was no longer present when its deliverable
+mark was attempted; it was not reloaded, reset or navigated by this check.
+The original origin's draft and saved cloud project were not modified.
+
+**LINK / MAC SMOKE PASS; REAL PHONE RESULT PENDING.** The owner must use the
+same Wi-Fi, leave the Mac awake and report phone model/browser, navigation,
+Day/Night, dimensions, summary and observed responsiveness. Save/Share/uploads,
+quote submission and PDF's save-dependent path are intentionally excluded from
+this isolated test. No real-mobile or performance PASS inferred. Stop the
+temporary LAN process after the phone test; no persistent service registered.
+
+### 24 October — real iPhone feedback and temporary LAN shutdown
+
+Direct owner response to the requested navigation/dimensions/Day-Night/summary
+test: **“Si apre ed è fluido”**, device **“IPHONE17PRO MAX E GOOGLE”**.
+Recorded as **owner-reported real-device load/qualitative-fluidity PASS**, not
+desktop emulation or independent agent observation. The owner subsequently
+clarified **Google Chrome**. Browser/iOS versions, step counts and phone
+screenshots were not supplied. No claim of every control/combination,
+20real-phone cycles, measured FPS/frame time, before/after performance, HTTPS
+or cloud Save/Share/PDF/quote functionality follows from this response.
+
+After this temporary test, the exact authorised LAN process was stopped using
+its existing exec session34348. It exited0; a fresh listener check confirms
+port3004 is closed, while the original localhost3003/PID28356 remains active.
+No persistent service or network/firewall configuration was installed or
+changed. The integrated LAN tab was navigated back to the original local
+origin **without** a project query parameter, avoiding a cloud snapshot reload
+over the stored draft. No Save, reset, copy, quote, database write or email.
+The browser then visibly restored the10×4.5m Skimmer draft, mosaic1, shelf/bench,
+automatic cover/exterior loungers, expanded Presentation panel and Night.
+Its current EN preference was left unchanged. This is visible-state evidence,
+not a new whole-snapshot equality claim. Mac-only JPG/DOM receipt:
+`remaining-gates-20261022/phone-test-done-local-draft-restored-20261024`.
+
+This resolves the missing **owner real-phone usability feedback** sample; the
+quantitative performance, native recovery, privacy operation/validation and
+definitive hosting/email/exact-final-release gates remain open. No app source
+change requires another build or broad audit. Documentation diff-check is the
+relevant check here. No commit/push, merge or deploy.
+
+### 25 October — current WIP preservation and bounded independent closeout
+
+Local branch remains `feat/fullscreen-day-night-hidden-overflow`; fresh
+`git ls-remote` confirms local/remote HEAD
+`e27fe46903811b7b0f91f33259847115bb08f5ae`. This equality concerns committed
+HEAD only, not the uncommitted source changes. No checkout/reset/push/merge.
+
+| ID / requirement | Problem → action → actual proof | Status |
+|---|---|---|
+| R25-CODE / preserve and recover current code | Snapshot HEAD plus43modified tracked files and106new files outside Git, including source and evidence. Extract HEAD, apply binary diff, restore new files in an isolated directory;1473restored file hashes match the live WIP. Private environment filenames excluded; credential-pattern scan of patch/new text clear. No database backup claim. | Current local code/WIP restore PASS; off-device/database/private-object recovery unchanged. |
+| R25-PREVIEW / real current preview | Port3003had no listener, not a functioning live process. Restarted current-workspace Vite on127.0.0.1:3003only. Root actually inspected owner's integrated`esse-qa`preview and left it visible without reload/navigation/Save or input changes. | Local DEV preview PASS, not production/deployment proof. |
+| R25-UX / independent current touched surfaces | Separate reviewer, fresh local-only Chrome origin, desktop1440and emulated390/430. Dimension12→11preserves every other rendered Summary value; actual IT/ENshelf/bench/colours/coping/paving samples readable.16actual screenshots, DOM/actions and scroll retest receipts; root also inspected representative images and before/after DOM diff. | Scoped U08/U09/U10 PASS; no canonical-object/full-translation/physical-performance claim. |
+| R25-SCROLL / do not patch automation artifacts | Tool-associated mobile scroll changes retained in evidence. Direct-pointer click on visible Aqua keeps scroll67→67and identical44pxswatch rectangle. No repeat colour loop reproduced; no speculative application fix. | No confirmed new application defect from this sample. |
+| R25-CAMERA / current semantic camera tests | Independent read-only specialist ran contextual27479checks, parametric camera91551assertions/222projections/20pure traversal cycles, hero framing14760checks/7360cases/410320points. Hero crop minimum margin16.11px;46unavailable stair-side cases explicitly excluded. | Three current semantic suites PASS; not browser/visual/performance proof. |
+| R25-OLD / retain historical test failures honestly | Reproduced premium runner`overview`missing evaluator subjects and contradictory pre-Qwhole-pool oracle;`infinity-local`wholeSceneSHA;`top`pre-horizontalOnlyarrisSHA;`interior-finish`five obsolete function hashes. Approved framing changes explain the drift. No blind fixture/hash update or application camera change. | Four historical runners remain FAIL/inapplicable oracles, not four newly proven product bugs and not PASS. |
+
+Preservation/rehearsal receipt:
+`pool-shaper-wip-backups/current-release-20261025-UmDr5H/receipt.json`, with
+`head.tar`, `wip.patch`, `new-files.tar` and actual isolated `restored/` tree.
+This is a local current-code rehearsal only; it cannot replace data/object or
+historical/off-device backups. Credentials are not included.
+
+Independent browser proof: [review receipt](evidence/independent-targeted-20261025/REVIEW.md),
+`06-summary-before-dom.txt` / `07-summary-after-dom.txt`, screenshots01–16,
+`scroll-retest.json` and `coordinate-retest.json` in the same directory.
+The review made no cloud write, PDF/quote submission or email. Both reviewer
+tabs were closed and viewport restored. Owner draft remained on its own origin.
+No benchmark was attempted while two scenes were active.
+
+Exact semantic commands, each run once:
+`node scripts/run-contextual-camera-audit.mjs`;
+`node scripts/run-parametric-comfort-audit.mjs camera`;
+`node scripts/run-hero-capture-framing-audit.mjs`.
+Camera SHA256`642ad4342222b01e470004c6f52a4e2767137ae76cb27fc937e6b28be8a2d6be`,
+contextualSHA`b7861e44969c7795e628af0cf11b0cbb4373eadab7d6c743b2f5ec40956a16e9`,
+SceneSHA`19e33934fdb2a1e9311fc6f2045e3686e9bdd3e8283d6cff5f9526ce9bfe64f0`.
+No application source change; no new whole build or broad audit required.
+Final619`src/`/`scripts/`/`public/`file hashes still match the pre-review
+snapshot, with zero application changes in this continuation. Whole-WIP
+`git diff --check` PASS; report/new reviewer evidence credential-pattern scan
+has no matches. This bounded scan is not a full security certification.
+
+**Release remains FIX REQUIRED.** Existing performance comparison/latency is
+still NOT VERIFIED, not accepted by the owner and not rerun indefinitely.
+Native database/private-object restoration still needs a usable source
+credential or suitable existing logical backup. Privacy enforcement/legal
+validation and hosting/provider/date remain open. Public hosting and real
+notification activation remain expressly deferred. Full-candidate cloud/PDF/
+quote/error/language/security scope is not promoted by this local-only sample.
+The latest WIP is not a final committed/deployed candidate. No commit/push,
+production deploy, DNS, backend/secret change or real email in this continuation.
+
+### 25 October — misleading failed-save assurance: reproduced, corrected, retested
+
+| ID | Problem → correction → proof | Status |
+|---|---|---|
+| QUOTE25-01 | Actual failed project Save was followed by “La tua configurazione resta salvata” / “Your configuration remains saved”, including on a never-saved project. Change only this recovery text in `LeadRequestDialog.tsx` and the matching IT/EN dictionary entry to explain that choices and entered details remain **on this page** and can be retried. No promise of cloud persistence or cross-reload retention. | Confirmed defect FIXED; independent browser before/after PASS. |
+| QUOTE25-02 | Test actual current production UI without creating a project, lead or email. Existing temporary Node adapter reused on127.0.0.1:3040with cleared environment/no credentials, notifications disabled and **every POST rejected503 before worker dispatch**. Root independently probed503. Reviewer used only synthetic contacts on a separate origin; no attachments. | Local error-path isolation PASS; not successful live-backend submission proof. |
+| QUOTE25-03 | New `node scripts/quote-error-copy-audit.mjs` initially FAILS on old alert, then12assertions PASS using real translation code and current component wiring. Independent1440×900and emulated390×844 Submit/Retry, same-page modal close/reopen and IT→EN retain entered fields, timing/privacy, marketingOFF; false saved-assurance removed and full corrected alert/Retry readable. Browser redacts email/phone DOM values; exact plaintext equality is not inferred from redacted text. | Scoped regression PASS; full quote/error/i18n coverage unchanged. |
+
+Evidence: [independent retest receipt](evidence/quote-error-copy-20261025/REVIEW.md),
+`before-{it,en}-alert.jpg`, `after-{it,en}-alert.jpg`,
+`after-en-mobile390-alert.jpg`, paired DOMs and`after-fields.json` in that folder.
+Root also inspected the actual before/after rendered alerts. The form is
+intentionally blank after the isolated page reload between builds; fields were
+re-entered for the after test. This is **not** cross-reload form persistence.
+
+Current-candidate TypeScript`--noEmit`, client/SSR/Nitro production build,
+12copy checks, new-script ESLint and diff-check PASS. Existing chunk-size,
+tsconfig-path and Nitro option warnings remain, not a performance PASS.
+Scoped ESLint baseline comparison: LeadRequestDialog29existing formatting
+findings before/after; messages437before/after, identical rule/line/column
+locations and no new findings. No unrelated mass formatting was performed.
+
+Pre-edit copies of both source files and the report are preserved outside Git:
+`pool-shaper-wip-backups/quote-copy-20261025-Nrvycw/`.
+Only two customer-copy lines plus the focused test/report/evidence changed in
+this continuation; no form logic, renderer, liner, geometry, camera, data model,
+backend, consent mechanism or notification behavior changed. Reviewer tab was
+closed; exact QA adapter sessions41931and95645exited0, fresh listener check
+confirms port3040closed. Owner's3003preview/draft untouched.
+
+**FIX REQUIRED for the overall release remains.** Performance, real native
+database/private-object recovery, privacy operation/validation, definitive
+hosting/email and final exact-commit online validation are not closed by this
+local error-copy correction. No commit/push, merge, production deploy, DNS,
+secret change, cloud write or real email.
+
+### 25 October — retention operation: verified boundary and required owner action
+
+This is not a new purge feature or an erasure authorisation. The proposed
+12month notice remains subject to privacy validation. Independent read-only
+review of the application schema/mappings was followed by one root
+`information_schema.columns` SELECT limited to the six authorised application
+tables in **Daniele2 / waetxxqdlsuanqescuye**.63column definitions returned;
+**zero customer rows read and zero mutations**. Receipt:
+`evidence/remaining-gates-20261022/retention-schema-only-20261025.json`.
+
+| ID | Requirement / actual evidence / safe next action | Status |
+|---|---|---|
+| RET25-01 | Apply12months from last request-related contact only to unconverted requests. Current live structured schema has no last-human-contact, contract-conversion, legal-hold or retention-decision fields. Creation, project updates and provider-email events are not substitutes. An external CRM/register may exist; its absence is not inferred. Owner must identify the authoritative register and authorised operator before candidate requests can be classified. | Operational retention BLOCKED; no automatic date-based deletion introduced. |
+| RET25-02 | Scope erasure across actual copies. `leads` stores contacts/snapshot/attachments; outbox`submission`and optional`payload`duplicate content. Completed uploads can reuse one`storage_path`for multiple requests in a project. Current public-share code strips customer/upload fields; that is not proof of every historical row's contents or anonymous status. | Source relationship verified; actual personal-data inventory/erasure NOT performed. |
+| RET25-03 | Avoid unsafe blanket cleanup. The old0002migration's manual folder-cleanup comment is not a sufficient operator procedure when other requests can reference the same object. Any authorised deletion must use exact approved request/object IDs after reviewing all surviving references, notification copies and applicable backup/provider handling. Do not delete a whole project prefix merely because one request expires. | Explicit safety correction in this operating report; no migration/trigger/deletion applied. |
+
+Minimum operator handoff, **prepared but not executed**:
+
+1. Validate the policy with the controller's privacy adviser and designate who
+   reviews it and how often. Identify the secure CRM/register that establishes
+   last contact, contract conversion and any justified preservation restrictions.
+2. Classify exact request IDs against that record; do not generate an expiry
+   decision from`created_at`,`projects.updated_at`or email delivery timestamps.
+3. Before destructive work, obtain approved exact scope and the still-missing
+   usable database/object backup plus isolated recovery proof. Resolve copied
+   notification content and shared attachment references; preserve still-needed
+   objects. Coordinate external provider and backup-copy handling under the
+   validated policy rather than inventing a blanket retention period.
+4. Only an authorised operator then performs the separately approved changes
+   and records a minimal non-PII receipt and verification. No such approval,
+   operator execution or erasure result is claimed here.
+
+Relevant local mappings independently reviewed: migrations0001/0002/0003 and
+20261010112312;`src/lib/lead/storage.ts`,`leadNotification.server.ts`,
+`attachmentStorage.ts`and`src/lib/project-delivery/service.ts`.
+No schema, application, backend access control, processor setting or user data
+changed. No build/re-audit warranted for this documentation/schema-only check;
+diff-check PASS. Pre-edit report preserved as
+`pool-shaper-wip-backups/quote-copy-20261025-Nrvycw/report-before-retention-20261025.md`.
+
+**Full-objective completion is unproven and blocked, not narrowed to the local
+checks already passed.** The same external prerequisites remain after the
+three25October continuation turns: privacy operation/validation needs an
+authoritative business record/operator, native recovery needs an existing valid
+credential or usable logical/object backup, and public hosting/notification
+activation is expressly deferred by the owner. Performance remains NOT VERIFIED
+after bounded inconclusive comparisons and is not waived by qualitative phone
+feedback; a qualified controlled real-hardware baseline/candidate proof is still
+required. The final exact-commit online gate cannot be promoted from historical
+previews or this uncommitted WIP. No credential reset, paid service, automatic
+purge, repeated benchmark campaign, production deployment, DNS, merge, email,
+commit/push or new cloud write is authorised by this handoff or performed.

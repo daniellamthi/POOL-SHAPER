@@ -1,0 +1,48 @@
+{
+  "scope": "Owner-authorized native local PostgreSQL recovery destination; not a completed data restore",
+  "ownerApproval": "Sì, prova locale isolata",
+  "source": {
+    "accountSelected": "Daniele 2",
+    "projectRef": "waetxxqdlsuanqescuye",
+    "projectName": "Configuratore piscine wellness",
+    "verifiedBy": "Explicit-account MCP get_project and same-project authenticated Connect UI",
+    "postgresVersion": "17.11.0.003",
+    "statusObserved": "ACTIVE_HEALTHY",
+    "existingAppCredentials": "API URL/service-role present; values never displayed",
+    "nativeConnectionCredential": "MISSING: existing PostgreSQL database password",
+    "cloudMutations": 0
+  },
+  "localTarget": {
+    "directory": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/local-restore-20261023-tFOjne/data",
+    "database": "pool_shaper_restore",
+    "version": "17.11 (Homebrew)",
+    "privateSocketDirectory": "/private/tmp/ps-recovery-u5KWzS",
+    "socketPortName": 55439,
+    "tcpListenAddresses": "",
+    "tcpListenerObserved": false,
+    "unixSocketConnectionVerified": true,
+    "authLocal": "peer",
+    "authHost": "reject",
+    "unsafeAuthRules": 0,
+    "directoryPermissions": "0700",
+    "privateCredentialFilePermissions": "0600",
+    "insideGitWorktree": false,
+    "dataChecksums": "on",
+    "userTables": 0,
+    "shutdown": "orderly pg_ctl stop, followed by no server running",
+    "retainedForRehearsal": true
+  },
+  "bootstrap": {
+    "initialRestrictedAttempt": "initdb shared-memory allocation denied by sandbox; utility removed its own incomplete fresh data directory",
+    "authorizedNativeRetry": "PASS",
+    "dockerStarted": false,
+    "paidServicesCreated": false
+  },
+  "result": {
+    "isolatedDestination": "PASS",
+    "actualDatabaseBackupRestore": "BLOCKED: no native dump or PostgreSQL password available",
+    "storageObjectRestore": "NOT VERIFIED",
+    "applicationRecoveryRlsAndE2e": "NOT VERIFIED",
+    "rpoRto": "Owner objectives not defined; no values invented"
+  }
+}

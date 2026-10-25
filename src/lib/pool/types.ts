@@ -199,6 +199,8 @@ export interface PoolConfig {
   shape: PoolShapeId;
   shapeSelected?: boolean;
   copingMaterial?: import("./coping-materials").CopingMaterialId;
+  copingStyle?: import("./coping-style").CopingStyle;
+  copingEdge?: import("./coping-style").CopingEdge;
   paving?: import("./presentation").PavingId;
   pavingFormat?: import("./presentation").PavingFormatId;
   premiumEnvironment?: import("./presentation").PremiumEnvironment;
@@ -215,6 +217,7 @@ export interface PoolConfig {
   features: ReadonlyArray<PoolFeatureId>;
   /** Optional immersed furniture; actual capacity is derived from the Sun Shelf. */
   sunShelfLoungerCount?: number;
+  integratedBenchStations?: number;
   sunShelfLoungerColor?: import("./sun-shelf-lounger-colors").SunShelfLoungerColorId;
   ledColor?: string;
   /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before

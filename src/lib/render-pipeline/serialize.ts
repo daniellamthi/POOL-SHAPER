@@ -179,6 +179,9 @@ export function serializePoolRenderConfig(
   if (config.system === "overflow" && config.overflowType === "continuous") {
     throw new Error("Sfioro nascosto: usa l’immagine della scena 3D o il Project Book. Il renderer esterno non supporta questa sezione.");
   }
+  if (config.copingEdge !== undefined) {
+    throw new Error("Spigolo del bordo: usa la scena 3D o il Project Book. Il renderer esterno non supporta questo profilo.");
+  }
   const cameraPreset = options.cameraPreset ?? "hero";
   const outputPresetId = options.outputPresetId ?? DEFAULT_RENDER_OUTPUT_PRESET_ID;
   const outputPreset = RENDER_OUTPUT_PRESETS[outputPresetId];
@@ -192,6 +195,7 @@ export function serializePoolRenderConfig(
     overflowType: config.overflowType,
     depth: config.dimensions.depth,
     copingThickness,
+    copingStyle: config.copingStyle,
   });
 
   const materials = resolveMaterials({

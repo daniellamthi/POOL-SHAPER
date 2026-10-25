@@ -1,0 +1,75 @@
+Browser tab: 8, Title: "Pool Studio — 3D Pool Configurator", URL: "http://esse-qa.localhost:3003/".
+0 AXWebArea Pool Studio — 3D Pool Configurator, URL: esse-qa.localhost:3003/
+	1 heading 3D Pool Configurator, Value: 1
+		2 text 3D Pool Configurator
+	3 container
+		4 image Piscine Wellness
+		5 container Configuration phases
+			6 content list
+				7 button Pool Reinforced concrete · 10.0 × 4.5 m, Help: Pool · Reinforced concrete · 10.0 × 4.5 m
+					8 text Pool
+					9 text Reinforced concrete · 10.0 × 4.5 m
+				10 button Water system Skimmer · Modern slim, Help: Water system · Skimmer · Modern slim
+					49 text Water system
+					50 text Skimmer · Modern slim
+				11 button Access & comfort Internal stairs · Sun shelf · Bench, Help: Access & comfort · Internal stairs · Sun shelf · Bench
+					51 text Access & comfort
+					52 text Internal stairs · Sun shelf · Bench
+				12 button Finishes Mosaic · Mosaic 1, Help: Finishes · Mosaic · Mosaic 1
+					53 text Finishes
+					54 text Mosaic · Mosaic 1
+				13 button Exterior Travertine · Porcelain stoneware · Grey · 30 × 60 cm, Help: Exterior · Travertine · Porcelain stoneware · Grey · 30 × 60 cm
+					55 text Exterior
+					56 text Travertine · Porcelain stoneware · Grey · 30 × 60 cm
+				14 button Options Automatic cover · Chaise longue, Help: Options · Automatic cover · Chaise longue
+					57 text Options
+					58 text Automatic cover · Chaise longue
+				15 button Presentation In progress, Help: Presentation · In progress
+					59 text Presentation
+					60 text In progress
+		16 container Language
+			17 checkbox Description: Italian, Value: 0
+			18 checkbox Description: English, Value: 1
+		19 container Scene time
+			20 checkbox Day, Value: 0
+			21 checkbox Night, Value: 1
+		22 button Start again
+		23 container
+			25 pop up button (collapsed) Description: Pool view, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			26 text Drag to rotate · Scroll to zoom · Right-click to pan
+			27 toolbar View tools
+				28 checkbox Guides, Value: 0
+				29 checkbox Technical view, Value: 0
+				30 checkbox Reframe, Value: 0
+		31 container Step 7: Presentation
+			32 container
+				33 text Your finished pool: scene, summary and proposal request.
+				61 tab group Presentation
+					62 tab (selected, settable, boolean) Scene, Value: 1
+					63 tab (selectable, settable, boolean) Summary, Value: 0
+					64 tab (selectable, settable, boolean) Request a proposal, Value: 0
+				65 text TIME OF DAY
+				66 container Time of day
+					67 checkbox Description: Day, Value: 0
+					68 checkbox Description: Night, Value: 1
+				69 button Next option: Summary
+					70 text Next option
+					71 text : 
+					72 text Summary
+				73 button More options
+			37 container
+				38 text PHASE 07 OF 07 ·  1/3 · Scene
+				39 heading Presentation, Value: 2
+					40 text Presentation
+				41 text 10.0 × 4.5 m · ready for a proposal
+			42 button VIEW THE POOL
+			43 button (expanded) MINIMISE, Secondary Actions: Collapse
+			44 container
+				45 button BACK
+				46 button CONTINUE · SUMMARY
+					74 text CONTINUE
+					75 text · 
+					76 text SUMMARY
+	48 container Notifications alt+T
+
+The focused UI element is 0 AXWebArea Pool Studio — 3D Pool Configurator, URL: esse-qa.localhost:3003/

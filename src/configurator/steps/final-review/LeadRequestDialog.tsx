@@ -310,7 +310,7 @@ export function LeadRequestDialog({
                     role="alert"
                     className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-[12.5px] font-light text-destructive"
                   >
-                    {t(errorMessage ?? "Invio non riuscito. Riprova tra poco.")} {t("La tua configurazione resta salvata: puoi riprovare senza perdere nulla.")}{" "}</div>
+                    {t(errorMessage ?? "Invio non riuscito. Riprova tra poco.")} {t("Le tue scelte e i dati inseriti restano in questa pagina. Puoi riprovare.")}{" "}</div>
                 ) : null}
 
                 <Button

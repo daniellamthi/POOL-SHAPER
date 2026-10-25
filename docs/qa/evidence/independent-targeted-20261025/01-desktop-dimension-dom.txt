@@ -1,0 +1,101 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina In corso":
+        - generic: Piscina
+        - generic: In corso
+      - button "Sistema acqua":
+        - generic: Sistema acqua
+      - button "Accesso & comfort":
+        - generic: Accesso & comfort
+      - button "Finiture" [disabled]:
+        - generic: Finiture
+      - button "Esterno" [disabled]:
+        - generic: Esterno
+      - button "Optional" [disabled]:
+        - generic: Optional
+      - button "Presentazione" [disabled]:
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno" [pressed]:
+      - generic: Giorno
+    - button "Notte":
+      - generic: Notte
+  - button "Ricomincia":
+    - generic: Ricomincia
+- main:
+  - generic: L 12.00 m
+  - generic: W 4.50 m
+  - generic: D 1.50 m
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - status: Struttura · Cemento armato
+  - toolbar "Strumenti vista":
+    - button "Guide" [pressed]:
+      - text: Guide
+    - button "Vista tecnica":
+      - text: Vista tecnica
+    - button "Riquadra":
+      - text: Riquadra
+- 'region "Passo 1: Piscina"':
+  - paragraph: Pianta vista dall’alto per lunghezza e larghezza, vista in sezione per la profondità.
+  - tablist "Forma e dimensioni":
+    - tab "Forma"
+    - tab "Lunghezza e larghezza" [selected]
+    - tab "Profondità"
+  - generic: Lunghezza
+  - spinbutton "Lunghezza": "12"
+  - generic: m
+  - generic "Lunghezza":
+    - slider "Lunghezza" [active]
+  - generic: 3 m
+  - generic: 25 m
+  - generic: Larghezza
+  - spinbutton "Larghezza": "4.5"
+  - generic: m
+  - generic "Larghezza":
+    - slider "Larghezza"
+  - generic: 2 m
+  - generic: 12 m
+  - paragraph: "La vista dall’alto mostra la pianta in scala reale. Trascina i cursori: la vasca si ridimensiona in tempo reale."
+  - paragraph: Valori calcolati
+  - term: Volume d’acqua
+  - definition:
+    - text: 81,00
+    - generic: m³
+  - term: Specchio d’acqua
+  - definition:
+    - text: 54,00
+    - generic: m²
+  - term: Superficie interna
+  - definition: 103,50 m²
+  - term: Fondo
+  - definition: 54,00 m²
+  - term: Pareti
+  - definition: 49,50 m²
+  - term: Perimetro
+  - definition: 33,00 m
+  - 'button "Prossima scelta: Profondità"':
+    - text: "Prossima scelta: Profondità"
+  - button "Altre opzioni":
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 01 di 07
+    - generic: · 2/3 · Lunghezza e larghezza
+  - heading "Piscina" [level=2]
+  - paragraph: Rettangolare · 12,00 × 4,50 m · prof. 1,50 m
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua · Profondità":
+    - text: Continua
+    - generic: · Profondità
+- region "Notifications alt+T"

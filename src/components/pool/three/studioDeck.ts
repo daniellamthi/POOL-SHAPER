@@ -46,6 +46,7 @@ export function studioDeckInnerOffset(
   poolType: PoolType,
   system: SystemType,
   overflowType: OverflowType,
+  copingStyle?: import("@/lib/pool/coping-style").CopingStyle | undefined,
 ) {
-  return poolType === "in-ground" ? copingOuterOffset(system, overflowType) : 0.17;
+  return poolType === "in-ground" ? copingOuterOffset(system, overflowType, copingStyle) : 0.17;
 }

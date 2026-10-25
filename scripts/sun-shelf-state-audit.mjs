@@ -36,6 +36,8 @@ await build({
         export { configuredPoolLayout } from "${join(process.cwd(), "src/lib/pool/resolved-layout.ts")}";
         export { SUN_SHELF_WATER_DEPTH } from "${join(process.cwd(), "src/lib/pool/sun-shelf-model.ts")}";
         export { leadSubmissionInputSchema } from "${join(process.cwd(), "src/lib/lead/schema.ts")}";
+        export { resolveAutomaticCover } from "${join(process.cwd(), "src/lib/pool/cover-plan.ts")}";
+        export { supportsCopingStyle, supportsCopingEdge, integratedCoping, copingEdgeRadius } from "${join(process.cwd(), "src/lib/pool/coping-style.ts")}";
       `;
       },
     },
@@ -57,6 +59,8 @@ const {
   configuredPoolLayout,
   SUN_SHELF_WATER_DEPTH,
   leadSubmissionInputSchema,
+  resolveAutomaticCover,
+  supportsCopingStyle, supportsCopingEdge, integratedCoping, copingEdgeRadius,
 } = await import(pathToFileURL(file).href);
 const { reducer, createInitialState } = configuratorTesting;
 let checks = 0;
@@ -439,6 +443,102 @@ const tray = readFileSync("src/components/pool/wizard/StepTrays.tsx", "utf8");
 check(tray.includes('image="/product-previews/esse-white.jpg"') && !tray.includes("lympha-immersed.jpg"), "owner-requested white product photo in wizard");
 const picker = readFileSync("src/components/pool/wizard/SunShelfLoungerColorPicker.tsx", "utf8");
 check(!picker.includes("<img") && picker.includes("aria-pressed") && picker.includes('size-11'), "accessible colour chips only, with touch-size controls");
+
+// Actual reducer, public snapshot, quote validator and PDF summary for the
+// new selections: no mock store and no cloud/email writes.
+const concealedCoping = run(eligible, [{ type: "setSystem", value: "overflow" }, { type: "setOverflowType", value: "continuous" }]);
+for (const style of ["dedicated", "flush"]) for (const count of [1, 2, 3, 4]) {
+  const state = run(concealedCoping, [{ type: "setCopingStyle", value: style }, { type: "setIntegratedBenchStations", value: count }]);
+  const bench = configuredPoolLayout(state.config).comfort.elements.find(element => element.kind === "integratedBench");
+  check(bench, "12×5 opposite bench is available");
+  equal(bench.stations.count, count, "actual requested station count");
+  equal(bench.jets.length, count * 4, "two back and two leg jets per station");
+  equal(state.config.features, eligible.config.features, "new choices preserve all selected features");
+  equal(state.config.equipment, eligible.config.equipment, "new choices preserve equipment");
+  const saved = restore(state), shared = shareableProject(saved), spec = createPhotoSceneSpec(saved);
+  for (const snapshot of [saved, shared]) {
+    equal(snapshot.config.copingStyle ?? "flush", style, "save/share preserves coping style");
+    equal(snapshot.config.integratedBenchStations, count, "save/share preserves bench stations");
+    equal(configuredPoolLayout(snapshot.config).comfort.elements.find(element => element.kind === "integratedBench").jets, bench.jets, "restored geometry matches selected jets");
+    check(leadSubmissionInputSchema.safeParse(leadFor(snapshot)).success, "quote accepts valid new selections");
+  }
+  equal(spec.selection.copingStyle ?? "flush", style, "Photo Spec preserves style");
+  equal(spec.selection.integratedBenchStations, count, "Photo Spec preserves stations");
+  equal(spec.pool.technicalConfiguration.coping.separateCoping, style !== "flush", "Photo Spec declares actual integrated paving geometry");
+  equal(spec.pool.outline.length, style === "dedicated" ? 68 : 4, "save/reload/share Photo Spec includes actual rounded or square pool corners");
+  for (const locale of ["it", "en"]) {
+    const summary = buildProjectSummary(saved, locale);
+    const row = summary.sections.find(section => section.id === "comfort").rows.find(row => /Panca integrata|Integrated bench/.test(row.value));
+    check(row && row.value.includes(String(count)) && row.value.includes(String(count * 4)), "summary/PDF includes seats and actual jet count in both languages");
+    const coping = summary.sections.find(section => section.id === "materials").rows.find(row => row.label === (locale === "it" ? "Bordo" : "Coping"));
+    check(coping && (style === "flush" ? /filo|Deck-level/.test(coping.hint) : /dedicato|Separate/.test(coping.hint)), "summary/PDF describes chosen coping");
+  }
+  const withCover = { ...state.config, equipment: [...state.config.equipment, "automaticCover"], coverPosition: "closed" };
+  const cover = resolveAutomaticCover(withCover);
+  const other = resolveAutomaticCover({ ...withCover, copingStyle: style === "flush" ? "dedicated" : "flush" });
+  check(cover.geometry && other.geometry && cover.geometry.housingY === other.geometry.housingY, "concealed overflow choices retain the same real cover datum");
+}
+for (const base of [eligible]) for (const edge of ["square", "rounded"]) {
+  const state = reducer(base, {type: "setCopingEdge", value: edge});
+  for (const snapshot of [restore(state), shareableProject(restore(state))]) {
+    equal(snapshot.config.copingEdge ?? "square", edge, "edge choice survives save/reload/share");
+    equal(createPhotoSceneSpec(snapshot).pool.technicalConfiguration.coping.edge, edge, "Photo Spec describes real edge");
+    for (const locale of ["it", "en"]) {
+      const row = buildProjectSummary(snapshot, locale).sections.find(s => s.id === "materials").rows.find(r => /Angoli della vasca|Pool corners/.test(r.label));
+      check(row && (edge === "square" ? /Retto|Square/.test(row.value) : /Arrotondato|Rounded/.test(row.value)), "PDF summary edge translated");
+    }
+  }
+  equal(state.config.features, base.config.features, "edge choice preserves comfort");
+  equal(state.config.dimensions, base.config.dimensions, "edge choice preserves pool dimensions");
+  equal(createPhotoSceneSpec(restore(state)).pool.outline.length, edge === "rounded" ? 68 : 4, "Skimmer icons change the actual pool outline");
+}
+for (const edge of ["square", "rounded"]) equal(reducer(concealedCoping, {type:"setCopingEdge", value:edge}), concealedCoping, "overflow does not expose or accept the Skimmer-only corner action");
+equal(reducer(eligible, {type:"setCopingEdge", value:"square"}), eligible, "legacy Skimmer remains square without dirtying project");
+equal(reducer(eligible, {type: "setCopingStyle", value: "flush"}), eligible, "Skimmer rejects overflow-only flush selection");
+const dormant = {...eligible, config: {...eligible.config, copingStyle: "flush"}};
+const dormantSpec = createPhotoSceneSpec(project(dormant));
+equal(dormantSpec.pool.technicalConfiguration.coping.style, "dedicated", "legacy dormant flush must not affect Skimmer");
+equal(dormantSpec.pool.elevations.copingY, .055, "Skimmer keeps normal rim elevation");
+for (const poolType of ["in-ground", "above-ground"]) for (const system of ["skimmer", "overflow", "infinity"]) for (const overflowType of ["visible", "hidden", "continuous"]) {
+  const cfg = {...eligible.config, poolType, system, overflowType, copingStyle: "flush", copingEdge: "rounded"};
+  const styleAllowed = poolType === "in-ground" && system === "overflow" && overflowType === "continuous";
+  const edgeAllowed = poolType === "in-ground" && system === "skimmer";
+  equal(supportsCopingStyle(cfg), styleAllowed, "two photos only for hidden overflow");
+  equal(integratedCoping(cfg), styleAllowed, "dormant flush never changes other pool systems");
+  equal(supportsCopingEdge(cfg), edgeAllowed, "corner icon selector only for Skimmer");
+  equal(copingEdgeRadius(cfg), styleAllowed || edgeAllowed ? .006 : undefined, "hidden overflow keeps fixed edge easing independent of dormant Skimmer choice");
+}
+for (const rawEdge of ["invalid", null, 42]) {
+  const invalid = project(eligible); invalid.config.copingEdge = rawEdge;
+  assert.throws(() => parseProjectConfiguration(JSON.stringify(invalid)), /copingEdge/); checks++;
+  check(!leadSubmissionInputSchema.safeParse(leadFor(invalid)).success, "quote rejects invalid edge enum");
+}
+for (const invalid of [0, 5, -1, 1.5, NaN, "3"]) {
+  equal(reducer(eligible, { type: "setIntegratedBenchStations", value: invalid }), eligible, "invalid station action rejected");
+  const raw = project(eligible); raw.config.integratedBenchStations = invalid;
+  assert.throws(() => parseProjectConfiguration(JSON.stringify(raw)), /integratedBenchStations/); checks++;
+  check(!leadSubmissionInputSchema.safeParse(leadFor(raw)).success, "quote rejects invalid station count");
+}
+const invalidStyle = project(eligible); invalidStyle.config.copingStyle = "unknown";
+assert.throws(() => parseProjectConfiguration(JSON.stringify(invalidStyle)), /copingStyle/); checks++;
+check(!leadSubmissionInputSchema.safeParse(leadFor(invalidStyle)).success, "quote rejects unknown coping style");
+equal(reducer(eligible, { type: "setCopingStyle", value: "dedicated" }), eligible, "legacy default style does not create false dirty state");
+const fourSeats = reducer(eligible, { type: "setIntegratedBenchStations", value: 4 });
+const shortBench = run(fourSeats, [{ type: "setDimension", key: "length", value: 6 }, { type: "setDimension", key: "width", value: 3 }]);
+const shortPlan = configuredPoolLayout(shortBench.config).comfort.elements.find(element => element.kind === "integratedBench");
+equal(shortBench.config.integratedBenchStations, 4, "resize retains customer intent");
+check(shortPlan.stations.adjusted && shortPlan.stations.count <= shortPlan.stations.capacity, "resize never squeezes an extra seating position");
+check(!leadSubmissionInputSchema.safeParse(leadFor(project(shortBench))).success, "unconfirmed seat adjustment cannot become an incorrect quote");
+const confirmedBench = reducer(shortBench, { type: "setIntegratedBenchStations", value: shortPlan.stations.capacity });
+check(!configuredPoolLayout(confirmedBench.config).comfort.elements.find(element => element.kind === "integratedBench").stations.adjusted, "customer can confirm the compatible seat count");
+const concealed = run(eligible, [{ type: "setSystem", value: "overflow" }, { type: "setOverflowType", value: "continuous" }]);
+for (const style of ["dedicated", "flush"]) {
+  const state = reducer(concealed, { type: "setCopingStyle", value: style });
+  const snapshot = restore(state), spec = createPhotoSceneSpec(snapshot);
+  equal(spec.pool.technicalConfiguration.coping.separateCoping, style === "dedicated", "both coping choices apply to concealed overflow");
+  equal(spec.pool.elevations.copingY, 0, "concealed overflow coping stays flush to the terrace");
+  equal(shareableProject(snapshot).config.copingStyle ?? "flush", style, "concealed overflow retains chosen style, including its non-mutating legacy default");
+}
 console.log(
   `Sun Shelf state PASS: ${checks} checks; actual reducer, 12×5 capacity ${capacity}, quantities/colours, 10 cm immersion, project/shared/Photo Spec round trips, IT/EN summaries and quote schema. Offline; no backend calls.`,
 );

@@ -83,6 +83,9 @@ export interface ConfiguratorContextValue {
   setMosaicFinish: (value: MosaicFinishId) => void;
   togglePoolFeature: (value: PoolFeatureId) => void;
   setSunShelfLoungerCount: (value: number) => void;
+  setCopingStyle: (value: NonNullable<PoolConfig["copingStyle"]>) => void;
+  setCopingEdge: (value: NonNullable<PoolConfig["copingEdge"]>) => void;
+  setIntegratedBenchStations: (value: number) => void;
   setSunShelfLoungerColor: (value: import("./sun-shelf-lounger-colors").SunShelfLoungerColorId) => void;
   setSunShelfRun: (value: number) => void;
   sunShelfNotice: string | null;

@@ -26,7 +26,7 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
     case "setPoolType": return "POOL_OVERVIEW";
     case "setPoolStructure": return "STRUCTURE_OVERVIEW";
     case "setFinish": case "setLinerColor": case "setMosaicFinish": return "INTERIOR_FINISH";
-    case "setCopingMaterial": return "COPING";
+    case "setCopingStyle": case "setCopingEdge": case "setCopingMaterial": return "COPING";
     case "setPaving": case "setPavingFormat": return "PAVING";
     case "setExteriorPanelFinish": return "EXTERIOR_PANEL";
     case "setExternalStairSide": case "setExternalStairPlatformExtended": return "EXTERNAL_STAIRS";
@@ -40,6 +40,7 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
         : !c.features.includes("ledLighting") && c.features.includes("hydromassageBenchLighting") ? "BENCH_LIGHTING" : "LIGHTING";
     case "setInternalStairType": case "setInternalStairMirrored": case "toggleInternalSteps": case "setPoolAccess": return accessFocus(c);
     case "setHydromassageVariant": return accessFocus(c);
+    case "setIntegratedBenchStations": return "BENCH";
     case "toggleInoxLadder": return c.features.includes("inoxLadder") || c.poolAccess === "stainlessSteelLadder" ? "INOX" : accessFocus(c);
     case "togglePoolFeature":
       if (action.value === "ledLighting") return "LIGHTING";

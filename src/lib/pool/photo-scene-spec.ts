@@ -1,5 +1,5 @@
 import type { ProjectConfiguration } from "./project";
-import { buildOutline, computeMetrics, outlineBounds } from "./geometry";
+import { computeMetrics, outlineBounds } from "./geometry";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { buildFloorProfile } from "./floor-profile";
 import { configuredPoolLayout } from "./resolved-layout";
@@ -13,6 +13,8 @@ import { resolveAutomaticCover } from "./cover-plan";
 import { oppositeInfinityCoordinate } from "./infinity-access";
 import { resolvedAccessAnchors } from "./technical-plan";
 import { structureFamily } from "./construction-presentation";
+import { integratedCoping, copingEdgeRadius, supportsCopingEdge } from "./coping-style";
+import { configuredOutline, roundedPoolCorners, DEDICATED_POOL_CORNER_RADIUS } from "./configured-outline";
 
 /** Data contract only. No renderer, generative redesign, UI theme, or customer PII.
  * The future renderer must build product geometry from these same versioned
@@ -21,11 +23,11 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
   const config = project.config;
   if (config.shape === "organic") throw new Error("Unsupported retired pool shape");
   const { customer: _customer, uploads: _uploads, ...selection } = config;
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const poolType = config.poolType ?? "in-ground";
   const elevations = getPoolVerticalLayout({ poolType, system: config.system,
     overflowType: config.overflowType, depth: config.dimensions.depth,
-    copingThickness: POOL_BORDER_PRESET.thickness });
+    copingThickness: POOL_BORDER_PRESET.thickness, copingStyle: config.copingStyle });
   const { floorYAt: _floorY, depthAt: _depth, ...floor } = buildFloorProfile({
     outline, shape: config.shape, poolType, dimensions: config.dimensions,
     verticalLayout: elevations,
@@ -80,6 +82,11 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
         };
       })(),
       technicalConfiguration: {
+        coping: { style: integratedCoping(config) ? "flush" : "dedicated", separateCoping: !integratedCoping(config),
+          ...(supportsCopingEdge(config) ? {edge: config.copingEdge ?? "square"} : {}),
+          ...(copingEdgeRadius(config) !== undefined ? {noseRadius: copingEdgeRadius(config)} : {}),
+          cornerRadius: roundedPoolCorners(config) ? DEDICATED_POOL_CORNER_RADIUS : 0,
+          topY: elevations.copingY, ...(integratedCoping(config) ? { paving: pavingLayout(config.paving, config.pavingFormat) } : {}) },
         ...(config.system === "overflow" && config.overflowType === "continuous" ? {
           continuousEdge: { paving: pavingLayout(config.paving, config.pavingFormat),
             topY: elevations.copingY, separateCoping: false, collection: "concealed-lateral-intake" },

@@ -1,0 +1,10 @@
+{
+  "origin": "Owner-supplied visual references, 24 October 2026",
+  "purpose": "Coping style selection, independent from the selected material",
+  "images": {
+    "coping-dedicated.jpg": "Attachment image-1.png",
+    "coping-flush.jpg": "Attachment image-2.png"
+  },
+  "processing": "Aspect-preserving downsampling to at most 800 px and JPEG encoding; no generated or recoloured content",
+  "productIdentification": "Visual style references, not a claim of an exact commercial product or certified construction detail"
+}

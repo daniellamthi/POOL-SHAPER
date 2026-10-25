@@ -18,6 +18,7 @@ import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { localizeSummaryModel, translateText, formatNumericText, formatNumber as localeNumber, type Locale } from "@/lib/i18n";
 import { configuredSunShelfLoungers } from "@/lib/pool/sun-shelf-loungers";
 import { sunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
+import { integratedCoping, supportsCopingEdge } from "@/lib/pool/coping-style";
 import { SUN_SHELF_WATER_DEPTH } from "@/lib/pool/sun-shelf-model";
 import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
@@ -266,6 +267,9 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
             : id === "sunShelf" ? t("Sun Shelf · lunghezza complessiva {run} m · acqua {depth} cm", {
                 depth: localeNumber((resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.waterDepth ?? SUN_SHELF_WATER_DEPTH) * 100, locale),
                 run: formatNumber(config.dimensions.sunShelfRun ?? resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.run ?? 0, 3),
+              }) : id === "integratedBench" ? t("Panca integrata · {count} postazioni · {jets} bocchette", {
+                count: localeNumber(resolvedLayout.comfort.elements.find(element => element.kind === "integratedBench")?.stations?.count ?? 0, locale),
+                jets: localeNumber(resolvedLayout.comfort.elements.find(element => element.kind === "integratedBench")?.jets?.length ?? 0, locale),
               }) : POOL_FEATURE_LABEL[id],
       ),
   ];
@@ -328,10 +332,11 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
         { label: "Rivestimento", value: finishTitle, hint: finishHint, swatch: finishSwatch },
         {
           label: "Bordo",
-          value: config.system === "overflow" && config.overflowType === "continuous" ? paving.label : copingMaterial?.title ?? "Da selezionare",
-          hint: config.system === "overflow" && config.overflowType === "continuous" ? "Bordo a filo pavimentazione" : undefined,
-          swatch: config.system === "overflow" && config.overflowType === "continuous" ? { hex: paving.color } : copingMaterial ? { hex: copingMaterial.color } : undefined,
+          value: integratedCoping(config) ? paving.label : copingMaterial?.title ?? "Da selezionare",
+          hint: integratedCoping(config) ? "Bordo a filo pavimentazione" : "Bordo dedicato",
+          swatch: integratedCoping(config) ? { hex: paving.color } : copingMaterial ? { hex: copingMaterial.color } : undefined,
         },
+        ...(supportsCopingEdge(config) ? [{label: "Angoli della vasca", value: config.copingEdge === "rounded" ? "Arrotondato" : "Retto", hint: config.copingEdge === "rounded" ? config.shape === "l-shape" ? "Angoli esterni arrotondati: raggio 20 cm." : "Angoli vasca arrotondati: raggio 20 cm." : "Angoli della vasca a 90°."}] : []),
         ...(config.poolType === "above-ground"
           ? [{ label: "Pannelli esterni", value: exteriorPanelFinishTitle(config) }]
           : []),

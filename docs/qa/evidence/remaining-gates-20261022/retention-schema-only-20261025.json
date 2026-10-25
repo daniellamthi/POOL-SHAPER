@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-25",
+  "account": "Daniele 2",
+  "project": "waetxxqdlsuanqescuye",
+  "operation": "SELECT information_schema.columns restricted to the six POOL-SHAPER application tables",
+  "customerRowsRead": 0,
+  "mutations": 0,
+  "scope": "Structured schema metadata only; no claim about external CRM, unstructured JSON contents or legal approval",
+  "tables": {
+    "attachment_owners": [
+      {
+        "name": "project_id",
+        "type": "text"
+      },
+      {
+        "name": "owner_hash",
+        "type": "text"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "attachment_uploads": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "project_id",
+        "type": "text"
+      },
+      {
+        "name": "slot",
+        "type": "smallint"
+      },
+      {
+        "name": "content_hash",
+        "type": "text"
+      },
+      {
+        "name": "name",
+        "type": "text"
+      },
+      {
+        "name": "mime_type",
+        "type": "text"
+      },
+      {
+        "name": "size",
+        "type": "integer"
+      },
+      {
+        "name": "storage_path",
+        "type": "text"
+      },
+      {
+        "name": "grant_hash",
+        "type": "text"
+      },
+      {
+        "name": "granted_until",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "lease_until",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "state",
+        "type": "text"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "lead_notifications": [
+      {
+        "name": "request_id",
+        "type": "uuid"
+      },
+      {
+        "name": "submission",
+        "type": "jsonb"
+      },
+      {
+        "name": "payload",
+        "type": "jsonb"
+      },
+      {
+        "name": "state",
+        "type": "text"
+      },
+      {
+        "name": "attempts",
+        "type": "integer"
+      },
+      {
+        "name": "retryable",
+        "type": "boolean"
+      },
+      {
+        "name": "next_attempt_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "first_attempt_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "lease_token",
+        "type": "uuid"
+      },
+      {
+        "name": "lease_until",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "provider_id",
+        "type": "text"
+      },
+      {
+        "name": "last_event_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "error_code",
+        "type": "text"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "leads": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "request_id",
+        "type": "uuid"
+      },
+      {
+        "name": "idempotency_key",
+        "type": "text"
+      },
+      {
+        "name": "project_id",
+        "type": "text"
+      },
+      {
+        "name": "schema_version",
+        "type": "integer"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "customer_name",
+        "type": "text"
+      },
+      {
+        "name": "customer_email",
+        "type": "text"
+      },
+      {
+        "name": "customer_phone",
+        "type": "text"
+      },
+      {
+        "name": "project_location",
+        "type": "text"
+      },
+      {
+        "name": "timing",
+        "type": "text"
+      },
+      {
+        "name": "notes",
+        "type": "text"
+      },
+      {
+        "name": "privacy_accepted",
+        "type": "boolean"
+      },
+      {
+        "name": "marketing_consent",
+        "type": "boolean"
+      },
+      {
+        "name": "project_configuration",
+        "type": "jsonb"
+      },
+      {
+        "name": "status",
+        "type": "text"
+      },
+      {
+        "name": "email_error",
+        "type": "text"
+      },
+      {
+        "name": "email_sent_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "attachments",
+        "type": "jsonb"
+      },
+      {
+        "name": "project_reference",
+        "type": "text"
+      }
+    ],
+    "notification_events": [
+      {
+        "name": "event_id",
+        "type": "text"
+      },
+      {
+        "name": "provider_id",
+        "type": "text"
+      },
+      {
+        "name": "state",
+        "type": "text"
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "projects": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "public_ref",
+        "type": "text"
+      },
+      {
+        "name": "project_id",
+        "type": "text"
+      },
+      {
+        "name": "edit_token_hash",
+        "type": "text"
+      },
+      {
+        "name": "snapshot_version",
+        "type": "integer"
+      },
+      {
+        "name": "snapshot",
+        "type": "jsonb"
+      },
+      {
+        "name": "share_enabled",
+        "type": "boolean"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone"
+      }
+    ]
+  }
+}

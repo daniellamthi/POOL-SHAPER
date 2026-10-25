@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ShaderPreparation } from "./ShaderPreparation";
-import { installDevelopmentInteractionTiming } from "@/lib/pool/development-interaction-timing";
+import { installDevelopmentInteractionTiming, readDevelopmentRenderPause, writeDevelopmentRenderPause } from "@/lib/pool/development-interaction-timing";
 import { installDevelopmentGlDiagnostic } from "@/lib/pool/development-gl-diagnostic";
 import { OrbitControls, Line, useProgress } from "@react-three/drei";
 import { OwnedContactShadows as ContactShadows } from "./OwnedContactShadows";
@@ -41,6 +41,7 @@ import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 import { createCoastalTerrace, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
 import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
+import { integratedCoping } from "@/lib/pool/coping-style";
 import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
@@ -161,6 +162,9 @@ export interface SceneProps {
   /** Export framing ignores DOM panels without changing the configured pool. */
   cleanCapture?: boolean;
   sunShelfLoungerCount?: number;
+  integratedBenchStations?: number;
+  copingStyle?: import("@/lib/pool/coping-style").CopingStyle;
+  copingEdge?: import("@/lib/pool/coping-style").CopingEdge;
   sunShelfLoungerColor?: import("@/lib/pool/sun-shelf-lounger-colors").SunShelfLoungerColorId;
   sunShelfRun?: number;
   photoModeQuality: PhotoModeQuality;
@@ -437,6 +441,9 @@ function DevelopmentRendererMetrics({ qaPaused }: { qaPaused: boolean }) {
         p95FrameTimeMs: percentile(0.95),
         frameCount: sorted.length,
         renderer,
+        qaPaused,
+        frameloop: getRoot().frameloop,
+        queuedFrames: getRoot().internal.frames,
         visibility: document.visibilityState,
         calls: Math.round(drawCalls.current.reduce((sum, count) => sum + count, 0) / drawCalls.current.length),
         peakCalls: Math.max(...drawCalls.current),
@@ -926,6 +933,7 @@ function StudioFloor({
   sceneTime,
   paving,
   pavingFormat,
+  integratedEdge = false,
 }: {
   outline: Outline;
   size: number;
@@ -938,6 +946,7 @@ function StudioFloor({
   sceneTime: SceneTimeOfDay;
   paving: import("@/lib/pool/presentation").PavingId;
   pavingFormat?: PavingFormatId | undefined;
+  integratedEdge?: boolean | undefined;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -950,9 +959,9 @@ function StudioFloor({
   const pavingGeometry = useMemo(
     () =>
       premiumInfinity && infinityZone
-        ? createInfinityDeck(outline, infinityZone, copingOuterOffset(system, overflowType))
+        ? createInfinityDeck(outline, infinityZone, integratedEdge ? 0 : copingOuterOffset(system, overflowType))
         : null,
-    [premiumInfinity, infinityZone, outline, system, overflowType],
+    [premiumInfinity, infinityZone, outline, system, overflowType, integratedEdge],
   );
   useEffect(() => () => pavingGeometry?.dispose(), [pavingGeometry]);
   const terraceLayout = useMemo(() => pavingLayout(paving, pavingFormat), [paving, pavingFormat]);
@@ -1169,6 +1178,9 @@ export default function PoolScene({
   photoMode,
   cleanCapture = false,
   sunShelfLoungerCount,
+  integratedBenchStations,
+  copingStyle,
+  copingEdge,
   sunShelfLoungerColor = "white",
   sunShelfRun,
   photoModeQuality,
@@ -1177,7 +1189,10 @@ export default function PoolScene({
   const controls = useRef<OrbitControlsImpl | null>(null);
   const renderer = useRef<import("three").WebGLRenderer | null>(null);
   const [preparingShaders, setPreparingShaders] = useState(false);
-  const [qaRenderPaused, setQaRenderPaused] = useState(false);
+  const [qaRenderPaused, setQaRenderPaused] = useState(() => import.meta.env.DEV && readDevelopmentRenderPause());
+  useEffect(() => {
+    if (import.meta.env.DEV) writeDevelopmentRenderPause(qaRenderPaused);
+  }, [qaRenderPaused]);
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     const toggle = (event: KeyboardEvent) => {
@@ -1208,19 +1223,22 @@ export default function PoolScene({
   const shadowRevision=JSON.stringify([
     outline,shape,system,overflowType,poolType,length,width,depth,floorProfileSetting,
     shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairMirrored,
-    hydromassageVariant,sunShelfRun,sunShelfLoungerCount,infinityEdge,construction,
+    hydromassageVariant,sunShelfRun,sunShelfLoungerCount,integratedBenchStations,infinityEdge,construction,
     solarShower,loungers,exteriorPanelFinish,externalStairSide,externalStairPlatformExtended,
     pellicano,coverPlan.geometry,coverPlan.extension,materials.skimmer.type,skimmers.positions,
-    paving,pavingFormat,
+    paving,pavingFormat,copingStyle,copingEdge,
   ]);
   useLayoutEffect(() => {
     if (sunLight.current) sunLight.current.shadow.needsUpdate = true;
   },[shadowRevision,assetsLoading]);
 
   const verticalLayout = useMemo(
-    () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
-    [poolType, system, overflowType, depth, copingThickness],
+    () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness, copingStyle }),
+    [poolType, system, overflowType, depth, copingThickness, copingStyle],
   );
+  const integratedEdge = integratedCoping({ poolType, system, overflowType, copingStyle });
+  const pavingTopY = integratedEdge ? verticalLayout.copingY : 0;
+  const rimOffset = copingOuterOffset(system, overflowType, copingStyle);
 
   // Single source of truth for every floor elevation -- rendering, stairs,
   // lighting and measurements all read the same model (see floor-profile.ts).
@@ -1315,6 +1333,7 @@ export default function PoolScene({
         hydromassageVariant,
         nominalWidth: width,
         sunShelfRun,
+        integratedBenchStations,
         infinityWallType: normalisedInfinityEdge?.wallType,
         system,
         overflowType,
@@ -1335,6 +1354,7 @@ export default function PoolScene({
       poolType,
       features,
       hydromassageVariant,
+      integratedBenchStations,
       width,
       sunShelfRun,
       normalisedInfinityEdge?.wallType,
@@ -1365,13 +1385,13 @@ export default function PoolScene({
   // anchored), the access placement itself and, above ground, both ends of
   // the external staircase.
   const externalStairs = poolType === "above-ground" && features.includes("externalStaircase");
-  const coverSubject = useMemo(() => coverCameraSubject(coverPlan, verticalLayout, outline, copingOuterOffset(system, overflowType)),
-    [coverPlan, verticalLayout, outline, system, overflowType]);
+  const coverSubject = useMemo(() => coverCameraSubject(coverPlan, verticalLayout, outline, rimOffset),
+    [coverPlan, verticalLayout, outline, rimOffset]);
   const planBounds = useMemo(() => {
     const b = outlineBounds(outline);
     // Include the actual shell/coping envelope; Infinity's receiver projects
     // beyond it. No furniture/scenery can inflate this architectural fit.
-    const margin = copingOuterOffset(system, overflowType) + (poolType === "above-ground" && showMeasurements ? infinityZone ? 0.5 : 0.05 : 0);
+    const margin = rimOffset + (poolType === "above-ground" && showMeasurements ? infinityZone ? 0.5 : 0.05 : 0);
     const points: [number, number][] = [
       [b.minX-margin,b.minZ-margin], [b.maxX+margin,b.maxZ+margin],
     ];
@@ -1391,17 +1411,17 @@ export default function PoolScene({
     if (externalStairs) {
       const stairs = planExternalStaircase({ outline, side: externalStairSide,
         platformExtended: externalStairPlatformExtended, accessAnchor: lighting.accessPlan.placement,
-        copingOffset: copingOuterOffset(system, overflowType), infinityExcluded,
+        copingOffset: rimOffset, infinityExcluded,
         groundY: verticalLayout.groundY,
         topY: system === "overflow" ? verticalLayout.waterY-0.001 : verticalLayout.copingY });
       if (stairs) points.push(...stairs.footprint.map(p => [p[0], p[1]] as [number,number]));
     }
     return points;
   }, [outline, system, overflowType, infinityZone, poolType, externalStairs, externalStairSide,
-    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout, showMeasurements, coverPlan.geometry, coverSubject]);
+    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout, showMeasurements, coverPlan.geometry, coverSubject, rimOffset]);
   const planView = focus === "top" && !photoMode;
   const planRevision = JSON.stringify([outline, depth, features, resolvedLayout, system, overflowType,
-    poolType, copingThickness, materials.coping.id, externalStairSide, externalStairPlatformExtended, construction]);
+    poolType, copingThickness, materials.coping.id, copingStyle, externalStairSide, externalStairPlatformExtended, construction]);
   const deckObstacles = useMemo(() => {
     const points: { x: number; z: number }[] = [
       resolvedLayout.ladder?.plan.placement,
@@ -1463,9 +1483,9 @@ export default function PoolScene({
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
   const visibleDeckLoungers = loungers && (construction?.showLoungers ?? true);
   const deckFurniturePlan = useMemo(() => system !== "infinity" && (construction?.showEnvironment ?? true)
-    ? planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType),
+    ? planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType,copingStyle),
       studioDeckBand(outline,true,visibleDeckLoungers),deckObstacles,{loungers:visibleDeckLoungers,shower:solarShower,coverHousing}) : null,
-  [system,construction?.showEnvironment,outline,poolType,overflowType,deckObstacles,visibleDeckLoungers,solarShower,coverHousing]);
+  [system,construction?.showEnvironment,outline,poolType,overflowType,copingStyle,deckObstacles,visibleDeckLoungers,solarShower,coverHousing]);
   const deckFurnitureEnvelope = useMemo(() => deckFurniturePlan ? deckFurnitureCameraPoints(deckFurniturePlan) : [], [deckFurniturePlan]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
@@ -1500,6 +1520,8 @@ export default function PoolScene({
     materials.surface.textureUrl,
     materials.coping.color,
     materials.coping.id,
+    copingStyle,
+    copingEdge,
     paving,
     pavingFormat,
     exteriorPanelFinish,
@@ -1511,6 +1533,7 @@ export default function PoolScene({
     sceneTime,
     features.join(","),
     hydromassageVariant,
+    integratedBenchStations,
     ledColor,
     ledIntensity,
     poolAccess,
@@ -1639,6 +1662,7 @@ export default function PoolScene({
           sceneTime={sceneTime}
           paving={paving ?? "gres"}
           pavingFormat={pavingFormat}
+          integratedEdge={integratedEdge}
         />
       ) : (
           <StudioPaving
@@ -1648,6 +1672,10 @@ export default function PoolScene({
             overflowType={overflowType}
             paving={paving ?? "gres"}
             pavingFormat={pavingFormat}
+            integratedEdge={integratedEdge}
+            topY={pavingTopY}
+            copingStyle={copingStyle}
+            copingEdge={copingEdge}
             environment={construction?.showEnvironment ?? true}
             loungers={visibleDeckLoungers}
             furnitureRows={deckFurniturePlan?.rows}
@@ -1668,16 +1696,16 @@ export default function PoolScene({
       {/* Presentation furniture on the studio deck: hidden in the raw
           construction stages and never part of the configuration. */}
       {system !== "infinity" && (construction?.showEnvironment ?? true) ? (
-        <DeckLoungers
+        <group position={[0, pavingTopY, 0]}><DeckLoungers
           outline={outline}
-          innerOffset={studioDeckInnerOffset(poolType, system, overflowType)}
+          innerOffset={studioDeckInnerOffset(poolType, system, overflowType, copingStyle)}
           band={studioDeckBand(outline, true, visibleDeckLoungers)}
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
           shower={solarShower}
           loungers={visibleDeckLoungers}
           coverHousing={coverHousing}
-        />
+        /></group>
       ) : null}
 
       <PoolModel
@@ -1697,6 +1725,8 @@ export default function PoolScene({
         poolType={poolType}
         copingThickness={copingThickness}
         pavingThickness={pavingLayout(paving, pavingFormat).thickness}
+        copingStyle={copingStyle}
+        copingEdge={copingEdge}
         showWater={showWater}
         waterGeometryRevision={`${shadowRevision}|${assetsLoading}`}
         planView={planView}

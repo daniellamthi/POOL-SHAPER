@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 import { revealWizardFinish } from "./finish-guide";
+import { claimWizardGuidance, wizardGuidanceVersion } from "./wizard-guidance";
 
 export function useFinishGuide() {
   const [activation, setActivation] = useState(0);
@@ -22,9 +23,12 @@ export function GuidedFinishSection({ label, description, guide, children }: {
   const { activation, consumed } = guide;
   useEffect(() => {
     if (!activation || consumed.current >= activation) return;
+    const scroller = sectionRef.current?.closest<HTMLElement>(".pool-dock-scroll");
+    if (scroller) claimWizardGuidance(scroller);
+    const version = scroller ? wizardGuidanceVersion(scroller) : 0;
     const frame = requestAnimationFrame(() => {
       const section = sectionRef.current;
-      if (!section) return;
+      if (!section || scroller && wizardGuidanceVersion(scroller) !== version) return;
       consumed.current = activation;
       revealWizardFinish(section, window.matchMedia("(prefers-reduced-motion: reduce)").matches);
       setHighlight(true);

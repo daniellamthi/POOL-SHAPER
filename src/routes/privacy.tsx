@@ -85,8 +85,11 @@ function PrivacyPolicy() {
 
         <Section title="4. Conservazione dei dati">
           <p>
-            {t("Conserviamo i dati per il tempo necessario a gestire la tua richiesta e, in caso di rapporto contrattuale, per")}{" "}<Placeholder>periodo di conservazione definito</Placeholder>{" "}
-            {t("in base agli obblighi di legge applicabili.")}{" "}</p>
+            {t("Per le richieste di preventivo che non danno luogo a un contratto, il periodo di conservazione previsto per i dati personali e gli eventuali allegati è di 12 mesi dall'ultimo contatto relativo alla richiesta.")}
+          </p>
+          <p>
+            {t("Se viene concluso un contratto, conserviamo i dati necessari alla sua esecuzione e all'adempimento degli obblighi di legge per i termini applicabili. Eventuali conservazioni ulteriori devono essere motivate e documentate.")}
+          </p>
         </Section>
 
         <Section title="5. Destinatari dei dati">

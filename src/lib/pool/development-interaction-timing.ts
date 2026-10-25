@@ -1,3 +1,17 @@
+// Tab-local QA state survives a Scene remount in the embedded browser. It is
+// not project data; resuming removes it, and production never calls these helpers.
+const QA_RENDER_PAUSE_KEY = "pool-shaper:qa-render-paused";
+export function readDevelopmentRenderPause(): boolean {
+  try { return window.sessionStorage.getItem(QA_RENDER_PAUSE_KEY) === "true"; }
+  catch { return false; }
+}
+export function writeDevelopmentRenderPause(paused: boolean): void {
+  try {
+    if (paused) window.sessionStorage.setItem(QA_RENDER_PAUSE_KEY, "true");
+    else window.sessionStorage.removeItem(QA_RENDER_PAUSE_KEY);
+  } catch { /* A blocked session store must not break the configurator. */ }
+}
+
 /** Opt-in DEV-only QA timing. Measures trusted input to second animation-frame
  * callback, NOT GPU completion or the final 3D paint. No customer values,
  * element text, credentials or project data are observed or logged. */

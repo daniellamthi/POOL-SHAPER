@@ -3,6 +3,7 @@ import { decisions, type DecisionProps } from "./decisions";
 import { ArrowRight, Check, Moon, Plus, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfigurator } from "@/lib/pool/context";
+import { integratedCoping, supportsCopingStyle, supportsCopingEdge } from "@/lib/pool/coping-style";
 import {
   EQUIPMENT,
   LINER_COLORS,
@@ -476,6 +477,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     toggleInoxLadder,
     setExternalStairSide,
     setSunShelfLoungerCount,
+    setIntegratedBenchStations,
     setSunShelfLoungerColor,
     setSunShelfRun,
     sunShelfNotice,
@@ -579,6 +581,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
   };
   const comfortChoice = shelfOn ? "sunShelf" : hydroOn ? hydroVariant : "none";
   const benchOn = config.features.includes("integratedBench");
+  const benchElement = comfort.elements.find(element => element.kind === "integratedBench");
   const benchAvailable =
     shelfOn && !hydroOn && (benchOn || comfort.availability.integratedBench.available);
 
@@ -718,7 +721,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
           </ChoiceGrid>
           {!shelfProposal.availability.sunShelf.available ? <p role="status" className="text-xs text-muted-foreground">{t("Sun Shelf")}: {t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
           {!hydroProposal.availability.hydromassage.available ? <p role="status" className="text-xs text-muted-foreground">{t("Idromassaggio")}: {t(hydroProposal.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
-          {shelfOn && shelfRange.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions>
+          {shelfOn && shelfRange.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
             <DimensionControl label="Lunghezza spiaggetta e gradini" unit="m" step={0.005} precision={3}
               value={requestedShelfRun} min={shelfRange.min} max={shelfRange.max} onChange={setSunShelfRun} />
             <p className="text-xs text-muted-foreground">{t("Intervallo utile: {min}–{max} m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.", {
@@ -753,7 +756,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             {config.features.includes("sunShelfLoungers") ? <SunShelfLoungerColorPicker value={config.sunShelfLoungerColor} onChange={setSunShelfLoungerColor} /> : null}
             {shelfLoungers.available ? <>
               <p className="text-xs text-muted-foreground">{t("Quantità consentite: da 1 a {count}.", { count: number(shelfLoungers.capacity) })}</p>
-              {config.features.includes("sunShelfLoungers") ? <label className="flex items-center gap-3 text-sm">
+              {config.features.includes("sunShelfLoungers") ? <label className="flex items-center gap-3 text-sm" data-wizard-guidance-group tabIndex={-1}>
                 {t("Quantità lettini")}
                 <select aria-label={t("Quantità lettini")} className="rounded-lg border border-hairline bg-card px-3 py-2"
                   value={config.sunShelfLoungerCount ?? shelfLoungers.capacity} onChange={event => setSunShelfLoungerCount(Number(event.target.value))}>
@@ -790,6 +793,18 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                   onSelect={() => togglePoolFeature("integratedBench")}
                 />
               </ChoiceGrid>
+              {benchOn && benchElement?.stations ? <div className="flex flex-col gap-2" data-wizard-guidance-group tabIndex={-1}>
+                <label className="flex items-center gap-3 text-sm">
+                  {t("Postazioni panca")}
+                  <select aria-label={t("Postazioni panca")} className="rounded-lg border border-hairline bg-card px-3 py-2"
+                    value={benchElement.stations.count} onChange={event => setIntegratedBenchStations(Number(event.target.value))}>
+                    {Array.from({ length: benchElement.stations.capacity }, (_, i) => i + 1).map(count => <option key={count} value={count}>{number(count)}</option>)}
+                  </select>
+                </label>
+                <p className="text-xs text-muted-foreground">{t("Per postazione: 2 bocchette schiena e 2 bocchette gambe.")}</p>
+                {benchElement.stations.adjusted ? <p role="alert" className="text-xs text-destructive">{t("Conferma le postazioni della panca: la richiesta supera lo spazio disponibile.")}</p> : null}
+              </div> : null}
+              {benchOn && !benchElement ? <p role="status" className="text-xs text-muted-foreground">{t(comfort.availability.integratedBench.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
             </div>
           ) : null}
         </div>
@@ -983,6 +998,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
           <div
             role="radiogroup"
             aria-label={t("Anteprima luce")}
+            data-wizard-guidance-ignore
             className="inline-flex items-center gap-0.5 rounded-full border border-hairline bg-card p-0.5"
           >
             <span className="px-2.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -1084,9 +1100,10 @@ const PAVING_IMAGES: Record<string, string | undefined> = {
 
 export function DeckTray({ tab, setTab }: DecisionProps) {
   const { t } = useI18n();
-  const { config, setCopingMaterial, setPaving, setPavingFormat } = useConfigurator();
+  const { config, setCopingMaterial, setCopingStyle, setCopingEdge, setPaving, setPavingFormat } = useConfigurator();
+  const deckCoping = integratedCoping(config);
   const layout = pavingLayout(config.paving, config.pavingFormat);
-  const copingVisible = !(config.system === "overflow" && config.overflowType !== "hidden");
+  const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
   // Disclosure is presentation-only; it must not create a technical selection
   // or dirty a saved project. Each existing subcategory keeps its own guide.
   const [openFamilies, setOpenFamilies] = useState<Partial<Record<string, FinishFamily | null>>>({});
@@ -1107,7 +1124,28 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
         ]}
       />
       {tab === "coping" && copingVisible ? (
-        <ChoiceGrid label={t("Materiale del bordo")} dense>
+        <div className="space-y-4">
+        {supportsCopingStyle(config) ? <ChoiceGrid label={t("Tipo di bordo")}>
+          <ChoiceCard title={t("Bordo dedicato")} description={t(config.shape === "rectangle" ? "Angoli vasca arrotondati R20 cm, finitura del bordo indipendente." : "Finitura del bordo indipendente dalla pavimentazione.")}
+            image="/product-previews/coping-dedicated.jpg" selected={!deckCoping} onSelect={() => setCopingStyle("dedicated")} />
+          <ChoiceCard title={t("Bordo filo pavimentazione")} description={t("Un unico piano e la stessa finitura della pavimentazione.")}
+            image="/product-previews/coping-flush.jpg" selected={deckCoping} onSelect={() => setCopingStyle("flush")} />
+        </ChoiceGrid> : null}
+        {supportsCopingEdge(config) ? <ChoiceGrid label={t("Angoli della vasca")} dense>
+          {(["square", "rounded"] as const).map(edge => <ChoiceCard compact key={edge}
+            title={t(edge === "square" ? "Retto" : "Arrotondato")}
+            description={t(edge === "square" ? "Angoli della vasca a 90°." : config.shape === "l-shape" ? "Angoli esterni arrotondati: raggio 20 cm." : "Angoli vasca arrotondati: raggio 20 cm.")}
+            image={<svg aria-hidden="true" viewBox="0 0 120 60" className="h-full w-full" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d={edge === "square" ? "M18 45V15H102" : "M18 45V29A14 14 0 0 1 32 15H102"} />
+            </svg>}
+            selected={(config.copingEdge ?? "square") === edge} onSelect={() => setCopingEdge(edge)} />)}
+        </ChoiceGrid> : null}
+        {deckCoping ? <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">{t("Il bordo segue materiale, formato e posa della pavimentazione.")}</p>
+          <button type="button" className="inline-flex items-center gap-2 self-start text-sm" onClick={() => setTab("paving")}>
+            {t("Scegli pavimentazione")} <ArrowRight className="size-4" />
+          </button>
+        </div> : <ChoiceGrid label={t("Materiale del bordo")} dense>
           {copingMaterialsForPool(config.poolType).filter(option => config.poolType === "above-ground" || (!isPorcelainReference(option.id) && !isTravertineReference(option.id))).map((option) => (
             config.poolType === "in-ground" && (option.id === "anthracite-gres" || option.id === "travertine") ?
             <FinishFamilyChoice key={option.id} family={option.id === "travertine" ? "travertine" : "porcelain"}
@@ -1124,7 +1162,8 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
               onSelect={() => { open(null); setCopingMaterial(option.id); }}
             />
           ))}
-        </ChoiceGrid>
+        </ChoiceGrid>}
+        </div>
       ) : (
         <div className="space-y-5">
         <ChoiceGrid label={t("Pavimentazione")} dense>
@@ -1228,7 +1267,7 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
               {t("Con il bordo Infinity l’esterno è il paesaggio: niente lettini sul bordo a sfioro. La doccia solare resta nella proposta, posizionata in fase di progetto.")}</p>
           ) : null}
           {coverOn && coverPlan.status !== "UNAVAILABLE" ? (
-            <div className="flex max-w-xl flex-col gap-2 rounded-2xl border border-hairline p-4">
+            <div className="flex max-w-xl flex-col gap-2 rounded-2xl border border-hairline p-4" data-wizard-guidance-group tabIndex={-1}>
               <div className="flex items-baseline justify-between">
                 <GroupLabel>{t("Apertura copertura")}</GroupLabel>
                 <output className="font-mono text-xs text-muted-foreground">
@@ -1296,7 +1335,7 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
         ]}
       />
       {tab === "scene" ? (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5" data-wizard-guidance-ignore>
           <GroupLabel>{t("Momento della giornata")}</GroupLabel>
           <ChoiceGrid label={t("Momento della giornata")} dense>
             <ChoiceCard

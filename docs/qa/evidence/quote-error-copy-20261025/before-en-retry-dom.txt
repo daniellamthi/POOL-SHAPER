@@ -1,0 +1,104 @@
+- heading [level=1]: 3D Pool Configurator
+- banner:
+  - navigation:
+    - list:
+      - button:
+        - generic: Pool
+        - generic: Reinforced concrete · 10.0 × 4.5 m
+      - button:
+        - generic: Water system
+        - generic: Skimmer · Modern slim
+      - button:
+        - generic: Access & comfort
+        - generic: Internal stairs
+      - button:
+        - generic: Finishes
+        - generic: PVC liner · Blue Sky [602]
+      - button:
+        - generic: Exterior
+        - generic: Travertine · Porcelain stoneware · 60 × 120 cm
+      - button:
+        - generic: Options
+        - generic: No options
+      - button:
+        - generic: Presentation
+        - generic: In progress
+  - button: IT
+  - button [pressed]: EN
+  - button [pressed]:
+    - generic: Day
+  - button:
+    - generic: Night
+  - button:
+    - generic: Start again
+- main:
+  - button:
+    - text: Pool view
+  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan
+  - toolbar:
+    - button:
+      - text: Guides
+    - button:
+      - text: Technical view
+    - button:
+      - text: Reframe
+- region:
+  - paragraph: "Your finished pool: scene, summary and proposal request."
+  - tablist:
+    - tab: Scene
+    - tab: Summary
+    - tab [selected]: Request a proposal
+  - heading [level=3]: Ready to turn this project into a proposal?
+  - paragraph: A consultant reviews the configuration, feasibility and investment.
+  - button: Review your project with a consultant
+  - paragraph:
+    - text: Phase 07 of 07
+    - generic: · 3/3 · Request a proposal
+  - heading [level=2]: Presentation
+  - paragraph: 10.0 × 4.5 m · ready for a proposal
+  - button:
+    - text: View the pool
+  - button [expanded]:
+    - text: Minimise
+  - button:
+    - text: Back
+  - button:
+    - text: Request a proposal
+- region "Notifications alt+T"
+- dialog "Review your project with a consultant":
+  - heading "Review your project with a consultant" [level=2]
+  - paragraph: A few details so a Piscine Wellness consultant can contact you.
+  - generic: Name *
+  - textbox "Name *": QA Isolata
+  - generic: Email *
+  - textbox "Email *": <redacted>
+  - generic: Phone *
+  - textbox "Phone *": <redacted>
+  - generic: Project location *
+  - textbox "Project location *": Località QA
+  - generic: When would you like to build it? *
+  - radiogroup "When would you like to build it?":
+    - radio "As soon as possible"
+    - text: As soon as possible
+    - radio "Within 3 months"
+    - text: Within 3 months
+    - radio "3–6 months"
+    - text: 3–6 months
+    - radio "6–12 months"
+    - text: 6–12 months
+    - radio "Still considering" [checked]:
+    - text: Still considering
+  - generic: Notes (optional)
+  - textbox "Notes (optional)"
+  - checkbox "I have read and accept the privacy notice . *" [checked]:
+  - text: I have read and accept the
+  - link "privacy notice":
+    - /url: /privacy
+  - text: .
+  - generic: "*"
+  - checkbox "I would like to receive marketing communications (optional)."
+  - text: I would like to receive marketing communications (optional).
+  - alert: "Project save failed. Please try again before submitting your request. Your configuration remains saved: you can try again without losing anything."
+  - button "Try again"
+  - button "Close":
+    - generic: Close

@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp, Scan } from "luci
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MacroStep } from "./wizard-model";
+import { captureWizardChoice, nextWizardOptions, revealWizardOptions, wizardGuidanceVersion } from "./wizard-guidance";
 import "./fullscreen.css";
 
 /** Phase icons of the frozen icon family: 24px grid, 1.5px round stroke. */
@@ -332,6 +333,33 @@ function ScrollCueArea({ className, children, decisionKey }: { className: string
       observer.disconnect();
     };
   }, []);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const content = contentRef.current;
+    if (!scroller || !content) return;
+    let frame = 0;
+    const guide = (event: MouseEvent) => {
+      cancelAnimationFrame(frame);
+      if (!(event.target instanceof Element)) return;
+      const request = captureWizardChoice(content, scroller, event.target);
+      if (!request) return;
+      // Let React commit disclosed controls and run their explicit guides.
+      // Two frames also settle layout before measuring the new options.
+      frame = requestAnimationFrame(() => {
+        frame = requestAnimationFrame(() => {
+          if (request.version !== wizardGuidanceVersion(scroller)) return;
+          const target = nextWizardOptions(content, request);
+          if (target) revealWizardOptions(scroller, target,
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        });
+      });
+    };
+    scroller.addEventListener("click", guide, true);
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("click", guide, true);
+    };
+  }, [decisionKey]);
   const reveal = () => {
     const scroller = scrollRef.current;
     if (!scroller) return;

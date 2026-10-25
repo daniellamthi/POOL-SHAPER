@@ -54,6 +54,9 @@ import {
 } from "./stoneTextures";
 import type { CopingMaterialId } from "@/lib/pool/coping-materials";
 import { configureDeckCopingGrain } from "./deckCopingGrain";
+import { copingNoseRadius } from "./copingProfile";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { integratedCoping, copingEdgeRadius, type CopingStyle, type CopingEdge } from "@/lib/pool/coping-style";
 import { isReferenceFinish } from "@/lib/pool/reference-finishes";
 import { configureReferenceCoping, loadReferenceFinishMaps, REFERENCE_SAMPLER_REVISION } from "./referenceFinishTexture";
 
@@ -112,6 +115,8 @@ interface PoolModelProps {
   overflowType: OverflowType;
   poolType: PoolType;
   copingThickness: number;
+  copingStyle?: CopingStyle | undefined;
+  copingEdge?: CopingEdge | undefined;
   pavingThickness?: number;
   showWater: boolean;
   waterGeometryRevision?: string;
@@ -462,6 +467,8 @@ export function PoolModel({
   overflowType,
   poolType,
   copingThickness,
+  copingStyle,
+  copingEdge,
   pavingThickness = 0.02,
   showWater,
   waterGeometryRevision,
@@ -509,16 +516,21 @@ export function PoolModel({
     overflowType,
     depth,
     copingThickness,
+    copingStyle,
   });
   const waterLevel = verticalLayout.waterY;
   const isOverflow = system === "overflow";
   const isVisibleOverflow = isOverflow && overflowType === "visible";
   const isContinuousOverflow = isOverflow && overflowType === "continuous" && poolType !== "above-ground";
+  const deckCoping = integratedCoping({ poolType, system, overflowType, copingStyle });
+  // Keep the existing clear intake beneath the flush concealed-overflow cap.
+  const copingSectionThickness = isContinuousOverflow ? pavingThickness : copingThickness;
+  const noseRadius = copingEdgeRadius({poolType, system, overflowType, shape, copingEdge}) ?? copingNoseRadius(copingSectionThickness);
   const maxAnisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const getSceneState = useThree((state) => state.get);
   const copingOutline = useMemo(
-    () => offsetOutline(outline, copingOuterOffset(system, overflowType)),
-    [outline, system, overflowType],
+    () => offsetOutline(outline, copingOuterOffset(system, overflowType, copingStyle)),
+    [outline, system, overflowType, copingStyle],
   );
   const hiddenSection = isContinuousOverflow
     ? { ...concealedOverflowSection(verticalLayout.wallTopY, copingThickness),
@@ -1004,11 +1016,12 @@ export function PoolModel({
   );
   const coping = useDisposable(
     () =>
-      isVisibleOverflow || isContinuousOverflow
+      isVisibleOverflow || deckCoping
         ? new THREE.BufferGeometry()
-        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingThickness, infinitySection,
-            materials.coping.id === "deck-marrone" || materials.coping.id === "reference-ipe"),
-    [copingInner, terminatedCopingOutline, copingThickness, isVisibleOverflow, isContinuousOverflow, infinitySection, materials.coping.id],
+        : createCopingSlabGeometry(copingInner, terminatedCopingOutline, copingSectionThickness, infinitySection,
+            materials.coping.id === "deck-marrone" || materials.coping.id === "reference-ipe",
+            noseRadius),
+    [copingInner, terminatedCopingOutline, copingSectionThickness, isVisibleOverflow, deckCoping, infinitySection, materials.coping.id, noseRadius],
   );
   const overflowLip = useDisposable(
     () =>
@@ -1018,11 +1031,17 @@ export function PoolModel({
     [outline, overflowWaterEdge, isOverflow, isVisibleOverflow, isContinuousOverflow],
   );
   const copingBed = useDisposable(
-    () =>
-      isVisibleOverflow || isContinuousOverflow
-        ? new THREE.BufferGeometry()
-        : createRingGeometry(copingInner, terminatedCopingOutline, false, infinitySection),
-    [copingInner, terminatedCopingOutline, isVisibleOverflow, isContinuousOverflow, infinitySection],
+    () => {
+      if (isVisibleOverflow || deckCoping) return new THREE.BufferGeometry();
+      const joint = createRingGeometry(copingInner, terminatedCopingOutline, false, infinitySection);
+      if (isOverflow) return joint;
+      const support = joint.clone();
+      support.translate(0, verticalLayout.wallTopY - copingSurfaceY + noseRadius, 0);
+      const bed = mergeGeometries([joint, support])!;
+      joint.dispose(); support.dispose();
+      return bed;
+    },
+    [copingInner, terminatedCopingOutline, isVisibleOverflow, deckCoping, infinitySection, verticalLayout.wallTopY, copingSurfaceY, noseRadius, isOverflow],
   );
   const grilleInnerSeat = useDisposable(
     () => createRingGeometry(overflowKerbOuter, offsetOutline(overflowKerbOuter, 0.012)),
@@ -1481,12 +1500,11 @@ export function PoolModel({
           space (see configureCopingTriplanar) so the rounded bevel, which
           turns from horizontal to near-vertical, never stretches the way a
           UV projected flat from the ring's XZ footprint would. */}
-      {!isVisibleOverflow && !isContinuousOverflow && (
+      {!isVisibleOverflow && !deckCoping && (
         <group name="pool-perimeter-finish">
-          {/* Joint bedding seen through the slab joints: the same stone,
-              a shade darker and only 3.5mm down, so a joint reads as a fine
-              integrated line -- never a black trench in a foreign colour. */}
-          <mesh geometry={copingBed} position={[0, copingSurfaceY - 0.0035, 0]} receiveShadow>
+          {/* Keep the matching joint bed beneath the rounded nose, so its
+              flat perimeter cannot protrude through the curved stone face. */}
+          <mesh geometry={copingBed} position={[0, copingSurfaceY - noseRadius - 0.0005, 0]} receiveShadow>
             {rawShellKind ? (
               <RawShellMaterial kind={rawShellKind} />
             ) : (

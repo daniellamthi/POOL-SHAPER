@@ -18,6 +18,8 @@ import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, getShapeDefinition } from "@
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
+import { integratedCoping, supportsCopingEdge } from "@/lib/pool/coping-style";
+import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 import { pavingLayout } from "@/lib/pool/presentation";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { formatNumber } from "@/lib/pool/format";
@@ -59,9 +61,10 @@ function newPoolLines(submission: LeadSubmission): string[] {
     : isMosaic
       ? (getMosaicFinish(config.mosaicFinish).name ?? "Mosaico")
       : (LINER_COLORS.find((c) => c.id === config.linerColor)?.title ?? config.linerColor);
-  const copingTitle = config.system === "overflow" && config.overflowType === "continuous"
+  const copingFinishTitle = integratedCoping(config)
     ? `${pavingLayout(config.paving, config.pavingFormat).label} — bordo a filo pavimentazione`
     : COPING_MATERIALS.find((c) => c.id === config.copingMaterial)?.title ?? "Non selezionato";
+  const copingTitle = copingFinishTitle + (supportsCopingEdge(config) ? config.copingEdge === "rounded" ? " — angoli arrotondati R20 cm" : " — angoli retti" : "");
   const skimmerDetail =
     config.system === "skimmer"
       ? `${SKIMMER_TYPE_LABEL[config.skimmerType as keyof typeof SKIMMER_TYPE_LABEL] ?? config.skimmerType} · ${SKIMMER_FINISHES.find((s) => s.id === config.skimmerFinish)?.title ?? config.skimmerFinish}`
@@ -73,8 +76,11 @@ function newPoolLines(submission: LeadSubmission): string[] {
         config.poolAccess)
     : "Non selezionato";
   const featureLabels = config.features
-    .filter((id) => id === "hydromassage" || id === "externalStaircase")
-    .map((id) => POOL_FEATURE_LABEL[id as keyof typeof POOL_FEATURE_LABEL] ?? id);
+    .filter((id) => id === "hydromassage" || id === "externalStaircase" || id === "integratedBench")
+    .map((id) => id === "integratedBench" ? (() => {
+      const bench = configuredPoolLayout(config).comfort.elements.find(element => element.kind === "integratedBench");
+      return `Panca integrata · ${bench?.stations?.count ?? 0} postazioni · ${bench?.jets?.length ?? 0} bocchette`;
+    })() : POOL_FEATURE_LABEL[id as keyof typeof POOL_FEATURE_LABEL] ?? id);
   const hasLed = config.features.includes("ledLighting");
   const equipmentLabels = EQUIPMENT.filter((option) => config.equipment.includes(option.id)).map(
     (option) => EQUIPMENT_LABEL[option.id],

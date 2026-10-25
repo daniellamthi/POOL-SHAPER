@@ -83,6 +83,8 @@ import type {
   RenovationConfig,
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
+import { integratedCoping, supportsCopingStyle, supportsCopingEdge, isCopingEdge } from "./coping-style";
+import { configuredOutline } from "./configured-outline";
 import { configuredSunShelfRange, sunShelfRunWithinRange } from "./sun-shelf-range";
 import { clampOrganicShapeParams } from "./organic-shape";
 import { pavingId, pavingFormatId, premiumEnvironment, type PavingId, type PavingFormatId, type PremiumEnvironment } from "./presentation";
@@ -100,6 +102,8 @@ type Action =
   | { type: "setCustomerField"; key: keyof CustomerInfo; value: string }
   | { type: "setShape"; value: PoolShapeId }
   | { type: "setCopingMaterial"; value: NonNullable<PoolConfig["copingMaterial"]> }
+  | { type: "setCopingStyle"; value: NonNullable<PoolConfig["copingStyle"]> }
+  | { type: "setCopingEdge"; value: NonNullable<PoolConfig["copingEdge"]> }
   | { type: "setCustomMode"; value: CustomMode }
   | { type: "setControlPoint"; index: number; value: ControlPoint }
   | { type: "resetControlPoints" }
@@ -119,6 +123,7 @@ type Action =
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
   | { type: "setSunShelfLoungerCount"; value: number }
+  | { type: "setIntegratedBenchStations"; value: number }
   | { type: "setSunShelfLoungerColor"; value: SunShelfLoungerColorId }
   | { type: "setSunShelfRun"; value: number }
   | { type: "setLedColor"; value: string }
@@ -252,6 +257,11 @@ function reduceConfiguration(state: State, action: Action): State {
       const candidate = { ...config, dimensions: { ...config.dimensions, sunShelfRun: action.value } };
       if (!configuredComfortPlan(candidate).availability.sunShelf.available) return state;
       return { ...state, config: candidate };
+    }
+    case "setIntegratedBenchStations": {
+      const bench = configuredComfortPlan(config).elements.find(element => element.kind === "integratedBench");
+      return bench?.stations && Number.isSafeInteger(action.value) && action.value >= 1 && action.value <= bench.stations.capacity
+        ? { ...state, config: { ...config, integratedBenchStations: action.value } } : state;
     }
     case "setSunShelfLoungerCount":
       return config.features.includes("sunShelfLoungers") && Number.isFinite(action.value)
@@ -417,6 +427,14 @@ function reduceConfiguration(state: State, action: Action): State {
         ),
       };
     }
+    case "setCopingStyle":
+      if (!supportsCopingStyle(config)) return state;
+      if ((integratedCoping(config) ? "flush" : "dedicated") === action.value) return state;
+      return action.value === "dedicated" || action.value === "flush"
+        ? { ...state, config: { ...config, copingStyle: action.value } } : state;
+    case "setCopingEdge":
+      if (!supportsCopingEdge(config) || !isCopingEdge(action.value) || (config.copingEdge ?? "square") === action.value) return state;
+      return { ...state, config: { ...config, copingEdge: action.value } };
     case "setCopingMaterial":
       if (config.poolType !== "in-ground" && isReferenceFinish(action.value)) return state;
       return { ...state, config: { ...config, copingMaterial: action.value } };
@@ -857,8 +875,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
   }, [projectConfiguration, draftReady]);
 
   const outline = useMemo(
-    () => buildOutline(config.shape, config.dimensions, config.controlPoints),
-    [config.shape, config.dimensions, config.controlPoints],
+    () => configuredOutline(config),
+    [config.shape, config.dimensions, config.controlPoints, config.poolType, config.system, config.overflowType, config.copingStyle, config.copingEdge],
   );
 
   const metrics = useMemo(
@@ -930,6 +948,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setCustomerField: (key, v) => dispatch({ type: "setCustomerField", key, value: v }),
       setShape: (v) => dispatch({ type: "setShape", value: v }),
       setCopingMaterial: (v) => dispatch({ type: "setCopingMaterial", value: v }),
+      setCopingStyle: (v) => dispatch({ type: "setCopingStyle", value: v }),
+      setCopingEdge: (v) => dispatch({ type: "setCopingEdge", value: v }),
       setCustomMode: (v) => dispatch({ type: "setCustomMode", value: v }),
       setControlPoint: (index, v) => dispatch({ type: "setControlPoint", index, value: v }),
       resetControlPoints: () => dispatch({ type: "resetControlPoints" }),
@@ -949,6 +969,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
       setSunShelfLoungerCount: (v) => dispatch({ type: "setSunShelfLoungerCount", value: v }),
+      setIntegratedBenchStations: (v) => dispatch({ type: "setIntegratedBenchStations", value: v }),
       setSunShelfLoungerColor: (v) => dispatch({ type: "setSunShelfLoungerColor", value: v }),
       setSunShelfRun: (v) => dispatch({ type: "setSunShelfRun", value: v }),
       sunShelfNotice: state.sunShelfNotice ?? null,

@@ -15,7 +15,24 @@ let checks = 0;
 const check = (condition, label) => { assert(condition, label); checks++; };
 const settle = () => new Promise(resolve => setTimeout(resolve, 60));
 
-check(sceneSource.includes('const [qaRenderPaused, setQaRenderPaused] = useState(false)'), 'QA pause is retained React state, not a transient R3F toggle');
+check(sceneSource.includes('useState(() => import.meta.env.DEV && readDevelopmentRenderPause())'), 'DEV pause initializes from tab-local session state across Scene remounts');
+check(sceneSource.includes('if (import.meta.env.DEV) writeDevelopmentRenderPause(qaRenderPaused)'), 'Only DEV writes QA pause state; it is not technical project configuration');
+const pauseHelpers = { exports: {}, window: { sessionStorage: new Map() } };
+pauseHelpers.window.sessionStorage.getItem = key => pauseHelpers.window.sessionStorage.get(key) ?? null;
+pauseHelpers.window.sessionStorage.setItem = (key, value) => pauseHelpers.window.sessionStorage.set(key, value);
+pauseHelpers.window.sessionStorage.removeItem = key => pauseHelpers.window.sessionStorage.delete(key);
+runInNewContext(ts.transpileModule(readFileSync('src/lib/pool/development-interaction-timing.ts', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS },
+}).outputText, pauseHelpers);
+check(pauseHelpers.exports.readDevelopmentRenderPause() === false, 'Fresh tab starts with rendering enabled');
+pauseHelpers.exports.writeDevelopmentRenderPause(true);
+for (let remount = 0; remount < 4; remount++) check(pauseHelpers.exports.readDevelopmentRenderPause() === true, 'Pause survives a fresh Scene initializer');
+pauseHelpers.exports.writeDevelopmentRenderPause(false);
+check(pauseHelpers.exports.readDevelopmentRenderPause() === false && pauseHelpers.window.sessionStorage.size === 0, 'Resume clears QA state rather than persisting a project preference');
+pauseHelpers.window.sessionStorage.getItem = () => { throw Error('Storage blocked'); };
+pauseHelpers.window.sessionStorage.setItem = () => { throw Error('Storage blocked'); };
+check(pauseHelpers.exports.readDevelopmentRenderPause() === false, 'Unavailable session storage safely defaults to live rendering');
+pauseHelpers.exports.writeDevelopmentRenderPause(true);
 check(sceneSource.includes('frameloop={preparingShaders || (import.meta.env.DEV && qaRenderPaused) ? "never" : "always"}'), 'Canvas reconfiguration/resize cannot silently resume a paused QA scene');
 check(sceneSource.includes('enabled={showWater && !photoMode && !qaRenderPaused}'), 'Shader readiness cannot resume an intentionally paused QA canvas');
 const pauseEffect = sceneSource.slice(sceneSource.indexOf('function DevelopmentRendererMetrics')).match(/useLayoutEffect\(\(\) => \{([\s\S]*?)\}, \[qaPaused, size.width, size.height, getRoot\]\);/);
