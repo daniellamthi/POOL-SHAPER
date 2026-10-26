@@ -3066,3 +3066,31 @@ clean reload plus apply/restore produced zero new console errors.
 Evidence: [proposal-comparison-20261026](evidence/proposal-comparison-20261026/).
 This is a scoped feature checkpoint, not completion of the wider premium goal or
 release approval. No merge, deploy, geometry/material/camera redesign or real email.
+
+
+#### 26 October — customer garden: calibrated-camera foundation
+
+A separate, not-yet-wired camera module now reconstructs perspective and metric
+pose from four clockwise photo points marking a measured rectangle on level
+ground. It assumes a centred principal point, square pixels and negligible lens
+distortion. A damped physical-camera fit reduces click-noise error without
+warping the pool image. Nearly orthographic views require a known vertical FOV;
+invalid/too-small/nonconvex rectangles, impossible poses and excessive residuals
+are rejected. Real measurement accuracy is not inferred from reprojection error.
+
+Focused runner `node scripts/run-site-photo-camera-audit.mjs` PASS: 67 camera
+poses across landscape/portrait/square formats; projected points above and below
+the ground plane; one-pixel corner perturbations; overhead known-FOV fallback;
+invalid inputs; image resizing without scale drift; measured dimensions scaling;
+off-centre subject and rolled camera. The noisy fixture converges to about
+0.53 pixels maximum residual. TypeScript, new source/runner ESLint and diff-check
+PASS. No runtime scene, material, geometry, existing camera or backend changes.
+
+This checkpoint is the mathematical foundation only. Customer photo upload,
+local persistence, interactive four-point calibration, placement controls,
+live scene compositing, export and visual/physical-photo validation remain OPEN.
+The next integration must use one live canvas, preserve photo aspect ratio,
+suppress only the studio backdrop/ground in the photo mode, keep the configured
+pool at metric scale, and restore the existing viewport on exit. AR remains a
+separate subsequent path requiring supported-device verification. This does not
+close the wider premium goal or any existing release gate.
