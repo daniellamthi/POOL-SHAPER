@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-26T16:31:49.743Z",
+  "origin": "http://lighting-qa-20261026.localhost:3003/",
+  "fixture": "Synthetic 1400x900 ground rectangle 14x9 metres; not a real property photo",
+  "browserChecks": {
+    "upload": true,
+    "fourPointCalibration": true,
+    "offsetX": 1.5,
+    "offsetZ": -0.5,
+    "rotationDegrees": 20,
+    "localSaveAndReload": true,
+    "italian": true,
+    "english": true,
+    "mobileViewport": "390x844, emulated",
+    "oneCanvas": true,
+    "noHorizontalOverflow": true,
+    "dayAndNight": true,
+    "pngDownloadDesktopAndMobile": true,
+    "exportDimensions": [
+      1400,
+      900
+    ],
+    "returnToConfigurator": true,
+    "referenceReentryDoesNotExport": true
+  },
+  "consoleErrors": [],
+  "limitations": [
+    "Real-property photo accuracy not verified",
+    "No AR or real-phone hardware test",
+    "No cloud/share/PDF photo delivery",
+    "Scene lighting remains configured, not inferred from photo"
+  ]
+}

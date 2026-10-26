@@ -31,9 +31,13 @@ import { TechnicalDataPanel } from "./TechnicalDataPanel";
 import type { TechnicalPlan } from "@/lib/pool/technical-plan";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
 
+const GardenPhotoStudio = lazy(() => import("./GardenPhotoStudio"));
 const PoolScene = lazy(() => import("./three/PoolScene"));
 
 type ViewportProps = SceneProps & {
+  gardenStudio: boolean;
+  gardenProjectId: string;
+  onCloseGardenStudio: () => void;
   technicalPlan: TechnicalPlan;
   onToggleTechnicalView: () => void;
   onTechnicalFocus: (focus: VisualFocus) => void;
@@ -182,6 +186,7 @@ function QualityPicker({
 }
 
 export const PoolViewport = memo(function PoolViewport({
+  gardenStudio, gardenProjectId, onCloseGardenStudio,
   technicalPlan,
   onToggleTechnicalView,
   onTechnicalFocus,
@@ -212,6 +217,13 @@ export const PoolViewport = memo(function PoolViewport({
         : renderPhase === "error"
           ? "Retry Photorealistic Render"
           : "Generate Photorealistic Render";
+
+  if (gardenStudio) return <Suspense fallback={<ViewportFallback />}><GardenPhotoStudio key={gardenProjectId}
+    projectId={gardenProjectId} poolLength={scene.length} poolWidth={scene.width} onClose={onCloseGardenStudio}
+    renderScene={sitePhotoView => <Suspense fallback={<ViewportFallback />}><PoolScene {...scene}
+      sitePhotoView={sitePhotoView} photoMode={false} cleanCapture cameraLocked focus="review"
+      showMeasurements={false} technicalView={false}
+    /></Suspense>} /></Suspense>;
 
   return (
     <div data-architectural-plan={scene.focus === "top" && scene.poolType === "in-ground" && !scene.photoMode ? scene.technicalView ? "technical" : "true" : undefined}

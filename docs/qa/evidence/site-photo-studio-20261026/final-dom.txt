@@ -1,0 +1,88 @@
+- heading [level=1]: Configuratore piscine 3D
+- banner:
+  - navigation:
+    - list:
+      - button:
+        - generic: Piscina
+        - generic: Cemento armato · 10,0 × 4,5 m
+      - button:
+        - generic: Sistema acqua
+        - generic: Skimmer · Slim Moderno
+      - button:
+        - generic: Accesso & comfort
+        - generic: Scala interna
+      - button:
+        - generic: Finiture
+        - generic: Liner PVC · Blue Sky [602]
+      - button:
+        - generic: Esterno
+        - generic: Travertino · Gres porcellanato · 60 × 120 cm
+      - button:
+        - generic: Optional
+        - generic: Nessun optional
+      - button:
+        - generic: Presentazione
+        - generic: In corso
+  - button [pressed]: IT
+  - button: EN
+  - button [pressed]:
+    - generic: Giorno
+  - button:
+    - generic: Notte
+  - button:
+    - generic: Ricomincia
+- main
+- region:
+  - paragraph: "La tua piscina finita: scena, riepilogo e richiesta di proposta."
+  - tablist:
+    - tab [selected]: Scena
+    - tab: Riepilogo
+    - tab: Richiedi proposta
+  - button: Nel tuo giardino
+  - paragraph: Momento della giornata
+  - button [pressed]:
+    - generic: Giorno
+    - generic: Luce naturale, colori reali del rivestimento.
+  - button:
+    - generic: Notte
+    - generic: Scena notturna, con le luci selezionate.
+  - button:
+    - text: "Prossima scelta: Riepilogo"
+  - button:
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 07 di 07
+    - generic: · 1/3 · Scena
+  - heading [level=2]: Presentazione
+  - paragraph: 10,0 × 4,5 m · pronta per la proposta
+  - button:
+    - text: Vedi la piscina
+  - button [expanded]:
+    - text: Riduci
+  - button:
+    - text: Indietro
+  - button:
+    - text: Continua
+    - generic: · Riepilogo
+- region "Notifications alt+T"
+- dialog "Nel tuo giardino" [active]:
+  - heading "Nel tuo giardino" [level=2]
+  - paragraph: "La foto resta su questo dispositivo. Usa un terreno piano e libero: gli oggetti in primo piano non mascherano automaticamente la piscina."
+  - text: Carica foto del giardino
+  - button "Carica foto del giardino"
+  - paragraph: "Piscina configurata: 10 × 4,5 m. La scala dipende dalle misure del riferimento."
+  - button "Modifica riferimenti"
+  - generic: La piscina mantiene le dimensioni configurate.
+  - img "Foto del giardino"
+  - text: Spostamento X (metri)
+  - spinbutton "Spostamento X (metri)": "1.5"
+  - text: Spostamento Z (metri)
+  - spinbutton "Spostamento Z (metri)": "-0.5"
+  - text: Rotazione piscina (gradi)
+  - spinbutton "Rotazione piscina (gradi)": "20"
+  - button "Conserva in questo browser"
+  - button "Esporta immagine giardino"
+  - paragraph: Foto e posizionamento non sono inclusi nel link condiviso o nel Project Book. Esporta questa immagine separatamente.
+  - status
+  - button "Chiudi":
+    - generic: Chiudi

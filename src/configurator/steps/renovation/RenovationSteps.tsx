@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { Droplets, Paintbrush, Layers, Wrench, Settings, RefreshCw } from "lucide-react";
 import { ChoiceCard, ChoiceGrid, GroupLabel, StepTabs } from "@/components/pool/wizard/ChoiceCard";
@@ -215,6 +216,7 @@ export function RenovationReviewStep({ ctx }: { ctx: TrayContext }) {
   const delivery = useProjectDelivery();
   return <div className={body}>
     <ProjectDeliveryPanel delivery={delivery} captureHero={ctx.captureHero} captureDayNight={ctx.captureDayNight} />
+    {ctx.openGardenStudio ? <Button variant="outline" onClick={ctx.openGardenStudio}>{t("Nel tuo giardino")}</Button> : null}
     <ProposalComparison captureHero={ctx.captureHero} onApplied={() => delivery.setHeroUrl(null)} />
     <ProjectSummary publicRef={delivery.link?.publicRef} heroUrl={delivery.heroUrl} />
     <section className="flex flex-col gap-3 border-t border-hairline pt-5">

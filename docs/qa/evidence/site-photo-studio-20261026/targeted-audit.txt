@@ -1,0 +1,2 @@
+Site photo storage validation PASS: project isolation, malformed data, bounds, incomplete drafts.
+Site photo rig PASS: 12 placements / 48 projected points, stable rerenders, asset readiness, resize, capture-once and failure recovery. Hooks simulated; no GPU claim.

@@ -1,3 +1,4 @@
+import { SitePhotoCameraRig, type SitePhotoView } from "./SitePhotoCameraRig";
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ShaderPreparation } from "./ShaderPreparation";
@@ -108,6 +109,7 @@ export type SceneFocus = CameraIntent;
 export type SceneTimeOfDay = "day" | "night";
 
 export interface SceneProps {
+  sitePhotoView?: SitePhotoView | undefined;
   construction?: import("@/lib/pool/construction-presentation").ConstructionPresentation;
   outline: Outline;
   /** Unrounded design footprint for the exterior paving perimeter only. */
@@ -943,6 +945,7 @@ function StudioFloor({
   paving,
   pavingFormat,
   integratedEdge = false,
+  hideGround = false,
 }: {
   outline: Outline;
   size: number;
@@ -956,6 +959,7 @@ function StudioFloor({
   paving: import("@/lib/pool/presentation").PavingId;
   pavingFormat?: PavingFormatId | undefined;
   integratedEdge?: boolean | undefined;
+  hideGround?: boolean | undefined;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -1037,7 +1041,7 @@ function StudioFloor({
         </mesh>
         </>
       ) : null}
-      <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
+      <mesh visible={!hideGround} name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
         {premiumInfinity && infinityZone && coastalMap ? <meshStandardMaterial
           side={DoubleSide}
           color={sceneTime === "night" ? "#68655e" : "#c1b8a7"}
@@ -1144,6 +1148,7 @@ function StudioFloor({
 }
 
 export default function PoolScene({
+  sitePhotoView,
   outline,
   pavingOutline,
   shape,
@@ -1570,6 +1575,7 @@ export default function PoolScene({
       dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : renderer.current?.getPixelRatio() ?? ACTIVE_RENDERING_QUALITY.dpr}
       gl={{
         antialias: ACTIVE_RENDERING_QUALITY.antialias,
+        alpha: true,
         // Retaining every WebGL back buffer causes sustained GPU-memory growth
         // in WebKit. Screenshots are not part of the current workflow, so the
         // renderer can safely release each frame after presentation.
@@ -1592,8 +1598,8 @@ export default function PoolScene({
         position: [12, 9, 14],
       }}
     >
-      <color attach="background" args={[background]} />
-      {system !== "infinity" ? <fog
+      {!sitePhotoView ? <color attach="background" args={[background]} /> : null}
+      {system !== "infinity" && !sitePhotoView ? <fog
         attach="fog"
         args={[
           background,
@@ -1608,7 +1614,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} showBackdrop={!planView} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} showBackdrop={!planView && !sitePhotoView} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
 
       <SceneMood
         dusk={dusk}
@@ -1665,6 +1671,7 @@ export default function PoolScene({
       <Suspense fallback={null}>
       {infinityStage ? (
         <StudioFloor
+          hideGround={!!sitePhotoView}
           outline={outline}
           size={deckSize}
           theme={visualTheme}
@@ -1681,6 +1688,7 @@ export default function PoolScene({
         />
       ) : (
           <StudioPaving
+            hideGround={!!sitePhotoView}
             outline={outline}
             outerOutline={pavingOutline}
             poolType={poolType}
@@ -1889,9 +1897,10 @@ export default function PoolScene({
       ) : null}
 
       {import.meta.env.DEV ? <DevelopmentRendererMetrics qaPaused={qaRenderPaused} /> : null}
-      {!photoMode ? <HeroCaptureListener /> : null}
+      {!photoMode && !sitePhotoView ? <HeroCaptureListener /> : null}
       {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
 
+      {!sitePhotoView ? <>
       <PlanCamera enabled={focus === "top"} />
       <OrbitControls
         ref={controls}
@@ -1954,13 +1963,15 @@ export default function PoolScene({
         deckFurnitureEnvelope={deckFurnitureEnvelope}
       />
 
+      </> : <SitePhotoCameraRig view={sitePhotoView} />}
+
       {/* Premium post pass -- only ever mounts (and only ever fetches its
           chunk) when the active quality tier opts in (Experience);
           Configuration keeps today's exact output and bundle untouched.
           Skipped in Photo Mode: EffectComposer takes over the render loop
           with its own render-priority mechanism, which would fight with
           PhotoModeRenderer's for who owns the final canvas draw. */}
-      {ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !photoMode ? (
+      {ACTIVE_RENDERING_QUALITY.postProcessing.enabled && !photoMode && !sitePhotoView ? (
         <Suspense fallback={null}>
           <PremiumPostFX />
         </Suspense>
@@ -1979,7 +1990,7 @@ export default function PoolScene({
       {/* Normal configuration is raster-only. Tracing is loaded and mounted
           exclusively in response to the user's explicit Photo Mode toggle. */}
     </Canvas>
-    {infinityStage && !photoMode && coastalStatus !== "ready" ? (
+    {infinityStage && !photoMode && !sitePhotoView && coastalStatus !== "ready" ? (
       <div role="status" aria-live="polite" className="absolute inset-0 z-[2] flex items-center justify-center bg-viewport text-sm text-foreground/70">
         {coastalStatus === "error" ? "Panorama non disponibile. Seleziona nuovamente Infinity per riprovare." : "Preparazione panorama Infinity…"}
       </div>

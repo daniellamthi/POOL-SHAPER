@@ -194,6 +194,7 @@ export function StudioPaving({
   paving = "gres",
   pavingFormat,
   environment = true,
+  hideGround = false,
   loungers = false,
   furnitureRows = NO_FURNITURE_ROWS,
   decking = true,
@@ -212,6 +213,7 @@ export function StudioPaving({
   pavingFormat?: PavingFormatId | undefined;
   /** Late-stage context: wide terrace and lawn instead of the compact band. */
   environment?: boolean;
+  hideGround?: boolean | undefined;
   /** Reserve the furniture footprint plus a clear poolside passage. */
   loungers?: boolean;
   furnitureRows?: readonly DeckFurnitureSide[] | undefined;
@@ -291,6 +293,7 @@ export function StudioPaving({
   return (
     <group name="premium-configuration-studio">
       <mesh
+        visible={!hideGround}
         name={environment ? "studio-lawn" : "studio-ground"}
         geometry={geometry.ground}
         position={[0, -0.012, 0]}

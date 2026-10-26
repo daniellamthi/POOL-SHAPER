@@ -123,6 +123,7 @@ function ConfiguratorLayout() {
   const { technical: projectTechnical, cover } = useTechnicalData();
   const {
     config: projectConfig,
+    projectId,
     renovation,
     outline,
     skimmers: projectSkimmers,
@@ -210,6 +211,7 @@ function ConfiguratorLayout() {
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const toggleMobileExpanded = useCallback(() => setMobileExpanded((value) => !value), []);
   const [photoMode, setPhotoMode] = useState(false);
+  const [gardenStudio, setGardenStudio] = useState(false);
   const [photoModeQuality, setPhotoModeQuality] = useState<PhotoModeQuality>("standard");
   // Set once the path tracer has proven it can't run on this device (no
   // WebGL2, or WebGLPathTracer threw during setup -- see
@@ -543,6 +545,7 @@ function ConfiguratorLayout() {
     },
     captureHero,
     captureDayNight,
+    openGardenStudio: () => setGardenStudio(true),
   };
   const RenovationComponent = RENOVATION_COMPONENTS[step] ?? ProjectTypeStep;
   const trayContent = renovationWorkflow ? (
@@ -627,6 +630,9 @@ function ConfiguratorLayout() {
           )}
         >
           <PoolViewport
+            gardenStudio={gardenStudio}
+            gardenProjectId={projectId}
+            onCloseGardenStudio={() => setGardenStudio(false)}
             outline={outline}
             pavingOutline={pavingOutline}
             shape={config.shape}

@@ -3023,7 +3023,7 @@ commercial/CRM continuity until last. Work proceeds one feature at a time.
 | Workstream | Current scope/status |
 |---|---|
 | Compare alternatives | Browser-local comparison implemented and verified below. Cloud comparison/export is not claimed. |
-| Customer's garden | OPEN: calibrated photo placement, then a separately validated AR path. |
+| Customer's garden | Local calibrated photo studio implemented and verified on a synthetic reference. Real-property validation and a separately validated AR path remain OPEN. |
 | Catalogue presentation | OPEN: improve scene composition/context using approved pool geometry. |
 | Customer-accessible photorealistic rendering | OPEN: validate supported scene fidelity and delivery/runtime before publication. |
 | Reliability | OPEN: existing physical-device baseline, candidate cloud/PDF, recovery, privacy operation and publication/email gates remain applicable. |
@@ -3094,3 +3094,57 @@ suppress only the studio backdrop/ground in the photo mode, keep the configured
 pool at metric scale, and restore the existing viewport on exit. AR remains a
 separate subsequent path requiring supported-device verification. This does not
 close the wider premium goal or any existing release gate.
+
+
+#### 26 October — customer garden: local photo studio integration
+
+Supersedes the unwired UI status in the foundation checkpoint above. Presentation
+now opens “Nel tuo giardino” / “In your garden”, also available in renovation
+review. JPG/PNG/WebP photographs are decoded locally, limited to 20 MB and resized
+to at most 1800 pixels. Four clockwise reference points and two measured ground
+rectangle dimensions determine the existing calibrated perspective camera.
+An optional known vertical FOV supports ambiguous views. Point coordinates can
+also be edited numerically. Metre offsets and rotation position the configured
+pool without changing its size, geometry, finishes, options or square paving corners.
+
+Only one live canvas is mounted. Studio backdrop and artificial ground are hidden
+inside the photo studio; the existing viewport is remounted on exit. The matched
+camera owns the photo render loop. Its projection remains tied to the image aspect,
+including CSS rounding on mobile. Export waits for assets and stable rendering,
+captures at the source photo resolution, restores renderer size/DPR even on capture
+failure, composites the original photo and pool into a PNG, and adds an indicative
+study notice. Re-entering reference editing resets the export request, preventing
+an unsolicited second download. IT/EN controls and error messages are included.
+
+Manual local saving uses validated IndexedDB records isolated by project ID;
+reopening and a complete page reload restore photo, points, dimensions and placement.
+The component is keyed by project ID so pending work cannot cross project sessions.
+The UI explicitly distinguishes this local photo from cloud sharing and Project Book.
+No photo or placement fields were added to backend records or existing exports.
+
+Verification: TypeScript no-emit PASS; new-source ESLint and diff-check PASS.
+Focused `node scripts/run-site-photo-studio-audit.mjs` PASS: storage identity and
+malformed/bounded data guards; actual camera component with simulated hooks,
+12 placements / 48 projected points at and above/below ground; rerender stability,
+asset readiness, irregular viewport resizing, capture-once behavior, source
+resolution capture, failure restoration and preview remount. These tests are not
+GPU evidence. The unchanged 67-pose mathematical foundation audit was not repeated.
+
+Integrated-browser PASS on the existing local QA origin: actual file selection,
+four-point calibration of a clearly labelled synthetic 1400×900 diagram with a
+14×9 m ground reference; 10×4.5 m configured Skimmer pool, position (1.5,-0.5 m),
+20° rotation; IT/EN, invalid-dimension feedback, local save/reopen/full reload,
+day/night composition, return to normal configuration, desktop and 390×844 mobile
+emulation. One canvas and no horizontal page overflow observed. Actual PNG downloads
+were inspected, including 1400×900 export from mobile with the English notice.
+Final browser console error count: zero. Dev server had stopped and was restarted
+once on loopback port3003; the stale browser error tab was replaced in the same IAB.
+
+Evidence: [site-photo-studio-20261026](evidence/site-photo-studio-20261026/).
+Limitations: this is calibrated raster compositing, not real-property measurement
+validation or automatic photographic lighting/foreground masking. Lighting retains
+the configured day/night setup; use a matching photo. Real garden photographs,
+physical-device quality/performance, AR and photo cloud/PDF delivery remain OPEN.
+Catalogue presentation, customer render-service validation and all existing release
+gates also remain OPEN. Pricing/CRM remain deferred. No broad build/audit, backend
+mutation, new QA project, real email, merge or deployment was performed.

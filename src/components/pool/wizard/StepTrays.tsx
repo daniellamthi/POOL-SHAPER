@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { decisions, type DecisionProps } from "./decisions";
 import { ArrowRight, Check, Moon, Plus, Sun } from "lucide-react";
@@ -67,6 +68,7 @@ import { useI18n } from "@/lib/i18n";
 /** What a tray may ask of the shell: point the camera at what is being edited,
  * and the presentation controls the shell owns (photo mode). */
 export interface TrayContext {
+  openGardenStudio?: () => void;
   focus: (intent: SceneFocus | null) => void;
   /** Bumped by the final step's primary action: opens the proposal request. */
   photoMode?: { available: boolean; active: boolean; reason?: string; enter: () => void };
@@ -1346,6 +1348,7 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
       />
       {tab === "scene" ? (
         <div className="flex flex-col gap-5" data-wizard-guidance-ignore>
+          {ctx.openGardenStudio ? <Button variant="outline" onClick={ctx.openGardenStudio}>{t("Nel tuo giardino")}</Button> : null}
           <GroupLabel>{t("Momento della giornata")}</GroupLabel>
           <ChoiceGrid label={t("Momento della giornata")} dense>
             <ChoiceCard
