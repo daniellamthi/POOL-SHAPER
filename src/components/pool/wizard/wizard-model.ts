@@ -207,7 +207,7 @@ export function describeSelection(stepId: string | undefined, config: PoolConfig
       const bench = config.features.includes("hydromassageBenchLighting");
       const layout = stairs || bench ? configuredPoolLayout(config) : null;
       return `${config.sceneTime === "night" ? "Notte" : "Giorno"} · ${[
-        ...(config.features.includes("ledLighting") ? ["LED subacquei"] : []),
+        ...(config.features.includes("ledLighting") ? [config.ledType === "perimeter" ? "LED perimetrali" : "LED subacquei"] : []),
         ...(stairs && layout?.stairMicroSpots.length ? ["micro-spot scale"] : []),
         ...(bench && layout?.comfort.elements.some(element => element.kind === "hydromassage" && element.spots?.length) ? ["micro-spot panca"] : []),
       ].join(" + ") || "senza luci"}`;

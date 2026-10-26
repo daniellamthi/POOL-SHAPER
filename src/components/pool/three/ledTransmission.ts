@@ -3,7 +3,7 @@ import { LED_OPTICS } from "@/lib/pool/led-optics";
 import { MICRO_SPOT_OPTICS } from "@/lib/pool/micro-spot-optics";
 import { skipInactiveSpotLighting } from "./spotLightWork";
 export const MAX_MICRO_SPOT_SOURCES = 64;
-export const LED_TRANSPORT_CACHE_KEY = `led-transport-v8-early-spot-${MICRO_SPOT_OPTICS.nearField}-${MAX_MICRO_SPOT_SOURCES}-${LED_OPTICS.nearField}-${LED_OPTICS.absorption.join("-")}-${LED_OPTICS.irradianceKnee}`;
+export const LED_TRANSPORT_CACHE_KEY = `led-transport-v9-area-early-spot-${MICRO_SPOT_OPTICS.nearField}-${MAX_MICRO_SPOT_SOURCES}-${LED_OPTICS.nearField}-${LED_OPTICS.absorption.join("-")}-${LED_OPTICS.irradianceKnee}`;
 
 export interface MicroSpotTransportUniforms {
   origins: { value: Vector3[] };
@@ -95,7 +95,9 @@ export function applyLedTransmission(shader: WebGLProgramParametersWithUniforms,
   const shadowCall = "getShadow( spotShadowMap[ i ], spotLightShadow.shadowMapSize, spotLightShadow.shadowIntensity, spotLightShadow.shadowBias, spotLightShadow.shadowRadius, vSpotLightCoord[ i ] )";
   const shadowLine = `directLight.color *= ( directLight.visible && receiveShadow ) ? ${shadowCall} : 1.0;`;
   const fastLine = shadowLine.replace(shadowCall, shadowCall.replace("getShadow(", "poolLedShadow( spotLight.position,"));
-  const lightChunk = ShaderChunk.lights_fragment_begin.replace(
+  const areaCall = "RE_Direct_RectArea( rectAreaLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );";
+  const lightChunk = ShaderChunk.lights_fragment_begin.replace(areaCall,
+    `if (any(greaterThan(rectAreaLight.color, vec3(0.0)))) { ${areaCall} }`).replace(
     "getSpotLightInfo( spotLight, geometryPosition, directLight );",
     microSpots ? "getSpotLightInfo( spotLight, geometryPosition, directLight, poolSpotNearFields[UNROLLED_LOOP_INDEX] );" : "getSpotLightInfo( spotLight, geometryPosition, directLight );",
   );

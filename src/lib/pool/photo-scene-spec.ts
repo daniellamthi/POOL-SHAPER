@@ -8,6 +8,7 @@ import { resolveMaterials } from "./materials";
 import { POOL_BORDER_PRESET, WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
 import { pavingLayout, premiumEnvironment } from "./presentation";
 import { normalisedLedIntensity } from "./led-optics";
+import { configuredPerimeterLights, poolLedType } from "./perimeter-lighting";
 import { computeInfinityEdgeGeometry, infinityExclusion } from "./infinity-edge";
 import { resolveAutomaticCover } from "./cover-plan";
 import { oppositeInfinityCoordinate } from "./infinity-access";
@@ -108,6 +109,8 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     lighting: { time: config.sceneTime === "night" ? "night" : "day",
       stairMicroSpots: { enabled: config.features.includes("stairLighting") && layout.stairMicroSpots.length > 0, positions: config.features.includes("stairLighting") ? layout.stairMicroSpots : [] },
       ledsEnabled: config.features.includes("ledLighting"), color: config.ledColor ?? "#ffffff",
+      type: poolLedType(config.ledType),
+      ...(poolLedType(config.ledType) === "perimeter" ? { perimeter: configuredPerimeterLights(config) } : {}),
       intensity: normalisedLedIntensity(config.ledIntensity) },
     environment: { id: premiumEnvironment(config.premiumEnvironment),
       footprint: outline, poolBounds: bounds,

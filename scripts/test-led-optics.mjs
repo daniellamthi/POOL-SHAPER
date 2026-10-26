@@ -15,10 +15,11 @@ assert.equal(hueToLedHex(-80), hueToLedHex(280));
 assert.deepEqual(calibratedLedColor('invalid'), calibratedLedColor('#ffffff'));
 assert.equal(isLedColor('#fff'), false);
 assert.equal(ledCandela(32, 0, 1500), 0);
-assert.ok(ledCandela(32, 8, 1500) < ledCandela(32, 2, 1500));
+assert.equal(ledCandela(32, 2, 1500, 'day'), 0);
+assert.ok(ledCandela(32, 8, 1500, 'night') < ledCandela(32, 2, 1500, 'night'));
 const solidAngle = 2 * Math.PI * (1 - Math.cos(LED_OPTICS.angle));
 for (const [area, count] of [[18, 2], [32, 2], [50, 3], [72, 4], [32, 8]]) {
-  const total = ledCandela(area, count, 1500) * count * solidAngle / LED_OPTICS.presentations.day.output;
+  const total = ledCandela(area, count, 1500, 'night') * count * solidAngle / LED_OPTICS.presentations.night.output;
   assert.ok(total <= area * LED_OPTICS.maxLumensPerSquareMetre + 1e-8);
 }
 assert.ok(LED_OPTICS.absorption[0] > LED_OPTICS.absorption[1] && LED_OPTICS.absorption[1] > LED_OPTICS.absorption[2]);

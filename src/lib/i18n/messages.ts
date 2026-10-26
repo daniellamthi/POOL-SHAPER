@@ -2,6 +2,18 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ["LED perimetrali", "Perimeter LEDs"],
+  ["{length} m · LED perimetrali", "{length} m · Perimeter LEDs"],
+  ["Fascia continua sotto il bordo, rivolta verso la vasca. Scegli i lati da illuminare.", "Continuous lighting recessed under the coping, facing the pool. Choose the illuminated sides."],
+  ["Lati illuminati", "Illuminated sides"],
+  ["Pianta LED perimetrali", "Perimeter LED plan"],
+  ["Lato {side}", "Side {side}"],
+  ["Lunghezza LED selezionata: {length} m", "Selected LED length: {length} m"],
+  ["Seleziona almeno un lato.", "Select at least one side."],
+  ["Il lato Infinity resta libero: la fascia segue soltanto i bordi con contenimento.", "The Infinity edge stays clear: the strip follows only the retaining edges."],
+  ["Illuminazione perimetrale a LED", "Perimeter LED lighting"],
+  ["Lunghezza fascia LED", "LED strip length"],
+  ["LED perimetrali: usa la scena 3D o il Project Book. Il renderer esterno non supporta questa illuminazione.", "Perimeter LEDs: use the 3D scene or Project Book. The external renderer does not support this lighting."],
   ["Tipo di bordo", "Coping style"],
   ["Angoli della vasca", "Pool corners"],
   ["Angoli della vasca a 90°.", "90° pool corners."],

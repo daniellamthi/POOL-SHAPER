@@ -1,0 +1,115 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina Cemento armato · 10,0 × 4,5 m":
+        - generic: Piscina
+        - generic: Cemento armato · 10,0 × 4,5 m
+      - button "Sistema acqua Skimmer · Slim Moderno":
+        - generic: Sistema acqua
+        - generic: Skimmer · Slim Moderno
+      - button "Accesso & comfort Scala interna":
+        - generic: Accesso & comfort
+        - generic: Scala interna
+      - button "Finiture Liner PVC · Blue Sky [602]":
+        - generic: Finiture
+        - generic: Liner PVC · Blue Sky [602]
+      - button "Esterno In corso" [active]:
+        - generic: Esterno
+        - generic: In corso
+      - button "Optional":
+        - generic: Optional
+      - button "Presentazione":
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno" [pressed]:
+      - generic: Giorno
+    - button "Notte":
+      - generic: Notte
+  - button "Ricomincia":
+    - generic: Ricomincia
+- main:
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+  - toolbar "Strumenti vista":
+    - button "Guide":
+      - text: Guide
+    - button "Vista tecnica":
+      - text: Vista tecnica
+    - button "Riquadra":
+      - text: Riquadra
+- 'region "Passo 5: Esterno"':
+  - paragraph: "Il bordo della vasca e la pavimentazione attorno: qui compare l’esterno."
+  - tablist "Bordo e decking":
+    - tab "Bordo vasca" [selected]
+    - tab "Pavimentazione"
+  - group "Angoli della vasca":
+    - button "Retto" [pressed]:
+      - generic: Retto
+      - generic: Angoli della vasca a 90°.
+    - button "Arrotondato":
+      - generic: Arrotondato
+      - generic: "Angoli vasca arrotondati: raggio 20 cm."
+  - group "Materiale del bordo":
+    - button "Limestone Ivory":
+      - generic: Limestone Ivory
+      - generic: Pietra calcarea chiara, grana fine e contemporanea.
+    - button "Pietra di Prun":
+      - generic "Campione fotografico. Fotografia del campione fornito; le variazioni naturali e il lotto di fornitura sono da confermare.":
+        - 'img "Campione fotografico: Campione fotografico fornito di Pietra di Prun chiara, con venature e pori naturali."'
+        - generic: Campione fotografico
+      - generic: Pietra di Prun
+      - generic: Pietra crema con venature naturali.
+    - button "Travertino" [expanded] [pressed]:
+      - img "Travertino chiaro"
+      - generic: Travertino
+      - generic: Chiaro o venato · due varianti
+    - group "Varianti del travertino":
+      - heading "Varianti del travertino" [level=4]
+      - paragraph: Finitura attuale conservata fino alla scelta.
+      - button "Travertino chiaro":
+        - img "Travertino chiaro"
+        - generic: Travertino chiaro
+        - generic: Tono chiaro con pori naturali.
+      - button "Travertino venato":
+        - img "Travertino venato"
+        - generic: Travertino venato
+        - generic: Venatura sedimentaria longitudinale.
+    - button "Gres porcellanato":
+      - img "Gres porcellanato"
+      - generic: Gres porcellanato
+      - generic: Quattro finiture
+    - button "Ardesia":
+      - generic: Ardesia
+      - generic: Ardesia naturale, scura e materica.
+    - button "WPC":
+      - generic: WPC
+      - generic: Composito legno-polimero con venatura uniforme.
+    - button "Legno Ipè":
+      - img "Legno Ipè"
+      - generic: Legno Ipè
+      - generic: Doghe longitudinali · scala di visualizzazione
+  - 'button "Prossima scelta: Pavimentazione"':
+    - text: "Prossima scelta: Pavimentazione"
+  - button "Altre opzioni":
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 05 di 07
+    - generic: · 1/2 · Bordo vasca
+  - heading "Esterno" [level=2]
+  - paragraph: Travertino · Gres porcellanato · 60 × 120 cm
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua · Pavimentazione":
+    - text: Continua
+    - generic: · Pavimentazione
+- region "Notifications alt+T"

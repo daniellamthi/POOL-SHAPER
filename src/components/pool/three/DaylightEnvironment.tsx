@@ -132,10 +132,7 @@ export function DaylightEnvironment({
   // Night must never light or reflect the daytime capture (its clouds and
   // sun showed up in the night water): it uses the procedural night sky.
   const night = timeOfDay === "night";
-  const [nightPrepared,setNightPrepared]=useState(night);
   const [nightSky,setNightSky]=useState<Texture|null>(null);
-  useLayoutEffect(()=>{if(night)setNightPrepared(true);},[night]);
-  useEffect(()=>{if(import.meta.env.DEV)console.debug("[Pool3D environment cache]",JSON.stringify({night,prepared:nightPrepared,ready:!!nightSky,nightTexture:nightSky?.uuid,dayTexture:sky?.uuid}));},[night,nightPrepared,nightSky,sky]);
   const assetUrl = photographicSky ? "/hdri/infinity-white-cliff-1k.hdr" : "/hdri/pool-daylight-1k.hdr";
   useLayoutEffect(() => {
     onCoastalStatus?.(!photographicSky ? "loading" : panoramaError || (!night && skyError) ? "error"
@@ -195,9 +192,11 @@ export function DaylightEnvironment({
   />, [theme, sunDirection[0], sunDirection[1], sunDirection[2], night, outdoor]);
   return (
     <>
-      {nightPrepared ? <RetainedNightEnvironment onReady={setNightSky}/> : null}
-      {(night ? nightSky : sky) ? (
-        <Environment map={(night ? nightSky : sky)!} environmentRotation={[0,!night && photographicSky ? coastalRotation : 0,0]} environmentIntensity={night ? SCENE_VISUAL_PRESET.environment.night : photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
+      {/* Capture once while the initial scene loads. A first Night click must
+          not clear the active environment or allocate six cube faces. */}
+      <RetainedNightEnvironment onReady={setNightSky}/>
+      {(night ? nightSky ?? sky : sky) ? (
+        <Environment map={(night ? nightSky ?? sky : sky)!} environmentRotation={[0,!night && photographicSky ? coastalRotation : 0,0]} environmentIntensity={night ? SCENE_VISUAL_PRESET.environment.night : photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
       ) : !night ? (
         <Environment
           // Same PMREM dimensions as the loaded1024px HDR and night cube;

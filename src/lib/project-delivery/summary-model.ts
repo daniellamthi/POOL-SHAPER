@@ -8,6 +8,7 @@ import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import type { ProjectConfiguration } from "@/lib/pool/project";
 import { projectGeometry } from "@/lib/pool/project-metrics";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { configuredPerimeterLights, poolLedType } from "@/lib/pool/perimeter-lighting";
 import { pavingLayout } from "@/lib/pool/presentation";
 import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
@@ -144,7 +145,7 @@ export function technicalRows(
       },
       {
         label: "LED",
-        value: `${technical.leds.count.value ?? 0} · disposizione automatica`,
+        value: technical.leds.perimeter ? `${technical.leds.perimeter.length.toFixed(1)} m · LED perimetrali` : `${technical.leds.count.value ?? 0} · disposizione automatica`,
         hint: PROVENANCE[technical.leds.count.provenance],
       },
     );
@@ -276,6 +277,7 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
   const compatibilityIssues = comfortConfigurationIssues(config).map(issue => t(issue.reason));
 
   const hasLed = config.features.includes("ledLighting");
+  const perimeter = hasLed && poolLedType(config.ledType) === "perimeter" ? configuredPerimeterLights(config) : null;
   const ledColor = config.ledColor ?? "#ffffff";
   const lightingPlan = hasLed ? configuredLightingPlan(config) : null;
   const selectedEquipment = EQUIPMENT.filter((option) => config.equipment.includes(option.id));
@@ -365,11 +367,14 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
           ? [{ label: "Optional panca", value: POOL_FEATURE_LABEL.hydromassageBenchLighting }]
           : []),
         ...(hasLed ? [
-        { label: "Impianto", value: "Illuminazione subacquea a LED" },
-        {
+        { label: "Impianto", value: perimeter ? "Illuminazione perimetrale a LED" : "Illuminazione subacquea a LED" },
+        ...(perimeter ? [
+          { label: "Lati illuminati", value: perimeter.selected.map(side => t("Lato {side}", { side: side.id + 1 })).join(", ") },
+          { label: "Lunghezza fascia LED", value: `${formatNumber(perimeter.length, 1)} m` },
+        ] : [{
           label: "Punti luce",
           value: `${lightingPlan?.count ?? 0} · automatici, dimensionamento indicativo`,
-        },
+        }]),
         { label: "Colore selezionato", value: ledColor.toUpperCase(), swatch: { hex: ledColor } },
         {
           label: "Intensità luce",

@@ -92,7 +92,7 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
   const config = pick(project.config, [
     "projectType", "poolType", "structure", "shape", "shapeSelected", "copingMaterial", "copingStyle", "copingEdge", "paving", "pavingFormat", "premiumEnvironment",
     "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
-    "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "sceneTime", "infinityEdge", "poolAccess",
+    "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "ledType", "ledPerimeterSides", "sceneTime", "infinityEdge", "poolAccess",
     "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
     "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount", "sunShelfLoungerColor", "integratedBenchStations",
   ]);

@@ -1,0 +1,116 @@
+[
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"viewport\",\"phase\":\"update\",\"actualDuration\":5.799999997019768,\"baseDuration\":5.799999997019768,\"startTime\":102116.89999999851,\"commitTime\":102129.79999999702}",
+    "timestamp": "2026-10-26T11:40:55.772Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"tray\",\"phase\":\"update\",\"actualDuration\":7,\"baseDuration\":5.700000002980232,\"startTime\":102122.69999999553,\"commitTime\":102129.79999999702}",
+    "timestamp": "2026-10-26T11:40:55.773Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"configurator\",\"phase\":\"update\",\"actualDuration\":19.600000001490116,\"baseDuration\":18.399999998509884,\"startTime\":102110,\"commitTime\":102129.79999999702}",
+    "timestamp": "2026-10-26T11:40:55.773Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":0.8999999985098839,\"baseDuration\":30.799999997019768,\"startTime\":102138.39999999851,\"commitTime\":102139.29999999702}",
+    "timestamp": "2026-10-26T11:40:55.773Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D ground build] {\"module\":[1.2,0.6],\"boards\":false,\"visible\":true,\"durationMs\":0.3}",
+    "timestamp": "2026-10-26T11:40:55.773Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/StudioPaving.tsx?t=1792965433916"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D ground build] {\"module\":[1.2,0.6],\"boards\":false,\"visible\":true,\"durationMs\":0.1}",
+    "timestamp": "2026-10-26T11:40:55.773Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/StudioPaving.tsx?t=1792965433916"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":6.800000004470348,\"baseDuration\":31,\"startTime\":102140.19999999553,\"commitTime\":102147.10000000149}",
+    "timestamp": "2026-10-26T11:40:55.782Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":0.7000000029802322,\"baseDuration\":31.19999999552965,\"startTime\":102188.69999999553,\"commitTime\":102189.39999999851}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":80.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"viewport\",\"phase\":\"update\",\"actualDuration\":5.799999997019768,\"baseDuration\":5.700000002980232,\"startTime\":102197.5,\"commitTime\":102209.89999999851}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"tray\",\"phase\":\"update\",\"actualDuration\":6.600000001490116,\"baseDuration\":6.500000007450581,\"startTime\":102203.29999999702,\"commitTime\":102209.89999999851}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"configurator\",\"phase\":\"update\",\"actualDuration\":16.600000001490116,\"baseDuration\":16.900000005960464,\"startTime\":102193.29999999702,\"commitTime\":102209.89999999851}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"viewport\",\"phase\":\"nested-update\",\"actualDuration\":0,\"baseDuration\":5.700000002980232,\"startTime\":102212.69999999553,\"commitTime\":102214.69999999553}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"configurator\",\"phase\":\"nested-update\",\"actualDuration\":0,\"baseDuration\":16.900000005960464,\"startTime\":102212.69999999553,\"commitTime\":102214.69999999553}",
+    "timestamp": "2026-10-26T11:40:55.874Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/PoolConfigurator.tsx?t=1793014835307"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":0.7000000029802322,\"baseDuration\":31.19999999552965,\"startTime\":102215.39999999851,\"commitTime\":102216.10000000149}",
+    "timestamp": "2026-10-26T11:40:55.880Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":6.199999995529652,\"baseDuration\":30.399999991059303,\"startTime\":102221.10000000149,\"commitTime\":102227.39999999851}",
+    "timestamp": "2026-10-26T11:40:55.881Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":0.19999999552965164,\"baseDuration\":30.399999991059303,\"startTime\":102232.5,\"commitTime\":102232.69999999553}",
+    "timestamp": "2026-10-26T11:40:55.881Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D React timing] {\"id\":\"scene\",\"phase\":\"update\",\"actualDuration\":0.3999999985098839,\"baseDuration\":30.599999994039536,\"startTime\":102865.39999999851,\"commitTime\":102865.79999999702}",
+    "timestamp": "2026-10-26T11:40:56.571Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":81.6,\"frameTimeMs\":12.26,\"medianFrameTimeMs\":10.3,\"p95FrameTimeMs\":20.2,\"frameCount\":164,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"qaPaused\":false,\"frameloop\":\"always\",\"queuedFrames\":0,\"visibility\":\"visible\",\"calls\":83,\"peakCalls\":229,\"callScope\":\"full frame, all passes\",\"triangles\":41680,\"geometries\":62,\"textures\":35,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":12,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[3.8870301482688694,3.0038738314032227,1.2798422892540278],\"projection\":[2.0442828865525877,0,0,0,0,3.2708526184841404,0,0,-0.10827365451388894,-0.33388020833333343,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-26T11:40:57.616Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1793014734784"
+  }
+]

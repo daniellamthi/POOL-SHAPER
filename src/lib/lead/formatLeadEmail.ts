@@ -14,6 +14,7 @@
  */
 import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { configuredPerimeterLights } from "@/lib/pool/perimeter-lighting";
 import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, getShapeDefinition } from "@/lib/pool/config";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
 import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
@@ -110,7 +111,9 @@ function newPoolLines(submission: LeadSubmission): string[] {
     ...(hasLed
       ? [
           `Illuminazione LED: sì — colore ${(config.ledColor ?? "#ffffff").toUpperCase()}, intensità ${Math.round(normalisedLedIntensity(config.ledIntensity) * 100)}%`,
-          `Punti luce: ${configuredLightingPlan(config).count} — automatici, dimensionamento indicativo (preset generico 1500 lm)`,
+          ...(config.ledType === "perimeter" ? [
+            `LED perimetrali: ${configuredPerimeterLights(config).selected.map(side => `Lato ${side.id + 1}`).join(", ")} · ${formatNumber(configuredPerimeterLights(config).length, 1)} m`,
+          ] : [`Punti luce: ${configuredLightingPlan(config).count} — automatici, dimensionamento indicativo (preset generico 1500 lm)`]),
         ]
       : []),
     ...(equipmentLabels.length ? [`Gestione piscina: ${equipmentLabels.join(", ")}`] : []),

@@ -34,7 +34,9 @@ pauseHelpers.window.sessionStorage.setItem = () => { throw Error('Storage blocke
 check(pauseHelpers.exports.readDevelopmentRenderPause() === false, 'Unavailable session storage safely defaults to live rendering');
 pauseHelpers.exports.writeDevelopmentRenderPause(true);
 check(sceneSource.includes('frameloop={preparingShaders || (import.meta.env.DEV && qaRenderPaused) ? "never" : "always"}'), 'Canvas reconfiguration/resize cannot silently resume a paused QA scene');
-check(sceneSource.includes('enabled={showWater && !photoMode && !qaRenderPaused}'), 'Shader readiness cannot resume an intentionally paused QA canvas');
+check(sceneSource.includes('enabled={showWater && !photoMode && !qaRenderPaused && (ledType !== "perimeter" || !features.includes("ledLighting") || perimeterReady)}'), 'Shader readiness respects QA pause and waits for the lazy perimeter light graph');
+const preparationSignature = sceneSource.slice(sceneSource.indexOf('<ShaderPreparation')).split('].join(')[0];
+check(!/\bsceneTime\b/.test(preparationSignature), 'Uniform-only Day/Night changes do not pause the canvas for shader preparation');
 const pauseEffect = sceneSource.slice(sceneSource.indexOf('function DevelopmentRendererMetrics')).match(/useLayoutEffect\(\(\) => \{([\s\S]*?)\}, \[qaPaused, size.width, size.height, getRoot\]\);/);
 check(!!pauseEffect, 'Pause layout effect responds to viewport changes');
 const qaState = { internal: { frames: 2 }, frameloop: 'always', setFrameloop(value) { this.frameloop = value; } };

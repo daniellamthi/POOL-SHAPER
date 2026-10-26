@@ -1,0 +1,32 @@
+[
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":28.2,\"frameTimeMs\":35.41,\"medianFrameTimeMs\":8.7,\"p95FrameTimeMs\":11.3,\"frameCount\":109,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"qaPaused\":false,\"frameloop\":\"always\",\"queuedFrames\":1,\"visibility\":\"visible\",\"calls\":94,\"peakCalls\":127,\"callScope\":\"full frame, all passes\",\"triangles\":49190,\"geometries\":59,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[27.23390932872376,16.979541063670442,-4.862103679170275],\"projection\":[2.0442828865525877,0,0,0,0,3.2708526184841404,0,0,0.12307942708333326,-0.33388020833333343,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-26T09:32:25.163Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792966645367"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":105.9,\"frameTimeMs\":9.45,\"medianFrameTimeMs\":8.9,\"p95FrameTimeMs\":12.4,\"frameCount\":212,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"qaPaused\":false,\"frameloop\":\"always\",\"queuedFrames\":0,\"visibility\":\"visible\",\"calls\":97,\"peakCalls\":161,\"callScope\":\"full frame, all passes\",\"triangles\":36694,\"geometries\":59,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[27.23390932872376,16.979541063670442,-4.862103679170275],\"projection\":[2.0442828865525877,0,0,0,0,3.2708526184841404,0,0,0.12307942708333326,-0.33388020833333343,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-26T09:32:27.816Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792966645367"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":97.6,\"frameTimeMs\":10.25,\"medianFrameTimeMs\":9.2,\"p95FrameTimeMs\":13,\"frameCount\":196,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"qaPaused\":false,\"frameloop\":\"always\",\"queuedFrames\":0,\"visibility\":\"visible\",\"calls\":97,\"peakCalls\":161,\"callScope\":\"full frame, all passes\",\"triangles\":36694,\"geometries\":59,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[27.23390932872376,16.979541063670442,-4.862103679170275],\"projection\":[2.0442828865525877,0,0,0,0,3.2708526184841404,0,0,0.12307942708333326,-0.33388020833333343,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-26T09:32:29.897Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792966645367"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":105.4,\"frameTimeMs\":9.49,\"medianFrameTimeMs\":9.1,\"p95FrameTimeMs\":11.9,\"frameCount\":211,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"qaPaused\":false,\"frameloop\":\"always\",\"queuedFrames\":0,\"visibility\":\"visible\",\"calls\":96,\"peakCalls\":130,\"callScope\":\"full frame, all passes\",\"triangles\":36694,\"geometries\":59,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[27.23390932872376,16.979541063670442,-4.862103679170275],\"projection\":[2.0442828865525877,0,0,0,0,3.2708526184841404,0,0,0.12307942708333326,-0.33388020833333343,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-26T09:32:31.964Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792966645367"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":108.8,\"frameTimeMs\":9.19,\"medianFrameTimeMs\":9,\"p95FrameTimeMs\":11.1,\"frameCount\":218,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"qaPaused\":false,\"frameloop\":\"always\",\"queuedFrames\":0,\"visibility\":\"visible\",\"calls\":96,\"peakCalls\":130,\"callScope\":\"full frame, all passes\",\"triangles\":36694,\"geometries\":59,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[27.23390932872376,16.979541063670442,-4.862103679170275],\"projection\":[2.0442828865525877,0,0,0,0,3.2708526184841404,0,0,0.12307942708333326,-0.33388020833333343,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-26T09:32:34.039Z",
+    "url": "http://lighting-qa-20261026.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792966645367"
+  }
+]

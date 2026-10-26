@@ -29,6 +29,8 @@ import { configuredAccessPlan } from "@/lib/pool/access-plan";
 import { configuredComfortPlan, normalizeComfortFeatures } from "@/lib/pool/comfort-plan";
 import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
 import { configuredLightingPlan } from "@/lib/pool/lighting-plan";
+import { configuredPerimeterLights, poolLedType } from "@/lib/pool/perimeter-lighting";
+import { PerimeterLightSelector } from "./PerimeterLightSelector";
 import { resolveAutomaticCover } from "@/lib/pool/cover-plan";
 import { getCopingSwatchDataUrl } from "@/components/pool/copingSwatchPreview";
 import { InfinitySideSelector } from "@/configurator/steps/pool-system/InfinitySideSelector";
@@ -968,9 +970,11 @@ const PANEL_SWATCH: Record<string, string> = {
 
 export function LightTray({ tab, setTab }: DecisionProps) {
   const { t } = useI18n();
-  const { config, togglePoolFeature, setLedColor, setLedIntensity, setSceneTime } =
+  const { config, togglePoolFeature, setLedColor, setLedIntensity, setSceneTime, setLedType, setLedPerimeterSides } =
     useConfigurator();
   const hasLed = config.features.includes("ledLighting");
+  const perimeter = hasLed && poolLedType(config.ledType) === "perimeter";
+  const perimeterPlan = useMemo(() => configuredPerimeterLights(config), [config]);
   const stairSpots = useMemo(() => configuredPoolLayout(config).stairMicroSpots, [config]);
   const hasStairLed = config.features.includes("stairLighting") && stairSpots.length > 0;
   const hasBenchLed = config.features.includes("hydromassageBenchLighting");
@@ -1032,7 +1036,7 @@ export function LightTray({ tab, setTab }: DecisionProps) {
           </div>
         ) : null}
       </div>
-      {tab === "lighting" ? (
+      {tab === "lighting" ? (<>
         <ChoiceGrid label={t("Illuminazione subacquea")}>
           <ChoiceCard
             title={t("Senza illuminazione")}
@@ -1058,14 +1062,18 @@ export function LightTray({ tab, setTab }: DecisionProps) {
             title={t("LED subacquei")}
             description={t("Fari RGB a parete, disposti automaticamente. Anteprima notturna.")}
             image={ill("led-on")}
-            selected={hasLed}
+            selected={hasLed && !perimeter}
             onSelect={() => {
-              if (!hasLed) togglePoolFeature("ledLighting");
+              setLedType("underwater");
               setSceneTime("night");
               setTab("color");
             }}
             footer={plan ? `${plan.count} fari · ${plan.surfaceArea.toFixed(1)} m²` : undefined}
           />
+          <ChoiceCard title={t("LED perimetrali")}
+            description={t("Fascia continua sotto il bordo, rivolta verso la vasca. Scegli i lati da illuminare.")}
+            image={<svg viewBox="0 0 160 100" fill="none" aria-hidden><rect x="25" y="20" width="110" height="60" rx="7" stroke="currentColor" opacity=".2"/><path d="M33 66V31a3 3 0 013-3h88" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>}
+            selected={perimeter} onSelect={() => { setLedType("perimeter"); setSceneTime("night"); }} />
           {config.features.includes("hydromassage") ? (
             <ChoiceCard
               title={t("Micro-spot sulla panca")}
@@ -1079,7 +1087,8 @@ export function LightTray({ tab, setTab }: DecisionProps) {
             />
           ) : null}
         </ChoiceGrid>
-      ) : (
+        {perimeter ? <PerimeterLightSelector plan={perimeterPlan} onChange={setLedPerimeterSides}/> : null}
+      </>) : (
         <div className="grid gap-4 lg:grid-cols-2">
           <LedColorWheel value={config.ledColor ?? "#ffffff"} onChange={setLedColor} />
           <LedIntensityControl value={config.ledIntensity} onChange={setLedIntensity} />

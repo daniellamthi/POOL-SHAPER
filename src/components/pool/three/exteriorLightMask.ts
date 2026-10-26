@@ -20,6 +20,10 @@ export function excludeSubmergedDirectLights(shader: WebGLProgramParametersWithU
     .replace("RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );", `
         RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
       }`);
-  const chunk = ShaderChunk.lights_fragment_begin.slice(0, start) + spotChunk + ShaderChunk.lights_fragment_begin.slice(end);
+  // Area emitters are exclusively the recessed perimeter strips. The pool
+  // shell shields the dry terrace; do not light it through the opaque wall.
+  const areaCall = "RE_Direct_RectArea( rectAreaLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );";
+  const chunk = (ShaderChunk.lights_fragment_begin.slice(0, start) + spotChunk + ShaderChunk.lights_fragment_begin.slice(end))
+    .replace(areaCall, "/* Recessed perimeter emitter: dry receiver is shielded by the pool shell. */");
   shader.fragmentShader = shader.fragmentShader.replace("#include <lights_fragment_begin>", skipInactiveSpotLighting(chunk));
 }

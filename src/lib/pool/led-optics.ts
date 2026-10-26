@@ -134,12 +134,9 @@ export const LED_OPTICS = {
     // `output` is kept moderate on purpose: a hotter lamp only clips the
     // lit liner to white under the tone mapper and the colour is lost. The
     // visible intensity comes from the tighter cone and the brighter beam.
-    // Daylight: the lamp is visibly ON at the lens (the customer must see
-    // the fixtures they chose) but throws no beam, no lit water and no
-    // patch on the liner (2 % residual output, below what the sun leaves
-    // visible). Against sunlight a pool LED is invisible in a
-    // real photograph; a coloured daytime beam was a CG tell.
-    day: { output: 0.02, emission: 1.6, glow: 0.35, scatter: 0 },
+    // Daylight retains the selected physical fixtures without artificial
+    // emission. Night is the contextual preview of their light output.
+    day: { output: 0, emission: 0, glow: 0, scatter: 0 },
     evening: { output: 0.5, emission: 9, glow: 0.9, scatter: 0.75 },
     night: { output: 0.7, emission: 16, glow: 1, scatter: 1 },
   },

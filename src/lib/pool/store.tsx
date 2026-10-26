@@ -28,6 +28,7 @@ import { planSkimmers } from "./engineering";
 import { configuredAccessPlan } from "./access-plan";
 import { configuredComfortPlan, activeFlightKind, normalizeComfortFeatures } from "./comfort-plan";
 import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
+import { configuredPerimeterLights, isPerimeterSideSelection, isPoolLedType, poolLedType, type PoolLedType } from "./perimeter-lighting";
 import {
   buildFloorProfile,
   clampShallowDepth,
@@ -129,6 +130,8 @@ type Action =
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
   | { type: "setSceneTime"; value: "day" | "night"; preserveCamera?: boolean }
+  | { type: "setLedType"; value: PoolLedType }
+  | { type: "setLedPerimeterSides"; value: ReadonlyArray<number> }
   | { type: "setPaving"; value: PavingId }
   | { type: "setPavingFormat"; value: PavingFormatId }
   | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
@@ -236,7 +239,11 @@ function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
 }
 
 function configurationReducer(state: State, action: Action): State {
-  const next = reduceConfiguration(state, action);
+  let next = reduceConfiguration(state, action);
+  const steps = state.config.projectType === "renovation" ? RENOVATION_STEPS : STEPS;
+  if (next.step !== state.step && steps[state.step]?.id === "lighting") {
+    next = { ...next, config: { ...next.config, sceneTime: "day" } };
+  }
   if (next.config === state.config) return next;
   const config = normalizeSunShelfLoungers(next.config);
   const removed = state.config.features.includes("sunShelfLoungers") && !config.features.includes("sunShelfLoungers")
@@ -272,6 +279,14 @@ function reduceConfiguration(state: State, action: Action): State {
         && sunShelfLoungerColor(config.sunShelfLoungerColor).id !== action.value
         ? { ...state, config: { ...config, sunShelfLoungerColor: action.value } }
         : state;
+    case "setLedType": {
+      if (!isPoolLedType(action.value)) return state;
+      const sides = config.ledPerimeterSides ?? configuredPerimeterLights(config).selected.map(side => side.id);
+      return { ...state, config: { ...config, ledType: action.value, ledPerimeterSides: sides,
+        features: config.features.includes("ledLighting") ? config.features : [...config.features, "ledLighting"] } };
+    }
+    case "setLedPerimeterSides":
+      return isPerimeterSideSelection(action.value) ? { ...state, config: { ...config, ledPerimeterSides: action.value } } : state;
     case "setLedColor":
       return isLedColor(action.value)
         ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
@@ -909,6 +924,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         return renovationStepComplete(index, config, renovation);
       }
       const stepId = STEPS[index]?.id;
+      if (stepId === "lighting" && config.features.includes("ledLighting") && poolLedType(config.ledType) === "perimeter")
+        return configuredPerimeterLights(config).selected.length > 0;
       if (stepId === "pool-type") return config.poolType !== null;
       if (stepId === "shape-dimensions") return config.shapeSelected === true;
       if (stepId === "structure") return config.structure !== null;
@@ -976,6 +993,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
       setSceneTime: (v, preserveCamera = false) => dispatch({ type: "setSceneTime", value: v, preserveCamera }),
+      setLedType: (value) => dispatch({ type: "setLedType", value }),
+      setLedPerimeterSides: (value) => dispatch({ type: "setLedPerimeterSides", value }),
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
       setPavingFormat: (v) => dispatch({ type: "setPavingFormat", value: v }),
       setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),

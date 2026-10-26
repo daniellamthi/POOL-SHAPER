@@ -2863,3 +2863,137 @@ required. The final exact-commit online gate cannot be promoted from historical
 previews or this uncommitted WIP. No credential reset, paid service, automatic
 purge, repeated benchmark campaign, production deployment, DNS, merge, email,
 commit/push or new cloud write is authorised by this handoff or performed.
+
+### 25 October — lighting follow-up (uncommitted candidate)
+
+Base: `00d306e7c134c025a46377c752a926c9028cf7e2`, branch
+`feat/fullscreen-day-night-hidden-overflow`. This section describes new local
+lighting WIP, not the already deployed baseline or a new release approval.
+Owner confirmed a recessed continuous strip **under the coping, facing the
+basin**, with selectable sides.
+
+| ID | Change and evidence | Gate |
+|---|---|---|
+| LIGHT25-01 | Leaving the lighting step restores Day without clearing products/RGB. SceneMood now interpolates explicit original daytime targets, including projects initially opened at Night; its real callback is executed by the local audit. | Local state/target tests PASS; browser appearance NOT VERIFIED. |
+| LIGHT25-02 | Night uses the existing dedicated sky and configured night sun/ground colours. Retain/prewarm the night environment; remove Day/Night from topology preparation; discard inactive daytime underwater scattering before its 24-sample loop. | Shader lifecycle 50 checks PASS. Removed source-level work is not a measured frame-time improvement. GPU timing NOT VERIFIED. |
+| LIGHT25-03 | Underwater/perimeter alternatives share one main lighting feature; independent stair/bench selections remain. Perimeter follows actual rounded wall polylines, supports side selection and keeps the active Infinity overflow edge clear. SVG side numbers match controls. | 67 geometry cases, all four L orientations and 6×3/8×4/12×5 included; combined audit 5,291 checks PASS. Actual strip appearance/light distribution NOT VERIFIED. |
+| LIGHT25-04 | New subtype/sides survive parser, actual delivery service Save/Reload/Share through an isolated MemoryProjectStore, summary/technical IT/EN and Photo scene specification. Fixed the real share allowlist omission found by the test. Legacy snapshots remain underwater lights. Unsupported external renderer rejects active perimeter lighting explicitly instead of silently dropping it. | Local data tests PASS; cloud round-trip and newly generated PDF/browser export NOT exercised. No cloud project created or email sent. |
+| LIGHT25-05 | Three new files pass targeted ESLint. Typecheck, production build, LED optics, existing 36 underwater layouts plus four L orientations, shader audit and diff-check PASS. Perimeter/LTC code is a conditional chunk (~249 kB raw/~104 kB gzip), not an initial requirement for other lighting choices. | Build/static PASS; load/real-device performance NOT VERIFIED. |
+| LIGHT25-06 | Integrated browser opening requested at `http://127.0.0.1:3003/`; app returns queued. The running server cwd matches this worktree. Browser inventory returns `Local browser use is disabled in Work settings`; no screenshots, real clicks or GPU timing can be claimed. | Visual desktop/mobile and controlled performance gate OPEN. Enable browser use in Work settings to complete them. |
+| LIGHT25-07 | Follow-up executes the actual PerimeterSide component with deterministic hook/JSX stubs over six colours and repeated Day/Night props. Physical geometry/material identities are retained, the area emitter remains mounted, Day output/emission is zero, and LTC initialization runs once. | Local component/resource tests PASS. Stubs are not rendered browser evidence; same browser-control blocker revalidated. |
+
+Test receipts and final build log:
+`/private/tmp/pool-lighting-wip-20261025-Pq0zvp/`.
+The same directory preserves `tracked.patch` and an explicit four-file
+`new-files.tar` backup, excluding environment files and credentials.
+No lighting commit/push, merge, deployment, backend migration or email send.
+**Lighting status: FIX REQUIRED — visual and quantitative performance gates
+remain open.** Do not promote local source tests to a visual/performance PASS.
+
+
+#### 26 October — browser follow-up on the same uncommitted candidate
+
+The single integrated-browser opening attempt succeeded. Existing Node PID36738
+still serves port3003from the correct worktree; no server copy was started.
+Branch/base unchanged,30modified/new WIP files confirmed. Before this report
+update, the full tracked binary diff matched the supplied `tracked.patch`
+byte-for-byte. No application source was edited during this continuation.
+
+The127.0.0.1draft was observed only. The pre-existing localhost origin also
+contained a restored draft and changed phase between observations; it is not a
+controlled fixture. Initial exploratory observations there are excluded from
+controlled PASS claims. A fresh local-only QA origin on the same server,
+`lighting-qa-20261026.localhost:3003`, was then configured through real UI controls
+without Save, Share, PDF, quote or customer input. No cloud Project ID was created.
+
+| ID | Actual browser proof | Gate |
+|---|---|---|
+| LIGHT26-08 | Desktop1440×900, new10×4.5mconcrete Skimmer fixture: underwater white/cyan; exclusive switch to perimeter; selected side1→side3moves the visible strip; sides2/3/4total19m; red/green colour response. Rounded corners selected through UI; four-side length28.6mwith visible continuous curved strip. Independent stair micro-spots were available and remained unselected in this fixture. | Scoped real-render/UI PASS; not every geometry, colour or camera. Under-coping recess depth and full Infinity visual coverage are not certified by these distant views. |
+| LIGHT26-09 | Leaving lighting for Exterior changes Night→Day; returning preserves perimeter type/sides/colour. A reload actually restores Night, then Day renders natural daytime water/ground. Restored summary IT/EN contains perimeter type, sides1–4,28.6m,#00FF15and60%. | Scoped state/appearance/local-reload/summary PASS. Not a cloud Save/Reload/Share proof. |
+| LIGHT26-10 |390×844emulated viewport: colour control, wrapped side buttons, all four selections/29mlength, underwater/perimeter switching and automatic Day on Continue work. Screenshots09–12record actual rendering and scrolling. | Scoped mobile UI PASS. Pool remains small in these views, including expanded mode; close visual inspection of strip placement on mobile remains OPEN. This is the Mac browser, not real phone hardware. |
+| LIGHT26-11 | Existing DEV telemetry on AppleM1Pro/ANGLE Metal,1440×900,DPR~1.405: trusted click to second rAF71.5msafter restoring at Night; first overlapping2sframe window80.8FPS,p9517.3ms; later observed windows87.8–91.4FPS,p9513.1–14.7ms. No shader-preparation entry followed that Day click in the captured log. | Quantitative sample only, performance gate OPEN: one sample, no matched baseline, another5173scene tab remained open, GPU timing null. Second rAF is neither GPU completion nor final3Dpaint. |
+| LIGHT26-12 | Adding a perimeter side caused a3sautomation timeout while topology changed; the missed action was inspected, then completed after settling. UI explicitly displayed shader preparation for a subsequent side addition. No console errors were captured for the controlled fixture. | Topology-change latency requires controlled investigation; no speculative renderer/camera fix applied. |
+| LIGHT26-13 | Current `ProjectDelivery.tsx` calls `delivery.save()` before PDF when dirty/unsaved; Share also saves. Exercising the current WIP there would write project data, contrary to the owner's no-backend/archive-change constraint. | Browser PDF and cloud gate remain NOT VERIFIED. Neither button was clicked; no new QA project, backend mutation or email. |
+
+Evidence: [browser receipts](evidence/lighting-browser-20261026/), screenshots03–17,
+paired summary/state DOMs and `reloaded-transition-logs.json`. Metric timestamps
+are UTC in the raw logs. Viewport override reset; the visible tab returned to
+`http://127.0.0.1:3003/`. Source/script WIP hashes are recorded separately and
+checked unchanged after this documentation update. No broad audit/build repeated.
+
+**Current lighting status: FIX REQUIRED.** The browser access blocker is resolved
+and the scoped checks above have actual browser evidence. Remaining close visual
+coverage, controlled performance and cloud/PDF gates are not PASS. All prior
+release gates remain unchanged. No lighting commit/push, merge, deploy, Supabase
+change, cloud project creation or real email in this continuation.
+
+
+#### 26 October — final controlled visual and transition checks
+
+Same candidate/base/server, no application changes. The stale5173preview tab
+was closed (not its project data); browser inventory then contained precisely
+one scene throughout these checks. QA remains local-only, with no Save, Share,
+PDF, quote, cloud write or email.
+
+| Requirement | Current authoritative evidence | Result |
+|---|---|---|
+| Actual Night/perimeter/selected sides | Rounded10×4.5mfixture, four sides exercised individually through the UI. Side1and side3opposite long-wall strips and side2/side4short-wall illumination follow their selected positions; disabled sides lose their diffuser emission. Close orbit view06shows the side3strip inside the basin beneath the coping and its separate water reflection. White/green/blue and the prior red/cyan screenshots record actual colour response. | Scoped desktop visual PASS. Geometry is unchanged; this is not a claim about every possible configuration. |
+| Desktop/mobile visuals | Desktop1440×900and emulated390×844/430×932. Collapsing the tray and using the existing Reframe/zoom/orbit controls resolves the previously insufficient close view. Mobile12shows only side4lit; mobile17shows adjacent sides1/4in white, including the corner. Controls and selected colour work at both widths. | Scoped desktop/mobile visual PASS; earlier mobile close-view gap is closed. Mac hardware with viewport emulation, not a physical-phone test. |
+| Direct Night→Day | One-scene trusted-input telemetry: desktop lighting43.5ms, desktop full exterior38.3ms, mobile39034.7ms, mobile43035.1msto second rAF. No shader preparation in the captured5safter these inputs. Day screenshots07/13/18/21show natural daytime colours with no retained green/blue LED emission. Around mobile inputs, observed application p95frame windows9–12.3ms; the full exterior desktop sample p9523.8–25.5ms. | Direct switch/state/appearance verified responsive in this sample. These are rAF/frame observations, not GPU/final-paint timing or a universal60FPSguarantee. |
+| Automatic Day when leaving lighting | Day restoration consistently succeeds and preserves products/colour/sides. Desktop Night→Exterior samples192.9msand161.4ms; stable Day→Exterior control77.8ms. A separate GL-attribution sample116.4msrecords16buffer uploads/2texture uploads and no compileShader/linkProgram calls; measured wrapped GL call time~0.4ms. Resize-adjacent670.8mscontrol explicitly excluded from the stable comparison. Mobile automatic exit46.5ms. | Functional PASS; brief desktop exit hitch remains OPEN, not waived or promoted to fluidity PASS. |
+| Avoid speculative changes | Inspected the exact navigation reducer and perimeter resource lifecycle. Day reset already occurs atomically in the navigation reducer; diffuser geometry is memoized by coordinate signature, with stable material/light objects. No demonstrated duplicate-reset or per-toggle diffuser rebuild was found. | No speculative source fix, camera/geometry change or repeated general audit. Investigate the remaining desktop phase-exit cost before closing the complete fluidity requirement. |
+
+Receipts: [final-controlled](evidence/lighting-browser-20261026/final-controlled/),
+`transition-receipt.json` contains action timestamps, input samples and frame
+windows before/after each action. GL attribution is a separate instrumented
+sample, not interchangeable with the uninstrumented timing samples. No browser
+console errors captured. Viewport override reset and current3003owner preview
+restored. Original29source/script WIP hashes still unchanged.
+
+**Goal remains active: visual checks are complete; automatic desktop exit
+fluidity remains to resolve.** No lighting commit/push while this requested
+performance gate is open. Existing cloud/PDF, real-hardware baseline and other
+release gates remain unchanged; no merge/deploy/backend mutation/email.
+
+
+#### 26 October — requested phase-change optimization and scoped closeout
+
+Owner explicitly requested optimizing the phase change as well as the direct
+Day/Night switch. Two focused lifecycle changes preserve all final camera poses,
+geometry, materials, lighting choices and settled rendering quality:
+
+- Clear the old inspection and resolve the deck target in layout effects, before
+  paint. The first deck frame no longer uses the old lighting inspection target
+  followed by a delayed reframe. System-detail behavior retains its existing
+  effect and target; colour preview remains unchanged.
+- Run camera movement/idle bookkeeping at frame priority -1, before the existing
+  AdaptiveQuality callback at priority 0. The first moving frame now uses the
+  existing interactive DPR immediately. Existing idle debounce, settled DPR,
+  locked/export resolution and camera flight targets are preserved.
+
+A temporary React Profiler experiment was removed completely before the final
+change. Root/viewport/tray/scene receipts identified delayed updates; it did not
+become production telemetry. Compared with the supplied WIP, only
+`PoolConfigurator.tsx` and `PoolScene.tsx` received additional application edits.
+The other27original source/script hashes remain identical. New focused runner:
+`node scripts/phase-change-timing-audit.mjs`.
+
+| Required final check | Evidence and limits | Result |
+|---|---|---|
+| Actual Night, perimeter and chosen sides | Earlier controlled one-side/opposite-side/rounded-corner desktop and390/430emulated views remain applicable: geometry/materials/emission were not changed. Final candidate mobile screenshot24and paired DOM23reconfirm Night with sides1/4, white60%; returning upstream and to Exterior restores Day and preserves selections. | Scoped real-render visual PASS. Physical-phone proof and every possible pool geometry are not claimed. |
+| Direct and automatic Night→Day fluidity | Direct switch measurements35–44mswere captured before the lifecycle fix; a final-candidate emulated390retest measures39.7mswith Day confirmed. For the requested automatic phase change, immediate pre-edit reference120.1ms; layout-only samples109.3/107.7ms; full-fix desktop98.6/84.8msand emulated390mobile97.9ms. Matching one-scene setup, no React/GL profiler enabled in these final samples. The identical settled deck camera vector is recorded in `verification.json`. | Scoped transition regression/optimization PASS. Small sample; not a statistical speedup guarantee, final-paint/GPU timing, universal60FPSclaim or closure of the separate release-wide real-hardware baseline gate. |
+| Desktop/mobile final rendering | Final screenshot22shows natural daytime desktop water/coping;24shows the selected under-coping Night strip on mobile;25/26show Day after leaving lighting. No console errors captured. | Scoped desktop1440×900and emulated390×844PASS; earlier430×932visual proof retained. |
+| Targeted code verification | TypeScript no-emit PASS; new regression runner93checksPASS; new runner ESLint PASS; source/report diff-check PASS. Runner executes actual effect callbacks and frame bookkeeping/AdaptiveQuality, reproduces the old first-frame DPR error at priority0, asserts corrected first-frame/idle/locked output and no repeated unchanged buffer resizing, and verifies deck target before paint with exactly one reframe. | PASS for the two changed lifecycle paths. Existing lighting/geometry/data suites and full build were already PASS on the preserved WIP and were not rerun broadly. |
+
+Receipts: [phase-optimization](evidence/lighting-browser-20261026/phase-optimization/).
+All measured times are input-to-second-rAF, not browser-tool round-trip latency
+or completed GPU/3Dpaint. Moving quality uses the same pre-existing levels; the
+settled camera/image quality is preserved. No new dependency or production
+telemetry, backend/Supabase/archival-system change, cloud project, real email,
+merge or deployment.
+
+**Requested lighting/transition/desktop-mobile checks are now complete for this
+candidate.** This supersedes the earlier open desktop phase-exit item. The
+separate release-wide performance baseline, native recovery, privacy operation,
+cloud/PDF final-candidate and hosting/email/publication gates remain OPEN and
+are not waived. Save as a feature-branch checkpoint, not release approval.

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ShaderPreparation } from "./ShaderPreparation";
+import type { PerimeterLightingPlan, PoolLedType } from "@/lib/pool/perimeter-lighting";
 import { installDevelopmentInteractionTiming, readDevelopmentRenderPause, writeDevelopmentRenderPause } from "@/lib/pool/development-interaction-timing";
 import { installDevelopmentGlDiagnostic } from "@/lib/pool/development-gl-diagnostic";
 import { OrbitControls, Line, useProgress } from "@react-three/drei";
@@ -96,6 +97,7 @@ export type { PhotoModeQuality };
 // Split into its own chunk: only fetched when Experience quality is active,
 // so Configuration (today's default) never downloads the postprocessing lib.
 const PremiumPostFX = lazy(() => import("./PremiumPostFX"));
+const PerimeterLights = lazy(() => import("./PerimeterLights").then(module => ({ default: module.PerimeterLights })));
 // Same reasoning: three-gpu-pathtracer is a substantial library that only
 // Photo Mode needs, so the live configurator never pays for it.
 const PhotoModeRenderer = lazy(() =>
@@ -115,6 +117,8 @@ export interface SceneProps {
   materials: ResolvedMaterials;
   features: ReadonlyArray<PoolFeatureId>;
   ledColor?: string;
+  ledType?: PoolLedType;
+  perimeterLighting?: PerimeterLightingPlan;
   /** 0..1 dimmer, already resolved: the scene never guesses a default. */
   ledIntensity: number;
   /** Which internal staircase is built; resolved upstream. */
@@ -219,15 +223,12 @@ function SceneMood({
   const dayColor = useMemo(() => new Color(baseBackground), [baseBackground]);
   const duskColor = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.background), []);
   const scratch = useMemo(() => new Color(), []);
-  const baseSky = useRef(0);
-  const baseSun = useRef(0);
-  const baseAux = useRef(0);
+  const daySun = useMemo(() => new Color(SCENE_VISUAL_PRESET.lighting.sun.color), []);
+  const nightSun = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.sunColor), []);
+  const dayGround = useMemo(() => new Color(SCENE_VISUAL_PRESET.lighting.sky.groundColor.light), []);
+  const nightGround = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.skyGroundColor), []);
 
   useFrame(({ gl, scene }, delta) => {
-    if (baseSky.current === 0 && sky.current) baseSky.current = sky.current.intensity;
-    if (baseSun.current === 0 && sun.current) baseSun.current = sun.current.intensity;
-    if (baseAux.current === 0 && auxiliary.current) baseAux.current = auxiliary.current.intensity;
-
     const target = dusk ? 1 : 0;
     const step = delta / SCENE_VISUAL_PRESET.dusk.transitionSeconds;
     blend.current =
@@ -242,12 +243,16 @@ function SceneMood({
     scratch.copy(dayColor).lerp(duskColor, t);
     if (scene.background instanceof Color) scene.background.copy(scratch);
     if (scene.fog) scene.fog.color.copy(scratch);
-    if (sky.current)
-      sky.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sky : baseSky.current, preset.skyIntensity, t);
-    if (sun.current)
-      sun.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sun : baseSun.current, preset.sunIntensity, t);
+    if (sky.current) {
+      sky.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sky : SCENE_VISUAL_PRESET.lighting.sky.intensity.light, preset.skyIntensity, t);
+      sky.current.groundColor.copy(dayGround).lerp(nightGround, t);
+    }
+    if (sun.current) {
+      sun.current.intensity = MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sun : SCENE_VISUAL_PRESET.lighting.sun.intensity.light, preset.sunIntensity, t);
+      sun.current.color.copy(daySun).lerp(nightSun, t);
+    }
     if (auxiliary.current) {
-      auxiliary.current.intensity = MathUtils.lerp(baseAux.current, preset.auxiliaryIntensity, t);
+      auxiliary.current.intensity = MathUtils.lerp(SCENE_VISUAL_PRESET.lighting.auxiliary.intensity.light, preset.auxiliaryIntensity, t);
     }
   });
   return null;
@@ -665,7 +670,9 @@ function CameraRig({
     if (!renderQualityState.idle && idleElapsed.current >= RENDER_QUALITY_IDLE_DELAY) {
       renderQualityState.idle = true;
     }
-  });
+    // AdaptiveQuality reads this signal at priority 0. Publish movement first
+    // so a phase change does not render its first frame at the idle DPR.
+  }, -1);
 
   const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping", "infinity",
     "paving", "exterior-panel", "external-stairs", "pellicano", "stair-lighting", "bench-lighting", "skimmer-detail", "overflow-hidden", "overflow-visible", "overflow-continuous", "features", "cover"].includes(focus);
@@ -1144,6 +1151,8 @@ export default function PoolScene({
   construction,
   features,
   ledColor = "#ffffff",
+  ledType = "underwater",
+  perimeterLighting,
   ledIntensity,
   internalStairType,
   internalStairMirrored = false,
@@ -1189,6 +1198,7 @@ export default function PoolScene({
   const controls = useRef<OrbitControlsImpl | null>(null);
   const renderer = useRef<import("three").WebGLRenderer | null>(null);
   const [preparingShaders, setPreparingShaders] = useState(false);
+  const [perimeterReady, setPerimeterReady] = useState(false);
   const [qaRenderPaused, setQaRenderPaused] = useState(() => import.meta.env.DEV && readDevelopmentRenderPause());
   useEffect(() => {
     if (import.meta.env.DEV) writeDevelopmentRenderPause(qaRenderPaused);
@@ -1536,6 +1546,8 @@ export default function PoolScene({
     integratedBenchStations,
     ledColor,
     ledIntensity,
+    ledType,
+    perimeterLighting?.signature,
     poolAccess,
     photoModeQuality,
   ].join("|");
@@ -1597,10 +1609,10 @@ export default function PoolScene({
 
       <SceneMood
         dusk={dusk}
-        baseBackground={background}
-        baseExposure={SCENE_VISUAL_PRESET.exposure[visualTheme]}
-        baseEnvironment={system === "infinity" ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[visualTheme]}
-        coastalDaylight={system === "infinity"}
+        baseBackground={infinityStage && !planView ? "#cee0ec" : PALETTE.light.background}
+        baseExposure={SCENE_VISUAL_PRESET.exposure.light}
+        baseEnvironment={infinityStage ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment.light}
+        coastalDaylight={infinityStage}
         sky={skyLight}
         sun={sunLight}
         auxiliary={auxiliaryLight}
@@ -1767,7 +1779,7 @@ export default function PoolScene({
           onSelect={onSelectInfinitySide}
         />
       ) : null}
-      {features.includes("ledLighting") && (construction?.showLighting ?? true) ? (
+      {features.includes("ledLighting") && ledType === "underwater" && (construction?.showLighting ?? true) ? (
         <PoolLights
           lighting={lighting}
           layout={verticalLayout}
@@ -1778,6 +1790,8 @@ export default function PoolScene({
           presentation={dusk ? "night" : "day"}
         />
       ) : null}
+      {features.includes("ledLighting") && ledType === "perimeter" && perimeterLighting && showWater && (construction?.showLighting ?? true)
+        ? <Suspense fallback={null}><PerimeterLights plan={perimeterLighting} night={dusk} colour={ledColor} intensity={ledIntensity} onReady={setPerimeterReady}/></Suspense> : null}
 
       {poolType === "above-ground" && features.includes("externalStaircase") && (construction?.showAccessories ?? true) ? (
         <ExternalStaircase
@@ -1948,8 +1962,10 @@ export default function PoolScene({
         </Suspense>
       ) : null}
 
-      <ShaderPreparation enabled={showWater && !photoMode && !qaRenderPaused} onPreparing={setPreparingShaders} signature={[
-        sceneTime, features.join(","), lighting.plan.count,
+      <ShaderPreparation enabled={showWater && !photoMode && !qaRenderPaused && (ledType !== "perimeter" || !features.includes("ledLighting") || perimeterReady)} onPreparing={setPreparingShaders} signature={[
+        // Day/Night changes uniform values, not the retained light graph or
+        // equal-size environment maps. Re-preparing pauses the whole canvas.
+        features.join(","), ledType, perimeterLighting?.selected.length, lighting.plan.count,
         resolvedLayout.stairMicroSpots.length,
         resolvedLayout.comfort.elements.reduce((sum,element)=>sum+(element.spots?.length??0),0),
         construction?.showLighting, construction?.showAccessories, infinityStage,

@@ -220,6 +220,9 @@ export interface PoolConfig {
   integratedBenchStations?: number;
   sunShelfLoungerColor?: import("./sun-shelf-lounger-colors").SunShelfLoungerColorId;
   ledColor?: string;
+  /** Alternative main lighting system; legacy projects retain wall luminaires. */
+  ledType?: import("./perimeter-lighting").PoolLedType;
+  ledPerimeterSides?: ReadonlyArray<number>;
   /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before
    * the control existed; readers substitute LED_OPTICS.defaultIntensity. */
   ledIntensity?: number;

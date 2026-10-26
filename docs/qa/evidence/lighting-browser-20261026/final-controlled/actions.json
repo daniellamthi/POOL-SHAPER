@@ -1,0 +1,74 @@
+[
+  {
+    "name": "desktop-night-to-day-1",
+    "at": "2026-10-26T11:25:31.374Z",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "name": "desktop-auto-day-leave-lighting",
+    "at": "2026-10-26T11:25:55.776Z",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "name": "mobile390-night-to-day-1",
+    "at": "2026-10-26T11:26:38.638Z",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "name": "mobile390-auto-day-leave-lighting",
+    "at": "2026-10-26T11:27:04.594Z",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "name": "mobile430-night-to-day",
+    "at": "2026-10-26T11:27:56.283Z",
+    "viewport": [
+      430,
+      932
+    ]
+  },
+  {
+    "name": "desktop-day-to-exterior-control",
+    "at": "2026-10-26T11:28:15.860Z",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "name": "desktop-auto-day-warm-repeat-1",
+    "at": "2026-10-26T11:28:34.844Z",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "name": "desktop-day-to-exterior-stable-control",
+    "at": "2026-10-26T11:28:57.200Z",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "name": "desktop-exterior-direct-night-to-day",
+    "at": "2026-10-26T11:30:00.515Z",
+    "viewport": [
+      1440,
+      900
+    ]
+  }
+]

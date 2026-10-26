@@ -90,6 +90,9 @@ float beamDensity(vec3 p) {
 const int STEPS = 24;
 
 void main() {
+  // Day/OFF retains the volume and light topology, but must not ray-march
+  // twenty-four samples for a beam whose contribution is exactly zero.
+  if (density <= 0.0001) discard;
   // The volume is INTEGRATED along the view ray. The previous version shaded
   // the hull and derived its cross-section profile from the hull vertex's own
   // radius -- which is, by construction, exactly the cone radius, so the

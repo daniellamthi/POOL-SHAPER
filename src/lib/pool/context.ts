@@ -90,6 +90,8 @@ export interface ConfiguratorContextValue {
   setSunShelfRun: (value: number) => void;
   sunShelfNotice: string | null;
   setLedColor: (value: string) => void;
+  setLedType: (value: import("./perimeter-lighting").PoolLedType) => void;
+  setLedPerimeterSides: (value: ReadonlyArray<number>) => void;
   setLedIntensity: (value: number) => void;
   setSceneTime: (value: "day" | "night", preserveCamera?: boolean) => void;
   setPaving: (value: import("./presentation").PavingId) => void;

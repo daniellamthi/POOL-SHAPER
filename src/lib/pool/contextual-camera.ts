@@ -30,7 +30,7 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
     case "setPaving": case "setPavingFormat": return "PAVING";
     case "setExteriorPanelFinish": return "EXTERIOR_PANEL";
     case "setExternalStairSide": case "setExternalStairPlatformExtended": return "EXTERNAL_STAIRS";
-    case "setLedColor": case "setLedIntensity": return "LIGHTING";
+    case "setLedColor": case "setLedIntensity": case "setLedType": case "setLedPerimeterSides": return "LIGHTING";
     case "setSceneTime":
       if (action.preserveCamera) return undefined;
       // Optional micro-light controls also request their existing night

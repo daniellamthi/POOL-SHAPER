@@ -1,0 +1,100 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina Cemento armato · 10,0 × 4,5 m":
+        - generic: Piscina
+        - generic: Cemento armato · 10,0 × 4,5 m
+      - button "Sistema acqua Skimmer · Slim Moderno":
+        - generic: Sistema acqua
+        - generic: Skimmer · Slim Moderno
+      - button "Accesso & comfort Scala interna":
+        - generic: Accesso & comfort
+        - generic: Scala interna
+      - button "Finiture In corso":
+        - generic: Finiture
+        - generic: In corso
+      - button "Esterno":
+        - generic: Esterno
+      - button "Optional":
+        - generic: Optional
+      - button "Presentazione":
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno":
+      - generic: Giorno
+    - button "Notte" [pressed]:
+      - generic: Notte
+  - button "Ricomincia":
+    - generic: Ricomincia
+- main:
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+  - toolbar "Strumenti vista":
+    - button "Guide":
+      - text: Guide
+    - button "Vista tecnica":
+      - text: Vista tecnica
+    - button "Riquadra":
+      - text: Riquadra
+- 'region "Passo 4: Finiture"':
+  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.
+  - tablist "Acqua e luci":
+    - tab "Illuminazione" [selected]
+    - tab "Colore LED"
+  - radiogroup "Anteprima luce":
+    - generic: Anteprima
+    - radio "Giorno":
+      - text: Giorno
+    - radio "Notte" [checked]:
+      - text: Notte
+  - group "Illuminazione subacquea":
+    - button "Senza illuminazione":
+      - generic: Senza illuminazione
+      - generic: Nessun faro subacqueo a parete. I micro-spot delle scale sono indipendenti.
+    - button "+ Micro-spot sulle scale":
+      - generic: + Micro-spot sulle scale
+      - generic: Micro-spot discreti nelle alzate, coordinati al colore dei fari piscina. Optional indipendente.
+      - generic: 6 micro-spot · nelle alzate
+    - button "LED subacquei":
+      - generic: LED subacquei
+      - generic: Fari RGB a parete, disposti automaticamente. Anteprima notturna.
+      - generic: 0 fari · 45,0 m²
+    - button "LED perimetrali" [pressed]:
+      - generic: LED perimetrali
+      - generic: Fascia continua sotto il bordo, rivolta verso la vasca. Scegli i lati da illuminare.
+  - group "Lati illuminati":
+    - generic: Lati illuminati
+    - img "Pianta LED perimetrali":
+      - generic: "1"
+      - generic: "2"
+      - generic: "3"
+      - generic: "4"
+    - button "Lato 1" [active]
+    - button "Lato 2"
+    - button "Lato 3" [pressed]:
+      - text: Lato 3
+    - button "Lato 4"
+    - paragraph: "Lunghezza LED selezionata: 9,9 m"
+  - 'button "Prossima scelta: Colore LED"':
+    - text: "Prossima scelta: Colore LED"
+  - paragraph:
+    - text: Fase 04 di 07
+    - generic: · 1/2 · Illuminazione
+  - heading "Finiture" [level=2]
+  - paragraph: Notte · LED perimetrali
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua · Colore LED":
+    - text: Continua
+    - generic: · Colore LED
+- region "Notifications alt+T"

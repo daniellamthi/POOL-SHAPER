@@ -1,0 +1,29 @@
+{
+  "typecheck": "PASS",
+  "targeted_regression_checks": 93,
+  "new_script_eslint": "PASS",
+  "diff_check": "PASS",
+  "runtime": "Vite DEV / existing PID 36738 / port 3003",
+  "measure": "trusted input to second rAF, not GPU completion",
+  "before_same_session_ms": [
+    120.1
+  ],
+  "after_layout_ms": [
+    109.3,
+    107.7
+  ],
+  "after_full_fix_desktop_ms": [
+    98.6,
+    84.8
+  ],
+  "after_full_fix_mobile390_ms": [
+    97.9
+  ],
+  "settled_camera_before_after": [
+    4.160214155819165,
+    3.5502418465038157,
+    1.9628023081297687
+  ],
+  "full_build_repeated": false,
+  "after_full_fix_direct_mobile390_ms": 39.7
+}

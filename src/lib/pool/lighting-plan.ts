@@ -128,5 +128,6 @@ export function planSceneLighting({
 
 /** UI, summary and commercial export use the exact same obstacles/elevations as the 3D scene. */
 export function configuredLightingPlan(config: PoolConfig): PoolLightingPlan {
-  return configuredPoolLayout(config).lighting.plan;
+  const plan = configuredPoolLayout(config).lighting.plan;
+  return config.ledType === "perimeter" ? { ...plan, count: 0, positions: [] } : plan;
 }

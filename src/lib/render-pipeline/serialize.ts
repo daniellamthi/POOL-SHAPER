@@ -175,6 +175,9 @@ export function serializePoolRenderConfig(
     );
   }
   // The external Blender bridge does not construct the new lateral intake.
+  if (config.features.includes("ledLighting") && config.ledType === "perimeter") {
+    throw new Error("LED perimetrali: usa la scena 3D o il Project Book. Il renderer esterno non supporta questa illuminazione.");
+  }
   // Browser Photo Mode and Project Book capture the actual scene unchanged.
   if (config.system === "overflow" && config.overflowType === "continuous") {
     throw new Error("Sfioro nascosto: usa l’immagine della scena 3D o il Project Book. Il renderer esterno non supporta questa sezione.");

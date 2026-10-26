@@ -1,8 +1,9 @@
 import { exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { decisions } from "./wizard/decisions";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
+import { configuredPerimeterLights, poolLedType } from "@/lib/pool/perimeter-lighting";
 import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
@@ -195,7 +196,7 @@ function ConfiguratorLayout() {
   const [frameToken, setFrameToken] = useState(0);
   const [inspectionView, setInspectionView] = useState<SceneFocus | null>(null);
   const [technicalView, setTechnicalView] = useState(false);
-  useEffect(() => setInspectionView(null), [step, visualFocus]);
+  useLayoutEffect(() => setInspectionView(null), [step, visualFocus]);
   const stepContentRef = useRef<HTMLDivElement>(null);
   // P5: mobile-only fullscreen presentation of the SAME live viewport --
   // never a second Canvas/renderer, just a CSS repositioning of the
@@ -441,12 +442,17 @@ function ConfiguratorLayout() {
         ? config.overflowType === "continuous" ? "overflow-continuous" : config.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible"
         : "skimmer-detail");
       reframe();
-    } else if (activeStepId === "deck" &&
+    }
+  }, [activeStepId, decision?.id, config.system, config.overflowType, reframe]);
+  // Resolve the deck view before paint, so leaving lighting does not render
+  // the old inspection view and then schedule a second camera update.
+  useLayoutEffect(() => {
+    if (activeStepId === "deck" &&
       (decision?.id === "coping" || decision?.id === "paving")) {
       setInspectionView(decision.id);
       reframe();
     }
-  }, [activeStepId, decision?.id, config.system, config.overflowType, reframe]);
+  }, [activeStepId, decision?.id, reframe]);
   useEffect(() => {
     if (activeStepId === "lighting" && decision?.id === "color") {
       // Entering colour also requests its night preview. A retained micro-spot
@@ -616,6 +622,8 @@ function ConfiguratorLayout() {
             construction={construction}
             features={config.features}
             ledColor={config.ledColor ?? "#ffffff"}
+            ledType={poolLedType(config.ledType)}
+            {...(poolLedType(config.ledType) === "perimeter" ? { perimeterLighting: configuredPerimeterLights(config) } : {})}
             ledIntensity={normalisedLedIntensity(config.ledIntensity)}
             internalStairType={config.internalStairType ?? "linear"}
             {...(config.hydromassageVariant

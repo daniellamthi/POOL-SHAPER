@@ -1,0 +1,155 @@
+- heading "3D Pool Configurator" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Configuration phases":
+    - list:
+      - button "Pool Reinforced concrete · 10.0 × 4.5 m":
+        - generic: Pool
+        - generic: Reinforced concrete · 10.0 × 4.5 m
+      - button "Water system Skimmer · Modern slim":
+        - generic: Water system
+        - generic: Skimmer · Modern slim
+      - button "Access & comfort Internal stairs":
+        - generic: Access & comfort
+        - generic: Internal stairs
+      - button "Finishes PVC liner · Blue Sky [602]":
+        - generic: Finishes
+        - generic: PVC liner · Blue Sky [602]
+      - button "Exterior Travertine · Porcelain stoneware · 60 × 120 cm":
+        - generic: Exterior
+        - generic: Travertine · Porcelain stoneware · 60 × 120 cm
+      - button "Options No options":
+        - generic: Options
+        - generic: No options
+      - button "Presentation In progress":
+        - generic: Presentation
+        - generic: In progress
+  - group "Language":
+    - button "Italian": IT
+    - button "English" [active] [pressed]: EN
+  - group "Scene time":
+    - button "Day" [pressed]:
+      - generic: Day
+    - button "Night":
+      - generic: Night
+  - button "Start again":
+    - generic: Start again
+- main:
+  - button "Pool view":
+    - text: Pool view
+  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan
+  - toolbar "View tools":
+    - button "Guides":
+      - text: Guides
+    - button "Technical view":
+      - text: Technical view
+    - button "Reframe":
+      - text: Reframe
+- 'region "Step 7: Presentation"':
+  - paragraph: "Your finished pool: scene, summary and proposal request."
+  - tablist "Presentation":
+    - tab "Scene"
+    - tab "Summary" [selected]
+    - tab "Request a proposal"
+  - region "Save and share":
+    - paragraph: Your project
+    - paragraph: Not saved yet
+    - paragraph: Save to receive a Project ID, return to it and share it.
+    - button "Save project":
+      - text: Save project
+    - button "Share":
+      - text: Share
+    - button "Project Book PDF":
+      - text: Project Book PDF
+  - img "Your configured pool"
+  - paragraph: Your project
+  - heading "rectangular pool 10.00 × 4.50 m, depth 1.50 m" [level=2]
+  - paragraph: In-ground pool · Skimmer — classic edge · approx. 67 m³ of water
+  - paragraph: Project ID assigned when saved
+  - heading "Your pool" [level=3]
+  - button "Edit"
+  - term: Type
+  - definition:
+    - generic: In-ground pool
+  - term: Structure
+  - definition:
+    - generic: Reinforced concrete
+  - term: Dimensions
+  - definition:
+    - generic: rectangular pool 10.00 × 4.50 m, depth 1.50 m
+  - heading "Waterline" [level=3]
+  - button "Edit"
+  - term: Hydraulic system
+  - definition:
+    - generic: Skimmer — classic edge
+  - term: Skimmer
+  - definition:
+    - generic: Slim / modern · White ABS
+  - heading "Materials" [level=3]
+  - button "Edit"
+  - term: Lining
+  - definition:
+    - generic: Motion Blue Sky [602]
+    - generic: Crystal-blue water tones
+  - term: Coping
+  - definition:
+    - generic: Travertine
+    - generic: Separate coping
+  - term: Pool corners
+  - definition:
+    - generic: Rounded
+    - generic: "Rounded pool corners: 20 cm radius."
+  - term: Paving
+  - definition:
+    - generic: Porcelain stoneware
+  - term: Paving size
+  - definition:
+    - generic: 60 × 120 cm
+    - generic: Reference dimensions for the visualisation; supply to be confirmed.
+  - heading "Access and comfort" [level=3]
+  - button "Edit"
+  - term: Included
+  - definition:
+    - generic: Integrated internal stairs — Straight internal stairs
+  - heading "Lighting" [level=3]
+  - button "Edit"
+  - term: Equipment
+  - definition:
+    - generic: Perimeter LED lighting
+  - term: Illuminated sides
+  - definition:
+    - generic: Side 1, Side 2, Side 3, Side 4
+  - term: LED strip length
+  - definition:
+    - generic: 28.6 m
+  - term: Selected colour
+  - definition:
+    - generic: "#00FF15"
+  - term: Light brightness
+  - definition:
+    - generic: 60%
+  - heading "Presentation" [level=3]
+  - button "Edit"
+  - term: Time of day
+  - definition:
+    - generic: Day
+  - generic "View technical details"
+  - 'button "Next option: Request a proposal"':
+    - text: "Next option: Request a proposal"
+  - button "More options":
+    - text: More options
+  - paragraph:
+    - text: Phase 07 of 07
+    - generic: · 2/3 · Summary
+  - heading "Presentation" [level=2]
+  - paragraph: 10.0 × 4.5 m · ready for a proposal
+  - button "View the pool":
+    - text: View the pool
+  - button "Minimise" [expanded]:
+    - text: Minimise
+  - button "Back":
+    - text: Back
+  - button "Continue · Request a proposal":
+    - text: Continue
+    - generic: · Request a proposal
+- region "Notifications alt+T"

@@ -1,0 +1,85 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina":
+        - generic: Piscina
+      - button "Sistema acqua":
+        - generic: Sistema acqua
+      - button "Accesso & comfort":
+        - generic: Accesso & comfort
+      - button "Finiture":
+        - generic: Finiture
+      - button "Esterno":
+        - generic: Esterno
+      - button "Optional":
+        - generic: Optional
+      - button "Presentazione":
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno":
+      - generic: Giorno
+    - button "Notte" [pressed]:
+      - generic: Notte
+  - button "Ricomincia":
+- main:
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - button "Riquadra":
+    - text: Riquadra
+  - button "Espandi piscina":
+  - button "Altri strumenti":
+- 'region "Passo 4: Finiture"':
+  - paragraph: I fari subacquei e il loro colore, con un’anteprima notturna per valutarli.
+  - tablist "Acqua e luci":
+    - tab "Illuminazione"
+    - tab "Colore LED" [selected]
+  - radiogroup "Anteprima luce":
+    - generic: Anteprima
+    - radio "Giorno":
+      - text: Giorno
+    - radio "Notte" [checked]:
+      - text: Notte
+  - region "Colore LED":
+    - heading "Colore LED" [level=4]
+    - slider "Tonalità LED"
+    - button "Bianco" [active] [pressed]: Bianco
+    - status "Colore LED selezionato": Bianco neutro
+    - paragraph: Trascina per scegliere una tonalità. Le frecce regolano con precisione.
+    - generic "Colori LED predefiniti":
+      - button "LED Blu"
+      - button "LED Ciano"
+      - button "LED Verde"
+      - button "LED Rosso"
+      - button "LED Arancio"
+      - button "LED Viola"
+  - region "Intensità luce LED":
+    - heading "Intensità luce" [level=4]
+    - status: 60%
+    - slider "Intensità luce LED": "60"
+    - group "Livelli rapidi":
+      - button "25%"
+      - button "50%"
+      - button "75%"
+      - button "100%"
+    - paragraph: "Regola la resa reale dei fari: lente, fascio e luce nell'acqua. Predefinito 60%, come una serata tipo."
+  - button "Altre opzioni":
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 04 di 07
+    - generic: · 2/2 · Colore LED
+  - heading "Finiture" [level=2]
+  - paragraph: Notte · LED perimetrali
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua":
+    - text: Continua
+- region "Notifications alt+T"

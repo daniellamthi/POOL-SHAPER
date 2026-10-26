@@ -15,6 +15,7 @@ import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "./types";
 import { isRenovationConfig } from "@/lib/pool/renovation";
 import { isSunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
+import { isPerimeterSideSelection, isPoolLedType } from "@/lib/pool/perimeter-lighting";
 import { comfortConfigurationIssues, COMFORT_RESOLUTION_MESSAGE } from "@/lib/pool/comfort-compatibility";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -54,6 +55,8 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (typeof configValue !== "object" || configValue === null) return false;
 
   const config = configValue as Record<string, unknown>;
+  if (config["ledType"] !== undefined && !isPoolLedType(config["ledType"])) return false;
+  if (config["ledPerimeterSides"] !== undefined && !isPerimeterSideSelection(config["ledPerimeterSides"])) return false;
   if (config["copingStyle"] !== undefined && config["copingStyle"] !== "dedicated" && config["copingStyle"] !== "flush") return false;
   if (config["copingEdge"] !== undefined && config["copingEdge"] !== "square" && config["copingEdge"] !== "rounded") return false;
   if (config["integratedBenchStations"] !== undefined && (!Number.isSafeInteger(config["integratedBenchStations"]) || Number(config["integratedBenchStations"]) < 1 || Number(config["integratedBenchStations"]) > 4)) return false;

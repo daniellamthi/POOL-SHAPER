@@ -4,6 +4,7 @@ import type { SkimmerPlan } from "./engineering";
 import type { ResolvedPoolLayout } from "./resolved-layout";
 import type { Outline, PoolConfig, PoolMetrics } from "./types";
 import { outlineCentroid } from "./geometry";
+import { configuredPerimeterLights } from "./perimeter-lighting";
 import type { InfinityExclusion } from "./walls";
 
 export type TechnicalProvenance = "CALCULATED" | "RULE_BASED" | "ESTIMATED" | "NOT_AVAILABLE";
@@ -90,6 +91,7 @@ export interface TechnicalPlan {
   /** Internal surface is a useful finish-area proxy, not a product take-off. */
   finishArea: TechnicalField<number>;
   leds: {
+    perimeter?: { sides: number[]; length: number };
     count: TechnicalField<number>;
     positions: ResolvedPoolLayout["lighting"]["plan"]["positions"];
   };
@@ -144,7 +146,8 @@ export function buildTechnicalPlan({
         coordinate: oppositeInfinityCoordinate(outline, excluded),
       }
     : null;
-  const ledsEnabled = config.features.includes("ledLighting");
+  const perimeter = config.features.includes("ledLighting") && config.ledType === "perimeter" ? configuredPerimeterLights(config) : null;
+  const ledsEnabled = config.features.includes("ledLighting") && !perimeter;
   const overflow: TechnicalPlan["overflow"] = config.system === "skimmer"
     ? null
     : config.system === "infinity"
@@ -185,6 +188,7 @@ export function buildTechnicalPlan({
       note: "Superficie interna come stima iniziale; sfridi e dettagli di posa esclusi.",
     },
     leds: {
+      ...(perimeter ? { perimeter: { sides: perimeter.selected.map(side => side.id), length: perimeter.length } } : {}),
       count: { value: ledsEnabled ? layout.lighting.plan.positions.length : 0, provenance: "RULE_BASED" },
       positions: ledsEnabled ? layout.lighting.plan.positions : [],
     },
