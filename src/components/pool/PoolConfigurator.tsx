@@ -212,6 +212,7 @@ function ConfiguratorLayout() {
   const toggleMobileExpanded = useCallback(() => setMobileExpanded((value) => !value), []);
   const [photoMode, setPhotoMode] = useState(false);
   const [gardenStudio, setGardenStudio] = useState(false);
+  const [cataloguePatio, setCataloguePatio] = useState(false);
   const [photoModeQuality, setPhotoModeQuality] = useState<PhotoModeQuality>("standard");
   // Set once the path tracer has proven it can't run on this device (no
   // WebGL2, or WebGLPathTracer threw during setup -- see
@@ -546,6 +547,7 @@ function ConfiguratorLayout() {
     captureHero,
     captureDayNight,
     openGardenStudio: () => setGardenStudio(true),
+    presentationContext: config.system !== "infinity" ? { active: cataloguePatio, setActive: setCataloguePatio } : undefined,
   };
   const RenovationComponent = RENOVATION_COMPONENTS[step] ?? ProjectTypeStep;
   const trayContent = renovationWorkflow ? (
@@ -630,6 +632,7 @@ function ConfiguratorLayout() {
           )}
         >
           <PoolViewport
+            cataloguePatio={premiumPresentationAvailable && cataloguePatio}
             gardenStudio={gardenStudio}
             gardenProjectId={projectId}
             onCloseGardenStudio={() => setGardenStudio(false)}

@@ -1,0 +1,28 @@
+{
+  "status": "PASS within local preview scope",
+  "layout": {
+    "cases": 72,
+    "partsChecked": 3228,
+    "minClearanceMetres": 0.7,
+    "drawBatches": 5
+  },
+  "checks": [
+    "typecheck",
+    "new-source ESLint",
+    "diff-check",
+    "desktop day/night",
+    "390x844 emulated mobile day/night",
+    "IT/EN controls",
+    "open garden restores original context",
+    "construction phase excludes patio",
+    "photo studio excludes patio",
+    "return to presentation restores selection"
+  ],
+  "browserConsoleErrors": 0,
+  "limits": [
+    "No physical-device performance claim",
+    "Patio is session-local presentation only",
+    "No Photo Mode/cloud/PDF patio validation",
+    "Overall catalogue and release approval remain open"
+  ]
+}

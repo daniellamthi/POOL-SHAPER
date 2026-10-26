@@ -2,6 +2,12 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ["Ambientazione", "Setting"],
+  ["Ambientazione della presentazione", "Presentation setting"],
+  ["Giardino aperto", "Open garden"],
+  ["Patio contemporaneo", "Contemporary patio"],
+  ["Ambientazione illustrativa, indipendente dalla piscina configurata.", "Illustrative setting, independent of the configured pool."],
+
   ["Nel tuo giardino", "In your garden"],
   ["Rotazione piscina (gradi)", "Pool rotation (degrees)"],
   ["Inserisci le due misure reali del rettangolo, tra 0,5 e 100 metri.", "Enter both actual rectangle dimensions, between 0.5 and 100 metres."],

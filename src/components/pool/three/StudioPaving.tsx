@@ -1,3 +1,4 @@
+import { CataloguePatio } from "./CataloguePatio";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
 import {
@@ -195,6 +196,7 @@ export function StudioPaving({
   pavingFormat,
   environment = true,
   hideGround = false,
+  patio,
   loungers = false,
   furnitureRows = NO_FURNITURE_ROWS,
   decking = true,
@@ -214,6 +216,7 @@ export function StudioPaving({
   /** Late-stage context: wide terrace and lawn instead of the compact band. */
   environment?: boolean;
   hideGround?: boolean | undefined;
+  patio?: { occupied: readonly (readonly [number, number, number])[]; direction: readonly [number, number, number] } | undefined;
   /** Reserve the furniture footprint plus a clear poolside passage. */
   loungers?: boolean;
   furnitureRows?: readonly DeckFurnitureSide[] | undefined;
@@ -292,6 +295,7 @@ export function StudioPaving({
     onBeforeCompile={dry} customProgramCacheKey={dryKey} />;
   return (
     <group name="premium-configuration-studio">
+      {patio && !hideGround && decking ? <CataloguePatio terrace={geometry.outer} occupied={patio.occupied} direction={patio.direction} /> : null}
       <mesh
         visible={!hideGround}
         name={environment ? "studio-lawn" : "studio-ground"}

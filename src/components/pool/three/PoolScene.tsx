@@ -109,6 +109,7 @@ export type SceneFocus = CameraIntent;
 export type SceneTimeOfDay = "day" | "night";
 
 export interface SceneProps {
+  cataloguePatio?: boolean | undefined;
   sitePhotoView?: SitePhotoView | undefined;
   construction?: import("@/lib/pool/construction-presentation").ConstructionPresentation;
   outline: Outline;
@@ -1148,6 +1149,7 @@ function StudioFloor({
 }
 
 export default function PoolScene({
+  cataloguePatio = false,
   sitePhotoView,
   outline,
   pavingOutline,
@@ -1505,6 +1507,22 @@ export default function PoolScene({
       studioDeckBand(outline,true,visibleDeckLoungers),deckObstacles,{loungers:visibleDeckLoungers,shower:solarShower,coverHousing}) : null,
   [system,construction?.showEnvironment,outline,poolType,overflowType,copingStyle,deckObstacles,visibleDeckLoungers,solarShower,coverHousing]);
   const deckFurnitureEnvelope = useMemo(() => deckFurniturePlan ? deckFurnitureCameraPoints(deckFurniturePlan) : [], [deckFurniturePlan]);
+  const patioContext = useMemo(() => {
+    if (!cataloguePatio || sitePhotoView || photoMode || planView || technicalView || system === "infinity") return undefined;
+    const stairs = externalStairs ? planExternalStaircase({outline, side:externalStairSide,
+      platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
+      copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,
+      groundY:verticalLayout.groundY, topY:system==="overflow"?verticalLayout.waterY-.001:verticalLayout.copingY}) : null;
+    const stairSubject = stairs ? externalStairCameraSubject(stairs, verticalLayout) : undefined;
+    const occupied = [...deckFurnitureEnvelope, ...(coverSubject?.points ?? []),
+      ...(stairSubject?.points ?? []), ...deckObstacles.map(p => [p.x, 0, p.z] as const)];
+    const direction = overviewCameraSubject(outline, verticalLayout, {
+      entrance: lighting.accessPlan.placement, exteriorDirection: stairSubject?.direction,
+    }).direction;
+    return {occupied, direction};
+  }, [cataloguePatio, sitePhotoView, photoMode, planView, technicalView, system,
+    deckFurnitureEnvelope, coverSubject, deckObstacles, outline, verticalLayout, lighting.accessPlan.placement,
+    externalStairs, externalStairSide, externalStairPlatformExtended, overflowType, infinityExcluded]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
     SCENE_VISUAL_PRESET.lighting.sun.frustumMargin;
@@ -1688,6 +1706,7 @@ export default function PoolScene({
         />
       ) : (
           <StudioPaving
+            patio={patioContext}
             hideGround={!!sitePhotoView}
             outline={outline}
             outerOutline={pavingOutline}

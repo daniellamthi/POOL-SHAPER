@@ -3024,7 +3024,7 @@ commercial/CRM continuity until last. Work proceeds one feature at a time.
 |---|---|
 | Compare alternatives | Browser-local comparison implemented and verified below. Cloud comparison/export is not claimed. |
 | Customer's garden | Local calibrated photo studio implemented and verified on a synthetic reference. Real-property validation and a separately validated AR path remain OPEN. |
-| Catalogue presentation | OPEN: improve scene composition/context using approved pool geometry. |
+| Catalogue presentation | Optional contemporary patio implemented and locally verified below. Final catalogue framing/render delivery and owner approval remain OPEN. |
 | Customer-accessible photorealistic rendering | OPEN: validate supported scene fidelity and delivery/runtime before publication. |
 | Reliability | OPEN: existing physical-device baseline, candidate cloud/PDF, recovery, privacy operation and publication/email gates remain applicable. |
 | Pricing and commercial/CRM continuity | DEFERRED by owner; not part of this increment. |
@@ -3148,3 +3148,46 @@ physical-device quality/performance, AR and photo cloud/PDF delivery remain OPEN
 Catalogue presentation, customer render-service validation and all existing release
 gates also remain OPEN. Pricing/CRM remain deferred. No broad build/audit, backend
 mutation, new QA project, real email, merge or deployment was performed.
+
+
+#### 26 October — catalogue presentation: contemporary patio
+
+Owner selected “Patio contemporaneo con pareti chiare e legno”. Presentation now
+provides an optional IT/EN setting selector (also in renovation review): open
+garden or contemporary patio. The latter adds light plaster walls, a warm timber
+screen and a small timber seat along the low return wall. All context is planned
+outside the actual square-corner terrace and selected accessory envelopes,
+including external staircase camera bounds. The established overview direction
+places the architecture behind the pool; existing camera poses are unchanged.
+Pool/coping/paving geometries, materials, LEDs and construction logic are unchanged.
+
+The setting is session-local presentation state, not a pool option or new backend
+field. It is omitted outside presentation, on Infinity, in technical/top views,
+in the calibrated photo studio and in Photo Mode. It requires visible decking.
+The original garden is still the default and can be restored immediately. This
+increment does not claim saved/shared setting persistence or Photo Mode/PDF parity.
+
+The new architecture uses five merged static draw batches, no additional lights,
+render targets or frame callbacks. Owned geometries/materials/wood map clones are
+disposed on replacement/unmount. No new assets, dependencies or global lighting
+changes were introduced. This is a bounded implementation, not GPU timing evidence.
+
+Verification: typecheck PASS; ESLint of the three new source files PASS;
+diff-check PASS. `node scripts/run-catalogue-patio-audit.mjs` PASS: 72 combinations
+of rectangle/L/curved outlines, three scales, four camera quadrants and accessory
+bounds; 3,228 parts checked for positive finite dimensions and at least 0.7 m
+clearance outside protected bounds. Mirroring, input immutability, invalid data
+and the five-batch/48-part budget are checked.
+
+Integrated-browser visual PASS on the existing isolated local QA origin with the
+10×4.5 m Skimmer fixture: desktop and 390×844 mobile emulation, day/night, IT/EN
+selector, restoration of the open garden, construction-phase exclusion, existing
+calibrated photo composition without patio, and restoration on leaving that studio.
+Final console error count zero. Infinity/technical/top/Photo Mode exclusions were
+reviewed in code; no additional visual validation of those paths is claimed here.
+Evidence: [catalogue-patio-20261026](evidence/catalogue-patio-20261026/).
+
+Remaining: owner approval of this illustrative context, broader catalogue shot
+composition and validated render/export delivery. Existing real-hardware,
+cloud/PDF, restore, privacy and release gates remain OPEN. Pricing/CRM remain
+deferred. No broad build/audit, backend mutation, email, merge or deploy performed.
