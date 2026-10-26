@@ -2997,3 +2997,19 @@ candidate.** This supersedes the earlier open desktop phase-exit item. The
 separate release-wide performance baseline, native recovery, privacy operation,
 cloud/PDF final-candidate and hosting/email/publication gates remain OPEN and
 are not waived. Save as a feature-branch checkpoint, not release approval.
+
+
+#### 26 October — square exterior paving corners
+
+Owner requested normal, unrounded exterior paving corners. The paving now
+uses the original design footprint for its outer perimeter; its inner junction
+continues to follow the actual rounded basin/coping. The lawn opening follows
+the corrected outer perimeter so grass cannot cover the new square corners.
+No pool/coping geometry, material, module size, lighting, camera or data change.
+
+Typecheck and diff-check PASS.28targeted assertions execute the actual
+StudioPaving geometry callback for rectangle/L, rounded Skimmer/hidden overflow:
+outer vertex count stays4/6, inner junction is identical, and raycasts exclude
+grass over square paving corners. Integrated-browser visual PASS on a local
+rounded10x4.5mSkimmer fixture. Evidence: [paving corners](evidence/paving-square-corners-20261026/).
+No full build or broad audit repeated, no cloud write/email/merge/deploy.

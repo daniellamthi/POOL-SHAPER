@@ -1,0 +1,9 @@
+{
+  "typecheck": "PASS",
+  "diff_check": "PASS",
+  "geometry_checks": 28,
+  "cases": "Actual StudioPaving callback: rectangle/L with rounded Skimmer and hidden overflow",
+  "preserved": "Rounded basin/coping and exact inner paving junction",
+  "changed": "Square exterior paving perimeter and matching lawn hole",
+  "browser": "Existing integrated browser, local-only QA origin, 10x4.5m rounded Skimmer fixture; no cloud writes"
+}

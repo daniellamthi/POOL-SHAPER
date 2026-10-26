@@ -1,4 +1,5 @@
 import { exteriorPanelFinish } from "@/lib/pool/above-ground";
+import { buildOutline } from "@/lib/pool/geometry";
 import { decisions } from "./wizard/decisions";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
 import { configuredPerimeterLights, poolLedType } from "@/lib/pool/perimeter-lighting";
@@ -184,6 +185,11 @@ function ConfiguratorLayout() {
       config.copingMaterial,
       config.poolType,
     ],
+  );
+
+  const pavingOutline = useMemo(
+    () => buildOutline(config.shape, config.dimensions, config.controlPoints),
+    [config.shape, config.dimensions, config.controlPoints],
   );
 
   // Dimension/depth editing always shows live guides; optional detail views
@@ -614,6 +620,7 @@ function ConfiguratorLayout() {
         >
           <PoolViewport
             outline={outline}
+            pavingOutline={pavingOutline}
             shape={config.shape}
             system={config.system}
             overflowType={config.overflowType}

@@ -110,6 +110,8 @@ export type SceneTimeOfDay = "day" | "night";
 export interface SceneProps {
   construction?: import("@/lib/pool/construction-presentation").ConstructionPresentation;
   outline: Outline;
+  /** Unrounded design footprint for the exterior paving perimeter only. */
+  pavingOutline?: Outline | undefined;
   shape: PoolShapeId;
   system: SystemType;
   overflowType: OverflowType;
@@ -1143,6 +1145,7 @@ function StudioFloor({
 
 export default function PoolScene({
   outline,
+  pavingOutline,
   shape,
   system,
   overflowType,
@@ -1679,6 +1682,7 @@ export default function PoolScene({
       ) : (
           <StudioPaving
             outline={outline}
+            outerOutline={pavingOutline}
             poolType={poolType}
             system={system}
             overflowType={overflowType}

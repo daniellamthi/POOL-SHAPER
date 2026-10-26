@@ -187,6 +187,7 @@ const RetainedPavingSurfaces = memo(function RetainedPavingSurfaces({ descriptor
 
 export function StudioPaving({
   outline,
+  outerOutline = outline,
   poolType,
   system,
   overflowType,
@@ -203,6 +204,7 @@ export function StudioPaving({
   copingEdge,
 }: {
   outline: Outline;
+  outerOutline?: Outline | undefined;
   poolType: PoolType;
   system: SystemType;
   overflowType: OverflowType;
@@ -243,7 +245,9 @@ export function StudioPaving({
     const inner = integratedEdge ? outline : poolType === "in-ground"
       ? offsetOutline(outline, Math.max(0, studioDeckInnerOffset(poolType, system, overflowType, copingStyle) - .002)) : originalInner;
     const band = studioDeckBand(outline, environment, loungers);
-    const outer = studioDeckOutline(originalInner, band, furnitureRows);
+    // Keep the terrace corners independent from the rounded basin/coping.
+    const outerInner = offsetOutline(outerOutline, studioDeckInnerOffset(poolType, system, overflowType, copingStyle));
+    const outer = studioDeckOutline(outerInner, band, furnitureRows);
     const far: Outline = [
       [-150, -150],
       [150, -150],
@@ -258,7 +262,7 @@ export function StudioPaving({
       // that showed the basin shell at low cameras.
       ground: createSurfaceGeometry(
         far,
-        decking ? (furnitureRows.length || integratedEdge ? offsetOutline(outer, -0.04) : offsetOutline(inner, band - 0.04)) : inner,
+        decking ? offsetOutline(outer, -0.04) : inner,
       ),
     };
     if (import.meta.env.DEV) console.debug("[Pool3D ground build]", JSON.stringify({
@@ -266,7 +270,7 @@ export function StudioPaving({
       durationMs: Number((performance.now() - started).toFixed(2)),
     }));
     return result;
-  }, [outline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking, integratedEdge, copingStyle]);
+  }, [outline, outerOutline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking, integratedEdge, copingStyle]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
