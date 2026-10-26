@@ -3013,3 +3013,56 @@ outer vertex count stays4/6, inner junction is identical, and raycasts exclude
 grass over square paving corners. Integrated-browser visual PASS on a local
 rounded10x4.5mSkimmer fixture. Evidence: [paving corners](evidence/paving-square-corners-20261026/).
 No full build or broad audit repeated, no cloud write/email/merge/deploy.
+
+
+#### 26 October — premium follow-up: proposal comparison
+
+Owner authorised work on the premium gaps, deferring economic clarity and
+commercial/CRM continuity until last. Work proceeds one feature at a time.
+
+| Workstream | Current scope/status |
+|---|---|
+| Compare alternatives | Browser-local comparison implemented and verified below. Cloud comparison/export is not claimed. |
+| Customer's garden | OPEN: calibrated photo placement, then a separately validated AR path. |
+| Catalogue presentation | OPEN: improve scene composition/context using approved pool geometry. |
+| Customer-accessible photorealistic rendering | OPEN: validate supported scene fidelity and delivery/runtime before publication. |
+| Reliability | OPEN: existing physical-device baseline, candidate cloud/PDF, recovery, privacy operation and publication/email gates remain applicable. |
+| Pricing and commercial/CRM continuity | DEFERRED by owner; not part of this increment. |
+
+Comparison is available in Presentation → Summary and the renovation review.
+Up to three named, immutable design snapshots carry a fresh clean canvas image.
+A single HTML table derives all specifications from the existing bilingual summary
+model; duplicate labels (e.g. multiple included comfort/equipment choices) are
+aggregated rather than overwritten. Differences-only and full-detail views share
+that model. No second 3D canvas is created.
+
+Each project's browser-local board is isolated by project ID. Contact details and
+attachments are excluded from design snapshots and preserved from the current
+project when a proposal is applied. Applying keeps a persisted previous design;
+removal has an undo action. Storage is validated, capped at three proposals and
+checked for changes from another tab before writing. Failed writes do not apply
+a proposal. The UI explicitly says proposals are browser-local and are not part
+of the existing cloud share/PDF. No backend, cloud project or email operation.
+
+Applying/restoring a proposal invalidates only the current summary image.
+Capture requests from summary and comparison are serialized through the existing
+hero callback, preserving camera targets and keep-clean export behavior.
+A temporary broader hero invalidation was discarded because it would interfere
+with the existing day/night PDF capture sequence; useProjectDelivery is unchanged.
+
+Verification: TypeScript no-emit PASS; focused comparison runner PASS for snapshot
+isolation/normalization, identity/type guards, contact/attachment preservation,
+roundtrip/restore, malformed storage rejection, IT/EN differences, repeated labels
+and ordering; actual capture callback queue PASS for concurrent callers, keep-clean
+and error recovery. New source/runner ESLint and diff-check PASS. No full build or
+broad audit. Browser PASS on existing isolated local QA origin: three captures,
+material/day-night differences, apply/restore, remove/undo, full table, reload
+persistence, IT/EN and 390×844 mobile emulation. Confirmed summary image changes
+after applying a different material. An initially narrow mobile input and missing
+Remove translation were fixed and visually retested. Development-only HMR hook
+order errors from the discarded hook edit are preserved in the receipt; final
+clean reload plus apply/restore produced zero new console errors.
+
+Evidence: [proposal-comparison-20261026](evidence/proposal-comparison-20261026/).
+This is a scoped feature checkpoint, not completion of the wider premium goal or
+release approval. No merge, deploy, geometry/material/camera redesign or real email.

@@ -1,0 +1,200 @@
+- heading [level=1]: 3D Pool Configurator
+- banner:
+  - navigation:
+    - list:
+      - button:
+        - generic: Pool
+      - button:
+        - generic: Water system
+      - button:
+        - generic: Access & comfort
+      - button:
+        - generic: Finishes
+      - button:
+        - generic: Exterior
+      - button:
+        - generic: Options
+      - button:
+        - generic: Presentation
+  - button: IT
+  - button [pressed]: EN
+  - button [pressed]:
+    - generic: Day
+  - button:
+    - generic: Night
+  - button:
+- main:
+  - button:
+    - text: Pool view
+  - button:
+    - text: Reframe
+  - button:
+  - button:
+- region:
+  - paragraph: "Your finished pool: scene, summary and proposal request."
+  - tablist:
+    - tab: Scene
+    - tab [selected]: Summary
+    - tab: Request a proposal
+  - region:
+    - paragraph: Your project
+    - paragraph: Not saved yet
+    - paragraph: Save to receive a Project ID, return to it and share it.
+    - button:
+      - text: Save project
+    - button:
+      - text: Share
+    - button:
+      - text: Project Book PDF
+  - button [expanded]:
+    - text: Compare proposals (3)
+  - paragraph: Keep up to three alternatives and compare their differences.
+  - paragraph: Your project
+  - heading [level=2]: rectangular pool 10.00 × 4.50 m, depth 1.50 m
+  - paragraph: In-ground pool · Skimmer — classic edge · approx. 67 m³ of water
+  - paragraph: Project ID assigned when saved
+  - link:
+    - /url: "#pool-viewport"
+    - text: ↑ Expand pool
+  - heading [level=3]: Your pool
+  - button: Edit
+  - term: Type
+  - definition:
+    - generic: In-ground pool
+  - term: Structure
+  - definition:
+    - generic: Reinforced concrete
+  - term: Dimensions
+  - definition:
+    - generic: rectangular pool 10.00 × 4.50 m, depth 1.50 m
+  - heading [level=3]: Waterline
+  - button: Edit
+  - term: Hydraulic system
+  - definition:
+    - generic: Skimmer — classic edge
+  - term: Skimmer
+  - definition:
+    - generic: Slim / modern · White ABS
+  - heading [level=3]: Materials
+  - button: Edit
+  - term: Lining
+  - definition:
+    - generic: Motion Blue Sky [602]
+    - generic: Crystal-blue water tones
+  - term: Coping
+  - definition:
+    - generic: Travertine
+    - generic: Separate coping
+  - term: Pool corners
+  - definition:
+    - generic: Rounded
+    - generic: "Rounded pool corners: 20 cm radius."
+  - term: Paving
+  - definition:
+    - generic: Porcelain stoneware
+  - term: Paving size
+  - definition:
+    - generic: 60 × 120 cm
+    - generic: Reference dimensions for the visualisation; supply to be confirmed.
+  - heading [level=3]: Access and comfort
+  - button: Edit
+  - term: Included
+  - definition:
+    - generic: Integrated internal stairs — Straight internal stairs
+  - heading [level=3]: Lighting
+  - button: Edit
+  - term: Equipment
+  - definition:
+    - generic: Perimeter LED lighting
+  - term: Illuminated sides
+  - definition:
+    - generic: Side 1, Side 4
+  - term: LED strip length
+  - definition:
+    - generic: 14.3 m
+  - term: Selected colour
+  - definition:
+    - generic: "#FFFFFF"
+  - term: Light brightness
+  - definition:
+    - generic: 60%
+  - heading [level=3]: Presentation
+  - button: Edit
+  - term: Time of day
+  - definition:
+    - generic: Day
+  - generic: View technical details
+  - button:
+    - text: "Next option: Request a proposal"
+  - button:
+    - text: More options
+  - paragraph:
+    - text: Phase 07 of 07
+    - generic: · 2/3 · Summary
+  - heading [level=2]: Presentation
+  - paragraph: 10.0 × 4.5 m · ready for a proposal
+  - button:
+    - text: View the pool
+  - button [expanded]:
+    - text: Minimise
+  - button:
+    - text: Back
+  - button:
+    - text: Continue
+- region "Notifications alt+T"
+- dialog "Compare proposals":
+  - heading "Compare proposals" [level=2]
+  - paragraph: Proposals are kept only in this browser, separately from cloud saves. They are not included in the shared link or PDF.
+  - text: Proposal name
+  - textbox "Proposal name" [disabled]:
+    - /placeholder: E.g. Travertine and warm lights
+  - button "Add current configuration" [disabled]:
+    - text: Add current configuration
+  - paragraph: The current configuration is already in the comparison.
+  - status
+  - button "Restore previous configuration" [active]:
+    - text: Restore previous configuration
+  - checkbox "Show differences only" [checked]
+  - text: Show differences only
+  - paragraph: Scroll the table to the right to compare the other proposals.
+  - region "Proposal comparison table":
+    - table "Proposal comparison table":
+      - caption: Proposal comparison table
+      - rowgroup:
+        - row "Specifications Preview of Giorno · Travertino Giorno · Travertino In-ground pool · Skimmer — classic edge · approx. 67 m³ of water Use Giorno · Travertino Remove Giorno · Travertino Preview of Notte · LED perimetrali Notte · LED perimetrali In-ground pool · Skimmer — classic edge · approx. 67 m³ of water Use Notte · LED perimetrali Remove Notte · LED perimetrali Preview of Giorno · Pietra di Prun Giorno · Pietra di Prun In-ground pool · Skimmer — classic edge · approx. 67 m³ of water Use Giorno · Pietra di Prun Remove Giorno · Pietra di Prun":
+          - columnheader "Specifications"
+          - columnheader "Preview of Giorno · Travertino Giorno · Travertino In-ground pool · Skimmer — classic edge · approx. 67 m³ of water Use Giorno · Travertino Remove Giorno · Travertino":
+            - img "Preview of Giorno · Travertino"
+            - generic: Giorno · Travertino
+            - generic: In-ground pool · Skimmer — classic edge · approx. 67 m³ of water
+            - button "Use Giorno · Travertino" [disabled]: Current
+            - button "Remove Giorno · Travertino": Remove
+          - columnheader "Preview of Notte · LED perimetrali Notte · LED perimetrali In-ground pool · Skimmer — classic edge · approx. 67 m³ of water Use Notte · LED perimetrali Remove Notte · LED perimetrali":
+            - img "Preview of Notte · LED perimetrali"
+            - generic: Notte · LED perimetrali
+            - generic: In-ground pool · Skimmer — classic edge · approx. 67 m³ of water
+            - button "Use Notte · LED perimetrali": Use proposal
+            - button "Remove Notte · LED perimetrali": Remove
+          - columnheader "Preview of Giorno · Pietra di Prun Giorno · Pietra di Prun In-ground pool · Skimmer — classic edge · approx. 67 m³ of water Use Giorno · Pietra di Prun Remove Giorno · Pietra di Prun":
+            - img "Preview of Giorno · Pietra di Prun"
+            - generic: Giorno · Pietra di Prun
+            - generic: In-ground pool · Skimmer — classic edge · approx. 67 m³ of water
+            - button "Use Giorno · Pietra di Prun": Use proposal
+            - button "Remove Giorno · Pietra di Prun": Remove
+      - rowgroup:
+        - row "Materials Coping Travertine · Separate coping Travertine · Separate coping Pietra di Prun · Separate coping":
+          - rowheader "Materials Coping":
+            - generic: Materials
+            - text: Coping
+          - cell "Travertine · Separate coping"
+          - cell "Travertine · Separate coping"
+          - cell "Pietra di Prun · Separate coping"
+        - row "Presentation Time of day Day Night Day":
+          - rowheader "Presentation Time of day":
+            - generic: Presentation
+            - text: Time of day
+          - cell "Day"
+          - cell "Night"
+          - cell "Day"
+  - button "Close":
+    - generic: Close

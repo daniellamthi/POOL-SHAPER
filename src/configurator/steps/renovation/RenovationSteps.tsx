@@ -19,6 +19,7 @@ import { getCustomerValidation } from "@/lib/pool/validation";
 import type { RenovationConfig } from "@/lib/pool/types";
 import { RENOVATION_AREA_LABEL, FILTRATION_WORK_LABEL, STRUCTURE_ISSUE_LABEL, EQUIPMENT_UPGRADE_LABEL } from "@/lib/lead/renovationLabels";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
+import { ProposalComparison } from "@/components/pool/delivery/ProposalComparison";
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
 import { ProjectDeliveryPanel } from "@/components/pool/delivery/ProjectDelivery";
 import { useProjectDelivery } from "@/components/pool/delivery/useProjectDelivery";
@@ -214,6 +215,7 @@ export function RenovationReviewStep({ ctx }: { ctx: TrayContext }) {
   const delivery = useProjectDelivery();
   return <div className={body}>
     <ProjectDeliveryPanel delivery={delivery} captureHero={ctx.captureHero} captureDayNight={ctx.captureDayNight} />
+    <ProposalComparison captureHero={ctx.captureHero} onApplied={() => delivery.setHeroUrl(null)} />
     <ProjectSummary publicRef={delivery.link?.publicRef} heroUrl={delivery.heroUrl} />
     <section className="flex flex-col gap-3 border-t border-hairline pt-5">
       <h3 className="text-[20px] font-light">{t("Richiedi una proposta di ristrutturazione")}</h3>

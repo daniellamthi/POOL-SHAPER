@@ -1,0 +1,208 @@
+- heading [level=1]: Configuratore piscine 3D
+- banner:
+  - navigation:
+    - list:
+      - button:
+        - generic: Piscina
+        - generic: Cemento armato · 10,0 × 4,5 m
+      - button:
+        - generic: Sistema acqua
+        - generic: Skimmer · Slim Moderno
+      - button:
+        - generic: Accesso & comfort
+        - generic: Scala interna
+      - button:
+        - generic: Finiture
+        - generic: Liner PVC · Blue Sky [602]
+      - button:
+        - generic: Esterno
+        - generic: Travertino · Gres porcellanato · 60 × 120 cm
+      - button:
+        - generic: Optional
+        - generic: Nessun optional
+      - button:
+        - generic: Presentazione
+        - generic: In corso
+  - button [pressed]: IT
+  - button: EN
+  - button [pressed]:
+    - generic: Giorno
+  - button:
+    - generic: Notte
+  - button:
+- main:
+  - button:
+    - text: Vista piscina
+  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+  - toolbar:
+    - button:
+      - text: Guide
+    - button:
+      - text: Vista tecnica
+    - button:
+      - text: Riquadra
+- region:
+  - paragraph: "La tua piscina finita: scena, riepilogo e richiesta di proposta."
+  - tablist:
+    - tab: Scena
+    - tab [selected]: Riepilogo
+    - tab: Richiedi proposta
+  - region:
+    - paragraph: Il tuo progetto
+    - paragraph: Non ancora salvato
+    - paragraph: Salva per ricevere un Project ID, riprenderlo e condividerlo.
+    - button:
+      - text: Salva progetto
+    - button:
+      - text: Condividi
+    - button:
+      - text: Project Book PDF
+  - button [expanded]:
+    - text: Confronta proposte (3)
+  - paragraph: Conserva fino a tre alternative e confronta le differenze.
+  - paragraph: Il tuo progetto
+  - heading [level=2]: Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m
+  - paragraph: Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua
+  - paragraph: Project ID assegnato al salvataggio
+  - heading [level=3]: La tua piscina
+  - button: Modifica
+  - term: Tipologia
+  - definition:
+    - generic: Piscina interrata
+  - term: Struttura
+  - definition:
+    - generic: Cemento armato
+  - term: Dimensioni
+  - definition:
+    - generic: Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m
+  - heading [level=3]: Linea d'acqua
+  - button: Modifica
+  - term: Sistema idraulico
+  - definition:
+    - generic: Skimmer — bordo classico
+  - term: Skimmer
+  - definition:
+    - generic: Slim / moderno · Bianco ABS
+  - heading [level=3]: Materiali
+  - button: Modifica
+  - term: Rivestimento
+  - definition:
+    - generic: Motion Blue Sky [602]
+    - generic: Acqua dalle tonalità azzurro cristallino
+  - term: Bordo
+  - definition:
+    - generic: Travertino
+    - generic: Bordo dedicato
+  - term: Angoli della vasca
+  - definition:
+    - generic: Arrotondato
+    - generic: "Angoli vasca arrotondati: raggio 20 cm."
+  - term: Pavimentazione
+  - definition:
+    - generic: Gres porcellanato
+  - term: Formato pavimentazione
+  - definition:
+    - generic: 60 × 120 cm
+    - generic: Dimensioni di riferimento della visualizzazione; fornitura da confermare.
+  - heading [level=3]: Accesso e comfort
+  - button: Modifica
+  - term: Incluso
+  - definition:
+    - generic: Scala interna integrata — Scala interna rettilinea
+  - heading [level=3]: Illuminazione
+  - button: Modifica
+  - term: Impianto
+  - definition:
+    - generic: Illuminazione perimetrale a LED
+  - term: Lati illuminati
+  - definition:
+    - generic: Lato 1, Lato 4
+  - term: Lunghezza fascia LED
+  - definition:
+    - generic: 14,3 m
+  - term: Colore selezionato
+  - definition:
+    - generic: "#FFFFFF"
+  - term: Intensità luce
+  - definition:
+    - generic: 60%
+  - heading [level=3]: Presentazione
+  - button: Modifica
+  - term: Momento
+  - definition:
+    - generic: Giorno
+  - generic: Scopri i dettagli tecnici
+  - button:
+    - text: "Prossima scelta: Richiedi proposta"
+  - button:
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 07 di 07
+    - generic: · 2/3 · Riepilogo
+  - heading [level=2]: Presentazione
+  - paragraph: 10,0 × 4,5 m · pronta per la proposta
+  - button:
+    - text: Vedi la piscina
+  - button [expanded]:
+    - text: Riduci
+  - button:
+    - text: Indietro
+  - button:
+    - text: Continua
+    - generic: · Richiedi proposta
+- region "Notifications alt+T"
+- dialog "Confronta proposte":
+  - heading "Confronta proposte" [level=2]
+  - paragraph: Proposte conservate solo in questo browser, separate dal salvataggio cloud. Non sono incluse nel link condiviso o nel PDF.
+  - text: Nome della proposta
+  - textbox "Nome della proposta" [disabled]:
+    - /placeholder: Es. Travertino e luci calde
+  - button "Aggiungi configurazione attuale" [disabled]:
+    - text: Aggiungi configurazione attuale
+  - paragraph: La configurazione attuale è già nel confronto.
+  - status: Configurazione precedente ripristinata.
+  - button "Ripristina configurazione precedente" [active]:
+    - text: Ripristina configurazione precedente
+  - checkbox "Mostra solo le differenze" [checked]
+  - text: Mostra solo le differenze
+  - region "Tabella confronto proposte":
+    - table "Tabella confronto proposte":
+      - caption: Tabella confronto proposte
+      - rowgroup:
+        - row "Caratteristiche Anteprima di Giorno · Travertino Giorno · Travertino Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua Usa Giorno · Travertino Rimuovi Giorno · Travertino Anteprima di Notte · LED perimetrali Notte · LED perimetrali Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua Usa Notte · LED perimetrali Rimuovi Notte · LED perimetrali Anteprima di Giorno · Pietra di Prun Giorno · Pietra di Prun Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua Usa Giorno · Pietra di Prun Rimuovi Giorno · Pietra di Prun":
+          - columnheader "Caratteristiche"
+          - columnheader "Anteprima di Giorno · Travertino Giorno · Travertino Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua Usa Giorno · Travertino Rimuovi Giorno · Travertino":
+            - img "Anteprima di Giorno · Travertino"
+            - generic: Giorno · Travertino
+            - generic: Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua
+            - button "Usa Giorno · Travertino" [disabled]: Attuale
+            - button "Rimuovi Giorno · Travertino": Rimuovi
+          - columnheader "Anteprima di Notte · LED perimetrali Notte · LED perimetrali Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua Usa Notte · LED perimetrali Rimuovi Notte · LED perimetrali":
+            - img "Anteprima di Notte · LED perimetrali"
+            - generic: Notte · LED perimetrali
+            - generic: Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua
+            - button "Usa Notte · LED perimetrali": Usa proposta
+            - button "Rimuovi Notte · LED perimetrali": Rimuovi
+          - columnheader "Anteprima di Giorno · Pietra di Prun Giorno · Pietra di Prun Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua Usa Giorno · Pietra di Prun Rimuovi Giorno · Pietra di Prun":
+            - img "Anteprima di Giorno · Pietra di Prun"
+            - generic: Giorno · Pietra di Prun
+            - generic: Piscina interrata · Skimmer — bordo classico · circa 67 m³ d'acqua
+            - button "Usa Giorno · Pietra di Prun": Usa proposta
+            - button "Rimuovi Giorno · Pietra di Prun": Rimuovi
+      - rowgroup:
+        - row "Materiali Bordo Travertino · Bordo dedicato Travertino · Bordo dedicato Pietra di Prun · Bordo dedicato":
+          - rowheader "Materiali Bordo":
+            - generic: Materiali
+            - text: Bordo
+          - cell "Travertino · Bordo dedicato"
+          - cell "Travertino · Bordo dedicato"
+          - cell "Pietra di Prun · Bordo dedicato"
+        - row "Presentazione Momento Giorno Notte Giorno":
+          - rowheader "Presentazione Momento":
+            - generic: Presentazione
+            - text: Momento
+          - cell "Giorno"
+          - cell "Notte"
+          - cell "Giorno"
+  - button "Chiudi":
+    - generic: Chiudi

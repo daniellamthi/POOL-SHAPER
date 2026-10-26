@@ -1,0 +1,59 @@
+{
+  "scope": "local QA origin, no cloud operations",
+  "checks": [
+    "three proposals with live scene captures",
+    "material and day/night differences",
+    "all rows toggle",
+    "apply and restore on desktop and mobile",
+    "remove and undo",
+    "reload persistence",
+    "IT/EN",
+    "390x844 emulated mobile",
+    "summary image refreshed after apply"
+  ],
+  "summaryImageRefreshed": true,
+  "consoleErrors": [],
+  "limitations": [
+    "browser-local only; no comparison cloud/PDF export",
+    "mobile emulation, not physical-device performance"
+  ],
+  "developmentHmrErrors": [
+    {
+      "level": "error",
+      "message": "React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks\n\n   Previous render            Next render\n   ------------------------------------------------------\n%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n PresentationTray 1. useContext                 useContext\n2. useContext                 useContext\n3. useContext                 useContext\n4. useState                   useState\n5. useState                   useState\n6. useState                   useState\n7. useState                   useState\n8. useState                   useState\n9. useCallback                useRef\n",
+      "timestamp": "2026-10-26T14:44:15.326Z",
+      "url": "http://lighting-qa-20261026.localhost:3003/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "TypeError: Cannot read properties of undefined (reading 'length')\n    at areHookInputsEqual (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3949:33)\n    at updateEffectImpl (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4606:45)\n    at Object.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:13129:5)\n    at exports.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react.js?v=ffd1c934:716:31)\n    at useProjectDelivery (http://lighting-qa-20261026.localhost:3003/src/components/pool/delivery/useProjectDelivery.ts?t=1793025855076:24:2)\n    at PresentationTray (http://lighting-qa-20261026.localhost:3003/src/components/pool/wizard/StepTrays.tsx?t=1793025855076:2622:19)\n    at Object.react_stack_bottom_frame (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:12618:12)\n    at renderWithHooksAgain (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4020:16)\n    at renderWithHooks (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3971:17)\n    at updateFunctionComponent (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:5321:16)",
+      "timestamp": "2026-10-26T14:44:15.334Z",
+      "url": "http://lighting-qa-20261026.localhost:3003/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "TypeError: Cannot read properties of undefined (reading 'length')\n    at areHookInputsEqual (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3949:33)\n    at updateEffectImpl (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4606:45)\n    at Object.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:13129:5)\n    at exports.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react.js?v=ffd1c934:716:31)\n    at useProjectDelivery (http://lighting-qa-20261026.localhost:3003/src/components/pool/delivery/useProjectDelivery.ts?t=1793025855076:24:2)\n    at PresentationTray (http://lighting-qa-20261026.localhost:3003/src/components/pool/wizard/StepTrays.tsx?t=1793025855076:2622:19)\n    at Object.react_stack_bottom_frame (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:12618:12)\n    at renderWithHooksAgain (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4020:16)\n    at renderWithHooks (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3971:17)\n    at updateFunctionComponent (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:5321:16)",
+      "timestamp": "2026-10-26T14:44:15.334Z",
+      "url": "http://lighting-qa-20261026.localhost:3003/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "TypeError: Cannot read properties of undefined (reading 'length')\n    at areHookInputsEqual (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3949:33)\n    at updateEffectImpl (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4606:45)\n    at Object.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:13129:5)\n    at exports.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react.js?v=ffd1c934:716:31)\n    at useProjectDelivery (http://lighting-qa-20261026.localhost:3003/src/components/pool/delivery/useProjectDelivery.ts?t=1793025855076:24:2)\n    at PresentationTray (http://lighting-qa-20261026.localhost:3003/src/components/pool/wizard/StepTrays.tsx?t=1793025855076:2622:19)\n    at Object.react_stack_bottom_frame (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:12618:12)\n    at renderWithHooksAgain (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4020:16)\n    at renderWithHooks (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3971:17)\n    at updateFunctionComponent (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:5321:16)",
+      "timestamp": "2026-10-26T14:44:15.334Z",
+      "url": "http://lighting-qa-20261026.localhost:3003/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "TypeError: Cannot read properties of undefined (reading 'length')\n    at areHookInputsEqual (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3949:33)\n    at updateEffectImpl (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4606:45)\n    at Object.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:13129:5)\n    at exports.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react.js?v=ffd1c934:716:31)\n    at useProjectDelivery (http://lighting-qa-20261026.localhost:3003/src/components/pool/delivery/useProjectDelivery.ts?t=1793025855076:24:2)\n    at PresentationTray (http://lighting-qa-20261026.localhost:3003/src/components/pool/wizard/StepTrays.tsx?t=1793025855076:2622:19)\n    at Object.react_stack_bottom_frame (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:12618:12)\n    at renderWithHooksAgain (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4020:16)\n    at renderWithHooks (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3971:17)\n    at updateFunctionComponent (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:5321:16)",
+      "timestamp": "2026-10-26T14:44:15.360Z",
+      "url": "http://lighting-qa-20261026.localhost:3003/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "%o\n\n%s\n\n%s\n TypeError: Cannot read properties of undefined (reading 'length')\n    at areHookInputsEqual (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3949:33)\n    at updateEffectImpl (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4606:45)\n    at Object.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:13129:5)\n    at exports.useEffect (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react.js?v=ffd1c934:716:31)\n    at useProjectDelivery (http://lighting-qa-20261026.localhost:3003/src/components/pool/delivery/useProjectDelivery.ts?t=1793025855076:24:2)\n    at PresentationTray (http://lighting-qa-20261026.localhost:3003/src/components/pool/wizard/StepTrays.tsx?t=1793025855076:2622:19)\n    at Object.react_stack_bottom_frame (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:12618:12)\n    at renderWithHooksAgain (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:4020:16)\n    at renderWithHooks (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:3971:17)\n    at updateFunctionComponent (http://lighting-qa-20261026.localhost:3003/node_modules/.vite/deps/react-dom_client.js?v=ffd1c934:5321:16) The above error occurred in the <PresentationTray> component. React will try to recreate this component tree from scratch using the error boundary you provided, CatchBoundary.",
+      "timestamp": "2026-10-26T14:44:15.361Z",
+      "url": "http://lighting-qa-20261026.localhost:3003/@vite/client"
+    }
+  ],
+  "finalReloadAt": "2026-10-26T14:49:34.821Z"
+}

@@ -221,22 +221,30 @@ function ConfiguratorLayout() {
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
   // Build 2 · clean hero: reframe to the whole-pool hero, let the scripted
   // flight start (the camera leaves its idle state) and settle, then capture.
-  const captureHero = useCallback(async (keepCleanCapture = false) => {
-    setCleanCapture(true);
-    setInspectionView("review");
-    reframe();
-    const started = Date.now();
-    while (renderQualityState.idle && Date.now() - started < 3000) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-    try {
-      return await requestHeroCapture();
-    } finally {
-      if (!keepCleanCapture) {
-        setCleanCapture(false);
-        reframe();
+  const captureQueue = useRef<Promise<string | null>>(Promise.resolve(null));
+  const captureHero = useCallback((keepCleanCapture = false) => {
+    // Summary, proposal comparison and export share one canvas capture channel.
+    // Queue requests so none replaces another pending capture callback.
+    const run = async () => {
+      setCleanCapture(true);
+      setInspectionView("review");
+      reframe();
+      const started = Date.now();
+      while (renderQualityState.idle && Date.now() - started < 3000) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
-    }
+      try {
+        return await requestHeroCapture();
+      } finally {
+        if (!keepCleanCapture) {
+          setCleanCapture(false);
+          reframe();
+        }
+      }
+    };
+    const pending = captureQueue.current.then(run, run);
+    captureQueue.current = pending;
+    return pending;
   }, [reframe]);
   /** Project Book "Presentazione": the same configuration and view, by day
    * and by night. Only the presentation time changes, and it is restored. */

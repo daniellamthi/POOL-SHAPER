@@ -37,6 +37,7 @@ import { InfinitySideSelector } from "@/configurator/steps/pool-system/InfinityS
 import { LedColorWheel } from "@/configurator/steps/pool-features/LedColorWheel";
 import { LedIntensityControl } from "@/configurator/steps/pool-features/LedIntensityControl";
 import { LeadRequestDialog } from "@/configurator/steps/final-review/LeadRequestDialog";
+import { ProposalComparison } from "@/components/pool/delivery/ProposalComparison";
 import { ProjectSummary } from "@/components/pool/ProjectSummary";
 import { ProjectDeliveryPanel } from "@/components/pool/delivery/ProjectDelivery";
 import type { DayNightCapture } from "@/lib/project-delivery/heroCapture";
@@ -1372,6 +1373,7 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
             captureHero={ctx.captureHero}
             captureDayNight={ctx.captureDayNight}
           />
+          <ProposalComparison captureHero={ctx.captureHero} onApplied={() => delivery.setHeroUrl(null)} />
           <ProjectSummary publicRef={delivery.link?.publicRef} heroUrl={delivery.heroUrl} />
         </div>
       ) : (
