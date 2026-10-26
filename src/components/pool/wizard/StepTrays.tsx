@@ -5,7 +5,7 @@ import { decisions, type DecisionProps } from "./decisions";
 import { ArrowRight, Check, Moon, Plus, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfigurator } from "@/lib/pool/context";
-import { integratedCoping, supportsCopingStyle, supportsCopingEdge } from "@/lib/pool/coping-style";
+import { integratedCoping, supportsCopingEdge } from "@/lib/pool/coping-style";
 import {
   EQUIPMENT,
   LINER_COLORS,
@@ -1114,7 +1114,7 @@ const PAVING_IMAGES: Record<string, string | undefined> = {
 
 export function DeckTray({ tab, setTab }: DecisionProps) {
   const { t } = useI18n();
-  const { config, setCopingMaterial, setCopingStyle, setCopingEdge, setPaving, setPavingFormat } = useConfigurator();
+  const { config, setCopingMaterial, setCopingEdge, setPaving, setPavingFormat } = useConfigurator();
   const deckCoping = integratedCoping(config);
   const layout = pavingLayout(config.paving, config.pavingFormat);
   const copingVisible = !(config.system === "overflow" && config.overflowType === "visible");
@@ -1139,12 +1139,6 @@ export function DeckTray({ tab, setTab }: DecisionProps) {
       />
       {tab === "coping" && copingVisible ? (
         <div className="space-y-4">
-        {supportsCopingStyle(config) ? <ChoiceGrid label={t("Tipo di bordo")}>
-          <ChoiceCard title={t("Bordo dedicato")} description={t(config.shape === "rectangle" ? "Angoli vasca arrotondati R20 cm, finitura del bordo indipendente." : "Finitura del bordo indipendente dalla pavimentazione.")}
-            image="/product-previews/coping-dedicated.jpg" selected={!deckCoping} onSelect={() => setCopingStyle("dedicated")} />
-          <ChoiceCard title={t("Bordo filo pavimentazione")} description={t("Un unico piano e la stessa finitura della pavimentazione.")}
-            image="/product-previews/coping-flush.jpg" selected={deckCoping} onSelect={() => setCopingStyle("flush")} />
-        </ChoiceGrid> : null}
         {supportsCopingEdge(config) ? <ChoiceGrid label={t("Angoli della vasca")} dense>
           {(["square", "rounded"] as const).map(edge => <ChoiceCard compact key={edge}
             title={t(edge === "square" ? "Retto" : "Arrotondato")}

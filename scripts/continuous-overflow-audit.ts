@@ -17,6 +17,8 @@ import { projectMetrics } from "../src/lib/pool/project-metrics";
 import { formatLeadEmail } from "../src/lib/lead/formatLeadEmail";
 import { concealedOverflowSection } from "../src/components/pool/three/poolConstruction";
 import { createBeveledRingGeometry } from "../src/components/pool/three/poolGeometry";
+import { integratedCoping, copingEdgeRadius } from "../src/lib/pool/coping-style";
+import { copingOuterOffset } from "../src/components/pool/three/poolConstruction";
 import { OVERFLOW_GEOMETRY } from "../src/lib/pool/config";
 
 let checks = 0;
@@ -123,4 +125,15 @@ for (const [id, label] of [["hidden", "Sfioro a bordo continuo"], ["continuous",
   check(restored.config.overflowType === id, "commercial rename preserves saved technical identity");
   check(JSON.stringify(buildProjectSummary(restored)).includes(label), "PDF and summary follow swapped commercial labels");
 }
+for (const copingStyle of [undefined, "dedicated", "flush"] as const) {
+  const edge = {poolType:"in-ground", system:"overflow", overflowType:"continuous", copingStyle} as const;
+  check(integratedCoping(edge), "concealed edge always uses the paving, including stored dedicated style");
+  check(copingOuterOffset(edge.system, edge.overflowType, copingStyle) === 0, "no separate coping band");
+  check(studioDeckInnerOffset(edge.poolType, edge.system, edge.overflowType, copingStyle) === 0, "paving reaches the actual basin outline");
+  check(copingEdgeRadius(edge) === .006, "rounded paving nose retained");
+  check(getPoolVerticalLayout({...edge, depth:1.5, copingThickness:.055}).copingY === 0, "single ground-level paving datum");
+}
+check(!integratedCoping({poolType:"in-ground",system:"skimmer",overflowType:"continuous"}), "Skimmer stays unchanged");
+check(!integratedCoping({poolType:"in-ground",system:"overflow",overflowType:"hidden"}), "other continuous-stone overflow stays unchanged");
+check(!integratedCoping({poolType:"above-ground",system:"overflow",overflowType:"continuous"}), "raised pools stay unchanged");
 console.log(`Continuous overflow: ${checks} checks PASS (local; no cloud writes or emails).`);

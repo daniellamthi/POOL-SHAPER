@@ -15,5 +15,7 @@ export const copingEdgeRadius = (config: CopingSystem & { copingEdge?: CopingEdg
   supportsCopingStyle(config) ? COPING_EDGE_RADIUS : supportsCopingEdge(config)
     ? config.copingEdge === "rounded" ? COPING_EDGE_RADIUS : .0018 : undefined;
 export function integratedCoping(config: Pick<PoolConfig, "poolType" | "system" | "overflowType"> & { copingStyle?: CopingStyle | undefined }) {
-  return supportsCopingStyle(config) && config.copingStyle !== "dedicated";
+  // Concealed overflow is one continuous paving surface, including legacy
+  // projects that stored a dedicated coping selection.
+  return supportsCopingStyle(config);
 }

@@ -3191,3 +3191,22 @@ Remaining: owner approval of this illustrative context, broader catalogue shot
 composition and validated render/export delivery. Existing real-hardware,
 cloud/PDF, restore, privacy and release gates remain OPEN. Pricing/CRM remain
 deferred. No broad build/audit, backend mutation, email, merge or deploy performed.
+
+
+### 26 October — concealed overflow unified with paving
+
+Owner-requested correction: the commercial “Sfioro nascosto” (technical ID
+continuous) always uses the paving surface through its rounded 6 mm basin-side
+nose, at ground level. Removed the independent coping choice and the separate
+32 cm ring even for stored copingStyle=dedicated. Paving material, format, grid
+and joints now continue to the basin outline. Existing basin corner shape and
+square exterior terrace corners are retained. Other overflow variants, Skimmer,
+Infinity, above-ground pools and water/collector elevations are unchanged.
+
+Verification: typecheck PASS; targeted continuous-overflow audit 774 checks PASS,
+including legacy styles, zero offset, common datum, retained roundover and other
+system exclusions. Integrated-browser visual PASS with the 10×4.5 m fixture,
+Gres 60×120: one surface at the water edge and no separate coping-material choice.
+Console errors zero. Evidence: evidence/hidden-overflow-unified-20261026.png.
+The unrelated reference-environment WIP and its open gates remain uncommitted.
+No deploy, merge, cloud mutation or email.

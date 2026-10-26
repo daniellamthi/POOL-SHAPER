@@ -24,8 +24,8 @@ export function concealedOverflowSection(wallTopY: number, copingThickness: numb
 }
 
 /** Architectural presentation only; never changes basin dimensions or quotation logic. */
-export function copingOuterOffset(system: SystemType, overflow: OverflowType, style?: import("@/lib/pool/coping-style").CopingStyle) {
-  if (system === "overflow" && overflow === "continuous") return style === "dedicated" ? .32 : 0;
+export function copingOuterOffset(system: SystemType, overflow: OverflowType, _style?: import("@/lib/pool/coping-style").CopingStyle) {
+  if (system === "overflow" && overflow === "continuous") return 0;
   // The deck meets the grille directly: no separate masonry border.
   if (system === "overflow" && overflow === "visible")
     return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;

@@ -75,7 +75,7 @@ console.log(JSON.stringify({ status: "PASS", cases, baseline, evidence }));
 for (const [length, width] of [[6, 3], [8, 4], [12, 5]]) {
   const outline = [[-length / 2, -width / 2], [length / 2, -width / 2], [length / 2, width / 2], [-length / 2, width / 2]];
   assert.equal(api.copingOuterOffset("overflow", "continuous"), 0, "legacy concealed overflow keeps integrated paving");
-  assert.equal(api.copingOuterOffset("overflow", "continuous", "dedicated"), .32, "explicit separate rim has a real width");
+  assert.equal(api.copingOuterOffset("overflow", "continuous", "dedicated"), 0, "legacy rim selection also joins the continuous paving");
   const g = api.createCopingSlabGeometry(outline, api.offsetOutline(outline, .32), .055);
   const material = new MeshBasicMaterial({ side: DoubleSide }), mesh = new Mesh(g, material);
   mesh.updateMatrixWorld();
