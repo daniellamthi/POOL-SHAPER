@@ -1,6 +1,6 @@
 # POOL-SHAPER — final customer QA / release readiness
 
-**Current working state: 8 November 2026 — scoped UI checks PASS; owner-authorized public Preview refresh in progress. Release prerequisites remain open.**
+**Current working state: 8 November 2026 — scoped UI checks PASS; owner-authorized public Preview refreshed and verified. Release prerequisites remain open.**
 Base before this checkpoint: `0bb0dd596081045fb8c6d79d03f1d9c60713f008`
 (`fix: unify concealed overflow edge with paving`, 26 October).
 The owner now explicitly requests committing/pushing the current implementation and
@@ -5013,8 +5013,10 @@ Existing WIP preserved; operational branch/head unchanged. No commit/push pendin
 
 Owner explicitly requested commit/push and updating the existing configuratoree.vercel.app, then opening it in the integrated browser. Verified operational branch and origin still at0bb0dd596081045fb8c6d79d03f1d9c60713f008 before checkpoint. Existing alias belongs to pool-shaper/prj_7YBi77yut3hUk4PvaoB3oQNv9is2, team_DWydw06SFQBNFE4wL9KZFAhY and previously pointed atdpl_39fdUof7n8snmrPPQnFYLNwPXDcH. Scope is that existing Preview alias, preserving its public access and environment; no main merge or Production promotion.
 
-All503 runtime/public source files match the native-tested QA snapshot byte for byte. Credential-pattern scan of197 candidate text files PASS. Latest source/type/QA production-build and native receipts remain applicable because runtime bytes did not change after testing. Commit includes current runtime/assets, relevant scripts and the four latest targeted QA evidence sets.1050 historical raw evidence files remain untouched locally and in the persistent full-WIP backup. APFS copy-on-write backup preserves all1257 initially untracked files plus tracked patch/status while avoiding a second physical548MB archive on the nearly full volume.
+All503 runtime/public source files match the native-tested QA snapshot byte for byte. Credential-pattern scan of201 candidate text files PASS. Latest source/type/QA production-build and native receipts remain applicable because runtime bytes did not change after testing. Commit includes current runtime/assets, relevant scripts and the four latest targeted QA evidence sets.1050 historical raw evidence files remain untouched locally and in the persistent full-WIP backup. APFS copy-on-write backup preserves all1257 initially untracked files plus tracked patch/status while avoiding a second physical548MB archive on the nearly full volume.
 
 Publication/build/anonymous-access and native online verification are recorded after the deploy in the publication receipt. Wider release gates remain open; no backend/Supabase action, real email, DNS or project-wide protection change is authorized or performed by this checkpoint.
 
 Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/vercel-checkpoint-20261108/publication-plan.json.
+
+Public Preview completed: runtime commit `ff353b37cce8b6881974c605792795f25f900000` pushed normally to the operational branch and verified identical on origin. Automatic Git-source Vercel build `dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1` is READY with that exact commit. Existing `https://configuratoree.vercel.app/` now points to this deployment; previous deployment retained as rollback target. Anonymous HTTP GET returned200 without cookies, authentication or bypass headers; entry CSS/JS assets also returned200. Native IAB reload restored the saved project; latest access copy, fixed mini-plan, selected SX, disabled DX and actual technical reason observed. Browser error log empty. Public tab shown and marked deliverable. No runtime change after the validated checkpoint. Final publication/HTTP/screenshot receipts are in the same evidence directory. Historical raw QA evidence remains local and backed up; the worktree is not globally clean. Whole-product launch gates remain open.

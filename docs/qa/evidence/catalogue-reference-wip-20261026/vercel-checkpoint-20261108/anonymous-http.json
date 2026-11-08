@@ -1,0 +1,32 @@
+{
+  "recorded": "2026-11-08T20:51:16.424075+00:00",
+  "url": "https://configuratoree.vercel.app/",
+  "status": 200,
+  "title": [
+    "Pool Studio \u2014 Configuratore piscine 3D"
+  ],
+  "cookies_sent": false,
+  "auth_or_bypass_sent": false,
+  "assets": [
+    {
+      "path": "/assets/styles-B8sh_qI4.css",
+      "status": 200,
+      "bytes": 121922
+    },
+    {
+      "path": "/assets/routes-C6SATnXE.css",
+      "status": 200,
+      "bytes": 10022
+    },
+    {
+      "path": "/assets/index-DSKuy8HI.js",
+      "status": 200,
+      "bytes": 458948
+    },
+    {
+      "path": "/assets/rolldown-runtime-hePW80VL.js",
+      "status": 200,
+      "bytes": 716
+    }
+  ]
+}

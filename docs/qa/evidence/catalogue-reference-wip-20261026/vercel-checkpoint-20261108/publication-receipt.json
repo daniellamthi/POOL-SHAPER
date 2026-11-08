@@ -1,0 +1,28 @@
+{
+  "runtimeCommit": "ff353b37cce8b6881974c605792795f25f900000",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "projectId": "prj_7YBi77yut3hUk4PvaoB3oQNv9is2",
+  "teamId": "team_DWydw06SFQBNFE4wL9KZFAhY",
+  "deploymentId": "dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1",
+  "deploymentUrl": "pool-shaper-dfyxukv4p-daniellamthis-projects.vercel.app",
+  "readyState": "READY",
+  "target": null,
+  "githubCommitSha": "ff353b37cce8b6881974c605792795f25f900000",
+  "alias": {
+    "alias": "configuratoree.vercel.app",
+    "deploymentId": "dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1"
+  },
+  "native": {
+    "url": "https://configuratoree.vercel.app/",
+    "snapshotVerified": [
+      "Saved project restored",
+      "Updated compatibility copy",
+      "Fixed-orientation access plan",
+      "SX/DX enabled and disabled states with actual reason"
+    ],
+    "consoleErrors": [],
+    "screenshot": "public-final.png"
+  },
+  "scope": "Existing public Preview alias updated; no main merge, Production promotion, DNS, backend, email or project protection change.",
+  "recordedAt": "2026-11-08T20:52:55.969Z"
+}
