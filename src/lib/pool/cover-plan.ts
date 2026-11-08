@@ -2,8 +2,7 @@ import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { copingOuterOffset } from "@/components/pool/three/poolConstruction";
 import { outlineBounds } from "./geometry";
 import { configuredOutline } from "./configured-outline";
-import { planSkimmers } from "./engineering";
-import { configuredPoolLayout } from "./resolved-layout";
+import { configuredLayoutWithSkimmers } from "./resolved-layout";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import type { PoolConfig } from "./types";
 
@@ -74,15 +73,18 @@ export function resolveAutomaticCover(config: PoolConfig): CoverPlan {
   else if (bounds.spanX < 5.5 || bounds.spanZ < 2.5)
     reason = "Luce libera insufficiente per questo modello di copertura.";
   if (enabled && !reason) {
-    const skimmers = config.system === "skimmer"
-      ? planSkimmers(outline, bounds.spanX * bounds.spanZ, true).positions
-      : [];
-    const comfort = configuredPoolLayout(config).comfort.elements
+    const resolved = configuredLayoutWithSkimmers(config);
+    const skimmers = config.system === "skimmer" ? resolved.skimmers.positions : [];
+    const comfort = resolved.layout.comfort.elements
       .filter((element) => element.kind === "sunShelf" || element.kind === "hydromassage");
     const conflict = (side: "minX" | "maxX") => {
       const edgeX = side === "minX" ? bounds.minX : bounds.maxX;
       return skimmers.some((point) => Math.abs(point.x - edgeX) < 0.36) ||
         comfort.some((element) => {
+          // A wholly submerged shelf stays below the cover's swept mat and
+          // the outside roller; its plan footprint is not an emerged obstacle.
+          const highest = Math.max(element.topY, ...(element.steps ?? []).map(step => step.topY), element.landing?.topY ?? -Infinity);
+          if (element.kind === "sunShelf" && highest < waterY - 0.03) return false;
           const b = outlineBounds(element.footprint);
           return Math.abs((side === "minX" ? b.minX : b.maxX) - edgeX) < 0.08;
         });

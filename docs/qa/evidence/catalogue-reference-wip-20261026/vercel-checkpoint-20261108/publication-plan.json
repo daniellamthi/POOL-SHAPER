@@ -1,0 +1,14 @@
+{
+  "recorded": "2026-11-08T20:47:08.466526+00:00",
+  "authorization": "Owner explicitly requested commit, push and refresh of existing configuratoree.vercel.app preview, then opening in IAB. This does not close outstanding launch/operational gates.",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "baseHead": "0bb0dd596081045fb8c6d79d03f1d9c60713f008",
+  "project": "prj_7YBi77yut3hUk4PvaoB3oQNv9is2",
+  "team": "team_DWydw06SFQBNFE4wL9KZFAhY",
+  "alias": "https://configuratoree.vercel.app/",
+  "environment": "Existing Preview, no production promotion or main merge",
+  "previousDeployment": "dpl_39fdUof7n8snmrPPQnFYLNwPXDcH",
+  "backup": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/vercel-checkpoint-20261108-zzxhyivb",
+  "backupMethod": "APFS copy-on-write clones of all1257 untracked files plus tracked.patch and original status; original workspace untouched",
+  "scope": "Current runtime/public assets, implementation checks and four most recent targeted QA receipts.1050 historical raw QA evidence files remain local and in durable backup. No credentials, .env values, backend operations, mail, DNS or project protection changes."
+}

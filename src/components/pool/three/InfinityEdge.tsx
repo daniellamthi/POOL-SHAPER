@@ -93,7 +93,7 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
       <WaterSurfaceMaterial waterLevel={waterLevel - assembly.dims.dropHeight / 2} reflections={false} depth={0.003} fallingFilm />
     </mesh>
     <mesh name="infinity-contained-receiver-water" geometry={assembly.receiver} renderOrder={2}>
-      <WaterSurfaceMaterial waterLevel={assembly.levels.receiverY} reflections={false} depth={assembly.dims.catchBasinDepth} flowing />
+      <WaterSurfaceMaterial waterLevel={assembly.levels.receiverY} reflections={false} depth={assembly.dims.catchBasinDepth} flowing receivingFlow />
     </mesh>
     </> : null}
   </group>;

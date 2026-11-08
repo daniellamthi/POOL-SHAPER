@@ -1,8 +1,7 @@
+import { configuredSkimmerPlan } from "../src/lib/pool/resolved-layout";
 import assert from "node:assert/strict";
 import { DEFAULT_CONTROL_POINTS, DEFAULT_CUSTOMER, DEFAULT_DIMENSIONS } from "../src/lib/pool/config";
 import { resolveAutomaticCover } from "../src/lib/pool/cover-plan";
-import { buildOutline } from "../src/lib/pool/geometry";
-import { planSkimmers } from "../src/lib/pool/engineering";
 import type { PoolConfig } from "../src/lib/pool/types";
 
 const base: PoolConfig = {
@@ -32,8 +31,7 @@ for (const length of [6, 8, 10, 12]) for (const width of [3, 4.5, 6]) {
         assert.ok(plan.slatRun > 0);
         assert.ok(plan.housingY > plan.waterY);
         if (system === "skimmer") {
-          const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
-          const positions = planSkimmers(outline, length * width, true).positions;
+          const positions = configuredSkimmerPlan(config).positions;
           const wallX = plan.housingSide === "minX" ? plan.footprint.minX : plan.footprint.maxX;
           assert.ok(positions.every((point) => Math.abs(point.x - wallX) >= 0.36), "roller must not share a skimmer wall");
         }

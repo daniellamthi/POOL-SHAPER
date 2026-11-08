@@ -1,0 +1,113 @@
+{
+  "date": "2026-11-08T19:38:56.721977+00:00",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "head": "0bb0dd596081045fb8c6d79d03f1d9c60713f008",
+  "source_sha256": {
+    "src/lib/pool/store.tsx": "5c3cbe794209322d3c25c4cee5d7b7cc59a1452c7f875e0ea5ab76fb392e71b3",
+    "src/components/pool/wizard/StepTrays.tsx": "1404eda34df4002a6c71c9654ff93f284984dfe35c5d798ac9a7bb90f05c4021",
+    "src/components/pool/DimensionControl.tsx": "568d0b64debb65d310c1a220488ed7c1ef1e410d010db35d8a6ab9965e8eeb23",
+    "src/components/pool/InternalStairSideControl.tsx": "686d6ad6bc450c202f150dd8422b77263478af3907f60d89e145b0e7bfe89c0b",
+    "src/lib/pool/internal-stair-options.ts": "266feaa917e88c57798febf384982cec4b35874a06cca8b4d3e8c53ac2780050",
+    "src/lib/i18n/messages.ts": "02ca166aec1b84725a6ff9bbd7e9c9726cf1a8a743eb764323334bfddbb5888e",
+    "src/lib/pool/contextual-camera.ts": "f87bb8eab7ca1d49c31662fcc783357947f531a99f87c8bcffb544d8e6e1aa59",
+    "src/components/pool/AccessPlanPreview.tsx": "08ddfcea8e57e1c3955723d968dc0e106281ae969cd50a3887ddb80e325e103a"
+  },
+  "sources_equal_final_qa_build": true,
+  "scope": [
+    "access completion live and restore uses actual active comfort availability",
+    "selected unavailable cover has explanation and removal",
+    "actual fixed-orientation access mini-plan and live dimensions",
+    "specific disabled-option reasons, retained comfort cards and explicit recovery",
+    "numeric clamp feedback",
+    "only necessary active-tab proposal derivation"
+  ],
+  "verification": {
+    "restore_access": 11,
+    "mini_real_ssr_focus_translation": 22,
+    "cover_actual_controlled_component": 7,
+    "dimension_actual_controlled_component": 11,
+    "stair_options_regression": 112,
+    "stair_width_regression": 305,
+    "typecheck": "PASS scoped8 source dependencies",
+    "diffcheck": "PASS targeted",
+    "qa_production_build": "PASS"
+  },
+  "performance": {
+    "scope": "Node controlled actual AccessTray derivation changing width; not child render/GPU/FPS/hardware acceptance",
+    "baseline_median_ms": 5.243249999999989,
+    "candidate_median_ms": 1.96875,
+    "baseline_p95_ms": 6.239584000000036,
+    "candidate_p95_ms": 2.312665999999979,
+    "iterations_per_run": 40,
+    "visible_4tab_snapshot_identical": true
+  },
+  "native_browser": {
+    "status": "PASS, scoped",
+    "verified_at": "2026-11-08T20:13:12.531269+00:00",
+    "previous_attempt": {
+      "status": "PENDING",
+      "reason": "Existing localhost tabs are browser error documents; one acquisition was rejected by browser URL policy. No alternate browser or policy bypass attempted. Owner asked to reload manually; response pending.",
+      "next": [
+        "repeat retained-invalid25x4.5 wizard and restore",
+        "Infinity selected cover reason and removal",
+        "SX/DX mini and first manual top view preserved",
+        "width input clamp message and quote update",
+        "IT/EN desktop and390x844 mobile emulation"
+      ]
+    },
+    "url": "http://localhost:3004/",
+    "viewports": [
+      "955x927 desktop",
+      "390x844 mobile emulation"
+    ],
+    "observed": [
+      "First SX/DX after manually selected top view preserves projection; straight row and mini track actual sides",
+      "Corner preview and actual opposite-head fitting positions shown",
+      "Out-of-range6m width adapts to2.67m with clear IT/EN message and updated mini width",
+      "Retained-invalid25x4.5m shelf/corner capacity: last Access Continue and later stages disabled; reload restores Access and preserved choices",
+      "Specific capacity reasons on disabled SX/DX and retained selected Shelf card; recovery control visible",
+      "Selected cover then Infinity side2: Da verificare, technical reason and explicit removal; removal actually returns Nessun optional",
+      "390x844 IT/EN labels and mini readable, document width equals viewport390; Tab L\u2192R and Enter select",
+      "Shelf3.5m update changes mini remaining swim6.5m; original3.035m restored",
+      "All observed final browser error log entries empty"
+    ],
+    "handoff": "10x5m, Straight DX2.5m, Shelf3.035m, two lime loungers, original mosaico5, cover removed, IT/Day, top view; temporary viewport override reset",
+    "limits": [
+      "Emulated mobile is not real phone hardware or stable GPU/FPS acceptance",
+      "Native existing-pool/renovation flow not separately repeated",
+      "No cloud, PDF, long photo render, email or final proposal submission in this follow-up"
+    ]
+  },
+  "release": "Scoped native interaction/visual follow-up passed. Existing whole-WIP release gates remain open. No commit/push/deploy/merge/email/backend changes; public unchanged.",
+  "files": [
+    "changes.patch",
+    "access-red.log",
+    "access-final.log",
+    "cover-ui-red.log",
+    "cover-ui-final.log",
+    "wizard-compatibility.log",
+    "mini-plan.log",
+    "stair-options.log",
+    "stair-width.log",
+    "dimension-input.log",
+    "derivation-before.json",
+    "derivation-after.json",
+    "derivation-baseline-repeat.json",
+    "access-benchmark.ts",
+    "run-benchmark.mjs",
+    "typecheck.log",
+    "qa-build.log",
+    "source-files.json",
+    "native-linear-sx.png",
+    "native-mini-plan.png",
+    "native-clamp-dx.png",
+    "native-corner-sx.png",
+    "native-gate-blocked.png",
+    "native-cover-reason.png",
+    "native-mobile-it.png",
+    "native-mobile-en-clamp.png",
+    "native-mobile-plan-en.png",
+    "native-final-preview.png",
+    "native-errors.json"
+  ]
+}

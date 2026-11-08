@@ -1,0 +1,26 @@
+{
+  "denoiser-0.0.11.mjs": {
+    "bytes": 3817334,
+    "sha256": "e29a88880da7f5f1f5d5578c82aaa6df754e511d62e5da9f5c263ededacc67c5"
+  },
+  "rt_hdr.tza": {
+    "bytes": 1830792,
+    "sha256": "a097e8fe9b1ba71ec43cde3e6df3fcf54fa4f8f2f4dd41eac01d0a76a16261e3"
+  },
+  "hdr-transfer.js": {
+    "bytes": 1893,
+    "sha256": "1d292d0827dbec4e46d2a733dd8e0cede6f0340ea32e156d01141a4b00279053"
+  },
+  "LICENSE-denoiser.txt": {
+    "bytes": 1091,
+    "sha256": "901255f8ad04afc58dad5094cb08cf82b65b4781e88009265eb63bb4f95bc7f2"
+  },
+  "LICENSE-hdr-transfer.txt": {
+    "bytes": 1064,
+    "sha256": "796fc206ee19a2765298a5ab41e43f3edd1479c9e3a76efd79a99f719ce87498"
+  },
+  "LICENSE-Apache-2.0.txt": {
+    "bytes": 11358,
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  }
+}

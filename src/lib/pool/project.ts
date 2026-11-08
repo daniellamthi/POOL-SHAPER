@@ -213,6 +213,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
     externalStairSide: _savedStairSide,
     externalStairPlatformExtended: _savedStairPlatform,
     internalStairMirrored: _savedStairMirror,
+    internalStairWidth: savedStairWidth,
     ...restoredWithoutEdge
   } = restored;
   return {
@@ -243,7 +244,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
         ? { externalStairSide: externalStairSide(restored.externalStairSide) }
         : {}),
       ...(restored.poolType === "above-ground" ? { externalStairPlatformExtended: true } : {}),
-      ...(typeof restored.internalStairMirrored === "boolean" && restored.poolType === "above-ground"
+      ...(typeof restored.internalStairMirrored === "boolean"
         ? { internalStairMirrored: restored.internalStairMirrored } : {}),
       ...(restored.poolType === "above-ground" && restored.poolAccess === "stainlessSteelLadder"
         ? { poolAccess: null } : {}),
@@ -254,6 +255,8 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       // Same reasoning for the staircase variant: a project saved before the
       // corner flight existed comes back as the straight one it was drawn with.
       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
+      ...(typeof savedStairWidth === "number" && Number.isFinite(savedStairWidth) && savedStairWidth >= 0.8 && savedStairWidth <= 100
+        ? { internalStairWidth: savedStairWidth } : {}),
       // Unknown values restore as the default closed tub; absent stays absent.
       ...(restored.hydromassageVariant !== undefined
         ? { hydromassageVariant: restored.hydromassageVariant === "open" ? "open" : "closed" }

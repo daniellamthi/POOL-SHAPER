@@ -20,7 +20,7 @@ import { ReferencePavingMaterial } from "./ReferencePavingMaterial";
 import { createPavingModules, type PavingOptions } from "./pavingGeometry";
 import { samplePavingWood, samplePavingGres, WOOD_GRAIN_SCALE } from "./pavingTexture";
 import { createSurfaceGeometry } from "./poolGeometry";
-import { studioDeckBand, studioDeckInnerOffset, studioDeckOutline, type DeckFurnitureSide } from "./studioDeck";
+import { studioDeckBand, studioDeckInnerOffset, studioDeckOutline, extendStudioDeckToRoom, type DeckFurnitureSide } from "./studioDeck";
 import { createLimestoneMaps, createPrunMaps, createWPCMaps, configureExteriorRoughness, legacyMineralTextureUrl, legacyMineralTextureScale, LEGACY_MINERAL_SAMPLER_REVISION } from "./stoneTextures";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
@@ -205,8 +205,14 @@ export function StudioPaving({
   topY = 0,
   copingStyle,
   copingEdge,
+  groundBoundary,
+  pavingBoundary,
+  matteGrass = false,
 }: {
   outline: Outline;
+  groundBoundary?: Outline | undefined;
+  pavingBoundary?: Outline | undefined;
+  matteGrass?: boolean;
   outerOutline?: Outline | undefined;
   poolType: PoolType;
   system: SystemType;
@@ -252,7 +258,7 @@ export function StudioPaving({
     const band = studioDeckBand(outline, environment, loungers);
     // Keep the terrace corners independent from the rounded basin/coping.
     const outerInner = offsetOutline(outerOutline, studioDeckInnerOffset(poolType, system, overflowType, copingStyle));
-    const outer = studioDeckOutline(outerInner, band, furnitureRows);
+    const outer = extendStudioDeckToRoom(studioDeckOutline(outerInner, band, furnitureRows), pavingBoundary);
     const far: Outline = [
       [-150, -150],
       [150, -150],
@@ -266,7 +272,7 @@ export function StudioPaving({
       // sits under the slabs: an exactly matching edge left a hairline crack
       // that showed the basin shell at low cameras.
       ground: createSurfaceGeometry(
-        far,
+        groundBoundary ?? far,
         decking ? offsetOutline(outer, -0.04) : inner,
       ),
     };
@@ -275,7 +281,7 @@ export function StudioPaving({
       durationMs: Number((performance.now() - started).toFixed(2)),
     }));
     return result;
-  }, [outline, outerOutline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking, integratedEdge, copingStyle]);
+  }, [outline, outerOutline, poolType, system, overflowType, module, boards, environment, loungers, furnitureRows, decking, integratedEdge, copingStyle, groundBoundary, pavingBoundary]);
   // The renderer caches stationary shadows. A new footprint must invalidate
   // that cache, otherwise the old basin silhouette remains on the new paving.
   useEffect(() => {
@@ -295,7 +301,7 @@ export function StudioPaving({
     onBeforeCompile={dry} customProgramCacheKey={dryKey} />;
   return (
     <group name="premium-configuration-studio">
-      {patio && !hideGround && decking ? <CataloguePatio terrace={geometry.outer} occupied={patio.occupied} direction={patio.direction} /> : null}
+      {patio && !hideGround && decking ? <CataloguePatio terrace={geometry.outer} occupied={patio.occupied} direction={patio.direction} waterY={waterY} /> : null}
       <mesh
         visible={!hideGround}
         name={environment ? "studio-lawn" : "studio-ground"}
@@ -304,7 +310,7 @@ export function StudioPaving({
         receiveShadow
       >
         <Suspense fallback={plainGround}>
-          {environment || grassPrepared ? <NaturalGrassMaterial active={environment} waterY={waterY} /> : plainGround}
+          {environment || grassPrepared ? <NaturalGrassMaterial active={environment} waterY={waterY} matte={matteGrass} /> : plainGround}
         </Suspense>
       </mesh>
       {decking || pavingPrepared ? (

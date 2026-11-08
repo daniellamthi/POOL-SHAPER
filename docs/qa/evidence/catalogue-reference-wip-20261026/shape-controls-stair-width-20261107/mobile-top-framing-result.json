@@ -1,0 +1,42 @@
+{
+  "checks": 13,
+  "raw": {
+    "left": 0,
+    "top": 187,
+    "width": 172.921875,
+    "height": 143.40625
+  },
+  "frame": {
+    "left": 0,
+    "top": 187,
+    "width": 172.921875,
+    "height": 143.40625
+  },
+  "frustum": {
+    "width": 20.220759493670887,
+    "height": 43.759797468354435,
+    "centre": [
+      5.627544303797468,
+      8.466632911392406
+    ]
+  },
+  "poolPixels": 77.1484375,
+  "renovation": {
+    "left": 0,
+    "top": 191,
+    "width": 390,
+    "height": 139.40625
+  },
+  "ordinary": {
+    "left": 0,
+    "top": 191,
+    "width": 207.71875,
+    "height": 139.40625
+  },
+  "desktop": {
+    "left": 0,
+    "top": 144,
+    "width": 1095,
+    "height": 398
+  }
+}

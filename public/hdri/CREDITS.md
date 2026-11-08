@@ -20,3 +20,13 @@ buildings, terrain) into the pool scene's reflections -- see
   Used by the interactive renderer for PBR lighting and water reflections.
   The photographed surroundings are reflection-only: the main camera retains
   a clean procedural sky, without adding houses, landscaping or furniture.
+
+- `catalogue-garden-2k.hdr` — ["Symmetrical Garden 02"](https://polyhaven.com/a/symmetrical_garden_02),
+  Dimitrios Savva (photography), Jarod Guest (processing), CC0.
+  Source: https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/symmetrical_garden_02_2k.hdr
+  Original 2048×1024 HDR retained without pixel editing, 6,782,916 bytes.
+  SHA-256: `f14afaeb4ddd5ed4624b459a87f44cfc8215d4346fac0bb72304348c9a15dec7`.
+  Used for the illustrative private-residence and hotel-spa daylight settings:
+  backdrop, reflections and Photo Mode lighting. Spa reflections still include
+  their metric room geometry. Distant photographic landscape is not a metric
+  site-survey representation. General configurator and night skies unchanged.

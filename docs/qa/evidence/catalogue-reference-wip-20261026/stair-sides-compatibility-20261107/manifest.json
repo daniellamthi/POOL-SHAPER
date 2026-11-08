@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-07",
+  "head": "0bb0dd596081045fb8c6d79d03f1d9c60713f008",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "sourceHashes": {
+    "src/components/pool/InternalStairSideControl.tsx": "833fc33dee8c5fcb5ecda391e06ce41407f84833ff079aae98ce1815d3549aa8",
+    "src/components/pool/PoolConfigurator.tsx": "c2c0d52a8085b6664df847c91eb471881eccca6c8ae8ff9d27ec35105ff878c0",
+    "src/components/pool/wizard/StepTrays.tsx": "2f1b1cdccee2077ed44f19b5e1adcc6ea285a31e3bb76bf75b97a8fc73d88143",
+    "src/configurator/steps/renovation/RenovationSteps.tsx": "7a2e6569b8c99ea66ddd398b49d67b7c1ca1e3e94c0ad7f115aa0d8ec705a810",
+    "src/lib/i18n/messages.ts": "ee8f2da0e6ba2f4c6b5aea9bae5c1f4a9b5963c2816b44e57552d46740582ef4",
+    "src/lib/pool/comfort-plan.ts": "deefbd4cad18556005ce41dc8f7a7fd6b75695a16f2848f9f86d2e5d4cc7a84f",
+    "src/lib/pool/internal-stair-options.ts": "64ad5a553092c6e2f8c12f4dc0ab3e0473ef16e21176131ee48c7ec966eda118",
+    "src/lib/pool/project.ts": "4fea801b5dcc4b9a36a49be75d794e5d9455378643aa44a11408352522ea189e",
+    "src/lib/pool/renovation.ts": "a4ad7499e534c03e8718ebc16db265dbbc8271ef5dfc144d5dc07ba9886b8633",
+    "src/lib/pool/resolved-layout.ts": "f1293777c152e2af38ff7db4c8ad7c5c0ce2f23b1356bd86d8ad7d89652ee853",
+    "src/lib/pool/store.tsx": "1230d6aee569b82a60c71d050d14f23320b3ab1bd847055f24be675e25fd3f6c",
+    "src/lib/pool/types.ts": "7c4cfc93ce6a3c83dfeb7cdabb4ec9dca876a569936cb99974583987be790459",
+    "src/lib/project-delivery/service.ts": "0ee322b2b653be3836964b3e0eea030f4e4d0a4b471f506d2577c2dd940c2dca",
+    "src/lib/project-delivery/summary-model.ts": "1e4530f39237d20e3beb90eeceaf927930d25bcafbfda7419e1e98c249ff6d45",
+    "src/lib/pool/camera.ts": "6429a57d7c0bf7df1e4d2467ac338437dbb6c4767e9d81855b8527e481e49c54",
+    "src/lib/pool/internal-stair-width.ts": "5f656bcdc6ede718d5b3f2291fb72cbee182a2be9b815c383ecff035d9e3b4ef"
+  },
+  "checks": {
+    "optionsAndCombinations": 112,
+    "existingWidthRegression": 305,
+    "sourceTypecheck": "16 sources plus resolved dependencies PASS",
+    "qaBuild": "PASS; existing isolated production-style runtime on localhost3004",
+    "sourceEquality": "all 16 changed sources identical ROOT/QA",
+    "nativeDesktop": [
+      "straight SX and DX change real flight",
+      "corner SX and DX change real radial flight",
+      "straight + shelf then corner + shelf while preserving selected shelf",
+      "hydro selection sets corner; straight remains visible and disabled with reason",
+      "shelf and hydro combined views contain the selected independent corner stair",
+      "reload preserves corner + DX + hydromassage A"
+    ],
+    "nativeEmulation390x844": [
+      "Italian SX/DX and English L/R fit without document horizontal overflow",
+      "Tab from L reaches R; Enter selects R",
+      "standard focus and pressed-state feedback"
+    ],
+    "limits": [
+      "mobile emulation is not real hardware",
+      "renovation side serialization/preview/Share tested locally; native renovation UI not separately repeated",
+      "Share allowlist and JSON round trips are local tests, not a cloud round trip",
+      "summary data model IT/EN tested; PDF download not repeated",
+      "broader whole-WIP gates remain open; no public update, commit/push, backend or email"
+    ]
+  },
+  "toolNote": "Bipe Creator exact-name plugin/skill not found in connected tools/local skill catalog; implemented with available VB, incremental implementation, interaction and pool-modeling skills."
+}

@@ -1,5 +1,5 @@
 import { resolveComfortPlan, normalizeComfortFeatures, type ComfortPlan } from "./comfort-plan";
-import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
+import { ACCESS_DIMENSIONS, resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
 import { accessMounting } from "./access-plan";
 import { planSceneLighting, type SceneLightingPlan } from "./lighting-plan";
 import { buildFloorProfile } from "./floor-profile";
@@ -36,6 +36,7 @@ export interface ResolvedPoolLayout {
 }
 type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   stairMirrored?: boolean;
+  stairWidth?: number | undefined;
   shape: PoolShapeId;
   poolType: PoolType;
   features: ReadonlyArray<PoolFeatureId>;
@@ -62,14 +63,22 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
   const wantsFlightZone = features.includes("sunShelf") || features.includes("hydromassage");
   const missingShelfLanding =
     wantsFlightZone && input.floorProfile.sloped && !input.floorProfile.shelfZone;
+  const incompatibleHydro = input.access === "internalSteps" && input.stairType !== "corner" && features.includes("hydromassage");
+  const separateCorner = input.poolType === "in-ground" && input.access === "internalSteps" && input.stairType === "corner";
   const comfort = resolveComfortPlan({
     ...input,
-    separateHydroAccess: input.poolType === "in-ground" && input.access === "internalSteps" && input.stairType === "corner",
+    stairWidth: separateCorner ? undefined : input.stairWidth,
+    stairMirrored: separateCorner ? false : !!input.stairMirrored,
+    separateShelfAccess: separateCorner,
+    separateHydroAccess: separateCorner,
     waterY: input.layout.waterY,
     enabled: missingShelfLanding
       ? features.filter((feature) => feature !== "sunShelf" && feature !== "hydromassage")
-      : features,
+      : incompatibleHydro ? features.filter(feature => feature !== "hydromassage") : features,
   });
+  if (incompatibleHydro) {
+    comfort.availability.hydromassage = { available: false, reason: "L’idromassaggio richiede la scala angolare. Scegli Angolare oppure abbina la rettilinea alla spiaggetta." };
+  }
   if (missingShelfLanding) {
     const reason =
       "Profondità o spazio insufficienti per scala e pianerottolo regolari prima della pendenza.";
@@ -78,7 +87,7 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
       comfort.availability.hydromassage = { available: false, reason };
   }
   const integrated = comfort.elements.some(
-    (element) => element.kind === "sunShelf" || (element.kind === "hydromassage" && !!element.steps?.length),
+    (element) => (element.kind === "sunShelf" || element.kind === "hydromassage") && !!element.steps?.length,
   );
   const ladderAsAddon = input.poolType !== "above-ground" && input.access === "internalSteps" && features.includes("inoxLadder");
   const effectiveAccess = (input.poolType === "above-ground" && input.access === "stainlessSteelLadder") ||
@@ -94,9 +103,16 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
       ...mounting,
       rectangularCorner: input.poolType === "above-ground",
     };
-    const normal=resolveAccessPlan(request);
-    if(input.poolType!=="above-ground" || !input.stairMirrored || access!=="internalSteps" || !normal.placement) return normal;
-    const bounds=outlineBounds(input.outline),p=normal.placement,longX=bounds.spanX>=bounds.spanZ;
+    // Keep the chosen head-wall corner while widening, rather than jumping to a different wall.
+    const automatic = input.stairWidth !== undefined && access === "internalSteps" && input.stairType !== "corner"
+      ? resolveAccessPlan({ ...request, stairWidth: undefined }) : null;
+    const normal=resolveAccessPlan({ ...request, ...(automatic?.placement ? { stairWidthAnchor: automatic.footprint } : {}) });
+    // On a shelf layout the fitting row adapts to the entrance, never the
+    // reverse: derive the mirror anchor without the newly moved skimmers.
+    const mirrorSource = input.stairMirrored && access === "internalSteps" && comfort.elements.some(element => element.kind === "sunShelf")
+      ? resolveAccessPlan({ ...request, obstacles: [] }) : normal;
+    if(!input.stairMirrored || access!=="internalSteps" || !mirrorSource.placement) return normal;
+    const bounds=outlineBounds(input.outline),p=mirrorSource.placement,longX=bounds.spanX>=bounds.spanZ;
     return resolveAccessPlan({...request,mirrorAnchor:{
       x:longX?p.x:bounds.minX+bounds.maxX-p.x,
       z:longX?bounds.minZ+bounds.maxZ-p.z:p.z,
@@ -128,6 +144,8 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
     fallback.comfort.availability[activeComfort.kind] = { available: false, reason };
     return { ...fallback, status: "UNAVAILABLE" };
   }
+  if (input.skimmers.reason && features.includes("sunShelf"))
+    comfort.availability.sunShelf = { available: false, reason: input.skimmers.reason };
   const lighting = planSceneLighting({
     ...input,
     resolvedAccess: access,
@@ -163,7 +181,7 @@ export function configuredStairMicroSpots(config: PoolConfig): ReadonlyArray<Sta
   return config.features.includes("stairLighting") ? configuredPoolLayout(config).stairMicroSpots : [];
 }
 
-export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
+export function configuredLayoutWithSkimmers(config: PoolConfig) {
   const outline = configuredOutline(config);
   const poolType = config.poolType ?? "in-ground";
   const layout = getPoolVerticalLayout({
@@ -184,7 +202,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     twoLoungerShelf: config.features.includes("sunShelf"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
-  return resolvePoolLayout({
+  const input: LayoutInput = {
     outline,
     poolType,
     layout,
@@ -200,6 +218,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     infinityWallType: config.system === "infinity" ? config.infinityEdge?.wallType : undefined,
     access: config.poolAccess,
     stairType: config.internalStairType ?? "linear",
+    stairWidth: config.internalStairWidth,
     stairMirrored: !!config.internalStairMirrored,
     skimmers: planSkimmers(
       outline,
@@ -210,5 +229,33 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
       config.system === "infinity" && config.infinityEdge
         ? infinityExclusion(outline, config.infinityEdge, config.shape)
         : null,
+  };
+  if (config.system !== "skimmer" || !config.features.includes("sunShelf"))
+    return { layout: resolvePoolLayout(input), skimmers: input.skimmers };
+  // The entrance/platform owns its geometry. Place fittings after resolving it,
+  // then use the same final row for access validation, lighting and the scene.
+  const preliminary = resolvePoolLayout({ ...input, skimmers: { ...input.skimmers, positions: [] } });
+  const shelf = preliminary.comfort.elements.find(element => element.kind === "sunShelf");
+  if (!shelf || !preliminary.comfort.availability.sunShelf.available)
+    return { layout: resolvePoolLayout(input), skimmers: input.skimmers };
+  const bounds = outlineBounds(outline), platform = outlineBounds(shelf.footprint);
+  const longX = bounds.spanX >= bounds.spanZ;
+  const min = longX ? bounds.minX : bounds.minZ, max = longX ? bounds.maxX : bounds.maxZ;
+  const nearMin = Math.abs((longX ? platform.minX : platform.minZ)-min) < Math.abs((longX ? platform.maxX : platform.maxZ)-max);
+  const skimmers = planSkimmers(outline, computeMetrics(outline,config.dimensions.depth).waterSurface, true, null, {
+    head: { axis: longX ? "x" : "z", coordinate: nearMin ? max : min },
+    reserved: [...comfortFootprints(preliminary.comfort),
+      ...(preliminary.access.placement ? [preliminary.access.footprint] : []),
+      ...(preliminary.ladder?.plan.placement ? [preliminary.ladder.plan.footprint] : [])],
+    clearance: ACCESS_DIMENSIONS.fittingClearance + 1e-5,
   });
+  return { layout: resolvePoolLayout({ ...input, skimmers }), skimmers };
+}
+
+export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
+  return configuredLayoutWithSkimmers(config).layout;
+}
+
+export function configuredSkimmerPlan(config: PoolConfig) {
+  return configuredLayoutWithSkimmers(config).skimmers;
 }

@@ -230,6 +230,27 @@ export function resolveSunShelfLoungers({
   const adjusted = enabled && requested > candidates.length;
   // Keep requested quantity in configuration, never render a misleading partial order.
   const count = enabled && !adjusted ? requested : 0;
+  const selected = candidates.slice(0, count);
+  const centered = new Map<SunShelfLoungerPlacement, SunShelfLoungerPlacement>();
+  // Repack the requested quantity within each usable row. Taking only the
+  // middle slots of a full-capacity row offsets odd/even quantity changes.
+  for (const [lo, hi] of free) {
+    const cross = (placement: SunShelfLoungerPlacement) => alongX ? placement.z : placement.x;
+    const row = selected.filter(placement => cross(placement) >= lo && cross(placement) <= hi)
+      .sort((a, b) => cross(a) - cross(b));
+    const occupied = row.length * width + Math.max(0, row.length - 1) * between;
+    const first = (lo + hi - occupied + width) / 2;
+    const packed = row.map((placement, index) => {
+      const delta = first + index * (width + between) - cross(placement);
+      const dx = alongX ? 0 : delta, dz = alongX ? delta : 0;
+      return { ...placement, x: placement.x + dx, z: placement.z + dz,
+        footprint: placement.footprint.map(([x, z]) => [x + dx, z + dz] as const) };
+    });
+    // An Infinity exclusion may narrow an otherwise free row. Retain the
+    // original safe positions if its full centred group would cross that edge.
+    if (packed.every(placement => clearOfInfinityEdge(outline, infinityExcluded, placement.footprint)))
+      row.forEach((placement, index) => centered.set(placement, packed[index]!));
+  }
   return {
     available: true,
     enabled: count > 0,
@@ -237,7 +258,7 @@ export function resolveSunShelfLoungers({
     count,
     adjusted,
     ...(adjusted ? { reason: "Quantità lettini non compatibile con lo spazio attuale. Riduci la quantità o ripristina le dimensioni." } : {}),
-    placements: candidates.slice(0, count),
+    placements: selected.map(placement => centered.get(placement) ?? placement),
     passage: rectangle(route),
   };
 }

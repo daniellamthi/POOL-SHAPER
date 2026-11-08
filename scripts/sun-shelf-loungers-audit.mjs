@@ -245,6 +245,24 @@ check(
   "reject depth beyond manufacturer 20 cm",
 );
 check(resolveSunShelfLoungers({ ...input, quantity: 1 }).count === 1, "requested one");
+// Reducing quantity must recalculate the row, not choose an off-centre subset.
+for (const swap of [false,true]) for (const mirror of [-1,1]) {
+  const map=points=>points.map(([x,z])=>swap?[z,x*mirror]:[x*mirror,z]);
+  const c={...comfort,elements:comfort.elements.map(e=>({...e,footprint:map(e.footprint),landing:{...e.landing,footprint:map(e.landing.footprint)}}))};
+  const i={...input,comfort:c,outline:map(input.outline)},full=resolveSunShelfLoungers(i);
+  const cross=p=>swap?p.x:p.z;
+  const centre=full.placements.reduce((sum,p)=>sum+cross(p),0)/full.count;
+  check(full.capacity>=2,'centering fixture has multiple possible slots');
+  for(let quantity=1;quantity<=full.capacity;quantity++) {
+    const plan=resolveSunShelfLoungers({...i,quantity});
+    check(plan.count===quantity,'selected quantity remains exact');
+    const mean=plan.placements.reduce((sum,p)=>sum+cross(p),0)/plan.count;
+    check(Math.abs(mean-centre)<1e-7,'actual requested chaise row remains centred in usable shelf width, mirrored and rotated');
+    const ordered=plan.placements.map(cross).sort((a,b)=>a-b);
+    for(let n=1;n<ordered.length;n++)check(Math.abs(ordered[n]-ordered[n-1]-model.width-margins.between)<1e-7,'reduced row retains metric between-chair gap');
+  }
+}
+
 check(
   resolveSunShelfLoungers({ ...input, accessFootprints: [comfort.elements[0].footprint] }).count ===
     0,

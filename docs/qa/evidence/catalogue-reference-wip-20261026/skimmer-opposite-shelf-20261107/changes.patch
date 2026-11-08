@@ -1,0 +1,422 @@
+--- before/src/lib/pool/engineering.ts
++++ after/src/lib/pool/engineering.ts
+@@ -9,6 +9,8 @@
+   positions: ReadonlyArray<{ x: number; z: number; rotation: number }>;
+   spacing: number;
+   cornerDistance: number;
++  /** A requested wall cannot hold the complete hydraulic row. */
++  reason?: string;
+ }
+ 
+ /** Existing hydraulic sizing retained; this is indicative configuration, not certification. */
+@@ -17,10 +19,12 @@
+   waterSurface: number,
+   enabled = true,
+   infinityExcluded: InfinityExclusion | null = null,
++  placement?: { head: { axis: "x" | "z"; coordinate: number }; reserved: ReadonlyArray<Outline>; clearance: number },
+ ): SkimmerPlan {
+   if (!enabled || outline.length < 3 || !Number.isFinite(waterSurface) || waterSurface <= 0)
+     return { count: 0, positions: [], spacing: 0, cornerDistance: 0 };
+   const count = Math.max(1, Math.ceil(waterSurface / SQM_PER_SKIMMER));
++  if (placement) return skimmersOnHead(outline, count, infinityExcluded, placement);
+   const preferred = skimmerWall(outline, infinityExcluded);
+   const axis = preferred.axis === "x" ? 0 : 1;
+   const runs = boundaryRuns(outline, infinityExcluded)
+@@ -59,3 +63,47 @@
+     cornerDistance: Math.min(0.6, spacing / 2),
+   };
+ }
++
++/** Keep the actual wall plane and existing 90 cm fitting spacing. A selected
++ * shelf owns its head; skimmers use the opposite head's genuinely free spans. */
++function skimmersOnHead(outline: Outline, required: number, excluded: InfinityExclusion | null,
++  placement: { head: { axis: "x" | "z"; coordinate: number }; reserved: ReadonlyArray<Outline>; clearance: number }): SkimmerPlan {
++  const axis = placement.head.axis === "x" ? 0 : 1, cross = axis === 0 ? 1 : 0;
++  const runs = boundaryRuns(outline, excluded).map(run => {
++    const points = run.points.filter(point => Math.abs(point[axis] - placement.head.coordinate) < 1e-5);
++    const length = points.slice(1).reduce((sum, point, i) => sum + Math.hypot(point[0]-points[i]![0],point[1]-points[i]![1]), 0);
++    return { ...run, points, length };
++  }).filter(run => run.points.length >= 2 && run.length > 1e-5);
++  const positions: Array<{ x: number; z: number; rotation: number }> = [];
++  let spacing = 0;
++  for (const run of runs) {
++    const margin = Math.min(0.6, run.length / 2), start = run.points[0]!, end = run.points.at(-1)!;
++    const direction = Math.sign(end[cross] - start[cross]);
++    if (!direction) continue;
++    let spans: [number,number][] = [[margin, run.length - margin]];
++    for (const polygon of placement.reserved) {
++      if (!polygon.length) continue;
++      const normal = polygon.map(point => point[axis]);
++      if (placement.head.coordinate < Math.min(...normal) - placement.clearance || placement.head.coordinate > Math.max(...normal) + placement.clearance) continue;
++      const along = polygon.map(point => (point[cross] - start[cross]) * direction);
++      const lo = Math.min(...along) - placement.clearance, hi = Math.max(...along) + placement.clearance;
++      spans = spans.flatMap(([a,b]) => hi < a || lo > b ? [[a,b] as [number,number]] : [
++        ...(lo > a ? [[a, Math.min(b,lo)] as [number,number]] : []),
++        ...(hi < b ? [[Math.max(a,hi), b] as [number,number]] : []),
++      ]);
++    }
++    for (const [a,b] of spans.sort((one,two) => (two[1]-two[0])-(one[1]-one[0]))) {
++      const n = Math.min(required - positions.length, Math.max(1, Math.floor((b-a+1e-7)/0.9)+1));
++      if (n <= 0) break;
++      const pitch = n > 1 ? Math.min((b-a)/(n-1), Math.max(0.9,(b-a)/n)) : 0;
++      for (let i=0;i<n;i++) {
++        const p = sampleWall(run,(a+b)/2 + (i-(n-1)/2)*pitch);
++        if (positions.some(q => Math.hypot(q.x-p.x,q.z-p.z) < 0.9-1e-7)) continue;
++        positions.push({x:p.x,z:p.z,rotation:Math.atan2(p.nx,p.nz)});
++      }
++      spacing = pitch || b-a;
++    }
++  }
++  return {count:positions.length,positions,spacing,cornerDistance:Math.min(0.6,spacing/2),
++    ...(positions.length < required ? {reason:"Spazio insufficiente sulla testata opposta alla spiaggetta per tutti gli skimmer previsti. Modifica dimensioni, accesso o sistema acqua."} : {})};
++}
+--- before/src/lib/pool/resolved-layout.ts
++++ after/src/lib/pool/resolved-layout.ts
+@@ -1,5 +1,5 @@
+ import { resolveComfortPlan, normalizeComfortFeatures, type ComfortPlan } from "./comfort-plan";
+-import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
++import { ACCESS_DIMENSIONS, resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
+ import { accessMounting } from "./access-plan";
+ import { planSceneLighting, type SceneLightingPlan } from "./lighting-plan";
+ import { buildFloorProfile } from "./floor-profile";
+@@ -107,8 +107,12 @@
+     const automatic = input.stairWidth !== undefined && access === "internalSteps" && input.stairType !== "corner"
+       ? resolveAccessPlan({ ...request, stairWidth: undefined }) : null;
+     const normal=resolveAccessPlan({ ...request, ...(automatic?.placement ? { stairWidthAnchor: automatic.footprint } : {}) });
+-    if(!input.stairMirrored || access!=="internalSteps" || !normal.placement) return normal;
+-    const bounds=outlineBounds(input.outline),p=normal.placement,longX=bounds.spanX>=bounds.spanZ;
++    // On a shelf layout the fitting row adapts to the entrance, never the
++    // reverse: derive the mirror anchor without the newly moved skimmers.
++    const mirrorSource = input.stairMirrored && access === "internalSteps" && comfort.elements.some(element => element.kind === "sunShelf")
++      ? resolveAccessPlan({ ...request, obstacles: [] }) : normal;
++    if(!input.stairMirrored || access!=="internalSteps" || !mirrorSource.placement) return normal;
++    const bounds=outlineBounds(input.outline),p=mirrorSource.placement,longX=bounds.spanX>=bounds.spanZ;
+     return resolveAccessPlan({...request,mirrorAnchor:{
+       x:longX?p.x:bounds.minX+bounds.maxX-p.x,
+       z:longX?bounds.minZ+bounds.maxZ-p.z:p.z,
+@@ -140,6 +144,8 @@
+     fallback.comfort.availability[activeComfort.kind] = { available: false, reason };
+     return { ...fallback, status: "UNAVAILABLE" };
+   }
++  if (input.skimmers.reason && features.includes("sunShelf"))
++    comfort.availability.sunShelf = { available: false, reason: input.skimmers.reason };
+   const lighting = planSceneLighting({
+     ...input,
+     resolvedAccess: access,
+@@ -175,7 +181,7 @@
+   return config.features.includes("stairLighting") ? configuredPoolLayout(config).stairMicroSpots : [];
+ }
+ 
+-export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
++export function configuredLayoutWithSkimmers(config: PoolConfig) {
+   const outline = configuredOutline(config);
+   const poolType = config.poolType ?? "in-ground";
+   const layout = getPoolVerticalLayout({
+@@ -196,7 +202,7 @@
+     twoLoungerShelf: config.features.includes("sunShelf"),
+     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
+   });
+-  return resolvePoolLayout({
++  const input: LayoutInput = {
+     outline,
+     poolType,
+     layout,
+@@ -223,5 +229,33 @@
+       config.system === "infinity" && config.infinityEdge
+         ? infinityExclusion(outline, config.infinityEdge, config.shape)
+         : null,
+-  });
+-}
++  };
++  if (config.system !== "skimmer" || !config.features.includes("sunShelf"))
++    return { layout: resolvePoolLayout(input), skimmers: input.skimmers };
++  // The entrance/platform owns its geometry. Place fittings after resolving it,
++  // then use the same final row for access validation, lighting and the scene.
++  const preliminary = resolvePoolLayout({ ...input, skimmers: { ...input.skimmers, positions: [] } });
++  const shelf = preliminary.comfort.elements.find(element => element.kind === "sunShelf");
++  if (!shelf || !preliminary.comfort.availability.sunShelf.available)
++    return { layout: resolvePoolLayout(input), skimmers: input.skimmers };
++  const bounds = outlineBounds(outline), platform = outlineBounds(shelf.footprint);
++  const longX = bounds.spanX >= bounds.spanZ;
++  const min = longX ? bounds.minX : bounds.minZ, max = longX ? bounds.maxX : bounds.maxZ;
++  const nearMin = Math.abs((longX ? platform.minX : platform.minZ)-min) < Math.abs((longX ? platform.maxX : platform.maxZ)-max);
++  const skimmers = planSkimmers(outline, computeMetrics(outline,config.dimensions.depth).waterSurface, true, null, {
++    head: { axis: longX ? "x" : "z", coordinate: nearMin ? max : min },
++    reserved: [...comfortFootprints(preliminary.comfort),
++      ...(preliminary.access.placement ? [preliminary.access.footprint] : []),
++      ...(preliminary.ladder?.plan.placement ? [preliminary.ladder.plan.footprint] : [])],
++    clearance: ACCESS_DIMENSIONS.fittingClearance + 1e-5,
++  });
++  return { layout: resolvePoolLayout({ ...input, skimmers }), skimmers };
++}
++
++export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
++  return configuredLayoutWithSkimmers(config).layout;
++}
++
++export function configuredSkimmerPlan(config: PoolConfig) {
++  return configuredLayoutWithSkimmers(config).skimmers;
++}
+--- before/src/lib/pool/project-metrics.ts
++++ after/src/lib/pool/project-metrics.ts
+@@ -8,7 +8,7 @@
+ import { buildFloorProfile, computeSlopeMetrics } from "./floor-profile";
+ import { getPoolVerticalLayout } from "./vertical-layout";
+ import { configuredComfortPlan } from "./comfort-plan";
+-import { planSkimmers } from "./engineering";
++import { configuredSkimmerPlan } from "./resolved-layout";
+ import type { Outline, PoolConfig } from "./types";
+ 
+ export function projectMetrics(config: PoolConfig, outline: Outline) {
+@@ -50,6 +50,6 @@
+ export function projectGeometry(config: PoolConfig) {
+   const outline = configuredOutline(config);
+   const metrics = projectMetrics(config, outline);
+-  const skimmers = planSkimmers(outline, metrics.waterSurface, config.system === "skimmer");
++  const skimmers = configuredSkimmerPlan(config);
+   return { outline, metrics, skimmers };
+ }
+--- before/src/lib/pool/store.tsx
++++ after/src/lib/pool/store.tsx
+@@ -25,9 +25,8 @@
+   type DimensionKey,
+ } from "./config";
+ import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
+-import { planSkimmers } from "./engineering";
+ import { configuredAccessPlan } from "./access-plan";
+-import { configuredPoolLayout } from "./resolved-layout";
++import { configuredPoolLayout, configuredSkimmerPlan } from "./resolved-layout";
+ import { configuredComfortPlan, activeFlightKind, normalizeComfortFeatures } from "./comfort-plan";
+ import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
+ import { configuredPerimeterLights, isPerimeterSideSelection, isPoolLedType, poolLedType, type PoolLedType } from "./perimeter-lighting";
+@@ -932,8 +931,12 @@
+   );
+ 
+   const skimmers = useMemo(
+-    () => planSkimmers(outline, metrics.waterSurface, config.system === "skimmer"),
+-    [outline, metrics.waterSurface, config.system],
++    () => configuredSkimmerPlan(config),
++    // Geometry inputs only: changing a colour must not remount the fitting row.
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++    [outline, config.dimensions, config.poolType, config.system, config.overflowType, config.copingStyle,
++      config.features, config.poolAccess, config.internalStairType, config.internalStairWidth, config.internalStairMirrored,
++      config.hydromassageVariant, config.integratedBenchStations, config.infinityEdge],
+   );
+ 
+   const isStepComplete = useCallback(
+--- before/src/components/pool/PoolConfigurator.tsx
++++ after/src/components/pool/PoolConfigurator.tsx
+@@ -64,10 +64,9 @@
+ import { renderQualityState } from "@/lib/pool/renderQualityState";
+ import { requestHeroCapture } from "@/lib/project-delivery/heroCapture";
+ import { renovationPreviewConfig, renovationDecisions, renovationDecisionComplete, renovationMacroReachable } from "@/lib/pool/renovation";
+-import { planSkimmers } from "@/lib/pool/engineering";
+ import { projectMetrics } from "@/lib/pool/project-metrics";
+ import { buildTechnicalPlan } from "@/lib/pool/technical-plan";
+-import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
++import { configuredPoolLayout, configuredSkimmerPlan } from "@/lib/pool/resolved-layout";
+ import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
+ 
+ 
+@@ -149,7 +148,7 @@
+   const config = useMemo(() => renovationPreviewConfig(projectConfig, renovation,
+     step === 2 || (step === 3 && renovationBefore)), [projectConfig, renovation, step, renovationBefore]);
+   const skimmers = useMemo(() => projectConfig.projectType === "renovation"
+-    ? planSkimmers(outline, projectMetrics(config, outline).waterSurface, config.system === "skimmer")
++    ? configuredSkimmerPlan(config)
+     : projectSkimmers, [projectConfig.projectType, config, outline, projectSkimmers]);
+   const technical = useMemo(() => projectConfig.projectType === "renovation"
+     ? buildTechnicalPlan({ config, outline, skimmers, metrics: projectMetrics(config, outline), layout: configuredPoolLayout(config) })
+--- before/src/lib/pool/photo-scene-spec.ts
++++ after/src/lib/pool/photo-scene-spec.ts
+@@ -1,9 +1,8 @@
+ import type { ProjectConfiguration } from "./project";
+-import { computeMetrics, outlineBounds } from "./geometry";
++import { outlineBounds } from "./geometry";
+ import { getPoolVerticalLayout } from "./vertical-layout";
+ import { buildFloorProfile } from "./floor-profile";
+-import { configuredPoolLayout } from "./resolved-layout";
+-import { planSkimmers } from "./engineering";
++import { configuredLayoutWithSkimmers } from "./resolved-layout";
+ import { resolveMaterials } from "./materials";
+ import { POOL_BORDER_PRESET, WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
+ import { pavingLayout, premiumEnvironment } from "./presentation";
+@@ -37,7 +36,7 @@
+     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
+   });
+   const bounds = outlineBounds(outline);
+-  const layout = configuredPoolLayout(config);
++  const { layout, skimmers } = configuredLayoutWithSkimmers(config);
+   const resolvedMaterials = resolveMaterials(config);
+   const excluded = config.system === "infinity" && config.infinityEdge
+     ? infinityExclusion(outline, config.infinityEdge, config.shape) : null;
+@@ -49,7 +48,7 @@
+     selection,
+     structureType: structureFamily(config.structure),
+     pool: { outline, elevations, floor, layout,
+-      skimmers: planSkimmers(outline, computeMetrics(outline, config.dimensions.depth).waterSurface, config.system === "skimmer"),
++      skimmers,
+       infinity: config.system === "infinity" && config.infinityEdge ? {
+         requested: config.infinityEdge,
+         resolved: computeInfinityEdgeGeometry(outline, config.infinityEdge, config.shape),
+--- before/src/lib/pool/cover-plan.ts
++++ after/src/lib/pool/cover-plan.ts
+@@ -2,8 +2,7 @@
+ import { copingOuterOffset } from "@/components/pool/three/poolConstruction";
+ import { outlineBounds } from "./geometry";
+ import { configuredOutline } from "./configured-outline";
+-import { planSkimmers } from "./engineering";
+-import { configuredPoolLayout } from "./resolved-layout";
++import { configuredLayoutWithSkimmers } from "./resolved-layout";
+ import { getPoolVerticalLayout } from "./vertical-layout";
+ import type { PoolConfig } from "./types";
+ 
+@@ -74,15 +73,18 @@
+   else if (bounds.spanX < 5.5 || bounds.spanZ < 2.5)
+     reason = "Luce libera insufficiente per questo modello di copertura.";
+   if (enabled && !reason) {
+-    const skimmers = config.system === "skimmer"
+-      ? planSkimmers(outline, bounds.spanX * bounds.spanZ, true).positions
+-      : [];
+-    const comfort = configuredPoolLayout(config).comfort.elements
++    const resolved = configuredLayoutWithSkimmers(config);
++    const skimmers = config.system === "skimmer" ? resolved.skimmers.positions : [];
++    const comfort = resolved.layout.comfort.elements
+       .filter((element) => element.kind === "sunShelf" || element.kind === "hydromassage");
+     const conflict = (side: "minX" | "maxX") => {
+       const edgeX = side === "minX" ? bounds.minX : bounds.maxX;
+       return skimmers.some((point) => Math.abs(point.x - edgeX) < 0.36) ||
+         comfort.some((element) => {
++          // A wholly submerged shelf stays below the cover's swept mat and
++          // the outside roller; its plan footprint is not an emerged obstacle.
++          const highest = Math.max(element.topY, ...(element.steps ?? []).map(step => step.topY), element.landing?.topY ?? -Infinity);
++          if (element.kind === "sunShelf" && highest < waterY - 0.03) return false;
+           const b = outlineBounds(element.footprint);
+           return Math.abs((side === "minX" ? b.minX : b.maxX) - edgeX) < 0.08;
+         });
+--- before/src/lib/i18n/messages.ts
++++ after/src/lib/i18n/messages.ts
+@@ -521,6 +521,7 @@
+   ["Forma della scala", "Stair shape"], ["Tipo di scala interna", "Internal stair type"],
+   ["Rettilinea", "Straight"], ["Angolare", "Corner"],
+   ["Posizione della scala", "Stair position"],
++  ["Spazio insufficiente sulla testata opposta alla spiaggetta per tutti gli skimmer previsti. Modifica dimensioni, accesso o sistema acqua.", "Insufficient space on the end wall opposite the sun shelf for all required skimmers. Change the dimensions, access or water system."],
+   ["Lunghezza spiaggetta", "Sun shelf length"],
+   ["La scala angolare mantiene pedate e raggi costruttivi fissi. Usa SX e DX per scegliere il lato.", "Corner stairs retain their fixed treads and construction radii. Use L and R to choose the side."],
+   ["Scala a sinistra (SX)", "Stairs on the left (L)"],
+--- before/scripts/cover-plan-audit.ts
++++ after/scripts/cover-plan-audit.ts
+@@ -1,8 +1,7 @@
++import { configuredSkimmerPlan } from "../src/lib/pool/resolved-layout";
+ import assert from "node:assert/strict";
+ import { DEFAULT_CONTROL_POINTS, DEFAULT_CUSTOMER, DEFAULT_DIMENSIONS } from "../src/lib/pool/config";
+ import { resolveAutomaticCover } from "../src/lib/pool/cover-plan";
+-import { buildOutline } from "../src/lib/pool/geometry";
+-import { planSkimmers } from "../src/lib/pool/engineering";
+ import type { PoolConfig } from "../src/lib/pool/types";
+ 
+ const base: PoolConfig = {
+@@ -32,8 +31,7 @@
+         assert.ok(plan.slatRun > 0);
+         assert.ok(plan.housingY > plan.waterY);
+         if (system === "skimmer") {
+-          const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+-          const positions = planSkimmers(outline, length * width, true).positions;
++          const positions = configuredSkimmerPlan(config).positions;
+           const wallX = plan.housingSide === "minX" ? plan.footprint.minX : plan.footprint.maxX;
+           assert.ok(positions.every((point) => Math.abs(point.x - wallX) >= 0.36), "roller must not share a skimmer wall");
+         }
+--- before/scripts/skimmer-shelf-head-audit.ts
++++ after/scripts/skimmer-shelf-head-audit.ts
+@@ -0,0 +1,73 @@
++import {resolveAutomaticCover} from "@/lib/pool/cover-plan";
++import assert from 'node:assert/strict';
++import {configuratorTesting} from '@/lib/pool/store';
++import {projectGeometry} from '@/lib/pool/project-metrics';
++import {configuredLayoutWithSkimmers,configuredSkimmerPlan,comfortFootprints} from '@/lib/pool/resolved-layout';
++import {planSkimmers} from '@/lib/pool/engineering';
++import {outlineBounds} from '@/lib/pool/geometry';
++import {pointInBasin} from '@/lib/pool/boundary-placement';
++import {SQM_PER_SKIMMER} from '@/lib/pool/config';
++import {ACCESS_DIMENSIONS} from '@/components/pool/three/PoolAccessModel';
++import {toProjectConfiguration,serializeProjectConfiguration,parseProjectConfiguration} from '@/lib/pool/project';
++import {createPhotoSceneSpec} from '@/lib/pool/photo-scene-spec';
++import {renovationPreviewConfig} from '@/lib/pool/renovation';
++const initial=configuratorTesting.createInitialState(),b=initial.config;
++const base={...b,projectType:'new',poolType:'in-ground',structure:'reinforced-concrete',shape:'rectangle',shapeSelected:true,poolAccess:'internalSteps',features:['sunShelf'],system:'skimmer',dimensions:{...b.dimensions,length:10,width:5,depth:1.5,floorProfile:'flat'}} as any;
++let checks=0;const check=(v:unknown,m:string)=>{assert(v,m);checks++;};
++const distance=(point:{x:number;z:number},outline:ReadonlyArray<readonly[number,number]>)=>Math.min(...outline.map((a,i)=>{const d=outline[(i+1)%outline.length]!,dx=d[0]-a[0],dz=d[1]-a[1],t=Math.max(0,Math.min(1,((point.x-a[0])*dx+(point.z-a[1])*dz)/Math.max(1e-10,dx*dx+dz*dz)));return Math.hypot(point.x-a[0]-t*dx,point.z-a[1]-t*dz);}));
++const rows=[];
++for(const [length,width] of [[10,5],[10,4.5],[12,6],[5,10]])for(const type of ['linear','corner'])for(const mirrored of [false,true]){
++ const config={...base,internalStairType:type,internalStairMirrored:mirrored,dimensions:{...base.dimensions,length,width}};
++ const {layout,skimmers}=configuredLayoutWithSkimmers(config),geo=projectGeometry(config);
++ const shelf=layout.comfort.elements.find(e=>e.kind==='sunShelf');
++ check(!!shelf&&layout.comfort.availability.sunShelf.available,'requested shelf remains available with the selected flight '+JSON.stringify({length,width,type,mirrored,reason:layout.comfort.availability.sunShelf,skimmers}));
++ if(!shelf)continue;
++ const bounds=outlineBounds(geo.outline),sb=outlineBounds(shelf.footprint),axis=bounds.spanX>=bounds.spanZ?'x':'z';
++ const min=axis==='x'?bounds.minX:bounds.minZ,max=axis==='x'?bounds.maxX:bounds.maxZ;
++ const target=Math.abs((axis==='x'?sb.minX:sb.minZ)-min)<Math.abs((axis==='x'?sb.maxX:sb.maxZ)-max)?max:min;
++ check(skimmers.count===Math.ceil(geo.metrics.waterSurface/SQM_PER_SKIMMER),'hydraulic count is retained');
++ check(skimmers.positions.every(p=>Math.abs(p[axis]-target)<1e-5),'row is entirely on the actual head opposite the shelf');
++ check(JSON.stringify(skimmers)===JSON.stringify(geo.skimmers),'project geometry uses the shared row');
++ check(JSON.stringify(skimmers)===JSON.stringify(configuredSkimmerPlan(config)),'shared wrapper uses the same final row');
++ const reserved=[...comfortFootprints(layout.comfort),...(layout.access.placement?[layout.access.footprint]:[])];
++ for(const p of skimmers.positions){
++  check(distance(p,geo.outline)<1e-5,'each fitting stays on the true wall');
++  check(pointInBasin(p.x+Math.sin(p.rotation)*.02,p.z+Math.cos(p.rotation)*.02,geo.outline),'fitting front points into water');
++  check(reserved.every(poly=>!pointInBasin(p.x,p.z,poly)&&distance(p,poly)>=ACCESS_DIMENSIONS.fittingClearance-1e-6),'no opening intersects platform, landing or stair');
++ }
++ for(let i=0;i<skimmers.positions.length;i++)for(let j=i+1;j<skimmers.positions.length;j++)check(Math.hypot(skimmers.positions[i]!.x-skimmers.positions[j]!.x,skimmers.positions[i]!.z-skimmers.positions[j]!.z)>=.9-1e-6,'existing minimum row spacing retained');
++ rows.push({length,width,type,mirrored,positions:skimmers.positions});
++}
++// Changing corner side must move the safe fitting span, not the shelf head.
++const sides=[false,true].map(mirrored=>configuredLayoutWithSkimmers({...base,internalStairType:'corner',internalStairMirrored:mirrored}));
++check(JSON.stringify(sides[0]!.skimmers.positions)!==JSON.stringify(sides[1]!.skimmers.positions),'corner SX/DX changes the free fitting span');
++for(const reversed of [false,true]){
++ const c={...base,internalStairType:'linear',dimensions:{...base.dimensions,floorProfile:'slope',shallowDepth:1.1,slopeReversed:reversed}};
++ const pair=configuredLayoutWithSkimmers(c),shelf=pair.layout.comfort.elements.find(e=>e.kind==='sunShelf')!;
++ check(!!shelf&&pair.layout.comfort.availability.sunShelf.available,'sloping shelf remains valid');
++ const sb=outlineBounds(shelf.footprint),opposite=sb.minX<-4.9?5:-5;
++ check(pair.skimmers.positions.every(p=>Math.abs(p.x-opposite)<1e-5),'reversed shelf end reverses the skimmer end');
++}
++// A short occupied head cannot silently spill the missing row onto the shelf wall.
++const tooLarge={...base,internalStairType:'corner',dimensions:{...base.dimensions,length:25,width:4.5}};
++const limited=configuredLayoutWithSkimmers(tooLarge);
++check(limited.layout.status==='UNAVAILABLE'&&!!limited.skimmers.reason,'insufficient head capacity has an explicit unavailable result');
++check(!limited.layout.comfort.availability.sunShelf.available,'capacity conflict blocks completion through the real comfort gate');
++check(limited.skimmers.positions.every(p=>Math.abs(p.x-12.5)<1e-5),'even capacity failure never falls back to a shelf-side wall');
++for(const c of [{...base,features:[]},{...base,features:[],shape:'l-shape',dimensions:{...base.dimensions,width:7,lShapeRecessLength:8,lShapeRecessWidth:3,lShapeOrientation:'se'}},{...base,features:[],poolType:'above-ground',structure:'modular-steel-panels'}]){
++ const geo=projectGeometry(c);check(JSON.stringify(geo.skimmers)===JSON.stringify(planSkimmers(geo.outline,geo.metrics.waterSurface,true)),'non-shelf legacy row remains exactly unchanged');
++}
++for(const system of ['overflow','infinity'])check(configuredSkimmerPlan({...base,system}).positions.length===0,'non-skimmer systems remain empty');
++const project=toProjectConfiguration(initial.projectId,{...base,internalStairType:'corner',internalStairMirrored:true},initial.renovation);
++const parsed=parseProjectConfiguration(serializeProjectConfiguration(project));
++check(JSON.stringify(projectGeometry(parsed.config).skimmers)===JSON.stringify(projectGeometry(project.config).skimmers),'save/reload derives the same adapted row');
++check(JSON.stringify(createPhotoSceneSpec(project).pool.skimmers)===JSON.stringify(projectGeometry(project.config).skimmers),'photo scene specification uses the same row');
++const renovation={...initial.renovation,existing:{poolType:'in-ground',poolAccess:'internalSteps',internalStairType:'corner',internalStairMirrored:true}} as any;
++const preview=renovationPreviewConfig({...base,projectType:'renovation',internalStairMirrored:false},renovation,true);
++check(JSON.stringify(configuredSkimmerPlan(preview))===JSON.stringify(configuredSkimmerPlan({...preview,internalStairMirrored:true})),'existing-pool side drives its own fitting row');
++const coverConfig={...base,internalStairType:'linear',equipment:['automaticCover']};
++const cover=resolveAutomaticCover(coverConfig);
++check(!!cover.geometry,'approved cover remains available above the submerged shelf');
++const rollerHead=cover.housingSide==='minX'?cover.footprint.minX:cover.footprint.maxX;
++check(configuredSkimmerPlan(coverConfig).positions.every(p=>Math.abs(p.x-rollerHead)>=.36),'cover roller does not share the actual skimmer head');
++console.log(JSON.stringify({checks,status:'PASS',rows}));
+--- before/scripts/run-skimmer-shelf-head-audit.mjs
++++ after/scripts/run-skimmer-shelf-head-audit.mjs
+@@ -0,0 +1,15 @@
++import { build } from "rolldown";
++import { join } from "node:path";
++import { pathToFileURL } from "node:url";
++import { unlink } from "node:fs/promises";
++const file = join(process.cwd(), `.skimmer-shelf-head-audit-${process.pid}.mjs`);
++try {
++  await build({ input: "scripts/skimmer-shelf-head-audit.ts", output: { file, format: "esm" }, platform: "node",
++    external: ["react", "react/jsx-runtime", "three", "@react-three/fiber", "@react-three/drei"],
++    resolve: { alias: { "@": join(process.cwd(), "src") } },
++    plugins: [{ name: "no-network-stair-width-audit", resolveId(id) {
++      if (id.endsWith("/projectDelivery.server")) return "\0unused-project-rpc";
++    }, load(id) { if (id === "\0unused-project-rpc") return "export const loadSharedProjectFn = () => { throw new Error('Unexpected RPC in stair width audit'); };"; } }],
++  });
++  await import(pathToFileURL(file).href);
++} finally { await unlink(file).catch(error => { if (error.code !== "ENOENT") throw error; }); }

@@ -236,6 +236,7 @@ function RecessedPoolLight({
         // over by the liner behind it. Drawing last within the opaque pass
         // keeps it visible in both the main image and the water's refraction.
         <mesh
+          name="led-core-glow"
           position={[0, 0, LED_OPTICS.lensCenter + 0.0004]}
           renderOrder={LED_OPTICS.glowRenderOrder}
         >

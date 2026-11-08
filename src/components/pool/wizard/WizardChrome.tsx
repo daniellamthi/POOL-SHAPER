@@ -208,7 +208,7 @@ export function ConfiguratorTray({
   onContinue: () => void;
   expanded: boolean;
   onExpandedChange: (value: boolean) => void;
-  onViewPool: () => void;
+  onViewPool?: (() => void) | undefined;
   nextChoice?: string | undefined;
 }) {
   const { t } = useI18n();
@@ -248,10 +248,10 @@ export function ConfiguratorTray({
           </div>
         </header>
         <div className="flex flex-col items-end gap-0.5 sm:flex-row sm:items-center">
-        <Button type="button" variant="ghost" onClick={onViewPool}
+        {onViewPool ? <Button type="button" variant="ghost" onClick={onViewPool}
           className="pool-dock-toggle rounded-full">
           <Scan aria-hidden />{t("Vedi la piscina")}
-        </Button>
+        </Button> : null}
         <Button
           type="button"
           variant="ghost"

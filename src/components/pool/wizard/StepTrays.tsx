@@ -1,3 +1,4 @@
+import { shapeDimensionLimits } from "@/lib/pool/shape-dimensions";
 import { PresentationContextPicker, type PresentationContextChoice } from "../PresentationContextPicker";
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -47,6 +48,9 @@ import { useProjectDelivery } from "@/components/pool/delivery/useProjectDeliver
 import { MetricsPanel } from "@/components/pool/MetricsPanel";
 import { ShapeEditor } from "@/components/pool/ShapeEditor";
 import { FileDrop } from "@/components/pool/FileDrop";
+import { InternalStairSideControl } from "@/components/pool/InternalStairSideControl";
+import { internalStairChoice } from "@/lib/pool/internal-stair-options";
+import { InternalStairWidthControl } from "@/components/pool/InternalStairWidthControl";
 import { DimensionControl } from "@/components/pool/DimensionControl";
 import { DIMENSION_LIMITS } from "@/lib/pool/config";
 import {
@@ -227,7 +231,7 @@ export function ShapeTray({ ctx, tab, setTab, showTabs = true }: { ctx: TrayCont
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
           <div className="flex flex-col gap-7">
             {(["length", "width"] as const).map((key) => {
-              const limits = DIMENSION_LIMITS[key];
+              const limits = shapeDimensionLimits(config.shape, key, config.dimensions);
               return (
                 <DimensionControl
                   key={key}
@@ -478,6 +482,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     togglePoolFeature,
     setPoolAccess,
     setInternalStairType,
+    setInternalStairWidth,
     setInternalStairMirrored,
     setHydromassageVariant,
     toggleInternalSteps,
@@ -493,77 +498,59 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
   // follow-up options (stair shape, optional inox ladder) are brought into view.
   const [stairsJustChosen, setStairsJustChosen] = useState(false);
   const stairType = config.internalStairType ?? "linear";
-  const plans = useMemo(
-    () => ({
-      linear: configuredAccessPlan({
-        ...config,
-        poolAccess: "internalSteps",
-        internalStairType: "linear",
-      }),
-      corner: configuredAccessPlan({
-        ...config,
-        poolAccess: "internalSteps",
-        internalStairType: "corner",
-      }),
-    }),
-    [config],
-  );
+  const plans = useMemo(() => ({
+    linear: internalStairChoice(config, "linear"),
+    corner: internalStairChoice(config, "corner"),
+  }), [config]);
   const stepsOn = config.poolAccess === "internalSteps";
   const inoxOn =
     config.poolAccess === "stainlessSteelLadder" ||
     (stepsOn && config.features.includes("inoxLadder"));
   const inoxLayout = useMemo(
-    () =>
+    () => tab === "ladder" ?
       configuredPoolLayout({
         ...config,
         poolAccess: stepsOn ? "internalSteps" : "stainlessSteelLadder",
         features: stepsOn
           ? [...config.features.filter((id) => id !== "inoxLadder"), "inoxLadder"]
           : config.features,
-      }),
-    [config, stepsOn],
+      }) : null,
+    [config, stepsOn, tab],
   );
-  const inoxPlan = stepsOn ? inoxLayout.ladder?.plan : inoxLayout.access;
+  const inoxPlan = stepsOn ? inoxLayout?.ladder?.plan : inoxLayout?.access;
   const inoxAvailable = config.poolType !== "above-ground" && (inoxOn || !!inoxPlan?.placement);
-  const orientations = useMemo(() => config.poolType === "above-ground" && stepsOn
-    ? [false,true].map(mirrored => ({mirrored,plan:configuredAccessPlan({...config,internalStairMirrored:mirrored})}))
-    : [],[config,stepsOn]);
+
 
   const comfort = useMemo(() => configuredComfortPlan(config), [config]);
   const shelfOn = config.features.includes("sunShelf");
-  const shelfLoungers = useMemo(() => configuredSunShelfLoungers(config), [config]);
+  const shelfLoungers = useMemo(() => tab === "shelf-options" ? configuredSunShelfLoungers(config) : null, [config, tab]);
   const hydroOn = config.features.includes("hydromassage") && !shelfOn;
   const hydroVariant = config.hydromassageVariant ?? "closed";
   const shelfProposal = useMemo(
-    () =>
-      configuredComfortPlan({
-        ...config,
-        features: shelfOn ? config.features : [...config.features, "sunShelf"],
-      }),
-    [config, shelfOn],
+    () => shelfOn || tab !== "comfort" ? comfort :
+      configuredComfortPlan({ ...config, features: [...config.features, "sunShelf"] }),
+    [config, shelfOn, tab, comfort],
   );
-  const hydroProposal = useMemo(
-    () =>
-      configuredComfortPlan({
-        ...config,
-        features: normalizeComfortFeatures(
-          hydroOn ? config.features : [...config.features, "hydromassage"],
-          "hydromassage",
-        ),
-      }),
-    [config, hydroOn],
-  );
-  const hydroVariants = useMemo(() => (["closed", "open"] as const).map(variant => ({
+  const hydroConfig = useMemo(() => ({
+    ...config,
+    internalStairType: "corner" as const,
+    poolAccess: "internalSteps" as const,
+    features: normalizeComfortFeatures([
+      ...config.features,
+      ...(config.poolAccess === "stainlessSteelLadder" && !config.features.includes("inoxLadder") ? ["inoxLadder" as const] : []),
+      "hydromassage",
+    ], "hydromassage"),
+  }), [config]);
+  const hydroVariants = useMemo(() => (tab === "comfort" ? ["closed", "open"] as const : []).map(variant => ({
     variant,
-    plan: configuredComfortPlan({ ...config, hydromassageVariant: variant,
-      features: normalizeComfortFeatures([...config.features, "hydromassage"], "hydromassage") }),
-  })), [config]);
+    plan: configuredComfortPlan({ ...hydroConfig, hydromassageVariant: variant }),
+  })), [hydroConfig, tab]);
   const shelfElement = shelfProposal.elements.find(element => element.kind === "sunShelf");
   // Include the complete configuration so a new layout dependency cannot
   // leave the advertised interval stale. Locale-only renders reuse this value.
-  const shelfRange = useMemo(() => configuredSunShelfRange(config), [config]);
-  const requestedShelfRun = config.dimensions.sunShelfRun ?? shelfElement?.run ?? (shelfRange.available ? shelfRange.defaultRun : 0);
-  const shelfRunInvalid = shelfOn && !sunShelfRunWithinRange(shelfRange, requestedShelfRun);
+  const shelfRange = useMemo(() => tab === "comfort" && shelfOn ? configuredSunShelfRange(config) : null, [config, tab, shelfOn]);
+  const requestedShelfRun = config.dimensions.sunShelfRun ?? shelfElement?.run ?? (shelfRange?.available ? shelfRange.defaultRun : 0);
+  const shelfRunInvalid = shelfOn && shelfRange !== null && !sunShelfRunWithinRange(shelfRange, requestedShelfRun);
   const ensureAccess = () => {
     if (config.poolAccess === null) {
       setInternalStairType("linear");
@@ -583,10 +570,19 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
       return;
     }
     if (!hydroVariants.find(item => item.variant === choice)?.plan.availability.hydromassage.available) return;
+    setInternalStairType("corner");
+    if (config.poolAccess === "stainlessSteelLadder" && !config.features.includes("inoxLadder")) togglePoolFeature("inoxLadder");
+    if (config.poolAccess !== "internalSteps") setPoolAccess("internalSteps");
     setHydromassageVariant(choice);
     if (!hydroOn) togglePoolFeature("hydromassage");
   };
   const comfortChoice = shelfOn ? "sunShelf" : hydroOn ? hydroVariant : "none";
+  const comfortUnavailable = !shelfProposal.availability.sunShelf.available &&
+    hydroVariants.every(({ plan }) => !plan.availability.hydromassage.available);
+  const comfortUnavailableReasons = [...new Set([
+    shelfProposal.availability.sunShelf.reason,
+    ...hydroVariants.map(({ plan }) => plan.availability.hydromassage.reason),
+  ].filter((reason): reason is string => !!reason))];
   const benchOn = config.features.includes("integratedBench");
   const benchElement = comfort.elements.find(element => element.kind === "integratedBench");
   const benchAvailable =
@@ -657,45 +653,41 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
             <p className="text-sm text-muted-foreground">{t("Piattaforma prolungata inclusa, con parapetto sui soli lati esterni.")}</p>
             </>
           ) : null}
-          {tab === "access" && stepsOn &&
-          !comfort.elements.some((e) => e.kind === "sunShelf") ? (
+          {tab === "access" && stepsOn ? (
             <RevealSection reveal={stairsJustChosen}>
               <GroupLabel>{t("Forma della scala")}</GroupLabel>
               <ChoiceGrid label={t("Tipo di scala interna")} dense>
                 {(["linear", "corner"] as const)
-                  .filter((type) => (type === "linear" && hydroOn) || !plans[type].reason || stairType === type)
                   .map((type) => (
                     <ChoiceCard
                       compact
                       key={type}
                       title={t(type === "linear" ? "Rettilinea" : "Angolare")}
                       description={t(type === "linear"
-                          ? "Gradini dritti sul lato corto."
-                          : config.poolType === "above-ground" ? "Gradini rettangolari integrati nell’angolo." : "Gradini a quarto di cerchio nell’angolo.")}
+                          ? config.poolType === "above-ground" ? "Gradini dritti sul lato corto." : "Da sola o con la spiaggetta. Gradini dritti sul lato corto."
+                          : config.poolType === "above-ground" ? "Gradini rettangolari integrati nell’angolo." : "Da sola, con spiaggetta o idromassaggio. Gradini curvi nell’angolo.")}
                       image={ill(type === "linear" ? "access-steps-linear" : "access-steps-corner")}
                       selected={stairType === type}
+                      disabled={!plans[type].available}
                       onSelect={() => setInternalStairType(type)}
-                      footer={plans[type].reason ? undefined : `${plans[type].steps} gradini`}
+                      footer={plans[type].reason ? t(plans[type].reason) : t("{count} gradini", { count: String(plans[type].steps) })}
                     />
                   ))}
               </ChoiceGrid>
-              {config.poolType === "above-ground" ? <ChoiceGrid label={t("Orientamento scala interna")} dense>
-                {orientations.filter(option=>!!option.plan.placement || option.mirrored===!!config.internalStairMirrored).map(option => (
-                  <ChoiceCard key={String(option.mirrored)} compact
-                    title={t(option.mirrored ? "Speculare" : "Standard")}
-                    description={t("Ingresso integrato nell’angolo del lato corto.")}
-                    image={<span className={option.mirrored ? "-scale-x-100" : ""}>{ill(stairType==="corner"?"access-steps-corner":"access-steps-linear")}</span>}
-                    selected={option.mirrored===!!config.internalStairMirrored}
-                    onSelect={()=>setInternalStairMirrored(option.mirrored)}
-                    footer={option.plan.reason || undefined} />
-                ))}
-              </ChoiceGrid> : null}
+              <InternalStairSideControl config={config} onChange={setInternalStairMirrored} />
+              {shelfOn && stairType === "corner" ? <p className="text-xs leading-relaxed text-muted-foreground">{t("La spiaggetta è abbinata a una scala angolare indipendente. La posizione dipende dallo spazio libero.")}</p> : null}
             </RevealSection>
           ) : null}
+          {tab === "access" && stepsOn ? <InternalStairWidthControl config={config} onChange={setInternalStairWidth} /> : null}
         </div>
       ) : (
         <div className="flex flex-col gap-5">
           {tab === "comfort" ? <>
+          {comfortUnavailable ? <div role="status" className="flex flex-col gap-2 rounded-xl border border-brand/20 bg-brand-soft p-4 text-sm leading-relaxed">
+            <p className="font-medium">{t("Nessuna zona comfort disponibile per questa configurazione.")}</p>
+            {comfortUnavailableReasons.map(reason => <p key={reason}>{t(reason)}</p>)}
+            <p>{t("Puoi proseguire con la vasca libera oppure modificare forma, dimensioni o accesso.")}</p>
+          </div> : null}
           <ChoiceGrid label={t("Zona comfort")}>
             <ChoiceCard
               title={t("Nessuna zona comfort")}
@@ -704,32 +696,34 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
               selected={comfortChoice === "none"}
               onSelect={() => chooseComfort("none")}
             />
-            {shelfOn || shelfProposal.availability.sunShelf.available ? (
               <ChoiceCard
                 title={t("Sun shelf")}
                 description={t("Solarium sommerso a {depth} cm per sdraiarsi in acqua.", {depth: number(SUN_SHELF_WATER_DEPTH * 100)})}
                 image={ill("comfort-sunShelf")}
                 selected={comfortChoice === "sunShelf"}
                 disabled={!shelfProposal.availability.sunShelf.available}
+                footer={!shelfProposal.availability.sunShelf.available ? t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.") : undefined}
                 onSelect={() => chooseComfort("sunShelf")}
               />
-            ) : null}
-            {hydroVariants.filter(item => item.plan.availability.hydromassage.available || (hydroOn && hydroVariant === item.variant)).map(({variant,plan}) => (
+            {hydroVariants.map(({variant,plan}) => (
                 <ChoiceCard
                   key={variant}
                   title={t(variant === "closed" ? "Idromassaggio A" : "Idromassaggio B")}
-                  description={t(variant === "closed" ? "Zona delimitata da un muretto, panca a L con getti." : "Panca a U con getti, aperta sulla vasca.")}
+                  description={t(variant === "closed" ? "Con scala angolare. Zona delimitata da un muretto e panca a L con getti." : "Con scala angolare. Panca a U con getti, aperta sulla vasca.")}
                   image={ill(variant === "closed" ? "comfort-hydro-closed" : "comfort-hydro-open")}
                   selected={comfortChoice === variant}
                   disabled={!plan.availability.hydromassage.available}
+                  footer={!plan.availability.hydromassage.available ? t(plan.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.") : undefined}
                   onSelect={() => chooseComfort(variant)}
                 />
             ))}
           </ChoiceGrid>
-          {!shelfProposal.availability.sunShelf.available ? <p role="status" className="text-xs text-muted-foreground">{t("Sun Shelf")}: {t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
-          {!hydroProposal.availability.hydromassage.available ? <p role="status" className="text-xs text-muted-foreground">{t("Idromassaggio")}: {t(hydroProposal.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
-          {shelfOn && shelfRange.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
-            <DimensionControl label="Lunghezza spiaggetta e gradini" unit="m" step={0.005} precision={3}
+          {(shelfOn && !comfort.availability.sunShelf.available) || (hydroOn && !comfort.availability.hydromassage.available) ?
+            <button type="button" className="self-start text-xs underline underline-offset-4" onClick={() => chooseComfort("none")}>{t("Rimuovi zona comfort")}</button> : null}
+          {(shelfOn || hydroOn) ? <InternalStairWidthControl config={config} onChange={setInternalStairWidth} /> : null}
+          {(shelfOn || hydroOn) && stepsOn ? <InternalStairSideControl config={config} onChange={setInternalStairMirrored} /> : null}
+          {shelfOn && shelfRange?.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
+            <DimensionControl label={stairType === "corner" ? "Lunghezza spiaggetta" : "Lunghezza spiaggetta e gradini"} unit="m" step={0.005} precision={3}
               value={requestedShelfRun} min={shelfRange.min} max={shelfRange.max} onChange={setSunShelfRun} />
             <p className="text-xs text-muted-foreground">{t("Intervallo utile: {min}–{max} m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.", {
               min: number(shelfRange.min, { maximumFractionDigits: 3 }), max: number(shelfRange.max, { maximumFractionDigits: 3 }),
@@ -745,13 +739,13 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
               </button>
             </div> : null}
           </div> : null}
-          {shelfOn && !shelfRange.available ? <p role="alert" className="text-xs text-destructive">{t(shelfRange.reason)}</p> : null}
+          {shelfOn && shelfRange && !shelfRange.available ? <p role="alert" className="text-xs text-destructive">{t(shelfRange.reason)}</p> : null}
           {shelfOn && shelfElement ? <p className="text-xs text-muted-foreground">{t("Spiaggetta: {run} m. Lunghezza di nuoto residua: {swim} m. Accesso separato di almeno 90 cm.", {
             run: number(shelfElement.run,{maximumFractionDigits:2}),
             swim: number(Math.max(config.dimensions.length,config.dimensions.width)-shelfElement.run,{maximumFractionDigits:2}),
           })}</p> : null}
           </> : null}
-          {tab === "shelf-options" && shelfOn ? <div className="flex flex-col gap-3">
+          {tab === "shelf-options" && shelfOn && shelfLoungers ? <div className="flex flex-col gap-3">
             <ChoiceGrid label={t("Optional per la spiaggetta")}>
               <ChoiceCard optional title={t("Lettini per spiaggetta")}
                 description={t("Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.")}
@@ -1240,7 +1234,7 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
       description={t(id === "loungers" ? "Esse · Lyxo, con telaio e cuscino per la pavimentazione." : item(id).description)}
       image={id === "loungers" ? "/product-previews/lympha-deck.jpg" : ill(`equipment-${id}`)}
       imageFit={id === "loungers" ? "contain" : "cover"}
-      {...(id === "loungers" ? { footer: t("Visibili nella presentazione finale.") } : {})}
+      {...(id === "automaticCover" && coverOn && coverPlan.status === "UNAVAILABLE" ? { footer: t("Da verificare") } : id === "loungers" ? { footer: t("Visibili nella presentazione finale.") } : {})}
       selected={config.equipment.includes(id)}
       onSelect={onSelect ?? (() => toggleEquipment(id))}
     />
@@ -1292,10 +1286,14 @@ export function OptionalTray({ ctx, tab, setTab }: { ctx: TrayContext } & Decisi
               />
             </div>
           ) : null}
-          {!coverOn && coverPlan.status === "UNAVAILABLE" && coverPlan.reason ? (
-            <p className="text-xs text-muted-foreground">
-              {t("Copertura automatica:")}{t(coverPlan.reason)}
-            </p>
+          {coverPlan.status === "UNAVAILABLE" && coverPlan.reason ? (
+            <div role="status" className="flex flex-col items-start gap-2 rounded-xl border border-hairline p-3 text-xs leading-relaxed">
+              <p>{t("Copertura automatica:")} {t(coverPlan.reason)}</p>
+              {coverOn ? <>
+                <p>{t("La scelta è conservata, ma la copertura non viene mostrata perché non è compatibile con la configurazione attuale.")}</p>
+                <button type="button" className="underline underline-offset-4" onClick={() => toggleEquipment("automaticCover")}>{t("Rimuovi copertura")}</button>
+              </> : null}
+            </div>
           ) : null}
         </div>
       ) : tab === "water" ? (
@@ -1346,6 +1344,7 @@ export function PresentationTray({ ctx, tab, setTab }: { ctx: TrayContext } & De
         <div className="flex flex-col gap-5" data-wizard-guidance-ignore>
           {ctx.openGardenStudio ? <Button variant="outline" onClick={ctx.openGardenStudio}>{t("Nel tuo giardino")}</Button> : null}
           {ctx.presentationContext ? <PresentationContextPicker choice={ctx.presentationContext} /> : null}
+          {ctx.photoMode ? <Button variant="outline" disabled={!ctx.photoMode.available} onClick={ctx.photoMode.enter}>{t(ctx.photoMode.active ? "Torna alla vista 3D" : "Render fotografico")}</Button> : null}
           <GroupLabel>{t("Momento della giornata")}</GroupLabel>
           <ChoiceGrid label={t("Momento della giornata")} dense>
             <ChoiceCard

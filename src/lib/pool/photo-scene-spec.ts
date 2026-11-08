@@ -1,9 +1,8 @@
 import type { ProjectConfiguration } from "./project";
-import { computeMetrics, outlineBounds } from "./geometry";
+import { outlineBounds } from "./geometry";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { buildFloorProfile } from "./floor-profile";
-import { configuredPoolLayout } from "./resolved-layout";
-import { planSkimmers } from "./engineering";
+import { configuredLayoutWithSkimmers } from "./resolved-layout";
 import { resolveMaterials } from "./materials";
 import { POOL_BORDER_PRESET, WATER_VISUAL_PRESET } from "@/configurator/materials/visual-presets";
 import { pavingLayout, premiumEnvironment } from "./presentation";
@@ -37,7 +36,7 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   const bounds = outlineBounds(outline);
-  const layout = configuredPoolLayout(config);
+  const { layout, skimmers } = configuredLayoutWithSkimmers(config);
   const resolvedMaterials = resolveMaterials(config);
   const excluded = config.system === "infinity" && config.infinityEdge
     ? infinityExclusion(outline, config.infinityEdge, config.shape) : null;
@@ -49,7 +48,7 @@ export function createPhotoSceneSpec(project: ProjectConfiguration) {
     selection,
     structureType: structureFamily(config.structure),
     pool: { outline, elevations, floor, layout,
-      skimmers: planSkimmers(outline, computeMetrics(outline, config.dimensions.depth).waterSurface, config.system === "skimmer"),
+      skimmers,
       infinity: config.system === "infinity" && config.infinityEdge ? {
         requested: config.infinityEdge,
         resolved: computeInfinityEdgeGeometry(outline, config.infinityEdge, config.shape),

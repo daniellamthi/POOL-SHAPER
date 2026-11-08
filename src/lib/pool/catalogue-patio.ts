@@ -91,16 +91,27 @@ export function planCataloguePatio(
     box("wood", left + 0.23 + i * 0.12, 0.46, seatV, 0.105, 0.07, seatLength);
   for (const end of [-1, 1])
     box("reveal", left + 0.41, 0.22, seatV + end * (seatLength / 2 - 0.22), 0.43, 0.44, 0.045);
+  // A small open timber canopy gives the seating corner real depth/shade.
+  // Human-scale members stay outside the deck/accessory circulation envelope.
+  const canopyLength = seatLength + 0.6;
+  for (const u of [left + 0.24, left + 1.18]) {
+    for (const end of [-1, 1])
+      box("wood", u, 1.2, seatV + end * (canopyLength / 2 - 0.1), 0.1, 2.4, 0.1);
+    box("wood", u, 2.47, seatV, 0.14, 0.14, canopyLength);
+  }
+  for (let i = 0; i < 16; i++)
+    box("wood", left + 0.71, 2.58, seatV - canopyLength / 2 + i * canopyLength / 15,
+      1.14, 0.12, 0.07);
   // Gravel margins stay beyond a clear strip around the configured deck.
   box("gravel", centre, 0.006, back + 0.72, width, 0.018, 1.12);
   box(
     "gravel",
     left + 0.72,
     0.006,
-    returnCentre + 0.6,
+    returnCentre + 0.3,
     1.12,
     0.018,
-    Math.max(0.1, returnLength - 1.2),
+    Math.max(0.1, returnLength - 0.6),
   );
   return {
     parts,

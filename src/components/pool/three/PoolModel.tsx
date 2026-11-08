@@ -72,7 +72,7 @@ const COPING_STONE_BUILDERS: Partial<Record<CopingMaterialId, (size?: number) =>
   "deck-marrone": createWoodDeckMaps,
   wpc: createWPCMaps,
 };
-import { photoModeState } from "@/lib/pool/photoModeState";
+import { markPhotoMaterialsChanged, photoModeState } from "@/lib/pool/photoModeState";
 import { buildWaterOutline, offsetOutline, outlinePerimeter } from "@/lib/pool/geometry";
 import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
@@ -131,6 +131,7 @@ interface PoolModelProps {
   ledColor?: string | undefined;
   ledIntensity?: number | undefined;
   skimmers: SkimmerPlan;
+  showSkimmers?: boolean;
   /** Geometry Pass D (Infinity, Rectangle + L-shape). Only meaningful
    * while `system === "infinity"`. */
   infinityEdge?: InfinityEdgeParams;
@@ -481,6 +482,7 @@ export function PoolModel({
   ledColor,
   ledIntensity,
   skimmers,
+  showSkimmers = true,
   poolAccess,
   internalStairType,
   infinityEdge,
@@ -603,7 +605,7 @@ export function PoolModel({
           width: Math.hypot(b[0] - a[0], b[1] - a[1]), top: verticalLayout.wallTopY + 0.01, bottom };
       }) : [];
     }
-    if (system !== "skimmer") return [];
+    if (system !== "skimmer" || !showSkimmers) return [];
     const p = SKIMMER_PROFILES[materials.skimmer.type];
     const centerY = verticalLayout.wallTopY - p.drop + p.center;
     return skimmers.positions.map((spot) => ({
@@ -612,7 +614,7 @@ export function PoolModel({
       top: centerY + p.height / 2 - p.bar + 0.004,
       bottom: centerY - p.height / 2 + p.bar - 0.004,
     }));
-  }, [system, skimmers.positions, materials.skimmer.type, verticalLayout.wallTopY, isInfinity, infinityEdge, outline, shape, waterLevel]);
+  }, [system, showSkimmers, skimmers.positions, materials.skimmer.type, verticalLayout.wallTopY, isInfinity, infinityEdge, outline, shape, waterLevel]);
   const sourceSurfaceMap = useSafeSurfaceTexture(materials.surface.maps.baseColorMap, materials.surface.kind === "mosaic");
   const calibratedSurfaceMap = useMemo(() => materials.surface.calibrateSample
     ? createLinerSampleMap(sourceSurfaceMap) : sourceSurfaceMap,
@@ -704,6 +706,12 @@ export function PoolModel({
     depth,
     dataAnisotropy,
   ]);
+
+  // Passive effects run after R3F commits the replacement maps to the retained
+  // materials. Photo Mode can then upload them without rebuilding geometry.
+  useEffect(() => {
+    markPhotoMaterialsChanged(getSceneState().scene);
+  }, [getSceneState, floorSurfaceMap, wallSurfaceMap, interiorMicroMaps]);
 
   const aboveGroundPanelMap = useMemo(() => createAboveGroundPanelMap(), []);
   const aboveGroundPanelBumpMap = useMemo(() => {
@@ -1241,7 +1249,7 @@ export function PoolModel({
           floorProfile={floorProfile}
           topY={verticalLayout.copingY}
           infinityExcluded={infinityExcluded}
-          obstacles={system === "skimmer" ? skimmers.positions : []}
+          obstacles={system === "skimmer" && showSkimmers ? skimmers.positions : []}
           {...accessMounting(system, overflowType, verticalLayout)}
         >
           {accessMaterial}
@@ -1254,7 +1262,7 @@ export function PoolModel({
             floorProfile={floorProfile}
             topY={verticalLayout.copingY}
             infinityExcluded={infinityExcluded}
-            obstacles={system === "skimmer" ? skimmers.positions : []}
+            obstacles={system === "skimmer" && showSkimmers ? skimmers.positions : []}
             {...accessMounting(system, overflowType, verticalLayout)}
           >
             {accessMaterial}

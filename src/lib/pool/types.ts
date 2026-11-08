@@ -113,6 +113,8 @@ export interface RenovationConfig {
     copingMaterial?: NonNullable<PoolConfig["copingMaterial"]>;
     poolAccess?: PoolAccess | null;
     internalStairType?: InternalStairType;
+    internalStairWidth?: number;
+    internalStairMirrored?: boolean;
   };
 }
 
@@ -239,7 +241,9 @@ export interface PoolConfig {
   /** Only meaningful while `poolAccess` is "internalSteps". Absent on projects
    *  saved before the corner staircase existed; readers substitute "linear". */
   internalStairType?: InternalStairType;
-  /** Above-ground internal entry at the other valid corner of its end wall. */
+  /** Requested clear width in metres for straight internal flights. Absent preserves automatic sizing. */
+  internalStairWidth?: number;
+  /** Internal entry on the other valid side of the same end wall. */
   internalStairMirrored?: boolean;
   /** Only meaningful while "hydromassage" is enabled; absent means "closed". */
   hydromassageVariant?: HydromassageVariant;

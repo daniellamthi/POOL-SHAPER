@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { lazy, memo, Suspense, useEffect, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useRef, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import {
   Aperture,
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { photoModeState, PHOTO_MODE_EXPORT_READY_SAMPLES } from "@/lib/pool/photoModeState";
 import type { RenderJobStatus } from "@/lib/render-pipeline";
-import type { SceneProps, PhotoModeQuality } from "./three/PoolScene";
+import type { SceneProps, PhotoModeQuality, CameraRecoveryState } from "./three/PoolScene";
 import { TechnicalDataPanel } from "./TechnicalDataPanel";
 import type { TechnicalPlan } from "@/lib/pool/technical-plan";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
@@ -130,29 +130,64 @@ function ViewportFallback() {
  * "Generate photo" button's enabled state off the same poll, since both are
  * reading the same underlying counter.
  */
-function usePhotoModeSamples() {
-  const [samples, setSamples] = useState(0);
+function usePhotoModeSamples(sessionKey: string | null) {
+  const [snapshot, setSnapshot] = useState({ sessionKey, samples: 0, preparing: true, contextLost: false });
   useEffect(() => {
-    // `photoModeState.samples` mirrors WebGLPathTracer#samples, which the
-    // library itself increments by `1/totalTiles` per rendered tile (see
-    // PathTracingRenderer.js) and only rounds once every tile in the current
-    // sample has been drawn (default tiling is 3x3, so it spends most of its
-    // time sitting at a fraction like N.111 or N.333). That's a legitimate
-    // "how far through this sample are we" progress value, not a bug -- the
-    // bug was displaying it raw instead of flooring it to the last fully
-    // completed sample count for this discrete-looking counter.
-    const id = window.setInterval(() => setSamples(Math.floor(photoModeState.samples)), 200);
+    if (sessionKey === null) return;
+    const id = window.setInterval(() => {
+      const next = {
+        sessionKey,
+        samples: Math.floor(photoModeState.samples),
+        preparing: !photoModeState.active || photoModeState.preparing || photoModeState.contextLost,
+        contextLost: photoModeState.contextLost,
+      };
+      setSnapshot(previous => previous.sessionKey === next.sessionKey && previous.samples === next.samples &&
+        previous.preparing === next.preparing && previous.contextLost === next.contextLost ? previous : next);
+    }, 200);
     return () => window.clearInterval(id);
-  }, []);
-  return samples;
+  }, [sessionKey]);
+  // A new render must be covered immediately, before the first polling tick.
+  // A completed previous session must never briefly expose unfinished tiles.
+  if (sessionKey === null || snapshot.sessionKey !== sessionKey) return { samples: 0, preparing: sessionKey !== null, contextLost: false };
+  return snapshot;
 }
 
-function PhotoModeStatus({ samples }: { samples: number }) {
+function PhotoModeStatus({ samples, preparing, contextLost, onRetry, onCancel }: { samples: number; preparing: boolean; contextLost: boolean; onRetry: () => void; onCancel: () => void }) {
   const { t } = useI18n();
-  return (
-    <p className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground/70">
-      {t("Refining…")}{samples} {t("samples")}</p>
+  const percent = Math.max(0, Math.min(100, Math.floor(samples / PHOTO_MODE_EXPORT_READY_SAMPLES * 100)));
+  const loading = contextLost || preparing || samples < PHOTO_MODE_EXPORT_READY_SAMPLES;
+  const loadingRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!loading) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    loadingRef.current?.focus({ preventScroll: true });
+    return () => { if (previous?.isConnected) previous.focus({ preventScroll: true }); };
+  }, [loading]);
+  if (loading) return (
+    <div ref={loadingRef} data-photo-loading role="dialog" aria-modal="true" aria-label={t("Preparazione foto…")} tabIndex={-1}
+      className="absolute inset-0 z-30 flex items-center justify-center bg-neutral-950 px-8 text-white outline-none"
+      onKeyDown={event => {
+        if (event.key === "Escape") { event.preventDefault(); onCancel(); }
+        if (event.key === "Tab") {
+          event.preventDefault();
+          (loadingRef.current?.querySelector<HTMLButtonElement>("button") ?? loadingRef.current)?.focus();
+        }
+      }}>
+      {contextLost ? <div role="status" className="max-w-sm text-center text-sm text-white/80">
+        <p>{t("Rendering in pausa. Premi Riprova per riprendere.")}</p>
+        <Button type="button" variant="viewport" size="sm" className="mt-4" onClick={onRetry}>{t("Riprova")}</Button>
+      </div> : <div className="w-full max-w-xs">
+        <div className="mb-4 text-center">
+          <span data-photo-progress aria-hidden="true" className="text-2xl font-light tabular-nums tracking-tight text-white/90">{percent}%</span>
+        </div>
+        <div role="progressbar" aria-label={t("Preparazione foto…")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}
+          className="h-px w-full overflow-hidden bg-white/15">
+          <div className="h-full w-full origin-left bg-white/85 transition-transform duration-200 motion-reduce:transition-none" style={{ transform: `scaleX(${percent / 100})` }} />
+        </div>
+      </div>}
+    </div>
   );
+  return <p data-photo-progress className="pointer-events-none absolute left-1/2 top-[calc(var(--pool-header-height,0px)+4.5rem)] z-20 max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full border border-hairline bg-background/95 px-4 py-2 text-center text-xs text-foreground shadow-sm">{t("Foto pronta da scaricare")}</p>;
 }
 
 function QualityPicker({
@@ -205,8 +240,15 @@ export const PoolViewport = memo(function PoolViewport({
   ...scene
 }: ViewportProps) {
   const { t } = useI18n();
-  const samples = usePhotoModeSamples();
-  const exportReady = scene.photoMode && samples >= PHOTO_MODE_EXPORT_READY_SAMPLES;
+  const [graphicsGeneration, setGraphicsGeneration] = useState(0);
+  const cameraRecovery = useRef<CameraRecoveryState>({ capture: null, pending: null });
+  const retryGraphics = () => {
+    cameraRecovery.current.pending ??= cameraRecovery.current.capture?.() ?? null;
+    setGraphicsGeneration(value => value + 1);
+  };
+  const { samples, preparing, contextLost } = usePhotoModeSamples(scene.photoMode ? `${scene.photoModeQuality}:${graphicsGeneration}` : null);
+  const photoLoading = scene.photoMode && (preparing || contextLost || samples < PHOTO_MODE_EXPORT_READY_SAMPLES);
+  const exportReady = scene.photoMode && !preparing && samples >= PHOTO_MODE_EXPORT_READY_SAMPLES;
   const renderButtonLabel =
     renderPhase === "rendering"
       ? renderProgress
@@ -230,13 +272,13 @@ export const PoolViewport = memo(function PoolViewport({
       className="relative h-full w-full overflow-hidden bg-viewport">
       <ClientOnly fallback={<ViewportFallback />}>
         <Suspense fallback={<ViewportFallback />}>
-          <PoolScene {...scene} />
+          <PoolScene key={graphicsGeneration} {...scene} cameraRecovery={cameraRecovery} />
         </Suspense>
       </ClientOnly>
       {scene.construction && <div key={`${scene.construction.stage}-${scene.construction.structure}`}
         aria-hidden className="pointer-events-none absolute inset-0 z-[1] bg-viewport animate-[construction-reveal_240ms_ease-out_both] motion-reduce:hidden" />}
 
-      <div data-viewport-view-menu className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
+      <div data-viewport-view-menu inert={photoLoading} aria-hidden={photoLoading || undefined} className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -283,9 +325,9 @@ export const PoolViewport = memo(function PoolViewport({
         </select>
       </div> : null}
 
-      {scene.photoMode ? <PhotoModeStatus samples={samples} /> : null}
+      {scene.photoMode ? <PhotoModeStatus samples={samples} preparing={preparing} contextLost={contextLost} onRetry={retryGraphics} onCancel={onTogglePhotoMode} /> : null}
 
-      <div data-viewport-toolbar className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-4 sm:p-5">
+      <div data-viewport-toolbar inert={photoLoading} aria-hidden={photoLoading || undefined} className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-4 sm:p-5">
         <p className="hidden pb-2 text-[10px] tracking-[0.02em] text-muted-foreground/55 sm:block">
           {t(scene.photoMode
             ? "Path-traced preview — camera locked while refining"
@@ -340,10 +382,10 @@ export const PoolViewport = memo(function PoolViewport({
                   <DropdownMenuItem
                     disabled={!exportReady}
                     onSelect={() => {
-                      photoModeState.exportRequestId += 1;
+                      if (!photoModeState.preparing && !photoModeState.contextLost) photoModeState.exportRequestId += 1;
                     }}
                   >
-                    {t("Genera foto")}{t(!exportReady ? ` (ancora ${PHOTO_MODE_EXPORT_READY_SAMPLES}+ campioni)` : "")}
+                    {t(exportReady ? "Genera foto" : "Preparazione foto…")}
                   </DropdownMenuItem>
                 </>
               ) : (
@@ -369,15 +411,16 @@ export const PoolViewport = memo(function PoolViewport({
                 variant="viewport"
                 size="sm"
                 disabled={!exportReady}
-                title={t(exportReady
-                    ? "Save the current frame as a PNG"
-                    : `Keep refining -- ${PHOTO_MODE_EXPORT_READY_SAMPLES} samples gives a clean image`)}
+                title={t(preparing
+                    ? "Preparazione foto…"
+                    : exportReady ? "Save the current frame as a PNG"
+                    : "L’immagine si sta affinando. Attendi che sia pronta per scaricarla.")}
                 onClick={() => {
-                  photoModeState.exportRequestId += 1;
+                  if (!photoModeState.preparing && !photoModeState.contextLost) photoModeState.exportRequestId += 1;
                 }}
               >
                 <Download />
-                {t("Generate photo")}</Button>
+                {t(preparing ? "Preparazione foto…" : "Generate photo")}</Button>
             </>
           ) : null}
           <div role="toolbar" data-camera-occluder="view-tools" aria-label={t("Strumenti vista")} className={cn(CONTROL_SURFACE, "h-10 gap-0.5 p-1")}>

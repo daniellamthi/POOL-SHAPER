@@ -1,0 +1,1043 @@
+--- before/src/components/pool/DimensionControl.tsx
++++ after/src/components/pool/DimensionControl.tsx
+@@ -1,5 +1,5 @@
+ import { useI18n } from "@/lib/i18n";
+-import { useId } from "react";
++import { useEffect, useId, useRef, useState } from "react";
+ import { Slider } from "@/components/ui/slider";
+ 
+ interface Props {
+@@ -19,6 +19,30 @@
+   const id = useId();
+   const decimals = precision ?? (step < 0.1 ? 2 : step < 1 ? 1 : 0);
+ 
++  const [draft, setDraft] = useState<string | null>(null);
++  const cancelled = useRef(false);
++  const frame = useRef<number | null>(null);
++  const pending = useRef<number | null>(null);
++  const latestValue = useRef(value);
++  latestValue.current = value;
++  const change = useRef(onChange);
++  change.current = onChange;
++  const flush = () => {
++    if (frame.current !== null) cancelAnimationFrame(frame.current);
++    frame.current = null;
++    if (pending.current !== null) {
++      const next = pending.current;
++      pending.current = null;
++      if (next !== latestValue.current) {
++        latestValue.current = next;
++        change.current(next);
++      }
++    }
++  };
++  useEffect(() => () => {
++    if (frame.current !== null) cancelAnimationFrame(frame.current);
++  }, []);
++
+   return (
+     <div className="group flex flex-col gap-3.5 border-b border-hairline pb-6 last:border-0 last:pb-0">
+       <div className="flex items-baseline justify-between gap-4">
+@@ -36,13 +60,27 @@
+             type="number"
+             inputMode="decimal"
+             lang={locale}
+-            value={Number(value.toFixed(decimals))}
++            value={draft ?? Number(value.toFixed(decimals))}
+             min={min}
+             max={max}
+             step={step}
+-            onChange={(event) => {
+-              const next = Number.parseFloat(event.target.value);
+-              if (Number.isFinite(next)) onChange(next);
++            onFocus={() => { cancelled.current = false; }}
++            onChange={(event) => setDraft(event.target.value)}
++            onBlur={(event) => {
++              const next = Number.parseFloat(event.currentTarget.value);
++              if (!cancelled.current && Number.isFinite(next)) {
++                const clamped = Math.max(min, Math.min(max, next));
++                if (clamped !== value) onChange(clamped);
++              }
++              cancelled.current = false;
++              setDraft(null);
++            }}
++            onKeyDown={(event) => {
++              if (event.key === "Enter" || event.key === "Escape") {
++                event.preventDefault();
++                cancelled.current = event.key === "Escape";
++                event.currentTarget.blur();
++              }
+             }}
+             className="numeric w-[5.5rem] border-0 bg-transparent p-0 text-right text-[22px] leading-none text-foreground outline-none [appearance:textfield] focus:text-foreground [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+           />
+@@ -56,7 +94,14 @@
+         max={max}
+         step={step}
+         onValueChange={([next]) => {
+-          if (typeof next === "number") onChange(next);
++          if (typeof next !== "number") return;
++          setDraft(null);
++          pending.current = next;
++          if (frame.current === null) frame.current = requestAnimationFrame(flush);
++        }}
++        onValueCommit={([next]) => {
++          if (typeof next === "number") pending.current = next;
++          flush();
+         }}
+         aria-label={t(label)}
+       />
+--- before/src/components/pool/InternalStairWidthControl.tsx
++++ after/src/components/pool/InternalStairWidthControl.tsx
+@@ -0,0 +1,33 @@
++import { useMemo } from "react";
++import { DimensionControl } from "./DimensionControl";
++import { useI18n } from "@/lib/i18n";
++import type { PoolConfig } from "@/lib/pool/types";
++import { configuredInternalStairWidthRange, internalStairWidthFits } from "@/lib/pool/internal-stair-width";
++
++export function InternalStairWidthControl({ config, onChange }: {
++  config: PoolConfig;
++  onChange: (value: number | undefined) => void;
++}) {
++  const { t, number } = useI18n();
++  const range = useMemo(() => configuredInternalStairWidthRange(config),
++    // Width alone changes only the live flight, not its range or the automatic anchor.
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++    [config.poolType, config.shape, config.dimensions, config.controlPoints, config.system,
++      config.overflowType, config.features, config.poolAccess, config.internalStairType,
++      config.internalStairMirrored, config.hydromassageVariant, config.infinityEdge,
++      config.integratedBenchStations, config.copingStyle, config.copingEdge]);
++  const requested = config.internalStairWidth;
++  const valid = useMemo(() => requested === undefined || internalStairWidthFits(config, requested), [config, requested]);
++  return <div className="flex flex-col gap-3" data-internal-stair-width>
++    {range.available ? <>
++      <DimensionControl label="Larghezza scala" unit="m" step={0.05} precision={2}
++        value={requested ?? range.defaultWidth} min={range.min} max={range.max} onChange={onChange} />
++      <p className="text-xs text-muted-foreground">{t("Da {min} a {max} m, secondo lo spazio disponibile. Pedate e alzate restano invariate.", {
++        min: number(range.min, { maximumFractionDigits: 2 }), max: number(range.max, { maximumFractionDigits: 2 }),
++      })}</p>
++    </> : <p className="text-xs text-muted-foreground">{t(range.reason)}</p>}
++    {!valid && range.available ? <p role="alert" className="text-xs text-destructive">{t("La larghezza salvata non entra nella configurazione attuale. Modifica la misura o ripristina Automatica.")}</p> : null}
++    <button type="button" className="self-start text-xs underline underline-offset-4 disabled:text-muted-foreground disabled:no-underline"
++      disabled={requested === undefined} onClick={() => onChange(undefined)}>{t("Ripristina larghezza automatica")}</button>
++  </div>;
++}
+--- before/src/components/pool/PoolConfigurator.tsx
++++ after/src/components/pool/PoolConfigurator.tsx
+@@ -702,6 +702,7 @@
+             {...(poolLedType(config.ledType) === "perimeter" ? { perimeterLighting: configuredPerimeterLights(config) } : {})}
+             ledIntensity={normalisedLedIntensity(config.ledIntensity)}
+             internalStairType={config.internalStairType ?? "linear"}
++            internalStairWidth={config.internalStairWidth}
+             {...(config.hydromassageVariant
+               ? { hydromassageVariant: config.hydromassageVariant }
+               : {})}
+--- before/src/components/pool/ShapeEditor.tsx
++++ after/src/components/pool/ShapeEditor.tsx
+@@ -1,8 +1,11 @@
+ import { useI18n } from "@/lib/i18n";
+-import { useRef, useState } from "react";
++import { useEffect, useMemo, useRef, useState } from "react";
+ import { RotateCcw } from "lucide-react";
+ import { Button } from "@/components/ui/button";
+ import { useConfigurator } from "@/lib/pool/context";
++import { DIMENSION_LIMITS } from "@/lib/pool/config";
++import { buildOutline, POOL_SHAPE_GUARDRAILS, validatePoolShape } from "@/lib/pool/geometry";
++import type { ControlPoint } from "@/lib/pool/types";
+ 
+ const SIZE = 320;
+ const PAD = 26;
+@@ -10,8 +13,13 @@
+ /** Editable outline: drag the control points, the 3D basin follows live. */
+ export function ShapeEditor() {
+   const { t } = useI18n();
+-  const { config, outline, setControlPoint, resetControlPoints } = useConfigurator();
++  const { config, outline, setControlPoint, resetControlPoints, setDimension } = useConfigurator();
+   const svgRef = useRef<SVGSVGElement>(null);
++  const dragRef = useRef<{ index: number; pointerId: number; offset: ControlPoint } | null>(null);
++  const pendingRef = useRef<{ index: number; point: ControlPoint } | null>(null);
++  const frameRef = useRef<number | null>(null);
++  const updateRef = useRef(setControlPoint);
++  updateRef.current = setControlPoint;
+   const [dragging, setDragging] = useState<number | null>(null);
+ 
+   const editorHeight = SIZE * 0.62;
+@@ -35,21 +43,85 @@
+       })
+       .join(" ") + " Z";
+ 
+-  const move = (event: React.PointerEvent) => {
+-    if (dragging === null || !svgRef.current) return;
+-    const rect = svgRef.current.getBoundingClientRect();
++  const shapeStatus = useMemo(() => {
++    const validation = validatePoolShape(
++      buildOutline("custom", config.dimensions, config.controlPoints),
++      config.controlPoints,
++    );
++    if (validation.valid) return { valid: true, suggested: null };
++    // A uniformly larger version preserves the chosen silhouette. Offer it
++    // only when the same production guardrails validate the rounded dimensions.
++    const scale = Math.max(
++      POOL_SHAPE_GUARDRAILS.minimumHardRadius / validation.minimumRadius,
++      POOL_SHAPE_GUARDRAILS.minimumNeckWidth / validation.minimumNeckWidth,
++    );
++    const length = Math.ceil(config.dimensions.length * scale * 10) / 10;
++    const width = Math.ceil(config.dimensions.width * scale * 10) / 10;
++    const dimensions = { ...config.dimensions, length, width };
++    const suggested = Number.isFinite(scale) && scale > 1 &&
++      length <= DIMENSION_LIMITS.length.max && width <= DIMENSION_LIMITS.width.max &&
++      validatePoolShape(buildOutline("custom", dimensions, config.controlPoints), config.controlPoints).valid
++      ? { length, width }
++      : null;
++    return { valid: false, suggested };
++  }, [config.dimensions, config.controlPoints]);
++
++  const pointFromEvent = (event: React.PointerEvent): ControlPoint | null => {
++    const svg = svgRef.current;
++    if (!svg) return null;
++    const rect = svg.getBoundingClientRect();
++    if (rect.width <= 0 || rect.height <= 0) return null;
+     const x = ((event.clientX - rect.left) / rect.width) * SIZE;
+     const y = ((event.clientY - rect.top) / rect.height) * editorHeight;
+-    const nx = Math.max(
+-      -0.5,
+-      Math.min(0.5, (x - centreX) / metresToScreen / config.dimensions.length),
+-    );
+-    const ny = Math.max(
+-      -0.5,
+-      Math.min(0.5, (y - centreY) / metresToScreen / config.dimensions.width),
+-    );
+-    setControlPoint(dragging, [nx, ny]);
+-  };
++    return [
++      (x - centreX) / metresToScreen / config.dimensions.length,
++      (y - centreY) / metresToScreen / config.dimensions.width,
++    ];
++  };
++
++  const flush = () => {
++    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
++    frameRef.current = null;
++    const pending = pendingRef.current;
++    pendingRef.current = null;
++    if (pending) updateRef.current(pending.index, pending.point);
++  };
++
++  const move = (event: React.PointerEvent) => {
++    const drag = dragRef.current;
++    if (!drag || event.pointerId !== drag.pointerId) return;
++    const point = pointFromEvent(event);
++    if (!point) return;
++    pendingRef.current = {
++      index: drag.index,
++      point: [
++        Math.max(-0.5, Math.min(0.5, point[0] + drag.offset[0])),
++        Math.max(-0.5, Math.min(0.5, point[1] + drag.offset[1])),
++      ],
++    };
++    // Pointer devices can emit more often than the screen refreshes. Keep
++    // the newest position and rebuild the basin at most once per frame.
++    if (frameRef.current === null) frameRef.current = requestAnimationFrame(flush);
++  };
++
++  const finish = (event: React.PointerEvent, includePosition: boolean) => {
++    const drag = dragRef.current;
++    if (!drag || drag.pointerId !== event.pointerId) return;
++    if (includePosition) move(event);
++    flush();
++    dragRef.current = null;
++    setDragging(null);
++    if (svgRef.current?.hasPointerCapture(event.pointerId)) {
++      svgRef.current.releasePointerCapture(event.pointerId);
++    }
++  };
++
++  useEffect(() => () => {
++    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
++    frameRef.current = null;
++    pendingRef.current = null;
++    dragRef.current = null;
++  }, []);
+ 
+   return (
+     <div className="flex flex-col gap-4">
+@@ -59,8 +131,9 @@
+           viewBox={`0 0 ${SIZE} ${editorHeight}`}
+           className="w-full touch-none select-none"
+           onPointerMove={move}
+-          onPointerUp={() => setDragging(null)}
+-          onPointerLeave={() => setDragging(null)}
++          onPointerUp={(event) => finish(event, true)}
++          onPointerCancel={(event) => finish(event, false)}
++          onLostPointerCapture={(event) => finish(event, false)}
+         >
+           <path
+             d={path}
+@@ -70,29 +143,62 @@
+             strokeWidth={1.2}
+           />
+           {config.controlPoints.map(([x, y], index) => (
+-            <circle
+-              key={index}
+-              cx={toScreen([x * config.dimensions.length, y * config.dimensions.width])[0]}
+-              cy={toScreen([x * config.dimensions.length, y * config.dimensions.width])[1]}
+-              r={dragging === index ? 7 : 5}
+-              className="cursor-grab"
+-              fill="var(--background)"
+-              stroke="var(--foreground)"
+-              strokeWidth={1}
+-              onPointerDown={(event) => {
+-                event.currentTarget.setPointerCapture(event.pointerId);
+-                setDragging(index);
+-              }}
+-            />
++            <g key={index}>
++              <circle
++                cx={toScreen([x * config.dimensions.length, y * config.dimensions.width])[0]}
++                cy={toScreen([x * config.dimensions.length, y * config.dimensions.width])[1]}
++                r={16}
++                className={shapeStatus.valid ? "cursor-grab" : "cursor-not-allowed"}
++                fill="transparent"
++                onPointerDown={(event) => {
++                  if (!shapeStatus.valid || dragRef.current || event.button !== 0) return;
++                  const point = pointFromEvent(event);
++                  if (!point || !svgRef.current) return;
++                  event.preventDefault();
++                  dragRef.current = { index, pointerId: event.pointerId, offset: [x - point[0], y - point[1]] };
++                  svgRef.current.setPointerCapture(event.pointerId);
++                  setDragging(index);
++                }}
++              />
++              <circle
++                cx={toScreen([x * config.dimensions.length, y * config.dimensions.width])[0]}
++                cy={toScreen([x * config.dimensions.length, y * config.dimensions.width])[1]}
++                r={dragging === index ? 7 : 5}
++                pointerEvents="none"
++                fill="var(--background)"
++                stroke="var(--foreground)"
++                strokeWidth={1}
++              />
++            </g>
+           ))}
+         </svg>
+       </div>
++      {!shapeStatus.valid ? (
++        <div className="flex flex-col items-start gap-2 text-[11.5px] text-muted-foreground" role="status">
++          <p>{t("Questa sagoma è troppo stretta o curva per le dimensioni scelte. Aumenta le dimensioni per modificarla in sicurezza.")}</p>
++          {shapeStatus.suggested ? (
++            <Button type="button" variant="outline" size="sm" onClick={() => {
++              setDimension("length", shapeStatus.suggested!.length);
++              setDimension("width", shapeStatus.suggested!.width);
++            }}>
++              {t("Adatta dimensioni")} · {shapeStatus.suggested.length} × {shapeStatus.suggested.width} m
++            </Button>
++          ) : null}
++        </div>
++      ) : null}
+       <div className="flex items-center justify-between gap-4">
+         <p className="text-[11.5px] font-light text-muted-foreground">
+-          {t("Drag the control points to shape the basin.")}{" "}</p>
+-        <Button type="button" variant="ghost" size="sm" onClick={resetControlPoints}>
++          {t("Drag the control points to shape the basin.")} </p>
++        <Button type="button" variant="ghost" size="sm" onClick={() => {
++          if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
++          frameRef.current = null;
++          pendingRef.current = null;
++          dragRef.current = null;
++          setDragging(null);
++          resetControlPoints();
++        }}>
+           <RotateCcw />
+-          {t("Reset outline")}{" "}</Button>
++          {t("Reset outline")} </Button>
+       </div>
+     </div>
+   );
+--- before/src/components/pool/three/PoolAccessModel.tsx
++++ after/src/components/pool/three/PoolAccessModel.tsx
+@@ -590,6 +590,8 @@
+   outline,
+   access,
+   stairType = "linear",
++  stairWidth,
++  stairWidthAnchor,
+   floorProfile,
+   topY,
+   infinityExcluded = null,
+@@ -604,6 +606,8 @@
+   outline: Outline;
+   access: PoolAccess | null;
+   stairType?: InternalStairType;
++  stairWidth?: number | undefined;
++  stairWidthAnchor?: Outline | undefined;
+   floorProfile: FloorProfileModel;
+   topY: number;
+   infinityExcluded?: InfinityExclusion | null;
+@@ -715,9 +719,12 @@
+     Math.max(...boundsX) - Math.min(...boundsX),
+     Math.max(...boundsZ) - Math.min(...boundsZ),
+   );
++  if (access === "internalSteps" && stairWidth !== undefined &&
++      (!Number.isFinite(stairWidth) || stairWidth < ACCESS_DIMENSIONS.minWidth || stairWidth > shortSpan - 0.2))
++    return { ...empty, reason: "Larghezza della scala non compatibile con lo spazio disponibile." };
+   const width =
+     access === "internalSteps"
+-      ? THREE.MathUtils.clamp(
++      ? stairWidth ?? THREE.MathUtils.clamp(
+           shortSpan * 0.32,
+           ACCESS_DIMENSIONS.minWidth,
+           ACCESS_DIMENSIONS.maxWidth,
+@@ -800,6 +807,14 @@
+       infinityExcluded,
+       (p) => {
+         const footprint = footprintAt(p, width, run);
++        if (stairWidthAnchor?.length === 4) {
++          const a = stairWidthAnchor, b = footprint;
++          const ax = a[1]![0] - a[0]![0], az = a[1]![1] - a[0]![1];
++          const bx = b[1]![0] - b[0]![0], bz = b[1]![1] - b[0]![1];
++          const sameDirection = (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz)) > 0.999;
++          const sameCorner = a.slice(0, 2).some(q => b.slice(0, 2).some(r => Math.hypot(q[0] - r[0], q[1] - r[1]) < 0.025));
++          if (!sameDirection || !sameCorner) return false;
++        }
+         if (mirrorAnchor && Math.hypot(p.x-mirrorAnchor.x,p.z-mirrorAnchor.z)>0.02) return false;
+         if (!clearOfFittings(footprint)) return false;
+         const ends = footprint.slice(2).map(([x, z]) => floorProfile.floorYAt(x, z));
+--- before/src/components/pool/three/PoolScene.tsx
++++ after/src/components/pool/three/PoolScene.tsx
+@@ -150,6 +150,7 @@
+   ledIntensity: number;
+   /** Which internal staircase is built; resolved upstream. */
+   internalStairType: InternalStairType;
++  internalStairWidth?: number | undefined;
+   internalStairMirrored?: boolean;
+   hydromassageVariant?: HydromassageVariant;
+   poolAccess: PoolAccess | null;
+@@ -815,7 +816,7 @@
+   const visibleFrame = cleanCapture ? projectBookHeroFrame(viewportSize.width, viewportSize.height) : visibleCameraFrame(canvas.getBoundingClientRect(), [
+     ...Array.from(occluderRoot.querySelectorAll(occluderSelector)).map(element => element.getBoundingClientRect()),
+     ...(summaryRect ? [summaryRect] : []),
+-  ], subjectAspect);
++  ], subjectAspect, focus === "top" ? frame => centeredArchitecturalFrame(frame, viewportSize.width) : undefined);
+   const visibleFrameKey = `${visibleFrame.left}:${visibleFrame.top}:${visibleFrame.width}:${visibleFrame.height}`;
+   const fitFov = localFraming ? SCENE_VISUAL_PRESET.camera.fov
+     : cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov;
+@@ -1286,6 +1287,7 @@
+   perimeterLighting,
+   ledIntensity,
+   internalStairType,
++  internalStairWidth,
+   internalStairMirrored = false,
+   hydromassageVariant,
+   poolAccess,
+@@ -1369,7 +1371,7 @@
+   const assetsLoading=useProgress(state=>state.active);
+   const shadowRevision=JSON.stringify([
+     graphicsRevision,outline,shape,system,overflowType,poolType,length,width,depth,floorProfileSetting,
+-    shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairMirrored,
++    shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairWidth,internalStairMirrored,
+     hydromassageVariant,sunShelfRun,sunShelfLoungerCount,integratedBenchStations,infinityEdge,construction,
+     solarShower,loungers,exteriorPanelFinish,externalStairSide,externalStairPlatformExtended,
+     pellicano,coverPlan.geometry,coverPlan.extension,materials.skimmer.type,skimmers.positions,
+@@ -1486,6 +1488,7 @@
+         skimmers: system === "skimmer" ? skimmers : { ...skimmers, positions: [] },
+         access: poolAccess,
+         stairType: internalStairType,
++        stairWidth: internalStairWidth,
+         stairMirrored: internalStairMirrored,
+         floorProfile,
+         infinityExcluded,
+@@ -1505,6 +1508,7 @@
+       system,
+       poolAccess,
+       internalStairType,
++      internalStairWidth,
+       internalStairMirrored,
+       floorProfile,
+       infinityExcluded,
+@@ -1712,6 +1716,7 @@
+     normalisedInfinityEdge?.enabled,
+     normalisedInfinityEdge?.side,
+     internalStairType,
++    internalStairWidth,
+     internalStairMirrored,
+     floorProfileSetting,
+     shallowDepth,
+--- before/src/components/pool/wizard/StepTrays.tsx
++++ after/src/components/pool/wizard/StepTrays.tsx
+@@ -1,3 +1,4 @@
++import { shapeDimensionLimits } from "@/lib/pool/shape-dimensions";
+ import { PresentationContextPicker, type PresentationContextChoice } from "../PresentationContextPicker";
+ import { Button } from "@/components/ui/button";
+ import { useEffect, useMemo, useState, type ReactNode } from "react";
+@@ -47,6 +48,7 @@
+ import { MetricsPanel } from "@/components/pool/MetricsPanel";
+ import { ShapeEditor } from "@/components/pool/ShapeEditor";
+ import { FileDrop } from "@/components/pool/FileDrop";
++import { InternalStairWidthControl } from "@/components/pool/InternalStairWidthControl";
+ import { DimensionControl } from "@/components/pool/DimensionControl";
+ import { DIMENSION_LIMITS } from "@/lib/pool/config";
+ import {
+@@ -227,7 +229,7 @@
+         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
+           <div className="flex flex-col gap-7">
+             {(["length", "width"] as const).map((key) => {
+-              const limits = DIMENSION_LIMITS[key];
++              const limits = shapeDimensionLimits(config.shape, key, config.dimensions);
+               return (
+                 <DimensionControl
+                   key={key}
+@@ -478,6 +480,7 @@
+     togglePoolFeature,
+     setPoolAccess,
+     setInternalStairType,
++    setInternalStairWidth,
+     setInternalStairMirrored,
+     setHydromassageVariant,
+     toggleInternalSteps,
+@@ -698,6 +701,7 @@
+               </ChoiceGrid> : null}
+             </RevealSection>
+           ) : null}
++          {tab === "access" && stepsOn ? <InternalStairWidthControl config={config} onChange={setInternalStairWidth} /> : null}
+         </div>
+       ) : (
+         <div className="flex flex-col gap-5">
+@@ -739,6 +743,7 @@
+           </ChoiceGrid>
+           {!comfortUnavailable && !shelfProposal.availability.sunShelf.available ? <p role="status" className="text-xs text-muted-foreground">{t("Sun Shelf")}: {t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
+           {!comfortUnavailable && !hydroProposal.availability.hydromassage.available ? <p role="status" className="text-xs text-muted-foreground">{t("Idromassaggio")}: {t(hydroProposal.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
++          {(shelfOn || hydroOn) ? <InternalStairWidthControl config={config} onChange={setInternalStairWidth} /> : null}
+           {shelfOn && shelfRange.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
+             <DimensionControl label="Lunghezza spiaggetta e gradini" unit="m" step={0.005} precision={3}
+               value={requestedShelfRun} min={shelfRange.min} max={shelfRange.max} onChange={setSunShelfRun} />
+--- before/src/configurator/steps/pool-shape/PoolShapeStep.tsx
++++ after/src/configurator/steps/pool-shape/PoolShapeStep.tsx
+@@ -1,3 +1,4 @@
++import { shapeDimensionLimits } from "@/lib/pool/shape-dimensions";
+ import { FileDrop } from "@/components/pool/FileDrop";
+ import { DimensionControl } from "@/components/pool/DimensionControl";
+ import { MetricsPanel } from "@/components/pool/MetricsPanel";
+@@ -32,7 +33,7 @@
+           ["width", "Larghezza"],
+         ] as ReadonlyArray<readonly ["length" | "width", string]>
+       ).map(([key, label]) => {
+-        const limits = DIMENSION_LIMITS[key];
++        const limits = shapeDimensionLimits(config.shape, key, config.dimensions);
+         return (
+           <DimensionControl
+             key={key}
+@@ -254,7 +255,7 @@
+           ["lShapeRecessWidth", "Larghezza del rientro"],
+         ] as const
+       ).map(([key, label]) => {
+-        const limits = DIMENSION_LIMITS[key];
++        const limits = shapeDimensionLimits(config.shape, key, config.dimensions);
+         const value = config.dimensions[key] ?? (key === "lShapeRecessLength" ? 4 : 3);
+         return (
+           <DimensionControl
+--- before/src/configurator/steps/renovation/RenovationSteps.tsx
++++ after/src/configurator/steps/renovation/RenovationSteps.tsx
+@@ -1,3 +1,5 @@
++import { InternalStairWidthControl } from "@/components/pool/InternalStairWidthControl";
++import { internalStairWidthFits } from "@/lib/pool/internal-stair-width";
+ import { PresentationContextPicker } from "@/components/pool/PresentationContextPicker";
+ import { Button } from "@/components/ui/button";
+ import { useI18n } from "@/lib/i18n";
+@@ -140,6 +142,15 @@
+           <ChoiceCard key={id} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={(e.internalStairType ?? "linear") === id}
+             onSelect={() => choose({ internalStairType: id })} />)}
+       </ChoiceGrid> : null}
++      {e?.poolAccess === "internalSteps" ? <InternalStairWidthControl
++        config={renovationPreviewConfig(config, r, true)}
++        onChange={width => {
++          const current = renovationPreviewConfig(config, r, true);
++          if (width === undefined) {
++            const { internalStairWidth: _width, ...automatic } = e;
++            updateRenovation({ existing: automatic });
++          } else if (internalStairWidthFits(current, width)) choose({ internalStairWidth: width });
++        }} /> : null}
+       {e?.poolAccess && configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason ? <p role="alert" className="text-[12px] text-destructive">
+         {t(configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason ?? "")} {t("Scegli un accesso compatibile o indica una vasca senza scala interna.")}{" "}</p> : null}
+     </> : null}
+--- before/src/lib/i18n/messages.ts
++++ after/src/lib/i18n/messages.ts
+@@ -2,6 +2,18 @@
+ 
+ /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
+ export const messages: ReadonlyArray<readonly [string, string]> = [
++  ["Larghezza scala", "Stair width"],
++  ["Ripristina larghezza automatica", "Reset automatic width"],
++  ["Larghezza scala: {width} m", "Stair width: {width} m"],
++  ["Da {min} a {max} m, secondo lo spazio disponibile. Pedate e alzate restano invariate.", "From {min} to {max} m, based on the available space. Treads and risers stay unchanged."],
++  ["La larghezza salvata non entra nella configurazione attuale. Modifica la misura o ripristina Automatica.", "The saved width does not fit the current configuration. Change the width or restore Automatic."],
++  ["La scala angolare mantiene pedate e raggi costruttivi fissi. Scegli Rettilinea per regolare la larghezza.", "Corner stairs retain their fixed tread dimensions and radii. Choose Straight to adjust the width."],
++  ["Seleziona una scala rettilinea compatibile per regolarne la larghezza.", "Select compatible straight stairs to adjust their width."],
++  ["La scala non è compatibile con lo spazio attuale. Modifica la piscina o ripristina la larghezza automatica.", "The stairs do not fit the current space. Change the pool or restore the automatic width."],
++  ["Larghezza della scala non compatibile con lo spazio disponibile.", "The stair width does not fit the available space."],
++
++  ["Questa sagoma è troppo stretta o curva per le dimensioni scelte. Aumenta le dimensioni per modificarla in sicurezza.", "This outline is too narrow or curved for the selected dimensions. Increase the dimensions to edit it safely."],
++  ["Adatta dimensioni", "Adjust dimensions"],
+   ["Il tuo progetto, passo dopo passo", "Your project, step by step"],
+   ["Progetta la piscina per il tuo spazio.", "Design the pool for your space."],
+   ["Scegli se realizzare una nuova piscina o rinnovare quella esistente. Dimensioni, materiali e dotazioni prenderanno forma nei prossimi passi.", "Choose whether to build a new pool or renovate an existing one. Dimensions, materials and equipment will take shape in the following steps."],
+--- before/src/lib/pool/comfort-plan.ts
++++ after/src/lib/pool/comfort-plan.ts
+@@ -143,6 +143,7 @@
+   separateHydroAccess = false,
+   nominalWidth,
+   sunShelfRun,
++  stairWidth: requestedStairWidth,
+   integratedBenchStations: requestedBenchStations,
+ }: {
+   outline: Outline;
+@@ -161,6 +162,7 @@
+   /** Commercial width, independent of outline rotation/principal axis. */
+   nominalWidth?: number;
+   sunShelfRun?: number | undefined;
++  stairWidth?: number | undefined;
+   integratedBenchStations?: number | undefined;
+ }): ComfortPlan {
+   const unsupported =
+@@ -233,7 +235,7 @@
+         { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.minZ + shelfRun }, axis: "z", coordinate: bounds.minZ },
+         { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.maxZ - shelfRun, maxZ: bounds.maxZ - EDGE_INSET }, axis: "z", coordinate: bounds.maxZ },
+       ];
+-  const stairWidth = Math.min(1.2, shortSpan - 1.2);
++  const stairWidth = requestedStairWidth ?? Math.min(1.2, shortSpan - 1.2);
+   const withSteps = (candidate: typeof shelfCandidates[number], minimumRun: number) => {
+     if ((infinityAtCrossMin || infinityAtCrossMax) && safeCrossMax - safeCrossMin < stairWidth + 1.2)
+       return null;
+@@ -244,6 +246,7 @@
+     const crossMin = longX ? candidate.rect.minZ : candidate.rect.minX;
+     const crossMax = longX ? candidate.rect.maxZ : candidate.rect.maxX;
+     const stairAtMin = !excludedWall(infinityExcluded, longX ? "z" : "x", longX ? bounds.minZ : bounds.minX);
++    if (requestedStairWidth !== undefined && (!Number.isFinite(stairWidth) || stairWidth < 0.8 || stairWidth > crossMax - crossMin - 0.2)) return null;
+     const center = stairAtMin ? crossMin + stairWidth / 2 : crossMax - stairWidth / 2;
+     const topY = waterY - (minimumRun ? SUN_SHELF_WATER_DEPTH : 0.22);
+     // Solve against the floor at the actual landing, including its slope.
+--- before/src/lib/pool/context.ts
++++ after/src/lib/pool/context.ts
+@@ -103,6 +103,7 @@
+   setExternalStairPlatformExtended: (value: boolean) => void;
+   setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
+   setInternalStairType: (value: InternalStairType) => void;
++  setInternalStairWidth: (value: number | undefined) => void;
+   setInternalStairMirrored: (value: boolean) => void;
+   setHydromassageVariant: (value: HydromassageVariant) => void;
+   setPoolAccess: (value: PoolAccess) => void;
+--- before/src/lib/pool/engineering.ts
++++ after/src/lib/pool/engineering.ts
+@@ -30,7 +30,10 @@
+         pb = sampleWall(b, b.length / 2);
+       const da = Math.abs((axis === 0 ? pa.x : pa.z) - preferred.coordinate),
+         db = Math.abs((axis === 0 ? pb.x : pb.z) - preferred.coordinate);
+-      return da - db || b.length - a.length;
++      // A shortened side of an L is not a suitable preference over its
++      // uninterrupted wall. Spread the row on the longest actual mounting
++      // run; use the established preferred side only to break equal lengths.
++      return b.length - a.length || da - db;
+     });
+   const positions: Array<{ x: number; z: number; rotation: number }> = [];
+   let spacing = 0;
+@@ -38,7 +41,7 @@
+     const margin = Math.min(0.6, run.length / 2);
+     const n = Math.min(
+       count - positions.length,
+-      Math.max(1, Math.floor((run.length - 0.588) / 0.9) + 1),
++      Math.max(1, Math.floor((run.length - 2 * margin) / 0.9) + 1),
+     );
+     if (n <= 0) break;
+     const pitch = run.length / n;
+--- before/src/lib/pool/geometry.ts
++++ after/src/lib/pool/geometry.ts
+@@ -131,7 +131,16 @@
+   dimensions: Dimensions,
+ ): ReadonlyArray<ControlPoint> {
+   const previous = points[index];
+-  if (!previous) return points;
++  if (!previous || !requested.every(Number.isFinite)) return points;
++  if (requested[0] === previous[0] && requested[1] === previous[1]) return points;
++  const constructible = (trialPoints: ReadonlyArray<ControlPoint>) => {
++    if (!isValidControlPolygon(trialPoints)) return false;
++    const outline = buildOutline("custom", dimensions, trialPoints);
++    // Most clamped drags fail curvature. Check this linear guard before
++    // the quadratic neck/coping tests, with exactly the same hard limit.
++    if (minimumCurvatureRadius(outline) < POOL_SHAPE_GUARDRAILS.minimumHardRadius) return false;
++    return validatePoolShape(outline, trialPoints).valid;
++  };
+   const delta: ControlPoint = [requested[0] - previous[0], requested[1] - previous[1]];
+   const neighbourInfluence = 0.1;
+   const candidate = points.map((point, pointIndex) => {
+@@ -147,7 +156,7 @@
+         ] as const)
+       : point;
+   });
+-  if (validatePoolShape(buildOutline("custom", dimensions, candidate), candidate).valid) {
++  if (constructible(candidate)) {
+     return candidate;
+   }
+   let low = 0;
+@@ -169,7 +178,7 @@
+           ] as const)
+         : point;
+     });
+-    if (validatePoolShape(buildOutline("custom", dimensions, trialPoints), trialPoints).valid) {
++    if (constructible(trialPoints)) {
+       low = amount;
+     } else high = amount;
+   }
+--- before/src/lib/pool/internal-stair-width.ts
++++ after/src/lib/pool/internal-stair-width.ts
+@@ -0,0 +1,58 @@
++import type { PoolConfig } from "./types";
++import { configuredPoolLayout } from "./resolved-layout";
++import { configuredOutline } from "./configured-outline";
++import { outlineBounds } from "./geometry";
++
++export type InternalStairWidthRange =
++  | { available: true; min: number; max: number; defaultWidth: number }
++  | { available: false; reason: string };
++
++const automaticConfig = (config: PoolConfig): PoolConfig => {
++  const { internalStairWidth: _width, ...automatic } = config;
++  return automatic;
++};
++const integratedFlight = (layout: ReturnType<typeof configuredPoolLayout>) =>
++  layout.comfort.elements.find(element => (element.kind === "sunShelf" || element.kind === "hydromassage") && !!element.steps?.length);
++
++/** Same real footprints, fittings, Infinity exclusions and comfort clearances as the scene. */
++export function internalStairWidthFits(config: PoolConfig, width: number): boolean {
++  if (!Number.isFinite(width) || width < 0.8 || width > 100) return false;
++  const automatic = configuredPoolLayout(automaticConfig(config));
++  const integrated = integratedFlight(automatic);
++  if (!integrated && (config.poolAccess !== "internalSteps" || config.internalStairType === "corner" || !automatic.access.placement)) return false;
++  const candidate = configuredPoolLayout({ ...config, internalStairWidth: width });
++  if (candidate.status === "UNAVAILABLE") return false;
++  return integrated
++    ? !!candidate.comfort.elements.find(element => element.kind === integrated.kind && !!element.steps?.length)
++    : !!candidate.access.placement && Math.abs(candidate.access.width - width) < 1e-7;
++}
++
++/** Range is calculated only when pool geometry/options change, never on every slider tick. */
++export function configuredInternalStairWidthRange(config: PoolConfig): InternalStairWidthRange {
++  const automatic = automaticConfig(config);
++  const plan = configuredPoolLayout(automatic);
++  const integrated = integratedFlight(plan);
++  if (!integrated && config.internalStairType === "corner") return { available: false,
++    reason: "La scala angolare mantiene pedate e raggi costruttivi fissi. Scegli Rettilinea per regolare la larghezza." };
++  if (!integrated && (config.poolAccess !== "internalSteps" || !plan.access.placement)) return { available: false,
++    reason: "Seleziona una scala rettilinea compatibile per regolarne la larghezza." };
++  const bounds = outlineBounds(configuredOutline(automatic));
++  const span = Math.min(bounds.spanX, bounds.spanZ);
++  const defaultWidth = integrated ? Math.min(1.2, span - 1.2) : plan.access.width;
++  if (!internalStairWidthFits(automatic, defaultWidth)) return { available: false,
++    reason: "La scala non è compatibile con lo spazio attuale. Modifica la piscina o ripristina la larghezza automatica." };
++  // Search outwards from the known valid automatic flight. A fixed wall/corner
++  // prevents the solver from jumping to a different end as its width increases.
++  let lo = defaultWidth, hi = Math.max(defaultWidth, span - 0.2);
++  if (internalStairWidthFits(automatic, hi)) lo = hi;
++  else for (let i = 0; i < 16 && hi - lo > 0.001; i++) {
++    const mid = (lo + hi) / 2;
++    if (internalStairWidthFits(automatic, mid)) lo = mid; else hi = mid;
++  }
++  const max = Math.floor((lo + 1e-7) * 100) / 100;
++  // A narrower shelf access may violate its existing 90 cm passage criterion.
++  let min = 0.8;
++  while (min < defaultWidth - 0.001 && !internalStairWidthFits(automatic, min)) min = Math.round((min + 0.05) * 100) / 100;
++  min = Math.min(defaultWidth, min);
++  return { available: true, min, max: Math.max(max, defaultWidth), defaultWidth };
++}
+--- before/src/lib/pool/project.ts
++++ after/src/lib/pool/project.ts
+@@ -213,6 +213,7 @@
+     externalStairSide: _savedStairSide,
+     externalStairPlatformExtended: _savedStairPlatform,
+     internalStairMirrored: _savedStairMirror,
++    internalStairWidth: savedStairWidth,
+     ...restoredWithoutEdge
+   } = restored;
+   return {
+@@ -254,6 +255,8 @@
+       // Same reasoning for the staircase variant: a project saved before the
+       // corner flight existed comes back as the straight one it was drawn with.
+       internalStairType: restored.internalStairType === "corner" ? "corner" : "linear",
++      ...(typeof savedStairWidth === "number" && Number.isFinite(savedStairWidth) && savedStairWidth >= 0.8 && savedStairWidth <= 100
++        ? { internalStairWidth: savedStairWidth } : {}),
+       // Unknown values restore as the default closed tub; absent stays absent.
+       ...(restored.hydromassageVariant !== undefined
+         ? { hydromassageVariant: restored.hydromassageVariant === "open" ? "open" : "closed" }
+--- before/src/lib/pool/renovation.ts
++++ after/src/lib/pool/renovation.ts
+@@ -40,6 +40,7 @@
+         !valid(e.system, ["skimmer", "overflow"]) || !valid(e.overflowType, ["visible", "hidden", "continuous"]) ||
+         !valid(e.finish, ["liner", "mosaic"]) || !valid(e.poolAccess, [null, "internalSteps", "stainlessSteelLadder"]) ||
+         !valid(e.internalStairType, ["linear", "corner"]) ||
++        (e.internalStairWidth !== undefined && (!Number.isFinite(e.internalStairWidth) || e.internalStairWidth < 0.8 || e.internalStairWidth > 100)) ||
+         !valid(e.linerColor, LINER_COLORS.map(c => c.id)) ||
+         !valid(e.mosaicFinish, MOSAIC_FINISHES.map(c => c.id)) ||
+         !valid(e.copingMaterial, COPING_MATERIALS.map(c => c.id))) return false;
+@@ -74,7 +75,7 @@
+   const finish = before || !renovationIncludes(r, "interiorFinish") ? e.finish ?? r.currentFinish : config.finish;
+   const system = !before && renovationIncludes(r, "filtration") && r.filtrationWorks.includes("overflow")
+     ? "overflow" : e.system ?? config.system;
+-  const { infinityEdge: _edge, ...base } = config;
++  const { infinityEdge: _edge, internalStairWidth: _width, ...base } = config;
+   return {
+     ...base,
+     poolType: e.poolType ?? config.poolType,
+@@ -86,6 +87,7 @@
+     overflowType: before || e.system === "overflow" ? e.overflowType ?? config.overflowType : config.overflowType,
+     poolAccess: e.poolAccess !== undefined ? e.poolAccess : config.poolAccess,
+     internalStairType: e.internalStairType ?? config.internalStairType ?? "linear",
++    ...(e.internalStairWidth !== undefined ? { internalStairWidth: e.internalStairWidth } : {}),
+     dimensions: e.poolType === "above-ground" ? { ...config.dimensions, floorProfile: "flat" } : config.dimensions,
+     copingMaterial: !before && renovationIncludes(r, "coping") && r.replaceCoping &&
+       COPING_MATERIALS.some(c => c.id === r.copingMaterial)
+--- before/src/lib/pool/resolved-layout.ts
++++ after/src/lib/pool/resolved-layout.ts
+@@ -36,6 +36,7 @@
+ }
+ type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
+   stairMirrored?: boolean;
++  stairWidth?: number | undefined;
+   shape: PoolShapeId;
+   poolType: PoolType;
+   features: ReadonlyArray<PoolFeatureId>;
+@@ -64,6 +65,7 @@
+     wantsFlightZone && input.floorProfile.sloped && !input.floorProfile.shelfZone;
+   const comfort = resolveComfortPlan({
+     ...input,
++    stairWidth: input.poolType === "in-ground" && input.access === "internalSteps" && input.stairType === "corner" && !features.includes("sunShelf") ? undefined : input.stairWidth,
+     separateHydroAccess: input.poolType === "in-ground" && input.access === "internalSteps" && input.stairType === "corner",
+     waterY: input.layout.waterY,
+     enabled: missingShelfLanding
+@@ -94,7 +96,10 @@
+       ...mounting,
+       rectangularCorner: input.poolType === "above-ground",
+     };
+-    const normal=resolveAccessPlan(request);
++    // Keep the chosen head-wall corner while widening, rather than jumping to a different wall.
++    const automatic = input.stairWidth !== undefined && access === "internalSteps" && input.stairType !== "corner"
++      ? resolveAccessPlan({ ...request, stairWidth: undefined }) : null;
++    const normal=resolveAccessPlan({ ...request, ...(automatic?.placement ? { stairWidthAnchor: automatic.footprint } : {}) });
+     if(input.poolType!=="above-ground" || !input.stairMirrored || access!=="internalSteps" || !normal.placement) return normal;
+     const bounds=outlineBounds(input.outline),p=normal.placement,longX=bounds.spanX>=bounds.spanZ;
+     return resolveAccessPlan({...request,mirrorAnchor:{
+@@ -200,6 +205,7 @@
+     infinityWallType: config.system === "infinity" ? config.infinityEdge?.wallType : undefined,
+     access: config.poolAccess,
+     stairType: config.internalStairType ?? "linear",
++    stairWidth: config.internalStairWidth,
+     stairMirrored: !!config.internalStairMirrored,
+     skimmers: planSkimmers(
+       outline,
+--- before/src/lib/pool/shape-dimensions.ts
++++ after/src/lib/pool/shape-dimensions.ts
+@@ -0,0 +1,26 @@
++import { DIMENSION_LIMITS, type DimensionKey } from "./config";
++import { clampLShapeDimensions, L_SHAPE_GUARDRAILS } from "./l-shape";
++import type { Dimensions, PoolShapeId } from "./types";
++
++/** Keep the controls, stored dimensions and actual L outline in agreement. */
++export function normalizeShapeDimensions(shape: PoolShapeId, dimensions: Dimensions): Dimensions {
++  if (shape !== "l-shape") return dimensions;
++  const l = clampLShapeDimensions({ totalLength: dimensions.length, totalWidth: dimensions.width,
++    recessLength: dimensions.lShapeRecessLength, recessWidth: dimensions.lShapeRecessWidth,
++    orientation: dimensions.lShapeOrientation });
++  return { ...dimensions, length: l.totalLength, width: l.totalWidth,
++    lShapeRecessLength: l.recessLength, lShapeRecessWidth: l.recessWidth,
++    lShapeOrientation: l.orientation };
++}
++
++export function shapeDimensionLimits(shape: PoolShapeId, key: DimensionKey, dimensions: Dimensions) {
++  const limits = DIMENSION_LIMITS[key];
++  if (shape !== "l-shape") return limits;
++  if (key === "length") return { ...limits, min: L_SHAPE_GUARDRAILS.totalLength.min };
++  if (key === "width") return { ...limits, min: L_SHAPE_GUARDRAILS.totalWidth.min };
++  if (key === "lShapeRecessLength" || key === "lShapeRecessWidth") {
++    const span = key === "lShapeRecessLength" ? dimensions.length : dimensions.width;
++    return { ...limits, max: Math.max(limits.min, Math.min(limits.max, span - L_SHAPE_GUARDRAILS.minLegWidth)) };
++  }
++  return limits;
++}
+--- before/src/lib/pool/store.tsx
++++ after/src/lib/pool/store.tsx
+@@ -1,3 +1,4 @@
++import { normalizeShapeDimensions } from "./shape-dimensions";
+ import { exteriorPanelFinish, externalStairSide, withoutAboveGroundOnly, type ExteriorPanelFinishId, type ExternalStairSide } from "./above-ground";
+ import {
+   useCallback,
+@@ -96,6 +97,8 @@
+   structureSupportsPoolType,
+ } from "./structure-finish";
+ 
++import { internalStairWidthFits } from "./internal-stair-width";
++
+ type Action =
+   | { type: "setProjectType"; value: ProjectType }
+   | { type: "setPoolType"; value: PoolType }
+@@ -139,6 +142,7 @@
+   | { type: "setExternalStairPlatformExtended"; value: boolean }
+   | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
+   | { type: "setInternalStairType"; value: InternalStairType }
++  | { type: "setInternalStairWidth"; value: number | undefined }
+   | { type: "setInternalStairMirrored"; value: boolean }
+   | { type: "setHydromassageVariant"; value: HydromassageVariant }
+   | { type: "setPoolAccess"; value: PoolAccess }
+@@ -291,6 +295,14 @@
+       return isLedColor(action.value)
+         ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
+         : state;
++    case "setInternalStairWidth": {
++      if (action.value === undefined) {
++        const { internalStairWidth: _width, ...automatic } = config;
++        return { ...state, config: automatic };
++      }
++      return internalStairWidthFits(config, action.value)
++        ? { ...state, config: { ...config, internalStairWidth: action.value } } : state;
++    }
+     case "setInternalStairType":
+       return { ...state, config: { ...config, internalStairType: action.value } };
+     case "setInternalStairMirrored": {
+@@ -396,7 +408,7 @@
+       // otherwise have to default blindly) from whatever length/width the
+       // pool already has -- same seeding pattern `setFloorProfile` below
+       // uses for `shallowDepth`.
+-      const dimensions =
++      const dimensions = normalizeShapeDimensions(action.value,
+         action.value === "l-shape" && config.dimensions.lShapeRecessLength === undefined
+           ? (() => {
+               const seeded = clampLShapeDimensions({
+@@ -412,7 +424,7 @@
+                 lShapeOrientation: seeded.orientation,
+               };
+             })()
+-          : config.dimensions;
++          : config.dimensions);
+       // Geometry Pass D (Infinity, Rectangle + L-shape): switching to a shape
+       // Infinity has no real zones for (Organic) while Infinity is selected
+       // falls back to skimmer live, in-session -- the same rule project.ts's
+@@ -462,6 +474,7 @@
+         action.value,
+         config.dimensions,
+       );
++      if (points === config.controlPoints) return state;
+       return { ...state, config: { ...config, controlPoints: points } };
+     }
+     case "resetControlPoints":
+@@ -470,7 +483,7 @@
+       const limits = DIMENSION_LIMITS[action.key];
+       if (!Number.isFinite(action.value)) return state;
+       const value = clamp(action.value, limits.min, limits.max);
+-      const dimensions = { ...config.dimensions, [action.key]: value };
++      const dimensions = normalizeShapeDimensions(config.shape, { ...config.dimensions, [action.key]: value });
+       // A `shallowDepth` request is further clamped below the (possibly just
+       // updated) deep `depth` by a real minimum difference; changing `depth`
+       // itself must re-clamp an existing `shallowDepth` for the same reason
+@@ -907,6 +920,7 @@
+       config.features,
+       config.poolAccess,
+       config.internalStairType,
++      config.internalStairWidth,
+       config.hydromassageVariant,
+       config.infinityEdge,
+     ],
+@@ -1003,6 +1017,7 @@
+       setExternalStairPlatformExtended: (v) => dispatch({ type: "setExternalStairPlatformExtended", value: v }),
+       setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
+       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
++      setInternalStairWidth: (v) => dispatch({ type: "setInternalStairWidth", value: v }),
+       setInternalStairMirrored: (v) => dispatch({ type: "setInternalStairMirrored", value: v }),
+       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
+       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
+--- before/src/lib/pool/types.ts
++++ after/src/lib/pool/types.ts
+@@ -113,6 +113,7 @@
+     copingMaterial?: NonNullable<PoolConfig["copingMaterial"]>;
+     poolAccess?: PoolAccess | null;
+     internalStairType?: InternalStairType;
++    internalStairWidth?: number;
+   };
+ }
+ 
+@@ -239,6 +240,8 @@
+   /** Only meaningful while `poolAccess` is "internalSteps". Absent on projects
+    *  saved before the corner staircase existed; readers substitute "linear". */
+   internalStairType?: InternalStairType;
++  /** Requested clear width in metres for straight internal flights. Absent preserves automatic sizing. */
++  internalStairWidth?: number;
+   /** Above-ground internal entry at the other valid corner of its end wall. */
+   internalStairMirrored?: boolean;
+   /** Only meaningful while "hydromassage" is enabled; absent means "closed". */
+--- before/src/lib/project-delivery/service.ts
++++ after/src/lib/project-delivery/service.ts
+@@ -93,7 +93,7 @@
+     "projectType", "poolType", "structure", "shape", "shapeSelected", "copingMaterial", "copingStyle", "copingEdge", "paving", "pavingFormat", "premiumEnvironment",
+     "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
+     "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "ledType", "ledPerimeterSides", "sceneTime", "infinityEdge", "poolAccess",
+-    "internalStairType", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
++    "internalStairType", "internalStairWidth", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
+     "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount", "sunShelfLoungerColor", "integratedBenchStations",
+   ]);
+   config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "sunShelfRun", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
+@@ -102,7 +102,7 @@
+   config.uploads = [];
+   const renovation = pick(project.renovation, ["areas", "currentFinish", "filtrationWorks", "replaceCoping", "copingMaterial", "structureIssues", "equipmentUpgrades"]);
+   if (project.renovation.existing) renovation.existing = pick(project.renovation.existing,
+-    ["poolType", "structure", "system", "overflowType", "finish", "linerColor", "mosaicFinish", "copingMaterial", "poolAccess", "internalStairType"]);
++    ["poolType", "structure", "system", "overflowType", "finish", "linerColor", "mosaicFinish", "copingMaterial", "poolAccess", "internalStairType", "internalStairWidth"]);
+   return { schemaVersion: project.schemaVersion, projectId: project.projectId, config, renovation };
+ }
+ 
+--- before/src/lib/project-delivery/summary-model.ts
++++ after/src/lib/project-delivery/summary-model.ts
+@@ -241,6 +241,8 @@
+       : { hex: linerColor?.hex ?? "#dfe9ec", texture: linerColor?.texture };
+ 
+   const comfortItems = [
++    ...(config.internalStairWidth !== undefined && (resolvedLayout.access.placement && !resolvedLayout.access.corner || resolvedLayout.comfort.elements.some(element => !!element.steps?.length))
++      ? [t("Larghezza scala: {width} m", { width: formatNumber(config.internalStairWidth, 2) })] : []),
+     ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity} · ${t(sunShelfLoungerColor(config.sunShelfLoungerColor).label)}`] : []),
+     ...(config.poolAccess
+       ? [
+@@ -433,6 +435,8 @@
+         { label: "Struttura", value: (e?.structure ?? config.structure) ? STRUCTURE_LABEL[(e?.structure ?? config.structure)!] : "Da verificare" },
+         { label: "Dimensioni", value: dimensionsSentence },
+         { label: "Fondo", value: isSlopedFloor ? "In pendenza" : "Piano" },
++        ...(e?.internalStairWidth !== undefined && e.poolAccess === "internalSteps" && e.internalStairType !== "corner"
++          ? [{ label: t("Larghezza scala"), value: `${formatNumber(e.internalStairWidth, 2)} m` }] : []),
+         { label: "Accesso esistente", value: config.poolAccess === "internalSteps"
+           ? INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"] : config.poolAccess ? POOL_ACCESS_LABEL[config.poolAccess] : "Senza scala interna" },
+       ] },
+--- before/src/lib/pool/camera.ts
++++ after/src/lib/pool/camera.ts
+@@ -684,7 +684,8 @@
+ }
+ 
+ /** Only subtract UI that really overlaps the canvas; trays below it cost no area. */
+-export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>, preferredAspect?: number) {
++export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>, preferredAspect?: number,
++  frameForFit?: (frame: { left: number; top: number; width: number; height: number }) => { left: number; top: number; width: number; height: number }) {
+   let candidates = [{ left: 0, top: 0, right: canvas.width, bottom: canvas.height }];
+   for (const overlay of overlays) {
+     const fullWidth = overlay.width >= canvas.width * 0.55;
+@@ -703,9 +704,16 @@
+       other.left <= r.left && other.right >= r.right && other.top <= r.top && other.bottom >= r.bottom &&
+       (j < i || other.left < r.left || other.right > r.right || other.top < r.top || other.bottom > r.bottom)));
+   }
+-  const score = (r: typeof candidates[number]) => preferredAspect && preferredAspect > 0
+-    ? Math.min((r.right - r.left) / preferredAspect, r.bottom - r.top)
+-    : (r.right - r.left) * (r.bottom - r.top);
++  const score = (r: typeof candidates[number]) => {
++    const raw = { left: r.left, top: r.top, width: r.right - r.left, height: r.bottom - r.top };
++    // The top plan centres its free rectangle before fitting. Compare that
++    // usable subset now: a large side strip can otherwise collapse to a
++    // few pixels after selection and make the whole pool disappear.
++    const frame = frameForFit ? frameForFit(raw) : raw;
++    return preferredAspect && preferredAspect > 0
++      ? Math.min(frame.width / preferredAspect, frame.height)
++      : frame.width * frame.height;
++  };
+   const best = candidates.reduce((a,b) => score(b) > score(a) ? b : a,
+     {left:0,top:0,right:1,bottom:1});
+   return { left:best.left, top:best.top, width:best.right-best.left, height:best.bottom-best.top };

@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-07",
+  "baseHead": "0bb0dd596081045fb8c6d79d03f1d9c60713f008",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "runtime": "http://localhost:3004/",
+  "runtimeSource": "/private/tmp/pool-photo-worker-prod-d5n4g51f",
+  "sources": {
+    "src/components/pool/DimensionControl.tsx": {
+      "sha256": "b8a1f7d77dbb8a767336b47006ca0f49423121cab59a7082cab3b72ce0fc444b"
+    },
+    "src/components/pool/InternalStairWidthControl.tsx": {
+      "sha256": "42c3d8b801ebf93680d25b680d596c8774f1408f5bd4dfc49a996dd49c9ee9ba"
+    },
+    "src/components/pool/PoolConfigurator.tsx": {
+      "sha256": "46ecd23c701a300ea050ed574ae5054605583130f78bf8addb8bf9e04952c12f"
+    },
+    "src/components/pool/ShapeEditor.tsx": {
+      "sha256": "b20cce971efd6d479eb1620feeb0c4f76429f67dea20d712e08762dab448cb62"
+    },
+    "src/components/pool/three/PoolAccessModel.tsx": {
+      "sha256": "01d184d39e147248884e637269642aece3d24f4350033396e773e733eebffbdd"
+    },
+    "src/components/pool/three/PoolScene.tsx": {
+      "sha256": "b11d78efd3a80bbfb73b7c10b48550bbc2cd56e65634ee5a12fc963914c80eca"
+    },
+    "src/components/pool/wizard/StepTrays.tsx": {
+      "sha256": "558f63d1ef1a3e4ddbf027e58f7ab58d81917edba65aeb0af7aece1a82134e6e"
+    },
+    "src/configurator/steps/pool-shape/PoolShapeStep.tsx": {
+      "sha256": "b3fa07c14ebf2aa577329913f0734cc0837cf796b690428d7d65dcba7865dcf5"
+    },
+    "src/configurator/steps/renovation/RenovationSteps.tsx": {
+      "sha256": "e6a334b2a5268000f9482dc428628b5ea17666598e999aeda8b09317d117f72c"
+    },
+    "src/lib/i18n/messages.ts": {
+      "sha256": "46949ab99e26d45652e23eaa2667aa102891aca0b7d33620b44aa32b30cc5c86"
+    },
+    "src/lib/pool/comfort-plan.ts": {
+      "sha256": "d8d049a20898b95e40c54b252a7440a3eada950e3f8d0a2058dc8ac35cc73fd6"
+    },
+    "src/lib/pool/context.ts": {
+      "sha256": "aee3af00ab3eff61ed8f3a9fdfdb8f90ccce614652e7d6a0b181c18f0f1acc46"
+    },
+    "src/lib/pool/engineering.ts": {
+      "sha256": "8b3d6625d3445d160403e14407a5a65d213474e7ebf7584b7df20deb353873a2"
+    },
+    "src/lib/pool/geometry.ts": {
+      "sha256": "c814af30dd2e7869a4af6c7fe45081c93e576ad9a30496549a23c79f0d9319ef"
+    },
+    "src/lib/pool/internal-stair-width.ts": {
+      "sha256": "5e2267e245d817dea96bfcf70a0a132de928fcc264495008acda974b1c510aef"
+    },
+    "src/lib/pool/project.ts": {
+      "sha256": "7719a74ee8f8f0bddec4ccdb47712453ec6208760f81c8217c50e0dcfe226a25"
+    },
+    "src/lib/pool/renovation.ts": {
+      "sha256": "f67ff6c3e4316d2e5723c771a8292d50e9c81d5ff70b824c76e13d2b7bd66a77"
+    },
+    "src/lib/pool/resolved-layout.ts": {
+      "sha256": "cc7dc6dbda03384557ed328099f002149190f09478ad5df22e323b0a987233c2"
+    },
+    "src/lib/pool/shape-dimensions.ts": {
+      "sha256": "ebed8737a28d63feb9ab8d2cf1fa794a75b0d693cdffbe62a74889e077750b6b"
+    },
+    "src/lib/pool/store.tsx": {
+      "sha256": "04a60866a3c607d9995f2c104f96c2c26e52a665a77200acb58bed1f5a5d8482"
+    },
+    "src/lib/pool/types.ts": {
+      "sha256": "19862a1102240fc091c181c01ea9b609dc4c3ddd882a9cab5b2fd55f2401206d"
+    },
+    "src/lib/project-delivery/service.ts": {
+      "sha256": "e1d2dbc1de75711c28edfc14df1dbe488c3073df3a3f6058f25e239a978d1e85"
+    },
+    "src/lib/project-delivery/summary-model.ts": {
+      "sha256": "0f34e582e7c1595b2d2c60e59c3f8c25992f61d2a73969c5f297a9845c24e1a3"
+    },
+    "src/lib/pool/camera.ts": {
+      "sha256": "31bf7dcd000b1352010d533c9e22256313ddf05c3702eaf30cea9eea418d6641"
+    }
+  },
+  "checks": {
+    "shapeAndSkimmerChecks": 36,
+    "stairWidthChecks": 311,
+    "customInteractionChecks": 11,
+    "dimensionInputChecks": 8,
+    "mobileTopFramingChecks": 13,
+    "customGeometryExactParityCases": 64,
+    "legacyAutomaticStairLayoutsIdentical": 18,
+    "scopedSourceTypecheck": "PASS (24 sources and resolved dependencies)",
+    "nativeDesktop": [
+      "new pool L skimmer spacing before/after",
+      "custom handle drag changes SVG and 3D",
+      "stair numeric 1.70 m, slider 1.25 m, Escape and automatic reset",
+      "renovation L stair numeric 1.70 m"
+    ],
+    "nativeMobile": [
+      "390x844 emulation: explicit recovery of invalid 3x2 custom outline to 4x2.7",
+      "new small custom pool disappearance reproduced and fixed in final production-style build"
+    ],
+    "limits": [
+      "mobile viewport emulation, not real hardware",
+      "geometry CPU timings are not GPU/FPS measurements",
+      "cloud round trip and PDF download not exercised for new stair-width field",
+      "whole-WIP gates remain open; no commit/push/deploy",
+      "In the very compact mobile preview, dimension labels remain crowded; expansion can retain the previous small framing until reframing. These presentation issues are not certified resolved."
+    ]
+  },
+  "publicUpdated": false,
+  "commitPush": false
+}

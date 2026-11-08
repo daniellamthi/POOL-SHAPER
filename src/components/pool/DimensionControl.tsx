@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 
 interface Props {
@@ -19,6 +19,31 @@ export function DimensionControl({ label, hint, value, min, max, step, unit, pre
   const id = useId();
   const decimals = precision ?? (step < 0.1 ? 2 : step < 1 ? 1 : 0);
 
+  const [draft, setDraft] = useState<string | null>(null);
+  const [adapted, setAdapted] = useState<number | null>(null);
+  const cancelled = useRef(false);
+  const frame = useRef<number | null>(null);
+  const pending = useRef<number | null>(null);
+  const latestValue = useRef(value);
+  latestValue.current = value;
+  const change = useRef(onChange);
+  change.current = onChange;
+  const flush = () => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    if (pending.current !== null) {
+      const next = pending.current;
+      pending.current = null;
+      if (next !== latestValue.current) {
+        latestValue.current = next;
+        change.current(next);
+      }
+    }
+  };
+  useEffect(() => () => {
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+  }, []);
+
   return (
     <div className="group flex flex-col gap-3.5 border-b border-hairline pb-6 last:border-0 last:pb-0">
       <div className="flex items-baseline justify-between gap-4">
@@ -36,13 +61,29 @@ export function DimensionControl({ label, hint, value, min, max, step, unit, pre
             type="number"
             inputMode="decimal"
             lang={locale}
-            value={Number(value.toFixed(decimals))}
+            value={draft ?? Number(value.toFixed(decimals))}
             min={min}
             max={max}
             step={step}
-            onChange={(event) => {
-              const next = Number.parseFloat(event.target.value);
-              if (Number.isFinite(next)) onChange(next);
+            aria-describedby={adapted !== null ? `${id}-adapted` : undefined}
+            onFocus={() => { cancelled.current = false; setAdapted(null); }}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={(event) => {
+              const next = Number.parseFloat(event.currentTarget.value);
+              if (!cancelled.current && Number.isFinite(next)) {
+                const clamped = Math.max(min, Math.min(max, next));
+                setAdapted(clamped !== next ? clamped : null);
+                if (clamped !== value) onChange(clamped);
+              }
+              cancelled.current = false;
+              setDraft(null);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === "Escape") {
+                event.preventDefault();
+                cancelled.current = event.key === "Escape";
+                event.currentTarget.blur();
+              }
             }}
             className="numeric w-[5.5rem] border-0 bg-transparent p-0 text-right text-[22px] leading-none text-foreground outline-none [appearance:textfield] focus:text-foreground [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
@@ -56,10 +97,24 @@ export function DimensionControl({ label, hint, value, min, max, step, unit, pre
         max={max}
         step={step}
         onValueChange={([next]) => {
-          if (typeof next === "number") onChange(next);
+          if (typeof next !== "number") return;
+          setDraft(null);
+          setAdapted(null);
+          pending.current = next;
+          if (frame.current === null) frame.current = requestAnimationFrame(flush);
+        }}
+        onValueCommit={([next]) => {
+          if (typeof next === "number") pending.current = next;
+          flush();
         }}
         aria-label={t(label)}
       />
+
+      {adapted !== null ? <p id={`${id}-adapted`} role="status" className="text-xs leading-relaxed text-muted-foreground">
+        {t("Misura adattata a {value} {unit}. Intervallo consentito: {min}–{max} {unit}.", {
+          value: number(adapted), min: number(min), max: number(max), unit,
+        })}
+      </p> : null}
 
       <div className="flex justify-between text-[10px] font-light tracking-widest tabular-nums text-muted-foreground/50">
         <span>

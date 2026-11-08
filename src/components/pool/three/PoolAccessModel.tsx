@@ -590,6 +590,8 @@ export function resolveAccessPlan({
   outline,
   access,
   stairType = "linear",
+  stairWidth,
+  stairWidthAnchor,
   floorProfile,
   topY,
   infinityExcluded = null,
@@ -604,6 +606,8 @@ export function resolveAccessPlan({
   outline: Outline;
   access: PoolAccess | null;
   stairType?: InternalStairType;
+  stairWidth?: number | undefined;
+  stairWidthAnchor?: Outline | undefined;
   floorProfile: FloorProfileModel;
   topY: number;
   infinityExcluded?: InfinityExclusion | null;
@@ -715,9 +719,12 @@ export function resolveAccessPlan({
     Math.max(...boundsX) - Math.min(...boundsX),
     Math.max(...boundsZ) - Math.min(...boundsZ),
   );
+  if (access === "internalSteps" && stairWidth !== undefined &&
+      (!Number.isFinite(stairWidth) || stairWidth < ACCESS_DIMENSIONS.minWidth || stairWidth > shortSpan - 0.2))
+    return { ...empty, reason: "Larghezza della scala non compatibile con lo spazio disponibile." };
   const width =
     access === "internalSteps"
-      ? THREE.MathUtils.clamp(
+      ? stairWidth ?? THREE.MathUtils.clamp(
           shortSpan * 0.32,
           ACCESS_DIMENSIONS.minWidth,
           ACCESS_DIMENSIONS.maxWidth,
@@ -800,6 +807,14 @@ export function resolveAccessPlan({
       infinityExcluded,
       (p) => {
         const footprint = footprintAt(p, width, run);
+        if (stairWidthAnchor?.length === 4) {
+          const a = stairWidthAnchor, b = footprint;
+          const ax = a[1]![0] - a[0]![0], az = a[1]![1] - a[0]![1];
+          const bx = b[1]![0] - b[0]![0], bz = b[1]![1] - b[0]![1];
+          const sameDirection = (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz)) > 0.999;
+          const sameCorner = a.slice(0, 2).some(q => b.slice(0, 2).some(r => Math.hypot(q[0] - r[0], q[1] - r[1]) < 0.025));
+          if (!sameDirection || !sameCorner) return false;
+        }
         if (mirrorAnchor && Math.hypot(p.x-mirrorAnchor.x,p.z-mirrorAnchor.z)>0.02) return false;
         if (!clearOfFittings(footprint)) return false;
         const ends = footprint.slice(2).map(([x, z]) => floorProfile.floorYAt(x, z));

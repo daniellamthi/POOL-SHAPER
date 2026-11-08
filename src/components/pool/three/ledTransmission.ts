@@ -2,8 +2,9 @@ import { ShaderChunk, Vector3, type Camera, type WebGLProgramParametersWithUnifo
 import { LED_OPTICS } from "@/lib/pool/led-optics";
 import { MICRO_SPOT_OPTICS } from "@/lib/pool/micro-spot-optics";
 import { skipInactiveSpotLighting } from "./spotLightWork";
+import { shareLedProjector } from "./sharedLedProjector";
 export const MAX_MICRO_SPOT_SOURCES = 64;
-export const LED_TRANSPORT_CACHE_KEY = `led-transport-v9-area-early-spot-${MICRO_SPOT_OPTICS.nearField}-${MAX_MICRO_SPOT_SOURCES}-${LED_OPTICS.nearField}-${LED_OPTICS.absorption.join("-")}-${LED_OPTICS.irradianceKnee}`;
+export const LED_TRANSPORT_CACHE_KEY = `led-transport-v10-shared-projector-${MICRO_SPOT_OPTICS.nearField}-${MAX_MICRO_SPOT_SOURCES}-${LED_OPTICS.nearField}-${LED_OPTICS.absorption.join("-")}-${LED_OPTICS.irradianceKnee}`;
 
 export interface MicroSpotTransportUniforms {
   origins: { value: Vector3[] };
@@ -108,4 +109,5 @@ export function applyLedTransmission(shader: WebGLProgramParametersWithUniforms,
       ${shadowLine}
     #endif
   `)));
+  shareLedProjector(shader);
 }

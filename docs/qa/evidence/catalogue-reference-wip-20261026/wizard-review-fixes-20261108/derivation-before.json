@@ -1,0 +1,1 @@
+{"scope":"Actual AccessTray derivation, changing width; excludes child rendering/GPU/network","iterations":40,"medianMs":5.292249999999967,"p95Ms":6.0889589999999885,"accessCounts":{"stairs":80,"layout":40,"comfort":160,"loungers":40,"range":40},"comfortChecks":"PASS"}

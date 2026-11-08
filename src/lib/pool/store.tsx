@@ -1,3 +1,4 @@
+import { normalizeShapeDimensions } from "./shape-dimensions";
 import { exteriorPanelFinish, externalStairSide, withoutAboveGroundOnly, type ExteriorPanelFinishId, type ExternalStairSide } from "./above-ground";
 import {
   useCallback,
@@ -24,8 +25,8 @@ import {
   type DimensionKey,
 } from "./config";
 import { buildOutline, computeMetrics, constrainControlPoints } from "./geometry";
-import { planSkimmers } from "./engineering";
 import { configuredAccessPlan } from "./access-plan";
+import { configuredPoolLayout, configuredSkimmerPlan } from "./resolved-layout";
 import { configuredComfortPlan, activeFlightKind, normalizeComfortFeatures } from "./comfort-plan";
 import { isLedColor, normalisedLedIntensity, LED_OPTICS } from "./led-optics";
 import { configuredPerimeterLights, isPerimeterSideSelection, isPoolLedType, poolLedType, type PoolLedType } from "./perimeter-lighting";
@@ -96,6 +97,8 @@ import {
   structureSupportsPoolType,
 } from "./structure-finish";
 
+import { internalStairWidthFits } from "./internal-stair-width";
+
 type Action =
   | { type: "setProjectType"; value: ProjectType }
   | { type: "setPoolType"; value: PoolType }
@@ -139,6 +142,7 @@ type Action =
   | { type: "setExternalStairPlatformExtended"; value: boolean }
   | { type: "setPremiumEnvironment"; value: PremiumEnvironment }
   | { type: "setInternalStairType"; value: InternalStairType }
+  | { type: "setInternalStairWidth"; value: number | undefined }
   | { type: "setInternalStairMirrored"; value: boolean }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
   | { type: "setPoolAccess"; value: PoolAccess }
@@ -291,12 +295,23 @@ function reduceConfiguration(state: State, action: Action): State {
       return isLedColor(action.value)
         ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
         : state;
+    case "setInternalStairWidth": {
+      if (action.value === undefined) {
+        const { internalStairWidth: _width, ...automatic } = config;
+        return { ...state, config: automatic };
+      }
+      return internalStairWidthFits(config, action.value)
+        ? { ...state, config: { ...config, internalStairWidth: action.value } } : state;
+    }
     case "setInternalStairType":
+      if (action.value === "linear" && config.features.includes("hydromassage") && !config.features.includes("sunShelf")) return state;
       return { ...state, config: { ...config, internalStairType: action.value } };
     case "setInternalStairMirrored": {
-      if (config.poolType !== "above-ground") return state;
+      if (config.poolAccess !== "internalSteps" || !!config.internalStairMirrored === action.value) return state;
       const next = { ...config, internalStairMirrored: action.value };
-      return configuredAccessPlan(next).placement ? { ...state, config: next } : state;
+      const plan = configuredPoolLayout(next);
+      const hasFlight = !!plan.access.placement || plan.comfort.elements.some(element => !!element.steps?.length);
+      return plan.status !== "UNAVAILABLE" && hasFlight ? { ...state, config: next } : state;
     }
     case "setHydromassageVariant":
       return { ...state, config: { ...config, hydromassageVariant: action.value } };
@@ -396,7 +411,7 @@ function reduceConfiguration(state: State, action: Action): State {
       // otherwise have to default blindly) from whatever length/width the
       // pool already has -- same seeding pattern `setFloorProfile` below
       // uses for `shallowDepth`.
-      const dimensions =
+      const dimensions = normalizeShapeDimensions(action.value,
         action.value === "l-shape" && config.dimensions.lShapeRecessLength === undefined
           ? (() => {
               const seeded = clampLShapeDimensions({
@@ -412,7 +427,7 @@ function reduceConfiguration(state: State, action: Action): State {
                 lShapeOrientation: seeded.orientation,
               };
             })()
-          : config.dimensions;
+          : config.dimensions);
       // Geometry Pass D (Infinity, Rectangle + L-shape): switching to a shape
       // Infinity has no real zones for (Organic) while Infinity is selected
       // falls back to skimmer live, in-session -- the same rule project.ts's
@@ -462,6 +477,7 @@ function reduceConfiguration(state: State, action: Action): State {
         action.value,
         config.dimensions,
       );
+      if (points === config.controlPoints) return state;
       return { ...state, config: { ...config, controlPoints: points } };
     }
     case "resetControlPoints":
@@ -470,7 +486,7 @@ function reduceConfiguration(state: State, action: Action): State {
       const limits = DIMENSION_LIMITS[action.key];
       if (!Number.isFinite(action.value)) return state;
       const value = clamp(action.value, limits.min, limits.max);
-      const dimensions = { ...config.dimensions, [action.key]: value };
+      const dimensions = normalizeShapeDimensions(config.shape, { ...config.dimensions, [action.key]: value });
       // A `shallowDepth` request is further clamped below the (possibly just
       // updated) deep `depth` by a real minimum difference; changing `depth`
       // itself must re-clamp an existing `shallowDepth` for the same reason
@@ -732,6 +748,18 @@ function reduceConfiguration(state: State, action: Action): State {
   }
 }
 
+/** A retained comfort body is not proof that it still fits the current pool. */
+function accessSelectionComplete(config: PoolConfig): boolean {
+  const kind = activeFlightKind(config.features);
+  if (kind) {
+    const comfort = configuredComfortPlan(config);
+    return comfort.availability[kind].available && comfort.elements.some(element => element.kind === kind);
+  }
+  return config.poolAccess === null
+    ? config.poolType === "above-ground"
+    : !configuredAccessPlan(config).reason;
+}
+
 /** First step (in the appropriate wizard for this project type) that isn't
  * complete yet for a freshly-restored config -- mirrors `isStepComplete`'s
  * per-step rules below, but as a pure function over a specific config
@@ -751,11 +779,7 @@ function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConf
     if (stepId === "structure" && config.structure === null) return index;
     if (stepId === "system" && config.system === "infinity" && !config.infinityEdge?.enabled)
       return index;
-    if (stepId === "access" && !(activeFlightKind(config.features)
-      ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
-      : (config.poolAccess === null
-          ? config.poolType === "above-ground" // internal stairs OFF is a valid choice above ground
-          : !configuredAccessPlan(config).reason))) return index;
+    if (stepId === "access" && !accessSelectionComplete(config)) return index;
   }
   return STEPS.length - 1;
 }
@@ -907,14 +931,20 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       config.features,
       config.poolAccess,
       config.internalStairType,
+      config.internalStairWidth,
+      config.internalStairMirrored,
       config.hydromassageVariant,
       config.infinityEdge,
     ],
   );
 
   const skimmers = useMemo(
-    () => planSkimmers(outline, metrics.waterSurface, config.system === "skimmer"),
-    [outline, metrics.waterSurface, config.system],
+    () => configuredSkimmerPlan(config),
+    // Geometry inputs only: changing a colour must not remount the fitting row.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [outline, config.dimensions, config.poolType, config.system, config.overflowType, config.copingStyle,
+      config.features, config.poolAccess, config.internalStairType, config.internalStairWidth, config.internalStairMirrored,
+      config.hydromassageVariant, config.integratedBenchStations, config.infinityEdge],
   );
 
   const isStepComplete = useCallback(
@@ -936,11 +966,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
             (z) => z.side === config.infinityEdge?.side,
           )
         );
-      if (stepId === "access") return activeFlightKind(config.features)
-        ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
-        : (config.poolAccess === null
-          ? config.poolType === "above-ground" // internal stairs OFF is a valid choice above ground
-          : !configuredAccessPlan(config).reason);
+      if (stepId === "access") return accessSelectionComplete(config);
       return true;
     },
     [config, renovation, outline],
@@ -956,6 +982,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       skimmers,
       renovation,
       projectId,
+      projectReady: draftReady,
       projectConfiguration,
       isStepComplete,
       canContinue: isStepComplete(step),
@@ -1002,6 +1029,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setExternalStairPlatformExtended: (v) => dispatch({ type: "setExternalStairPlatformExtended", value: v }),
       setPremiumEnvironment: (v) => dispatch({ type: "setPremiumEnvironment", value: v }),
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
+      setInternalStairWidth: (v) => dispatch({ type: "setInternalStairWidth", value: v }),
       setInternalStairMirrored: (v) => dispatch({ type: "setInternalStairMirrored", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
@@ -1055,6 +1083,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       renovation,
       step,
       projectId,
+      draftReady,
       projectConfiguration,
       outline,
       metrics,
@@ -1071,4 +1100,4 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
 
 /** The pure configuration reducer and initial state, for the node audits
  * (scripts/above-ground-audit.ts). Not used by the app. */
-export const configuratorTesting = { reducer: configurationReducer, transitionReducer: reducer, createInitialState };
+export const configuratorTesting = { reducer: configurationReducer, transitionReducer: reducer, createInitialState, firstIncompleteStepIndex, accessSelectionComplete };

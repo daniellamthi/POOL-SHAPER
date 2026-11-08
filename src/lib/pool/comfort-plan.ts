@@ -141,8 +141,11 @@ export function resolveComfortPlan({
   infinityWallType = "traditional",
   hydromassageVariant = "closed",
   separateHydroAccess = false,
+  separateShelfAccess = false,
+  stairMirrored = false,
   nominalWidth,
   sunShelfRun,
+  stairWidth: requestedStairWidth,
   integratedBenchStations: requestedBenchStations,
 }: {
   outline: Outline;
@@ -158,9 +161,13 @@ export function resolveComfortPlan({
   hydromassageVariant?: HydromassageVariant | undefined;
   /** A selected radial flight is resolved separately against the spa body. */
   separateHydroAccess?: boolean;
+  /** A selected corner flight stays independent of the shelf platform. */
+  separateShelfAccess?: boolean;
+  stairMirrored?: boolean;
   /** Commercial width, independent of outline rotation/principal axis. */
   nominalWidth?: number;
   sunShelfRun?: number | undefined;
+  stairWidth?: number | undefined;
   integratedBenchStations?: number | undefined;
 }): ComfortPlan {
   const unsupported =
@@ -183,7 +190,7 @@ export function resolveComfortPlan({
   const shortSpan = longX ? spanZ : spanX;
   const longSpan = longX ? spanX : spanZ;
   if (shortSpan < 2.4 || longSpan < 4.8) {
-    const reason = "Spazio insufficiente per mantenere passaggi e proporzioni reali.";
+    const reason = "Dimensioni troppo ridotte per una zona comfort: servono almeno 4,80 × 2,40 m, oltre allo spazio utile per accessi e passaggi.";
     return {
       elements: [],
       availability: {
@@ -233,7 +240,7 @@ export function resolveComfortPlan({
         { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.minZ + EDGE_INSET, maxZ: bounds.minZ + shelfRun }, axis: "z", coordinate: bounds.minZ },
         { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.maxZ - shelfRun, maxZ: bounds.maxZ - EDGE_INSET }, axis: "z", coordinate: bounds.maxZ },
       ];
-  const stairWidth = Math.min(1.2, shortSpan - 1.2);
+  const stairWidth = requestedStairWidth ?? Math.min(1.2, shortSpan - 1.2);
   const withSteps = (candidate: typeof shelfCandidates[number], minimumRun: number) => {
     if ((infinityAtCrossMin || infinityAtCrossMax) && safeCrossMax - safeCrossMin < stairWidth + 1.2)
       return null;
@@ -243,7 +250,9 @@ export function resolveComfortPlan({
     const direction = positive ? 1 : -1;
     const crossMin = longX ? candidate.rect.minZ : candidate.rect.minX;
     const crossMax = longX ? candidate.rect.maxZ : candidate.rect.maxX;
-    const stairAtMin = !excludedWall(infinityExcluded, longX ? "z" : "x", longX ? bounds.minZ : bounds.minX);
+    const automaticAtMin = !excludedWall(infinityExcluded, longX ? "z" : "x", longX ? bounds.minZ : bounds.minX);
+    const stairAtMin = stairMirrored ? !automaticAtMin : automaticAtMin;
+    if (requestedStairWidth !== undefined && (!Number.isFinite(stairWidth) || stairWidth < 0.8 || stairWidth > crossMax - crossMin - 0.2)) return null;
     const center = stairAtMin ? crossMin + stairWidth / 2 : crossMax - stairWidth / 2;
     const topY = waterY - (minimumRun ? SUN_SHELF_WATER_DEPTH : 0.22);
     // Solve against the floor at the actual landing, including its slope.
@@ -315,8 +324,10 @@ export function resolveComfortPlan({
       waterDepth: SUN_SHELF_WATER_DEPTH,
       width: longX ? rect.maxZ - rect.minZ : rect.maxX - rect.minX,
       run: shelf.totalRun,
-      steps: shelf.steps.map(step => ({ ...step, footprint: joinShell(step.footprint) })),
-      riser: shelf.riser,
+      ...(!separateShelfAccess ? {
+        steps: shelf.steps.map(step => ({ ...step, footprint: joinShell(step.footprint) })),
+        riser: shelf.riser,
+      } : {}),
       landing: { ...shelf.landing, footprint: joinShell(shelf.landing.footprint) },
     };
     const loungers = resolveSunShelfLoungers({

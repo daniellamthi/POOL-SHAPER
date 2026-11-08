@@ -52,9 +52,9 @@ const context = { exports: {}, require: name => {
   throw Error(`Unexpected dependency: ${name}`);
 } };
 runInNewContext(ts.transpileModule(`${source}\nexports.configureNaturalGrass = configureNaturalGrass;`, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText, context);
-const render = (active, waterY = -.08) => {
+const render = (active, waterY = -.08, matte = false) => {
   cursor = 0; effects = [];
-  const result = context.exports.NaturalGrassMaterial({ active, waterY });
+  const result = context.exports.NaturalGrassMaterial({ active, waterY, matte });
   effects.forEach(effect => effect());
   return result;
 };
@@ -83,4 +83,27 @@ check(studio.includes("<NaturalGrassMaterial active={environment} waterY={waterY
 check(studio.includes("position={[0, -0.012, 0]}") && studio.includes("offsetOutline(outer, -0.04)"), "Approved ground elevation and deck contact overlap preserved");
 hooks.forEach(hook => hook.cleanup?.());
 check(mapDisposals === 2 && materialDisposals === 1, "True unmount releases both owned maps and material exactly once");
+
+// New Patio calibration must travel as public PBR properties to both renderers.
+hooks.length=0;const patio=render(true,-.08,true);
+check(patio.props.object.isMeshPhysicalMaterial===true,'Matte Patio grass needs serializable Physical PBR parameters');
+check(patio.props.object.specularIntensity===.25,'Patio uses an explicit low-sheen effective grass response');
+check(render(true,-.08,true).props.object===patio.props.object,'Authored outdoor settings reuse the same material owner when water level and mode are stable');
+check(patio.props.color==='#ffffff'&&patio.props.map.colorSpace===THREE.SRGBColorSpace,'Keep photographic colour and decoding unchanged');
+const {MaterialsTexture,MATERIAL_PIXELS}=await import(process.cwd()+'/node_modules/three-gpu-pathtracer/src/uniforms/MaterialsTexture.js');
+const data=new MaterialsTexture(),plain=new THREE.MeshStandardMaterial();data.updateFrom([patio.props.object,plain],[]);
+check(data.image.data[44]===.25&&data.image.data[MATERIAL_PIXELS*4+44]===1,'Installed tracer packer preserves calibrated and default specular intensities');data.dispose();plain.dispose();
+let patioDisposed=0;patio.props.object.addEventListener('dispose',()=>patioDisposed++);
+const garden=render(true,-.08,false);check(garden.props.object.type==='MeshStandardMaterial','Default grass path stays on its original material class');
+check(garden.props.map===patio.props.map&&garden.props.normalMap===patio.props.normalMap,'Context switch retains existing texture ownership and metric maps');
+check(patioDisposed===1,'Context switch releases replaced Patio material once');hooks.forEach(hook=>hook.cleanup?.());
+
+const studioTree=ts.createSourceFile('StudioPaving.tsx',studio,99,true,4);let matteArg;function findMatte(n){if(ts.isJsxAttribute(n)&&n.name.getText(studioTree)==='matte')matteArg=n.initializer.expression.getText(studioTree);ts.forEachChild(n,findMatte);}findMatte(studioTree);check(!!matteArg,'Explicit bounded StudioPaving caller');
+check(runInNewContext(matteArg,{matteGrass:false})===false&&runInNewContext(matteArg,{matteGrass:true})===true,'Studio forwards the explicit lawn mode');
+const sceneSource=readFileSync('src/components/pool/three/PoolScene.tsx','utf8'),sceneTree=ts.createSourceFile('PoolScene.tsx',sceneSource,99,true,4);let gardenExpression,callerExpression;
+function findCaller(n){if(ts.isVariableDeclaration(n)&&n.name.getText(sceneTree)==='photographicGarden')gardenExpression=n.initializer.getText(sceneTree);if(ts.isJsxAttribute(n)&&n.name.getText(sceneTree)==='matteGrass')callerExpression=n.initializer.expression.getText(sceneTree);ts.forEachChild(n,findCaller);}findCaller(sceneTree);check(!!gardenExpression&&!!callerExpression,'Actual catalogue scope and caller expressions exist');
+for(const setting of ['residence','spa-wall','spa-glass','infinity-villa',undefined])for(const patioContext of [undefined,{}]){
+ const photographicGarden=runInNewContext(gardenExpression,{architecture:setting?{setting}:null,patioContext}),passed=runInNewContext(callerExpression,{photographicGarden});
+ check(runInNewContext(matteArg,{matteGrass:passed})===(setting==='residence'||!!patioContext),'Only Patio/residence contexts opt into calibrated lawn optics');
+}
 console.log(JSON.stringify({ status: "PASS", checks, minimumRoughness: minimumRoughness / 255, maximumAuthoredSlope: maximumSlope, textureBytes: provenance.files.reduce((sum, file) => sum + file.bytes, 0), scope: "Asset/hash/shader/lifecycle contracts; visual and GPU performance gates remain separate" }));

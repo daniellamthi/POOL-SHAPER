@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import ts from "typescript";
+import {createRequire} from "node:module";
+const ts=createRequire(process.cwd()+"/package.json")("typescript");
 const source = readFileSync("src/lib/pool/catalogue-patio.ts", "utf8");
 const { planCataloguePatio } = runInNewContext(
   ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText + "; exports;",
@@ -21,7 +22,18 @@ for (const shape of shapes) for (const scale of [.5,1,3]) for (const sx of [-1,1
   assert(plan);
   assert.equal(JSON.stringify([terrace,occupied]),before,"input mutation");
   const b = plan.protectedBounds;
-  assert(plan.parts.length <= 48,"bounded geometry budget");
+  const posts=plan.parts.filter(p=>p.finish==='wood'&&p.size[1]>=2.3&&p.size[0]<=.12&&p.size[2]<=.12);
+  const slats=plan.parts.filter(p=>p.finish==='wood'&&p.position[1]>2.5);
+  assert.equal(posts.length,4,'four metric supports outside circulation');
+  assert.equal(slats.length,16,'bounded open overhead slats');
+  for(const post of posts)for(const other of plan.parts){
+    if(post===other||other.finish==='gravel')continue;
+    const overlap=[0,1,2].every(axis=>Math.min(post.position[axis]+post.size[axis]/2,other.position[axis]+other.size[axis]/2)-Math.max(post.position[axis]-post.size[axis]/2,other.position[axis]-other.size[axis]/2)>1e-8);
+    assert(!overlap,'support must not penetrate seat/walls/other members; contact is allowed');
+  }
+  for(const p of posts){assert(Math.abs(p.position[1]-p.size[1]/2)<1e-9,'supports rest at ground');assert.equal(p.size[1],2.4,'human-scale clear height does not grow with pool size');}
+  assert(Math.abs(Math.max(...plan.parts.map(p=>p.position[1]+p.size[1]/2))-2.64)<1e-9,'fixed canopy height');
+  assert(plan.parts.length <= 70,"bounded geometry budget");
   assert.equal(new Set(plan.parts.map(p=>p.finish)).size,5,"five draw batches");
   for (const p of plan.parts) {
     assert([...p.position,...p.size].every(Number.isFinite));

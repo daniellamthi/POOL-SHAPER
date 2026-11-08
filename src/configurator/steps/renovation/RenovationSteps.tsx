@@ -1,3 +1,7 @@
+import { InternalStairSideControl } from "@/components/pool/InternalStairSideControl";
+import { internalStairChoice } from "@/lib/pool/internal-stair-options";
+import { InternalStairWidthControl } from "@/components/pool/InternalStairWidthControl";
+import { internalStairWidthFits } from "@/lib/pool/internal-stair-width";
 import { PresentationContextPicker } from "@/components/pool/PresentationContextPicker";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
@@ -135,11 +139,24 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
       </ChoiceGrid>
       {e?.poolAccess === "internalSteps" ? <ChoiceGrid label={t("Scala interna esistente")}>
         {([ ["linear", "Scala rettilinea"], ["corner", "Scala angolare"] ] as const)
-          .filter(([id]) => !configuredAccessPlan(renovationPreviewConfig(config, { ...r, existing: { ...e, internalStairType: id } }, true)).reason)
-          .map(([id, title]) =>
-          <ChoiceCard key={id} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={(e.internalStairType ?? "linear") === id}
-            onSelect={() => choose({ internalStairType: id })} />)}
+          .map(([id, title]) => {
+            const choice = internalStairChoice(renovationPreviewConfig(config, r, true), id);
+            return <ChoiceCard key={id} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={(e.internalStairType ?? "linear") === id}
+              disabled={!choice.available} footer={t(choice.reason)}
+              onSelect={() => choose({ internalStairType: id })} />;
+          })}
       </ChoiceGrid> : null}
+      {e?.poolAccess === "internalSteps" ? <InternalStairSideControl config={renovationPreviewConfig(config, r, true)}
+        onChange={mirrored => choose({ internalStairMirrored: mirrored })} /> : null}
+      {e?.poolAccess === "internalSteps" ? <InternalStairWidthControl
+        config={renovationPreviewConfig(config, r, true)}
+        onChange={width => {
+          const current = renovationPreviewConfig(config, r, true);
+          if (width === undefined) {
+            const { internalStairWidth: _width, ...automatic } = e;
+            updateRenovation({ existing: automatic });
+          } else if (internalStairWidthFits(current, width)) choose({ internalStairWidth: width });
+        }} /> : null}
       {e?.poolAccess && configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason ? <p role="alert" className="text-[12px] text-destructive">
         {t(configuredAccessPlan(renovationPreviewConfig(config, r, true)).reason ?? "")} {t("Scegli un accesso compatibile o indica una vasca senza scala interna.")}{" "}</p> : null}
     </> : null}

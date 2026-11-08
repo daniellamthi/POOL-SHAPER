@@ -1,0 +1,18 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
+const root=process.cwd(),ts=createRequire(root+'/package.json')('typescript');
+const src=fs.readFileSync(root+'/src/components/pool/wizard/StepTrays.tsx','utf8');
+const ast=ts.createSourceFile('StepTrays.tsx',src,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const fn=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='OptionalTray').getText(ast).replace('export ','');
+const React={createElement:(tag,props,...children)=>({tag,props:props??{},children})};
+const nodes=n=>n&&typeof n==='object'?[n,...n.children.flat(Infinity).flatMap(nodes)]:[];
+let selected=true,status='UNAVAILABLE',removed=0;
+const scope={React,useI18n:()=>({t:x=>x}),useConfigurator:()=>({config:{equipment:selected?['automaticCover']:[],system:'infinity',poolType:'in-ground'},toggleEquipment:id=>{assert.equal(id,'automaticCover');removed++;},setCoverExtension:()=>{}}),resolveAutomaticCover:()=>({status,reason:'Incompatible Infinity',extension:0}),EQUIPMENT:[{id:'automaticCover',title:'Copertura automatica'},{id:'solarShower',title:'Doccia'},{id:'loungers',title:'Lettini'}],ChoiceCard:'card',ChoiceGrid:'grid',TabBody:'body',StepTabs:'tabs',GroupLabel:'label',ill:x=>x};
+const component=vm.runInNewContext(ts.transpileModule(fn+';OptionalTray;',{compilerOptions:{jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2022}}).outputText,scope);
+const render=()=>nodes(component({ctx:{focus(){}},tab:'outdoor',setTab(){}}));
+let n=render(),warning=n.find(n=>n.props.role==='status');assert(warning,'Selected incompatible cover must explain its state immediately');
+assert(JSON.stringify(warning).includes('Incompatible Infinity'));
+const remove=n.find(n=>n.tag==='button'&&n.children.includes('Rimuovi copertura'));assert(remove);remove.props.onClick();assert.equal(removed,1);
+assert(!n.some(n=>n.tag==='input'&&n.props.type==='range'),'Unavailable cover cannot expose a working slider');
+selected=false;n=render();assert(n.some(n=>n.props.role==='status'),'Unselected unavailable cover retains reason');
+status='AVAILABLE';selected=true;n=render();assert(n.some(n=>n.tag==='input'&&n.props.type==='range'),'Valid selected cover retains slider');assert(!n.some(n=>n.props.role==='status'),'Valid cover has no false conflict');
+console.log(JSON.stringify({status:'PASS',checks:7,scope:'Actual OptionalTray, invalid selected/unselected, removal and valid slider'}));

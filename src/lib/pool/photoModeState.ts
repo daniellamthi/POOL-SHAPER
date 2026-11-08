@@ -22,7 +22,18 @@
 export const photoModeState = {
   active: false,
   samples: 0,
+  preparing: false,
+  contextLost: false,
+  contextRestoreRequestId: 0,
   exportRequestId: 0,
+};
+
+// Texture loads commit independently of Photo Mode. Scope their invalidation
+// to the Canvas scene so another viewport cannot reset this accumulation.
+const materialRevisions = new WeakMap<object, number>();
+export const getPhotoMaterialRevision = (scene: object): number => materialRevisions.get(scene) ?? 0;
+export const markPhotoMaterialsChanged = (scene: object): void => {
+  materialRevisions.set(scene, getPhotoMaterialRevision(scene) + 1);
 };
 
 /**

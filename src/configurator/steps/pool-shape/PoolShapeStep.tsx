@@ -1,3 +1,4 @@
+import { shapeDimensionLimits } from "@/lib/pool/shape-dimensions";
 import { FileDrop } from "@/components/pool/FileDrop";
 import { DimensionControl } from "@/components/pool/DimensionControl";
 import { MetricsPanel } from "@/components/pool/MetricsPanel";
@@ -32,7 +33,7 @@ export function PoolShapeStep() {
           ["width", "Larghezza"],
         ] as ReadonlyArray<readonly ["length" | "width", string]>
       ).map(([key, label]) => {
-        const limits = DIMENSION_LIMITS[key];
+        const limits = shapeDimensionLimits(config.shape, key, config.dimensions);
         return (
           <DimensionControl
             key={key}
@@ -254,7 +255,7 @@ export function LShapeRecessControls({ disabled }: { disabled: boolean }) {
           ["lShapeRecessWidth", "Larghezza del rientro"],
         ] as const
       ).map(([key, label]) => {
-        const limits = DIMENSION_LIMITS[key];
+        const limits = shapeDimensionLimits(config.shape, key, config.dimensions);
         const value = config.dimensions[key] ?? (key === "lShapeRecessLength" ? 4 : 3);
         return (
           <DimensionControl

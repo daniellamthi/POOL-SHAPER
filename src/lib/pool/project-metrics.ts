@@ -8,7 +8,7 @@ import { configuredOutline } from "./configured-outline";
 import { buildFloorProfile, computeSlopeMetrics } from "./floor-profile";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { configuredComfortPlan } from "./comfort-plan";
-import { planSkimmers } from "./engineering";
+import { configuredSkimmerPlan } from "./resolved-layout";
 import type { Outline, PoolConfig } from "./types";
 
 export function projectMetrics(config: PoolConfig, outline: Outline) {
@@ -50,6 +50,6 @@ export type ProjectMetrics = ReturnType<typeof projectMetrics>;
 export function projectGeometry(config: PoolConfig) {
   const outline = configuredOutline(config);
   const metrics = projectMetrics(config, outline);
-  const skimmers = planSkimmers(outline, metrics.waterSurface, config.system === "skimmer");
+  const skimmers = configuredSkimmerPlan(config);
   return { outline, metrics, skimmers };
 }

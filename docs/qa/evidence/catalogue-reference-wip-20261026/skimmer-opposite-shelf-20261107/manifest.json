@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-07T12:39:49.075342+00:00",
+  "scope": "Skimmer system with a valid selected sun shelf: use the actual opposite short head and avoid access footprints.",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "head": "0bb0dd596081045fb8c6d79d03f1d9c60713f008",
+  "state": "Existing uncommitted WIP preserved. No commit/push/deployment or backend changes this turn.",
+  "source_sha256": {
+    "src/lib/pool/engineering.ts": "f83a41ab1514f40a606ae5c2aa46acc525112b8b610de6f2c5fd80d554e59bf1",
+    "src/lib/pool/resolved-layout.ts": "52e8c43d53e43d5f576bf21959bb5466c6fe459c681b1b99820771e054e0bc03",
+    "src/lib/pool/project-metrics.ts": "041966014b1ba646263192527e331932739d81c26e377c54e3cad05684e89a0f",
+    "src/lib/pool/store.tsx": "2739b0c4c924cded3dbc2fb837d275a4a1a09fb12a2785125317aff00a049e27",
+    "src/components/pool/PoolConfigurator.tsx": "d4082304ec3c4ed0e98c6ef00aad26385f19214d38e572e173f7afa2fcab792f",
+    "src/lib/pool/photo-scene-spec.ts": "08da6b1cad012fb5e74f7d15406cfd12dabd03d3d7ca48612cb81af6227ec11e",
+    "src/lib/pool/cover-plan.ts": "69d5047ff0c5f5df996825320e879050c2d3886c2bccf120550bd453b19cef3f",
+    "src/lib/i18n/messages.ts": "46eabc7df4ade4aef3f7907962e8a946027e849ef267237603df0e64bfd2f439"
+  },
+  "all_sources_equal_running_qa_snapshot": true,
+  "checks": {
+    "new_head_audit": 230,
+    "stair_options": 112,
+    "stair_width": 305,
+    "cover_plan": 1175,
+    "scoped_typecheck": "PASS, 8 sources and dependencies",
+    "targeted_diff_check": "PASS",
+    "qa_production_compile": "PASS"
+  },
+  "native_browser": {
+    "url": "http://localhost:3004/",
+    "viewport": "1095x927 desktop",
+    "pool": "10 x 5 m, Skimmer Slim Moderno, shelf, Day",
+    "passed": [
+      "Straight SX/DX: actual ports on the opposite head",
+      "Corner SX/DX: row moves into the free head span, away from the flight",
+      "Automatic cover enabled, 0 and 100 percent shown; roller on the head without skimmers",
+      "No errors in the observed final browser error log"
+    ],
+    "handoff": "Straight SX, 1.65 m, shelf retained, temporary cover removed, top view"
+  },
+  "limits": [
+    "Native UI coverage is desktop, not real mobile hardware.",
+    "JSON/save and photo specification checks are local only, not cloud round trips or PDF downloads.",
+    "Unrelated whole-WIP release, visual, performance and operational gates remain open.",
+    "Head too small for the full required row returns an explicit unavailable reason; no unsafe fallback to shelf side."
+  ],
+  "evidence_files": [
+    "baseline-red.log",
+    "head-audit-final.log",
+    "stair-options-regression.log",
+    "stair-width-regression.log",
+    "cover-red.log",
+    "cover-green.log",
+    "cover-regression.log",
+    "typecheck-final.log",
+    "qa-build-final.log",
+    "before-overview.png",
+    "linear-sx-top.png",
+    "linear-dx-top.png",
+    "corner-sx-top.png",
+    "corner-dx-top.png",
+    "cover-open.png",
+    "cover-closed.png",
+    "final-preview.png",
+    "changes.patch"
+  ]
+}

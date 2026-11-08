@@ -30,7 +30,15 @@ function RetainedNightEnvironment({onReady}:{onReady:(map:Texture|null)=>void}) 
   // EnvironmentPortal captures/attaches its cube in the child's layout effect.
   // Publish it before the first draw, not a passive effect one frame later:
   // a temporary null environment recompiles all physical materials twice.
-  useLayoutEffect(()=>{onReady(captureScene.environment);return()=>onReady(null);},[captureScene,onReady]);
+  useLayoutEffect(() => {
+    const map = captureScene.environment;
+    // This one-shot cube has no later updates. Three r185's initial nonzero
+    // render-target PMREM version bypasses its disposal listener; start the
+    // static map at zero so the normal cache path owns/releases the PMREM.
+    if (map) map.pmremVersion = 0;
+    onReady(map);
+    return () => { onReady(null); map?.dispose(); };
+  }, [captureScene, onReady]);
   // Match the256px cube generated from our1024px equirectangular daylight.
   // This night sky is only a smooth gradient (no photographic detail). Equal
   // PMREM dimensions also keep CUBEUV shader defines stable on Day/Night.
@@ -101,6 +109,7 @@ function neutraliseStudioGround(texture: DataTexture) {
 export function DaylightEnvironment({
   theme,
   timeOfDay = "day",
+  roomMap,
   sunDirection,
   outdoor = false,
   showBackdrop = true,
@@ -110,6 +119,7 @@ export function DaylightEnvironment({
 }: {
   theme: Theme;
   timeOfDay?: SceneTimeOfDay;
+  roomMap?: Texture | undefined;
   sunDirection: [number, number, number];
   outdoor?: boolean;
   /** Architectural plan hides only the visible sky, not the reflection environment. */
@@ -195,8 +205,8 @@ export function DaylightEnvironment({
       {/* Capture once while the initial scene loads. A first Night click must
           not clear the active environment or allocate six cube faces. */}
       <RetainedNightEnvironment onReady={setNightSky}/>
-      {(night ? nightSky ?? sky : sky) ? (
-        <Environment map={(night ? nightSky ?? sky : sky)!} environmentRotation={[0,!night && photographicSky ? coastalRotation : 0,0]} environmentIntensity={night ? SCENE_VISUAL_PRESET.environment.night : photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
+      {(roomMap ?? (night ? nightSky ?? sky : sky)) ? (
+        <Environment map={(roomMap ?? (night ? nightSky ?? sky : sky))!} environmentRotation={[0,!night && photographicSky ? coastalRotation : 0,0]} environmentIntensity={night ? SCENE_VISUAL_PRESET.environment.night : photographicSky ? COASTAL_DAYLIGHT.environment : SCENE_VISUAL_PRESET.environment[theme]} />
       ) : !night ? (
         <Environment
           // Same PMREM dimensions as the loaded1024px HDR and night cube;

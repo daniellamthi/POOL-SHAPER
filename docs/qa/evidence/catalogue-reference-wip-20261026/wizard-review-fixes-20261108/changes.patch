@@ -1,0 +1,520 @@
+--- before/src/lib/pool/store.tsx
++++ after/src/lib/pool/store.tsx
+@@ -748,6 +748,18 @@
+   }
+ }
+ 
++/** A retained comfort body is not proof that it still fits the current pool. */
++function accessSelectionComplete(config: PoolConfig): boolean {
++  const kind = activeFlightKind(config.features);
++  if (kind) {
++    const comfort = configuredComfortPlan(config);
++    return comfort.availability[kind].available && comfort.elements.some(element => element.kind === kind);
++  }
++  return config.poolAccess === null
++    ? config.poolType === "above-ground"
++    : !configuredAccessPlan(config).reason;
++}
++
+ /** First step (in the appropriate wizard for this project type) that isn't
+  * complete yet for a freshly-restored config -- mirrors `isStepComplete`'s
+  * per-step rules below, but as a pure function over a specific config
+@@ -767,11 +779,7 @@
+     if (stepId === "structure" && config.structure === null) return index;
+     if (stepId === "system" && config.system === "infinity" && !config.infinityEdge?.enabled)
+       return index;
+-    if (stepId === "access" && !(activeFlightKind(config.features)
+-      ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
+-      : (config.poolAccess === null
+-          ? config.poolType === "above-ground" // internal stairs OFF is a valid choice above ground
+-          : !configuredAccessPlan(config).reason))) return index;
++    if (stepId === "access" && !accessSelectionComplete(config)) return index;
+   }
+   return STEPS.length - 1;
+ }
+@@ -958,11 +966,7 @@
+             (z) => z.side === config.infinityEdge?.side,
+           )
+         );
+-      if (stepId === "access") return activeFlightKind(config.features)
+-        ? configuredComfortPlan(config).elements.some(element => element.kind === activeFlightKind(config.features))
+-        : (config.poolAccess === null
+-          ? config.poolType === "above-ground" // internal stairs OFF is a valid choice above ground
+-          : !configuredAccessPlan(config).reason);
++      if (stepId === "access") return accessSelectionComplete(config);
+       return true;
+     },
+     [config, renovation, outline],
+@@ -1096,4 +1100,4 @@
+ 
+ /** The pure configuration reducer and initial state, for the node audits
+  * (scripts/above-ground-audit.ts). Not used by the app. */
+-export const configuratorTesting = { reducer: configurationReducer, transitionReducer: reducer, createInitialState };
++export const configuratorTesting = { reducer: configurationReducer, transitionReducer: reducer, createInitialState, firstIncompleteStepIndex, accessSelectionComplete };
+--- before/src/components/pool/wizard/StepTrays.tsx
++++ after/src/components/pool/wizard/StepTrays.tsx
+@@ -507,32 +507,29 @@
+     config.poolAccess === "stainlessSteelLadder" ||
+     (stepsOn && config.features.includes("inoxLadder"));
+   const inoxLayout = useMemo(
+-    () =>
++    () => tab === "ladder" ?
+       configuredPoolLayout({
+         ...config,
+         poolAccess: stepsOn ? "internalSteps" : "stainlessSteelLadder",
+         features: stepsOn
+           ? [...config.features.filter((id) => id !== "inoxLadder"), "inoxLadder"]
+           : config.features,
+-      }),
+-    [config, stepsOn],
+-  );
+-  const inoxPlan = stepsOn ? inoxLayout.ladder?.plan : inoxLayout.access;
++      }) : null,
++    [config, stepsOn, tab],
++  );
++  const inoxPlan = stepsOn ? inoxLayout?.ladder?.plan : inoxLayout?.access;
+   const inoxAvailable = config.poolType !== "above-ground" && (inoxOn || !!inoxPlan?.placement);
+ 
+ 
+   const comfort = useMemo(() => configuredComfortPlan(config), [config]);
+   const shelfOn = config.features.includes("sunShelf");
+-  const shelfLoungers = useMemo(() => configuredSunShelfLoungers(config), [config]);
++  const shelfLoungers = useMemo(() => tab === "shelf-options" ? configuredSunShelfLoungers(config) : null, [config, tab]);
+   const hydroOn = config.features.includes("hydromassage") && !shelfOn;
+   const hydroVariant = config.hydromassageVariant ?? "closed";
+   const shelfProposal = useMemo(
+-    () =>
+-      configuredComfortPlan({
+-        ...config,
+-        features: shelfOn ? config.features : [...config.features, "sunShelf"],
+-      }),
+-    [config, shelfOn],
++    () => shelfOn || tab !== "comfort" ? comfort :
++      configuredComfortPlan({ ...config, features: [...config.features, "sunShelf"] }),
++    [config, shelfOn, tab, comfort],
+   );
+   const hydroConfig = useMemo(() => ({
+     ...config,
+@@ -544,17 +541,16 @@
+       "hydromassage",
+     ], "hydromassage"),
+   }), [config]);
+-  const hydroProposal = useMemo(() => configuredComfortPlan(hydroConfig), [hydroConfig]);
+-  const hydroVariants = useMemo(() => (["closed", "open"] as const).map(variant => ({
++  const hydroVariants = useMemo(() => (tab === "comfort" ? ["closed", "open"] as const : []).map(variant => ({
+     variant,
+     plan: configuredComfortPlan({ ...hydroConfig, hydromassageVariant: variant }),
+-  })), [hydroConfig]);
++  })), [hydroConfig, tab]);
+   const shelfElement = shelfProposal.elements.find(element => element.kind === "sunShelf");
+   // Include the complete configuration so a new layout dependency cannot
+   // leave the advertised interval stale. Locale-only renders reuse this value.
+-  const shelfRange = useMemo(() => configuredSunShelfRange(config), [config]);
+-  const requestedShelfRun = config.dimensions.sunShelfRun ?? shelfElement?.run ?? (shelfRange.available ? shelfRange.defaultRun : 0);
+-  const shelfRunInvalid = shelfOn && !sunShelfRunWithinRange(shelfRange, requestedShelfRun);
++  const shelfRange = useMemo(() => tab === "comfort" && shelfOn ? configuredSunShelfRange(config) : null, [config, tab, shelfOn]);
++  const requestedShelfRun = config.dimensions.sunShelfRun ?? shelfElement?.run ?? (shelfRange?.available ? shelfRange.defaultRun : 0);
++  const shelfRunInvalid = shelfOn && shelfRange !== null && !sunShelfRunWithinRange(shelfRange, requestedShelfRun);
+   const ensureAccess = () => {
+     if (config.poolAccess === null) {
+       setInternalStairType("linear");
+@@ -700,17 +696,16 @@
+               selected={comfortChoice === "none"}
+               onSelect={() => chooseComfort("none")}
+             />
+-            {shelfOn || shelfProposal.availability.sunShelf.available ? (
+               <ChoiceCard
+                 title={t("Sun shelf")}
+                 description={t("Solarium sommerso a {depth} cm per sdraiarsi in acqua.", {depth: number(SUN_SHELF_WATER_DEPTH * 100)})}
+                 image={ill("comfort-sunShelf")}
+                 selected={comfortChoice === "sunShelf"}
+                 disabled={!shelfProposal.availability.sunShelf.available}
++                footer={!shelfProposal.availability.sunShelf.available ? t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.") : undefined}
+                 onSelect={() => chooseComfort("sunShelf")}
+               />
+-            ) : null}
+-            {hydroVariants.filter(item => item.plan.availability.hydromassage.available || (hydroOn && hydroVariant === item.variant)).map(({variant,plan}) => (
++            {hydroVariants.map(({variant,plan}) => (
+                 <ChoiceCard
+                   key={variant}
+                   title={t(variant === "closed" ? "Idromassaggio A" : "Idromassaggio B")}
+@@ -718,15 +713,16 @@
+                   image={ill(variant === "closed" ? "comfort-hydro-closed" : "comfort-hydro-open")}
+                   selected={comfortChoice === variant}
+                   disabled={!plan.availability.hydromassage.available}
++                  footer={!plan.availability.hydromassage.available ? t(plan.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.") : undefined}
+                   onSelect={() => chooseComfort(variant)}
+                 />
+             ))}
+           </ChoiceGrid>
+-          {!comfortUnavailable && !shelfProposal.availability.sunShelf.available ? <p role="status" className="text-xs text-muted-foreground">{t("Sun Shelf")}: {t(shelfProposal.availability.sunShelf.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
+-          {!comfortUnavailable && !hydroProposal.availability.hydromassage.available ? <p role="status" className="text-xs text-muted-foreground">{t("Idromassaggio")}: {t(hydroProposal.availability.hydromassage.reason ?? "Non disponibile per questa configurazione.")}</p> : null}
++          {(shelfOn && !comfort.availability.sunShelf.available) || (hydroOn && !comfort.availability.hydromassage.available) ?
++            <button type="button" className="self-start text-xs underline underline-offset-4" onClick={() => chooseComfort("none")}>{t("Rimuovi zona comfort")}</button> : null}
+           {(shelfOn || hydroOn) ? <InternalStairWidthControl config={config} onChange={setInternalStairWidth} /> : null}
+           {(shelfOn || hydroOn) && stepsOn ? <InternalStairSideControl config={config} onChange={setInternalStairMirrored} /> : null}
+-          {shelfOn && shelfRange.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
++          {shelfOn && shelfRange?.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
+             <DimensionControl label={stairType === "corner" ? "Lunghezza spiaggetta" : "Lunghezza spiaggetta e gradini"} unit="m" step={0.005} precision={3}
+               value={requestedShelfRun} min={shelfRange.min} max={shelfRange.max} onChange={setSunShelfRun} />
+             <p className="text-xs text-muted-foreground">{t("Intervallo utile: {min}–{max} m, ricavato da due lettini, gradini, passaggi e spazio residuo della vasca.", {
+@@ -743,13 +739,13 @@
+               </button>
+             </div> : null}
+           </div> : null}
+-          {shelfOn && !shelfRange.available ? <p role="alert" className="text-xs text-destructive">{t(shelfRange.reason)}</p> : null}
++          {shelfOn && shelfRange && !shelfRange.available ? <p role="alert" className="text-xs text-destructive">{t(shelfRange.reason)}</p> : null}
+           {shelfOn && shelfElement ? <p className="text-xs text-muted-foreground">{t("Spiaggetta: {run} m. Lunghezza di nuoto residua: {swim} m. Accesso separato di almeno 90 cm.", {
+             run: number(shelfElement.run,{maximumFractionDigits:2}),
+             swim: number(Math.max(config.dimensions.length,config.dimensions.width)-shelfElement.run,{maximumFractionDigits:2}),
+           })}</p> : null}
+           </> : null}
+-          {tab === "shelf-options" && shelfOn ? <div className="flex flex-col gap-3">
++          {tab === "shelf-options" && shelfOn && shelfLoungers ? <div className="flex flex-col gap-3">
+             <ChoiceGrid label={t("Optional per la spiaggetta")}>
+               <ChoiceCard optional title={t("Lettini per spiaggetta")}
+                 description={t("Esse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.")}
+@@ -1238,7 +1234,7 @@
+       description={t(id === "loungers" ? "Esse · Lyxo, con telaio e cuscino per la pavimentazione." : item(id).description)}
+       image={id === "loungers" ? "/product-previews/lympha-deck.jpg" : ill(`equipment-${id}`)}
+       imageFit={id === "loungers" ? "contain" : "cover"}
+-      {...(id === "loungers" ? { footer: t("Visibili nella presentazione finale.") } : {})}
++      {...(id === "automaticCover" && coverOn && coverPlan.status === "UNAVAILABLE" ? { footer: t("Da verificare") } : id === "loungers" ? { footer: t("Visibili nella presentazione finale.") } : {})}
+       selected={config.equipment.includes(id)}
+       onSelect={onSelect ?? (() => toggleEquipment(id))}
+     />
+@@ -1290,10 +1286,14 @@
+               />
+             </div>
+           ) : null}
+-          {!coverOn && coverPlan.status === "UNAVAILABLE" && coverPlan.reason ? (
+-            <p className="text-xs text-muted-foreground">
+-              {t("Copertura automatica:")}{t(coverPlan.reason)}
+-            </p>
++          {coverPlan.status === "UNAVAILABLE" && coverPlan.reason ? (
++            <div role="status" className="flex flex-col items-start gap-2 rounded-xl border border-hairline p-3 text-xs leading-relaxed">
++              <p>{t("Copertura automatica:")} {t(coverPlan.reason)}</p>
++              {coverOn ? <>
++                <p>{t("La scelta è conservata, ma la copertura non viene mostrata perché non è compatibile con la configurazione attuale.")}</p>
++                <button type="button" className="underline underline-offset-4" onClick={() => toggleEquipment("automaticCover")}>{t("Rimuovi copertura")}</button>
++              </> : null}
++            </div>
+           ) : null}
+         </div>
+       ) : tab === "water" ? (
+--- before/src/components/pool/DimensionControl.tsx
++++ after/src/components/pool/DimensionControl.tsx
+@@ -20,6 +20,7 @@
+   const decimals = precision ?? (step < 0.1 ? 2 : step < 1 ? 1 : 0);
+ 
+   const [draft, setDraft] = useState<string | null>(null);
++  const [adapted, setAdapted] = useState<number | null>(null);
+   const cancelled = useRef(false);
+   const frame = useRef<number | null>(null);
+   const pending = useRef<number | null>(null);
+@@ -64,12 +65,14 @@
+             min={min}
+             max={max}
+             step={step}
+-            onFocus={() => { cancelled.current = false; }}
++            aria-describedby={adapted !== null ? `${id}-adapted` : undefined}
++            onFocus={() => { cancelled.current = false; setAdapted(null); }}
+             onChange={(event) => setDraft(event.target.value)}
+             onBlur={(event) => {
+               const next = Number.parseFloat(event.currentTarget.value);
+               if (!cancelled.current && Number.isFinite(next)) {
+                 const clamped = Math.max(min, Math.min(max, next));
++                setAdapted(clamped !== next ? clamped : null);
+                 if (clamped !== value) onChange(clamped);
+               }
+               cancelled.current = false;
+@@ -96,6 +99,7 @@
+         onValueChange={([next]) => {
+           if (typeof next !== "number") return;
+           setDraft(null);
++          setAdapted(null);
+           pending.current = next;
+           if (frame.current === null) frame.current = requestAnimationFrame(flush);
+         }}
+@@ -105,6 +109,12 @@
+         }}
+         aria-label={t(label)}
+       />
++
++      {adapted !== null ? <p id={`${id}-adapted`} role="status" className="text-xs leading-relaxed text-muted-foreground">
++        {t("Misura adattata a {value} {unit}. Intervallo consentito: {min}–{max} {unit}.", {
++          value: number(adapted), min: number(min), max: number(max), unit,
++        })}
++      </p> : null}
+ 
+       <div className="flex justify-between text-[10px] font-light tracking-widest tabular-nums text-muted-foreground/50">
+         <span>
+--- before/src/components/pool/InternalStairSideControl.tsx
++++ after/src/components/pool/InternalStairSideControl.tsx
+@@ -1,4 +1,5 @@
+-import { useMemo } from 'react';
++import { useId, useMemo } from 'react';
++import { AccessPlanPreview } from './AccessPlanPreview';
+ import { ArrowLeft, ArrowRight } from 'lucide-react';
+ import { useI18n } from '@/lib/i18n';
+ import { configuredInternalStairSides } from '@/lib/pool/internal-stair-options';
+@@ -10,8 +11,11 @@
+ }) {
+   const { t } = useI18n();
+   const options = useMemo(() => configuredInternalStairSides(config), [config]);
++  const reasonId = useId();
++  const selected = options.find(option => option.mirrored === !!config.internalStairMirrored)!;
+   return <fieldset className="flex flex-col gap-3" data-internal-stair-side>
+     <legend className="mb-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">{t('Posizione della scala')}</legend>
++    <AccessPlanPreview option={selected} />
+     <div className="grid grid-cols-2 gap-3">
+       {options.map(option => {
+         const left = option.side === 'left';
+@@ -19,7 +23,7 @@
+         const selected = option.mirrored === !!config.internalStairMirrored;
+         return <button key={option.side} type="button"
+           aria-label={t(left ? 'Scala a sinistra (SX)' : 'Scala a destra (DX)')}
+-          aria-pressed={selected} disabled={!option.available} onClick={() => onChange(option.mirrored)}
++          aria-pressed={selected} aria-describedby={!option.available ? `${reasonId}-${option.side}` : undefined} disabled={!option.available} onClick={() => onChange(option.mirrored)}
+           className={`flex min-h-12 items-center justify-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45 ${selected ? 'border-brand bg-brand-soft text-brand' : 'border-border bg-background hover:border-brand/50'}`}>
+           <Arrow className="size-4 shrink-0" aria-hidden="true" />
+           <span className="font-semibold">{t(left ? 'SX' : 'DX')}</span>
+@@ -27,6 +31,9 @@
+         </button>;
+       })}
+     </div>
++    {options.filter(option => !option.available).map(option => <p key={option.side} id={`${reasonId}-${option.side}`} className="text-xs leading-relaxed text-muted-foreground">
++      <span className="font-medium">{t(option.side === 'left' ? 'SX' : 'DX')}: </span>{t(option.reason)}
++    </p>)}
+     <p className="text-xs leading-relaxed text-muted-foreground">{t('SX e DX indicano i due lati della stessa testata. Le posizioni senza spazio sono disabilitate.')}</p>
+   </fieldset>;
+ }
+--- before/src/lib/pool/internal-stair-options.ts
++++ after/src/lib/pool/internal-stair-options.ts
+@@ -1,4 +1,4 @@
+-import { configuredPoolLayout } from '@/lib/pool/resolved-layout';
++import { configuredPoolLayout, configuredLayoutWithSkimmers } from '@/lib/pool/resolved-layout';
+ import { configuredOutline } from '@/lib/pool/configured-outline';
+ import { outlineBounds } from '@/lib/pool/geometry';
+ import type { InternalStairType, PoolConfig } from '@/lib/pool/types';
+@@ -15,20 +15,26 @@
+ 
+ /** Actual geometry decides which side is usable; no unconstrained mirror meshes. */
+ export function configuredInternalStairSides(config: PoolConfig) {
+-  const bounds = outlineBounds(configuredOutline(config));
++  const outline = configuredOutline(config);
++  const bounds = outlineBounds(outline);
+   const cross = bounds.spanX >= bounds.spanZ ? 1 : 0;
+   const centre = cross ? (bounds.minZ + bounds.maxZ) / 2 : (bounds.minX + bounds.maxX) / 2;
+   const options = [false, true].map(mirrored => {
+-    const plan = configuredPoolLayout({ ...config, internalStairMirrored: mirrored });
++    const { layout: plan, skimmers } = configuredLayoutWithSkimmers({ ...config, internalStairMirrored: mirrored });
+     const integrated = plan.comfort.elements.find(element => !!element.steps?.length);
+     const footprint = plan.access.placement ? plan.access.footprint : integrated?.steps?.[0]?.footprint ?? [];
+     const position = footprint.length ? footprint.reduce((sum, point) => sum + point[cross], 0) / footprint.length : null;
+-    return { mirrored, available: config.poolAccess === 'internalSteps' && plan.status !== 'UNAVAILABLE' && position !== null,
+-      position, footprint, reason: plan.access.reason || 'Spazio insufficiente sul lato scelto.' };
++    const active = config.features.includes('sunShelf') ? 'sunShelf' : config.features.includes('hydromassage') ? 'hydromassage' : null;
++    const reason = active && !plan.comfort.availability[active].available ? plan.comfort.availability[active].reason : plan.access.reason;
++    return { mirrored, outline, layout: plan, skimmers, available: config.poolAccess === 'internalSteps' && plan.status !== 'UNAVAILABLE' && position !== null,
++      position, footprint, reason: reason || 'Spazio insufficiente sul lato scelto.' };
+   });
+   const baseLeft = options[0]!.position === null || options[0]!.position! < centre;
+-  if (JSON.stringify(options[0]!.footprint) === JSON.stringify(options[1]!.footprint)) options[1]!.available = false;
+-  return options.map(option => ({ mirrored: option.mirrored, available: option.available,
++  if (options[1]!.available && JSON.stringify(options[0]!.footprint) === JSON.stringify(options[1]!.footprint)) {
++    options[1]!.available = false;
++    options[1]!.reason = 'Le due posizioni coincidono in questa configurazione.';
++  }
++  return options.map(option => ({ ...option,
+     side: (option.mirrored ? !baseLeft : baseLeft) ? 'left' as const : 'right' as const,
+-    reason: option.available ? '' : 'Spazio insufficiente sul lato scelto.' })).sort((a,b) => a.side === b.side ? 0 : a.side === 'left' ? -1 : 1);
++    reason: option.available ? '' : option.reason })).sort((a,b) => a.side === b.side ? 0 : a.side === 'left' ? -1 : 1);
+ }
+--- before/src/lib/i18n/messages.ts
++++ after/src/lib/i18n/messages.ts
+@@ -2,6 +2,16 @@
+ 
+ /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
+ export const messages: ReadonlyArray<readonly [string, string]> = [
++  ["Rimuovi zona comfort", "Remove comfort area"],
++  ["Misura adattata a {value} {unit}. Intervallo consentito: {min}–{max} {unit}.", "Value adjusted to {value} {unit}. Allowed range: {min}–{max} {unit}."],
++  ["Vista dall’alto · orientamento fisso", "Top view · fixed orientation"],
++  ["Pianta di scala, zona comfort e skimmer", "Plan of stairs, comfort area and skimmers"],
++  ["Scala evidenziata · zona comfort in grigio · skimmer a punti", "Highlighted stairs · grey comfort area · dots for skimmers"],
++  ["Ingombro scala", "Stair footprint"],
++  ["Nuoto residuo", "Remaining swim length"],
++  ["Le due posizioni coincidono in questa configurazione.", "Both positions coincide in this configuration."],
++  ["Rimuovi copertura", "Remove cover"],
++  ["La scelta è conservata, ma la copertura non viene mostrata perché non è compatibile con la configurazione attuale.", "Your selection is retained, but the cover is not shown because it is incompatible with the current configuration."],
+   ["Larghezza scala", "Stair width"],
+   ["Ripristina larghezza automatica", "Reset automatic width"],
+   ["Larghezza scala: {width} m", "Stair width: {width} m"],
+--- before/src/lib/pool/contextual-camera.ts
++++ after/src/lib/pool/contextual-camera.ts
+@@ -38,7 +38,9 @@
+       if (previousFocus === "STAIR_LIGHTING" || previousFocus === "BENCH_LIGHTING") return previousFocus;
+       return !c.features.includes("ledLighting") && c.features.includes("stairLighting") ? "STAIR_LIGHTING"
+         : !c.features.includes("ledLighting") && c.features.includes("hydromassageBenchLighting") ? "BENCH_LIGHTING" : "LIGHTING";
+-    case "setInternalStairType": case "setInternalStairMirrored": return "STAIRS";
++    case "setInternalStairType": return "STAIRS";
++    // Compare sides in the current projection, including a manually selected top view.
++    case "setInternalStairMirrored": return undefined;
+     case "toggleInternalSteps": return c.poolAccess === "internalSteps" ? "STAIRS" : accessFocus(c);
+     case "setPoolAccess": return accessFocus(c);
+     case "setHydromassageVariant": return accessFocus(c);
+--- before/src/components/pool/AccessPlanPreview.tsx
++++ after/src/components/pool/AccessPlanPreview.tsx
+@@ -0,0 +1,52 @@
++import { useI18n } from '@/lib/i18n';
++import { outlineBounds } from '@/lib/pool/geometry';
++import type { configuredInternalStairSides } from '@/lib/pool/internal-stair-options';
++
++type Option = ReturnType<typeof configuredInternalStairSides>[number];
++
++/** The same solved geometry as the scene, in a fixed top projection. */
++export function AccessPlanPreview({ option }: { option: Option }) {
++  const { t, number } = useI18n();
++  const { outline, layout, skimmers } = option;
++  if (outline.length < 3) return null;
++  const bounds = outlineBounds(outline);
++  const scale = Math.min(208 / Math.max(bounds.spanX, .1), 112 / Math.max(bounds.spanZ, .1));
++  const project = ([x, z]: readonly [number, number]) => [
++    120 + (x - (bounds.minX + bounds.maxX) / 2) * scale,
++    72 + (z - (bounds.minZ + bounds.maxZ) / 2) * scale,
++  ];
++  const points = (footprint: typeof outline) => footprint.map(point => project(point).join(',')).join(' ');
++  const integrated = layout.comfort.elements.find(element => element.steps?.length);
++  const flight = layout.access.placement ? layout.access.footprint : integrated?.steps?.[0]?.footprint ?? [];
++  const shelf = layout.comfort.elements.find(element => element.kind === 'sunShelf');
++  const width = layout.access.placement ? layout.access.width : flight.length ? (bounds.spanX >= bounds.spanZ ? outlineBounds(flight).spanZ : outlineBounds(flight).spanX) : 0;
++  const side = t(option.side === 'left' ? 'SX' : 'DX');
++  return <figure className="m-0 grid gap-2" data-access-plan>
++    <figcaption className="text-xs text-muted-foreground">{t('Vista dall’alto · orientamento fisso')}</figcaption>
++    <svg viewBox="0 0 240 144" role="img" aria-label={t('Pianta di scala, zona comfort e skimmer')} className="mx-auto h-36 w-full max-w-xs">
++      <polygon points={points(outline)} fill="currentColor" fillOpacity=".035" stroke="currentColor" strokeWidth="1" className="text-foreground" />
++      {layout.comfort.elements.map(element => <g key={element.kind}>
++        <polygon points={points(element.footprint)} fill="currentColor" fillOpacity=".15" stroke="currentColor" strokeWidth="1" className="text-muted-foreground" />
++        {element.steps?.map((step, index) => <polygon key={index} points={points(step.footprint)} fill="currentColor" fillOpacity=".12" stroke="currentColor" strokeWidth=".7" className="text-brand" />)}
++      </g>)}
++      {flight.length ? <polygon points={points(flight)} fill="currentColor" fillOpacity=".3" stroke="currentColor" strokeWidth="1.5" className="text-brand" /> : null}
++      {skimmers.positions.map((point, index) => {
++        const [cx, cy] = project([point.x, point.z]);
++        return <circle key={index} cx={cx} cy={cy} r="2.5" fill="currentColor" className="text-foreground" />;
++      })}
++      {flight.length ? (() => {
++        const centre = flight.reduce((sum, point) => [sum[0]! + point[0] / flight.length, sum[1]! + point[1] / flight.length], [0, 0]);
++        const [x, y] = project([centre[0]!, centre[1]!]);
++        return <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fontWeight="600" fill="currentColor" className="text-foreground">{side}</text>;
++      })() : null}
++    </svg>
++    <p className="text-[11px] leading-relaxed text-muted-foreground">{t('Scala evidenziata · zona comfort in grigio · skimmer a punti')}</p>
++    {option.available ? <dl className="flex flex-wrap gap-x-5 gap-y-2 text-xs tabular-nums">
++      {width > 0 ? <div><dt className="text-muted-foreground">{t(layout.access.corner ? 'Ingombro scala' : 'Larghezza scala')}</dt><dd className="mt-1 font-medium">{number(width, { maximumFractionDigits: 2 })} m</dd></div> : null}
++      {shelf ? <>
++        <div><dt className="text-muted-foreground">{t(shelf.steps?.length ? 'Lunghezza spiaggetta e gradini' : 'Lunghezza spiaggetta')}</dt><dd className="mt-1 font-medium">{number(shelf.run, { maximumFractionDigits: 2 })} m</dd></div>
++        <div><dt className="text-muted-foreground">{t('Nuoto residuo')}</dt><dd className="mt-1 font-medium">{number(Math.max(0, Math.max(bounds.spanX, bounds.spanZ) - shelf.run), { maximumFractionDigits: 2 })} m</dd></div>
++      </> : null}
++    </dl> : null}
++  </figure>;
++}
+--- before/scripts/run-dimension-input-audit.mjs
++++ after/scripts/run-dimension-input-audit.mjs
+@@ -7,4 +7,5 @@
+ input.props.onFocus?.();tree=render();input=find(tree,'input');input.props.onChange({target:{value:'2'}});assert.equal(changes.length,0,'Typing a partial width must not resize the pool');tree=render();input=find(tree,'input');input.props.onChange({target:{value:'2.55'}});tree=render();input=find(tree,'input');input.props.onBlur({currentTarget:{value:'2.55'}});assert.equal(value,2.55);
+ tree=render();input=find(tree,'input');input.props.onChange({target:{value:''}});tree=render();input=find(tree,'input');input.props.onBlur({currentTarget:{value:''}});assert.equal(value,2.55);
+ tree=render();input=find(tree,'input');input.props.onChange({target:{value:'99'}});tree=render();find(tree,'input').props.onBlur({currentTarget:{value:'99'}});assert.equal(value,4);
+-tree=render();const slider=find(tree,'slider');changes=[];slider.props.onValueChange([2]);slider.props.onValueChange([2.5]);slider.props.onValueChange([3]);assert.equal(changes.length,0);raf();assert.deepEqual(changes,[3]);slider.props.onValueChange([3.5]);slider.props.onValueCommit([3.6]);assert.equal(value,3.6);assert.equal(raf,null);cleanup?.();console.log(JSON.stringify({status:'PASS',checks:8,scope:'Actual control: numeric drafts/empty/clamp and coalesced slider/final commit'}));
++tree=render();assert.equal(find(tree,'p')?.props.role,'status','Clamping announces the applied range');find(tree,'input').props.onFocus();tree=render();assert.equal(find(tree,'p'),undefined,'New edit clears the old adjustment message');find(tree,'input').props.onBlur({currentTarget:{value:'99'}});tree=render();assert.equal(find(tree,'p')?.props.role,'status','A clamped no-op must still explain the adaptation');
++tree=render();const slider=find(tree,'slider');changes=[];slider.props.onValueChange([2]);slider.props.onValueChange([2.5]);slider.props.onValueChange([3]);assert.equal(changes.length,0);raf();assert.deepEqual(changes,[3]);slider.props.onValueChange([3.5]);slider.props.onValueCommit([3.6]);assert.equal(value,3.6);assert.equal(raf,null);cleanup?.();console.log(JSON.stringify({status:'PASS',checks:11,scope:'Actual control: numeric drafts/empty/clamp and coalesced slider/final commit'}));
+--- before/scripts/wizard-compatibility-audit.ts
++++ after/scripts/wizard-compatibility-audit.ts
+@@ -0,0 +1,50 @@
++import assert from 'node:assert/strict';
++import React from 'react';
++import {renderToStaticMarkup} from 'react-dom/server';
++import {configuratorTesting} from '@/lib/pool/store';
++import {configuredPoolLayout} from '@/lib/pool/resolved-layout';
++import {STEPS} from '@/lib/pool/config';
++import {configuredInternalStairSides} from '@/lib/pool/internal-stair-options';
++import {AccessPlanPreview} from '@/components/pool/AccessPlanPreview';
++import {focusForAction} from '@/lib/pool/contextual-camera';
++import {translateText} from '@/lib/i18n';
++{
++const initial=configuratorTesting.createInitialState();
++const base={...initial.config,projectType:'new',poolType:'in-ground',structure:'reinforced-concrete',shape:'rectangle',shapeSelected:true,poolAccess:'internalSteps',system:'skimmer',features:['sunShelf'],internalStairType:'corner',dimensions:{...initial.config.dimensions,length:10,width:5,depth:1.5,floorProfile:'flat'}} as any;
++const access=STEPS.findIndex(s=>s.id==='access');
++const invalid={...base,dimensions:{...base.dimensions,length:25,width:4.5}};
++assert.equal(configuratorTesting.accessSelectionComplete(invalid),false,'Live gate blocks retained capacity conflict');
++assert.equal(configuratorTesting.accessSelectionComplete(base),true,'Live gate accepts valid shelf');
++const p=configuredPoolLayout(invalid);
++assert(p.comfort.elements.some(e=>e.kind==='sunShelf')&&!p.comfort.availability.sunShelf.available,'actual retained-invalid fixture');
++assert.equal(configuratorTesting.firstIncompleteStepIndex(invalid,initial.renovation),access,'Restoring an invalid retained shelf must stop at Access');
++assert.equal(configuratorTesting.firstIncompleteStepIndex(base,initial.renovation),STEPS.length-1,'valid shelf still completes');
++for(const mirrored of [false,true]) for(const type of ['linear','corner']){
++ const c={...base,internalStairType:type,internalStairMirrored:mirrored};
++ assert.equal(configuratorTesting.firstIncompleteStepIndex(c,initial.renovation),STEPS.length-1,'valid SX/DX flights complete');
++}
++assert.equal(configuratorTesting.firstIncompleteStepIndex({...base,features:[],poolAccess:null},initial.renovation),access,'in-ground no entrance remains incomplete');
++assert.equal(configuratorTesting.firstIncompleteStepIndex({...base,features:[],poolType:'above-ground',poolAccess:null},initial.renovation),STEPS.length-1,'above-ground explicit stairs OFF remains valid');
++console.log(JSON.stringify({status:'PASS',checks:11,scope:'Real restore/access completion, retained capacity conflict and valid side/entrance regressions'}));
++
++}
++{
++const initial=configuratorTesting.createInitialState();const base={...initial.config,projectType:'new',poolType:'in-ground',structure:'reinforced-concrete',shape:'rectangle',shapeSelected:true,poolAccess:'internalSteps',system:'skimmer',features:['sunShelf'],internalStairType:'linear',dimensions:{...initial.config.dimensions,length:10,width:5,depth:1.5,floorProfile:'flat'}} as any;
++let checks=0;const check=(v:any,m:string)=>{assert(v,m);checks++;};
++for(const type of ['linear','corner'])for(const mirrored of [false,true]){
++ const c={...base,internalStairType:type,internalStairMirrored:mirrored};const option=configuredInternalStairSides(c).find(s=>s.mirrored===mirrored)!;
++ const html=renderToStaticMarkup(React.createElement(AccessPlanPreview,{option}));
++ check(html.includes('role="img"')&&!/NaN|Infinity/.test(html),'finite actual diagram');
++ check((html.match(/<circle/g)??[]).length===option.skimmers.positions.length,'same actual fitting row');
++ check(html.includes('Nuoto residuo')&&html.includes('Lunghezza spiaggetta'),'real shelf dimensions shown');
++ check(focusForAction({type:'setInternalStairMirrored'},c,'SUN_SHELF')===undefined,'side comparison keeps current comfort view');
++}
++const invalid=configuredInternalStairSides({...base,internalStairType:'corner',dimensions:{...base.dimensions,length:25,width:4.5}});
++check(invalid.every(s=>!s.available&&s.reason.includes('skimmer')),'capacity reason retained on both sides');
++for(const side of invalid){const html=renderToStaticMarkup(React.createElement(AccessPlanPreview,{option:side}));check(!html.includes('Nuoto residuo'),'invalid geometry does not advertise valid dimensions');}
++check(focusForAction({type:'setInternalStairMirrored'},base)===undefined,'first side toggle also preserves manual projection');
++check(translateText('Nuoto residuo','en')==='Remaining swim length','English measurement label');
++check(translateText('Misura adattata a {value} {unit}. Intervallo consentito: {min}–{max} {unit}.','en',{value:'2.67',unit:'m',min:'.9',max:'2.67'}).includes('Value adjusted'),'English recovery message');
++console.log(JSON.stringify({status:'PASS',checks,scope:'Real SSR diagram on both flights/sides, same fittings, capacity reasons, stable focus and IT/EN'}));
++
++}--- before/scripts/run-wizard-compatibility-audit.mjs
++++ after/scripts/run-wizard-compatibility-audit.mjs
+@@ -0,0 +1,15 @@
++import { build } from "rolldown";
++import { join } from "node:path";
++import { pathToFileURL } from "node:url";
++import { unlink } from "node:fs/promises";
++const file = join(process.cwd(), `.wizard-compatibility-audit-${process.pid}.mjs`);
++try {
++  await build({ input: "scripts/wizard-compatibility-audit.ts", output: { file, format: "esm" }, platform: "node",
++    external: ["react", "react/jsx-runtime", "three", "@react-three/fiber", "@react-three/drei"],
++    resolve: { alias: { "@": join(process.cwd(), "src") } },
++    plugins: [{ name: "no-network-wizard-audit", resolveId(id) {
++      if (id.endsWith("/projectDelivery.server")) return "\0unused-project-rpc";
++    }, load(id) { if (id === "\0unused-project-rpc") return "export const loadSharedProjectFn = () => { throw new Error('Unexpected RPC in wizard compatibility audit'); };"; } }],
++  });
++  await import(pathToFileURL(file).href);
++} finally { await unlink(file).catch(error => { if (error.code !== "ENOENT") throw error; }); }
+--- before/scripts/run-cover-compatibility-ui-audit.mjs
++++ after/scripts/run-cover-compatibility-ui-audit.mjs
+@@ -0,0 +1,18 @@
++import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
++const root=process.cwd(),ts=createRequire(root+'/package.json')('typescript');
++const src=fs.readFileSync(root+'/src/components/pool/wizard/StepTrays.tsx','utf8');
++const ast=ts.createSourceFile('StepTrays.tsx',src,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
++const fn=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='OptionalTray').getText(ast).replace('export ','');
++const React={createElement:(tag,props,...children)=>({tag,props:props??{},children})};
++const nodes=n=>n&&typeof n==='object'?[n,...n.children.flat(Infinity).flatMap(nodes)]:[];
++let selected=true,status='UNAVAILABLE',removed=0;
++const scope={React,useI18n:()=>({t:x=>x}),useConfigurator:()=>({config:{equipment:selected?['automaticCover']:[],system:'infinity',poolType:'in-ground'},toggleEquipment:id=>{assert.equal(id,'automaticCover');removed++;},setCoverExtension:()=>{}}),resolveAutomaticCover:()=>({status,reason:'Incompatible Infinity',extension:0}),EQUIPMENT:[{id:'automaticCover',title:'Copertura automatica'},{id:'solarShower',title:'Doccia'},{id:'loungers',title:'Lettini'}],ChoiceCard:'card',ChoiceGrid:'grid',TabBody:'body',StepTabs:'tabs',GroupLabel:'label',ill:x=>x};
++const component=vm.runInNewContext(ts.transpileModule(fn+';OptionalTray;',{compilerOptions:{jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2022}}).outputText,scope);
++const render=()=>nodes(component({ctx:{focus(){}},tab:'outdoor',setTab(){}}));
++let n=render(),warning=n.find(n=>n.props.role==='status');assert(warning,'Selected incompatible cover must explain its state immediately');
++assert(JSON.stringify(warning).includes('Incompatible Infinity'));
++const remove=n.find(n=>n.tag==='button'&&n.children.includes('Rimuovi copertura'));assert(remove);remove.props.onClick();assert.equal(removed,1);
++assert(!n.some(n=>n.tag==='input'&&n.props.type==='range'),'Unavailable cover cannot expose a working slider');
++selected=false;n=render();assert(n.some(n=>n.props.role==='status'),'Unselected unavailable cover retains reason');
++status='AVAILABLE';selected=true;n=render();assert(n.some(n=>n.tag==='input'&&n.props.type==='range'),'Valid selected cover retains slider');assert(!n.some(n=>n.props.role==='status'),'Valid cover has no false conflict');
++console.log(JSON.stringify({status:'PASS',checks:7,scope:'Actual OptionalTray, invalid selected/unselected, removal and valid slider'}));

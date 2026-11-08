@@ -43,6 +43,8 @@ export interface ConfiguratorContextValue {
   renovation: RenovationConfig;
   /** Stable identity for the project being configured. */
   projectId: string;
+  /** Local/shared hydration finished; false while a shared project is unavailable. */
+  projectReady: boolean;
   /** The single canonical, serializable representation of everything the
    * customer has selected so far -- the source of truth for the summary,
    * autosave, exports and any future CRM/lead handoff. */
@@ -101,6 +103,7 @@ export interface ConfiguratorContextValue {
   setExternalStairPlatformExtended: (value: boolean) => void;
   setPremiumEnvironment: (value: import("./presentation").PremiumEnvironment) => void;
   setInternalStairType: (value: InternalStairType) => void;
+  setInternalStairWidth: (value: number | undefined) => void;
   setInternalStairMirrored: (value: boolean) => void;
   setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;

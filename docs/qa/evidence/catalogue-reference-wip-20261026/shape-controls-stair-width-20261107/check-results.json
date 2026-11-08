@@ -1,0 +1,27 @@
+{
+  "shapeAndSkimmerChecks": 36,
+  "stairWidthChecks": 311,
+  "customInteractionChecks": 11,
+  "dimensionInputChecks": 8,
+  "mobileTopFramingChecks": 13,
+  "customGeometryExactParityCases": 64,
+  "legacyAutomaticStairLayoutsIdentical": 18,
+  "scopedSourceTypecheck": "PASS (24 sources and resolved dependencies)",
+  "nativeDesktop": [
+    "new pool L skimmer spacing before/after",
+    "custom handle drag changes SVG and 3D",
+    "stair numeric 1.70 m, slider 1.25 m, Escape and automatic reset",
+    "renovation L stair numeric 1.70 m"
+  ],
+  "nativeMobile": [
+    "390x844 emulation: explicit recovery of invalid 3x2 custom outline to 4x2.7",
+    "new small custom pool disappearance reproduced and fixed in final production-style build"
+  ],
+  "limits": [
+    "mobile viewport emulation, not real hardware",
+    "geometry CPU timings are not GPU/FPS measurements",
+    "cloud round trip and PDF download not exercised for new stair-width field",
+    "whole-WIP gates remain open; no commit/push/deploy",
+    "In the very compact mobile preview, dimension labels remain crowded; expansion can retain the previous small framing until reframing. These presentation issues are not certified resolved."
+  ]
+}

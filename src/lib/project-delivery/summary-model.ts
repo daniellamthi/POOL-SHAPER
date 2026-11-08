@@ -4,6 +4,7 @@
  * ProjectConfiguration. The in-app Summary and the Project Book PDF both
  * render this object, so the two can never disagree.
  */
+import { configuredInternalStairSides } from "@/lib/pool/internal-stair-options";
 import { exteriorPanelFinishTitle } from "@/lib/pool/above-ground";
 import type { ProjectConfiguration } from "@/lib/pool/project";
 import { projectGeometry } from "@/lib/pool/project-metrics";
@@ -241,11 +242,13 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
       : { hex: linerColor?.hex ?? "#dfe9ec", texture: linerColor?.texture };
 
   const comfortItems = [
+    ...(config.internalStairWidth !== undefined && (resolvedLayout.access.placement && !resolvedLayout.access.corner || resolvedLayout.comfort.elements.some(element => !!element.steps?.length))
+      ? [t("Larghezza scala: {width} m", { width: formatNumber(config.internalStairWidth, 2) })] : []),
     ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity} · ${t(sunShelfLoungerColor(config.sunShelfLoungerColor).label)}`] : []),
     ...(config.poolAccess
       ? [
           config.poolAccess === "internalSteps"
-            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}${config.poolType === "above-ground" && config.internalStairMirrored ? " · speculare" : ""}`
+            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}${typeof config.internalStairMirrored === "boolean" ? ` · ${t(configuredInternalStairSides(config).find(side => side.mirrored === config.internalStairMirrored)?.side === "left" ? "Sinistra (SX)" : "Destra (DX)")}` : ""}`
             : POOL_ACCESS_LABEL[config.poolAccess],
         ]
       : []),
@@ -433,6 +436,8 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
         { label: "Struttura", value: (e?.structure ?? config.structure) ? STRUCTURE_LABEL[(e?.structure ?? config.structure)!] : "Da verificare" },
         { label: "Dimensioni", value: dimensionsSentence },
         { label: "Fondo", value: isSlopedFloor ? "In pendenza" : "Piano" },
+        ...(e?.internalStairWidth !== undefined && e.poolAccess === "internalSteps" && e.internalStairType !== "corner"
+          ? [{ label: t("Larghezza scala"), value: `${formatNumber(e.internalStairWidth, 2)} m` }] : []),
         { label: "Accesso esistente", value: config.poolAccess === "internalSteps"
           ? INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"] : config.poolAccess ? POOL_ACCESS_LABEL[config.poolAccess] : "Senza scala interna" },
       ] },

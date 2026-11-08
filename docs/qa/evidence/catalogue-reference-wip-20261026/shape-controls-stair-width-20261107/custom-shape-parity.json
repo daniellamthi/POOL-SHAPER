@@ -1,0 +1,715 @@
+{
+  "count": 64,
+  "beforeMs": 3183.0281250000003,
+  "afterMs": 1054.9380820000001,
+  "speedup": 3.0172653535887806,
+  "nanBeforeCorrupt": true,
+  "nanAfterPreserved": true,
+  "noopPreserved": true,
+  "cases": [
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 0,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 69.352709,
+      "afterMs": 33.946417
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 0,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 4.049542000000002,
+      "afterMs": 3.7263750000000186
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 0,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 61.48879100000002,
+      "afterMs": 19.655707999999976
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 0,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 60.05283300000002,
+      "afterMs": 37.54483400000004
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 2,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 54.48266699999999,
+      "afterMs": 25.91787499999998
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 2,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 56.457041999999944,
+      "afterMs": 22.335834000000034
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 2,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 3.244833999999969,
+      "afterMs": 3.832749999999919
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 2,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 56.36841700000002,
+      "afterMs": 18.87762500000008
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 4,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 3.2470420000000786,
+      "afterMs": 3.7450829999999087
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 4,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 56.45295799999997,
+      "afterMs": 27.367541000000074
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 4,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 55.39491599999997,
+      "afterMs": 26.582459000000085
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 4,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 3.2700829999999996,
+      "afterMs": 3.5065419999999676
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 6,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 51.70916599999998,
+      "afterMs": 23.750167000000033
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 6,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 56.55008299999997,
+      "afterMs": 23.53687500000001
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 6,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 60.85200000000009,
+      "afterMs": 27.280208000000016
+    },
+    {
+      "length": 10,
+      "width": 4.5,
+      "index": 6,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 62.74687499999993,
+      "afterMs": 27.019958000000088
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 0,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 61.46250000000009,
+      "afterMs": 26.85066699999993
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 0,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 3.7345000000000255,
+      "afterMs": 3.7286669999998594
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 0,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 63.78183399999989,
+      "afterMs": 30.906375000000025
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 0,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 65.77437500000019,
+      "afterMs": 23.717415999999957
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 2,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 62.678292000000056,
+      "afterMs": 23.735583000000133
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 2,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 62.624041000000034,
+      "afterMs": 39.171792000000096
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 2,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 3.823958000000175,
+      "afterMs": 3.718625000000202
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 2,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 64.80066600000009,
+      "afterMs": 27.00237500000003
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 4,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 3.8164170000000013,
+      "afterMs": 3.6928750000001855
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 4,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 64.16083400000002,
+      "afterMs": 23.381000000000085
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 4,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 63.59224999999992,
+      "afterMs": 18.838915999999926
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 4,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 63.59545899999989,
+      "afterMs": 41.94212500000003
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 6,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 60.47129199999995,
+      "afterMs": 26.79383299999995
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 6,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 64.42908299999976,
+      "afterMs": 27.355541999999787
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 6,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 63.96208300000035,
+      "afterMs": 30.65691700000025
+    },
+    {
+      "length": 6,
+      "width": 3,
+      "index": 6,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 62.402333,
+      "afterMs": 22.778957999999875
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 0,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 59.93120900000031,
+      "afterMs": 0.3015829999999369
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 0,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 64.26241600000003,
+      "afterMs": 0.35095799999999144
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 0,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 62.550459000000046,
+      "afterMs": 0.3896249999997963
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 0,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 64.50829099999964,
+      "afterMs": 0.796291999999994
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 2,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 56.85808300000008,
+      "afterMs": 0.3897500000002765
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 2,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 59.004667000000154,
+      "afterMs": 0.3364160000000993
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 2,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 61.04087500000014,
+      "afterMs": 0.3240000000000691
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 2,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 60.230458,
+      "afterMs": 0.4019579999999223
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 4,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 60.28324999999995,
+      "afterMs": 0.33341599999994287
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 4,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 60.9861249999999,
+      "afterMs": 0.394249999999829
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 4,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 60.05895899999996,
+      "afterMs": 0.35962500000005093
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 4,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 60.20775000000003,
+      "afterMs": 0.3320000000003347
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 6,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 56.644374999999854,
+      "afterMs": 0.33412500000031287
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 6,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 60.440791999999874,
+      "afterMs": 0.3380000000001928
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 6,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 60.18462499999987,
+      "afterMs": 0.3822500000001128
+    },
+    {
+      "length": 3,
+      "width": 2,
+      "index": 6,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 58.864500000000135,
+      "afterMs": 0.4234169999999722
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 0,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 56.82375000000002,
+      "afterMs": 35.47895799999969
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 0,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 3.6230829999999514,
+      "afterMs": 3.5186249999997017
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 0,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 60.07570799999985,
+      "afterMs": 24.778124999999818
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 0,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 60.62233399999968,
+      "afterMs": 36.17162499999995
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 2,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 56.975124999999935,
+      "afterMs": 28.51033299999972
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 2,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 57.001624999999876,
+      "afterMs": 25.622499999999945
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 2,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 3.4841670000000704,
+      "afterMs": 3.6736660000001393
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 2,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 60.67854200000011,
+      "afterMs": 18.415583999999853
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 4,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 3.736083000000235,
+      "afterMs": 3.6428329999998823
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 4,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 61.04616699999997,
+      "afterMs": 36.352499999999964
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 4,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 59.916707999999744,
+      "afterMs": 32.06537500000013
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 4,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 3.672125000000051,
+      "afterMs": 3.7458339999998316
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 6,
+      "target": [
+        0.4,
+        0.4
+      ],
+      "beforeMs": 56.462540999999874,
+      "afterMs": 35.858250000000226
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 6,
+      "target": [
+        -0.45,
+        -0.36
+      ],
+      "beforeMs": 60.63575000000037,
+      "afterMs": 25.562167000000045
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 6,
+      "target": [
+        0.22,
+        -0.4
+      ],
+      "beforeMs": 3.5109160000001793,
+      "afterMs": 3.5590839999995296
+    },
+    {
+      "length": 25,
+      "width": 12,
+      "index": 6,
+      "target": [
+        0.4,
+        0.32
+      ],
+      "beforeMs": 57.87679200000002,
+      "afterMs": 28.897041000000172
+    }
+  ]
+}

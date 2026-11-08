@@ -131,7 +131,16 @@ export function constrainControlPoints(
   dimensions: Dimensions,
 ): ReadonlyArray<ControlPoint> {
   const previous = points[index];
-  if (!previous) return points;
+  if (!previous || !requested.every(Number.isFinite)) return points;
+  if (requested[0] === previous[0] && requested[1] === previous[1]) return points;
+  const constructible = (trialPoints: ReadonlyArray<ControlPoint>) => {
+    if (!isValidControlPolygon(trialPoints)) return false;
+    const outline = buildOutline("custom", dimensions, trialPoints);
+    // Most clamped drags fail curvature. Check this linear guard before
+    // the quadratic neck/coping tests, with exactly the same hard limit.
+    if (minimumCurvatureRadius(outline) < POOL_SHAPE_GUARDRAILS.minimumHardRadius) return false;
+    return validatePoolShape(outline, trialPoints).valid;
+  };
   const delta: ControlPoint = [requested[0] - previous[0], requested[1] - previous[1]];
   const neighbourInfluence = 0.1;
   const candidate = points.map((point, pointIndex) => {
@@ -147,7 +156,7 @@ export function constrainControlPoints(
         ] as const)
       : point;
   });
-  if (validatePoolShape(buildOutline("custom", dimensions, candidate), candidate).valid) {
+  if (constructible(candidate)) {
     return candidate;
   }
   let low = 0;
@@ -169,7 +178,7 @@ export function constrainControlPoints(
           ] as const)
         : point;
     });
-    if (validatePoolShape(buildOutline("custom", dimensions, trialPoints), trialPoints).valid) {
+    if (constructible(trialPoints)) {
       low = amount;
     } else high = amount;
   }

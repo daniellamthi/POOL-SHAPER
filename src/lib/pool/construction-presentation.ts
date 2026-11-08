@@ -68,12 +68,12 @@ export function constructionPresentation(
               ? "water"
               : "structure";
   const continuous = config.system === "overflow" && config.overflowType === "continuous";
-  // The lateral intake is defined by water + the terrace slab. Show that
-  // section while selecting it, without changing other construction stages.
-  const continuousPreview = continuous && stage === "system";
-  const raw = stage !== "finish" && stage !== "water" && !continuousPreview;
+  // Show the selected overflow/Infinity edge together with its waterline. Keep the
+  // other construction stages and the deliberately dry technical view intact.
+  const overflowPreview = (config.system === "overflow" || config.system === "infinity") && stage === "system";
+  const raw = stage !== "finish" && stage !== "water" && !overflowPreview;
   return {
-    stage, raw, structure, showWater: stage === "water" || continuousPreview,
+    stage, raw, structure, showWater: stage === "water" || overflowPreview,
     showSystemComponents: stage !== "structure",
     showAccessories: stage === "access" || stage === "finish" || stage === "water",
     showLighting: stage === "water",

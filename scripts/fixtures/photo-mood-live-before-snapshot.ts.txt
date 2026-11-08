@@ -1,0 +1,72 @@
+// Frozen live-fade implementation before the photo snapshot ordering fix.
+// Test data only; not imported by the product. Keep the live arithmetic identical.
+function SceneMood({
+  dusk,
+  baseBackground,
+  baseExposure,
+  baseEnvironment,
+  coastalDaylight = false,
+  architecturalIndoor = false,
+  architecturalSetting = false,
+  photographicGarden = false,
+  photoMode = false,
+  sky,
+  sun,
+  auxiliary,
+}: {
+  dusk: boolean;
+  baseBackground: string;
+  baseExposure: number;
+  baseEnvironment: number;
+  coastalDaylight?: boolean;
+  architecturalIndoor?: boolean;
+  architecturalSetting?: boolean;
+  photographicGarden?: boolean;
+  photoMode?: boolean;
+  sky: React.RefObject<HemisphereLight | null>;
+  sun: React.RefObject<DirectionalLight | null>;
+  auxiliary: React.RefObject<SpotLight | null>;
+}) {
+  // Photo Mode snapshots lights once in its passive effect. Remove this
+  // raster-only sun before that snapshot: the HDRI already contains the sun.
+  useLayoutEffect(() => {
+    if (photographicGarden && photoMode && !dusk && sun.current) sun.current.intensity = 0;
+  }, [photographicGarden, photoMode, dusk, sun]);
+  const blend = useRef(dusk ? 1 : 0);
+  const dayColor = useMemo(() => new Color(baseBackground), [baseBackground]);
+  const duskColor = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.background), []);
+  const scratch = useMemo(() => new Color(), []);
+  const daySun = useMemo(() => new Color(architecturalSetting ? "#fff0d9" : SCENE_VISUAL_PRESET.lighting.sun.color), [architecturalSetting]);
+  const nightSun = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.sunColor), []);
+  const dayGround = useMemo(() => new Color(SCENE_VISUAL_PRESET.lighting.sky.groundColor.light), []);
+  const nightGround = useMemo(() => new Color(SCENE_VISUAL_PRESET.dusk.skyGroundColor), []);
+
+  useFrame(({ gl, scene }, delta) => {
+    const target = dusk ? 1 : 0;
+    const step = delta / SCENE_VISUAL_PRESET.dusk.transitionSeconds;
+    blend.current =
+      blend.current < target
+        ? Math.min(target, blend.current + step)
+        : Math.max(target, blend.current - step);
+    const t = blend.current;
+    const preset = SCENE_VISUAL_PRESET.dusk;
+
+    gl.toneMappingExposure = MathUtils.lerp(baseExposure, preset.exposure, t);
+    scene.environmentIntensity = MathUtils.lerp(baseEnvironment, preset.environment, t);
+    scratch.copy(dayColor).lerp(duskColor, t);
+    if (scene.background instanceof Color) scene.background.copy(scratch);
+    if (scene.fog) scene.fog.color.copy(scratch);
+    if (sky.current) {
+      sky.current.intensity = (architecturalIndoor ? 0.38 : 1) * MathUtils.lerp(coastalDaylight ? COASTAL_DAYLIGHT.sky : SCENE_VISUAL_PRESET.lighting.sky.intensity.light, preset.skyIntensity, t);
+      sky.current.groundColor.copy(dayGround).lerp(nightGround, t);
+    }
+    if (sun.current) {
+      sun.current.intensity = MathUtils.lerp(photographicGarden ? (photoMode ? 0 : CATALOGUE_GARDEN.rasterSunIntensity) : architecturalSetting ? 3.2 : coastalDaylight ? COASTAL_DAYLIGHT.sun : SCENE_VISUAL_PRESET.lighting.sun.intensity.light, preset.sunIntensity, t);
+      sun.current.color.copy(daySun).lerp(nightSun, t);
+    }
+    if (auxiliary.current) {
+      auxiliary.current.intensity = MathUtils.lerp(SCENE_VISUAL_PRESET.lighting.auxiliary.intensity.light, preset.auxiliaryIntensity, t);
+    }
+  });
+  return null;
+}

@@ -13,12 +13,15 @@ import { createShorelineField } from "./waterDepth";
 import { boostMetalEnvironment } from "./metalEnvironment";
 import type { Outline } from "@/lib/pool/types";
 import { skipInactiveSpotLighting } from "./spotLightWork";
+import { shareLedProjector } from "./sharedLedProjector";
+import { configureInfinityFlowAppearance } from "./infinityFlowAppearance";
 import { WaterRefractionDepth, WATER_DEPTH_REFRACTION } from "./waterRefractionDepth";
 import { CALM_POOL_WAVE_SLOPE, writeCalmWavePhases } from "./calmPoolWaves";
 import { FlatWaterProjection } from "./flatWaterProjection";
 
 interface WaterShader extends THREE.WebGLProgramParametersWithUniforms {
   uniforms: THREE.WebGLProgramParametersWithUniforms["uniforms"] & {
+    infinityFlowTime?: { value: number };
     waterLargeOffset?: { value: THREE.Vector2 };
     waterMicroOffset?: { value: THREE.Vector2 };
     waterLargeScale?: { value: number };
@@ -73,9 +76,9 @@ vec2 p = vNormalMapUv;
 float t = waterLargeOffset.y;
 // Two existing stochastic normal fields at unequal metric scales avoid
 // equally spaced vertical ribs. Only surface normals move, never colour.
-vec2 filmBroad = texture2D(normalMap, p * vec2(2.37, 0.93) + vec2(0.0, t * 0.18)).xy * 2.0 - 1.0;
-vec2 filmFine = texture2D(waterMicroNormalMap, p * vec2(9.71, 3.19) + vec2(0.17, t * 0.31)).xy * 2.0 - 1.0;
-vec2 combinedSlope = (filmBroad * 0.4 + filmFine * 0.15) * vec2(1.0, 0.55);
+vec2 filmBroad = texture2D(normalMap, p * vec2(2.37, 0.93) + vec2(0.0, t)).xy * 2.0 - 1.0;
+vec2 filmFine = texture2D(waterMicroNormalMap, p * vec2(9.71, 3.19) + vec2(0.17, waterMicroOffset.y)).xy * 2.0 - 1.0;
+vec2 combinedSlope = (filmBroad * 2.8 + filmFine * 0.8) * vec2(1.0, 0.55);
 vec3 waterNormal = normalize(vec3(combinedSlope, 1.0));
 normal = normalize(tbn * waterNormal);
 `;
@@ -453,6 +456,7 @@ export function WaterSurfaceMaterial({
   depth = 0.13,
   outline,
   fallingFilm = false,
+  receivingFlow = false,
   flowing = false,
   planView = false,
   geometryRevision = "",
@@ -464,6 +468,8 @@ export function WaterSurfaceMaterial({
   depth?: number;
   outline?: Outline;
   fallingFilm?: boolean;
+  /** Aerated impact immediately beneath the Infinity cascade. */
+  receivingFlow?: boolean;
   /** Infinity circulation retains gentle ripples when the camera settles. */
   flowing?: boolean;
   planView?: boolean;
@@ -626,6 +632,8 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
         WATER_VISUAL_PRESET.environmentIntensity.day / SCENE_VISUAL_PRESET.environment.light,
         WATER_VISUAL_PRESET.environmentIntensity.day,
       );
+      if (fallingFilm || receivingFlow) configureInfinityFlowAppearance(shader, receivingFlow);
+      shareLedProjector(shader);
       if (!shaders.current.includes(shader)) shaders.current.push(shader);
     },
     [
@@ -635,6 +643,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       reflection.aboveWaterline,
       shoreline,
       fallingFilm,
+      receivingFlow,
       opaqueDepth,
       waterLevel,
       metricWaves,
@@ -659,10 +668,11 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
     stillness.current = THREE.MathUtils.damp(stillness.current, stillTarget, 2.2, delta);
     const calm = THREE.MathUtils.lerp(1, flowing ? 0.8 : 0.65, stillness.current);
     for (const shader of shaders.current) {
+      if (shader.uniforms.infinityFlowTime) shader.uniforms.infinityFlowTime.value = time;
       // Slowed vs. the original bake: a calmer, more architectural drift --
       // still alive, not the "game water" scroll speed the raw values read as.
-      shader.uniforms.waterLargeOffset?.value.set(time * 0.0013, time * (fallingFilm ? -0.12 : 0.0007));
-      shader.uniforms.waterMicroOffset?.value.set(-time * 0.0035, time * (fallingFilm ? -0.17 : 0.0026));
+      shader.uniforms.waterLargeOffset?.value.set(time * 0.0013, time * (fallingFilm ? -0.75 : 0.0007));
+      shader.uniforms.waterMicroOffset?.value.set(-time * 0.0035, time * (fallingFilm ? -1.05 : 0.0026));
       if (shader.uniforms.waterLargeStrength) {
         shader.uniforms.waterLargeStrength.value = WATER_VISUAL_PRESET.normals.large.strength * (fallingFilm ? 1 : calm) * (flowing ? 3 : 1);
       }
@@ -703,7 +713,7 @@ vWaterMirrorCoord = waterTextureMatrix * modelMatrix * vec4(transformed, 1.0);`;
       side={THREE.DoubleSide}
       onBeforeCompile={configureWaterSurface}
       customProgramCacheKey={() =>
-        `p1c-dual-normal-physical-water-v25-flat-projection-receiver-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}-${outline ? 1 : 0}-${fallingFilm ? 1 : 0}-${metricWaves ? 1 : 0}`
+        `p1c-dual-normal-physical-water-v27-shared-led-projector-${WATER_DEBUG_MODE}-${REFLECTION_ENABLED && reflections ? 1 : 0}-${outline ? 1 : 0}-${fallingFilm ? 1 : 0}-${metricWaves ? 1 : 0}${fallingFilm || receivingFlow ? `-infinity-flow-v1-${receivingFlow ? 1 : 0}` : ""}`
       }
     />
   );

@@ -202,6 +202,9 @@ export function sunShelfCameraSubject(resolved: ResolvedPoolLayout, layout: Pool
     });
     if (touchesWall) points.push([px, layout.copingY + 0.08, pz]);
   }
+  // A separately selected corner flight is part of this comfort combination.
+  if (!element.steps?.length && resolved.access.corner)
+    points.push(...(accessCameraSubject(resolved.access, layout, outline)?.points ?? []));
   return { points, direction: [nx + tx * side * 0.35, 0.9, nz + tz * side * 0.35] };
 }
 
@@ -318,6 +321,8 @@ export function comfortCameraSubject(intent: "hydromassage" | "bench", resolved:
   const b = outlineBounds(element.footprint), pool = outlineBounds(outline);
   let nx = (pool.minX + pool.maxX - b.minX - b.maxX) / 2, nz = (pool.minZ + pool.maxZ - b.minZ - b.maxZ) / 2;
   const n = Math.hypot(nx, nz); if (n < 0.1) { nx = 1; nz = 0; } else { nx /= n; nz /= n; }
+  if (intent === "hydromassage" && resolved.access.corner)
+    points.push(...(accessCameraSubject(resolved.access, layout, outline)?.points ?? []));
   return { points, direction: [nx + nz * 0.35, 1, nz - nx * 0.35] };
 }
 
@@ -620,14 +625,14 @@ export function overflowCameraSubject(intent: "overflow-hidden" | "overflow-visi
   const cross = intent === "overflow-continuous"
     ? [[-0.5, layout.waterY], [0, layout.copingY], [0.9, layout.copingY], [0, layout.copingY - 0.025], [0.105, layout.wallTopY - g.channelDepth]]
     : intent === "overflow-visible"
-    ? [[-0.25, layout.waterY], [0, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY],
+    ? [[-0.5, layout.waterY], [0, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY],
       [g.visibleChannelOuterOffset, layout.wallTopY], [g.visibleKerbWidth, layout.wallTopY - g.channelDepth],
       [g.visibleChannelOuterOffset, layout.wallTopY - g.channelDepth]]
-    : [[-0.25, layout.waterY], [g.waterEdgeOffset, section.intakeTopY], [section.copingInnerOffset, section.copingTopY],
+    : [[-0.5, layout.waterY], [g.waterEdgeOffset, section.intakeTopY], [section.copingInnerOffset, section.copingTopY],
       [copingOuterOffset("overflow", "hidden"), section.copingTopY], [section.copingInnerOffset, section.copingBottomY],
       [section.channelOuterOffset, section.channelFloorY]];
   const points: CameraPoint[] = [];
-  for (const along of [-1.1, 1.1]) for (const [outward, y] of cross)
+  for (const along of [-0.8, 0.8]) for (const [outward, y] of cross)
     points.push([x - nx * outward! + tx * along, y!, z - nz * outward! + tz * along]);
   return { points, direction: [nx + tx * 0.35, 1.1, nz + tz * 0.35] as CameraPoint };
 }
@@ -684,7 +689,8 @@ export function contextualAccessCamera(intent: CameraIntent, resolved: ResolvedP
 }
 
 /** Only subtract UI that really overlaps the canvas; trays below it cost no area. */
-export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>, preferredAspect?: number) {
+export function visibleCameraFrame(canvas: { left: number; top: number; width: number; height: number }, overlays: ReadonlyArray<{ left: number; top: number; width: number; height: number }>, preferredAspect?: number,
+  frameForFit?: (frame: { left: number; top: number; width: number; height: number }) => { left: number; top: number; width: number; height: number }) {
   let candidates = [{ left: 0, top: 0, right: canvas.width, bottom: canvas.height }];
   for (const overlay of overlays) {
     const fullWidth = overlay.width >= canvas.width * 0.55;
@@ -703,9 +709,16 @@ export function visibleCameraFrame(canvas: { left: number; top: number; width: n
       other.left <= r.left && other.right >= r.right && other.top <= r.top && other.bottom >= r.bottom &&
       (j < i || other.left < r.left || other.right > r.right || other.top < r.top || other.bottom > r.bottom)));
   }
-  const score = (r: typeof candidates[number]) => preferredAspect && preferredAspect > 0
-    ? Math.min((r.right - r.left) / preferredAspect, r.bottom - r.top)
-    : (r.right - r.left) * (r.bottom - r.top);
+  const score = (r: typeof candidates[number]) => {
+    const raw = { left: r.left, top: r.top, width: r.right - r.left, height: r.bottom - r.top };
+    // The top plan centres its free rectangle before fitting. Compare that
+    // usable subset now: a large side strip can otherwise collapse to a
+    // few pixels after selection and make the whole pool disappear.
+    const frame = frameForFit ? frameForFit(raw) : raw;
+    return preferredAspect && preferredAspect > 0
+      ? Math.min(frame.width / preferredAspect, frame.height)
+      : frame.width * frame.height;
+  };
   const best = candidates.reduce((a,b) => score(b) > score(a) ? b : a,
     {left:0,top:0,right:1,bottom:1});
   return { left:best.left, top:best.top, width:best.right-best.left, height:best.bottom-best.top };

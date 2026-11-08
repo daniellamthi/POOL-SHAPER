@@ -1,11 +1,14 @@
 # POOL-SHAPER — final customer QA / release readiness
 
-**Current closeout: 25 October 2026 — BLOCKED on release prerequisites, not publication approval.**
-Feature HEAD and remote are both `e27fe46903811b7b0f91f33259847115bb08f5ae`;
-the later local WIP is not a deployed/committed release. The dated records below
-are historical checkpoints, not interchangeable candidate proofs. See the final
-25 October addendum for the current backup, independent browser replay and
-semantic camera checks. Remaining requirements are retained, not waived.
+**Current working state: 8 November 2026 — scoped UI checks PASS; owner-authorized public Preview refresh in progress. Release prerequisites remain open.**
+Base before this checkpoint: `0bb0dd596081045fb8c6d79d03f1d9c60713f008`
+(`fix: unify concealed overflow edge with paving`, 26 October).
+The owner now explicitly requests committing/pushing the current implementation and
+updating the existing `configuratoree.vercel.app` Preview. This is not approval of
+all operational publication gates. Read the final dated 8 November sections and
+the Vercel publication receipt for the exact source and deployed version.
+Performance, real recovery, complete privacy operations and production email
+prerequisites are not waived by this Preview refresh.
 
 ## Candidate and controls — 20 October 2026
 
@@ -3210,3 +3213,1808 @@ Gres 60×120: one surface at the water edge and no separate coping-material choi
 Console errors zero. Evidence: evidence/hidden-overflow-unified-20261026.png.
 The unrelated reference-environment WIP and its open gates remain uncommitted.
 No deploy, merge, cloud mutation or email.
+
+
+### 26 October — four reference environments (WIP, visual gate OPEN)
+
+Implemented session-local presentation choices for the owner's four references:
+stone-wall hotel spa, glazed hotel spa, private residence and Infinity villa.
+Architecture follows the actual outline bounds/orientation in metres; ceiling
+height, glazing bays and furniture remain human-sized. Infinity architecture is
+placed landward, leaving the vanishing side open. Existing square paving corners
+and pool construction geometry are preserved. This does not change the approved
+Infinity lip/receiver into a new construction detail; reference-3 edge fidelity
+still requires review. Settings are illustrative and not added to the quotation,
+backend, shared project schema or PDF.
+
+New geometry uses merged finish batches and two vegetation batches; owned
+materials/maps/geometries are disposed. No assets downloaded, backend mutations,
+email, merge or deployment. Real hardware performance is not inferred from this.
+The new camera poses and lighting apply only while these settings are selected.
+The existing open garden/patio and construction-stage behaviour remain available.
+Accessory-envelope compatibility and above-ground variants have not been validated
+for the four new settings; do not infer that from the rectangular-footprint audit.
+
+The existing browser Photo Mode is exposed in Presentation. Corrected its camera
+projection updates and stale export readiness. Removed raster contact shadows
+from the traced scene and retained the configured cover. The installed path tracer
+has a defective mixed RGB/RGBA merge path (reverse copy and incorrect bounds):
+traced-only geometry clones now normalize RGB to RGBA, preserving every original
+colour and restoring original geometry on exit. This fixes black paving/coping.
+The gres shader's mineral sampling/colour adjustment is baked into traced-only
+maps because the tracer does not execute onBeforeCompile. Other custom shader
+finishes have not received a complete parity audit. Architectural glazing uses a
+thin-sheet transmission model: actual browser comparison showed the volume model
+rendering as opaque mirrors. Removed artificial window-area emitters that appeared
+as white rectangles in reflections. PNG export now uses a Blob URL after the
+initial data-URL download was not received by the integrated browser.
+
+Targeted checks: typecheck PASS; 42 metric architecture cases / 3,508 parts PASS;
+render callback tests PASS (pose/projection changes, stale convergence, export
+once); RGB/RGBA preservation/restoration and integration with the installed
+path-tracer geometry merger PASS. New-source lint and diff-check PASS; no full build or broad audit was run.
+
+Browser evidence is provisional. Infinity accumulated over 200 samples and the
+paving colour correction was visible. Both spa views were inspected; the glazed
+spa now shows the garden, but its latest image was only at 73 samples. Private
+residence live and progressive render were inspected. The current implementation
+still looks synthetic relative to the supplied photographs, especially planting,
+exterior background and water/light balance: photorealism acceptance is OPEN.
+PNG download via Blob was received and the actual 1140×975 file inspected
+(residence, over 283 samples). It remains visibly synthetic and noisy; 190 samples
+is only the existing export threshold, not a quality acceptance criterion.
+The inspected PNG is saved as evidence/catalogue-reference-wip-20261026/residence-before-ripple-fix.png.
+Its water was nearly flat: traced ripple UV repeat incorrectly assumed normalized
+UVs although the pool uses metres, and weak finite differences quantized away in
+an 8-bit bake. A Photo-Mode-only correction uses 0.635 repeats/metre and a bake
+slope gain of 30. Browser inspection at 133 samples shows broken-up reflections
+instead of perfectly straight mirror boundaries; overall photo quality remains OPEN.
+Evidence: residence-current-wip.png in the same folder. Latest console errors: zero.
+Live water is unchanged.
+Latest full desktop/mobile/day/night matrix, cover parity, cloud/PDF and owner
+approval remain OPEN. No commit/push for this increment until
+its required gates pass. Broader release gates and deferred pricing/CRM remain as
+previously recorded.
+
+
+#### 26 October — private-residence photographic garden follow-up (WIP)
+
+The previous goal turn made verified progress: concealed-overflow correction
+committed/pushed as 0bb0dd5. This follow-up continues the reference environments,
+not the deferred pricing/CRM work.
+
+Added the unedited CC0 Symmetrical Garden 02 capture from Poly Haven (Dimitrios
+Savva / Jarod Guest), 2048×1024 HDR, 6,782,916 bytes. Source/license/hash are in
+public/hdri/CREDITS.md. It is loaded only by the private-residence daylight context;
+visible background, reflections and Photo Mode share its rotation. The key follows
+the captured sun. The raster helper sun is removed before the traced scene snapshot
+to avoid duplicating the HDR sun. Night, original garden, technical views and the
+calibrated customer-photo composition keep their previous environments.
+
+The residence foreground now has a metric planted boundary and five low shrubs.
+Only its lawn is bounded by the local plot, preventing a flat lawn from hiding
+the photographic landscape; pool and paving outlines/grids are unchanged.
+The distant panorama is illustrative, not measured land or a property survey.
+
+Mobile inspection found pool clipping: viewport portrait detection had used the
+nearly square free UI frame. Outdoor catalogue cameras now fit actual pool bounds
+in that free frame, preserving eye height and desktop poses; the existing indoor
+lens behaviour is unchanged. The pool remains central instead of fitting all the
+interior villa furniture. Targeted camera test: 72 projected fits at three scales,
+four Infinity orientations and three portrait ratios PASS. The architecture audit
+now checks 42 cases / 3,520 parts, shrub/ground bounds, HDR hash/dimensions and
+captured-sun/key alignment in four rotations: PASS. New-source ESLint, typecheck,
+renderer regression audit and diff-check PASS. No broad build/audit performed.
+
+Integrated browser: daylight/night switch, original-garden restoration and the
+390×844 emulated mobile composition were inspected. Temporary viewport override
+was reset. Desktop Photo Mode export was actually downloaded after >860 samples;
+its 1140×975 PNG was opened and inspected. Console errors: zero. Evidence in
+catalogue-reference-wip-20261026: garden-desktop.png, garden-mobile.png,
+garden-night.png, garden-restored.png and garden-export.png.
+
+The garden background and water reflections are closer to the references, but the
+villa's materials/edge detail, planting fidelity and the full four-environment
+photo acceptance remain OPEN. No claim of photoreal completion, real-device
+performance or measured landscape accuracy. Accessory/above-ground, remaining
+spa/Infinity visual matrix, cover/render parity, cloud/PDF and broader release
+gates remain as previously recorded. All reference-environment changes remain
+uncommitted WIP; the separately committed concealed-overflow fix is preserved.
+
+
+#### 26 October — spa materials and retained room reflections (WIP)
+
+Progress: actual latest spa PNG (>334 samples,1140×975) inspected and preserved
+as spa-materials-photo-334-samples.png in the existing catalogue evidence folder.
+It remains noisy, too warm/dark in the basin and below the photo references.
+The blue foreground wedge and water/light balance still require diagnosis.
+
+The preceding material increment uses original CC0 Oak Veneer 03 albedo,
+OpenGL normals and roughness at metric scale (credits/hashes recorded), small
+within-envelope bevels, complete window jambs and villa fascias. Spa viewpoints
+stand alongside the basin at1.65m. Above-water coves now illuminate architecture
+without submerged LED spill. Default dry GLSL was verified identical to HEAD
+at four water elevations. Photographic water has a clear interface and calmer
+indoor normals, retaining liner/IOR/attenuation; live water shading is unchanged.
+
+This turn addressed outdoor-sky reflections in the lightweight indoor view.
+Two retained128px PMREM maps capture the actual dry room, with a neutral bounce
+floor and separate dark night sky. This is a bounded raster approximation,
+not solved multi-bounce GI. It borrows geometry/scans, owns capture material
+clones/targets and releases targets when the room changes or unmounts. Parent
+ownership retains maps across the lazy Photo Mode boundary. Photo Mode keeps
+its own HDR and traces the actual room. Pool geometry/shaders are unchanged.
+
+Targeted verification: typecheck, new-source ESLint and diff-check PASS.
+Room audit:12 scaled/rotated rooms, ceiling hits, resource ownership, two-map
+reuse across toggles/Suspense remount, returned/partial-target disposal and
+render-state restoration after simulated failure PASS. Camera72outdoor fits
++12indoor viewpoints and Photo Mode callback/geometry/clear-water tests PASS.
+No full build or broad audit.
+
+Integrated browser390×844 emulated: wall spa prepared2maps in216ms; counter
+stayed2 after Day/Night and the first Photo Mode entry/exit. Glass spa added
+its2maps in161.9ms; Night added none. These are desktop CPU preparation wall
+times, not GPU/frame-time or real-mobile acceptance. Both spas Day/Night and
+original-garden restoration inspected. Viewport override/source diagnostics
+removed. Fresh-session errors:none observed; THREE.Clock deprecation warnings
+remain. An earlier HMR dependency-length warning preceded a full reload and
+was not a final-load renderer error. Evidence:spa-room-*.png,
+spa-glass-room-*.png,room-garden-restored.png,room-runtime.json.
+
+Photorealism/planting/indirect light, full four-scene/accessory/above-ground
+matrix, cover parity, cloud/PDF and real-hardware gates remain OPEN. No commit
+for this environment WIP; concealed-overflow0bb0dd5 remains preserved/pushed.
+No merge/deploy/backend/email. Disk space ran low: only verified redundant
+agent temporary assets/debug dumps removed. Evidence moved rather than copied;
+the exported PNG is a checksum-verified hard link to its unchanged download.
+
+Final source without diagnostics: desktop spa preview inspected, no browser errors observed; spa-room-final-desktop.png.
+
+
+#### 26 October — spa cove underside / dark-basin diagnosis (WIP)
+
+Previous turn was progress: retained room maps and real browser evidence. This
+turn investigated the dark photographic basin without changing pool geometry,
+liner, water calibration, camera or outdoor lighting. A temporary isolated QA
+query hid only the water surface from the tracer. The basin stayed dark, so
+reflection/refraction alone did not explain it. Actual source material data
+confirmed the white multiplier and selected Blue Sky image, no black vertex
+colours, and the expected basin/stair bounds. Controls are preserved as
+spa-diagnostic-no-water-before.png (41 samples),
+spa-diagnostic-no-water-downlight-trial.png (76 samples, brighter trial), and
+spa-basin-materials-diagnostic.json. These noisy diagnostic controls do not
+constitute photo acceptance or a quantitative matched-image comparison.
+
+The actual water-plane factory filled the complete area with upward normals
+and finite tangents in six metric/oriented cases. The actual wall factory had
+720 nondegenerate triangles, zero opposed shading normals, minimum face/vertex
+normal dot0.91977. No geometry changes followed these checks. The precise
+cause of the remaining triangular sunlit-looking patch is still unproven;
+this work does not claim a mesh-hole correction.
+
+The existing cove bars had explicitly sampled wall-facing area lights only.
+Added their downward emitting faces, matching each bar's length/width and
+positioned2mm below its underside to avoid self-occlusion. Final calibrated
+flux40lm/m Day and30lm/m Night; the preceding240/180 trial over-brightened the
+room and was reduced. Existing wall wash60/90lm/m, colour and pool products
+are preserved. Room-proxy captures use the same face-specific values. Only
+the two indoor catalogue settings receive these lights.
+
+Targeted checks PASS: typecheck after temporary diagnostics removal; affected
+TSX lint/diff-check; retained-room lifecycle/ownership/failure tests;24 actual
+fixture JSX cases checking downward normal, emitting dimensions/clearance,
+unchanged wall wash and matching captured powers; Photo Mode callback,
+RGB/RGBA restoration and clear-water regression checks. No full build/audit.
+
+The final actual PNG was downloaded through the integrated-browser download
+event and opened:1140×975, Standard,760×650 viewport; HUD342samples at download
+observation. Evidence:spa-cove-downlight-photo.png and export-ui.png. The basin
+is more readable than spa-materials-photo-334-samples.png, with its selected
+liner unchanged. Noise, hard interior shadows, bright coves and synthetic
+planting remain below the supplied references: photorealism acceptance OPEN.
+Live390×844 emulated Day/Night and return to Day inspected; no browser errors
+observed. Mobile evidence saved, viewport override reset. Temporary query,
+water exclusion and source diagnostics removed. No real-device/GPU performance
+claim; the extra area-light cost still belongs to the open performance gate.
+
+All reference-environment changes remain uncommitted WIP pending required
+acceptance. Concealed-overflow0bb0dd5 remains preserved; no merge/deploy/backend/
+email. Disk now reported9.8GiB free; this is a current observation, not a claim
+that the small agent-only temporary cleanup recovered that space.
+
+
+#### 26 October — bounded photographic output filter (WIP)
+
+Previous goal turn made progress on the spa cove's downward emission. This
+increment reduces photographic noise only in the four new catalogue settings;
+existing garden/patio photo output remains opt-out by default. No source pool
+geometry, materials, lighting, camera, saved project data or backend changed.
+
+The first direct DenoiseMaterial output trial was REJECTED: bypassing the
+tracer's clamped reconstruction made fine variation worse (matched PNGs frozen
+at 205.8889 samples; photo-filter-first-*.png/json). A second trial retained
+reconstruction but exposed newly dark pixels; its 202.8889-sample pair is kept
+as photo-filter-second-*.png. Neither trial was treated as acceptance.
+
+Final output filters a separate linear HDR copy, then uses the original
+reconstruction/tone mapping/colour conversion. Radius is two source pixels;
+no accumulating buffer is modified. The floating-point target is allocated
+only after 190 samples, reused/resized and disposed with the filter. Early
+preview/fades keep the original output, and draw failures fall back to it.
+Finite-value/weight guards prevent invalid neighbours spreading through the
+kernel; undefined weighted results retain their original centre sample.
+
+Targeted typecheck, new-source ESLint, existing Photo Mode regressions and
+new callback/resource/opt-in audit PASS. The latter exercises untouched
+accumulation, lazy allocation, one resize, original output ownership, HDR
+precision, render-target/map restoration and failure/disposal paths. Actual
+WebGL fixture (scripts/photo-output-numeric-probe.ts) injected NaN, infinity
+and a 1e20 HDR peak into 16×16 pixels: zero newly non-finite pixels, bright
+peak finite, uniform-neighbour maximum error 5.96e-8. This is a shader test
+in the integrated browser, not a hardware-performance benchmark.
+
+Final matched PNGs were actually downloaded and inspected at the SAME frozen
+220.4444-sample accumulation, 1140×975. No newly black pixels were detected
+under the explicitly recorded threshold. Local high-frequency RMS ratios:
+water 0.664, stone wall 0.977, ceiling slats 0.951, paving 0.971; patch mean RGB
+shift stayed below 0.8/255. These measures include real texture and do NOT
+prove pure-noise reduction, colour calibration or photorealism. Manual review
+found water grain attenuated with slats/mullions still legible. Evidence:
+photo-filter-final-original.png, photo-filter-final-filtered.png,
+photo-filter-final-matched.json and photo-filter-numeric-gpu.json.
+
+All temporary comparison/pause controls and query handling were removed from
+application source. Final-source glass-spa Night export was downloaded and
+opened from a 390×844 emulated viewport: 585×1266 PNG, HUD269 samples at download
+observation. No render errors observed; known THREE.Clock deprecations remain.
+Evidence: photo-filter-night-mobile*.png. Night brightness still needs visual
+matching; this smoke check does not close that fidelity gate. The viewport
+override is reset after testing. The retained numeric fixture is QA-only and
+has no application import after removal of the comparison controls.
+
+Photorealism remains OPEN: residual noise/fireflies, lighting balance, hard
+shadows and synthetic planting are still evident. Other catalogue contexts,
+finishes/accessories, real hardware cost, cloud/PDF parity and broader release
+gates remain as previously recorded. The new pass adds a floating-point
+output buffer and screen passes only in Photo Mode; no frame-rate claim is
+made. All environment/filter work remains uncommitted WIP pending the required
+gates. Concealed-overflow commit 0bb0dd5 is preserved; no merge/deploy/email.
+
+### 26 October — photographed catalogue vegetation (WIP)
+
+Replaced only the procedural diamond foliage/straight branches of the four new
+catalogue settings with the CC0 photographed Searsia Lucida b/g models from
+Poly Haven (James Ray Cock / Jenelle van Heerden). This is illustrative evergreen
+landscaping, not a botanical reconstruction of the reference olive tree.
+Existing plant positions, buildings, pool/coping, water, cameras, lights and
+original garden/patio settings are preserved. Tree height is 3.2 m × existing
+placement scale, shrubs 0.85 m; bases now follow the explicit scene ground.
+
+The derivative retains original indexed positions/normals/UVs without
+simplification; only two source plants are packaged, with duplicate texture
+references consolidated. Four original 1K maps are hash-verified and unchanged.
+The separate original alpha scan supplies opaque 0.5-threshold leaf/twig cutouts
+for both renderers. Three merged material batches are memoized by plan, with
+owned geometry/material/alpha-clone cleanup; decoded source geometry/maps remain
+cached. Model/maps are loaded only when the catalogue architecture mounts.
+Provenance, source URLs, hashes and reproduction command are recorded in
+public/models/catalogue/CREDITS.md and scripts/prepare-catalogue-vegetation.py.
+
+Targeted typecheck, new-source ESLint, diff check, existing metric architecture
+and room-reflection regressions PASS. The new vegetation audit decodes actual
+GLB geometry with GLTFLoader (image decoding stubbed), tests eight ground/context
+placements, finite attributes, correct height/ground and borrowed-source
+preservation. Image paths and original-map hashes are also checked. Evidence:
+vegetation-audit.txt. Maximum current glass-spa planting has 886,290 triangles;
+model + four maps total 6,676,658 bytes. Node-only placement preparation measured
+roughly 16–174 ms in this run; this is not a browser/GPU or real-device benchmark.
+Added geometry/network cost remains part of the open performance gate.
+
+Integrated-browser checks: glass spa Day real PNG downloaded/opened at HUD199
+samples (1140×975), plus live Day/Night screenshots at 390×844 emulated viewport.
+Original photographed leaf/branch colour and silhouettes are present in both
+renderers; mobile night/day switches retain the scene. Evidence:
+vegetation-spa-glass-live.png, vegetation-spa-glass-photo.png and
+vegetation-spa-glass-mobile-{day,night}.png. Early texture-path errors were fixed
+before these final-source captures; no new render errors observed thereafter.
+The PNG remains visibly noisy and the planting sparse compared with the supplied
+references. This is a verified replacement of the oversized diamond foliage,
+not photorealism acceptance. Viewport reset after mobile checks. Real hardware,
+remaining context/accessory matrix, night matching and the previously listed
+release gates remain OPEN. All environment changes remain uncommitted WIP;
+concealed-overflow commit 0bb0dd5 remains intact. No merge/deploy/backend/email.
+Final normal-viewport live residence screenshot also inspected/saved as
+vegetation-residence-live.png; no captured console errors on that final scene.
+A browser-observation timeout during the first context switch was followed by
+an authoritative check of the same tab, which showed the villa selected and
+rendering; the server was not restarted. Final preview: Day, villa, live 3D,
+normal viewport, tray collapsed. Building/lighting realism remains visibly
+below the photographic references and is still an open acceptance requirement.
+
+### 26 October — catalogue garden shadow-depth regression (WIP)
+
+Found a concrete raster-lighting defect in the new private villa. Its HDR-aligned
+sun is 50 m from the origin, while a 10×4.5 m pool used a shadow far plane of
+38.3805 m. The origin receiver projected to NDC z=1.61346 (outside), clipping
+its shadows. Also, changing far/extent props on an already allocated directional
+shadow map left the old projection until explicitly updated.
+
+The villa now retains enough depth for its existing shadow volume (83.9995 m
+in this case). Other contexts retain the previous declared far formula. The
+existing geometry/asset invalidation effect now synchronizes the projection
+before requesting its cached shadow refresh, including context return; it has
+no new Day/Night/Photo Mode dependency. No map-resolution, light-intensity,
+material, pool/coping, architecture geometry or view-camera changes were made.
+
+Typecheck, diff check and scripts/run-catalogue-shadow-audit.mjs PASS. The audit
+uses the actual source expression/effect and Three.js matrices: twelve size,
+rotation and ground cases, 48 receiver projections, 6,624 nominal building-corner
+depth checks, old clipping reproduction, stale-projection reproduction and
+non-villa range preservation. Evidence: shadow-depth-audit.json.
+
+A temporary diagnostic in the existing DEV renderer logger verified the actual
+integrated-browser matrices: villa far83.9995 / origin NDCz0.185624; Day/Night use
+the same depth/projection and a 2048² cached map with autoUpdate=false. Returning
+to the original garden restores far38.3805 / NDCz0.686617 and its original extent.
+Evidence: shadow-depth-runtime.json and shadow-depth-{before,after,night}.png.
+These are camera/resource and visual checks, not a hardware baseline/candidate
+benchmark; no new GPU-performance claim. Static-frame differences are subtle,
+most visible beneath the loungers and near the building. Lighting/material
+realism is still below the reference photographs; photorealism remains OPEN.
+
+Temporary diagnostic source was removed and the page reloaded for final-source
+verification. Photo Mode traces actual rays rather than this raster shadow map;
+its previous convergence/lighting limitations remain. All catalogue work stays
+uncommitted WIP pending the required gates, with concealed-overflow commit
+0bb0dd5 intact. No merge, deploy, backend modification or email.
+Final-source cold-reload villa screenshot verified at the normal viewport:
+shadow-depth-final.png. No captured console errors; preview left on Day/live 3D
+with the tray collapsed. The temporary probe is absent from final source.
+
+### 26–27 October — shared physical catalogue glazing (WIP)
+
+Replaced the new catalogue windows' live diffuse-white 20% alpha overlay with
+Three.js physical transmission. Live view and Photo Mode now share the same
+material factory: transmission .92, IOR1.5, clear tint/thin-pane policy retained,
+opacity1 and physical depth handling. Roughness is calibrated from .08 to .02
+in both modes, reducing the frosted appearance. The old live/Photo Mode branch
+and mode-dependent memo invalidation are removed; a Suspense remount can still
+allocate new owned materials. No custom Fresnel
+alpha/colour-compositing patch remains; the stock physical shader handles the
+linear reflection/transmission calculation. Catalogue room-map capture retains
+its established separate .18-alpha approximation without mutating live optics.
+Pool geometry/materials, views, HDR/light powers, original garden and patio are
+unchanged. This shared physical model does not prove complete visual parity.
+
+Targeted typecheck, new-source ESLint, glass integration audit and existing
+room-environment/fixture regressions PASS. The new audit exercises the actual
+factory/light mask at three water elevations and the owned capture clone,
+including preservation of source optics. Evidence: glass-material-audit.json.
+The sharper glass is verified in the live villa and glass spa; full current
+Photo Mode PNG/finish/accessory acceptance remains OPEN.
+
+A DEV-only local comparison restored the exact previous live optical settings
+on the same material before switching to the physical candidate. The controls
+were removed afterward. Raw trial windows are in glass-gpu-comparison.json;
+all have matched 1002×929 viewport, 1661×1540 buffer, DPR1.65836, camera/projection,
+Experience tier, visible/idle state and M1 Pro Metal renderer. The first .08
+physical trial had GPU medians12.55–13.05 ms versus11.77–11.94 ms legacy. Final
+.02 trials also showed a much slower period (26.61–33.25 ms, p95 up to51.80 ms).
+An immediate reverse comparison then measured legacy16.52–17.84 ms and final
+physical16.32–17.50 ms (p95s18.27–19.63 vs18.53–20.60 ms). This variability prevents
+a stable performance acceptance claim. Physical transmission adds rendering
+work/buffers; observed average calls rose from64 to72–74 in these windows.
+GPU timers exclude the planar mirror pass; this is a warm local development
+comparison, not the whole-branch real-hardware gate or a mobile-device test.
+
+Evidence includes glass-previous.png, the initial .08 physical trial image,
+and glass-spa-clear-day.png. Building lighting, sparse planting, other context
+matrix and previously recorded readiness gates remain open. Catalogue changes
+remain uncommitted WIP; no merge/deploy/backend/email action.
+Final-source verification after removing all comparison controls and query flags:
+390×844 emulated live Day/Night screenshots inspected, correct return to Day,
+normal viewport reset, no captured console errors. This was a viewport/layout
+and rendering smoke check from the desktop browser; it is not iPhone hardware
+or mobile-tier performance acceptance. Initial compositor resize frame was
+excluded; final settled frames are glass-final-mobile-{day,night}.png.
+Final desktop screenshot glass-final-desktop.png is inspected, with the spa
+left visible on Day/live 3D and tray collapsed. Branch/approved HEAD remain
+feat/fullscreen-day-night-hidden-overflow / 0bb0dd596081045fb8c6d79d03f1d9c60713f008.
+
+
+### 27 October — canopy density and resource follow-up (WIP)
+
+The sparse Searsia tree is replaced by the CC0 Poly Haven Tree Small 02 by
+Rico Cilliers; the existing Searsia shrub and planting positions are preserved.
+Current tree design height is 4 m times each placement scale. Pool, unified
+concealed coping, terrace outer corners and view cameras are unchanged.
+The source tree has 2,062,487 triangles; the selected conservative derivative
+has 393,104. The first 225,669-triangle trial was rejected for coverage loss.
+Its metadata and source/rejected silhouettes remain in the existing evidence
+folder, alongside final source/LOD three-view images.
+
+The final meshopt GLB is 6,769,740 bytes plus 6,127,455 bytes of original tree
+maps and 1,926,402 bytes of shrub maps. Quantized UV transforms are also applied
+to the original separate alpha masks. Named source leaf/twig roles survive
+optimizer changes to alphaMode. Original source images/hashes are preserved;
+source, CC0 attribution, tool versions and derivation are recorded under
+public/models/catalogue. Offline reproduction produced the same packed SHA.
+
+Live placement uses borrowed geometry in 3 groups (6 with shrubs), rather than
+per-plant geometry copies. Current glass-spa layout still draws 3,931,040 tree
+triangles: a higher geometry cost than the old sparse model. Isolated Node
+placement preparation ranged 0.15–2.09 ms in the final run; this is not browser,
+GPU or whole-frame performance evidence. Photo Mode expands identical instance
+matrices only on entry, converting quantized attributes to floats before
+transforms; owned copies and proxy instance buffers are disposed independently
+from cached source resources.
+
+GPU silhouette comparison at 512x512 and alphaTest .5 retained 93.42% front,
+91.35% side and 92.05% top occupied pixels; corresponding IoU is 88.39%, 84.96%,
+88.77%. This is not pixel parity, PBR appearance or complete close-up acceptance.
+The rejected derivative retained only about 79–83% coverage. A separate far-view
+experiment did not justify adding alphaHash; final rendering retains hard
+alphaTest .5. The original atlas has black RGB outside the separate mask; a
+bounded linear correction after alpha discard reduces mip colour darkening.
+Its final GPU numeric probe recovered [104,255,52] from filtered [26,64,13]
+with alpha64, matching the expected value within one byte. This tests the
+formula, not whole-scene PBR quality; Photo Mode uses the original atlas/mask.
+
+Plants outside indoor spas receive the existing cached exterior HDR instead of
+the interior ceiling/floor probe. Only receiver intensity transitions between
+Day (.24) and Night (.015). Outdoor settings keep their scene environment.
+Catalogue glazing transmission is calibrated to 1 instead of the preceding
+.92 to remove the residual diffuse surface contribution; shared live/traced
+factory, roughness .02, IOR1.5 and thin-pane policy remain. This supersedes the
+preceding section's transmission value without claiming overall visual parity.
+
+Targeted checks PASS: typecheck, six relevant source ESLint files, diff check,
+8 packed-canopy placement/resource cases, all six representative traced
+primitives, source-resource preservation and proxy-instance disposal, glass
+factory at three water elevations, legacy vegetation helper regressions,
+room capture/cache/cove regressions. The 774 concealed-overflow checks still
+PASS. Local and remote HEAD remain 0bb0dd596081045fb8c6d79d03f1d9c60713f008.
+
+Integrated-browser smoke: actual glass-spa Photo Mode starts accumulating
+(6 samples observed) with the full new canopy; no captured console errors.
+The initial click timed out during setup, but fresh UI state confirmed entry.
+This does not pass the final PNG quality, convergence, memory or performance
+gate. Live Night/Day controls return correctly to Day. Final desktop Day
+screenshot inspected; mobile was not rerun for this canopy change. Photorealism
+remains below the supplied photographs, especially architecture/lighting and
+plant appearance; full four-scene, finish/accessory, export and real-hardware
+performance gates remain OPEN. No timing improvement is claimed.
+
+Evidence: canopy-gpu-coverage.json, canopy-{source,lod}-{front,side,top}.png,
+canopy-photo-smoke.png, canopy-live-{day,night}.png and the retained QA HTML
+in evidence/catalogue-reference-wip-20261026. Temporary main-page controls and
+all three public/qa source-comparison files (including the large original
+binary link) were removed; the temporary QA tab was closed. The integrated
+preview remains on Day/live 3D. Catalogue work remains uncommitted pending the
+required gates; concealed-overflow commit 0bb0dd5 remains pushed. No merge,
+deploy, backend change or email.
+
+
+### 27 October — spa cove highlight control (WIP)
+
+Reference comparison showed a broad nearly white upper-wall band in both Day
+and Night, obscuring stone texture. The catalogue luminous material now uses
+the scene tone mapping rather than bypassing it. The two existing emitting
+faces are calibrated to the established scene exposure: wall flux 3/5 lm per
+metre (Day/Night), down flux 8/6, replacing 60/90 and 40/30. These illustrative
+values are not a product photometric specification. No new lights/passes,
+geometry, pool/coping, view camera, HDR, global exposure or material scans.
+
+Paired 1043x929 JPEG screenshots use the same stone-spa view. On a fixed
+30,600-pixel upper-wall band excluding UI/water, near-white pixels
+(R>=245,G>=240,B>=220) fall from 11,723 Day /13,531 Night to zero in each.
+Mean display luma falls from 223.24/224.55 to 159.96/149.98. These are
+screenshot metrics, not radiometric validation or full-image parity. The
+water remains visible; the live floor and ceiling remain dark at Night and
+broader material/lighting realism is still OPEN. A first wall-only adjustment
+was insufficient; the down-facing contribution also needed calibration.
+
+Actual integrated-browser diagnostic confirmed toneMapped=true,
+emissiveIntensity=3 and matching rectangular-light powers in both modes.
+The diagnostic was removed, the app cold-reloaded and the final Day view
+inspected. Existing room tests PASS: 12 metric capture cases, cache/toggle/
+Suspense/failure cleanup, 24 actual fixture orientation/dimension/flux cases.
+Capture assertions now read the shared calibrated flux rather than obsolete
+60/90 constants. Targeted source ESLint and diff check PASS; no full build or
+broad audit was repeated. A real Photo Mode PNG was downloaded after the UI reached 194 samples
+(200 observed immediately afterward), opened and decoded: RGBA2086x1858,
+8,160,196 bytes, SHA-256 recorded in cove-photo-file.json. It contains the new
+canopy and calibrated cove lights. No captured console errors. The exported
+image retains conspicuous grain on walls/ceiling/furniture and some water
+regions; download/file integrity PASS does not pass photographic-quality or
+full-scene live/traced parity. Standard6-bounce/.85-scale output was used;
+no exporter, renderer-quality, denoiser or camera change in this follow-up.
+Preview returned to Day/live 3D with the tray collapsed.
+
+Evidence in the existing catalogue folder: cove-{before,final}-{day,night}.jpg,
+cove-cold-day.jpg, cove-pixel-comparison.json, cove-runtime.json,
+cove-photo-export.png, cove-photo-{file,runtime}.json and the three scoped
+source/test patches. Catalogue work remains uncommitted pending the
+required visual/performance gates; approved concealed-overflow HEAD0bb0dd5
+is preserved. No merge, deploy, backend write or email.
+
+
+### 27 October — photo noise diagnosis and rejected candidates (WIP)
+
+Captured the actual linear float HDR output at 46.78 samples,1773x1579;
+paired2086x1858 outputs retain the tracer's original clamped reconstruction,
+AgX/exposure.95 and sRGB conversion. Full HDR is only in private temporary
+storage; raw float ROI data, source hash, full paired PNGs and metadata are
+retained in the existing catalogue evidence folder with prefix denoise-.
+The standalone fixture bypasses the190sample filter gate only on its captured
+input; the product's readiness threshold was not changed.
+
+A stronger three-pixel/log-distance bilateral filter reduced high-frequency
+variation by roughly30–49% versus the previous filter in these patches. A
+separate actual GPU fixture exposed the tradeoff: a coherent one-pixel dark
+joint retained .295 of raw contrast versus .459 with the previous filter.
+Strong steps and bright lines remained, but the extra detail loss is
+unacceptable. Candidate REJECTED; the previous filter is restored byte for byte
+(SHA256 9f00fa5e5af4cc4007d5e957f88561aa22d4b387234a3c9efb319c70ba375822).
+The new detail probe records noise and edge scores separately; a lower noise
+score alone is not an acceptance test. NaN/Inf guards and resource/state
+regressions still PASS.
+
+Neural trials were isolated from the product. npm oidn-web0.5.0 was tested with
+its local HDR weights; a separate WebGPU smoke page obtained an adapter but
+did not complete requestDevice during observation. It was cancelled, without
+claiming that all WebGPU/browser/hardware combinations are unsupported. The
+rt_hdr hash matches the original RenderKit Git LFS pointer. The current pmndrs
+WebGPU documentation differs from npm's published denoiser0.0.11 tag, so the
+registry packages and exact hashes are recorded instead of assuming API parity.
+Sources: https://github.com/pissang/oidn-web and
+https://pmndrs.github.io/denoiser/docs/getting-started/quick-start.
+
+The published denoiser0.0.11 WebGL implementation completed standalone color-only
+LDR output using synchronous float readback (26.74s and24.12s observed in two
+local trials). The initial relative weights URL failed; the absolute local URL
+fixed loading. Its asynchronous ImageData output trial reached100%tile progress
+but did not return an image during observation; it was cancelled before the
+instrumented synchronous-readback trial. Both sRGB-tiler options produced files,
+but only about1–3% high-frequency reduction in the selected display patches,
+with visible grain persisting. These trials do not justify integration or a
+performance claim. No project dependency/lockfile change, external image upload,
+new QA service project, or production inference/model assets were added.
+
+Next, actual aligned HDR snapshots at24 and48 samples verified zero camera and
+projection matrix change. The common-prefix MC estimator is .85–1.03 across
+four patches, consistent with substantial sampling noise. It is not a literal
+noise percentage: quasi/random correlation, heavy tails and material detail
+limit the estimate. Raw paired buffers and an independent Python reproduction
+script are saved as denoise-temporal-baseline.{bin,json} and
+denoise-temporal-analysis.py. Material replacement is not justified by these
+measurements alone.
+
+A separate trial enabled the existing tracer filterGlossyFactor=.15 only for
+indoor Photo Mode. Actual snapshots confirmed .15 at24/48 samples and identical
+camera/projection matrices both within and across baseline/candidate runs.
+At48 samples the high-frequency variance ratios were1.286wall,.909roof,
+1.363water,.704floor; mean-light ratios were1.011,.851,.974,.791. Different
+stochastic samples and short runs prevent a universal causal/performance claim,
+but there was no consistent benefit and floor brightness changed materially.
+The inspected later preview still showed grain. Candidate REJECTED and the
+renderer restored byte for byte to its pre-trial WIP. No190+sample final PNG
+was claimed for this rejected candidate. Evidence: denoise-temporal-glossy*,
+denoise-glossy-comparison.json and denoise-glossy-rejected-preview.jpg.
+
+All temporary product capture controls, baseline module copies and public/qa
+pages/runtime/weights/large HDR link were removed; trial tabs closed. Final-source typecheck, diff check and existing
+photo output resource/state checks PASS. Final cold-reload live preview inspected;
+no captured console errors (denoise-study-final-preview.jpg). The permanent additions are diagnostic
+coverage, evidence and this report; pool/coping, camera, material and application
+rendering behavior from the preceding WIP are preserved. Photographic quality,
+full context/accessory matrix, mobile and stable hardware performance remain
+OPEN. No commit/push while those required gates remain open; HEAD0bb0dd5 remains
+preserved. No merge, deploy, backend write or real email.
+
+Next required diagnostic: establish a trusted native OIDN reference on the exact
+captured frame before integrating another browser port or increasing spatial
+blur. This is a quality reference, not a substitute for the browser/export
+gates. Keep the original output until a candidate improves noise with acceptable
+material detail, lighting and actual end-to-end export behavior.
+
+
+### 27 October — HDR reference, responsive worker and export integration (WIP)
+
+Established a native OIDN2.5.1 CPU reference using the official arm64 macOS
+release, whose archive digest matches the official release asset. The exact
+captured46.78sample float HDR and the same rt_hdr.tza weights were used. Native
+LDR retained the grain; native HDR removed conspicuous sampling noise while
+leaving floor joints and ceiling slats readable. Native processing is only an
+offline quality reference, not product or browser performance acceptance.
+
+The published denoiser0.0.11 WebGL port needs explicit PU forward/inverse
+transfer around its HDR model. A copied source contained one invalid RGB pixel
+(three NaNs); replacing only invalid/negative input scalars in the copied image
+prevents contamination. The original accumulator and materials stay unchanged.
+With this correction, WebGL output has zero invalid scalars and linear RMSE
+.005626394 versus the same-weight, fixed-inputScale1 native HDR output. This
+is not pixel parity or a universal detail-quality claim.
+
+A fresh standalone module-worker trial completed in64.70s on this local
+desktop, with1295main-page heartbeat ticks and a maximum64.3ms gap for the50ms
+heartbeat. The image matches the corrected main-thread WebGL result numerically.
+This proves that this trial avoids the earlier main-thread compilation stall;
+it does not establish real-mobile or stable hardware performance. Source,
+weights, native/reference images, logs and digests are recorded with prefix
+denoise-hdr- in the existing evidence folder. Large source HDR and SDK remain
+private temporary files, not shipped application assets.
+
+Integrated a lazy, locally hosted one-export worker for indoor catalogue
+Photo Mode only. Existing190sample readiness and the stock AgX/sRGB output
+path remain. The copied HDR is processed off the main thread; tracing pauses
+for the worker, then the clean linear texture is drawn and exported inside
+the same animation-frame task. Camera/projection/buffer-size changes and
+unmount cancel pending work and reject late replies. Errors/deadline retain
+the prior output path. The matching clean photo remains frozen for repeated
+downloads; owned texture/context are released on reset/exit. No new runtime
+dependency or lockfile change; pinned self-hosted model/module/license assets
+are lazy-loaded only when an indoor catalogue photo is requested.
+
+Targeted helper audit27checks PASS, including actual ArrayBuffer transfer
+(detachment), gate, duplicate requests, display-before-export, cached output,
+reset/cancel/late result, malformed/nonfinite output and callback ownership.
+Worker/GL in this audit are simulated; actual full190+sample product PNG,
+cancel/reentry, mobile and complete context/detail gates are still pending.
+Typecheck PASS. Scoped ESLint has no non-formatting errors; existing source
+formatting violations and one pre-existing fast-refresh export warning remain.
+No broad formatting change or build was run. No commit/push, merge, deploy,
+backend change or email. Concealed-overflow HEAD0bb0dd5 remains preserved.
+
+
+Actual product follow-up: stone spa/Day,10x4.5m concealed-overflow fixture,
+Gres60x120. At224observed floored samples the clean image is displayed in
+the real configurator. Two actual Generate Photo downloads decode as
+RGBA2086x1858,5,113,900bytes, identical SHA256
+daa3b8e3a895a77742b5a598ac19cf1f836e04e6b3ae452bc5890b7127c7598a.
+Sample count remains224between the repeated downloads. PNG inspected:
+conspicuous grain removed; roof slats, wall/paving joints and water
+reflections readable. Furniture/landscape and full photographic-reference
+quality still need work. This is a scoped product export PASS, not complete
+catalogue quality acceptance. No captured browser warnings/errors at this
+point. The first long download-event observation timed out and reset the
+tool kernel; the same tab was inspected before another click, without
+restarting the render. Cached-photo download captures succeeded afterward.
+The worker's in-progress button label was not independently observed in
+this run; actual product processing latency is not inferred from the
+standalone64.70s timing. Buffer-size invalidation is scoped to the new HDR
+session so other photo contexts retain their existing behavior. Evidence:
+denoise-hdr-product-{export.png,preview.jpg,file.json}.
+
+
+Final lifecycle smoke: opening the options tray invalidated the completed
+photo when framing changed (224to0samples, Generate Photo disabled). Exit
+restored live3D controls. Reentry began a fresh refinement and reached7samples,
+with no stale ready image/export. Captured browser warnings/errors remain zero.
+Final preview is Day/live3D, stone spa, tray collapsed. Actual cancellation of
+an in-progress worker was not exercised in the product run; the27check helper
+audit covers simulated-worker cancellation and late replies. Both facts are
+kept separate in denoise-hdr-lifecycle-browser.json.
+
+Removed only the eight owned public/qa prototype files after archiving fixture
+sources. Final typecheck and diff check PASS; prior output-filter resource/state
+regression PASS and its source SHA remains9f00fa5e5af4cc4007d5e957f88561aa22d4b387234a3c9efb319c70ba375822.
+Scoped non-format ESLint PASS with the pre-existing fast-refresh warning.
+No full build/general audit. Remaining gates: actual worker-in-progress cancel
+and button label, other indoor context/Night, material detail and wider context
+quality, mobile emulation plus separate real-hardware performance. Catalogue
+WIP and this integration remain uncommitted until required gates pass; no
+publication, main merge, backend mutation or email.
+
+
+### 27 October — mobile glass-spa export and night mismatch follow-up (WIP)
+
+Actual integrated-browser viewport430x932, canvas860x1864 (emulation only).
+The mobile menu exposes Generate Photo, disabled below190samples and enabled
+afterward. Glass spa/Night exported a valid RGBA860x1864 PNG at204observed
+floored samples. The clean completed view was inspected; no captured
+warnings/errors. The processing label and actual in-progress cancellation
+were not observed before completion, so those checks remain OPEN.
+
+Visual Night acceptance FAIL: the exported exterior/ceiling remain daylike,
+whereas the actual live Night view is dark. This is not passed merely because
+the file was generated. Source shows that Photo Mode replaces the dark
+indoor gradient with the legacy photographic dusk HDRI; live indoor night
+uses its dark procedural sky. Scoped candidate: indoor+dark Photo Mode keeps
+the existing dark gradient rather than loading that dusk HDRI. Day and
+existing outdoor/studio contexts retain their existing HDRI load path.
+Cove/other light powers, materials, exposure, geometry and camera unchanged.
+The candidate still requires an actual regenerated Night PNG and Day return
+check. Before PNG, live comparison and metadata retained with denoise-hdr-
+glass-night-*; pre-change renderer saved privately. No merge/deploy/backend
+change/email. Catalogue gates remain OPEN and no commit/push is claimed.
+
+
+Candidate verification: actual cold-load glass spa/Night render reached232
+observed floored samples and exported RGBA645x1398,1,039,979bytes, SHA256
+bfb90c138767459ebc8b8c88c34dab73b03dbe2c64cf6ff1dba0441376e8047c.
+PNG inspected: exterior sky is now dark; cove lines, roof slats and paving
+joints remain readable. Scoped sky identity/export PASS; full live/traced
+indoor photometry remains OPEN (the traced interior is brighter than live).
+Current DOM canvas645x1398 matches the actual file on CSS430x932. The earlier
+warm-resized baseline was860x1864, so no pixel-aligned, detail-parity or
+performance ratio is claimed. Both are emulation, not real-phone evidence.
+
+Exited Photo Mode, returned to Day/live3D with the options collapsed, and
+cleared the viewport override. Captured warnings/errors zero. Typecheck and
+diff-check PASS; scoped non-format ESLint has only the pre-existing
+fast-refresh warning. No general build/audit. Actual in-progress worker
+cancellation and preparation-label observation remain unverified: the
+inspected post-request menu already showed the completed Generate Photo
+state. No processing-speed claim is inferred. Broader environment/material/
+mobile-hardware gates remain OPEN. Current WIP is preserved, uncommitted;
+HEAD0bb0dd5 and approved concealed overflow are unchanged. No merge, deploy,
+backend change or email.
+
+
+### 27 October — catalogue loungers, open timber frames and linen (WIP)
+
+Scoped to the illustrative catalogue furniture. Replaced the solid chaise
+plinth with an open timber frame, supporting slats, reclining back and small
+hinge caps. Added crowned cushions, a head pillow and actual 2.5mm welt
+geometry inside the metric envelope. Existing chair positions/orientation
+and human scale remain; pool geometry, paving and optional product loungers
+are untouched. A dedicated opaque linen material uses owned, deterministic
+128px colour/normal/roughness maps with a 4cm repeat and mipmaps. Original
+oak scans and architectural materials remain; timber grain follows each
+frame member. Geometry remains merged by finish. Dedicated linen and warm timber preserve
+existing sofa fabric and architectural wood: at most8finish groups in the
+wall spa,7in the glazed spa and9in residence/Infinity, excluding vegetation.
+
+The first crown probe exposed RoundedBox's missing central face vertices;
+selective tessellation now makes the crown real. A ray probe also verifies
+that the welt is not buried in the fabric volume. Final targeted55checks
+PASS: bounded frame/cushion shapes, real free space below the bed, supporting
+rails/slats, smooth finite normals, visible welt, mipmapped metric weave,
+colour/data spaces and owned texture/material disposal. The first under-bed
+ray was initially inside a support slat and was moved below it; that was a
+fixture correction, not a geometry regression.
+
+A necessary reflection-capture compatibility fix distinguishes transmitting
+glass from opaque physical linen. Previously every physical material was
+treated as glazing in the capture proxy. Glass retains its approved capture
+approximation and actual live/traced optics; linen stays opaque. Three
+glass-water elevations and opaque-linen capture regressions PASS. The room
+capture effect/resource tests PASS across12metric/rotated rooms and24cove
+fixtures; cove powers, sky/exposure and cameras unchanged.
+
+Architectural geometry42cases/3,592parts PASS, maximum45,452triangles before
+vegetation, within the existing60,000bound. A separate before/current check
+removes only the chaise builder and compares every remaining plan field:
+126cases with four contexts, pool sizes, rotations, three ground levels and
+four Infinity orientations are byte-identical, including cameras, planting
+and ground outline. This is source/geometry evidence, not FPS or physical
+mobile acceptance. Typecheck and diff-check PASS; scoped non-format ESLint
+PASS. No general build/audit. Before image, source patches, hashes and
+numeric results use prefix loungers-20261027- in the existing evidence
+folder. Actual final Photo Mode PNG and wider context/mobile checks are
+still pending at this point; do not infer photographic completion.
+Catalogue WIP remains uncommitted pending required gates. No merge/deploy,
+backend write, real email or new QA service project.
+
+
+First actual glass-spa/Day export with open frames was downloaded at212
+observed floored samples and visually inspected. Frame/cushion separation,
+pillows and supporting legs are visible. The frame's pale tone remained
+too close to the linen, so the final candidate applies a dedicated warm
+timber tint to chaise frames only, reusing the original oak maps. Ceiling,
+wall and existing sofa wood retain their original materials. No new image
+asset or texture upload is needed for that tint. The final-tint geometry
+42case test and126non-chaise before/current comparison PASS; merged finish
+group bounds are recorded explicitly rather than claimed as total scene
+draw calls. A fresh190+sample final-tint photo is still in progress here.
+
+
+Browser interruption at final warm-tint export: last observed218floored
+samples, Generate Photo enabled. The combined export/download observation
+exceeded30s and reset the CUA kernel. Rebinding the same existing tab reported
+transport closed. One explicit documented js_reset retained the browser tabs
+but did not restore the transport. No alternative browser/control route was
+used and the render/server were not restarted. Existing Node4334 remains
+listening on127.0.0.1:3003. Observation loss is not evidence that rendering
+stopped. A narrow filesystem check of only the task's photo filename pattern
+found no PNG newer than the first open-frame export at this time.
+
+The actual first open-frame/cushion PNG is preserved as
+loungers-20261027-first-open-frame-export.png, RGBA1564x1393, with hash/size
+in its file metadata. It proves the geometry export before the final warm
+timber tint; it is not presented as that final candidate. Final-tint live
+preview was inspected before Photo Mode, but its PNG, outside-context
+preview and final browser lifecycle are still NOT VERIFIED. The explicit
+1043x929viewport override could not be cleared while transport was closed;
+clear it once control returns. The existing tab was marked for handoff before
+the observation failure. Read that same tab's actual state before another
+export request. Details: loungers-20261027-browser-interruption.json.
+
+All final source/numeric checks above remain PASS. This is meaningful WIP
+progress, not complete catalogue acceptance. No commit/push while required
+visual/performance gates remain open; HEAD0bb0dd5 and the concealed-overflow
+fix are preserved. No merge, deploy, backend mutation or email.
+
+
+### 27 October — browser recovery and final furniture collaudo resumed
+
+Browser control is available again. The old tab3is authoritatively missing;
+the recovered integrated browser contained only the earlier unreachable5173
+tab. Port3003also had no listener. Started one Vite server from the correct
+repository and opened the same isolated lighting-QA origin in a fresh tab2;
+this follows verified handle/server absence, not a restart based on a timeout.
+The project restored10x4.5m, concealed overflow, Gres60x120and Day. All source
+hashes still match the recorded final candidate. No source code was changed
+during recovery and no earlier WIP was restored.
+
+Actual residence live/Day inspected: two human-scale open-frame loungers with
+cushions/head pillows and a distinct warm timber finish are present. The
+screenshot uses the new normal1280x720viewport; this is a scoped appearance
+sample, not every context/configuration, final photographic-reference
+acceptance or a matched performance comparison. Captured warnings/errors zero.
+Glazed-spa Day Photo Mode is accumulating again at canvas2560x1440. Its
+final warm-tint PNG remains pending here. Existing evidence is retained,
+including the earlier observation failure; browser-recovery.json records
+this change of state. No main merge/deploy/backend mutation/email.
+
+
+### 27 October — actual preparation state and owner-confirmed reload
+
+Glazed-spa Day reached198observed floored samples; actual Generate Photo
+showed the disabled IT “Preparazione foto…” state. Screenshot and timed
+observations are preserved under loungers-20261027-preparing-owner-reload.
+The subsequent return to the initial garden was explicitly confirmed by the
+owner as a manual reload, not an application failure. No new PNG was produced
+before it. Do not report this as a renderer crash or a completed export.
+
+Corrected only the export button tooltip while preparing: it now uses the
+existing IT/EN preparation translation rather than the stale190sample help.
+TSX syntax, exact one-branch delta against the pre-change WIP backup and scoped
+diff-check PASS. Runtime preparation tooltip still awaits verification.
+A separate tab in the same integrated browser now performs the photo QA so
+the owner can use the original Patio preview. Same restored local project,
+Standard quality and190sample threshold retained; no new QA service project.
+Final warm-tint PNG, in-app cancellation and wider acceptance remain OPEN.
+No commit/push while required WIP gates remain open; no merge/deploy/backend/email.
+
+
+### 27 October — final warm-frame PNG and corrected preparation help verified
+
+The separate integrated-browser tab3 completed the final glazed-spa Day
+export with the warm timber chaise finish. Actual disabled preparation label
+and tooltip both read “Preparazione foto…”; the corrected help is runtime
+verified in Italian using the existing IT/EN translation. No new translation
+or unrelated source change. Generate was requested at195observed floored
+samples, Standard quality, unchanged190sample threshold. No captured warning
+or error after preparation. Cached repeat download returned in under1second.
+
+Actual RGBA PNG1642x1858, 4226770bytes, SHA256
+33e55c1efdbc7bd454d9659f9e5faf092eddcfe11d6d1dd76f7a088345b61275.
+File: evidence/catalogue-reference-wip-20261026/loungers-20261027-final-warm-frame-export.png.
+Opaque pixels throughout. Warm frame and linen now separate visibly; open
+rails/legs, cushion crowns/pillows, ceiling slats and paving joints remain
+readable in the inspected output. Furniture sample PASS; this does not approve
+whole-scene photorealism. The earlier pale-frame PNG used a different aspect,
+so no matched pixel comparison or quantitative realism claim is made. All
+furniture source hashes still match the recorded numeric/source verification.
+
+Opening options invalidated accumulation to0and disabled Generate, then
+explicit Return to3D restored live controls. This verifies a completed-export
+return, not cancellation while a worker is in progress. The original tab2
+was subsequently absent from the browser inventory; tab3is retained as the
+current working preview. Existing evidence and the owner-confirmed manual
+reload history are preserved.
+
+Largest remaining visible gap is exterior depth/flat boundaries beyond the
+glazing; foreground material/contact detail and full context/mobile/performance
+coverage also remain OPEN. No commit/push for the catalogue WIP before its
+required gates PASS; approved concealed-overflow HEAD0bb0dd5 retained.
+No merge/deploy, backend mutation, real email or new QA service project.
+
+
+### 27 October — low planting in the spa courtyards (WIP)
+
+Added only a low irregular shrub band behind the existing courtyard trees
+of the two spa settings, reusing the original scanned shrub/model/maps.
+No new asset bytes, architecture parts, materials, lights, pool/edge/paving
+geometry or camera change. Existing residence/Infinity plans are byte-identical.
+Before/current126cases prove every plan field unchanged except indoor shrubs.
+
+Actual packed-GLB footprint checks24cases/three pool sizes/two ground levels
+PASS: shrubs rest on ground, remain below1.5m, leave at least1m at glazing
+and do not intersect courtyard walls. Source ownership/proxy disposal PASS.
+Architecture42cases/3,592parts/max45,452triangles before vegetation PASS.
+Scoped lint and whitespace checks against WIP backups, including untracked
+files, PASS. No general build or repeated unrelated audits.
+
+10x4.5m:15shrubs at the wall spa,40at the glazed spa;252,080additional
+scanned triangles in the latter, three added instanced material groups.
+Maximum58shrubs in tested sizes, hard bound60. These counts are not hardware
+FPS acceptance. Live Day/Night checked without captured warning/error; outside
+planting stays dark at Night. Final same-viewport Day PNG is accumulating;
+visual improvement and broader catalogue acceptance remain OPEN at this point.
+Evidence prefix: spa-planting-20261027-. WIP remains uncommitted while required
+gates are open. No merge/deploy/backend mutation/email/new QA service project.
+
+
+Planting visual correction: the first actual same-size1642x1858PNG at198
+observed samples showed shrubs reading as an evenly spaced row. Preserved
+as spa-planting-20261027-row-candidate.png with its original source hashes
+and marked NOT ACCEPTED for composition. Changed only those plants' positions
+and heights into staggered groups of three, retaining counts/model/materials
+and all other plan fields. Minimum root separation0.288m. Repeated only the
+changed placement/lint/diff checks: actual packed asset24cases PASS;126
+plan/count comparisons PASS. Architectural part geometry is byte-identical,
+so its42case geometry audit was not unnecessarily repeated.
+
+Grouped wall-spa Day and glazed-spa Night sampled live; the planting remains
+outside the glazing and dark at Night. Final grouped glazed-spa Day photo is
+accumulating at the same1642x1858canvas/821x929CSS/Standard settings as the
+previous PNGs. It remains pending here; no final photographic acceptance,
+commit/push, merge/deploy, backend mutation or email is inferred.
+
+
+Grouped planting — actual final PNG and normal-view return
+
+Actual grouped glazed-spa Day PNG downloaded and visually inspected at217
+observed floored samples: RGBA1642x1858, 4329185bytes, SHA256
+3f78d6f165f92d63883fe286561c28d92e05da3db28ecc18df8b2ca9b803c1f5.
+File: evidence/catalogue-reference-wip-20261026/spa-planting-20261027-clustered-export.png.
+All pixels opaque. Source hashes still match the targeted checks. Groups
+read less like the rejected uniform row and add low vegetation below the
+trees; paving joints, pool and furniture remain readable. Partial appearance
+improvement, not full photorealism PASS: flat ground/boundaries and weak distant
+landscape remain a substantial visible gap versus the supplied references.
+
+During accumulation the actual CSS width changed821to890and the canvas
+1642to1780pixels wide; a sample reset was observed. Kept the same renderer
+session, temporarily fixed QA viewport821x929, and completed the PNG without
+lowering Standard quality or190sample threshold. Reset the temporary viewport
+override after explicit Return to3D; live controls restored, normal view
+observed821x929CSS/1504x1701adaptive buffer. Captured warnings/errors zero.
+This is not hardware/mobile performance acceptance. Existing worker-cancel,
+full context and release gates remain OPEN. No commit/push for this WIP while
+required gates remain open; HEAD0bb0dd5 and approved concealed overflow retained.
+No merge/deploy/backend mutation/email/new QA service project.
+
+
+### 27 October — photographic distant context for the hotel spas (WIP)
+
+SPA Day now uses the existing original CC0 Symmetrical Garden 02 capture
+for its distant backdrop, matched exterior sun and Photo Mode lighting.
+The live renderer retains its metric room reflection probe, captured against
+that same Day sky/orientation. No new asset bytes, panorama mesh, pool/room
+geometry or camera change. Cove powers/exposure targets stay unchanged.
+SPA Night retains its procedural sky, fog and dark traced gradient.
+
+Backdrop ownership tests: 66 PASS. Room capture: 12 metric/rotated cases
+and 24 cove fixtures PASS. Original HDRI SHA unchanged. Glass/wall Day and
+glass Night sampled live. The final downloaded Day PNG was inspected at
+1642 × 1858 (204 observed samples before request). It adds distant depth
+beyond glazing; foreground/contact/material realism remains WIP.
+SHA256 a8b285b4606b1b4397fc943c2bbc669100190292532f7c6c4a732e5267fa2e87.
+The earlier Day export preceded the following lighting snapshot correction;
+the final-day-export PNG includes it.
+
+Photo Mode QA exposed a real snapshot race: a Night photo could capture
+Day/intermediate environment, lights and exposure before the live fade
+finished. Preserved failing values are in mood-snapshot-mismatch.json.
+SceneMood now applies the full selected target in a layout effect before
+the tracer's passive scene snapshot. This supersedes the earlier interim
+claim that the entire SceneMood implementation was byte-identical.
+The live fade arithmetic remains numerically identical: 64 controlled
+samples PASS, alongside 40 photo snapshot cases PASS. The regression
+uses a permanent frozen fixture, not a temporary-directory dependency.
+
+Actual fresh-browser captured profiles PASS: Day environment 0.65,
+exposure 0.95, extra raster sun 0; Night environment 0.06, exposure 1.05,
+sun 0.22, auxiliary 0.04; direct Night→Day restored the Day profile.
+These were read at tracer setup using a temporary DEV canvas diagnostic.
+The diagnostic was removed after evidence capture: PhotoModeRenderer is
+byte-identical to its preserved pre-probe WIP. The Night screenshot was a
+native wide, partially accumulated view; it is not a full denoised Night
+PNG or matched photometric comparison. Full Night evaluation stays OPEN.
+
+Typecheck PASS after removal. Scoped behavioral ESLint: 0 errors and the
+same 7 existing PoolScene hook warnings; prettier/prettier was disabled
+for this comparison. Default formatting-enabled lint is nonzero on the
+WIP; no broad formatting applied. Eight scoped diff checks include new
+files; PASS. No full build, general audit or unrelated geometry test.
+
+Both temporary viewport overrides were reset via the browser API. The
+QA tab is left live in SPA glazing/Day. An initial export observation
+produced timeouts; the same tab subsequently responded, had no captured
+warning/error, and a cached output request downloaded the PNG. No reload
+or server restart was used to obtain that final output. An earlier return
+to the garden was confirmed by the owner as a manual page reload; this
+does not establish the cause of every previous page-state change.
+
+Evidence prefix spa-backdrop-20261027-. Full context/accessory/finish
+matrix, worker cancel during real denoise, mobile/hardware performance,
+cloud/PDF and existing release gates remain OPEN. WIP uncommitted;
+no merge, deploy, backend mutation, email or new QA service project.
+
+### 27 October — SPA Night export and room irradiance calibration (WIP)
+
+A complete browser Night PNG was downloaded and inspected: 1642 × 1858,
+Standard, 208 observed samples before its initial request. SHA256
+b9af9ba106b37c890bfd84ef2e4e0fd777df8f7ab3ea82a165c7253e1be1d234.
+The actual summary confirms perimeter LEDs, sides 1 and 4, 14.5 m,
+#FFFFFF, 60%. The terse Optional header was not proof of absent lighting.
+This PNG precedes the live-only calibration below and is its photo reference.
+The active worker-preparation state was not intercepted before completion;
+no cancellation was performed. The real in-progress cancellation gate
+remains OPEN. The cached output request delivered the PNG.
+
+Comparison exposed a separate live-room energy error: the captured probe
+already contained authored cove lighting, but SceneMood multiplied the
+whole map by the sky scale (0.06 at Night). This attenuated indirect fixture
+light as well as sky, unlike the tracer's complete physical cove lights.
+Two narrowly scoped production-file changes address that boundary:
+CatalogueRoomEnvironment now captures sky/background at 0.65 Day/0.06
+Night while preserving physical cove powers. SceneMood consumes a ready
+live indoor probe at scale 1; photo and fallback/outdoor paths keep their
+existing factors. Exposure, fixture powers, geometry, materials, cameras
+and PhotoModeRenderer are unchanged by this calibration. The map cache
+includes its new version/scales; still two retained 128px targets.
+
+Both new regression assertions were observed FAIL before production edits:
+capture sky/background 1 versus expected 0.65/0.06; live captured-room
+consumer 0.65 versus expected 1. After the fix: room capture/resource/cache
+checks PASS (12 metric/rotated cases), 24 actual cove JSX fixtures PASS,
+40 photo snapshot cases PASS, 64 existing live/fallback fade samples PASS,
+and 4 room-energy live/photo Day/Night cases PASS. The live captured-room
+intensity change is intentional and supersedes the prior blanket live-profile
+invariance claim; direct-light/exposure fade arithmetic is retained.
+Typecheck PASS. Scoped behavioral ESLint: 0 errors, the same 7 pre-existing
+PoolScene warnings, prettier/prettier disabled. Four scoped diff checks
+PASS. No full suite/build or unrelated audit was run under the requested
+narrow scope.
+
+Native browser sampled SPA glass and wall in Day and Night, with no captured
+warning/error. Night ceiling/wall/paving remain readable. Three illustrative
+JPEG regions are closer in display luminance to the traced reference after
+the change; coordinates and raw values are retained in roi-luminance.json.
+These are approximate surface regions, not registered/calibrated photometry,
+lux readings, full-image parity or hardware performance. Substantial raster
+versus traced-GI differences and complete photographic fidelity remain OPEN.
+
+The module update returned the presentation to Garden during HMR; the SPA
+was explicitly reselected and the native checks then performed. Final preview
+is live SPA glazing/Night, with the temporary viewport override reset.
+Evidence prefixes spa-night-20261027- and spa-irradiance-20261027- retain
+actual PNG, summary, before/after UI, red/green output, scoped patches and
+current source hashes. Prior backdrop manifest is marked historical.
+Full contexts/accessory/finish matrix, real denoise cancellation, stable
+hardware/mobile checks, cloud/PDF and previous release gates remain OPEN.
+No commit/push, merge, deployment, backend mutation, email or new QA project.
+
+### 27 October — chaise and room metric proportions (WIP)
+
+Owner requested human-scale furniture and proportionate space. Chaise
+longues retain their existing 2.02 x 0.82 m envelope, 0.90 m frame height.
+Found a real outdoor-layout defect: 3 m pools left only 0.08 m between
+chairs; defensive 1 m planner input overlapped. The sole production change
+sets a minimum 0.71 m center offset, leaving 0.60 m free between chairs.
+Larger layouts retain their placement. No furniture rescaling.
+
+Regression observed FAIL first, then 56 metric setting/size/orientation
+cases PASS, with at least 1.03 m sampled coping-side passage. These are
+project layout targets, not building-code compliance. Actual chaise geometry,
+texture and ownership checks: 55 PASS. Typecheck and scoped diff checks PASS.
+Preserved-WIP comparison: 28 plans, 19 fully identical; only chaise X
+positions may differ, all other fields retained.
+
+Native browser sampled private villa 3 x 2 m. Restored the actual starting
+case, 7 x 3 m SPA wall/Day, rather than the older 10 x 4.5 m fixture.
+Evidence prefix catalogue-scale-20261027-. No full build, unrelated audit,
+cloud save or new QA project. Complete architecture collision/reference
+fidelity and existing release gates remain OPEN. No commit/push or deploy.
+
+### 28 October — SPA wall floor coverage and smaller chaise longues (WIP)
+
+Owner requested an immediate fix for visible green inside SPA wall and
+smaller chaise longues. The standard terrace ended before the room wall,
+leaving grass below the furniture. SPA wall now provides a metric room
+paving boundary; the selected terrace expands to its rectangular union
+with that boundary, and the lawn opening follows the same boundary.
+Original terrace extent is never reduced. Inner basin cutout, approved
+concealed edge/roundover, selected paving material and metric grid remain.
+
+Only SPA wall chaise assemblies are reduced by 10% around their grounded
+anchor: nominal 1.818 x 0.738 m, frame height 0.81 m. The compound frame
+now respects a part's metric dimensions; default frames remain identical.
+This intentionally supersedes the previous fixed SPA wall size per the
+owner's new request. SPA glass, residence and Infinity retain their sizes.
+
+Regression observed FAIL for missing floor boundary and oversized chairs,
+then PASS: 6 rotated/size cases including actual frame geometry. Metric
+layout audit 56 cases PASS; default lounger geometry checks 55 PASS;
+typecheck PASS; scoped diff checks PASS for 7 files. Behavioral ESLint:
+0 errors, the same 9 existing warnings, prettier/prettier disabled.
+Preservation comparison: 24 plans PASS; 18 other-context plans identical;
+only SPA wall floor boundary and chaise assemblies may differ.
+
+Native live Day preview checked at 7 x 3 m with panel open and collapsed:
+no visible interior grass, smaller chairs, no captured warning/error.
+No viewport override set. Evidence prefix spa-wall-floor-20261028-.
+New traced Photo Mode/Night/mobile/performance tests were not claimed;
+existing broader WIP/release gates remain OPEN. No commit/push, merge,
+deploy, backend mutation, email or new QA project.
+
+### 28 October — residence floor continuity and inclusive SPA catalogue cap (WIP)
+
+Owner confirmed a catalogue maximum of **12 × 6 m inclusive** for both indoor SPA contexts. Eligibility uses the canonical basin outline shared with the viewport, including L/custom shapes and rounded corners. Above the longer/shorter span limit, both SPA options stay visible with native disabled gray buttons and an IT/EN reason. A previously selected indoor context immediately resolves to garden; reducing dimensions makes the options available again without silently reselecting a SPA. This is a catalogue presentation limit, not a certified construction or GPU maximum.
+
+Private residence now extends the selected paving underneath both building wings and exterior wall bases. Removed only its two raised exposed floors; retained the supporting plinths with their tops 1 cm below ground to avoid coplanar faces. SPA and Infinity planner output preserved in 18 comparisons. Outer paving corners remain square; basin/coping/material/camera geometry was not changed by this correction.
+
+Targeted verification: residence 12 cases/396 checks; existing SPA-wall 6 cases and catalogue-scale 56 cases; availability 65 checks plus 28 canonical/stale-selection checks PASS. Typecheck PASS. Focused ESLint: 0 errors, existing warnings only. Native integrated browser: residence 7 × 3 m Day; both SPAs at12×6m; both disabled at12.1×6 and12×6.1m; mouse clicks blocked and keyboard Tab skips; IT/EN message verified. Restored 7 × 3 m/Italian/Day. Evidence prefixes villa-floor-20261028-, spa-limit-20261028-; stage/source hashes in catalogue-dimensions-floor-20261028-manifest.json.
+
+Branch remains feat/fullscreen-day-night-hidden-overflow; local and remote HEAD both 0bb0dd596081045fb8c6d79d03f1d9c60713f008. Work is intentionally uncommitted pending required WIP gates; no merge/deploy/backend changes/email/new QA project. Small-pool residence visual check and new photo exports are tracked in the next follow-up, not inferred from unit tests.
+
+### 28 October — patio material, shadow and photographic-context follow-up (WIP)
+
+Patio now reuses cached scanned oak with owned PBR texture clones and metric grain coordinates, plus small real bevels through the existing geometry helper. Retains five colour draw batches and unchanged planner footprints/clearances. Walls, timber and bench cast cached shadows; gravel receives them. No new lights or frame callbacks. Day uses the existing garden HDR and matched sun/depth range; 30 targeted lighting comparisons preserve other contexts. This is an appearance change, not measured performance approval: shadow casting and output filtering add work.
+
+The selected Patio remains present during Photo Mode; technical/top/site-photo and Infinity exclusions are retained. Existing photographic output filtering explicitly includes Patio; original open garden stays opt-in. Native Night testing exposed direct orange underwater-light spill on the Patio wall. Its dry materials now reuse the existing receiver mask with actual waterY; the native live Night recheck removed that spill. Shared pool LED/material/shader definitions were not edited.
+
+Targeted checks PASS: 72 planner cases / 3228 parts / minimum 0.7 m circulation; 19 component/resource/geometry/light checks; existing output-filter callback/state/ownership test with updated Patio caller scope; typecheck; focused lint 0 errors with pre-existing warnings; diff-check. Native integrated browser: Day/Night/Day, real Day and Night PNG exports 2096 × 1858. FilteredDay export SHA256 42d0c217d3fa679e59ac77b535f5900096de673475bc5518593470ed7979c8e1.
+
+**Night photographic appearance remains FAIL/OPEN.** The real Night PNG still has orange fireflies on dry surfaces and excessive brightness in the water. This is distinct from the corrected live-render direct-light leak. A Patio Night-only glossy filter 0.25 experiment did not produce useful improvement and was removed; PhotoModeRenderer and PoolScene were checked byte-identical to their pre-experiment state. Do not treat the glossy025PNG as accepted evidence. No global LED power or water optics were changed to hide the issue.
+
+Additional native residence check at 3 × 2 m Day: chosen paving remains continuous under both wings, full-size furniture retained; restored 7 × 3 m/Italian/Day afterward. Evidence prefixes patio-realism-20261028- and villa-floor-20261028-; results and source/export hashes are saved alongside. Native outputs establish successful export and context inclusion, not final photorealism, photometric correctness, hardware speed or owner approval. Other WIP/release gates remain OPEN. No commit/push, merge, deploy, backend mutation, email or new QA project.
+
+Final native preview left visible: SPA stone wall, 7 × 3 m, Italian, Day, Photo Mode off; screenshot patio-realism-20261028-final-spa-wall-live.jpg. Final typecheck and targeted output-filter/patio checks PASS after removing the experiment.
+
+### 28 October — retain selected context for lighting and complete glazed-SPA floor (WIP)
+
+Selected catalogue contexts now accompany the finished pool when navigating back to lighting, exterior and options after reaching Presentation. A project-scoped visit marker keeps early/raw/technical views unchanged and does not carry this reveal into another project. The chosen context retains its paving and furniture. Photo Mode availability remains tied to final Presentation. Existing context compatibility and the inclusive 12 × 6 m indoor cap remain in force.
+
+Native testing found that the former lighting-detail camera went above the SPA roof. Indoor lighting/micro-spot focus now reuses the existing architectural camera, without changing its eye height, lens or pose data. Outdoor/raw/detail camera routing is preserved. The glazed SPA now uses the same full-room paving boundary as the stone-wall SPA: selected paving reaches the glazing/wall bases, removing interior grass gaps. Other planner output is byte-identical in 18 comparison cases; furniture dimensions and pool geometry/materials are unchanged.
+
+Targeted verification PASS: 216 actual configurator stage-routing combinations; 12 SPA floor/layout cases including rotations and the 12 × 6 m glass boundary; 36 camera-routing checks plus the existing 72 outdoor fits and 12 indoor viewpoints. Typecheck PASS. Scoped ESLint: 0 errors, 8 existing warnings. Native integrated browser at 7 × 3 m: glazed-SPA Presentation Day -> lighting/LED colour Night -> Presentation Day, with the same context retained; Patio also remained present on returning to lighting. No interior green gap visible in the glazed SPA in Day or Night. LED type, #FF8000 colour and 95% intensity preserved; no captured console errors.
+
+Final preview left open: glazed SPA, Lighting/LED colour, Night. Evidence prefix context-glass-20261028-, with stage/source hashes in its manifest. These focused fixes do not close the previously recorded Night Photo Mode quality, hardware performance, export/cloud/PDF or other WIP/release gates. Work remains uncommitted under the existing gate instruction; no push, merge, deploy, backend/email operation or new QA project.
+
+### 28 October — Patio Night HDR export denoising (WIP)
+
+Patio Night now opts into the existing HDR export denoiser through a separate denoiseExport flag. Indoor defaults are retained; Patio Day and other outdoor contexts keep their prior export path. The indoor optics flag is not reused. No LED power, live lighting, water material, worker or shared shader change was made in this follow-up.
+
+Targeted checks PASS: output-filter integration/default/guard scope including 8 context combinations; existing HDR helper 27 checks using simulated worker/GL; typecheck; scoped ESLint 0 errors and 8 existing warnings. Native integrated browser produced a real 2140 × 1858 PNG after visible PREPARAZIONE FOTO at 329 samples. SHA256 97d63c66bf152878489ae1f156ec76faff89237c523803c298d43b24e9c876e1. Dry-wall orange fireflies are visibly removed compared with the previous unaccepted Night PNG. This is a qualitative comparison with different accumulated sample counts and viewport widths, not a controlled numeric image-quality benchmark.
+
+**Night photographic quality remains OPEN.** Water stays excessively bright and appears smoothed; removing noise does not prove photometric correctness or reference fidelity. Do not present this PNG as final quality approval. On a fresh Night accumulation, native PREPARAZIONE FOTO was observed at 349 samples, then interrupted by choosing Day: counter reset to 0, preparing cleared and Day accumulation reached 199. Worker termination/ownership is covered separately by simulated helper tests, not inferred as GPU or memory proof. The earlier interrupted attempt was confirmed by the owner as a manual reload/page change and is not counted as an export bug.
+
+Final native preview restored to glazed SPA, lighting/LED colour, Night, Photo Mode off; selected architecture and full-room paving retained, #FF8000 and 95% unchanged. No captured new console errors. Evidence prefix patio-hdr-20261028-, manifest includes source/export hashes. Existing broader WIP/release gates remain OPEN; no commit/push, merge/deploy, backend/email operation or new QA project.
+
+### 29 October — Patio Night submerged-light transport and native export follow-up (WIP)
+
+The installed path tracer reads analytic SpotLight power but ignores the raster diffuser map and the accepted submerged-light receiver transport. A bounded candidate adapter now carries only named powered underwater pool spots into the existing traced sampler, with the existing near-field regularisation, absorption, luminance knee, waterline cutoff and actual calibrated diffuser pixels/projection. Live luminaires, slider output, geometry and water materials are untouched. Caller scope is Patio Night only; other contexts and Patio Day retain the prior path. This is parity with the accepted preview optics, not a new claim of certified photometry.
+
+The initial additional-sampler approach failed native GPU shader validation and was replaced, not accepted. Revised candidate copies the diffuser into the tracer-owned existing optical atlas without adding a sampler; original IES layer ordering is retained, upload clones are disposed, borrowed live maps remain untouched. Integration uses the installed library's private owned material and has an explicit signature guard; future library changes require retesting. Low-resolution preview shares that material in this version.
+
+Targeted checks PASS: typecheck; 4 transformed-fixture layouts; 8 evaluated actual caller-scope combinations; projector direction, existing IES identities/order including visible lights below hidden parents, no extra sampler declaration, live scene identity, off/hidden/invalid-level bypass, borrowed ownership and cleanup. New helper lint: 0 errors/warnings; existing two components retain their 8 prior warnings. Preservation check: removing only this adapter's additions restores the exact prior HDR-stage hashes of both existing source files.
+
+Native integrated browser exported 1816 × 1858 PNG at 217 samples, SHA256 e3376a2934f54bea8bc141c458d93bccdb86f7f379d23db125f51fc4632c21cf. Revised candidate renders without the initial shader compile error, but texture-unit allocation warnings remain and need baseline comparison. The 217-sample image remains too uniform: Night photographic/reference quality remains OPEN. A same-frame 208-sample pre/post-HDR pair was then obtained: existing bilateral output before worker versus cached clean output, counter unchanged. Dry-surface fireflies are removed and dark reflection bands remain; broad bright orange water already exists before the worker. This differs from the more uniformly bright 217-sample export, so repeatability/reference quality remains OPEN; neither export is final acceptance. The paired download listener expired after the first file; UI confirmed processing completed, and a second explicit click saved the cached clean frame. No processing restart. Temporary extra export callback was removed, with exact pre-diagnostic source-hash restoration verified.
+
+The previous preview process was confirmed absent before restarting. IPv4-only serving returned HTTP200 but browser navigation refused; localhost resolves IPv6 first. Sole server was restarted on loopback localhost/IPv6 and HTTP200 verified. Owner-requested new direct preview http://localhost:3003/ opened visibly and restored the existing 8 × 4 m Infinity configuration without edits. Separate original QA origin retains 7 × 3 m; no cloud project/save/email action. Browser refused observation of the internal connection-error page; no raw browser or alternate browser was used. Subsequent explicit HTTP navigation succeeded.
+
+Work and full objective remain in progress. No commit/push, merge/deploy, backend mutation, email or new QA project. Existing wider performance, villa/reference fidelity, cloud/PDF and release gates remain OPEN.
+
+Same-frame PNG hashes: before HDR a57c2157878b58226526a713b4630de68c43113b943dbc08075716dff31c8c18; after HDR 1a116967e02c2fcb708f43d6b975cb594f7582d28bf309a601124a24213076fe. Evidence prefix photo-led-20261029-. Final caller/adapter hashes are recorded after diagnostic removal.
+
+### 29 October — residence-only metric oak facade detail (WIP)
+
+The existing central opaque bay of the private residence now has 39 vertical oak battens over recessed dark backing, matching the owner’s contemporary white-and-timber direction. Screen stays inside the original 3.5 m bay: battens are 3.24 m high and 24 mm deep with 11 mm real reveals; dimensions stay fixed as the pool changes. The existing scanned oak and merged wood batch are reused. No new material finish, texture, light, camera or frame callback. Extra static geometry is not a measured performance speedup.
+
+Targeted verification PASS: 16 metric facade layouts (3×2,7×3,12×6,25×8 m; both orientations and two ground elevations); glazing/ground clearance and existing part/material budget; existing residence floor12cases/396checks; typecheck; scoped planner lint0errors/warnings and diff-check. Preservation comparison:18 non-residence plans byte-identical;6 residence plans match the prior full plan after removing only this facade treatment, including paving, furniture, cameras and planting. Existing SPA catalogue cap is retained.
+
+Native integrated browser: 7×3 m residence Day, before/after live facade inspected. Actual Day PNG exported at200samples, 1816×1858, SHA256 bda450d5c5d85eb6fe3005b2915f29cc7c69a61e1283bcbbfd9b4772aba21eaf. New facade and continuous paving are present. Traced glass remains noisy and water appearance needs refinement; this does not establish final photorealistic quality. Browser panel changed size during this check; before/after screenshots are qualitative rather than a controlled image benchmark. No captured console errors. Final QA tab is residence Day with Photo Mode off; main Infinity8×4 tab retained. App opening returned queued: foreground visibility is not claimed.
+
+Evidence prefix villa-facade-20261029-, source/export hashes in its manifest. Main Infinity8×4 preview configuration preserved. Night Photo quality, hardware performance and broader reference/WIP/release gates remain OPEN. No commit/push, merge/deploy, backend/email operation or new QA project.
+
+### 29 October — measured residence tree-culling experiment rejected
+
+Investigated current live rendering cost on Apple M1 Pro / ANGLE Metal. An experimental residence-only split of the existing tree instances provided independent engine frustum bounds without reducing models or changing materials/transforms. Real-asset tests preserved every instance, full-view triangle counts and borrowed ownership; 14/16 tested views submitted fewer triangles. Typecheck and focused lint passed. Other catalogue contexts and original Photo Mode instance/bake path were preserved.
+
+**Candidate REJECTED and removed.** Native isolated A/B used 15 approximately2-second windows per side, with identical camera/projection, DPR1.7420844,908×929 viewport,1581×1618 buffer and experience preset. Existing Infinity companion was temporarily paused using its DEV shortcut; no companion frames were emitted during the comparison. Baseline: mean31.43FPS, mean window-p9533.95ms,113–115draw calls. Candidate:31.30FPS,34.03ms,129–133calls. Reported triangle counts fell, but measured frame performance did not improve. These measurements compare only this experimental change with its immediate WIP baseline, not checkpoint00d306e against the entire current WIP; they do not close the release performance gate.
+
+CataloguePlants restored byte-identical to its pre-experiment WIP; new candidate helper/audit removed from production paths. Rejected source and exact measurements retained as evidence, prefix plant-culling-20261029-. Infinity rendering resumed and fresh logs confirmed qaPaused=false, frameloop=always. No project data, geometry assets, materials, cameras or committed state changed. Next diagnosis uses existing GPU timing instrumentation; no frame-rate gain claimed. Broader goal remains active; no commit/push, merge/deploy, backend/email operation or new QA project.
+
+Existing qaGpuTiming instrumentation is supported on this Apple M1 Pro context. Restored residence Day yielded 8 settled GPU windows; the final two reported main/transmission/shadow medians16.506/16.479ms and p9517.111/17.121ms. Planar mirror work is excluded by this probe. Its manual render ownership and different observation interval mean these GPU-mode FPS values are not directly compared with the prior normal-loop A/B. Raw windows saved in plant-culling-20261029-restored-villa-gpu.json; further pass-level diagnosis remains open.
+
+GPU diagnostic query removed after collection; final QA preview checked as residence7×3m/Day/PhotoMode off. Normal URL restored. Final screenshot plant-culling-20261029-final-restored.jpg.
+
+
+### 29 October — passive native GPU pass timing (WIP)
+
+Added an opt-in DEV-only diagnostic (`?qaPassGpuTiming=1`) around existing renderer.render calls. It does not take R3F render ownership, create frames/draws, flush/finish GL, change reflection cadence/resolution or alter scene output. Existing qaGpuTiming probe is mutually exclusive. Bounded asynchronous owned GPU queries preserve nested/borrowed query ownership, render return/error semantics, disjoint rejection and disposal. Only two PoolScene additions versus its pre-diagnostic snapshot: import and effect in the existing DEV-only metrics component.
+
+Native Apple M1 Pro / ANGLE Metal, residence7×3m Day: last15 settled approximately2-second windows,14:54:58–14:55:26UTC. Main1581×1618: mean window median8.741ms, mean window p959.914ms; planar mirror1024²:7.891ms/7.987ms. Approximately29–30 mirror samples per2seconds confirms existing idle15Hz cadence. Nested render work belongs to its outer query; these numbers are not additive frame-time percentiles. The companion/scheduling conditions differ from the earlier isolated tree experiment, so no FPS comparison or production speedup is claimed. The result identifies meaningful mirror cost; changing its refresh policy would still need complete scene-change invalidation and image validation.
+
+Targeted verification PASS: typecheck(session12367 exit0), actual adapter protocol test including recursive calls/returns/errors, query guard/bounded allocation/disjoint/disposal, helper ESLint0errors/warnings after formatting, scoped diff-check. No full build/audit. Native captured error log empty. Diagnostic query removed and QA restored to residence7×3Day, PhotoMode off; main Infinity8×4 retained. Evidence prefix render-pass-timing-20261029-, exact windows and source hashes recorded. This is diagnostic progress, not visual/reference acceptance or closure of the full hardware performance gate. Goal remains active; no commit/push, merge/deploy, backend/email operation or new QA project.
+
+
+### 29 October — residence rear-wing occupied depth (WIP)
+
+Native Day view showed an empty rear wing behind the private villa glazing. Added a compact four-chair dining bay only to residence: fixed1.60×0.85m timber table,750mm top;480×440mm seats at460mm. Rear chair legs extend into grounded backrest posts.29 static parts reuse the existing merged wood/dark/linen batches; no additional material, texture, frame callback, light or camera. House dimensions, glazing, facade, paving footprint, pool, exterior loungers and planting retained.
+
+Targeted checks PASS:16 dining layouts(3×2,7×3,12×6,25×8m; two orientations and ground offsets), metric dimensions, four grounded chairs, supported backrests and clear passage/glazing/wall envelopes;16 existing facade layouts;12 floor cases/396checks; typecheck; planner semantic ESLint with formatting rule disabled to preserve existing style; scoped diff-check. Exact generated-plan comparison:18 non-residence plans byte-identical,6 residence plans identical after removing only the29 new interior parts.
+
+Native7×3m residence Day live before/after inspected; dining furniture adds visible occupied depth in live glazing. Actual PNG1816×1858 exported with UI200samples immediately before click and213after completion(exact export counter unrecorded). Photographic glass remains noisy and reflection-dominated, so it does not clearly validate every furniture detail. Traced pool still has a broad flat beige area: photographic water/reference fidelity is NOT accepted. No captured console errors. Final QA restored to residenceDay, PhotoModeoff, collapsed tray and no GPU diagnostic query. Evidence prefix villa-dining-20261029-, actual PNG/source hashes and isolated patch retained.
+
+The preceding reflection diagnosis found animated lighting/cover paths that must remain responsive; no speculative static-cache or refresh reduction was applied. Additional dining geometry is not a performance improvement. Full photorealism, speed and broader WIP gates remain OPEN; goal active, no commit/push, merge/deploy, backend/email operation or new QA project.
+
+
+### 29 October — traced water absorption on bounded physical paths (WIP)
+
+Investigated the persistent beige centre in the native residence Day PNG. Live basin absorption is implemented in raster onBeforeCompile and therefore absent from the tracer. Its legacy water stand-in supplies only a surface with a pale attenuation colour; the installed tracer applies volume attenuation at transmissive back-face hits, so the open top sheet does not provide the same view-to-floor medium as the live shader. Selected liner albedo was not changed.
+
+Added a guarded owned-shader adapter for residenceDayPhotoMode only. It integrates actual ray length inside the outline extruded from deepest floorY to waterY, using the selected finish's existing per-metre RGB absorption. Both view/bounce segments and direct-light/environment shadow paths use Beer–Lambert extinction. Raster optical-path scaling is not reapplied to those complete physical paths. Oriented polygon-edge integration supports concavity and either winding, with vertical/AABB clipping and finite light distances; no per-ray intersection arrays, new sampler, scene geometry, live shader or light added. The legacy water stand-in attenuation colour becomes neutral only while this medium is present, preventing duplicate absorption. Water interface IOR/normals/transmission remain as before. Cleanup restores the owned shader/uniforms and original live materials; adapters unwind in reverse installation order. Private library contract has explicit signature guards; valid simple polygon input capped at256points. This is absorption transport, not a new scattering/caustic solver or certified water optical measurement.
+
+Targeted checks PASS:347 executions of the actual scalar GLSL body(translated by removing types only), including known path lengths and independent30000-step numerical integration across rotated/translated/reversed/concave/rounded outlines; errors below0.002m in the numerical comparison.20 executed actual caller-scope combinations preserve Night/other contexts/showWateroff and coefficient/outline identities. Real installed PhysicalPathTracingMaterial adapter guards, shader/uniform restoration, no extra sampler and owned setup/teardown order PASS. Typecheck PASS(session24524), helper ESLint0errors/warnings, scoped diff-check. Existing unrelated rendering sources unchanged.
+
+Native integrated-browser GPU compiled and refined the candidate; captured0errors and only the existing THREE.Clock deprecation warning. Same7×3mhidden-overflow/SandBeach179/Prun50×50/residenceDay/high scene exported1816×1858PNG. Baseline UI200before click/213after; candidate193ready before export/215after; exact exported counters not recorded. Centre-water mean RGB changed159.12/149.14/117.95→100.02/126.33/108.49; sky patch changed under0.001/channel; dry paving means changed approximately-1.8to-1.95/channel(includes stochastic/indirect-light differences, not pixel-identity acceptance). Actual image replaces the bare beige centre with depth-dependent green water and lighter shallow steps; wall/reflection bands remain. It is a scoped improvement, not final reference-quality acceptance: water detail/caustics, glass noise, other finishes/systems/shapes and broader native parity still need work. Night and other environments keep their prior caller path; no new native acceptance claimed for them.
+
+Final QA restored to residenceDay/PhotoModeoff/collapsed tray/no diagnostic query; both preview tabs retained. Evidence prefix photo-water-medium-20261029- includes actual pre/postPNG, source hashes, isolated patches and numerical samples. No speedup claimed; full hardware performance and broader WIP/release gates remain OPEN. Goal remains active. No commit/push, merge/deploy, backend/email operation or new QA project.
+
+
+### 29 October — selective Villa Day HDR cleanup (native fixture verified; broader WIP)
+
+Actual Villa Day PNG now demonstrates cleaner glazing while retaining the existing bilateral water ripples. The learned HDR model receives the original raw accumulator, preserving its expected noise statistics. Only the water's bounding rectangle is read separately from the existing linear-HDR bilateral display copy; the worker restores those pixels under the projected water polygon after inference. No camera, geometry, material, light, exposure, additional render pass or new sampler. One extra bounded pixel read/copy is required; in this2226×1858 view the ROI is about12.7% of the frame(roughly8.4MB floatRGBA, plus an optional8-bit mask), rather than another full HDR image. It can grow with framing.
+
+The existing indoor/PatioNight paths remain unchanged. Optional target publication is invalidated on preview/fade/failure/disposal; stale dimensions fall back to the current visible image. Normalized water contours are clipped against the camera frustum before division byW, then scan-converted at pixel centres. The owned worker receives independent transferred data and validates dimensions, opacity, rectangle coverage and finite output. Accumulation/live materials remain borrowed and unchanged. Full-frame cleanup flattened water cues, raw-water preservation exposed extra grain, and feeding prefiltered data to the model left glazing noise: all superseded variants are archived, not accepted final output.
+
+Targeted checks PASS:36 actual HDR helper checks; output-filter allocation/draw/map/state/ownership and current-target publication;12 evaluated HDR caller scopes;24 clipped/reversed perspective views and129584 pixel classifications against independent camera-ray/outline intersections(16 exact boundary-centre ambiguities excluded); actual worker code with controlled inference proves raw-model input, separate filtered-region restoration, nonzero rectangle offsets, invalid rectangle/coverage rejection and protected float values above1. These protocol/math checks are not learned-model/GPU evidence. Typecheck(session49275) and scoped helper ESLint(session55712) PASS; scoped diff-check PASS. No general build/audit.
+
+Native integrated browser:7×3mhidden-overflow/SandBeach179/Prun50×50/residenceDay/high. PNG2226×1858 exported after UI211samples before request/225after; no captured errors or HDR fallback warnings. DEV projection log records the actual water polygon. Visual inspection confirms cleaner dry glazing and preserved water ripples/shallower steps; architectural/furniture scale and selected paving remain. Image-space glass high-frequency proxy0.2075→0.0257; water0.2792→0.3257 across independent accumulations. These are illustrative, not controlled same-frame noise/fidelity scores. The final source freezes during capture; no source update/reload interrupted this successful proof.
+
+Request-to-download9.927s in this observation includes browser interaction; a second download reused the frozen UI225sample result in0.292s and produced a byte-identical PNG. SHA25666a51751a51c3c049d592cfd5491caddfb1fa49ca697e9f1ff603090a1d404bb. This confirms cache/output stability, not a new general performance gain. No worker-only, FPS, memory or full-WIP baseline/candidate claim. Source-edit logs identify Vite Fast Refresh invalidation of HDRI_BY_THEME as one cause of development-state resets; earlier interruptions/manual causes are not all attributed. The prior absent localhost3003 listener was verified before the single restart(session95062); no redundant server started.
+
+Final QA restored to residenceDay/PhotoModeoff/collapsed tray and retained in the integrated browser. Evidence prefix villa-hdr-20261029- includes final/superseded PNGs, repeated-download hashes, actual projection/logs, source hashes and isolated patches. This closes this one native fixture's export-cleanup check. Photographic/reference fidelity, other contexts/shapes/systems/finishes, whole hardware performance, cloud/PDF and broader WIP/release gates remain OPEN. Goal remains active; no commit/push, merge/deploy, backend/email operation or new QA project.
+
+
+### 29 October — static planar-reflection reuse rejected (native A/B)
+
+A DEV-only candidate compared exact supported scene inputs at the existing 15 Hz idle cadence and reused the mirror image only when unchanged. Dynamic callbacks/textures fell back to normal captures; camera, light, geometry and material changes invalidated reuse. The candidate passed 149 invalidation checks, 33 actual-hook lifecycle checks and the existing 495 ray, 26 projection, 83 depth and 122 receiver-capture checks. These checks did not establish visual/GPU acceptance.
+
+Fresh-load A/B on the native integrated browser, Apple M1 Pro / ANGLE Metal, Villa Day 7 × 3 m, hidden overflow, Sand Beach 179 and Prun 50 × 50 cm: 15 settled two-second windows per side. Both used the same camera `[-7.1, 3, 0.4500000000000008]`, projection, viewport 1113 × 929, DPR 1.5734920155476155, drawing buffer 1751 × 1461, experience quality, 4096 shadow map, 58 geometries and 56 textures. No second scene tab or GPU-timing scheduling override was used.
+
+| Metric | Baseline | Candidate |
+| --- | ---: | ---: |
+| Mean reported FPS | 30.78 | 30.83 |
+| Mean of per-window p95 frame times | 33.81 ms | 34.02 ms |
+| Reported full-frame draw calls | 112–114 | 93 |
+| Peak full-frame draw calls | 145 | 93 |
+
+**Rejected:** fewer submissions did not yield a meaningful native responsiveness improvement. All candidate production code, provenance markers and candidate-only tests were removed; the pre-candidate WaterSurfaceMaterial snapshot was restored byte-for-byte. The candidate source is archived only under `/private/tmp/pool-reflection-cache-20261029/rejected-candidate-source/`; this temporary archive is not the operational source. Evidence prefix: `reflection-cache-20261029-` in the existing evidence folder. No cache is enabled in the WIP. The broader performance and release gates remain open. No commit, push, merge or deployment was performed.
+
+The owner confirmed that recent returns to Garden included accidental manual interaction. They are not evidence of an intrinsic export-reset defect. Development HMR can independently remount scene state when source exports change; no unrelated HMR refactor was made.
+
+
+### 29 October — Patio Night bounded water medium (native export verified; visual gate OPEN)
+
+Extended the existing bounded photographic water medium only to Patio Night. It uses the selected finish’s original per-metre absorption on view/bounce and light paths. The LED adapter now omits its legacy direct-path extinction only when that explicit medium owns absorption, avoiding double counting. Other LED callers retain the original default. The bounded Night water interface is purely transmissive; prior interface values remain in other contexts. Geometry, selected finishes, live lights, cameras, exposure and raster rendering were not changed. Existing filtered-water ROI preservation now also applies to this Night export, retaining water detail while the learned denoiser processes the original accumulator elsewhere.
+
+Targeted validation: typecheck PASS; 40 actual caller/interface-scope combinations and 347 GLSL/path/ownership checks PASS; 8 transformed LED layouts across default/medium modes plus combined-adapter teardown and existing caller contracts PASS. Existing projection/ROI worker and actual frame-callback/material/merger checks PASS. The frame-callback fixture needed the current HDR/buffer refs; this was a test-only repair. Semantic ESLint rules for the transport helper PASS with Prettier disabled; default formatting lint reports errors. No full build/general audit was run.
+
+Native integrated browser exported the original Night baseline at UI228 samples (2226×1858), then a separate local 7×3m/1.5m flat/hidden-overflow/straight-stair/Sand Beach179/Prun50×50 fixture with two submerged RGB lights, #FF8000/95%. Medium-only export UI417 samples; pure-interface export UI386, both2560×1440. The landscape fixture has no heat-pump optional; the portrait baseline had it. The original framing/format differs, so these images do not establish a controlled pixel or speed improvement. An attempted viewport override timed out and the actual isolated viewport stayed1280×720. A second pure-interface export was byte-identical to its cached first PNG. Return to live Lighting retained #FF8000/95%; Presentation returned to Day in the same Patio. No captured export fallback/initialization error; existing GPU texture-allocation warnings remain a separate previously open issue.
+
+**Night reference fidelity remains OPEN:** the centre remains too uniform and the pure-interface visual delta is small. Successful export and physically bounded absorption do not constitute final photorealism, photometric or performance acceptance. Evidence prefix `patio-water-medium-20261029-`; manifest includes source/output hashes, native UI and comparison limits. Original scheda was left for the owner; isolated local test tab retained for continuation. No backend/cloud project, email, commit/push, merge or deployment.
+
+
+### 30 October — Photo Mode resource lifetime and Night sky (WIP; native cycle checks PASS)
+
+Owner confirmed the recent Garden returns included manual reload/context changes. They do not establish an intrinsic export-reset defect. Continued in a separate local browser tab; owner preview left intact.
+
+Fixed the installed three-gpu-pathtracer0.0.24 disposer omissions with explicit ownership of its low-resolution targets, material/BVH/environment data, atlas render targets and copy/blend materials. Borrowed scene maps/materials remain untouched. Owned compiler listeners detach before adapter restoration, avoiding two new cleanup-time shader compilations; existing compile promises settle before program/data disposal. Cleanup is idempotent and best-effort. The temporary WebGL allocation tracer was removed from production source after diagnosis.
+
+A second lifetime defect was reproduced in Three0.185.1's PMREM cache: the one-shot Night cube's initial nonzero version enters a path without the cache disposal listener. The retained static cube now starts its published version at zero and disposes the owned texture on unmount, allowing the normal PMREM cache lifecycle; Drei still owns its cube target. This does not change sky colours/capture geometry. Photo teardown also restores environment/background only while those values remain Photo-owned, preserving the returning live environment's earlier layout-effect update (20 regression checks).
+
+Native integrated-browser Patio Night, 7×3m, hidden overflow, Sand Beach179, Prun50×50, two submerged LEDs #FF8000/95%, Apple M1 Pro/ANGLE Metal: pre-fix cached exits grew57→80textures; tracer cleanup alone reduced this to35→36; the complete fix returned34→34textures in two consecutive cycles. Geometry warmed48→49 and remained49. A final clean-source full PNG export and exit also returned34textures/49geometries. Viewport1113×929, DPR1.5734920155476155, live buffer1751×1461; output2226×1858. Native peak sampler budget is16/16 after correcting the DEV counter to include WebGL2 array/integer/3D/shadow samplers; older13-sampler reports were incomplete. No new sampler was introduced. Resource counts are scoped lifetime evidence, not a stable FPS/hardware acceptance comparison.
+
+Also excluded the additive LED core-glow disk from photographic tracing (real lens/emitter retained); actual fixture/ray/exclusion tests36checks across4rotations PASS. Bounded Patio Night now retains the existing live-palette gradient rather than replacing it with a brighter dusk HDRI;16 executed actual-loader-gate cases preserve other routes. This removes that unnecessary load/environment reset; no measured speed claim. Night water still has a broad overly uniform warm centre: reference fidelity remains OPEN.
+
+Targeted checks PASS: typecheck(session79022),31owned-resource fixture disposals with actual installed public library methods,20scene restoration checks,3actual installed-PMREM cache cycles,36glow rays,40medium caller/interface combinations,347GLSL/path checks,16HDRI gates, existing actual frame callback/material merger, SceneMood and8transformed LED layout checks; scoped diff-check. No full build/lint/general audit. Final clean-source PNG observed250samples before click/265after (exact exported counter unrecorded), SHA256 `3a7666c6be881a457010eece1090823013db298b374fdd8739661c8b9b1b0384`; captured no export/cleanup error. Evidence and source hashes: existing evidence folder, `photo-cleanup-20261030/manifest.json` (earlier artifacts retain their29October prefixes).
+
+Full photographic fidelity, stable overall performance, current-WIP cloud/PDF and other previously open release gates remain OPEN. Goal active. No commit/push, merge/deploy, backend/email action or new QA project.
+
+
+### 30 October — Patio Day photographic water absorption (native comparison verified; WIP)
+
+The native Patio Day baseline still showed a beige, nearly flat pool centre because the existing bounded photographic medium was enabled only for residenceDay/PatioNight. Extended its caller to PatioDay using the selected finish's unchanged absorption coefficients and actual pool bounds; Night, residence, other settings, live geometry/materials/camera/lights and the default Day interface remain as before. No new shader sampler, shader implementation, asset or denoiser route.
+
+Before/after integrated-browser exports: same7×3m hidden-overflow/straight stair/SandBeach179/Prun50×50 PatioDay, camera/projection identical in saved runtime logs, viewport1113×929, DPR2, output2226×1858, peak16samplers. Baseline observed204samples before export/225after; candidate203before/222after; exact exported counters unrecorded. Candidate replaces the beige centre with a subdued green water tone coherent with the finish. The recorded centre patch mean RGB173.058/169.185/160.336→151.180/160.953/157.257; dry paving and grass means differ by approximately0.8–1.4/channel (stochastic/indirect-light differences, not pixel identity). This is scoped colour/absorption evidence; broad uniformity, caustic/detail realism and the sparse surrounding Patio landscape still fall short of the supplied references.
+
+Typecheck PASS(session51788);40actual caller/interface combinations,347actual GLSL/path/ownership checks,16actual HDRI gate cases PASS(session40486); scoped diff-check PASS. No full build/lint/general audit. Existing evidence folder: `patio-day-medium-20261030/manifest.json`, source-only patch, full outputs, UI, runtime logs and measured image regions/hashes. Isolated QA left PatioDay/live/collapsed tray; owner preview retained. Full goal remains active, overall visual/performance and prior release gates OPEN; no commit/push, merge/deploy, backend/email operation or new QA project.
+
+
+### 30 October — Patio planting candidate rejected; cached-shadow correction retained (WIP)
+
+Tried existing lighter evergreen scans with fixed metric trees/shrubs outside the deck/accessory bounds. Actual GLTF geometry tests covered32plans/four orientations and0.7m clearance; original two-tree layout capped246580triangles/6primitive groups. The second tree was repositioned beyond the low wall after native review. Both two-tree photographic exports succeeded2226×1858; last observed268samples before/296after (exact exported counter unrecorded). Also evaluated one tree(max157951triangles) and6→3static material batches with actual vertex bounds/material/triangle equivalence. Shared default canopy geometry contract and typecheck passed. These are rejected experiments, not accepted product content.
+
+Initial15-window bare-scene mean92.13FPS/p95mean12.78ms; first two-tree candidate83.47/13.84. Later measurements drifted to72.79FPS for two trees, then approximately67with one instanced tree and44with merged geometry. Crucially the restored bare scene also reported approximately45FPS: the long-session measurements cannot attribute the fall to vegetation or prove a stable optimization. Owner preview was read only and showed Garden/live, not Photo Mode. No alternate browser or user-session intervention was used. Visual benefit remained modest and submission/triangle costs increased, so no planting or static-merge candidate was retained. Full performance acceptance remains OPEN.
+
+Restored all candidate planner, plant helper/component, paving and PoolScene changes byte-for-byte to this turn's starting WIP; earlier accepted Day water absorption and all previous work remain intact. Removed only the new candidate test after archiving it. Retained one small Patio correction: when its architectural meshes mount/change/unmount, invalidate the directional/spot cached shadows once, preventing removed/moved walls/bench from leaving stale shadows. It adds no per-frame shadow update, geometry, material, light, camera or shader change. Targeted actual hooks/Three lights/resource tests21checks PASS, typecheck PASS(session66335), scoped diff-check PASS. Final native preview verified PatioDay/live/collapsed tray without candidate vegetation. No full build/general audit.
+
+Evidence is in the existing folder under `patio-planting-20261030/manifest.json`: rejected source snapshots/outputs, measured runtime logs, accepted-shadow-fix.patch and restored-live-ui.png. Candidate-named images do not represent the final WIP. Full reference fidelity, lower-cost Patio landscaping and stable overall performance remain incomplete; goal active and all previous release gates preserved. No commit/push, merge/deploy, Supabase/backend/email action or new QA project.
+
+
+### 30 October — low-cost Patio seating canopy (native export verified; WIP)
+
+Added a small open timber canopy over the existing Patio bench, using the same scanned oak/material and five architectural draw batches. Four10cm posts have2.4m clear support height; two headers and16open slats top out at2.64m. The canopy is1.14m wide and follows the existing human-scale seat length (roof length≤3.6m); members do not scale up with pool size. The existing side gravel footing extends0.6m to cover the supports. No pool/paving perimeter, camera, light, shader, new material/texture asset or frame callback changed. The native PNG shows the whole canopy and actual striped shadows at the seating corner, adding visible depth. This remains illustrative architecture, not a structural/building-code specification or supplied pool product.
+
+Targeted planner checks PASS:72rectangular/L/oval/size/orientation/accessory cases,4812parts; finite/mirrored input preservation,0.7m circulation, grounded supports/fixed height and no support penetration into bench/walls/other members. Existing actual JSX/Three geometry/map/ownership/cached-shadow checks21PASS; vertices12804→19932 (+2376triangles), five batches retained, no new samplers (native peak16/16). Targeted typecheck PASS using inherited project compiler options for the layout entry and imported dependencies; scoped diff-check PASS. No full build/lint/general audit. Initial standalone CLI typecheck omitted project alias/type resolution; the saved target config resolves those and passes.
+
+Integrated-browser7×3m/hidden-overflow/SandBeach179/Prun50×50 PatioDay export2226×1858, observed260samples before/283after (exact export counter unrecorded), SHA256 `09131b1f48431c67bc8e21455b7cc6498bdc7e0898a36c57e3fa8ce8824fb80f`. Camera/projection match the saved earlier bare-Patio photograph; it is a visual reference pair, not a fresh stable performance comparison. Captured no export error. Live Night/Day toggles retained Patio; final QA returned PatioDay/live/collapsed tray. New Night photographic export/mobile/hardware acceptance is not claimed. Evidence/source hashes/targeted patch: existing evidence folder `patio-canopy-20261030/manifest.json`.
+
+The empty lawn/backdrop transition, broad water uniformity and full reference fidelity still need improvement. Overall performance and all previous release gates remain OPEN; no FPS gain is claimed. Goal active. No commit/push, merge/deploy, Supabase/backend/email operation or new QA project.
+
+
+### 30 October — authored outdoor lawn optical response (Patio A/B and Villa export verified; WIP)
+
+The lawn already uses the reviewed CC0 photograph, not a missing texture. Calibrated an effective low-sheen grass response using public MeshPhysicalMaterial.specularIntensity0.25 only in Patio/residence catalogue contexts. Existing photographic RGB,1m visual scale, packed normal/matte roughness, normal strength, stochastic sampler, geometry, lights and camera remain unchanged. This is a visual aggregate-leaf calibration, not measured botanical reflectance. Garden/SPA/Infinity retain the original default material path. A stable true mode/water level retains the material owner and both maps; changes release the replaced material once. Public PBR scalar values survive the installed path-tracer material packer, avoiding shader-only photographic mismatch. No new texture asset, mesh or sampler was introduced.
+
+Targeted44checks PASS: original texture bytes/provenance, actual hook/shader/resource lifecycle, material replacement/reuse, real installed MaterialsTexture packing (calibrated0.25/default1), actual caller expression scope. Targeted typecheck PASS(session5129) with inherited project options and selected source entries/imported dependencies; scoped diff-check PASS. No full build/lint/general audit. Temporary baseline-only matte=false was restored/removed; canonical StudioPaving now consumes the existing photographicGarden scope through matteGrass. The viewport override capability was unavailable; final A/B uses actual matching recorded dimensions rather than claiming an emulated device.
+
+Native integrated-browser Apple M1 Pro/ANGLE Metal, PatioDay7×3m, hidden overflow, SandBeach179, Prun50×50 and accepted timber canopy: fresh baseline and candidate camera/projection/viewport/buffer/DPR match exactly. Viewport1042×929, PNG2084×1858, peak16samplers. Baseline observed411samples before/440after export; candidate431before/487after; exact exported counters unrecorded. Near-lawn mean RGB104.524/119.783/89.169→100.775/116.708/83.047; far lawn116.162/130.194/102.453→110.545/125.558/92.913. The reduced pale/blue veil makes the photographed green more legible. Dry-paving patch means differ under0.73/channel; water reflections also change through the lawn's indirect/specular contribution. Stochastic/indirect differences are not pixel-identity or performance acceptance. Captured0errors. A previous differently sized photograph is archived only as prior-viewport-reference.png, not the controlled baseline.
+
+VillaDay native smoke export also succeeded2084×1858 at observed260samples before/275after, SHA256 `032c34ac1d90e00b44f7311de0a0c9eb01519eaa505da686e2472f1933cabb48`. There is no paired fresh Villa baseline, so no quantitative Villa image/speed delta is claimed. Villa Night/live toggle and return to Day retained the context; final isolated QA is VillaDay/live/collapsed tray. No new Night photographic/mobile/hardware-speed acceptance. Evidence/source hashes/patch and full outputs: existing evidence folder `catalogue-lawn-optics-20261030/manifest.json`.
+
+Overall reference fidelity remains incomplete: the exported compositions still contain excess foreground paving/empty lawn, and the water centre is too uniform. Inspect photographic framing against editor insets before changing approved camera poses. Stable overall performance and all previous release gates remain OPEN; no FPS gain claimed. Goal active; no commit/push, merge/deploy, Supabase/backend/email action or new QA project.
+
+
+### 30 October — Villa photographic frame separated from editor panels
+
+The photographic renderer inherited the editor's asymmetric UI-inset projection, leaving excessive empty foreground paving in the saved Villa image. It now owns a separate camera only for residence overview/review photographs: same exact world viewpoint, original lens/film shift unless a wider projection is needed to retain the actual basin perimeter inside ±0.88 NDC (6% frame margin per edge). The editor camera is untouched. Default/detail/inside/orthographic projections retain their prior values; real pose/lens/output-size changes invalidate accumulation and stale HDR exports. Water-preservation ROI uses the exact traced camera.
+
+Targeted typecheck PASS for PhotoModeRenderer/photoCamera/PoolScene and imported dependencies. 357 real-camera/caller-scope checks PASS, including 15 fixtures that require fitting; actual frame callback, stale-export guard, HDR cancellation and panel-only optical stability PASS. Pertinent water-medium/HDR-gate checks (40/347/16), ROI (24 views/129584 pixels) and scene ownership (20 checks) PASS. No general audit/full build/lint run.
+
+Integrated-browser Villa Day 7×3m, hidden overflow, SandBeach179, Prun50×50: full PNG2084×1858 exported successfully, observed198 samples before/203 after (exact export counter unrecorded). Complete pool opening and substantially less empty foreground; loungers retain their original metric scale and are partly outside the photograph. Prior same-WIP Villa output is a composition reference, not a fresh performance A/B. Captured no export error.
+
+The same full-frame candidate was tried on Patio Day (196→208 samples) and REJECTED because it cropped the accepted canopy roof. Final scope excludes Patio, SPA, Garden and detail views; native restored Patio source/owned projection matrices match exactly. Rejected PNG/UI/logs are clearly labelled in evidence, not current output. Final QA is Patio Day/live with collapsed tray. New Night photographic/mobile/hardware acceptance is not claimed.
+
+Evidence/source hashes/targeted patch: existing evidence folder `villa-photo-frame-20261030/manifest.json`. Overall water colour/detail fidelity and stable performance/release gates remain OPEN. Goal active; no commit/push, merge/deploy, backend/Supabase/email action or new QA project.
+
+
+### 30 October — REJECTED photographic raster-caustic parity candidate
+
+Confirmed a transport difference: PoolModel's authored raster caustic shader is ignored by the path tracer, whose direct-light visibility follows straight transmissive shadow rays. Tried carrying the existing cellular pattern into the owned direct-directional-light diffuse contribution, after real shadow visibility and bounded-water checks, retaining selected-finish absorption and all live materials. Reused the IES atlas to remain at16 samplers. This was an authored approximation, not a refractive photon/caustic solver.
+
+Targeted typecheck and installed-tracer atlas/ownership/noop/cleanup checks PASS after correcting one missing import caught by the initial browser/typecheck. The application rendered and produced two full PNG2084×1858 exports, but this did not prove activation of the candidate shader (see correction below): candidate298→319 observed samples, baseline283→304, exact export counters unrecorded. Camera/projection/viewport/buffer/DPR match exactly. The earlier Patio PNG has a different camera, so was not used as the controlled baseline.
+
+REJECTED / activation correction: the actual photographic catalogue sun is in the HDRI; SceneMood intentionally sets the duplicate directional sun intensity to0. The candidate required a positive DirectionalLight and returned a no-op. Thus both PNGs rendered without its correction; centre-water luma142.08→143.96 and standard deviation2.026→1.867 are stochastic differences, not evidence of a candidate energy lift. Unit tests with a positive directional fixture did not establish real-scene activation or native shader acceptance. Restored PhotoModeRenderer.tsx and PoolScene.tsx byte-for-byte to this turn's accepted starting WIP, preserving the verified Villa framing change. Removed only the newly created caustic adapter and its candidate audit from production; their sources, full images, logs, numerical probe and restoration hashes remain in `REJECTED-photo-sun-caustics-20261030/manifest.json`. No temporary zero-strength switch remains.
+
+Next investigation should couple caustic irradiance to the actual water-normal refraction and sun direction with conserved mean energy, rather than retain a cosmetic brightness lift. Overall fidelity/performance/release gates remain OPEN; goal active. No commit/push, merge/deploy, backend/Supabase/email action or new QA project.
+
+
+### 30 October — Actual-normal refracted HDRI sunlight, native Patio/Villa verification
+
+The photographic catalogue sun is carried by the HDRI; its duplicate directional light is intentionally off. Corrected the earlier rejected raster-pattern evidence accordingly: that adapter had not activated in the real scene, so its apparent PNG differences were stochastic and did not establish shader/image acceptance. The new path uses the actual photographed water-normal bitmap, its UV transform/flip/tangent frame/normal strength, Snell refraction and Fresnel reflection to transport sunlight to the real horizontal pool floor. Finite opening/wall interception and a flat-water reference bound the field. Focused HDR peaks are capped at4 while conserving transported flux on the represented receiving region. Existing scene shadow visibility, selected-finish absorption, specular/environment response outside the solar cone, live materials, geometry and camera remain unchanged. This is a single-interface horizontal-floor approximation; wall caustics, surface displacement/multiple scattering and slope receivers are not solved.
+
+The actual HDRI solar-core probe found peak61031 at texel1229,137; the1%-peak core lies within0.38°. Configured versus installed-tracer world direction differs0.00375°; the correction uses a full0.4°/zero0.6° cone. It corrects that solar next-event diffuse path, keeping the duplicate directional light off. It reuses the existing IES atlas; no new sampler. A final guard avoids the volume/atlas query for zero-solar-weight samples without changing the positive-weight formula. Runtime activation is independently recorded in an owned DEV-only canvas diagnostic, removed on exit. The temporary baseline override was removed.
+
+Targeted typecheck PASS. Relevant tests PASS: Snell footprint, finite-pool interception and flux accounting; flat-normal identity; actual bitmap/TBN/flip/repeat/scale; concave/reversed outlines; bounded energy-preserving gain; installed owned-shader/atlas and borrowed-map preservation; HDRI activation with directional intensity0; Day/medium/flat caller gate; reverse teardown; existing frame invalidation/export guards and scene ownership. No full build/lint or general audit. Actual native setup bake observed25.6ms Patio and34.4ms Villa, once per photo; CPU probe is not a frame-rate benchmark.
+
+Native integrated-browser Apple M1 Pro/ANGLE Metal, Patio Day7×3m, hidden overflow, SandBeach179, Prun50×50: fresh active/inactive PNGs2070×1858 have identical camera/projection/viewport/buffer/DPR. Activation and intentional baseline inactivity were both verified in the actual canvas. Candidate observed243→275 samples, baseline208→234, exact export counters unrecorded. Centre-water luma standard deviation2.082→8.333, with visible coherent focused detail replacing the broad flat region; mean luma145.271→141.753. Dry-paving mean luma176.738→176.613; stochastic/indirect variation is not pixel identity or performance acceptance. No material tint was changed.
+
+Villa Day native export also PASS, observed211→219 samples, complete pool opening and focused water detail visible, original metric furniture/architecture retained. It is a native smoke/export validation, not a fresh Villa performance/visual A/B. The final zero-weight guard compiled and converged253 samples with activation confirmed, no captured GPU error and peak16samplers; no extra post-guard PNG/FPS comparison claimed. Diagnostic attribute counts after relevant exits were0. Final QA is Villa Day/live, collapsed tray.
+
+Full PNGs, paired probe, activation records, HDRI/actual-normal probes, targeted logs, backups, exact patch and verified source hashes: `refracted-sun-water-20261030/manifest.json`. Stable overall performance, wider reference fidelity/device coverage and pre-existing release gates remain OPEN. Goal active; no commit/push, merge/deploy, backend/Supabase/email action or new QA project.
+
+
+### 30 October — Bounded Photo preparation camera transmission cache
+
+Targeted native enter/exit validation found a reproducible residual texture: Villa Day post-exit counts57→58→59. A temporary create/delete allocation trace isolated the surviving allocation to Three185's raster transmission pass, whose render-state cache keys targets by camera.id. The owned photographic camera is new on every mount, so the library's preparation raster retained one more target per reopen. This was separate from the newly verified refracted-sun field/atlas cleanup. A transient SPA/context-change trace is preserved as diagnostic context, not a controlled performance comparison.
+
+The preparation raster now reuses a dedicated camera cached per editor camera, copying the current photographic world transform and projection exactly. The editor and owned path-tracing cameras stay untouched; existing photographic framing, geometry, materials and light transport are preserved. One renderer-owned fallback transmission target stays warm by design. Temporary allocation instrumentation was removed byte-for-byte before native acceptance.
+
+Regression test first failed on the missing bounded camera identity, then PASS:12 remount-style camera cycles reuse one raster camera; exact world/projection matrices, parented editor preservation, perspective/orthographic and isolated editors. Existing357 photographic-camera checks PASS; selected inherited-options typecheck PhotoModeRenderer/new helper and targeted diff-check PASS. No general audit/full build/lint/test suite.
+
+Fresh native integrated-browser Apple M1 Pro/ANGLE Metal, Villa Day7×3m hidden overflow SandBeach179 Prun50×50: three short entry/exit cycles end at57→57→57 textures and56→56→56 geometries. Fixed-cycle camera/projection/viewport1112×929/buffer1750×1462/DPR1.5741993619603036 and quality match exactly. Median of the final five2-second performance-window means per exit:15.58/16.08/15.94ms. These are short observed frame-time windows, not a stable baseline/candidate FPS gain or GPU-timer benchmark; before/fixed viewport/projections differ. Actual solar-field activation confirmed; observed photo samples0/13/12, no new full PNG export in this follow-up. Exit diagnostic counts0. No captured GPU error establishes only captured-log coverage. Preparation still recompiles on reopening; faster initial compilation is not claimed.
+
+Evidence, raw logs, rejected transient diagnostic trace, actual controlled allocation stack, comparison, screenshot, targeted patch and verified sources/hashes: `photo-raster-fallback-cache-20261030/manifest.json` in the existing evidence folder. Final QA Villa Day/live with collapsed tray. Overall stable performance, reference fidelity/device/mobile/export/cloud and prior release gates remain OPEN; goal active. No commit/push, merge/deploy, backend/Supabase/email operation or new QA project.
+
+
+### 2 November — Photographic GPU context-loss recovery
+
+Native SPA glazing Day12×6m exposed a real failure: the browser logged Context Lost while the sample counter continued to grow; a later PNG2224×1858 was entirely transparent RGBA0. It was an empty capture, not a valid photograph/baseline. The original spontaneous context-loss cause is not established by this investigation.
+
+Photo Mode now stops sampling and invalidates stale HDR work/requests on loss; Generate photo is disabled. A visible IT/EN recovery card offers Retry. Native restoration recreates the owned tracer and retained room/environment captures, invalidates shadows, and preserves selected configuration/context without page reload. A context-generation guard also rejects a stale asynchronous toBlob callback after restoration/unmount. Live geometry, metric furniture, materials, lens/framing rules and transport formulas were not changed.
+
+Targeted regression first failed because the actual frame callback still rendered on a lost context, then PASS. Actual frame/export/watcher and parent callbacks cover initial/duplicate loss, restoration, stale generation/blob cancellation, request/HDR reset, fresh room cache, distinct sibling keys and listener cleanup; simulated GL/Node EventTarget is not native GPU proof. Existing framing/geometry/water-interface checks PASS, HDR export36checks PASS, selected typecheck and scoped diff-check PASS. No general audit/full build/lint/test suite. React hook/cleanup/accessibility review stayed within the changed components.
+
+Native integrated browser M1Pro/ANGLE Metal, SPA glazing12×6m, hidden overflow, SandBeach179, Prun50×50: two desktop controlled GPU-loss cycles passed (IT pointer→5 observed samples; EN keyboard→37). A390×844 emulated viewport passed with visible recovery control and17 samples after pointer recovery. Setting/dimensions retained in all three; Italian and normal viewport restored. This is desktop viewport emulation, not real-phone acceptance. Temporary QA loss control removed from source before final checks and export; DOM count0 verified. Initial duplicate recovery keys and a header-covered Retry control were caught and corrected by the native tests; intermediate failures remain clearly recorded.
+
+Final full PNG2226×1858 exported with the cleaned source; observed sample counts and download are in final-export-record.json (exact export counter not asserted). All alpha255, nonuniform scene verified numerically and image inspected. Water remains amber with the legacy indoor optics (actual diagnostic medium:false): this is valid export/recovery proof, not final water/reference-quality acceptance. The Day/Night room is visible after return to3D, but a separate MeshPhysicalMaterial raster shader exceeds the16-texture-unit GPU limit in the large SPA: that rendering gate remains OPEN and is the next concrete bug to investigate. No overall FPS gain, prevention of future context loss, early-compile recovery or long-run hardware guarantee is claimed.
+
+Evidence, original empty PNG/logs, IT/EN/emulated screenshots, exact targeted patch, checked sources/hashes, final photograph and test logs: `photo-context-recovery-20261102/manifest.json` in the existing evidence folder. Goal and overall fidelity/performance/device/export/cloud/release gates remain OPEN. No commit/push, merge/deploy, backend/Supabase/email operation or new QA project.
+
+
+### 2 November — Shared water receiver sampler (rectangle verified; angular gate open)
+
+The failing large-SPA water fragment declared17 samplers on a16-unit GPU. World-position and hardware-depth receiver images are alternative encodings, so they now share one uniform binding. Both original images, decode formulas, fallback behavior, capture passes, material/geometry/lens and light layout remain unchanged. The water cache key advances to v26 to invalidate the prior program. No texture packing or reduced light/shadow quality was introduced.
+
+Targeted regression observed RED with two receiver samplers, then GREEN with one. Actual capture/GLSL-lookup checks cover world/depth switches, exact image pointers and numerical decode, cache, failed capture and no-float fallback without extra draws or material recompilation. Existing depth83 and flat-receiver122 checks PASS; selected inherited-options typecheck and scoped diff-check PASS. No general audit/full build/lint. Temporary QA-host shader capture removed; PoolScene matches the accepted pre-diagnosis WIP byte-for-byte, including the previous context-recovery changes.
+
+Native integrated browser Apple M1 Pro/ANGLE Metal, rectangle12×6m, hidden overflow, SandBeach179, Prun50×50 and underwater LEDs: SPA glass/stone Day/Night render visibly with no failure recorded by the temporary capture. Final cleaned-source glass Day/Night verified again; captured final Night log has peak16/limit16 and no error. Live buffer1751×1461 at viewport1113×929. These are compilation/live-image checks, not photographic export, real-phone or stable performance acceptance. Water colour/reference fidelity remains open.
+
+A targeted angular12×6m test exposed a separate remaining limit: a non-water receiver fragment declares18 sampler units, including four projector maps and four spotlight shadows. The linker fails on this16-unit GPU. This is a preprocessed-source declaration count, not active-uniform introspection of a failed link. No lights/shadows were removed to hide it. The correction therefore closes the observed rectangular water failure only; the angular lighting/receiver gate stays OPEN and is the next concrete bug. QA configuration restored to rectangle/SPA glass/Day/live, tray collapsed. Owner-confirmed manual reload/context changes explain those particular returns to Garden; unrelated reset behavior is not declared proven absent.
+
+Evidence, failed sources, native logs/screenshots, exact targeted patch and verified source hashes: `water-shared-receiver-20261102/manifest.json` in the existing evidence folder. Goal and overall WIP/release gates remain OPEN. No commit/push, merge/deploy, backend/Supabase/email operation or new QA project.
+
+
+### 2 November — Shared LED projector binding (tested angular SPA gate resolved)
+
+The angular12×6m failure used four independent projector sampler declarations for the exact same PoolLights diffuser image. Wet lining now shares that image through one material-local uniform, with the original sorted per-fixture projection coordinates and every shadow sample intact. Water and the two catalogue tree material families use the same helper. The native initial wet-only candidate linked lining/water but exposed over-budget tree branch/leaf fragments (the preprocessed branch declares17 units); those diagnostic failures are retained, and the plant receiver integration removes that remaining duplicate. No global Three ShaderChunk mutation, texture copying/packing, new pass, reduced fixture count, removed shadow, normal/roughness tint, camera or geometry change. Relevant material program keys advance; the photographic water marker remains intact.
+
+The getter follows Three's actual post-onBeforeCompile assignment of the scene-local spotLightMap array, rather than holding its initially empty value or a global registry. Current projected maps all refer to the owned diffuser; a distinct-image guard prevents silently aliasing a future heterogeneous map configuration. Introducing different projector images would require extending the allocator. No new owned texture/resource is introduced.
+
+Targeted regression RED observed4≠1 before editing, then PASS using the actual wet callback and saved failing GLSL18→15 declarations. It checks original texture identity, upload assignment timing, no-map/replacement/mixed-map guard, exact projector coordinate/shadow expressions, idempotence and unchanged global chunks. Pertinent micro-spot regression5464checks/224configurations PASS; existing actual shared-receiver capture/GLSL lookup PASS. Selected inherited-options typecheck PASS for water/LED/plant entries and imports. Scoped lint found two formatting-only issues in the new helper; corrected with final exit0. No full build/lint/general audit.
+
+Native integrated browser Apple M1 Pro/ANGLE Metal, angular12×6m with lower-right4.8×2.4m recess, hidden overflow, SandBeach179, Prun50×50, four underwater LEDs: SPA stone and glass Day/Night render with no recorded shader failure after the complete correction. Actual linked-program active sampler counts are15 for wet lining,16 for water,14/15 for tree variants; all four spotlight shadow uniforms remain active. This closes the specific angular12×6m sampler failure recorded above, not every pool shape/size or larger fixture budget. A390×844 desktop viewport emulation also renders glass Night; it is not real-phone hardware validation.
+
+Temporary QA error/link instrumentation removed; PoolScene exactly matches the accepted pre-diagnosis WIP, preserving the context recovery work. Fresh cleaned-source SPA glass Day photograph preparation reached34 observed samples; returned to3D, Night then Day, captured no error and peak16/limit16. This is a preparation/return smoke test, not a new full photograph/export-quality acceptance. Default viewport1113×929/live buffer1751×1461 restored. Final isolated QA remains angular/SPA glass/Day/live, tray collapsed. No stable speed/FPS or pixel-matched A/B claim; remaining water colour/reference fidelity and wider device/export/cloud gates stay OPEN.
+
+Evidence including the initial incomplete candidate, actual linked sampler names/counts, desktop/emulated screenshots, photo smoke, final clean logs, exact targeted patch and verified sources/hashes: `shared-led-projector-20261102/manifest.json` in the existing evidence folder. Goal remains active. No commit/push, merge/deploy, backend/Supabase/email operation or new QA project.
+
+
+### 2 November — Wheel zoom and damping responsive-quality fix
+
+Owner requested a quick conclusion and configurator speed priority; the proposed SPA photographic-medium experiment remains in temporary files only and was not applied. Live wheel start/end events can occur synchronously before a frame, so the previous per-frame interaction flag missed them. CameraRig now publishes movement on start/change and retains one pending moving frame, including a delayed first frame; actual damping changes restart the existing0.3s settle debounce. No React render per event, new render pass, changed DPR tiers/idle quality, camera pose/geometry/material/light/Photo Mode modification. New listener is removed on cleanup.
+
+Targeted regression observed RED on the original wheel behavior, and separately on a400ms first frame; final actual effect/frame/AdaptiveQuality callbacks PASS with real Three EventDispatcher, damping, held input, full idle restoration, no repeated target resizing and listener cleanup. Selected inherited-options PoolScene typecheck PASS; scoped diff-check PASS. No full build/lint/general audit.
+
+Native integrated browser SPA glazing12×6m Day: previous wheel observation remained1751×1461; final cleaned-source wheel observation is1113×929, about59.6% fewer rendered pixels during interaction. Temporary transition history confirms DPR1 while moving and the original1.57349 after settling. An earlier immediate read was inconclusive; it is not performance evidence. Temporary diagnostic removed, final DOM attribute null. This proves the interactive pixel-load correction, not an FPS improvement percentage or a stable baseline/candidate hardware benchmark. Stationary resolution returns1751×1461. Existing source/WIP and all other release gates preserved.
+
+Evidence, targeted patch/test, native observations and verified source hashes: `interactive-quality-20261102/manifest.json` in the existing evidence folder. No commit/push while prior WIP gates remain open; no merge/deploy/backend/Supabase/email operation or new QA project.
+
+
+### 2 November — Context selection: retained room captures and plant materials
+
+Measured context-switch lag came from rebuilding both128px Day/Night room PMREM captures on every SPA revisit, plus recreating unchanged plant material/map owners as placements changed. PoolScene now owns a bounded pool (two indoor capture pairs plus an empty exterior slot), retaining the same filtering generator. Geometry, rim/ground level and GPU revision invalidate the owner; unmount releases all targets and generator, including Strict Mode replay. Plant source materials are discovered per asset and reused over placement-only changes; instance matrices still update and indoor/outdoor material semantics still invalidate. No quality, room geometry, camera, light, capture resolution or material values were reduced.
+
+Targeted RED observed prior room maps disposed on context change and prior plant material identity changed on placement update. Final actual-source room-cache and plant-lifecycle regressions PASS, including bounded capacity, revisits/exterior return, geometry/GPU invalidation, owned/borrowed resources, updated placement matrices and cleanup. Existing room-capture/lighting, photo context recovery and interactive-quality regressions PASS; selected inherited-options typecheck, helper ESLint and scoped diff-check PASS. No full build/lint/general audit. Temporary timing diagnostic removed from source.
+
+Native integrated browser Apple M1 Pro/ANGLE Metal, angular12×6m, hidden overflow, Mosaico7, Prun50×50: baseline revisit rebuilt room capture in348.8ms; intermediate cache-only candidate observed retained hits0–0.1ms at unchanged fixed128px capture resolution. Final clean-source warm SPA switch input→second-rAF samples126.6/137.7/128.4/136.6ms; first non-warm recorded sample378.2ms. Earlier baseline clicks536.8/587ms were recorded at a different viewport (1672×929 versus final1078×929; intermediate1351×929). These are indicative observations, not a controlled speedup percentage, INP, final3D/GPU paint or global FPS claim. First visits still prepare resources; no zero-lag guarantee. Wider stable baseline/candidate performance acceptance stays OPEN.
+
+Glass/stone revisits, Villa→Patio→glass return and glass Night smoke verified visually; no recorded error in the final timed switch samples. This is not new Photo export, real-phone, long-run memory or all-shape acceptance. Evidence, intermediate/baseline/final raw logs, targeted patch, checked sources/hashes and Night screenshot: `context-selection-speed-20261102/manifest.json` under the existing evidence folder. Existing WIP/fidelity/device/export/cloud/release gates and goal remain OPEN. No commit/push while those requested gates remain open; no merge/deploy/backend/Supabase/email operation or new QA project.
+
+
+### 2 November — Water and closer framing in overflow selection
+
+Owner requested water visible for the UI choices “Sfioro nascosto” (internal continuous), “Sfioro a griglia” (visible) and “Sfioro a bordo continuo” (hidden), with closer edge detail. The system-stage finished/water preview now applies to all overflow variants; technical view stays dry, and other construction stages, lighting/accessory gates and decking rules are preserved. Only these three camera subjects narrow the framed edge run2.2→1.6m and include0.5m of water foreground while retaining the existing section points and viewing direction. No basin/edge geometry, hydraulic level, material, shader, light or unrelated camera changes.
+
+Targeted actual-source checks PASS45 cases: three variants/structures, dry technical and other stages, configuration immutability, desktop/portrait camera section fit over three orientations and both pool heights. Selected inherited-options typecheck PASS after adding the missing R3F JSX augmentation to the isolated test fixture (initial fixture-only dependency JSX errors); scoped diff-check PASS. Native current11.8×4.5m Day preview confirms water and close detail for grating and continuous edge; screenshots and actual-source check script, hashes and exact patch archived in `overflow-preview-20261102/manifest.json` under existing evidence. This is a focused preview fix; wider WIP/release gates remain OPEN. No commit/push pending those gates, merge/deploy/backend/Supabase/email or new QA project.
+
+
+### 2 November — Infinity water and animated receiver during system selection
+
+The same system-stage water preview now includes Infinity. This enables the existing crest, downward flowing film and lower receiver water; no animation, geometry, hydraulic level, material, camera or shader was changed. Technical view and structure/access/finish stages remain dry as before. Actual-source targeted checks PASS for three structures, previous overflow previews, unchanged options and inactive animation. The actual water frame callback advances falling-film offsets downward and receiver offsets while the camera is idle. Selected inherited-options typecheck and scoped diff-check PASS. Native11.8×4.5m Day/side2/traditional wall preview shows basin water, front film and the lower receiver. Two screenshots supplement the callback test; no GPU timing, real-phone or stable performance claim.
+
+Evidence and exact one-file patch: `infinity-preview-20261102/manifest.json` in the existing evidence folder. Wider WIP/release gates remain OPEN. No commit/push pending those gates, merge/deploy/backend/Supabase/email or new QA project.
+
+
+### 2 November — Infinity flow visibility correction after owner review
+
+Owner reported that the previous enabled-water preview still did not show a readable cascade. That earlier callback/gating proof was insufficient for visible acceptance. Native inspection confirmed nearly transparent water over a dark wet wall; the falling normal offsets were further slowed inside GLSL. The live Infinity film now has readable downward normal motion and irregular aerated rivulets; the receiver has a narrow moving impact band fading within0.17m of the falling sheet. Aeration adjusts physical diffuse/transmission/roughness using scene lighting, with no emission, extra sampler, mesh or render pass. Ordinary basin water retains its prior program key, optical path and timing. Geometry, hydraulic levels, cameras and unrelated configuration are unchanged.
+
+Actual shader injection/timing tests, selected typecheck, helper ESLint, scoped diff-check, shared water-receiver and shared LED-projector regressions PASS. Initial index-signature/formatting findings corrected before final checks. Native integrated browser after full reload:11.8×4.5m/Mosaic8/traditional Infinity/Day, final side3, basin water present, visible changing cascade streaks and receiver band in successive frames, no captured console error. Earlier side2 also inspected. This verifies live visibility, not photographic export, all shapes/devices, mobile or a stable FPS benchmark.
+
+Evidence, exact patch, source hashes, check script and two native frames: `infinity-visible-flow-20261102/manifest.json` under the existing evidence folder. VB Orchestrator routing applied with focused debugging and water rendering. Existing WIP/release gates remain OPEN; no commit/push pending those gates, merge/deploy/backend/Supabase/email or new QA project.
+
+
+### 2 November — selected access and comfort views
+
+- Fixed access tab navigation: internal stairs, optional inox ladder, external stairs and shelf options request their own detail rather than retaining the comfort/lighting camera. Stair type/mirror edits now frame the actual flight, including integrated comfort configurations.
+- Infinity access, ladder, shelf and comfort details now use the same physical local lens and free UI rectangle as other systems; the selected component stays above the options panel. General Infinity and water-edge views are preserved.
+- Targeted checks PASS: 78 actual subject/projection cases across three systems, desktop/portrait geometry, tab routing, typecheck of both changed components/dependencies, scoped diff-check. Native local browser checked 8 × 4 m Infinity straight/corner stairs, optional inox, integrated Hydro B flight and comfort tab transitions; no new console errors observed. Portrait checks are mathematical only.
+- Existing Vercel project preview updated from the current WIP snapshot; deployment dpl_6t8yMKKkLpdbYmuY7ktKBswVDBcm. Preview URL: https://pool-shaper-kvyb7mc5y-daniellamthis-projects.vercel.app/. No production promotion or backend operation. Existing whole-WIP release gates remain open; no commit/push in this follow-up.
+- Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/detail-views-20261102/manifest.json`.
+- Online verification completed: deployment READY, 500/500 source hashes match; native browser opened the new URL and checked 10 × 4.5 m Infinity stair selection. Corner stair visible above controls; console errors: 0. Evidence: `online-final.png`.
+
+
+### 3 November — bounded photographic water for indoor Day scenes (WIP)
+
+The existing finite-pool photographic medium now also applies to SPA Day using the selected finish absorption and actual basin outline/water/floor levels. Night, live rendering, interface/material tint, geometry, human-scale furniture and cameras are preserved. Indoor scenes explicitly retain no outdoor solar-caustic adapter.
+
+Targeted checks PASS:96 actual caller/solar scope cases (RED before fix),40 existing caller cases,347 actual GLSL path checks,16 HDRI gates,129584 projection/mask pixels, installed refracted-sun adapter/teardown, selected typecheck and scoped diff-check. An isolated production build was necessary because repeated DEV connection losses/reconnections interrupted photo tests; no DEV reset cause is declared fixed. Source matches the current WIP, with only a temporary node-server deployment target; original3003 retained, production test3004.
+
+Native SPA glass Day8x4m/steel/Skimmer/SandBeach179/Travertino60x120/internal stairs+inox+HydroB: actual DEV diagnostic medium:true and solar:false. Production desktop viewport emulation390x844 exported PNG780x1688, observed423 samples before/460after, exact export counter unrecorded; all alpha255 and nonuniform image independently inspected. Captured errors0. Returned to live and reset normal viewport. This is native export proof, not a controlled baseline/candidate pixel/speed comparison or real-phone result.
+
+The water uses depth absorption, but full reference fidelity remains OPEN: the portrait composition has excessive foreground paving and clips basin/furniture. SPA stone/Night/12x6/physical-phone photographs and wider performance/export/cloud/release gates are not newly passed. No commit/push or new remote deployment/backend/Supabase/email/QA record. Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/spa-photo-medium-20261103/manifest.json`.
+
+
+### 4 November — SPA photograph projection cleanup (WIP)
+
+SPA architectural photographs (overview/review and indoor lighting hero views) now clear the live UI view offset and use the actual full-buffer aspect. The owned photo camera retains the existing physical eye, lens and zoom; no basin/furniture/material/light/water or live/detail camera change. Villa perimeter fitting and other context projections remain unchanged. This addresses the panel-dependent photographic shift, not a claim that every basin/furniture point fits the portrait frame.
+
+Targeted regression RED observed before routing correction; final camera audit PASS776 checks, actual export frame/convergence and stale-request regressions PASS, selected PoolScene inherited-options typecheck PASS, scoped patch/whitespace PASS. No full build/lint/general audit. Native visual/export acceptance is BLOCKED: one attempt to bind the existing integrated preview was rejected by the browser URL security policy; no alternative browser or circumvention attempted. The restarted local preview answers HTTP200 on127.0.0.1:3003, but visibility is not claimed. No new PNG or screenshot accepted.
+
+Whole-WIP fidelity/device/performance/export/cloud/release gates remain open. No commit/push, new remote deployment, merge, backend/Supabase/email operation or new QA project. Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/spa-photo-frame-20261104/manifest.json`.
+
+
+### 4 November — publication preparation and actual external blockers
+
+Owner now requests completing publication readiness and real customer use. Website insertion is explicitly deferred until the end. One real quotation test email to info@piscinewellness.com is authorized; none has been sent. Earlier no-reset/no-other-Supabase-account/no-new-QA-record constraints remain in force.
+
+Current branch and local/remote HEAD match0bb0dd596081045fb8c6d79d03f1d9c60713f008; the additional source WIP is preserved, uncommitted. An isolated493-file runtime/public snapshot exactly matches current sources. Explicit Nitro Vercel production build PASS, output runtime nodejs24.x and filesystem/server routing verified. Chunk-size warnings remain. Initial sandbox build failed writing the shared dependency config cache; authorized build then passed. No production environment files copied or secrets accessed. Six local critical-path checks PASS: draft persistence, in-memory save/reload/share/Summary/PDF/quote, lead schema/commercial formatting, export guards, attachment policy/storage mocks, and notification concurrency/retry/webhook signature mocks. These do not exercise the real HTTP submit handler, actual provider delivery, cloud durability or browser downloads.
+
+Authenticated existing Vercel project inspection: pool-shaper/prj_7YBi77yut3hUk4PvaoB3oQNv9is2, team_DWydw06SFQBNFE4wL9KZFAhY. Only SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and LEAD_NOTIFICATIONS_QA_DISABLED exist, scoped to Preview; no Production values. Only pool-shaper.vercel.app is attached; no custom domain. SSO protection remains all_except_custom_domains, unchanged. Connected Resend account has no verified Piscine Wellness domain; no unrelated sender used or domain created. No Supabase account has been operated or inferred from organization names; info@piscinewellness.com plus exact project must still be verified before any operation.
+
+Production setup required, privately in the existing Vercel project (see `.env.production.example`, no real credentials): locked SUPABASE_URL and server-only SUPABASE_SERVICE_ROLE_KEY from Daniele2; RESEND_API_KEY and LEAD_FROM_EMAIL for the correct verified Piscine Wellness sender; LEAD_SENDER_DOMAIN_VERIFIED=true only after provider verification; LEAD_NOTIFY_EMAIL=info@piscinewellness.com; LEAD_NOTIFICATIONS_QA_DISABLED=false only in Production. Configure the authenticated provider webhook on final-host/api/resend/webhook and matching RESEND_WEBHOOK_SECRET. Keep Preview email inhibition intact. Never expose service credentials through VITE_* or browser code.
+
+The server-only recovery worker already exists (`scripts/run-lead-notification-worker.mjs` / `scripts/process-lead-notifications.ts`) but no production schedule is demonstrated. It must run periodically with the same protected runtime environment; use a cadence compatible with existing backoff and the23h uncertain-send cutoff. Do not introduce a public unauthenticated retry endpoint or enable paid scheduling silently. One authorized live request must then prove durable save, stable reference, single provider send and delivery evidence; provider acceptance alone is insufficient.
+
+Publication remains NOT READY pending that operational setup/delivery proof, actual database+private-object restore (original password still unavailable unless owner supplies it privately, or a usable backup), final browser visual/export acceptance (prior IAB policy denial unresolved), qualified real-hardware performance and completed privacy/provider/date/retention operations. Website button/domain/DNS work is deferred by owner. No commit/push until outstanding requested gates pass; no merge, deployment, production promotion, DNS, Supabase data operation or additional QA project.
+
+Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/release-preparation-20261104/manifest.json`.
+
+
+### Production settings — verified non-secret preparation, release still blocked
+
+Owner requests conclusion; latest owner replies say correct account/configuration is being prepared, with neither the original PostgreSQL password nor a usable database/attachment backup available. Rechecked existing Vercel project and connected provider: no new credentials or verified Piscine Wellness sender were present.
+
+Created and independently re-read four Production-scoped non-secret values on the existing project only: SUPABASE_URL=https://waetxxqdlsuanqescuye.supabase.co, LEAD_NOTIFY_EMAIL=info@piscinewellness.com, LEAD_NOTIFICATIONS_QA_DISABLED=true, LEAD_SENDER_DOMAIN_VERIFIED=false. Exact value/target checks PASS4/4; original Preview keys/scopes preserved. No secret was read, copied or generated, and no Supabase account/project operation occurred. The committed-template candidate now defaults to inhibited sending; disable that inhibition only when sender/credentials and the authorized one-email test are ready.
+
+Remaining Production keys: SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, LEAD_FROM_EMAIL, RESEND_WEBHOOK_SECRET. Sender verification, authenticated delivery webhook and scheduled retry execution still require real operational setup. One authorized email remains unsent; no unrelated-business domain used. Actual restore, browser visual/export and qualified hardware-performance acceptance, privacy and previous WIP gates remain open. No commit/push, deploy, production promotion, main merge or site/DNS change.
+
+Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/production-config-preparation/manifest.json`.
+
+
+### 5 November — owner-authorized public Preview link
+
+Published the current WIP as Preview deployment dpl_2mQ9WuH2fv6KUxcTMceFUbmqtsjZ (pool-shaper-lempsry2i-daniellamthis-projects.vercel.app), READY, target null.501/501 source hashes match current workspace runtime/public/build files, including the latest SPA water and photograph projection corrections. First source-upload attempt failed because the prebuild generator was missing; included the existing generator in the upload and the corrected build passed. No application source modification.
+
+Created a seven-day shareable link for this deployment only, explicitly requested by owner. Expiry2026-11-12 08:04:08UTC (09:04:08Europe/Rome). The access token is omitted from repository evidence. Fresh HTTP client with no Vercel login or authentication token: share link returns200 and the actual Pool Studio configurator HTML, referenced application JavaScript200, then root URL200 using only the share cookie. This verifies public HTTP access, not native WebGL/PNG/PDF visual acceptance.
+
+Project SSO settings preserved, no production promotion, main merge, commit/push, website/DNS/Supabase operation, new cloud QA record or real email. Existing release blockers remain open. Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/public-preview-20261105/manifest.json`.
+
+Owner-requested URL naming follow-up: assigned configuratoree.vercel.app to the same Preview, verified alias→project/deployment identity, and created its scoped seven-day public share link (expires12November2026 08:10:57UTC). Fresh unauthenticated HTTP client receives the actual configurator HTML with200 and stays on configuratoree.vercel.app, without redirecting to the personal-team hostname. Share token omitted from repository. No new build, runtime/source change, production promotion, project-wide protection change or website/DNS-provider change.
+
+
+### 5 November — customer flow fixes and permanent public Preview access
+
+Owner clarified that the blank initial page with two centered choices is the desired introduction, not an Infinity failure symptom. Project step now presents centered New pool/Renovation choices and Continue without mounting the 3D viewport; later stages and saved-project resume are preserved. Desktop and 390×844 native browser emulation checked, including renovation navigation and zero initial canvases. Comfort unavailability prominently shows actual plan reasons (including the existing 4.80×2.40m threshold), IT/EN. Chaises now center the actual selected quantity inside each safe usable row, preserving metric scale, stairs/passages and Infinity exclusions. One/two-chair native 12×5m Infinity checks passed.
+
+Targeted verification PASS: centering regression RED before fix then1205 checks; comfort264 checks; shelf range22392 checks/288 cases/980 CPU geometric samples; selected controller/scene dependency typecheck and exact patch whitespace check. These are not real-device, GPU/FPS, cloud persistence or export-delivery acceptance. Infinity selection opened in tested angular9.7×4.5m, fresh rectangle10×4.5m and12×5m configurations without captured console error; reported original failure remains unreproduced and no speculative Infinity runtime change was made.
+
+Final Preview dpl_39fdUof7n8snmrPPQnFYLNwPXDcH is READY;501/501 uploaded source hashes match, no missing/extra files. Assigned configuratoree.vercel.app to it. At owner's explicit request, this alias alone now has an alias-protection-override without expiry, superseding the prior requirement to use an expiring share link. Project-wide SSO remains unchanged. Fresh anonymous client with no cookies, login or token receives root HTML200 and application JavaScript200 with no login redirect. Native integrated browser also opens the bare URL and resumes the existing pool.
+
+Evidence, exact seven-file patch, checked source copies (non-runtime .txt), targeted check logs and screenshots: `docs/qa/evidence/catalogue-reference-wip-20261026/customer-flow-fixes-20261105/manifest.json`. Unrelated WIP preserved. Whole-WIP/release gates remain OPEN; no commit/push pending required gates, main merge, production promotion, backend/Supabase operation, real email or new cloud QA project.
+
+
+### 6 November — visible photo progress and HDR startup failure handling
+
+The photo progress label was hidden beneath the absolute header and the pending download tooltip contained untranslated English. The label now sits below the header, shows localized progress/readiness, and uses the same190-sample gate as download. Native desktop1280x720 and390x844 emulation, IT/EN pending copy, disabled/enabled download transitions, selected dependency typecheck and exact patch checks passed. No renderer quality/threshold/geometry/material/camera change.
+
+A separate confirmed error path in the existing HDR worker waited on a resolve-only callback while the vendor constructor launched asynchronous backend initialization without a catch. A scoped worker rejection listener now forwards startup failure to the existing error response and post-draw accumulated-photo fallback; listener/subscription cleanup covers success, rejection and synchronous constructor errors. Vendor bundle and180-second silent-stall deadline remain unchanged. Regression RED before fix, then23 startup checks PASS;40 export lifecycle checks PASS;24 views/129584 preservation pixels PASS; JS syntax and scoped reverse patch checks PASS. Independent functional review found no actionable regression. Simulated boundaries do not constitute native GPU acceptance.
+
+Actual native downloads inspected: public Villa Infinity/GreyRock798 PNG2090x1858 (6171933bytes) and local SPA vetrata/Skimmer10x4.5/BlueSky602 PNG780x1688 (2286995bytes). The local SPA export completed4.419seconds after the download click with no captured warning/error; photo accumulation duration was not a controlled benchmark. The earlier SPA timeout cause remains unproven because that tab no longer existed; no duplicate export was started while it was known live. This success does not prove a speed delta caused by the startup fix.
+
+Visual acceptance remains OPEN: the SPA portrait devotes excessive frame area to the ceiling and clips the basin; the Villa dark-water result needs a controlled light-liner comparison. Next scoped composition trial: lower only SPA portrait photographic pitch while preserving eye/lens, and verify before retaining. No speculative water/material/camera change in this delta. Existing operational/hardware/release gates remain open. No commit/push until required gates pass, new deployment, main merge, backend/Supabase action, email or cloud QA project.
+
+Evidence and exact six-file delta: `docs/qa/evidence/catalogue-reference-wip-20261026/photo-progress-export-20261106/manifest.json`.
+
+
+### 6 November — SPA portrait photographic composition
+
+Actual baseline SPA-glass photograph showed excessive ceiling and a cropped pool. The owned photographic camera now pitches down10degrees only for indoor overview/review with aspect<0.8. Eye, physical lens, live camera, wide frames and all detail/other environments retain their existing behavior. Direct matrix multiplication preserves inherited transforms, including nonuniform parent scale/shear; repeated sync cannot accumulate the tilt. No geometry/material/light/water changes.
+
+Targeted regression RED before change, then137 checks PASS, including50 actual caller contexts and parent-transform preservation; existing776 camera checks PASS; final PoolScene/dependency typecheck and scoped patch checks PASS. Independent functional review confirmed scope/invalidation; its parent-transform concern was corrected and regression-tested.
+
+The DEV comparison was interrupted by documented Vite server-connection loss/reconnect at13:08:44/13:08:48UTC; owner confirms no manual page action. Therefore an isolated production node-server build was necessary for stable native verification. Build PASS;493 runtime/public files matched the workspace snapshot, with only the temporary Nitro target override and no .env files copied. Three changed runtime sources rechecked against the built snapshot. Original server3003 preserved; isolated test server3004 (exec12063). Underlying development connection loss is not claimed fixed.
+
+Actual final PNG downloaded and inspected:585x1266,1266412bytes,SPA glass/concrete10x4.5/Skimmer/internal straight stairs/BlueSky602/Travertino60x120/Day/Standard. Native390x844 desktop viewport emulation; captured warning/errors0. Independent visual review approves this composition: ceiling~17%,stairs readable,right coping continuous. Baseline780x1688 and candidate585x1266 share aspect but not output resolution or recorded sample count; do not treat them as a matched quality/performance benchmark. Photo render exited and temporary viewport override reset after capture.
+
+Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/spa-portrait-composition-20261106/manifest.json`. This closes the focused portrait composition issue only. Overall photorealism, wider scene/device/performance and operational/release gates remain OPEN. Local WIP preserved; no commit/push until required gates pass, remote deployment,main merge,backend/Supabase action,real email or additional cloud QA project.
+
+
+### 6 November — retry after unrecoverable GPU loss
+
+Confirmed native failure: the public photo renderer reported Context Lost and remained paused after Riprova. The former button only incremented a request handled inside useFrame; with stopped frames or no restored event, it could not guarantee recovery. The button now recreates the owned PoolScene/Canvas directly from its DOM handler, retaining the same configuration and ambient selection. Old asynchronous captures remain invalidated by existing owner cleanup.
+
+Independent functional review caught loss of manual framing from a naive remount. Added a retry-only camera snapshot bridge preserving actual pose, optics/zoom/view offset, OrbitControls target and navigation limits. A second identified edge case (top-view round trip replaying a stale snapshot) was corrected. Normal subsequent focus changes retain their existing behavior. No materials, geometry, water shaders or normal camera presets changed.
+
+Targeted tests PASS: six actual-source retry/camera lifecycle groups using real Three cameras, including stopped frames, perspective/orthographic optics, pending-snapshot cleanup, StrictMode replay and top-view handoff; prior native-restore/stale-export/cache lifecycle audit; PoolViewport dependency typecheck; scoped reverse patch and whitespace check. Negative control removing the camera-identity invalidation fails the top-view/handoff regressions. No broad build/lint/audit.
+
+Native integrated-browser test PASS with temporary DEV-only shortcut: forced WebGL loss and frameloop=never, observed paused UI, clicked Riprova, observed a different canvas/context ID and resumed photo progress (7%). Before/after camera position, quaternion, projection, target and limits were exactly equal. SPA glass, 10x4.5m concrete/Skimmer/internal stairs/BlueSky602/Travertino/day retained. Console error query returned none. Test instrumentation removed; final sources typechecked/tested and live view rechecked. This proves focused desktop recovery, not real-device performance or a new PNG export.
+
+Render startup still causes long interaction stalls; these and the earlier Vite connection loss are not claimed fixed. Villa water fidelity comparison, wider scene/device/performance and operational/release gates remain open. All changes local; public Preview unchanged. No commit/push pending requested whole-WIP gates, deployment, merge, backend/Supabase operation, email or cloud QA project. Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/photo-context-retry-20261106/manifest.json`.
+
+
+### 6 November — photographic BVH preparation moved off the interface
+
+Measured the same SPA-glass 10x4.5m/Skimmer/BlueSky602/Travertino/day startup in the integrated desktop browser. A first run spent29.09s in setup. Detailed repeat:17.72s total, generator16.51s including1.89s geometry merge; BVH therefore approximately14.62s. Material bake48ms, constructor100ms and texture update125ms were not the dominant cause. These are scoped development observations, not qualified hardware benchmarks.
+
+The full scene now uses the installed tracer's setSceneAsync with an owned BVH worker. Positions, indices, groups/ranges, normalized values and SAH options are preserved; no geometric simplification, sample/quality reduction, lighting/material or camera preset change. Cancellation rejects the pending build before terminating the worker, so the installed tracer cannot upload a cancelled result. Exit and native context loss cancel; tracer publication waits for the complete scene and shader adapters. Idempotent release prevents late promises from cleaning a newer owner.
+
+Candidate initial work before yielding the UI thread:2.281s versus17.718s synchronous setup; candidate total preparation18.087s, so this improves responsiveness, not total render duration. Geometry merge remains approximately1.9s on the UI thread. Native worker loaded, accumulation progressed, and exits returned to the same SPA. Attempts to inspect native in-flight cancellation reached the completed build before observation; do not label those a native cancellation PASS. Worker and actual-effect cancellation are covered by the focused tests below.
+
+Tests PASS:14 worker cases with real separate-thread execution and byte-identical serialized BVH against the installed synchronous API;6 actual-source async effect cases covering deferred publication, cancellation, late resolve/reject, context loss and failure; existing context recovery with new build-cancel assertion;20 scene-ownership checks; tracer disposal/resource ownership audit; targeted renderer/worker dependency typecheck; scoped patch/whitespace. Independent functional review and negative controls confirmed the cancellation guards matter.
+
+An isolated production node-server build was necessary for the new worker bundle: PASS,495 runtime/public source files copied without .env files, all3 changed runtime sources match the built snapshot. Compiled worker asset151.62kB. Native production localhost:3004 loaded and rendered to22% before returning to live3D. No captured error; warnings were THREE.Clock deprecation and16 texture units reported against16 supported. No new PNG export, overall fidelity or device-performance acceptance claimed. All temporary timing instrumentation removed.
+
+Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/photo-bvh-worker-20261106/manifest.json`. Remaining work includes the initial merge stall, Villa water fidelity comparison, wider scene/device/performance and prior operational/release gates. Changes remain local; public Preview unchanged. No commit/push until required whole-WIP gates, remote deployment, main merge, backend/Supabase operation, real email or new cloud QA project.
+
+
+### 6 November — late photographic material refresh and Villa diagnostic
+
+Public Villa Infinity comparison completed with three actual2090×1858 PNGs: Arctic White/Standard≥215 samples retained dark bands; High≥236 showed white walls; re-entered Standard≥190 also showed white walls after restoring the collapsed-tray framing. Therefore a persistent Standard bounce-limit defect is not established; scene/material reinitialization is a confound. No optical/quality parameter was changed from this comparison.
+
+A confirmed independent loading defect was corrected: asynchronous liner maps could update retained React materials after the tracer had copied its textures, with no subsequent upload. PoolModel now marks committed map replacements with a scene-scoped WeakMap revision. PhotoMode checks that revision, uploads materials once without rebuilding the BVH, resets accumulation, and cancels stale HDR/PNG output. Changes during asynchronous BVH preparation are caught before the first sample. No unrelated material, geometry, camera or live-water change.
+
+Verification PASS:7 focused regression groups using the actual loader/map callbacks, tracer packing and HDR helper; pre-fix negative control fails;6 asynchronous setup cases; context recovery;40 HDR export checks; targeted component/dependency typecheck; exact patch/whitespace checks. Native integrated browser in the existing isolated local snapshot used controlled late texture delivery after8 samples: one upload reset8.111→0, then progressed to215 samples. Actual PNG2190×1854 downloaded; captured console errors0. The temporary loader gate and DOM counters were removed, source copies checked against the workspace, and viewport override reset. No new full build was required.
+
+Visual acceptance remains OPEN: the GreyRock native PNG still has dark wall bands; this lifecycle fix is not claimed to resolve their cause or deliver premium water realism. The initial long merge stall, broader devices/scenes/performance and previous operational/release gates remain open. Public Preview unchanged. No commit/push until requested whole-WIP gates, deployment, main merge, backend/Supabase change, real email or new cloud QA project. Current localhost3004 QA runtime is Vite on the existing isolated snapshot with current source copies; it replaces that port’s previous production server. Evidence: `docs/qa/evidence/catalogue-reference-wip-20261026/photo-material-refresh-20261106/manifest.json`.
+
+### 6 November — same-tracer Villa water isolation
+
+Native integrated-browser diagnostic on isolated Vite localhost3004: 9.7x4.5m angular/concrete/Infinity/internal stairs/GreyRock798/Travertino/Villa/Day. Temporary visible QA controls mutated the same tracer without scene rebuild. All six captured states have byte-equivalent camera world/projection matrices (live and photo) and renderScale0.85. Baseline210.889 samples; material-refresh61.222; emissive walls43.889; flat normals34; clear interface41; restored water with10/10 bounces57.667.
+
+Material refresh did not remove the dark regions. Wall emission separated a bright visible-wall strip from an adjacent darker contribution. Flat normals straightened the boundaries without removing them. IOR1/transmission1/flat normals retained the broad left strip while removing the near refracted band. Restored optics with10/10 at unchanged scale retained the same overall pattern. These observations support submerged geometry/shading contributions and do not establish a defective water tint or an insufficient6/6 bounce budget. Independent visual/source review agreed that no permanent optical/quality change is justified by this evidence. The unequal low sample counts support qualitative region comparisons only, not converged exposure/quality acceptance.
+
+No root runtime change was made. Temporary QA panel/source archived, then removed; isolated PhotoModeRenderer is byte-identical to the root candidate. Returned to live3D, collapsed the tray and handed off the clean preview. Configuration/Villa remained selected during these tests and cleanup; captured console errors0. Owner denies touching the page during the historical reset; do not attribute it to manual action. That historical development reconnection/reset and overall visual fidelity remain open, not fixed by this diagnostic.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/photo-villa-isolation-20261106/manifest.json. No full build, device benchmark, commit/push, deployment, main merge, backend change or email. Existing performance and operational gates remain open.
+
+Subsequent clean-candidate check: selected ArcticWhite180 through the real UI and exported Standard after the190-sample ready gate. Native PNG2190x1854, export request22:20:19.440Z to completion22:20:21.947Z (2.507s after click; not total rendering time). Captured console errors0, no unsolicited Garden reset. Independent image review PASS for this export: white walls and muted blue-grey shaded band, with no persistent near-black/brown artifact. This does not prove the cause or permanent resolution of the earlier intermittent public result and is not overall photorealistic acceptance. Returned to live3D, retained Villa/ArcticWhite and collapsed the tray. PNG, download metadata and final preview are in the same evidence manifest.
+
+### 6 November — shared vegetation tangent preparation
+
+Native profiling of the same SPA-glass10x4.5m/Skimmer/internal stairs/BlueSky602/Travertino/day/Standard scene confirmed the remaining synchronous cost: computeTangents1956ms of static generation2442ms, with the largest plant primitive expanded to4,139,360 vertices. The whole scene has4,895,750 vertices. A per-mesh yielding adapter would not split this single large calculation, so no private-generator adapter was added.
+
+cataloguePlantGeometry now decodes each source primitive once and prepares missing tangents before positive uniform-scale/rotation placements. All positions, normals, UVs, other source attributes, indices, groups, bounds, materials and placement counts remain exact in targeted comparisons. Nonuniform, mirrored, sheared or singular matrices retain the previous post-expansion behavior for their whole material batch; authored tangents remain untouched. Borrowed GLB/live instances are never modified or disposed. Temporary decoded copies dispose in finally.
+
+Native paired observations: plant bake1420.8->1193.4ms; setSceneAsync synchronous preparation2507.5->783.8ms; measured segment sum3928.3->1977.2ms. Complete setSceneAsync18514.2->16347.2ms (excludes earlier plant bake and subsequent accumulation). Two baseline profiles and one candidate, same configuration/tray; this is scoped development evidence, not stable input-latency or device-performance acceptance. Native rendering progressed, captured console errors0, and independent visual review found no obvious vegetation regression. Baseline/candidate screenshots were15%/12% accumulated, so subtle differences are not excluded.
+
+Targeted checks PASS: six real Meshopt-GLB/synthetic comparison cases, whole-batch fallback, authored-tangent preservation, empty placements, source immutability and injected decoded-source cleanup failures; exact original-source negative control fails the work-scaling assertion. Root-source/dependency typecheck, audit syntax and scoped whitespace pass. No broad build or audit. Real generated tangents are not bit-identical: maximum direction delta3.018degrees, mean foliage0.0037403degrees,24 foliage vertices>1degree, four handedness changes in4,480,870 fixture vertices. These are explicitly measured numerical differences, not an equivalence claim. Native new retained plant tangent storage is75,414,880bytes (~71.9MiB); the largest computeTangents temporary allocation drops structurally from8.28million to0.83million vectors, but actual peak memory is unmeasured.
+
+Temporary profilers removed, relevant runtime copies equal root, clean reload cleared both DOM probes. This deliberate reload retained hydrated pool configuration but reset presentation setting to Garden; SPA was reselected and returned as clean live3D with tray collapsed. Do not confuse this intentional reload with the earlier unsolicited development disconnect. No new PNG export, commit/push pending whole-WIP gates, deployment, main merge, Supabase/backend action or email. General live-scene/device performance and operational gates remain open.
+
+Evidence, exact scoped patch, source snapshots, native timings/screenshots and checks: docs/qa/evidence/catalogue-reference-wip-20261026/photo-plant-preparation-20261106/manifest.json.
+
+Next performance finding after clean reload: live SPA with collapsed tray reports20.2–20.3FPS,49.4–49.6ms frame time,p95~57.8ms at1095x927viewport/DPR1.588/1738x1472buffer on the browser-reported AppleM1Pro renderer. Full-frame counters report8.48–16.96million triangles across passes; GPU timing is unavailable, so a GPU-only cause is not proven. This is a separate live-scene cost unaffected by the photo-only optimization. Isolate that cost next; do not repeat the photographic tangent audit. Raw intervals: live-followup.json in the same evidence folder.
+
+### 7 November — live SPA plant area-light work
+
+Isolated the live SPA cost on the same10x4.5m Skimmer/BlueSky602/Travertino/day scene. Per-instance leaf culling reduced submitted triangles but not FPS; freezing the mirror improved only part of the cost and lacks safe invalidation; neither was integrated. Temporarily removing area lighting from plants isolated a substantial fragment-shader cost, but that appearance-changing variant was also rejected.
+
+Integrated only CataloguePlants callback/program-key updates plus cataloguePlantAreaLight. The helper skips rectangular-light BRDF work behind the emitter plane, where stock LTC_Evaluate returns zero. All original base/clearcoat texture lookups precede the branch, preserving implicit derivatives/filtering. Global Three chunks and other materials are untouched; incompatible/missing/duplicate shader anchors return unchanged. Plant geometry/placements/maps, actual lights and reflection cadence remain unchanged. The first explicit-gradient candidate was rejected after a native glossy-case difference of27/255.
+
+Verification:24 shader integration/fallback checks and2,410 numeric finite-input cases PASS; scoped component/dependency typecheck, audit syntax and whitespace PASS. Native WebGL comparison:72 cases,1,179,648pixels,4,718,592channels; one channel differed1/255, all others equal, no compile/link errors. The raw strict bit-identity test reports REVIEW; accepted only as a quantization-level difference after review, not bit-exact equivalence or a general GPU guarantee. Independent day/night screenshot review found no obvious vegetation/glass/composition regression; moving water differs naturally and subtle artifacts are not excluded. Villa/no-area-light compile check captured no errors.
+
+Repeated paired five-window native development comparison: Day22.0–22.4FPS, mean45.112ms ->26.5–26.9FPS,37.336ms (-17.24% frame time). Night18.4–18.6FPS,54.122ms ->21.7–21.9FPS,45.930ms (-15.14%). Camera, projection, viewport1095x927,DPR1.588,buffer1738x1472 and geometry/triangle count match. Browser reports AppleM1Pro/ANGLE. This is scoped local evidence, not stable isolated hardware/device acceptance; overall live fluidity remains OPEN.
+
+Temporary diagnostics removed; running QA source restored to integrated root, final SPA/day/live3D preview handed off. Source HMR during these diagnostics caused known reloads and SPA was reselected; this does not explain the owner's earlier unsolicited Garden reset, which stays OPEN. Public unchanged. No full build, commit/push pending whole-WIP gates, deployment, main merge, backend/Supabase change or email. Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/live-plant-area-lights-20261107/manifest.json.
+
+
+### 7 November — catalogue setting recovery after reload
+
+Confirmed that the pool draft restored while the catalogue setting and visited-presentation latch were React-only state. A controlled native reload of SPA vetrata therefore returned to Garden before the change. Added a small tab/project-local sessionStorage hook for the six catalogue settings and latch only. The provider exposes its existing hydration-ready flag so temporary/default project state cannot overwrite the saved preference. Selection writes immediately; project changes stay isolated; existing Infinity and maximum12x6m indoor availability normalization remains authoritative. Restricted/full storage degrades safely. Photo Mode, camera and cloud/project data are not persisted by this hook.
+
+Verification PASS: native before/after reload reproduced failure then retained selected SPA vetrata; Photo Mode did not restart. Actual Presentation→Optional→Presentation navigation retained the indoor scene.84 actual-hook/storage checks with simulated React commit ordering cover invalid records, unavailable storage, hydration, project isolation/reset, immediate selection and compatibility normalization.216 actual stage-routing cases preserve raw/technical/intro construction flags. Scoped PoolConfigurator/provider/hook dependency typecheck, source equality and whitespace checks passed. No full build or broad audit.
+
+Integrated in the real workspace, preserving existing WIP. Native QA is the existing isolated localhost3004 runtime with matching source, clean live3D SPA/day preview handed off. This corrects loss of environment following a reload; it does NOT establish or fix the cause of the historical unsolicited reload. The owner explicitly confirmed no interaction at that time. Public unchanged; no commit/push pending whole-WIP gates, deployment, main merge, cloud/backend action or email. Broader visual/performance and operational gates remain open.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/presentation-resume-20261107/manifest.json.
+
+
+### 7 November — native SPA export lifecycle and pending throughput probe
+
+Existing native IAB tab7/local Vite3004, SPA vetrata10x4.5m Skimmer/BlueSky602/Travertino/Day/Standard. Added only a temporary QA-copy lifecycle recorder (document timeOrigin, pagehide/pageshow, context/error and Vite full-reload/websocket events). After one deliberate reload to start recording, selected SPA survived. Observed photo progress4→6→8→21→44→79→95%, then the actual190-sample ready state after approximately14minutes. No unsolicited reload was observed during accumulation; this does not resolve the earlier historical report.
+
+The first Genera foto attempt did NOT produce a verified PNG: download wait timed out at60s and the CUA kernel reset. Subsequent attachment of the same tab repeatedly timed out on focus emulation, including after the export worker's180s deadline. Tab7 remained in browser inventory; Vite PID16418 remained listening; no new matching piscina-wellness-photo PNG was found in Downloads. These observations do not distinguish an application/GPU stall from a browser-control failure. Asked the owner whether the visible page is frozen, downloaded, or showing a save dialog; response pending. Existing tab was requested in the side panel, but tool returned queued, so visibility is NOT claimed. No manual page/server restart or speculative production fix was performed.
+
+Scoped source review found no document reload in Configurator/Viewport/PhotoModeRenderer. The separate chunk-reload guard can reload on vite:preloadError, but the installed Vite emits that from its build helper, not the normal dev lazy import. Dev websocket reconnection/full-reload are separate potential triggers; none was observed during this accumulation. Export has two synchronous GPU readbacks before its worker deadline begins; the worker uses WebGL denoising and full-image pad/add operations for tiled blending. These are investigation points, not established causes of the observed timeout. Canvas2190x1854 was observed, but actual HDR target dimensions were not captured and must not be assumed equal.
+
+A separate throughput finding: native photo frames measured2.1–2.5FPS/401–476ms, with the installed3x3 tiling (one tile/frame), implying roughly3.6–4.3seconds per complete sample. Other existing tabs were not isolated. Prepared a QA-only SAH leaf1-vs4 benchmark, keeping image quality/geometry/materials and measuring complete samples5→24 with stable noise. Two-file syntax/semantic typecheck PASS; candidate is archived only, NOT installed or measured. Prioritize export diagnosis before this benchmark. No gain or visual-equivalence claim.
+
+Root runtime remains unchanged this turn. The QA copy still has the temporary lifecycle import/probe because altering it now would contaminate the unresolved live state; remove it after recording the outcome. Recovery/visual/device/operational gates remain open; no commit/push, deploy, main merge, backend change or email. Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/spa-export-lifecycle-20261107/manifest.json.
+
+### 7 November — export trace and observed development reload
+
+The former QA tab7 was absent from the next browser inventory, so its render job could no longer be continued. Reused the same Vite3004 server/PID16418 in a new marked-handoff tab9. A loopback-only JSON event collector recorded export stages/dimensions/timestamps without images or project data. Only the QA copy temporarily lowered readiness190→8 to exercise the full-resolution export protocol quickly; actual captures were59.67 and20.67samples. These are NOT final-quality acceptance. The real workspace retained190 throughout.
+
+Baseline native SPA vetrata10x4.5m/Skimmer/BlueSky602/Travertino/day/Standard: HDR target2176x1224, output PNG2560x1440. Raw synchronous GPU readback1105ms, ROI17ms, denoiser7166ms; request→PNG link click8978ms. No reload/context-loss event during this export. Separately, merely arming the CUA download observer before a click timed out and reset its kernel; the same page was then reacquired and responded normally. This demonstrates a tool-observer failure in this diagnostic run, not the cause of the older unobserved export attempt.
+
+Prepared a TMP-only cancellable PBO/fence readback candidate. Its simulated protocol/GL audit passed81checks after the baseline failed the new deferred-read assertion; scoped TypeScript0diagnostics. Native GPU fixture passed14checks including131072HDR and32768ROI float values bit-identical to synchronous reads, DPR2 viewport/scissor restoration with default/non-null targets, cancellation and no GL error. However full-scene raw scheduling still blocked942ms, followed by131ms CPU copy; request→PNG8920ms. This is not a sufficient performance result or a stable hardware A/B/A comparison. Candidate and extra audit were NOT integrated in ROOT. A finer per-GL-call trace was prepared/typechecked but its pending run was interrupted before export; no fine-grained timing finding is claimed.
+
+The candidate generated an actual valid6586017-byte2560x1440PNG, retrieved using the browser's downloadMedia on a temporary visible duplicate of the exact generated blob link. Decoded/viewed image contains the intended SPA, with expected low-sample water noise. The duplicate link only exposed the same payload for QA; this is not proof of the unmodified automatic-download UX or a190-sample quality pass. Adding that QA link listener initially caused an SSR500 because it referenced document at module scope; a browser-only guard corrected it and HTTP200 was verified. This was an introduced diagnostic-only defect, not a product regression.
+
+New authoritative reload evidence: at00:41:56Z and00:42:08Z, lifecycle records show vite:ws:disconnect→pagehide→boot:reload with changed document timeOrigin, without a corresponding agent reload/source edit. Photo Mode ended, but the previously integrated recovery hook retained SPA vetrata. The installed Vite client explicitly calls location.reload after reconnect ping on this event. This establishes the proximate trigger of these new QA reloads; it does not identify why the websocket disconnected, establish the historical incident's cause, or imply a public-production reload bug. Large gaps in observation wall-clock time and changed live frame rates mean these sessions cannot support stable-device acceptance. A temporary QA-only server.hmr:false setting did not remove the observed client connection and was reverted.
+
+Cleanup verified: ROOT runtime unchanged; QA renderer/export/worker/readiness restored to the ROOT source,190-sample gate restored, previous lifecycle import/module and native fixture removed, QA Vite config restored, loopback collector stopped. No experimental candidate, trace or reduced-sample gate shipped. Existing server retained and clean live3D SPA preview handed off. No full build/broad audit, commit/push pending whole-WIP gates, deploy, merge, backend/Supabase action or email.
+
+Next: use a genuinely stable production-style QA runtime for long native190-sample export/visual acceptance; then use the prepared fine trace to isolate the remaining readback setup stall before changing code. BVH leaf benchmark remains archived/unmeasured. Overall fluidity, hardware/device, visual and operational gates remain open.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/spa-export-trace-20261107/manifest.json.
+
+
+### 7 November — opaque photo loading and initial skimmer reveal
+
+User request: keep the early pool free of skimmers; hide progressive photographic noise behind a premium black progress screen; improve speed. PoolViewport now uses an opaque black modal with only a thin progress bar and percentage until the original190-sample ready condition. Fresh quality/retry sessions cover immediately, view controls are inert, keyboard focus stays inside and Escape cancels. Context-loss retry remains available. Polling stops entirely outside Photo Mode and avoids unchanged state updates. No photographic quality threshold or renderer algorithm was reduced.
+
+Native desktop and390x844 mobile-emulation screenshots confirm the black loading surface. The same page reached190 and revealed the completed image without reload in the initial loading-UI run. Final keyboard/modal checks passed: Tab stayed inside; Escape returned to live3D, though desktop browser control timed out during preparation before the result could be observed. Mobile Escape was observed directly. The owner confirmed the percentage advanced during the read timeout. These observations distinguish progress from the tool timeout; they do not establish that every interaction stays responsive during heavy preparation or certify real mobile hardware.
+
+A real pre-existing reveal mismatch was reproduced: early Installazione hid skimmer bodies but still cut two wall openings. PoolModel now receives the existing showSkimmers stage flag and applies it to holes and coping obstacles. Native final-build before/after confirms closed initial walls and restored Slim Moderno openings/bodies in Sistema acqua. Other system branches and saved selections are preserved. Targeted checks:14 loading component/hook cases,10 opening/profile/Infinity cases plus Scene flag propagation PASS; scoped three-source dependency typecheck and whitespace PASS. QA production compile PASS, required to verify this isolated non-HMR runtime.
+
+Native full-quality export also succeeded through the actual Genera foto button with a bounded download observer:2190x1854PNG,6738538bytes,SHA256 3d818fbadb6e78b5d6952b123ce117397afd0be94b9a518c5af16262eeff16ed. No QA duplicate link or lowered sample gate was used for this export. Visual acceptance remains OPEN for water noise, the very dark emerged wall band and cropped chaise/composition. An earlier55%→0% accumulation reset was observed without leaving Photo Mode; its cause is unproven.
+
+Throughput candidate REJECTED: QA-only BVH leaf4 reduced tree bytes170034464→89694560 and build time14.17–15.34s→11.51s, but valid repeated sampling was4.049s/sample versus baseline3.879 and3.834s/sample. A separate faster candidate run was subsequently invalidated and is not accepted evidence. Diagnostic code/leaf changes were removed; ROOT renderer remains unchanged. This turn does not close photographic speed or stable hardware/device acceptance.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/photo-production-loading-20261107/manifest.json. Local preview uses the matching QA production build on localhost3004. Public unchanged. Existing whole-WIP visual/performance and operational gates remain open; no commit/push, deployment, main merge, backend/Supabase action or email.
+
+
+### 7 November — L/custom controls, skimmer spacing and adjustable stair width
+
+Scoped owner request implemented in the current WIP. L-shape controls now use the existing geometric minimum5x4m and dynamic recess limits; the reducer normalizes matching values so displayed dimensions and constructed geometry agree. Both new-pool and renovation flows use the same rules. Skimmers prefer the longest actual eligible wall, with count/capacity based on usable margins: the reproduced10x7m SE/SW8x3m recess cluster is resolved while the rectangular baseline is preserved.
+
+Custom pointer updates coalesce per animation frame, preserve the final pointer coordinate/capture and ignore non-finite/no-op updates. Early curvature rejection avoids repeated expensive full validation without changing outputs in64 paired cases. Node-only aggregate geometry time3183→1055ms (3.02x) is not a GPU/FPS or real-device measurement. An invalid small default outline now explains its limits and offers an explicit uniform enlargement (native3x2→4x2.7m), applied only by user action. Numeric dimensions commit on Enter/blur, Escape cancels, and sliders coalesce frames while flushing the final value.
+
+Added optional internalStairWidth end-to-end: new and existing-pool controls, real layout/comfort resolution, local/project serialization, Share allowlist, IT/EN summary/PDF data model and scene/shadow dependencies. Straight and integrated comfort flights use actual collision/Infinity/clearance checks; automatic sizing and18 legacy layouts remain identical. Corner stairs retain their constructive radii/treads and show an explanation instead of an inert slider. Native new and renovation L-pool tests show1.70m width; new-pool slider1.25m, Escape and automatic reset also pass. Cloud round trip and an actual PDF download for this field were not performed.
+
+Native390x844 testing exposed a separate Top-frame selection bug: a side rectangle collapsed after symmetric centering, making the small custom pool disappear. Frame selection now evaluates the centered subset only for Top; default perspective behavior is preserved. The exact native DOM regression failed before and passes after (calculated4m footprint0.735→77.148px); final browser screenshots confirm the outline is visible again. Compact mobile dimension labels remain crowded, and an expanded view can retain its earlier small framing; these presentation limitations are not certified resolved. Emulation is not real mobile hardware.
+
+Verification PASS:36 real reducer/shape/skimmer checks,311 stair-width checks,11 actual custom interaction checks,8 dimension input checks,13 mobile framing checks;24-source scoped TypeScript syntax/semantic checks; targeted whitespace check. The production-style QA build was required for native verification without HMR and passed. All24 changed source files match the QA snapshot. No broad audit, unrelated refactor, backend/Supabase change or email. Existing WIP preserved; public deployment unchanged and commit/push remain pending the existing whole-WIP gates. Desktop preview left on the widened stair atlocalhost3004.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/shape-controls-stair-width-20261107/manifest.json.
+
+
+### 7 November — stair side controls and explicit comfort compatibility
+
+Owner-confirmed combinations: both stair types may stand alone; straight stairs may combine with a sun shelf; corner stairs may combine with sun shelf or hydromassage; straight+hydromassage is excluded. Both choice cards remain visible, including disabled combinations with their reason. New SX/DX arrow controls (L/R in English) use actual resolved placements and preserve keyboard focus/pressed states. Invalid positions stay disabled; no unconstrained mesh mirroring or relaxed geometric exclusions. Corner radii, treads and rises remain constructive and fixed; straight-width controls are retained.
+
+The existing mirror field now reaches in-ground scene geometry, the reducer, project restore and the existing-pool snapshot/Share allowlist. New and renovation settings stay isolated. IT/EN summary data includes the chosen side. A remembered width is preserved when switching to a fixed corner flight. Selecting hydromassage chooses corner stairs while preserving an existing inox ladder as an additive entrance when compatible. Legacy requested incompatible data is retained with unavailable status rather than silently deleted.
+
+With a sun shelf, selecting Corner now retains a real independent radial flight instead of silently rendering the integrated straight one. Shelf dimensions/furniture passage checks and Infinity/fitting exclusions remain authoritative; usable corner positions depend on space. Only the sun-shelf and hydromassage combination camera subjects were extended to include the independently selected radial flight. Other camera branches, materials and unrelated geometry remain unchanged. Native final-build views show both comfort body and corner flight.
+
+Verification PASS:112 focused option/layout/reducer/persistence/Share/summary/camera assertions and305 existing stair-width regression assertions. Initial real baseline side-selection and combined-framing assertions failed before their fixes. Updated the one prior width fixture that advertised the newly excluded straight+hydromassage combination; inactive legacy corner selections with non-internal access remain covered. Scoped16-source syntax/semantic checks, targeted whitespace and final QA production-style build PASS; all16 source hashes match ROOT and the running QA copy. No general audit or full test suite.
+
+Native desktop10x5m tests verified both straight and radial SX/DX changes, switching shape with an active shelf, choosing hydromassage from straight+shelf, the disabled Straight explanation, both combined views, and deliberate reload preserving Corner+DX+Hydromassage A. Native390x844 viewport emulation verified IT/EN controls, no horizontal document overflow, Tab L→R and Enter selection. The browser error log was empty in this observed session. This is not real-device/GPU performance acceptance. Renovation preview/JSON/Share were tested locally; its native UI was not separately repeated. No cloud round trip or PDF download repeated.
+
+Bipe Creator was requested, but no exact matching connected plugin or installed skill was found; no unrelated plugin was created or installed. Used available VB routing, incremental implementation, interaction and architectural pool-modeling guidance. Existing WIP preserved; branch/head unchanged. Public deployment unchanged; commit/push remain pending the existing whole-WIP gates. No backend/Supabase action or email. Desktop preview left on the corner stair/SX with the shelf retained, localhost3004.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/stair-sides-compatibility-20261107/manifest.json.
+
+
+### 7 November — skimmers on the head opposite the sun shelf
+
+Owner clarified that “opposite side” means the short head opposite the actual sun shelf. The previous longest-wall planner ignored that relationship. The configured layout now resolves the actual shelf/access first, then places the required skimmer row on the opposite real boundary head while reserving the flight/landing/ladder clearances. Switching an independent corner flight SX/DX moves the row into the remaining free head span. The mirror source is resolved without fitting obstacles to prevent a moved row from flipping its own entrance anchor; final geometry is validated against the actual row. Existing margins, minimum spacing and hydraulic count remain authoritative. An insufficient head returns an explicit IT/EN unavailable reason rather than falling back to the shelf-side wall.
+
+The live scene, existing-pool preview, project metrics and photographic specification use the same configured row. No-shelf, unsupported-shelf, L-shape and above-ground legacy planning are preserved. Overflow/Infinity have no skimmer row. Related cover testing reproduced a false incompatibility because both heads appeared occupied: the cover guard now distinguishes a completely submerged shelf from an emerged obstacle. Its actual top is below the cover sweep; the roller uses the head without skimmers. Cover geometry, materials and animation are unchanged.
+
+Verification PASS:230 new opposite-head layout/count/boundary/clearance/mirror/persistence/photo-spec checks;112 stair-option,305 stair-width and1175 cover-plan regression checks. Baseline opposite-head and related cover assertions failed before their fixes. Scoped eight-source dependency typecheck, targeted whitespace and final QA production compile PASS. All eight source hashes match ROOT and the running non-HMR QA snapshot. No general audit or full test suite.
+
+Native desktop1095x927,10x5m testing verified straight SX/DX and corner SX/DX with the actual openings visible on the opposite head, plus automatic-cover0/100% operation. Final error log empty in the observed session. Original straight SX1.65m restored and temporary optional cover removed; top-view preview left open at localhost3004. Native renovation UI, cloud round trip, actual PDF export and real mobile/GPU performance were not repeated; local renovation/serialization/spec model assertions are not cloud acceptance.
+
+Existing WIP preserved. Public deployment unchanged; commit/push remain pending the existing whole-WIP gates. No main merge, backend/Supabase action or email. Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/skimmer-opposite-shelf-20261107/manifest.json.
+
+
+### 8 November — ordered wizard review fixes
+
+Owner authorized implementing the previous review in order. Access completion now shares one availability-plus-element criterion between the live step and restored-project landing; retained-invalid comfort is not treated as complete. The 25x4.5m opposite-head skimmer-capacity fixture failed the restore assertion before the fix. Requested configuration data is preserved. Final delivery guards remain unchanged.
+
+A selected incompatible automatic cover now shows its real reason, “Da verificare”, retained-selection explanation and an explicit Remove cover action; it does not falsely expose the extension control. Side controls include a fixed-orientation SVG using the same already-resolved outline, comfort, flight and fitting row. Live dimensions distinguish integrated shelf+steps from independent flights and use the actual independent stair width. Side comparison preserves even the first manually selected projection. Disabled sides expose their real reason; unavailable comfort cards stay visible with reasons and selected invalid comfort has an explicit removal action. Numeric out-of-range commits announce the applied range. IT/EN copy added; no physical geometry, materials, shaders or unrelated camera branches changed.
+
+The access tray now derives inox, hydro alternatives, shelf interval and lounger capacity only in the relevant substep, reusing selected comfort. Controlled actual AccessTray Node derivation,40 changing-width iterations: baseline repeat median5.243ms/p956.240ms; candidate1.969ms/p952.313ms; all four visible substep choice/dimension snapshots identical. This excludes child rendering, GPU, network and real-device performance and is not a configurator-wide speed claim. A reviewer checked store, null guards and actual layout reuse; the identified coincident-empty-reason, projection and independent-width issues were addressed before final tests.
+
+Verification PASS:11 restore/live access assertions;22 actual SSR mini-plan/fitting/focus/translation checks;7 controlled actual cover-component cases;11 actual dimension-control cases;112 stair-option and305 stair-width regressions. Scoped eight-source dependency typecheck, targeted whitespace and final isolated QA production build PASS. All eight source hashes match ROOT and the running QA snapshot on localhost3004. A default-sandbox build could not write Vite's shared dependency cache; the authorized scoped build succeeded. No broad audit or full suite.
+
+NATIVE FOLLOW-UP PASS after the owner manually reloaded the error document. Reused IAB tab7 on the unchanged final production build,955x927 desktop and390x844 mobile emulation. Straight SX/DX retained the first manually chosen top projection; actual flight and opposite-head fittings matched the fixed mini-plan. Corner preview was also observed. Width6m adapted to2.67m with the actual IT/EN range message and updated mini quote. The retained-invalid25x4.5m shelf/corner fixture disabled the last Access Continue and all later stages; a deliberate reload restored Access with the requested data and both disabled-side reasons retained. The selected incompatible Shelf remained visible with reason and recovery control.
+
+Selected automatic cover followed by Infinity side2 now showed Da verificare, its actual technical reason and removal action; clicking Remove cover actually restored Nessun optional. Mobile IT/EN mini-plan and controls were readable without document horizontal overflow (390/390px); keyboard Tab left→right and Enter selection passed. Editing shelf length to3.5m updated remaining swim to6.5m, then3.035m restored. Final observed browser error log empty. Returned to10x5m/Straight DX2.5m/Shelf/two lime loungers/Mosaico5/no cover, IT/Day, top view; viewport override reset and preview marked deliverable. This is scoped interaction/visual acceptance, not stable hardware/GPU/FPS or whole-product release acceptance. Native renovation UI, cloud, actual PDF, long photographic rendering and email/final submission were not repeated.
+
+Existing WIP preserved; operational branch/head unchanged. No commit/push pending the existing whole-WIP gates; no public deployment, main merge, DNS, backend/Supabase action or email. Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/wizard-review-fixes-20261108/manifest.json.
+
+
+### 8 November — authorized public Preview checkpoint
+
+Owner explicitly requested commit/push and updating the existing configuratoree.vercel.app, then opening it in the integrated browser. Verified operational branch and origin still at0bb0dd596081045fb8c6d79d03f1d9c60713f008 before checkpoint. Existing alias belongs to pool-shaper/prj_7YBi77yut3hUk4PvaoB3oQNv9is2, team_DWydw06SFQBNFE4wL9KZFAhY and previously pointed atdpl_39fdUof7n8snmrPPQnFYLNwPXDcH. Scope is that existing Preview alias, preserving its public access and environment; no main merge or Production promotion.
+
+All503 runtime/public source files match the native-tested QA snapshot byte for byte. Credential-pattern scan of197 candidate text files PASS. Latest source/type/QA production-build and native receipts remain applicable because runtime bytes did not change after testing. Commit includes current runtime/assets, relevant scripts and the four latest targeted QA evidence sets.1050 historical raw evidence files remain untouched locally and in the persistent full-WIP backup. APFS copy-on-write backup preserves all1257 initially untracked files plus tracked patch/status while avoiding a second physical548MB archive on the nearly full volume.
+
+Publication/build/anonymous-access and native online verification are recorded after the deploy in the publication receipt. Wider release gates remain open; no backend/Supabase action, real email, DNS or project-wide protection change is authorized or performed by this checkpoint.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/vercel-checkpoint-20261108/publication-plan.json.

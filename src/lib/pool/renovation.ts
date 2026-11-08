@@ -40,6 +40,8 @@ export function isRenovationConfig(value: unknown): value is RenovationConfig {
         !valid(e.system, ["skimmer", "overflow"]) || !valid(e.overflowType, ["visible", "hidden", "continuous"]) ||
         !valid(e.finish, ["liner", "mosaic"]) || !valid(e.poolAccess, [null, "internalSteps", "stainlessSteelLadder"]) ||
         !valid(e.internalStairType, ["linear", "corner"]) ||
+        (e.internalStairWidth !== undefined && (!Number.isFinite(e.internalStairWidth) || e.internalStairWidth < 0.8 || e.internalStairWidth > 100)) ||
+        (e.internalStairMirrored !== undefined && typeof e.internalStairMirrored !== "boolean") ||
         !valid(e.linerColor, LINER_COLORS.map(c => c.id)) ||
         !valid(e.mosaicFinish, MOSAIC_FINISHES.map(c => c.id)) ||
         !valid(e.copingMaterial, COPING_MATERIALS.map(c => c.id))) return false;
@@ -74,7 +76,7 @@ export function renovationPreviewConfig(config: PoolConfig, r: RenovationConfig,
   const finish = before || !renovationIncludes(r, "interiorFinish") ? e.finish ?? r.currentFinish : config.finish;
   const system = !before && renovationIncludes(r, "filtration") && r.filtrationWorks.includes("overflow")
     ? "overflow" : e.system ?? config.system;
-  const { infinityEdge: _edge, ...base } = config;
+  const { infinityEdge: _edge, internalStairWidth: _width, internalStairMirrored: _mirrored, ...base } = config;
   return {
     ...base,
     poolType: e.poolType ?? config.poolType,
@@ -86,6 +88,8 @@ export function renovationPreviewConfig(config: PoolConfig, r: RenovationConfig,
     overflowType: before || e.system === "overflow" ? e.overflowType ?? config.overflowType : config.overflowType,
     poolAccess: e.poolAccess !== undefined ? e.poolAccess : config.poolAccess,
     internalStairType: e.internalStairType ?? config.internalStairType ?? "linear",
+    ...(typeof e.internalStairMirrored === "boolean" ? { internalStairMirrored: e.internalStairMirrored } : {}),
+    ...(e.internalStairWidth !== undefined ? { internalStairWidth: e.internalStairWidth } : {}),
     dimensions: e.poolType === "above-ground" ? { ...config.dimensions, floorProfile: "flat" } : config.dimensions,
     copingMaterial: !before && renovationIncludes(r, "coping") && r.replaceCoping &&
       COPING_MATERIALS.some(c => c.id === r.copingMaterial)

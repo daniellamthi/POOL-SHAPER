@@ -1,0 +1,45 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const root=process.cwd();
+const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'pool-custom-shape-audit-'));
+const geometryBundle=path.join(temporary,'geometry.cjs');
+const configBundle=path.join(temporary,'config.cjs');
+process.once('exit',()=>fs.rmSync(temporary,{recursive:true,force:true}));
+const req=createRequire(root+'/package.json');const ts=req('typescript');const {build}=req('rolldown');
+await build({input:root+'/src/lib/pool/geometry.ts',output:{file:geometryBundle,format:'cjs'}});
+await build({input:root+'/src/lib/pool/config.ts',output:{file:configBundle,format:'cjs'}});
+const geometry=req(geometryBundle); const configDefaults=req(configBundle);
+const source=fs.readFileSync(process.env.POOL_SHAPE_EDITOR_SOURCE || path.join(root,'src/components/pool/ShapeEditor.tsx'),'utf8');
+const js=ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+function harness(dimensions={...configDefaults.DEFAULT_DIMENSIONS}, screenWidth=320){
+ const refs=[],states=[],memos=[],effects=[],frames=new Map(),calls=[],dimensionCalls=[];let cursor=0,frameId=0;const captured=new Set();
+ const svg={getBoundingClientRect:()=>({left:0,top:0,width:screenWidth,height:198.4*screenWidth/320}),setPointerCapture:id=>captured.add(id),hasPointerCapture:id=>captured.has(id),releasePointerCapture:id=>captured.delete(id)};
+ const config={dimensions,controlPoints:configDefaults.DEFAULT_CONTROL_POINTS};
+ const context={config,outline:geometry.buildOutline('custom',dimensions,config.controlPoints),setControlPoint:(index,point)=>calls.push({index,point}),resetControlPoints:()=>calls.push({reset:true}),setDimension:(key,value)=>dimensionCalls.push({key,value})};
+ const react={useRef:value=>{const i=cursor++;return refs[i]??=( {current:value});},useState:value=>{const i=cursor++;states[i]??=value;return [states[i],v=>states[i]=v];},useMemo:(fn,deps)=>{const i=cursor++;if(!memos[i]||deps.some((d,j)=>d!==memos[i].deps[j]))memos[i]={deps,value:fn()};return memos[i].value;},useEffect:(fn,deps)=>{const i=cursor++;if(!effects[i])effects[i]={cleanup:fn()};}};
+ const exports={};vm.runInNewContext(js,{exports,require:id=>{if(id==='react')return react;if(id==='react/jsx-runtime')return {jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})};if(id==='@/lib/i18n')return {useI18n:()=>({t:x=>x})};if(id==='@/lib/pool/context')return {useConfigurator:()=>context};if(id==='@/lib/pool/geometry')return geometry;if(id==='@/lib/pool/config')return configDefaults;if(id==='@/components/ui/button')return {Button:'Button'};if(id==='lucide-react')return {RotateCcw:'RotateCcw'};throw Error(id);},requestAnimationFrame:fn=>{frames.set(++frameId,fn);return frameId;},cancelAnimationFrame:id=>frames.delete(id)});
+ const flat=node=>{if(!node)return [];if(Array.isArray(node))return node.flatMap(flat);if(typeof node!=='object')return [];return [node,...flat(node.props?.children)];};
+ const render=()=>{cursor=0;const nodes=flat(exports.ShapeEditor());const svgNode=nodes.find(n=>n.type==='svg');svgNode.props.ref.current=svg;return {nodes,svg:svgNode,handles:nodes.filter(n=>n.type==='circle'&&n.props.onPointerDown),buttons:nodes.filter(n=>n.type==='Button')};};
+ const event=(clientX,clientY,pointerId=1)=>({clientX,clientY,pointerId,button:0,currentTarget:svg,preventDefault(){}});
+ const atHandle=(handle,dx=0,dy=0,id=1)=>event(handle.props.cx*screenWidth/320+dx,handle.props.cy*screenWidth/320+dy,id);
+ return {render,event,atHandle,calls,dimensionCalls,frames,captured,runFrames:()=>{const callbacks=[...frames.values()];frames.clear();callbacks.forEach(fn=>fn());},unmount:()=>effects.forEach(e=>e?.cleanup?.())};
+}
+let checks=0;const check=(name,fn)=>{fn();checks++;console.log('PASS '+name);};
+check('burst coalesced latest position once per frame',()=>{const h=harness();let r=h.render();const p=r.handles[0];p.props.onPointerDown(h.atHandle(p));r=h.render();for(let i=1;i<=5;i++)r.svg.props.onPointerMove(h.atHandle(p,i*2,0));assert.equal(h.calls.length,0,'pointer moves must wait for one animation-frame commit');assert.equal(h.frames.size,1);h.runFrames();assert.equal(h.calls.length,1);assert(Math.abs(h.calls[0].point[0]-(-.5+10/268))<1e-12);});
+check('32px SVG hit target and independent visible handle',()=>{const h=harness();const r=h.render();assert.equal(r.handles.length,8);assert.equal(r.handles[0].props.r,16);});
+check('grab offset preserves point when hit target is clicked off-centre',()=>{const h=harness();const r=h.render();const p=r.handles[0];p.props.onPointerDown(h.atHandle(p,8,3));r.svg.props.onPointerMove(h.atHandle(p,8,3));h.runFrames();assert.deepEqual(Array.from(h.calls[0].point),[-.5,-.36]);});
+check('pointerup commits last coordinate before pending frame and releases capture',()=>{const h=harness();const r=h.render();const p=r.handles[0];p.props.onPointerDown(h.atHandle(p));r.svg.props.onPointerMove(h.atHandle(p,4,0));r.svg.props.onPointerUp(h.atHandle(p,12,0));assert.equal(h.frames.size,0);assert.equal(h.calls.length,1);assert(Math.abs(h.calls[0].point[0]-(-.5+12/268))<1e-12);assert.equal(h.captured.size,0);});
+check('pointercancel retains last valid move and stops subsequent updates',()=>{const h=harness();const r=h.render();const p=r.handles[0];p.props.onPointerDown(h.atHandle(p));r.svg.props.onPointerMove(h.atHandle(p,4,0));r.svg.props.onPointerCancel(h.atHandle(p,100,0));r.svg.props.onPointerMove(h.atHandle(p,150,0));assert.equal(h.calls.length,1);assert.equal(h.frames.size,0);assert(Math.abs(h.calls[0].point[0]-(-.5+4/268))<1e-12);});
+check('lost capture finalises pending gesture',()=>{const h=harness();const r=h.render();const p=r.handles[0];p.props.onPointerDown(h.atHandle(p));r.svg.props.onPointerMove(h.atHandle(p,4,0));r.svg.props.onLostPointerCapture(h.atHandle(p));assert.equal(h.calls.length,1);assert.equal(h.frames.size,0);});
+check('other touch/pointer cannot hijack active gesture',()=>{const h=harness();const r=h.render();r.handles[0].props.onPointerDown(h.atHandle(r.handles[0]));r.handles[1].props.onPointerDown(h.atHandle(r.handles[1],0,0,2));r.svg.props.onPointerMove(h.atHandle(r.handles[1],5,0,2));r.svg.props.onPointerUp(h.atHandle(r.handles[1],5,0,2));assert.equal(h.calls.length,0);assert.deepEqual([...h.captured],[1]);});
+check('unmount cancels queued updates',()=>{const h=harness();const r=h.render();r.handles[0].props.onPointerDown(h.atHandle(r.handles[0]));r.svg.props.onPointerMove(h.atHandle(r.handles[0],10,0));h.unmount();h.runFrames();assert.equal(h.calls.length,0);});
+check('3×2 warning gives explicit validated resize to4×2.7 without automatic edits',()=>{const h=harness({...configDefaults.DEFAULT_DIMENSIONS,length:3,width:2});const r=h.render();assert(r.nodes.some(n=>n.props.role==='status'));assert.equal(h.dimensionCalls.length,0);const button=r.buttons.find(b=>Array.isArray(b.props.children)&&b.props.children.includes('Adatta dimensioni'));assert(button);button.props.onClick();assert.deepEqual(h.dimensionCalls,[{key:'length',value:4},{key:'width',value:2.7}]);const dims={...configDefaults.DEFAULT_DIMENSIONS,length:4,width:2.7};assert(geometry.validatePoolShape(geometry.buildOutline('custom',dims,configDefaults.DEFAULT_CONTROL_POINTS),configDefaults.DEFAULT_CONTROL_POINTS).valid);});
+check('invalid compact shape cannot start a stuck drag',()=>{const h=harness({...configDefaults.DEFAULT_DIMENSIONS,length:3,width:2});const r=h.render();r.handles[0].props.onPointerDown(h.atHandle(r.handles[0]));r.svg.props.onPointerMove(h.atHandle(r.handles[0],10,0));assert.equal(h.frames.size,0);assert.equal(h.captured.size,0);});
+check('mobile240px editor keeps24px hit area and correct coordinates',()=>{const h=harness({...configDefaults.DEFAULT_DIMENSIONS},240);const r=h.render();const p=r.handles[0];assert(p.props.r*2*240/320>=24);p.props.onPointerDown(h.atHandle(p));r.svg.props.onPointerMove(h.atHandle(p,6,0));h.runFrames();assert(Math.abs(h.calls[0].point[0]-(-.5+8/268))<1e-12);});
+console.log(JSON.stringify({checks}));
+
+fs.rmSync(temporary,{recursive:true,force:true});

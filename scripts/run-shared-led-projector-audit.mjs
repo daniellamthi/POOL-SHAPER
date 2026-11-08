@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { resolve, dirname } from 'node:path';
+import vm from 'node:vm';
+const root=process.cwd(), req=createRequire(root+'/package.json'), T=req('three'), ts=req('typescript'), cache=new Map();
+function load(file){file=resolve(file);if(cache.has(file))return cache.get(file);const box={exports:{}};cache.set(file,box.exports);const local=name=>name==='three'?T:name.startsWith('@/')?load(resolve(root,'src',name.slice(2))+'.ts'):name.startsWith('.')?load(resolve(dirname(file),name)+'.ts'):req(name);vm.runInNewContext(ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{exports:box.exports,require:local,console},{filename:file});return box.exports;}
+const { applyLedTransmission }=load(root+'/src/components/pool/three/ledTransmission.ts');
+const shader={uniforms:T.UniformsUtils.clone(T.ShaderLib.physical.uniforms),fragmentShader:T.ShaderLib.physical.fragmentShader};
+const chunksBefore={...T.ShaderChunk};
+applyLedTransmission(shader);
+const expand=s=>s.replace(/#include <(\w+)>/g,(_,name)=>expand(T.ShaderChunk[name]));
+const expanded=expand(shader.fragmentShader);
+const declaredUnits=(expanded.match(/uniform sampler2D poolLedProjector\s*;/g)||[]).length+((expanded.match(/uniform sampler2D spotLightMap\[/g)||[]).length*4);
+assert.equal(declaredUnits,1,'four identical LED projector images must require one receiver sampler');
+const cookie=new T.DataTexture(new Uint8Array([1,2,3,255]),1,1), other=new T.Texture();
+const sourceArray=[cookie,cookie,cookie,cookie];
+// Emulate only Three renderer assignment timing: after onBeforeCompile.
+shader.uniforms.spotLightMap.value=sourceArray;
+assert.equal(shader.uniforms.poolLedProjector.value,cookie,'use original texture, without resampling/copy');
+assert.equal(shader.uniforms.spotLightMap.value,sourceArray,'do not alter built-in light state');
+shader.uniforms.spotLightMap.value=[];
+assert.equal(shader.uniforms.poolLedProjector.value,null,'no mapped spots uses no image');
+shader.uniforms.spotLightMap.value=[other,other];
+assert.equal(shader.uniforms.poolLedProjector.value,other,'follow replaced scene-owned map; no stale texture');
+shader.uniforms.spotLightMap.value=[cookie,other];
+assert.throws(()=>shader.uniforms.poolLedProjector.value,/shared|identical/i,'different images must never silently share a binding');
+assert.deepEqual(T.ShaderChunk,chunksBefore,'global library chunks untouched');
+// Verify all projector coordinates and shadow expressions are byte-identical.
+const stock=T.ShaderChunk.lights_fragment_begin;
+assert(expanded.includes('texture2D( poolLedProjector, spotLightCoord.xy )'));
+assert(expanded.includes('vSpotLightCoord[ i ].xyz / vSpotLightCoord[ i ].w'));
+assert(expanded.includes('spotShadowMap[ i ]'));
+assert(expanded.includes('SPOT_LIGHT_MAP_INDEX < NUM_SPOT_LIGHT_MAPS'));
+assert(stock.includes('texture2D( spotLightMap[ SPOT_LIGHT_MAP_INDEX ], spotLightCoord.xy )'));
+const helper=load(root+'/src/components/pool/three/sharedLedProjector.ts');
+const once=shader.fragmentShader;helper.shareLedProjector(shader);assert.equal(shader.fragmentShader,once,'idempotent composition');
+const full={uniforms:{spotLightMap:{value:[cookie,cookie,cookie,cookie]}},fragmentShader:readFileSync(root+'/docs/qa/evidence/catalogue-reference-wip-20261026/water-shared-receiver-20261102/l-active-fragment.glsl','utf8')};
+helper.shareLedProjector(full);
+const count=s=>[...s.matchAll(/uniform\s+(?:(?:highp|mediump|lowp)\s+)?[iu]?sampler\w+\s+\w+(?:\s*\[\s*(\d+)\s*\])?\s*;/g)].reduce((n,m)=>n+Number(m[1]||1),0);
+assert.equal(count(full.fragmentShader),15,'actual failing 18-unit lining shader saves precisely three bindings');
+assert.equal(full.uniforms.poolLedProjector.value,cookie);
+cookie.dispose();other.dispose();
+console.log(JSON.stringify({status:'PASS',scope:'Actual wet-material shader callback and native failing GLSL: 18 to 15 declarations; original projector image, all per-light coordinates/shadows, Three assignment timing, no-map/map replacement, distinct-map guard, local/idempotent patch. Native linking/visual acceptance separate.'}));

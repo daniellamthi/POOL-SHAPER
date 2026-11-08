@@ -14,6 +14,15 @@ export function studioDeckBand(outline: Outline, environment = true, loungers = 
   return loungers ? Math.max(base, DECK_CHAISE_LAYOUT.walkway + DECK_CHAISE_MODEL.length + DECK_CHAISE_LAYOUT.rearMargin) : base;
 }
 
+/** Extend the selected paving under an indoor room without shrinking its terrace. */
+export function extendStudioDeckToRoom(terrace: Outline, room?: Outline): Outline {
+  if (!room?.length) return terrace;
+  const points = [...terrace, ...room];
+  const minX = Math.min(...points.map(p => p[0])), maxX = Math.max(...points.map(p => p[0]));
+  const minZ = Math.min(...points.map(p => p[1])), maxZ = Math.max(...points.map(p => p[1]));
+  return [[minX, minZ], [maxX, minZ], [maxX, maxZ], [minX, maxZ]];
+}
+
 export type DeckFurnitureSide = { readonly rotation: number };
 /** Extra terrace behind the actual chaise row(s), not a larger ring on all
  * sides. Presentation space, not a certified installation clearance. */

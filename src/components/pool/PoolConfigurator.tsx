@@ -1,3 +1,5 @@
+import { useCataloguePresentation } from "@/lib/pool/use-catalogue-presentation";
+import { catalogueIndoorAvailable, resolveCatalogueSetting } from "@/lib/pool/catalogue-availability";
 import { exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { buildOutline } from "@/lib/pool/geometry";
 import { decisions } from "./wizard/decisions";
@@ -7,7 +9,7 @@ import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RENOVATION_STEPS, STEPS } from "@/lib/pool/config";
 import { ACTIVE_RENDERING_QUALITY } from "@/configurator/3d/scene/visual-preset";
@@ -62,10 +64,9 @@ import type { SceneFocus, PhotoModeQuality, SceneTimeOfDay } from "./three/PoolS
 import { renderQualityState } from "@/lib/pool/renderQualityState";
 import { requestHeroCapture } from "@/lib/project-delivery/heroCapture";
 import { renovationPreviewConfig, renovationDecisions, renovationDecisionComplete, renovationMacroReachable } from "@/lib/pool/renovation";
-import { planSkimmers } from "@/lib/pool/engineering";
 import { projectMetrics } from "@/lib/pool/project-metrics";
 import { buildTechnicalPlan } from "@/lib/pool/technical-plan";
-import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
+import { configuredPoolLayout, configuredSkimmerPlan } from "@/lib/pool/resolved-layout";
 import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 
 
@@ -124,6 +125,7 @@ function ConfiguratorLayout() {
   const {
     config: projectConfig,
     projectId,
+    projectReady,
     renovation,
     outline,
     skimmers: projectSkimmers,
@@ -146,7 +148,7 @@ function ConfiguratorLayout() {
   const config = useMemo(() => renovationPreviewConfig(projectConfig, renovation,
     step === 2 || (step === 3 && renovationBefore)), [projectConfig, renovation, step, renovationBefore]);
   const skimmers = useMemo(() => projectConfig.projectType === "renovation"
-    ? planSkimmers(outline, projectMetrics(config, outline).waterSurface, config.system === "skimmer")
+    ? configuredSkimmerPlan(config)
     : projectSkimmers, [projectConfig.projectType, config, outline, projectSkimmers]);
   const technical = useMemo(() => projectConfig.projectType === "renovation"
     ? buildTechnicalPlan({ config, outline, skimmers, metrics: projectMetrics(config, outline), layout: configuredPoolLayout(config) })
@@ -212,7 +214,12 @@ function ConfiguratorLayout() {
   const toggleMobileExpanded = useCallback(() => setMobileExpanded((value) => !value), []);
   const [photoMode, setPhotoMode] = useState(false);
   const [gardenStudio, setGardenStudio] = useState(false);
-  const [cataloguePatio, setCataloguePatio] = useState(false);
+  const indoorAvailable = useMemo(() => catalogueIndoorAvailable(outline), [outline]);
+  const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
+  const { setting: effectiveCatalogueSetting, contextEnabled: catalogueContextEnabled, select: setCatalogueSetting } = useCataloguePresentation({
+    projectId, ready: projectReady, presentation: premiumPresentationAvailable,
+    infinity: config.system === "infinity", indoorAvailable,
+  });
   const [photoModeQuality, setPhotoModeQuality] = useState<PhotoModeQuality>("standard");
   // Set once the path tracer has proven it can't run on this device (no
   // WebGL2, or WebGLPathTracer threw during setup -- see
@@ -275,7 +282,7 @@ function ConfiguratorLayout() {
       ? { day: current, night: alternate }
       : { day: alternate, night: current };
   }, [captureHero, config.sceneTime, setSceneTime, reframe]);
-  const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
+  useEffect(() => { if (!premiumPresentationAvailable || gardenStudio) setPhotoMode(false); }, [premiumPresentationAvailable, gardenStudio]);
   const openPremiumPresentation = useCallback(() => {
     if (!premiumPresentationAvailable) return;
     document.getElementById("premium-presentation")?.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -401,7 +408,14 @@ function ConfiguratorLayout() {
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
-  const construction = constructionPresentation(config, activeStepId, technicalView && !cleanCapture);
+  const constructionBase = constructionPresentation(config, activeStepId, technicalView && !cleanCapture);
+  // Once selected, the catalogue context accompanies the finished pool when
+  // navigating back to lights/deck/options. Raw and technical views stay clear.
+  const catalogueContextVisible = constructionBase.stage === "water" &&
+    (premiumPresentationAvailable || catalogueContextEnabled);
+  const construction = catalogueContextVisible
+    ? { ...constructionBase, showEnvironment: true, showDecking: true, showLoungers: true }
+    : constructionBase;
   // System details frame automatically, but remain inspectable by orbit/touch.
   const cameraLocked = false;
   const cameraFocus: SceneFocus = renovationWorkflow
@@ -461,6 +475,17 @@ function ConfiguratorLayout() {
       reframe();
     }
   }, [activeStepId, decision?.id, config.system, config.overflowType, reframe]);
+  // Tab navigation must inspect the selected component, even when another
+  // comfort zone is enabled. Option clicks keep their own contextual focus.
+  useLayoutEffect(() => {
+    if (activeStepId !== "access") return;
+    const accessView: SceneFocus = decision?.id === "access" ? "access"
+      : decision?.id === "ladder" ? "inox"
+      : decision?.id === "external" ? "external-stairs"
+      : decision?.id === "shelf-options" ? "shelf" : cameraFocus;
+    setInspectionView(accessView);
+    reframe();
+  }, [activeStepId, decision?.id, cameraFocus, reframe]);
   // Resolve the deck view before paint, so leaving lighting does not render
   // the old inspection view and then schedule a second camera update.
   useLayoutEffect(() => {
@@ -547,7 +572,12 @@ function ConfiguratorLayout() {
     captureHero,
     captureDayNight,
     openGardenStudio: () => setGardenStudio(true),
-    presentationContext: config.system !== "infinity" ? { active: cataloguePatio, setActive: setCataloguePatio } : undefined,
+    photoMode: { available: !photoModeUnsupported, active: photoMode, enter: togglePhotoMode },
+    presentationContext: {
+      value: effectiveCatalogueSetting,
+      onChange: value => setCatalogueSetting(resolveCatalogueSetting(value, config.system === "infinity", indoorAvailable)),
+      infinity: config.system === "infinity", indoorAvailable,
+    },
   };
   const RenovationComponent = RENOVATION_COMPONENTS[step] ?? ProjectTypeStep;
   const trayContent = renovationWorkflow ? (
@@ -606,7 +636,7 @@ function ConfiguratorLayout() {
         </div>
         <div className="flex items-center gap-1 sm:gap-3">
           <LocaleControls />
-          <DayNightSwitch sceneTime={sceneTime} onChange={(value) => setSceneTime(value, true)} />
+          {activeStepId !== "project" ? <DayNightSwitch sceneTime={sceneTime} onChange={(value) => setSceneTime(value, true)} /> : null}
           <Button
             type="button"
             variant="ghost"
@@ -626,13 +656,34 @@ function ConfiguratorLayout() {
           id="pool-viewport"
           className={cn(
             "pool-fullscreen-viewport relative w-full overflow-hidden bg-viewport",
+            activeStepId === "project" && !cleanCapture && "bg-background",
             mobileExpanded
               ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
               : "min-h-[200px] flex-1 rounded-[20px] border border-hairline lg:rounded-[24px]",
           )}
         >
-          <PoolViewport
-            cataloguePatio={premiumPresentationAvailable && cataloguePatio}
+          {activeStepId === "project" && !cleanCapture ? (
+            <div data-project-introduction className="absolute inset-x-0 bottom-0 top-[var(--pool-header-height,84px)] flex overflow-y-auto px-5 py-6 sm:px-10">
+              <div className="m-auto w-full max-w-2xl py-3 text-center">
+                <p className="label-xs mb-3 text-brand">{t("Il tuo progetto, passo dopo passo")}</p>
+                <h2 className="text-2xl font-light leading-tight tracking-tight sm:text-4xl">
+                  {t("Progetta la piscina per il tuo spazio.")}
+                </h2>
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                  {t("Scegli se realizzare una nuova piscina o rinnovare quella esistente. Dimensioni, materiali e dotazioni prenderanno forma nei prossimi passi.")}
+                </p>
+                <div className="mx-auto mt-7 w-full max-w-[480px] text-left">
+                  <ProjectTray />
+                </div>
+                <Button type="button" disabled={!canContinue} onClick={goNext}
+                  className="mt-7 min-h-11 rounded-full bg-brand px-8 text-white hover:bg-brand/90">
+                  {t("Continua")} <ArrowRight aria-hidden />
+                </Button>
+              </div>
+            </div>
+          ) : <PoolViewport
+            cataloguePatio={catalogueContextVisible && effectiveCatalogueSetting === "patio"}
+            catalogueSetting={catalogueContextVisible ? effectiveCatalogueSetting : "garden"}
             gardenStudio={gardenStudio}
             gardenProjectId={projectId}
             onCloseGardenStudio={() => setGardenStudio(false)}
@@ -650,6 +701,8 @@ function ConfiguratorLayout() {
             {...(poolLedType(config.ledType) === "perimeter" ? { perimeterLighting: configuredPerimeterLights(config) } : {})}
             ledIntensity={normalisedLedIntensity(config.ledIntensity)}
             internalStairType={config.internalStairType ?? "linear"}
+            internalStairWidth={config.internalStairWidth}
+            internalStairMirrored={!!config.internalStairMirrored}
             {...(config.hydromassageVariant
               ? { hydromassageVariant: config.hydromassageVariant }
               : {})}
@@ -663,7 +716,6 @@ function ConfiguratorLayout() {
                   exteriorPanelFinish: exteriorPanelFinish(config.exteriorPanelFinish),
                   externalStairSide: config.externalStairSide ?? "short",
                   externalStairPlatformExtended: true,
-                  internalStairMirrored: !!config.internalStairMirrored,
                   pellicano: config.equipment.includes("pellicano"),
                 }
               : {})}
@@ -733,9 +785,10 @@ function ConfiguratorLayout() {
             mobileExpanded={mobileExpanded}
             onToggleMobileExpanded={toggleMobileExpanded}
             onInspectionView={(view) => { setInspectionView(view); reframe(); }}
-          />
+          />}
         </main>
 
+        <div hidden={activeStepId === "project" && !cleanCapture}>
         <ConfiguratorTray
           nextChoice={nextDecision?.label}
           number={macroIndex + 1}
@@ -775,7 +828,7 @@ function ConfiguratorLayout() {
           }
           expanded={trayExpanded}
           onExpandedChange={setTrayExpanded}
-          onViewPool={() => { setInspectionView("review"); reframe(); }}
+          onViewPool={activeStepId === "project" ? undefined : () => { setInspectionView("review"); reframe(); }}
         >
           {comfortIssues.length ? <div role="alert" className="mb-3 flex flex-col gap-2 rounded-xl border border-brand/20 p-3 text-xs">
             <p>{t("Le scelte comfort sono conservate, ma richiedono una verifica con le dimensioni attuali.")}</p>
@@ -786,9 +839,10 @@ function ConfiguratorLayout() {
             }}>{t("Rivedi comfort")}</button>
           </div> : null}
           <div key={`${step}-${decision?.id ?? ""}`} className="animate-rise">
-            {trayContent}
+            {activeStepId === "project" && !cleanCapture ? null : trayContent}
           </div>
         </ConfiguratorTray>
+        </div>
       </div>
     </div>
   );

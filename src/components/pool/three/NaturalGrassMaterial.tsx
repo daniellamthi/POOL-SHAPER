@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useLoader, useThree } from "@react-three/fiber";
-import { LinearFilter, LinearMipmapLinearFilter, MeshStandardMaterial, NoColorSpace, RepeatWrapping, ShaderChunk, SRGBColorSpace, TextureLoader, type WebGLProgramParametersWithUniforms } from "three";
+import { LinearFilter, LinearMipmapLinearFilter, MeshStandardMaterial, MeshPhysicalMaterial, NoColorSpace, RepeatWrapping, ShaderChunk, SRGBColorSpace, TextureLoader, type WebGLProgramParametersWithUniforms } from "three";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
 
 const GRASS_METRES_PER_TILE = 1;
@@ -58,7 +58,7 @@ function configureNaturalGrass(shader: WebGLProgramParametersWithUniforms, water
 /** Kept mounted after the garden's first reveal. Phase navigation changes only
  * the attached material, not the photographic samplers or compiled lawn owner.
  * URL-cached originals are never changed or disposed by this consumer. */
-export function NaturalGrassMaterial({ active, waterY }: { active: boolean; waterY: number }) {
+export function NaturalGrassMaterial({ active, waterY, matte = false }: { active: boolean; waterY: number; matte?: boolean }) {
   const anisotropy = useThree(s => Math.min(8, s.gl.capabilities.getMaxAnisotropy()));
   const sources = useLoader(TextureLoader, GRASS_TEXTURE_URLS);
   const maps = useMemo(() => sources.map((source, index) => {
@@ -73,13 +73,17 @@ export function NaturalGrassMaterial({ active, waterY }: { active: boolean; wate
     texture.needsUpdate = true;
     return texture;
   }), [sources, anisotropy]);
-  const material = useMemo(() => new MeshStandardMaterial({ name: `natural-grass-${waterY}` }), [waterY]);
+  // An effective low-sheen leaf layer for the authored outdoor settings. Public PBR
+  // properties also survive photographic tracing, unlike shader-only edits.
+  const material = useMemo(() => matte
+    ? new MeshPhysicalMaterial({ name: `natural-grass-${waterY}`, specularIntensity: 0.25 })
+    : new MeshStandardMaterial({ name: `natural-grass-${waterY}` }), [waterY, matte]);
   useEffect(() => () => maps.forEach(texture => texture.dispose()), [maps]);
   useEffect(() => () => material.dispose(), [material]);
   const configure = useCallback((shader: WebGLProgramParametersWithUniforms) => configureNaturalGrass(shader, waterY), [waterY]);
   return active ? <primitive object={material} attach="material" color="#ffffff" map={maps[0]} normalMap={maps[1]}
     normalScale={[0.28, 0.28]} roughness={1} metalness={0} envMapIntensity={0.6}
-    onBeforeCompile={configure} customProgramCacheKey={() => `natural-grass-photo-v1-${waterY}`} />
+    onBeforeCompile={configure} customProgramCacheKey={() => matte ? `natural-grass-matte-v1-${waterY}` : `natural-grass-photo-v1-${waterY}`} />
     : <meshStandardMaterial color="#ddd9d2" roughness={0.95}
       onBeforeCompile={shader => excludeSubmergedDirectLights(shader, waterY)}
       customProgramCacheKey={() => `studio-ground-dry-${waterY}`} />;

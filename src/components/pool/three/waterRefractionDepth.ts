@@ -33,8 +33,9 @@ export class WaterRefractionDepth {
       }`,
   });
   readonly uniforms = {
-    poolOpaqueDepth: { value: this.target.depthTexture },
-    poolOpaqueWorldMap: { value: this.target.texture },
+    // World positions and hardware depth are alternate encodings. Share
+    // one binding without changing either captured image or decode path.
+    poolOpaqueReceiver: { value: this.target.texture },
     poolDepthWorld: { value: false },
     poolDepthReady: { value: false },
     poolDepthInverseProjection: { value: new THREE.Matrix4() },
@@ -135,6 +136,7 @@ export class WaterRefractionDepth {
       this.uniforms.poolDepthTexel.value.set(1 / width, 1 / height);
       this.uniforms.poolTransmissionTexel.value.set(1 / this.size.x, 1 / this.size.y);
       this.opticalKey = opticalKey;
+      this.uniforms.poolOpaqueReceiver.value = optical ? this.target.texture : this.target.depthTexture!;
       this.uniforms.poolDepthWorld.value = !!optical;
       this.revision = revision; this.uniforms.poolDepthReady.value = true;
       return true;
@@ -157,9 +159,8 @@ export class WaterRefractionDepth {
 }
 
 export const WATER_DEPTH_REFRACTION = `
-uniform sampler2D poolOpaqueDepth;
+uniform sampler2D poolOpaqueReceiver;
 #ifdef WATER_METRIC_WAVES
-uniform sampler2D poolOpaqueWorldMap;
 uniform bool poolDepthWorld;
 uniform vec2 poolTransmissionTexel;
 #endif
@@ -172,11 +173,11 @@ vec3 poolWaveNormal;
 vec3 poolOpaqueWorld(vec2 uv) {
 #ifdef WATER_METRIC_WAVES
   if (poolDepthWorld) {
-    vec4 receiver = texture2D(poolOpaqueWorldMap, uv);
+    vec4 receiver = texture2D(poolOpaqueReceiver, uv);
     return receiver.a > 0.999 ? receiver.xyz : vec3(0.0, poolInterfaceY + 1.0, 0.0);
   }
 #endif
-  float depth = texture2D(poolOpaqueDepth, uv).x;
+  float depth = texture2D(poolOpaqueReceiver, uv).x;
   vec4 view = poolDepthInverseProjection * vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
   return (poolDepthViewToWorld * vec4(view.xyz / view.w, 1.0)).xyz;
 }

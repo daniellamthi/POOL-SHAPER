@@ -1,0 +1,24 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {createRequire} from 'node:module';const ts=createRequire(process.cwd()+'/package.json')('typescript');import {performance} from 'node:perf_hooks';
+import {configuratorTesting} from '@/lib/pool/store';
+import {internalStairChoice} from '@/lib/pool/internal-stair-options';
+import {configuredPoolLayout} from '@/lib/pool/resolved-layout';
+import {configuredComfortPlan,normalizeComfortFeatures} from '@/lib/pool/comfort-plan';
+import {configuredSunShelfLoungers,SUN_SHELF_LOUNGER_MODEL} from '@/lib/pool/sun-shelf-loungers';
+import {configuredSunShelfRange,sunShelfRunWithinRange} from '@/lib/pool/sun-shelf-range';
+const base=configuratorTesting.createInitialState().config;
+let config:any={...base,projectType:'new',poolType:'in-ground',structure:'reinforced-concrete',shape:'rectangle',shapeSelected:true,poolAccess:'internalSteps',system:'skimmer',features:['sunShelf'],internalStairType:'linear',internalStairWidth:1.3,dimensions:{...base.dimensions,length:10,width:5,depth:1.5,floorProfile:'flat'}};
+const source=fs.readFileSync(process.env.ACCESS_SOURCE??process.cwd()+'/src/components/pool/wizard/StepTrays.tsx','utf8');
+const ast=ts.createSourceFile('StepTrays.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const fn=ast.statements.find((n:any)=>ts.isFunctionDeclaration(n)&&n.name.text==='AccessTray')!.getText(ast).replace('export ','');
+const noop=()=>{};let counts:any={};const count=(name:string,f:any)=>(...args:any[])=>{counts[name]=(counts[name]??0)+1;return f(...args);};
+const scope:any={React:{createElement:(tag:any,props:any,...children:any[])=>({tag,props:props??{},children})},useI18n:()=>({t:(x:any)=>x,number:(x:any)=>x,locale:'it'}),useMemo:(fn:any)=>fn(),useState:()=>[false,noop],useConfigurator:()=>({config}),internalStairChoice:count('stairs',internalStairChoice),configuredPoolLayout:count('layout',configuredPoolLayout),configuredComfortPlan:count('comfort',configuredComfortPlan),configuredSunShelfLoungers:count('loungers',configuredSunShelfLoungers),configuredSunShelfRange:count('range',configuredSunShelfRange),normalizeComfortFeatures,sunShelfRunWithinRange,SUN_SHELF_LOUNGER_MODEL,SUN_SHELF_WATER_DEPTH:.1,decisions:()=>[],ill:noop};
+for(const tag of ['TabBody','StepTabs','ChoiceGrid','ChoiceCard','GroupLabel','RevealSection','InternalStairSideControl','InternalStairWidthControl','DimensionControl','SunShelfLoungerColorPicker'])scope[tag]=tag;
+const component=vm.runInNewContext(ts.transpileModule(fn+';AccessTray;',{compilerOptions:{jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2022}}).outputText,scope);
+const nodes=(n:any):any[]=>n&&typeof n==='object'?[n,...n.children.flat(Infinity).flatMap(nodes)]:[];
+const render=(tab:string)=>nodes(component({tab,setTab:noop}));
+const sample=()=>{config={...config,internalStairWidth:config.internalStairWidth===1.3?1.35:1.3};const start=performance.now();const n=render('access');assert.equal(n.filter(n=>n.tag==='ChoiceCard'&&['Rettilinea','Angolare'].includes(n.props.title)).length,2);return performance.now()-start;};
+for(let i=0;i<5;i++)sample();counts={};const times=Array.from({length:40},sample).sort((a,b)=>a-b),accessCounts={...counts};
+// The comfort tab must still offer all three alternatives; the active shelf input remains present.
+const comfort=render('comfort');assert.equal(comfort.filter(n=>n.tag==='ChoiceCard').length,4);assert(comfort.some(n=>n.tag==='DimensionControl'));
+const snapshot=['access','ladder','comfort','shelf-options'].flatMap(tab=>render(tab).filter(n=>['ChoiceCard','DimensionControl'].includes(n.tag)).map(n=>({tab,tag:n.tag,props:n.props})));
+console.log(JSON.stringify({snapshot,scope:'Actual AccessTray derivation, changing width; excludes child rendering/GPU/network',iterations:40,medianMs:times[20],p95Ms:times[38],accessCounts,comfortChecks:'PASS'}));
