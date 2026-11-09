@@ -1492,7 +1492,7 @@ export default function PoolScene({
         stairType: internalStairType,
         stairWidth: internalStairWidth,
         stairMirrored: internalStairMirrored,
-        stairPosition: poolType === "in-ground" ? internalStairPosition : undefined,
+        stairPosition: internalStairPosition,
         floorProfile,
         infinityExcluded,
       }),

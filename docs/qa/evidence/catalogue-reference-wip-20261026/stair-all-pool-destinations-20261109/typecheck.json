@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "roots": [
+    "scripts/internal-stair-position-audit.ts",
+    "src/components/pool/AccessPlanPreview.tsx",
+    "src/components/pool/InternalStairPlanControl.tsx",
+    "src/components/pool/InternalStairSideControl.tsx",
+    "src/components/pool/three/PoolScene.tsx",
+    "src/configurator/steps/renovation/RenovationSteps.tsx",
+    "src/lib/i18n/messages.ts",
+    "src/lib/pool/internal-stair-options.ts",
+    "src/lib/pool/internal-stair-position.ts",
+    "src/lib/pool/project.ts",
+    "src/lib/pool/renovation.ts",
+    "src/lib/pool/resolved-layout.ts",
+    "src/lib/pool/store.tsx",
+    "src/types/three-fiber.d.ts"
+  ],
+  "errors": []
+}

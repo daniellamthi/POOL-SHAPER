@@ -3,6 +3,8 @@ import { configuredInternalStairSides } from "./internal-stair-options";
 import { configuredOutline } from "./configured-outline";
 import { outlineBounds } from "./geometry";
 import { nearestStairWall } from "./stair-position";
+import { mergedWallChords } from "./lighting";
+import { infinityExclusion } from "./infinity-edge";
 import type { InternalStairPosition, PoolConfig } from "./types";
 
 type Option = ReturnType<typeof configuredInternalStairSides>[number];
@@ -54,17 +56,50 @@ export function internalStairDragOrigin(option: Option): InternalStairPosition {
   return access.placement && !access.corner ? access.placement : centre(option.footprint);
 }
 
-/** Only real, fully validated corner poses; derived once per configuration. */
-export function cornerStairMoves(config: PoolConfig): StairMove[] {
-  if(config.internalStairType!=="corner")return [];
+export type StairPlanTarget = {
+  point: InternalStairPosition;
+  kind: "corner" | "wall" | "shelf";
+  move: StairMove | null;
+  reason: string;
+};
+
+/** Destinations and their real rejection reasons use the same solver as 3D. */
+export function internalStairPlanTargets(config: PoolConfig): StairPlanTarget[] {
+  const automatic={...config,internalStairPosition:undefined};
+  const plan=configuredLayoutWithSkimmers(automatic).layout;
+  if(plan.comfort.elements.some(e=>!!e.steps?.length))return configuredInternalStairSides(automatic).map(option=>({
+    point:centre(option.footprint),kind:"shelf",move:option.available?{option,mirrored:option.mirrored}:null,reason:option.reason,
+  }));
   const outline=configuredOutline(config);
-  return outline.flatMap((point,index)=>{
+  const exclusion=config.system==='infinity'&&config.infinityEdge?infinityExclusion(outline,config.infinityEdge,config.shape):null;
+  const explain=(point:InternalStairPosition,result:ReturnType<typeof moveInternalStair>)=>{
+    if(result.move||!exclusion)return result;
+    const onEdge=exclusion.edgeIndices?.some(index=>{
+      const a=outline[index]!,b=outline[(index+1)%outline.length]!,dx=b[0]-a[0],dz=b[1]-a[1];
+      const f=Math.max(0,Math.min(1,((point.x-a[0])*dx+(point.z-a[1])*dz)/(dx*dx+dz*dz)));
+      return Math.hypot(point.x-a[0]-dx*f,point.z-a[1]-dz*f)<.02;
+    })??Math.abs((exclusion.axis==='x'?point.x:point.z)-exclusion.coordinate)<.02;
+    return onEdge?{...result,reason:"Lato Infinity: questa posizione deve rimanere libera."}:result;
+  };
+  if(config.internalStairType==="corner")return outline.flatMap((point,index)=>{
     const a=outline[(index+outline.length-1)%outline.length]!,b=outline[(index+1)%outline.length]!;
     const ax=a[0]-point[0],az=a[1]-point[1],bx=b[0]-point[0],bz=b[1]-point[1];
     if(Math.abs((ax*bx+az*bz)/(Math.hypot(ax,az)*Math.hypot(bx,bz)))>.001)return [];
-    const result=moveInternalStair(config,{x:point[0],z:point[1]});
-    return result.move ? [result.move] : [];
+    const p={x:point[0],z:point[1]},result=explain(p,moveInternalStair(config,p));
+    return [{point:p,kind:"corner" as const,...result}];
   });
+  const width=plan.access.width||config.internalStairWidth||1.15;
+  return mergedWallChords(outline,.06).filter(wall=>wall.length>=width+.2).map(wall=>{
+    const point={x:(wall.a[0]+wall.b[0])/2,z:(wall.a[1]+wall.b[1])/2};
+    const samples=[.5,(width/2+.02)/wall.length,1-(width/2+.02)/wall.length];
+    const results=samples.map(f=>moveInternalStair(config,{x:wall.a[0]+(wall.b[0]-wall.a[0])*f,z:wall.a[1]+(wall.b[1]-wall.a[1])*f}));
+    return {point,kind:"wall" as const,...explain(point,results.find(result=>result.move)??results[0]!)};
+  });
+}
+
+/** Only real, fully validated corner poses; derived once per configuration. */
+export function cornerStairMoves(config: PoolConfig): StairMove[] {
+  return config.internalStairType==="corner" ? internalStairPlanTargets(config).flatMap(target=>target.move?[target.move]:[]) : [];
 }
 
 /** Snap the visual handle to the nearest valid visual target. This also avoids
@@ -85,7 +120,8 @@ export function moveInternalStairFromPlan(config: PoolConfig, point: InternalSta
 /** Turning follows the next wall/corner, keeping the flight attached and inward. */
 export function rotateInternalStair(config: PoolConfig, direction: -1 | 1, corners?: readonly StairMove[]) {
   const plan=configuredLayoutWithSkimmers(config).layout;
-  if (!plan.access.placement || plan.comfort.elements.some(e=>!!e.steps?.length)) return {move:null,reason:"La scala integrata alla spiaggetta mantiene il suo orientamento. Trascina per scegliere SX o DX."};
+  if (plan.comfort.elements.some(e=>!!e.steps?.length)) return {move:null,reason:"La scala integrata alla spiaggetta mantiene il suo orientamento. Trascina per scegliere SX o DX."};
+  if (!plan.access.placement) return {move:null,reason:plan.access.reason||"Posizione non disponibile."};
   if(plan.access.corner){
     const positions=corners??cornerStairMoves(config);
     if(positions.length<2)return {move:null,reason:"Nessuna parete compatibile in questa direzione."};
@@ -97,13 +133,18 @@ export function rotateInternalStair(config: PoolConfig, direction: -1 | 1, corne
     const step=direction*(area>=0?1:-1);
     return {move:positions[(current+step+positions.length)%positions.length]!,reason:""};
   }
-  const p=plan.access.placement;
-  const b=outlineBounds(configuredOutline(config)), cx=(b.minX+b.maxX)/2, cz=(b.minZ+b.maxZ)/2;
-  const x=(p.x-cx)/b.spanX, z=(p.z-cz)/b.spanZ;
-  const result=moveInternalStair(config,{x:cx-direction*z*b.spanX,z:cz+direction*x*b.spanZ});
-  if (result.move && Math.abs(Math.sin((result.move.option.layout.access.placement!.rotation-plan.access.placement.rotation)/2))<1e-5)
-    return {move:null,reason:"Nessuna parete compatibile in questa direzione."};
-  return result;
+  const outline=configuredOutline(config),wall=nearestStairWall(outline,plan.access.placement,plan.access.width);
+  if(!wall)return {move:null,reason:"Nessuna parete compatibile in questa direzione."};
+  const walls=mergedWallChords(outline,.06),current=walls.findIndex(w=>Math.hypot(w.a[0]-wall.a[0],w.a[1]-wall.a[1])<1e-6);
+  const area=outline.reduce((sum,p,i)=>{const q=outline[(i+1)%outline.length]!;return sum+p[0]*q[1]-q[0]*p[1];},0);
+  const step=direction*(area>=0?1:-1),fraction=wall.along/wall.length;
+  for(let distance=1;distance<walls.length;distance++){
+    const next=walls[(current+step*distance+walls.length)%walls.length]!;
+    if(next.length<plan.access.width+.2)continue;
+    const result=moveInternalStair(config,{x:next.a[0]+(next.b[0]-next.a[0])*fraction,z:next.a[1]+(next.b[1]-next.a[1])*fraction});
+    if(result.move&&Math.abs(Math.sin((result.move.option.layout.access.placement!.rotation-plan.access.placement.rotation)/2))>1e-5)return result;
+  }
+  return {move:null,reason:"Nessuna parete compatibile in questa direzione."};
 }
 
 export function nudgeInternalStair(config: PoolConfig, direction: -1 | 1, distance = .1) {

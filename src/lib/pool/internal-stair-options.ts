@@ -4,7 +4,7 @@ import { outlineBounds } from '@/lib/pool/geometry';
 import type { InternalStairType, PoolConfig } from '@/lib/pool/types';
 
 export function internalStairChoice(config: PoolConfig, type: InternalStairType) {
-  const plan = configuredPoolLayout({ ...config, poolAccess: 'internalSteps', internalStairType: type });
+  const plan = configuredPoolLayout({ ...config, poolAccess: 'internalSteps', internalStairType: type, internalStairPosition: undefined });
   const integrated = plan.comfort.elements.find(element => !!element.steps?.length);
   const active = config.features.includes('sunShelf') ? 'sunShelf' : config.features.includes('hydromassage') ? 'hydromassage' : null;
   const comfortReason = active && !plan.comfort.availability[active].available ? plan.comfort.availability[active].reason : null;

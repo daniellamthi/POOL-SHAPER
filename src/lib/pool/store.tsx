@@ -308,13 +308,17 @@ function reduceConfiguration(state: State, action: Action): State {
     case "setInternalStairPosition": {
       const { internalStairPosition: _position, ...automatic } = config;
       if (action.value === undefined) return { ...state, config: automatic };
-      if (config.poolType !== "in-ground" || config.poolAccess !== "internalSteps" || !isInternalStairPosition(action.value)) return state;
+      if (config.poolAccess !== "internalSteps" || !isInternalStairPosition(action.value)) return state;
       const next = { ...config, internalStairPosition: { x: action.value.x, z: action.value.z } };
       const plan = configuredPoolLayout(next);
       return plan.status !== "UNAVAILABLE" && plan.access.placement ? { ...state, config: next } : state;
     }
     case "setInternalStairType":
       if (action.value === "linear" && config.features.includes("hydromassage") && !config.features.includes("sunShelf")) return state;
+      if(action.value!==(config.internalStairType??"linear")){
+        const {internalStairPosition:_position,...automatic}=config;
+        return {...state,config:{...automatic,internalStairType:action.value}};
+      }
       return { ...state, config: { ...config, internalStairType: action.value } };
     case "setInternalStairMirrored": {
       if (config.poolAccess !== "internalSteps" || (!!config.internalStairMirrored === action.value && !config.internalStairPosition)) return state;

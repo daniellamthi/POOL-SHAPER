@@ -91,7 +91,7 @@ export function renovationPreviewConfig(config: PoolConfig, r: RenovationConfig,
     poolAccess: e.poolAccess !== undefined ? e.poolAccess : config.poolAccess,
     internalStairType: e.internalStairType ?? config.internalStairType ?? "linear",
     ...(typeof e.internalStairMirrored === "boolean" ? { internalStairMirrored: e.internalStairMirrored } : {}),
-    ...(e.poolType !== "above-ground" && e.internalStairPosition ? { internalStairPosition: e.internalStairPosition } : {}),
+    ...(e.internalStairPosition ? { internalStairPosition: e.internalStairPosition } : {}),
     ...(e.internalStairWidth !== undefined ? { internalStairWidth: e.internalStairWidth } : {}),
     dimensions: e.poolType === "above-ground" ? { ...config.dimensions, floorProfile: "flat" } : config.dimensions,
     copingMaterial: !before && renovationIncludes(r, "coping") && r.replaceCoping &&

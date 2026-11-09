@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import {configuratorTesting} from '@/lib/pool/store';
 import {configuredPoolLayout} from '@/lib/pool/resolved-layout';
 import {configuredOutline} from '@/lib/pool/configured-outline';
-import {currentInternalStairOption,cornerStairMoves,internalStairDragOrigin,moveInternalStairFromPlan,moveInternalStair,nudgeInternalStair,rotateInternalStair} from '@/lib/pool/internal-stair-position';
+import {internalStairChoice} from '@/lib/pool/internal-stair-options';
+import {currentInternalStairOption,internalStairPlanTargets,cornerStairMoves,internalStairDragOrigin,moveInternalStairFromPlan,moveInternalStair,nudgeInternalStair,rotateInternalStair} from '@/lib/pool/internal-stair-position';
 import {nearestStairWall,isInternalStairPosition} from '@/lib/pool/stair-position';
 import {parseProjectConfiguration,serializeProjectConfiguration,toProjectConfiguration} from '@/lib/pool/project';
 import {shareableProject} from '@/lib/project-delivery/service';
@@ -47,7 +48,15 @@ const centred={...base,internalStairPosition:{x:-5,z:0}};
 const nudged=nudgeInternalStair(centred,1);check(!!nudged.move&&Math.abs(nudged.move.position!.z)>.09,'keyboard nudge moves actual stair');
 const widened=configuredPoolLayout({...centred,internalStairWidth:2});check(widened.access.width===2&&Math.abs(widened.access.placement!.z)<.01,'custom width stays centred on selected wall');
 const above={...centred,poolType:'above-ground' as const,structure:'modular-steel-panels' as const};
-check(JSON.stringify(configuredPoolLayout(above).access.footprint)===JSON.stringify(configuredPoolLayout({...above,internalStairPosition:undefined}).access.footprint),'above-ground geometry unaffected');
+const aboveMoved=moveInternalStair(above,{x:-5,z:0}).move;
+check(!!aboveMoved&&Math.abs(configuredPoolLayout({...above,internalStairPosition:aboveMoved.position}).access.placement!.z)<1e-7,'above-ground manual flight is honoured');
+const aboveState=configuratorTesting.reducer({...initial,config:above},{type:'setInternalStairPosition',value:{x:-5,z:0}});
+check(aboveState.config.internalStairPosition?.z===0,'above-ground reducer accepts real valid wall');
+const aboveLoaded=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration(initial.projectId,aboveState.config,initial.renovation)));
+check(aboveLoaded?.config.internalStairPosition?.x===-5,'above-ground Save/Reload retains anchor');
+const aboveCorners=cornerStairMoves({...above,internalStairType:'corner'});
+check(aboveCorners.length===4&&new Set(aboveCorners.map(m=>JSON.stringify(m.option.footprint))).size===4,'above-ground exposes four distinct real corners');
+for(const m of aboveCorners)check(m.option.layout.access.corner?.rectangular===true,'above-ground retains rectangular treads');
 let state={...initial,config:base};
 state=configuratorTesting.reducer(state,{type:'setInternalStairPosition',value:{x:-5,z:0}});
 check(state.config.internalStairPosition?.x===-5,'store accepts valid attached placement');
@@ -108,4 +117,67 @@ for(const orientation of ['sw','se','ne','nw'] as const)for(const system of ['sk
   }
  }
 }
-console.log(JSON.stringify({checks,returnChecks,fixtures:fixtures.length,valid,rejected,status:'PASS'}));
+let destinationChecks=0;
+for(const poolType of ['in-ground','above-ground'] as const)for(const projectType of ['new','renovation'] as const)for(const shape of ['rectangle','l-shape','custom','organic'] as const)for(const kind of ['linear','corner'] as const){
+ const c:PoolConfig={...base,poolType,projectType,shape,internalStairType:kind};
+ const targets=internalStairPlanTargets(c),accepted=targets.filter(t=>t.move);
+ check(kind==='corner'&&['custom','organic'].includes(shape)?!accepted.length:accepted.length>=2,'every supported pool/shape has distinct meaningful destinations or correctly rejects radial flight on swept walls');destinationChecks++;
+ if(kind==='corner'&&shape==='rectangle'){check(accepted.length===4,'all four clear rectangle corners are available for both pool/project types');destinationChecks++;}
+ if(kind==='corner'&&shape==='l-shape'){check(targets.length===6&&accepted.length===5,'all L vertices shown and only reflex vertex unavailable');destinationChecks++;}
+ for(const target of accepted){
+  const move=target.move!,next={...c,...(move.mirrored!==undefined?{internalStairMirrored:move.mirrored,internalStairPosition:undefined}:{internalStairPosition:move.position})};
+  const actual=currentInternalStairOption(next);
+  check(actual.available&&sameFootprint(actual.footprint,move.option.footprint),'destination and actual 3D layout agree');destinationChecks++;
+  if(shape==='organic'){
+   assert.throws(()=>toProjectConfiguration(initial.projectId,next,initial.renovation),/non è più disponibile/);checks++;destinationChecks++;
+  }else{
+   const restored=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration(initial.projectId,next,initial.renovation)))!;
+   check(sameFootprint(configuredPoolLayout(restored.config).access.footprint,move.option.footprint),'destination survives Save/Reload in every supported pool/project/shape');destinationChecks++;
+   check(JSON.stringify(shareableProject(toProjectConfiguration(initial.projectId,next,initial.renovation)).config.internalStairPosition)===JSON.stringify(next.internalStairPosition),'Share retains destination for every supported pool/project/shape');destinationChecks++;
+  }
+  if(kind==='linear')for(const direction of [-1,1] as const){
+   const rotated=rotateInternalStair(next,direction).move;
+   check(!!rotated&&!sameFootprint(rotated.option.footprint,move.option.footprint),'straight flight rotates to another real wall on every supported shape');destinationChecks++;
+  }
+ }
+ const markup=renderToStaticMarkup(React.createElement(InternalStairPlanControl,{config:c,onPositionChange:()=>{},onSideChange:()=>{}}));
+ check(markup.includes('Sposta la scala')&&(!targets.length||markup.includes('Destinazioni della scala')),'destination controls rendered for every pool/project/shape');destinationChecks++;
+ check(kind!=='corner'||targets.length>0||markup.includes('Scegli Rettilinea'),'swept shape explains the compatible stair choice');destinationChecks++;
+}
+const radialMarkup=renderToStaticMarkup(React.createElement(InternalStairPlanControl,{config:{...base,internalStairType:'corner'},onPositionChange:()=>{},onSideChange:()=>{}}));
+check(radialMarkup.includes('data-stair-treads')&&(radialMarkup.match(/ A/g)??[]).length===configuredPoolLayout({...base,internalStairType:'corner'}).access.steps,'mini-plan draws every actual curved tread');destinationChecks++;
+for(const side of [0,1,2,3]){
+ const c={...base,system:'infinity' as const,internalStairType:'corner' as const,infinityEdge:clampInfinityEdgeParams({...defaultInfinityEdgeParams(),enabled:true,side})};
+ const targets=internalStairPlanTargets(c);
+ check(targets.length===4&&targets.filter(t=>t.move).length===2,'Infinity keeps all corners visible and reserves the two edge corners');destinationChecks++;
+ check(targets.filter(t=>!t.move).every(t=>!!t.reason),'blocked Infinity destinations explain real rejection');destinationChecks++;
+}
+for(const poolType of ['in-ground','above-ground'] as const){
+ const c={...base,poolType,internalStairType:'corner' as const},move=cornerStairMoves(c)[2]!;
+ const renovation={...initial.renovation,existing:{poolType,poolAccess:'internalSteps' as const,internalStairType:'corner' as const,internalStairPosition:move.position}};
+ for(const before of [true,false])check(sameFootprint(configuredPoolLayout(renovationPreviewConfig({...c,projectType:'renovation'},renovation,before)).access.footprint,move.option.footprint),'existing manual pose agrees in Before/Proposal for both pool types');
+ const loaded=parseProjectConfiguration(serializeProjectConfiguration(toProjectConfiguration(initial.projectId,{...c,projectType:'renovation'},renovation)))!;
+ check(sameFootprint(configuredPoolLayout(renovationPreviewConfig(loaded.config,loaded.renovation,true)).access.footprint,move.option.footprint),'existing pool position survives full restore');
+ check(!!shareableProject(toProjectConfiguration(initial.projectId,{...c,projectType:'renovation'},renovation)).renovation.existing?.internalStairPosition,'existing pool Share retains manual position');destinationChecks+=4;
+}
+for(const c of [{...base,system:'skimmer' as const,copingEdge:'rounded' as const},{...base,overflowType:'continuous' as const,copingStyle:'dedicated' as const}]){
+ const targets=internalStairPlanTargets({...c,internalStairType:'linear'});
+ check(targets.filter(t=>t.move).length>=2,'rounded basin still offers actual straight-flight wall destinations');destinationChecks++;
+ check(internalStairPlanTargets({...c,internalStairType:'corner'}).length===0,'radial flight cannot silently claim a swept corner');destinationChecks++;
+}
+const unavailable={...base,system:'infinity' as const,internalStairType:'corner' as const,infinityEdge:clampInfinityEdgeParams({...defaultInfinityEdgeParams(),enabled:true,side:1}),internalStairPosition:{x:5,z:-2.5}};
+const recovery=renderToStaticMarkup(React.createElement(InternalStairPlanControl,{config:unavailable,onPositionChange:()=>{},onSideChange:()=>{}}));
+check(!currentInternalStairOption(unavailable).available&&internalStairPlanTargets(unavailable).some(t=>!!t.move),'invalid retained anchor has real recovery destinations');destinationChecks++;
+check(recovery.includes('role="group"')&&recovery.includes('Destinazioni della scala'),'valid destination buttons remain accessible without a current flight');destinationChecks++;
+for(const poolType of ['in-ground','above-ground'] as const){
+ const stale={...base,poolType,shape:'custom' as const,internalStairType:'corner' as const,internalStairPosition:{x:-5,z:2.5}};
+ check(internalStairChoice(stale,'linear').available,'old radial anchor does not disable a compatible straight flight on a changed shape');destinationChecks++;
+ const changed=configuratorTesting.reducer({...initial,config:stale},{type:'setInternalStairType',value:'linear'});
+ check(!changed.config.internalStairPosition&&!!configuredPoolLayout(changed.config).access.placement,'choosing another stair type recovers a real automatic placement');destinationChecks++;
+ const same=configuratorTesting.reducer({...initial,config:{...base,poolType,internalStairType:'corner',internalStairPosition:{x:-5,z:2.5}}},{type:'setInternalStairType',value:'corner'});
+ check(!!same.config.internalStairPosition,'reselecting the same stair type preserves manual placement');destinationChecks++;
+}
+const shiftedMarkup=renderToStaticMarkup(React.createElement(InternalStairPlanControl,{config:{...centred,internalStairPosition:{x:-5,z:.1}},onPositionChange:()=>{},onSideChange:()=>{}}));
+check((shiftedMarkup.match(/aria-pressed="true"/g)??[]).length===2,'wall stays selected in both SVG and buttons after a fluid slide');destinationChecks++;
+check(!rotateInternalStair(unavailable,1).reason.includes('spiaggetta'),'unavailable independent flight never claims an integrated shelf');destinationChecks++;
+console.log(JSON.stringify({checks,returnChecks,destinationChecks,fixtures:fixtures.length,valid,rejected,status:'PASS'}));

@@ -143,7 +143,7 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
             const choice = internalStairChoice(renovationPreviewConfig(config, r, true), id);
             return <ChoiceCard key={id} compact title={title} image={<Layers className="size-12" strokeWidth={1} />} selected={(e.internalStairType ?? "linear") === id}
               disabled={!choice.available} footer={t(choice.reason)}
-              onSelect={() => choose({ internalStairType: id })} />;
+              onSelect={() => choose({ internalStairType: id, ...(id !== (e.internalStairType ?? "linear") ? { internalStairPosition: undefined } : {}) })} />;
           })}
       </ChoiceGrid> : null}
       {e?.poolAccess === "internalSteps" ? <InternalStairSideControl config={renovationPreviewConfig(config, r, true)}

@@ -2,6 +2,16 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ["Sposta la scala", "Move the stairs"],
+  ["Lato Infinity: questa posizione deve rimanere libera.", "Infinity edge: this position must remain clear."],
+  ["La scala angolare richiede un angolo retto libero. Scegli Rettilinea per posizionare la scala su un tratto curvo compatibile.", "Corner stairs require a free right-angle corner. Choose Straight to position the stairs along a compatible curved section."],
+  ["{count} posizioni disponibili", "{count} available positions"],
+  ["Angolo {number}", "Corner {number}"],
+  ["Parete {number}", "Wall {number}"],
+  ["Posizione {number}", "Position {number}"],
+  ["Destinazioni della scala", "Stair destinations"],
+  ["Trascina ↔ oppure scegli un punto numerato. Pianta e 3D si aggiornano insieme.", "Drag ↔ or choose a numbered point. The plan and 3D update together."],
+  ["I punti tratteggiati non sono disponibili. Selezionali per leggere il motivo.", "Dashed points are unavailable. Select one to read the reason."],
   ["Trascina la scala lungo il perimetro", "Drag the stairs along the perimeter"],
   ["Trascina la scala lungo il perimetro. Si aggancia alla parete e ruota verso l’interno.", "Drag the stairs along the perimeter. They snap to the wall and turn towards the pool."],
   ["Trascina la scala su un angolo libero. La rotazione mantiene i gradini aderenti alle pareti.", "Drag the stairs to a free corner. Rotation keeps the steps attached to the walls."],

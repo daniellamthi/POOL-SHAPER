@@ -17,7 +17,8 @@ export function InternalStairSideControl({ config, onChange, onPositionChange }:
   const selected = options.find(option => option.mirrored === !!config.internalStairMirrored)!;
   return <fieldset className="flex flex-col gap-3" data-internal-stair-side>
     <legend className="mb-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">{t('Posizione della scala')}</legend>
-    {config.poolType === "in-ground" && onPositionChange ? <InternalStairPlanControl config={config} onPositionChange={onPositionChange} onSideChange={onChange} /> : <AccessPlanPreview option={selected} />}
+    {onPositionChange ? <InternalStairPlanControl config={config} onPositionChange={onPositionChange} onSideChange={onChange} /> : <AccessPlanPreview option={selected} />}
+    {!onPositionChange || selected.layout.comfort.elements.some(element=>!!element.steps?.length) ? <>
     <div className="grid grid-cols-2 gap-3">
       {options.map(option => {
         const left = option.side === 'left';
@@ -37,5 +38,6 @@ export function InternalStairSideControl({ config, onChange, onPositionChange }:
       <span className="font-medium">{t(option.side === 'left' ? 'SX' : 'DX')}: </span>{t(option.reason)}
     </p>)}
     <p className="text-xs leading-relaxed text-muted-foreground">{t('SX e DX indicano i due lati della stessa testata. Le posizioni senza spazio sono disabilitate.')}</p>
+    </>:null}
   </fieldset>;
 }

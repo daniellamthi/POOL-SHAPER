@@ -1,0 +1,64 @@
+{
+  "status": "targeted local QA PASS; public Preview refresh pending",
+  "objective": "Move stairs to all physically compatible corners/walls across all supported pool types, with clearer interactive graphics and consistent 3D/persistence",
+  "supportedCatalogueShapes": [
+    "rectangle",
+    "l-shape",
+    "custom"
+  ],
+  "poolTypes": [
+    "in-ground",
+    "above-ground"
+  ],
+  "projectTypes": [
+    "new",
+    "renovation"
+  ],
+  "cornerGeometry": "All right-angle vertices shown; actual solver decides availability. Five usable convex L corners and four clear rectangle corners. Infinity/fittings/comfort/floor constraints retained. Swept corners require compatible straight stairs.",
+  "removedShape": "Organic remains unavailable in catalogue/store/export; legacy geometry-only regression does not re-enable it.",
+  "typeChangeRecovery": "A previous shape/variant anchor no longer disables a compatible stair type; changing type clears that old anchor in new-pool and existing-renovation controls. Reselecting the same type preserves placement.",
+  "ui": [
+    "Numbered actionable destinations and real rejection feedback",
+    "Actual curved/rectangular/straight tread lines",
+    "Desktop side-by-side plan/destination controls",
+    "Selected wall remains highlighted during a fluid slide",
+    "SVG and HTML keyboard controls; 44px minimum destination buttons; IT/EN"
+  ],
+  "audit": {
+    "checks": 3309,
+    "returnChecks": 966,
+    "destinationChecks": 675,
+    "fixtures": 11,
+    "valid": 191,
+    "rejected": 673,
+    "status": "PASS"
+  },
+  "regressions": {
+    "options": 112,
+    "width": 305
+  },
+  "typecheck": "14 roots and dependency closure PASS; existing Node/R3F ambient declarations",
+  "semanticLint": "5 targeted files, 0 errors, 0 warnings; formatting rule disabled to preserve existing style",
+  "build": "Matching isolated QA production Node build PASS; log /private/tmp/stair-all-pools-20261109/build.log",
+  "parity": {
+    "files": 506,
+    "mismatches": 0
+  },
+  "nativeReceipt": "native.json",
+  "nativeHighlights": [
+    "All four rectangle corners in-ground and above-ground",
+    "L: five free corners with overflow, three with selected Infinity side; actual opposite-corner drag",
+    "Above-ground desktop/mobile390 diagonal drag and reload",
+    "Six real custom walls in existing renovation; 10cm slide, both rotation directions, reload",
+    "Native rectangle/corner/manual -> custom -> straight recovery",
+    "320/768/1024/1440 emulation: no page horizontal overflow, all destination buttons >=44px",
+    "English visible labels and keyboard SVG selection"
+  ],
+  "previousPublicDeployment": "dpl_DGjJ9BufPbXnxj9681ERbFzGoS6m",
+  "limitations": [
+    "Mobile emulation with native pointer; not physical touch hardware",
+    "No cloud round trip, PDF, real email or long photo render repeated",
+    "No whole-product release, actual-device/GPU/FPS or general audit claim; operational release gates remain open."
+  ],
+  "safety": "No main merge, Production promotion, DNS, Supabase/backend operation or email; existing historical raw QA files preserved."
+}

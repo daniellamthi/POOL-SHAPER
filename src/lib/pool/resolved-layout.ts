@@ -222,7 +222,7 @@ export function configuredLayoutWithSkimmers(config: PoolConfig) {
     stairType: config.internalStairType ?? "linear",
     stairWidth: config.internalStairWidth,
     stairMirrored: !!config.internalStairMirrored,
-    stairPosition: config.poolType === "in-ground" ? config.internalStairPosition : undefined,
+    stairPosition: config.internalStairPosition,
     skimmers: planSkimmers(
       outline,
       computeMetrics(outline, config.dimensions.depth).waterSurface,
