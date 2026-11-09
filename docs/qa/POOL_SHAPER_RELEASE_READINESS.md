@@ -1,6 +1,6 @@
 # POOL-SHAPER — final customer QA / release readiness
 
-**Current working state: 9 November 2026 — wall-attached stair drag/rotation QA PASS; existing public Preview refresh in progress. Release prerequisites remain open.**
+**Current working state: 9 November 2026 — wall-attached stair drag/rotation QA PASS; existing public Preview refreshed and verified. Release prerequisites remain open.**
 Base before this checkpoint: `0bb0dd596081045fb8c6d79d03f1d9c60713f008`
 (`fix: unify concealed overflow edge with paving`, 26 October).
 The owner now explicitly requests committing/pushing the current implementation and
@@ -5032,3 +5032,5 @@ Targeted verification PASS:1661 position/geometry/persistence/SSR assertions acr
 Native IAB PASS on1280x720 desktop and390x844 emulated mobile: actual corner drag, invalid shelf drop preserving old geometry, rotation, straight wall slide matching visible3D, adjacent-wall rotation,0.10m keyboard move, unchanged manual top view, reload with identical plan polygons, mobile cross-wall drag/English text,390/390 document width, final54.83px mobile handle and integrated-shelf SX→DX drag with rotation disabled. Error log empty. Restored10x5m/continuous overflow/cornerSX/shelf3.035m/two lime loungers/IT/day; viewport override reset. Native touch/hardware, cloud, real PDF and long photo quality were not newly certified. Existing release gates remain open.
 
 Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/stair-perimeter-drag-20261109/manifest.json. Existing public Preview refresh follows the normal operational-branch checkpoint; no main merge, Production promotion, DNS, backend/Supabase operation or email. Historical untracked QA evidence is preserved.
+
+Public Preview verification completed: normal operational-branch commit/push `2669242b7626d78c70bf9fc8d3e7efdaf5bd2efe`, origin identical. Vercel Git-source build `dpl_43K6bzDcvA1NvLb5s8ohNaMFqXH7` READY for that SHA, Preview target. Existing `https://configuratoree.vercel.app/` alias reassigned from `dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1` (retained rollback). Anonymous HTTP200 with no authentication/cookies. Native public reload retained9.7x4.5m L-shape/Infinity project; new draggable control observed, real rotation changed the plan and automatic reset restored the exact original polygons. Browser errors empty; public top-view/plan shown and tab retained. Publication, HTTP and screenshot receipts are in the same dated evidence folder. No runtime source changed after the accepted QA build.

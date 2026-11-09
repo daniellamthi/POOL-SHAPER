@@ -55,7 +55,8 @@
   ],
   "publicPreview": {
     "alias": "https://configuratoree.vercel.app/",
-    "previousDeployment": "dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1",
-    "state": "pending Git checkpoint; existing Preview only"
+    "deployment": "dpl_43K6bzDcvA1NvLb5s8ohNaMFqXH7",
+    "runtimeCommit": "2669242b7626d78c70bf9fc8d3e7efdaf5bd2efe",
+    "state": "READY; anonymousHTTP200; native rotation/reset PASS"
   }
 }

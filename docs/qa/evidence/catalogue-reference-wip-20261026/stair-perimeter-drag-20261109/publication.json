@@ -1,0 +1,20 @@
+{
+  "runtimeCommit": "2669242b7626d78c70bf9fc8d3e7efdaf5bd2efe",
+  "deploymentId": "dpl_43K6bzDcvA1NvLb5s8ohNaMFqXH7",
+  "deploymentUrl": "pool-shaper-8eqohxta0-daniellamthis-projects.vercel.app",
+  "build": "READY",
+  "target": null,
+  "alias": "https://configuratoree.vercel.app/",
+  "previousDeployment": "dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1",
+  "verifiedAt": "2026-11-09T14:53:58.799Z",
+  "anonymousHTTP": 200,
+  "nativePublic": {
+    "newNamedDragControlVisible": true,
+    "rotationChangedActualPlan": true,
+    "automaticResetRestoredOriginalPlan": true,
+    "existingProjectPreserved": true,
+    "consoleErrors": [],
+    "screenshot": "public-final.png"
+  },
+  "scope": "Existing public Preview only; no main merge, Production promotion, DNS, backend, email or protection change."
+}
