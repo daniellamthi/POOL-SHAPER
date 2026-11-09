@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "verifiedAt": "2026-11-09T15:21:32.249479+00:00",
+  "runtimeCommit": "de238a9b03f1689b6f72e21def256cf07acae857",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "deploymentId": "dpl_DGjJ9BufPbXnxj9681ERbFzGoS6m",
+  "deploymentUrl": "https://pool-shaper-i8wigmbh5-daniellamthis-projects.vercel.app/",
+  "state": "READY",
+  "target": null,
+  "alias": "https://configuratoree.vercel.app/",
+  "aliasVerifiedDeploymentId": "dpl_DGjJ9BufPbXnxj9681ERbFzGoS6m",
+  "previousDeploymentRetained": "dpl_43K6bzDcvA1NvLb5s8ohNaMFqXH7",
+  "anonymousHttp": {
+    "url": "https://configuratoree.vercel.app/",
+    "status": 200,
+    "finalUrl": "https://configuratoree.vercel.app/",
+    "authentication": "none; no cookies or bypass headers",
+    "contentType": "text/html; charset=utf-8"
+  },
+  "native": {
+    "url": "https://configuratoree.vercel.app/",
+    "fixture": "existing L9.7x4.5/recess4x1.8/NW/Infinity-side1/corner/no-comfort",
+    "forwardChanged": true,
+    "reverseRestored": true,
+    "rotationActions": [
+      {
+        "direction": "Ruota verso la parete precedente",
+        "atOriginal": false,
+        "bothEnabled": true
+      },
+      {
+        "direction": "Ruota verso la parete successiva",
+        "atOriginal": true,
+        "bothEnabled": true
+      },
+      {
+        "direction": "Ruota verso la parete successiva",
+        "atOriginal": false,
+        "bothEnabled": true
+      },
+      {
+        "direction": "Ruota verso la parete precedente",
+        "atOriginal": true,
+        "bothEnabled": true
+      }
+    ],
+    "originalPoseRestored": true,
+    "consoleErrors": []
+  },
+  "screenshot": "public-verified.png",
+  "scope": "Existing public Preview only; no main merge or Production promotion"
+}

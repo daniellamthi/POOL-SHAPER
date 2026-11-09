@@ -1,5 +1,5 @@
 {
-  "status": "targeted QA PASS; public refresh pending",
+  "status": "targeted QA and public Preview native verification PASS",
   "scope": "Mini-plan corner stair drag and reversible rotation on L-shaped Infinity",
   "sourceFiles": [
     "src/components/pool/InternalStairPlanControl.tsx",
@@ -62,5 +62,6 @@
     ]
   },
   "previousPublicDeployment": "dpl_43K6bzDcvA1NvLb5s8ohNaMFqXH7",
-  "limitations": "Scoped fix acceptance only; wider release gates unchanged. Historical raw untracked evidence preserved."
+  "limitations": "Scoped fix acceptance only; wider release gates unchanged. Historical raw untracked evidence preserved.",
+  "publication": "publication.json"
 }

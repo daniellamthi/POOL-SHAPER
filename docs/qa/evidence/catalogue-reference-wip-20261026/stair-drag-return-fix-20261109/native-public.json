@@ -1,0 +1,30 @@
+{
+  "url": "https://configuratoree.vercel.app/",
+  "fixture": "existing L9.7x4.5/recess4x1.8/NW/Infinity-side1/corner/no-comfort",
+  "forwardChanged": true,
+  "reverseRestored": true,
+  "rotationActions": [
+    {
+      "direction": "Ruota verso la parete precedente",
+      "atOriginal": false,
+      "bothEnabled": true
+    },
+    {
+      "direction": "Ruota verso la parete successiva",
+      "atOriginal": true,
+      "bothEnabled": true
+    },
+    {
+      "direction": "Ruota verso la parete successiva",
+      "atOriginal": false,
+      "bothEnabled": true
+    },
+    {
+      "direction": "Ruota verso la parete precedente",
+      "atOriginal": true,
+      "bothEnabled": true
+    }
+  ],
+  "originalPoseRestored": true,
+  "consoleErrors": []
+}
