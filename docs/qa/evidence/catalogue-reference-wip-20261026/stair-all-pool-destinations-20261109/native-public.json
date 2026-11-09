@@ -1,0 +1,23 @@
+{
+  "url": "https://configuratoree.vercel.app/",
+  "fixture": "existing in-ground L9.7x4.5 / Infinity / corner stairs and inox ladder",
+  "actions": [
+    {
+      "action": "drag from corner4 to corner1",
+      "selected": "true"
+    },
+    {
+      "action": "select Angolo 6",
+      "selected": "true"
+    },
+    {
+      "action": "select Angolo 4",
+      "selected": "true"
+    }
+  ],
+  "originalPoseDifference": 0,
+  "blockedInfinityPreservesPose": true,
+  "blockedReason": "Lato Infinity: questa posizione deve rimanere libera.",
+  "errors": [],
+  "screenshot": "public-verified.png"
+}

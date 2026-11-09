@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "verifiedAtUtc": "2026-11-09T17:05:24.748973+00:00",
+  "runtimeCommit": "5e0a43fc3cf613dc43c23f4c3f2219a2fc6b646d",
+  "branch": "feat/fullscreen-day-night-hidden-overflow",
+  "deploymentId": "dpl_28mgK4FZQ4jF6scsDFhVtQz4w1d5",
+  "deploymentUrl": "https://pool-shaper-2njbsji56-daniellamthis-projects.vercel.app/",
+  "state": "READY",
+  "target": null,
+  "alias": "https://configuratoree.vercel.app/",
+  "aliasVerifiedDeploymentId": "dpl_28mgK4FZQ4jF6scsDFhVtQz4w1d5",
+  "previousDeploymentRetained": "dpl_DGjJ9BufPbXnxj9681ERbFzGoS6m",
+  "anonymousAccess": {
+    "url": "https://configuratoree.vercel.app/",
+    "finalUrl": "https://configuratoree.vercel.app/",
+    "status": 200,
+    "authentication": "none; no cookies or bypass headers",
+    "verifiedAtUtc": "2026-11-09T17:00:33.971501+00:00"
+  },
+  "native": {
+    "url": "https://configuratoree.vercel.app/",
+    "fixture": "existing in-ground L9.7x4.5 / Infinity / corner stairs and inox ladder",
+    "actions": [
+      {
+        "action": "drag from corner4 to corner1",
+        "selected": "true"
+      },
+      {
+        "action": "select Angolo 6",
+        "selected": "true"
+      },
+      {
+        "action": "select Angolo 4",
+        "selected": "true"
+      }
+    ],
+    "originalPoseDifference": 0,
+    "blockedInfinityPreservesPose": true,
+    "blockedReason": "Lato Infinity: questa posizione deve rimanere libera.",
+    "errors": [],
+    "screenshot": "public-verified.png"
+  },
+  "scope": "Existing public Preview only. No main merge, Production promotion, DNS, backend/Supabase action or email."
+}

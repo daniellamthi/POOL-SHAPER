@@ -1,5 +1,5 @@
 {
-  "status": "targeted local QA PASS; public Preview refresh pending",
+  "status": "targeted QA and native public Preview verification PASS",
   "objective": "Move stairs to all physically compatible corners/walls across all supported pool types, with clearer interactive graphics and consistent 3D/persistence",
   "supportedCatalogueShapes": [
     "rectangle",
@@ -60,5 +60,6 @@
     "No cloud round trip, PDF, real email or long photo render repeated",
     "No whole-product release, actual-device/GPU/FPS or general audit claim; operational release gates remain open."
   ],
-  "safety": "No main merge, Production promotion, DNS, Supabase/backend operation or email; existing historical raw QA files preserved."
+  "safety": "No main merge, Production promotion, DNS, Supabase/backend operation or email; existing historical raw QA files preserved.",
+  "publication": "publication.json"
 }
