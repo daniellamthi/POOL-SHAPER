@@ -703,6 +703,7 @@ function ConfiguratorLayout() {
             internalStairType={config.internalStairType ?? "linear"}
             internalStairWidth={config.internalStairWidth}
             internalStairMirrored={!!config.internalStairMirrored}
+            internalStairPosition={config.internalStairPosition}
             {...(config.hydromassageVariant
               ? { hydromassageVariant: config.hydromassageVariant }
               : {})}

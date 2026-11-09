@@ -484,6 +484,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
     setInternalStairType,
     setInternalStairWidth,
     setInternalStairMirrored,
+    setInternalStairPosition,
     setHydromassageVariant,
     toggleInternalSteps,
     toggleInoxLadder,
@@ -674,7 +675,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
                     />
                   ))}
               </ChoiceGrid>
-              <InternalStairSideControl config={config} onChange={setInternalStairMirrored} />
+              <InternalStairSideControl config={config} onChange={setInternalStairMirrored} onPositionChange={setInternalStairPosition} />
               {shelfOn && stairType === "corner" ? <p className="text-xs leading-relaxed text-muted-foreground">{t("La spiaggetta è abbinata a una scala angolare indipendente. La posizione dipende dallo spazio libero.")}</p> : null}
             </RevealSection>
           ) : null}
@@ -721,7 +722,7 @@ export function AccessTray({ tab, setTab }: DecisionProps) {
           {(shelfOn && !comfort.availability.sunShelf.available) || (hydroOn && !comfort.availability.hydromassage.available) ?
             <button type="button" className="self-start text-xs underline underline-offset-4" onClick={() => chooseComfort("none")}>{t("Rimuovi zona comfort")}</button> : null}
           {(shelfOn || hydroOn) ? <InternalStairWidthControl config={config} onChange={setInternalStairWidth} /> : null}
-          {(shelfOn || hydroOn) && stepsOn ? <InternalStairSideControl config={config} onChange={setInternalStairMirrored} /> : null}
+          {(shelfOn || hydroOn) && stepsOn ? <InternalStairSideControl config={config} onChange={setInternalStairMirrored} onPositionChange={setInternalStairPosition} /> : null}
           {shelfOn && shelfRange?.available ? <div className="flex flex-col gap-3" data-sun-shelf-dimensions data-wizard-guidance-group tabIndex={-1}>
             <DimensionControl label={stairType === "corner" ? "Lunghezza spiaggetta" : "Lunghezza spiaggetta e gradini"} unit="m" step={0.005} precision={3}
               value={requestedShelfRun} min={shelfRange.min} max={shelfRange.max} onChange={setSunShelfRun} />

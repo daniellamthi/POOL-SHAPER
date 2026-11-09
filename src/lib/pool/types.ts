@@ -62,6 +62,8 @@ export type PoolAccess = "internalSteps" | "stainlessSteelLadder";
 /** Which internal staircase is built: a straight flight down an end wall, or
  *  a radial flight wrapped around a corner. */
 export type InternalStairType = "linear" | "corner";
+/** Requested wall anchor in plan metres; orientation is derived from the actual wall. */
+export interface InternalStairPosition { x: number; z: number }
 /** Hydromassage architecture: same tub, with or without the low front wall. */
 export type HydromassageVariant = "closed" | "open";
 
@@ -115,6 +117,7 @@ export interface RenovationConfig {
     internalStairType?: InternalStairType;
     internalStairWidth?: number;
     internalStairMirrored?: boolean;
+    internalStairPosition?: InternalStairPosition | undefined;
   };
 }
 
@@ -245,6 +248,7 @@ export interface PoolConfig {
   internalStairWidth?: number;
   /** Internal entry on the other valid side of the same end wall. */
   internalStairMirrored?: boolean;
+  internalStairPosition?: InternalStairPosition | undefined;
   /** Only meaningful while "hydromassage" is enabled; absent means "closed". */
   hydromassageVariant?: HydromassageVariant;
   equipment: ReadonlyArray<EquipmentId>;

@@ -97,6 +97,7 @@ import {
   structureSupportsPoolType,
 } from "./structure-finish";
 
+import { isInternalStairPosition } from "./stair-position";
 import { internalStairWidthFits } from "./internal-stair-width";
 
 type Action =
@@ -144,6 +145,7 @@ type Action =
   | { type: "setInternalStairType"; value: InternalStairType }
   | { type: "setInternalStairWidth"; value: number | undefined }
   | { type: "setInternalStairMirrored"; value: boolean }
+  | { type: "setInternalStairPosition"; value: PoolConfig["internalStairPosition"] }
   | { type: "setHydromassageVariant"; value: HydromassageVariant }
   | { type: "setPoolAccess"; value: PoolAccess }
   | { type: "toggleInternalSteps" }
@@ -303,12 +305,21 @@ function reduceConfiguration(state: State, action: Action): State {
       return internalStairWidthFits(config, action.value)
         ? { ...state, config: { ...config, internalStairWidth: action.value } } : state;
     }
+    case "setInternalStairPosition": {
+      const { internalStairPosition: _position, ...automatic } = config;
+      if (action.value === undefined) return { ...state, config: automatic };
+      if (config.poolType !== "in-ground" || config.poolAccess !== "internalSteps" || !isInternalStairPosition(action.value)) return state;
+      const next = { ...config, internalStairPosition: { x: action.value.x, z: action.value.z } };
+      const plan = configuredPoolLayout(next);
+      return plan.status !== "UNAVAILABLE" && plan.access.placement ? { ...state, config: next } : state;
+    }
     case "setInternalStairType":
       if (action.value === "linear" && config.features.includes("hydromassage") && !config.features.includes("sunShelf")) return state;
       return { ...state, config: { ...config, internalStairType: action.value } };
     case "setInternalStairMirrored": {
-      if (config.poolAccess !== "internalSteps" || !!config.internalStairMirrored === action.value) return state;
-      const next = { ...config, internalStairMirrored: action.value };
+      if (config.poolAccess !== "internalSteps" || (!!config.internalStairMirrored === action.value && !config.internalStairPosition)) return state;
+      const { internalStairPosition: _position, ...automatic } = config;
+      const next = { ...automatic, internalStairMirrored: action.value };
       const plan = configuredPoolLayout(next);
       const hasFlight = !!plan.access.placement || plan.comfort.elements.some(element => !!element.steps?.length);
       return plan.status !== "UNAVAILABLE" && hasFlight ? { ...state, config: next } : state;
@@ -933,6 +944,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       config.internalStairType,
       config.internalStairWidth,
       config.internalStairMirrored,
+      config.internalStairPosition,
       config.hydromassageVariant,
       config.infinityEdge,
     ],
@@ -943,7 +955,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
     // Geometry inputs only: changing a colour must not remount the fitting row.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [outline, config.dimensions, config.poolType, config.system, config.overflowType, config.copingStyle,
-      config.features, config.poolAccess, config.internalStairType, config.internalStairWidth, config.internalStairMirrored,
+      config.features, config.poolAccess, config.internalStairType, config.internalStairWidth, config.internalStairMirrored, config.internalStairPosition,
       config.hydromassageVariant, config.integratedBenchStations, config.infinityEdge],
   );
 
@@ -1031,6 +1043,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setInternalStairType: (v) => dispatch({ type: "setInternalStairType", value: v }),
       setInternalStairWidth: (v) => dispatch({ type: "setInternalStairWidth", value: v }),
       setInternalStairMirrored: (v) => dispatch({ type: "setInternalStairMirrored", value: v }),
+      setInternalStairPosition: (v) => dispatch({ type: "setInternalStairPosition", value: v }),
       setHydromassageVariant: (v) => dispatch({ type: "setHydromassageVariant", value: v }),
       setPoolAccess: (v) => dispatch({ type: "setPoolAccess", value: v }),
       toggleInternalSteps: () => dispatch({ type: "toggleInternalSteps" }),

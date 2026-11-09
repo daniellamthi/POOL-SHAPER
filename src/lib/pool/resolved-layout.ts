@@ -18,6 +18,7 @@ import type {
   PoolShapeId,
   PoolType,
   PoolAccess,
+  InternalStairPosition,
 } from "./types";
 
 export type LayoutStatus = "VALID" | "AUTO_ADJUSTED" | "UNAVAILABLE";
@@ -36,6 +37,7 @@ export interface ResolvedPoolLayout {
 }
 type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   stairMirrored?: boolean;
+  stairPosition?: InternalStairPosition | undefined;
   stairWidth?: number | undefined;
   shape: PoolShapeId;
   poolType: PoolType;
@@ -111,7 +113,7 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
     // reverse: derive the mirror anchor without the newly moved skimmers.
     const mirrorSource = input.stairMirrored && access === "internalSteps" && comfort.elements.some(element => element.kind === "sunShelf")
       ? resolveAccessPlan({ ...request, obstacles: [] }) : normal;
-    if(!input.stairMirrored || access!=="internalSteps" || !mirrorSource.placement) return normal;
+    if(input.stairPosition || !input.stairMirrored || access!=="internalSteps" || !mirrorSource.placement) return normal;
     const bounds=outlineBounds(input.outline),p=mirrorSource.placement,longX=bounds.spanX>=bounds.spanZ;
     return resolveAccessPlan({...request,mirrorAnchor:{
       x:longX?p.x:bounds.minX+bounds.maxX-p.x,
@@ -220,6 +222,7 @@ export function configuredLayoutWithSkimmers(config: PoolConfig) {
     stairType: config.internalStairType ?? "linear",
     stairWidth: config.internalStairWidth,
     stairMirrored: !!config.internalStairMirrored,
+    stairPosition: config.poolType === "in-ground" ? config.internalStairPosition : undefined,
     skimmers: planSkimmers(
       outline,
       computeMetrics(outline, config.dimensions.depth).waterSurface,

@@ -93,7 +93,7 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
     "projectType", "poolType", "structure", "shape", "shapeSelected", "copingMaterial", "copingStyle", "copingEdge", "paving", "pavingFormat", "premiumEnvironment",
     "customMode", "controlPoints", "dimensions", "system", "overflowType", "skimmerFinish", "skimmerType", "finish",
     "linerColor", "mosaicFinish", "features", "ledColor", "ledIntensity", "ledType", "ledPerimeterSides", "sceneTime", "infinityEdge", "poolAccess",
-    "internalStairType", "internalStairWidth", "internalStairMirrored", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
+    "internalStairType", "internalStairWidth", "internalStairMirrored", "internalStairPosition", "hydromassageVariant", "equipment", "coverPosition", "coverExtension",
     "exteriorPanelFinish", "externalStairSide", "externalStairPlatformExtended", "sunShelfLoungerCount", "sunShelfLoungerColor", "integratedBenchStations",
   ]);
   config.dimensions = pick(config.dimensions, ["length", "width", "depth", "cornerRadius", "floorProfile", "shallowDepth", "slopeReversed", "sunShelfRun", "lShapeRecessLength", "lShapeRecessWidth", "lShapeOrientation", "organicCurvature"]);
@@ -102,7 +102,7 @@ export function shareableProject(project: ProjectConfiguration): ProjectConfigur
   config.uploads = [];
   const renovation = pick(project.renovation, ["areas", "currentFinish", "filtrationWorks", "replaceCoping", "copingMaterial", "structureIssues", "equipmentUpgrades"]);
   if (project.renovation.existing) renovation.existing = pick(project.renovation.existing,
-    ["poolType", "structure", "system", "overflowType", "finish", "linerColor", "mosaicFinish", "copingMaterial", "poolAccess", "internalStairType", "internalStairWidth", "internalStairMirrored"]);
+    ["poolType", "structure", "system", "overflowType", "finish", "linerColor", "mosaicFinish", "copingMaterial", "poolAccess", "internalStairType", "internalStairWidth", "internalStairMirrored", "internalStairPosition"]);
   return { schemaVersion: project.schemaVersion, projectId: project.projectId, config, renovation };
 }
 

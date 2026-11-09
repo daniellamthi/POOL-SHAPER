@@ -1,0 +1,61 @@
+{
+  "recorded": "2026-11-09T15:50:18.523312+01:00",
+  "base": "c7e45efbd9965b5fa004932b4a29e1fe43eb6410",
+  "status": "PASS scoped local QA",
+  "scope": "Wall-attached internal stair drag and rotation; no unrelated geometry/material/shader/camera change",
+  "contract": [
+    "Straight flight slides along a valid wall; yaw follows the actual inward normal",
+    "Corner flight snaps to valid square corners and turns with their walls",
+    "Integrated shelf flight retains its assembly and only changes its two valid SX/DX slots",
+    "Invalid drop leaves the previous project unchanged; feedback uses the real solver reason",
+    "SVG-only draft during pointer movement; project/3D commit on release; pointer capture and cancellation",
+    "Pointer, keyboard, rotate/reset; new position retained for new pool and existing renovation, Share and summaries"
+  ],
+  "checks": {
+    "positionAndSSR": 1661,
+    "stairOptionsRegression": 112,
+    "stairWidthRegression": 305,
+    "accessRestoreRegression": 11,
+    "readOnlyPlanAndTranslationRegression": 22,
+    "scopedTypeRoots": 23,
+    "productionNodeQABuild": "PASS",
+    "ESLint": "5 source files;0 errors/warnings with formatting rule disabled to preserve existing style"
+  },
+  "native": {
+    "browser": "Integrated Chromium",
+    "desktop": [
+      1280,
+      720
+    ],
+    "mobileEmulation": [
+      390,
+      844
+    ],
+    "passed": [
+      "Corner drag between free corners beside shelf",
+      "Rejected corner drop into occupied shelf left geometry unchanged",
+      "Corner rotation through actual button",
+      "Straight drag to centre of long wall with matching visible 3D",
+      "Straight rotation to adjacent wall",
+      "Keyboard ArrowRight moved actual flight0.10m",
+      "Manual top projection retained during drag/rotation",
+      "Actual reload retained identical plan polygons",
+      "Mobile drag between walls and English labels",
+      "No mobile document horizontal overflow390/390",
+      "Final mobile hit target54.83x54.83CSSpx",
+      "Integrated linear shelf drag switched SX toDX; rotation correctly disabled",
+      "Reset automatic position; original10x5m/overflow/shelf/cornerSX/2lime loungers restored"
+    ],
+    "consoleErrors": []
+  },
+  "limits": [
+    "Mobile viewport emulation is not physical touch/hardware testing",
+    "No actual cloud persistence, real PDF export, long photo render or mail repeated",
+    "Existing whole-product launch gates remain open"
+  ],
+  "publicPreview": {
+    "alias": "https://configuratoree.vercel.app/",
+    "previousDeployment": "dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1",
+    "state": "pending Git checkpoint; existing Preview only"
+  }
+}

@@ -2,6 +2,25 @@ import { REFERENCE_FINISHES } from "@/lib/pool/reference-finishes";
 
 /** Customer copy only. Technical identifiers and commercial collection names stay unchanged. */
 export const messages: ReadonlyArray<readonly [string, string]> = [
+  ["Trascina la scala lungo il perimetro", "Drag the stairs along the perimeter"],
+  ["Trascina la scala lungo il perimetro. Si aggancia alla parete e ruota verso l’interno.", "Drag the stairs along the perimeter. They snap to the wall and turn towards the pool."],
+  ["Trascina la scala su un angolo libero. La rotazione mantiene i gradini aderenti alle pareti.", "Drag the stairs to a free corner. Rotation keeps the steps attached to the walls."],
+  ["La scala integrata alla spiaggetta mantiene il suo orientamento. Trascina per scegliere SX o DX.", "Stairs integrated with the sun shelf keep their orientation. Drag to choose L or R."],
+  ["Nessuna posizione compatibile con la spiaggetta.", "No position is compatible with the sun shelf."],
+  ["Posizione non disponibile.", "Position unavailable."],
+  ["Nessuna parete compatibile in questa direzione.", "No compatible wall in this direction."],
+  ["Posizione della scala aggiornata.", "Stair position updated."],
+  ["Spostamento annullato.", "Move cancelled."],
+  ["Ruota verso la parete successiva", "Rotate to the next wall"],
+  ["Ruota verso la parete precedente", "Rotate to the previous wall"],
+  ["Ruota a destra", "Rotate right"],
+  ["Ruota a sinistra", "Rotate left"],
+  ["Posizione automatica", "Automatic position"],
+  ["Da tastiera: ← → sposta, ↑ ↓ ruota, Esc annulla, Home ripristina.", "Keyboard: ← → move, ↑ ↓ rotate, Esc cancel, Home reset."],
+  ["Scala posizionata in pianta · orientamento {angle}°", "Stairs positioned in plan · orientation {angle}°"],
+  ["Personalizzata in pianta", "Custom position in plan"],
+  ["Posizione scala", "Stair position"],
+
   ["Rimuovi zona comfort", "Remove comfort area"],
   ["Misura adattata a {value} {unit}. Intervallo consentito: {min}–{max} {unit}.", "Value adjusted to {value} {unit}. Allowed range: {min}–{max} {unit}."],
   ["Vista dall’alto · orientamento fisso", "Top view · fixed orientation"],

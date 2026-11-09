@@ -242,13 +242,15 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
       : { hex: linerColor?.hex ?? "#dfe9ec", texture: linerColor?.texture };
 
   const comfortItems = [
+    ...(config.internalStairPosition && resolvedLayout.access.placement
+      ? [t("Scala posizionata in pianta · orientamento {angle}°", {angle:formatNumber((resolvedLayout.access.placement.rotation*180/Math.PI+360)%360,0)})] : []),
     ...(config.internalStairWidth !== undefined && (resolvedLayout.access.placement && !resolvedLayout.access.corner || resolvedLayout.comfort.elements.some(element => !!element.steps?.length))
       ? [t("Larghezza scala: {width} m", { width: formatNumber(config.internalStairWidth, 2) })] : []),
     ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity} · ${t(sunShelfLoungerColor(config.sunShelfLoungerColor).label)}`] : []),
     ...(config.poolAccess
       ? [
           config.poolAccess === "internalSteps"
-            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}${typeof config.internalStairMirrored === "boolean" ? ` · ${t(configuredInternalStairSides(config).find(side => side.mirrored === config.internalStairMirrored)?.side === "left" ? "Sinistra (SX)" : "Destra (DX)")}` : ""}`
+            ? `${POOL_ACCESS_LABEL[config.poolAccess]} — ${INTERNAL_STAIR_LABEL[config.internalStairType ?? "linear"]}${!config.internalStairPosition && typeof config.internalStairMirrored === "boolean" ? ` · ${t(configuredInternalStairSides(config).find(side => side.mirrored === config.internalStairMirrored)?.side === "left" ? "Sinistra (SX)" : "Destra (DX)")}` : ""}`
             : POOL_ACCESS_LABEL[config.poolAccess],
         ]
       : []),
@@ -436,6 +438,7 @@ export function buildProjectSummary(project: ProjectConfiguration, locale: Local
         { label: "Struttura", value: (e?.structure ?? config.structure) ? STRUCTURE_LABEL[(e?.structure ?? config.structure)!] : "Da verificare" },
         { label: "Dimensioni", value: dimensionsSentence },
         { label: "Fondo", value: isSlopedFloor ? "In pendenza" : "Piano" },
+        ...(e?.internalStairPosition ? [{ label: t("Posizione scala"), value: t("Personalizzata in pianta") }] : []),
         ...(e?.internalStairWidth !== undefined && e.poolAccess === "internalSteps" && e.internalStairType !== "corner"
           ? [{ label: t("Larghezza scala"), value: `${formatNumber(e.internalStairWidth, 2)} m` }] : []),
         { label: "Accesso esistente", value: config.poolAccess === "internalSteps"

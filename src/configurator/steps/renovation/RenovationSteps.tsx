@@ -147,7 +147,8 @@ export function RenovationPoolStep({ ctx, tab, setTab }: { ctx: TrayContext } & 
           })}
       </ChoiceGrid> : null}
       {e?.poolAccess === "internalSteps" ? <InternalStairSideControl config={renovationPreviewConfig(config, r, true)}
-        onChange={mirrored => choose({ internalStairMirrored: mirrored })} /> : null}
+        onChange={mirrored => choose({ internalStairMirrored: mirrored, internalStairPosition: undefined })}
+        onPositionChange={position => choose({ internalStairPosition: position })} /> : null}
       {e?.poolAccess === "internalSteps" ? <InternalStairWidthControl
         config={renovationPreviewConfig(config, r, true)}
         onChange={width => {

@@ -14,7 +14,7 @@ export function InternalStairWidthControl({ config, onChange }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [config.poolType, config.shape, config.dimensions, config.controlPoints, config.system,
       config.overflowType, config.features, config.poolAccess, config.internalStairType,
-      config.internalStairMirrored, config.hydromassageVariant, config.infinityEdge,
+      config.internalStairMirrored, config.internalStairPosition, config.hydromassageVariant, config.infinityEdge,
       config.integratedBenchStations, config.copingStyle, config.copingEdge]);
   const requested = config.internalStairWidth;
   const valid = useMemo(() => requested === undefined || internalStairWidthFits(config, requested), [config, requested]);

@@ -105,6 +105,7 @@ export interface ConfiguratorContextValue {
   setInternalStairType: (value: InternalStairType) => void;
   setInternalStairWidth: (value: number | undefined) => void;
   setInternalStairMirrored: (value: boolean) => void;
+  setInternalStairPosition: (value: PoolConfig["internalStairPosition"]) => void;
   setHydromassageVariant: (value: HydromassageVariant) => void;
   setPoolAccess: (value: PoolAccess) => void;
   toggleInternalSteps: () => void;

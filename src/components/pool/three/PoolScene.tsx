@@ -152,6 +152,7 @@ export interface SceneProps {
   internalStairType: InternalStairType;
   internalStairWidth?: number | undefined;
   internalStairMirrored?: boolean;
+  internalStairPosition?: import("@/lib/pool/types").InternalStairPosition | undefined;
   hydromassageVariant?: HydromassageVariant;
   poolAccess: PoolAccess | null;
   skimmers: SkimmerPlan;
@@ -1289,6 +1290,7 @@ export default function PoolScene({
   internalStairType,
   internalStairWidth,
   internalStairMirrored = false,
+  internalStairPosition,
   hydromassageVariant,
   poolAccess,
   skimmers,
@@ -1371,7 +1373,7 @@ export default function PoolScene({
   const assetsLoading=useProgress(state=>state.active);
   const shadowRevision=JSON.stringify([
     graphicsRevision,outline,shape,system,overflowType,poolType,length,width,depth,floorProfileSetting,
-    shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairWidth,internalStairMirrored,
+    shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairWidth,internalStairMirrored,internalStairPosition,
     hydromassageVariant,sunShelfRun,sunShelfLoungerCount,integratedBenchStations,infinityEdge,construction,
     solarShower,loungers,exteriorPanelFinish,externalStairSide,externalStairPlatformExtended,
     pellicano,coverPlan.geometry,coverPlan.extension,materials.skimmer.type,skimmers.positions,
@@ -1490,6 +1492,7 @@ export default function PoolScene({
         stairType: internalStairType,
         stairWidth: internalStairWidth,
         stairMirrored: internalStairMirrored,
+        stairPosition: poolType === "in-ground" ? internalStairPosition : undefined,
         floorProfile,
         infinityExcluded,
       }),
@@ -1510,6 +1513,7 @@ export default function PoolScene({
       internalStairType,
       internalStairWidth,
       internalStairMirrored,
+      internalStairPosition,
       floorProfile,
       infinityExcluded,
       overflowType,
@@ -1718,6 +1722,7 @@ export default function PoolScene({
     internalStairType,
     internalStairWidth,
     internalStairMirrored,
+    JSON.stringify(internalStairPosition),
     floorProfileSetting,
     shallowDepth,
     slopeReversed,

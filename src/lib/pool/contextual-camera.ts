@@ -40,7 +40,8 @@ export function focusForAction(action: { type: string; key?: string; value?: unk
         : !c.features.includes("ledLighting") && c.features.includes("hydromassageBenchLighting") ? "BENCH_LIGHTING" : "LIGHTING";
     case "setInternalStairType": return "STAIRS";
     // Compare sides in the current projection, including a manually selected top view.
-    case "setInternalStairMirrored": return undefined;
+    case "setInternalStairMirrored":
+    case "setInternalStairPosition": return undefined;
     case "toggleInternalSteps": return c.poolAccess === "internalSteps" ? "STAIRS" : accessFocus(c);
     case "setPoolAccess": return accessFocus(c);
     case "setHydromassageVariant": return accessFocus(c);

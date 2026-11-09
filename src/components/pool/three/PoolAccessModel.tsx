@@ -1,3 +1,5 @@
+import { nearestStairWall } from "@/lib/pool/stair-position";
+import type { InternalStairPosition } from "@/lib/pool/types";
 import { StainlessSteelMaterial } from "./StainlessSteelMaterial";
 import { useEffect, useMemo, type ReactNode } from "react";
 import * as THREE from "three";
@@ -127,6 +129,7 @@ export function accessPlacement(
    * ladder/steps wall. `null` (every pre-Infinity call) is a no-op. */
   infinityExcluded: InfinityExclusion | null = null,
   accept?: (placement: AccessPosition) => boolean,
+  requestedPosition?: InternalStairPosition,
 ) {
   const inside = (x: number, z: number) => {
     let hit = false;
@@ -202,7 +205,9 @@ export function accessPlacement(
   // rendered no access at all. Escalating tolerances (same ladder
   // `mergedWallChords` already climbs for LED placement) collapses the
   // curve's low-curvature runs into real, placeable candidate walls instead.
-  const mergeTolerances = [0.06, 0.15, 0.3, 0.6, 1.0];
+  const requestedWall = requestedPosition ? nearestStairWall(outline, requestedPosition, width) : null;
+  if (requestedPosition && !requestedWall) return null;
+  const mergeTolerances = requestedPosition ? [0.06] : [0.06, 0.15, 0.3, 0.6, 1.0];
   for (const tolerance of mergeTolerances) {
     const edges = mergedWallChords(outline, tolerance)
       .map(({ a, b, length }) => ({
@@ -235,12 +240,13 @@ export function accessPlacement(
       });
     for (const { a, b, length } of edges) {
       if (length < width + 0.2) continue;
+      if (requestedWall && (a !== requestedWall.a && Math.hypot(a[0]-requestedWall.a[0],a[1]-requestedWall.a[1]) > 1e-6 || Math.hypot(b[0]-requestedWall.b[0],b[1]-requestedWall.b[1]) > 1e-6)) continue;
       const tx = (b[0] - a[0]) / length,
         tz = (b[1] - a[1]) / length;
       // Hard into one corner for both, then the other corner, then centred
       // only as a last resort when an obstruction leaves nowhere else.
       const cornerFirst = shortWallAccess ? atSkimmerEnd(a) : false;
-      const fractions = shortWallAccess
+      const fractions = requestedWall ? [requestedWall.along / length] : shortWallAccess
         ? cornerFirst
           ? [0, 1, 0.5]
           : [1, 0, 0.5]
@@ -592,6 +598,7 @@ export function resolveAccessPlan({
   stairType = "linear",
   stairWidth,
   stairWidthAnchor,
+  stairPosition,
   floorProfile,
   topY,
   infinityExcluded = null,
@@ -608,6 +615,7 @@ export function resolveAccessPlan({
   stairType?: InternalStairType;
   stairWidth?: number | undefined;
   stairWidthAnchor?: Outline | undefined;
+  stairPosition?: InternalStairPosition | undefined;
   floorProfile: FloorProfileModel;
   topY: number;
   infinityExcluded?: InfinityExclusion | null;
@@ -686,13 +694,15 @@ export function resolveAccessPlan({
         reason:
           "Scala angolare non disponibile sul fondo inclinato: il raccordo curvo richiede un pianerottolo piano.",
       };
+    const requestedCorner = stairPosition ? outline.reduce((best, point) =>
+      Math.hypot(point[0]-stairPosition.x,point[1]-stairPosition.z) < Math.hypot(best[0]-stairPosition.x,best[1]-stairPosition.z) ? point : best, outline[0]!) : null;
     const candidate = cornerStairPlan(
       outline,
       floorProfile.deepFloorY,
       topY,
       floorProfile,
       infinityExcluded,
-      footprint => (!mirrorAnchor || Math.hypot(footprint[0]![0]-mirrorAnchor.x,footprint[0]![1]-mirrorAnchor.z)<0.02) && clearOfFittings(footprint),
+      footprint => (!requestedCorner || Math.hypot(footprint[0]![0]-requestedCorner[0],footprint[0]![1]-requestedCorner[1]) < .02) && (!mirrorAnchor || Math.hypot(footprint[0]![0]-mirrorAnchor.x,footprint[0]![1]-mirrorAnchor.z)<0.02) && clearOfFittings(footprint),
     );
     const corner = candidate && rectangularCorner ? { ...candidate, rectangular: true } : candidate;
     if (!corner)
@@ -807,7 +817,7 @@ export function resolveAccessPlan({
       infinityExcluded,
       (p) => {
         const footprint = footprintAt(p, width, run);
-        if (stairWidthAnchor?.length === 4) {
+        if (!stairPosition && stairWidthAnchor?.length === 4) {
           const a = stairWidthAnchor, b = footprint;
           const ax = a[1]![0] - a[0]![0], az = a[1]![1] - a[0]![1];
           const bx = b[1]![0] - b[0]![0], bz = b[1]![1] - b[0]![1];
@@ -836,6 +846,7 @@ export function resolveAccessPlan({
           );
         }).every(Boolean);
       },
+      stairPosition,
     );
     if (placement)
       return {

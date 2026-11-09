@@ -1,6 +1,6 @@
 # POOL-SHAPER — final customer QA / release readiness
 
-**Current working state: 8 November 2026 — scoped UI checks PASS; owner-authorized public Preview refreshed and verified. Release prerequisites remain open.**
+**Current working state: 9 November 2026 — wall-attached stair drag/rotation QA PASS; existing public Preview refresh in progress. Release prerequisites remain open.**
 Base before this checkpoint: `0bb0dd596081045fb8c6d79d03f1d9c60713f008`
 (`fix: unify concealed overflow edge with paving`, 26 October).
 The owner now explicitly requests committing/pushing the current implementation and
@@ -5020,3 +5020,15 @@ Publication/build/anonymous-access and native online verification are recorded a
 Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/vercel-checkpoint-20261108/publication-plan.json.
 
 Public Preview completed: runtime commit `ff353b37cce8b6881974c605792795f25f900000` pushed normally to the operational branch and verified identical on origin. Automatic Git-source Vercel build `dpl_7gFqpQFrdxpnsD6QmXwoCup1Lza1` is READY with that exact commit. Existing `https://configuratoree.vercel.app/` now points to this deployment; previous deployment retained as rollback target. Anonymous HTTP GET returned200 without cookies, authentication or bypass headers; entry CSS/JS assets also returned200. Native IAB reload restored the saved project; latest access copy, fixed mini-plan, selected SX, disabled DX and actual technical reason observed. Browser error log empty. Public tab shown and marked deliverable. No runtime change after the validated checkpoint. Final publication/HTTP/screenshot receipts are in the same evidence directory. Historical raw QA evidence remains local and backed up; the worktree is not globally clean. Whole-product launch gates remain open.
+
+### 9 November — wall-attached stair placement from plan
+
+Owner requested dragging the internal stair anywhere on the pool perimeter and rotating it. Added an optional serializable wall anchor; the existing geometry solver projects onto the nearest real wall, derives inward yaw and retains its containment, floor/rise, Infinity, fitting and comfort exclusions. An invalid requested wall does not silently select a different one. Straight flights slide along free walls; radial flights require a valid square corner. Integrated linear shelf flights retain their paired architecture and expose drag-to-SX/DX with a clear explanation; independent corner flights can move around the free perimeter beside shelf or spa. Existing presets/default geometry and above-ground geometry remain unchanged.
+
+The existing fixed plan now exposes one named keyboard focus/drag handle, pointer capture, RAF draft preview, real rejection feedback, rotation controls and automatic reset. Global project/3D changes commit only on release. Existing manual camera projection is preserved. New-pool and renovation state remain isolated; restore validates coordinates, Share allowlists and IT/EN summaries retain the new choice. PoolScene, lighting, metrics and photo scene revision use the same actual plan.
+
+Targeted verification PASS:1661 position/geometry/persistence/SSR assertions across11 fixtures (191 accepted,673 rejected requests),112 existing stair-option,305 width,11 restore/access and22 read-only plan/i18n regressions. Scoped23-root dependency typecheck, source diff-check,5-file semantic ESLint (format rule disabled to preserve existing style), final isolated Node production build and506 runtime-file QA hash parity PASS. No broad audit/full test suite.
+
+Native IAB PASS on1280x720 desktop and390x844 emulated mobile: actual corner drag, invalid shelf drop preserving old geometry, rotation, straight wall slide matching visible3D, adjacent-wall rotation,0.10m keyboard move, unchanged manual top view, reload with identical plan polygons, mobile cross-wall drag/English text,390/390 document width, final54.83px mobile handle and integrated-shelf SX→DX drag with rotation disabled. Error log empty. Restored10x5m/continuous overflow/cornerSX/shelf3.035m/two lime loungers/IT/day; viewport override reset. Native touch/hardware, cloud, real PDF and long photo quality were not newly certified. Existing release gates remain open.
+
+Evidence: docs/qa/evidence/catalogue-reference-wip-20261026/stair-perimeter-drag-20261109/manifest.json. Existing public Preview refresh follows the normal operational-branch checkpoint; no main merge, Production promotion, DNS, backend/Supabase operation or email. Historical untracked QA evidence is preserved.

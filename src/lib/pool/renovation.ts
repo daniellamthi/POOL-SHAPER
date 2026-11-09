@@ -4,6 +4,7 @@ import { COPING_MATERIALS } from "./coping-materials";
 import { MOSAIC_FINISHES } from "@/configurator/materials/interior-textures";
 import { allowedFinishesForStructure, structureSupportsPoolType } from "./structure-finish";
 import { getCustomerValidation } from "./validation";
+import { isInternalStairPosition } from "./stair-position";
 import { configuredAccessPlan } from "./access-plan";
 
 export const renovationIncludes = (r: RenovationConfig, area: RenovationArea) =>
@@ -41,6 +42,7 @@ export function isRenovationConfig(value: unknown): value is RenovationConfig {
         !valid(e.finish, ["liner", "mosaic"]) || !valid(e.poolAccess, [null, "internalSteps", "stainlessSteelLadder"]) ||
         !valid(e.internalStairType, ["linear", "corner"]) ||
         (e.internalStairWidth !== undefined && (!Number.isFinite(e.internalStairWidth) || e.internalStairWidth < 0.8 || e.internalStairWidth > 100)) ||
+        (e.internalStairPosition !== undefined && !isInternalStairPosition(e.internalStairPosition)) ||
         (e.internalStairMirrored !== undefined && typeof e.internalStairMirrored !== "boolean") ||
         !valid(e.linerColor, LINER_COLORS.map(c => c.id)) ||
         !valid(e.mosaicFinish, MOSAIC_FINISHES.map(c => c.id)) ||
@@ -76,7 +78,7 @@ export function renovationPreviewConfig(config: PoolConfig, r: RenovationConfig,
   const finish = before || !renovationIncludes(r, "interiorFinish") ? e.finish ?? r.currentFinish : config.finish;
   const system = !before && renovationIncludes(r, "filtration") && r.filtrationWorks.includes("overflow")
     ? "overflow" : e.system ?? config.system;
-  const { infinityEdge: _edge, internalStairWidth: _width, internalStairMirrored: _mirrored, ...base } = config;
+  const { infinityEdge: _edge, internalStairWidth: _width, internalStairMirrored: _mirrored, internalStairPosition: _position, ...base } = config;
   return {
     ...base,
     poolType: e.poolType ?? config.poolType,
@@ -89,6 +91,7 @@ export function renovationPreviewConfig(config: PoolConfig, r: RenovationConfig,
     poolAccess: e.poolAccess !== undefined ? e.poolAccess : config.poolAccess,
     internalStairType: e.internalStairType ?? config.internalStairType ?? "linear",
     ...(typeof e.internalStairMirrored === "boolean" ? { internalStairMirrored: e.internalStairMirrored } : {}),
+    ...(e.poolType !== "above-ground" && e.internalStairPosition ? { internalStairPosition: e.internalStairPosition } : {}),
     ...(e.internalStairWidth !== undefined ? { internalStairWidth: e.internalStairWidth } : {}),
     dimensions: e.poolType === "above-ground" ? { ...config.dimensions, floorProfile: "flat" } : config.dimensions,
     copingMaterial: !before && renovationIncludes(r, "coping") && r.replaceCoping &&

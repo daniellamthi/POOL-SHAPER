@@ -15,6 +15,7 @@ export function internalStairChoice(config: PoolConfig, type: InternalStairType)
 
 /** Actual geometry decides which side is usable; no unconstrained mirror meshes. */
 export function configuredInternalStairSides(config: PoolConfig) {
+  config = { ...config, internalStairPosition: undefined };
   const outline = configuredOutline(config);
   const bounds = outlineBounds(outline);
   const cross = bounds.spanX >= bounds.spanZ ? 1 : 0;
