@@ -47,11 +47,57 @@ export function moveInternalStair(config: PoolConfig, point: InternalStairPositi
     available:true,reason:"",mirrored:!!config.internalStairMirrored,position:left?-1:1,side:left?"left":"right"}},reason:"" };
 }
 
+/** Pointer movement follows the visible footprint, not the wall pivot. On a
+ * narrow L arm those two anchors move in opposite directions when yaw changes. */
+export function internalStairDragOrigin(option: Option): InternalStairPosition {
+  const access=option.layout.access;
+  return access.placement && !access.corner ? access.placement : centre(option.footprint);
+}
+
+/** Only real, fully validated corner poses; derived once per configuration. */
+export function cornerStairMoves(config: PoolConfig): StairMove[] {
+  if(config.internalStairType!=="corner")return [];
+  const outline=configuredOutline(config);
+  return outline.flatMap((point,index)=>{
+    const a=outline[(index+outline.length-1)%outline.length]!,b=outline[(index+1)%outline.length]!;
+    const ax=a[0]-point[0],az=a[1]-point[1],bx=b[0]-point[0],bz=b[1]-point[1];
+    if(Math.abs((ax*bx+az*bz)/(Math.hypot(ax,az)*Math.hypot(bx,bz)))>.001)return [];
+    const result=moveInternalStair(config,{x:point[0],z:point[1]});
+    return result.move ? [result.move] : [];
+  });
+}
+
+/** Snap the visual handle to the nearest valid visual target. This also avoids
+ * selecting an L's reflex vertex when aiming at a neighbouring valid flight. */
+export function moveInternalStairFromPlan(config: PoolConfig, point: InternalStairPosition, corners: readonly StairMove[] = cornerStairMoves(config)) {
+  if(config.internalStairType!=="corner")return moveInternalStair(config,point);
+  const target=corners.reduce<StairMove|null>((best,move)=>{
+    const c=centre(move.option.footprint),b=best?centre(best.option.footprint):null;
+    return !b||Math.hypot(c.x-point.x,c.z-point.z)<Math.hypot(b.x-point.x,b.z-point.z) ? move : best;
+  },null);
+  if(target){
+    const c=centre(target.option.footprint),reach=Math.max(target.option.layout.access.width,target.option.layout.access.run)*.8+.1;
+    if(Math.hypot(c.x-point.x,c.z-point.z)<=reach)return {move:target,reason:""};
+  }
+  return {move:null,reason:moveInternalStair(config,point).reason||"Posizione non disponibile."};
+}
+
 /** Turning follows the next wall/corner, keeping the flight attached and inward. */
-export function rotateInternalStair(config: PoolConfig, direction: -1 | 1) {
+export function rotateInternalStair(config: PoolConfig, direction: -1 | 1, corners?: readonly StairMove[]) {
   const plan=configuredLayoutWithSkimmers(config).layout;
   if (!plan.access.placement || plan.comfort.elements.some(e=>!!e.steps?.length)) return {move:null,reason:"La scala integrata alla spiaggetta mantiene il suo orientamento. Trascina per scegliere SX o DX."};
-  const p=plan.access.corner ? {x:plan.access.footprint[0]![0],z:plan.access.footprint[0]![1]} : plan.access.placement;
+  if(plan.access.corner){
+    const positions=corners??cornerStairMoves(config);
+    if(positions.length<2)return {move:null,reason:"Nessuna parete compatibile in questa direzione."};
+    const anchor=plan.access.footprint[0]!;
+    let current=0;
+    positions.forEach((move,index)=>{const p=move.position!,b=positions[current]!.position!;
+      if(Math.hypot(p.x-anchor[0],p.z-anchor[1])<Math.hypot(b.x-anchor[0],b.z-anchor[1]))current=index;});
+    const outline=configuredOutline(config),area=outline.reduce((sum,p,i)=>{const q=outline[(i+1)%outline.length]!;return sum+p[0]*q[1]-q[0]*p[1];},0);
+    const step=direction*(area>=0?1:-1);
+    return {move:positions[(current+step+positions.length)%positions.length]!,reason:""};
+  }
+  const p=plan.access.placement;
   const b=outlineBounds(configuredOutline(config)), cx=(b.minX+b.maxX)/2, cz=(b.minZ+b.maxZ)/2;
   const x=(p.x-cx)/b.spanX, z=(p.z-cz)/b.spanZ;
   const result=moveInternalStair(config,{x:cx-direction*z*b.spanX,z:cz+direction*x*b.spanZ});

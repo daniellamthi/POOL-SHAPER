@@ -1,0 +1,41 @@
+{
+  "fixture": "L9.7x4.5/recess4x1.8/nw/Infinity-side1/corner/no-comfort",
+  "desktop": {
+    "forwardChanged": true,
+    "reverseRestored": true,
+    "rotationActions": [
+      {
+        "direction": "Ruota verso la parete precedente",
+        "atOriginal": false,
+        "bothEnabled": true
+      },
+      {
+        "direction": "Ruota verso la parete successiva",
+        "atOriginal": true,
+        "bothEnabled": true
+      },
+      {
+        "direction": "Ruota verso la parete successiva",
+        "atOriginal": false,
+        "bothEnabled": true
+      },
+      {
+        "direction": "Ruota verso la parete precedente",
+        "atOriginal": true,
+        "bothEnabled": true
+      }
+    ],
+    "rightLegDrag": true,
+    "leftReturn": true
+  },
+  "mobile": {
+    "viewport": "390x844 emulation",
+    "forwardChanged": true,
+    "reverseRestored": true
+  },
+  "consoleErrors": [],
+  "limitations": [
+    "Emulated mobile layout with native pointer; not physical touch hardware",
+    "No cloud, PDF or long render repeated"
+  ]
+}

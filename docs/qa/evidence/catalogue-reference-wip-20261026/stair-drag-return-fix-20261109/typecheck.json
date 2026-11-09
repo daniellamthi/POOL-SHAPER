@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "rootFiles": [
+    "src/components/pool/InternalStairPlanControl.tsx",
+    "src/lib/pool/internal-stair-position.ts",
+    "scripts/internal-stair-position-audit.ts",
+    "src/types/three-fiber.d.ts"
+  ],
+  "errors": []
+}

@@ -3,7 +3,7 @@ import { RotateCcw, RotateCw } from 'lucide-react';
 import { AccessPlanPreview } from './AccessPlanPreview';
 import { useI18n } from '@/lib/i18n';
 import { outlineBounds } from '@/lib/pool/geometry';
-import { currentInternalStairOption, moveInternalStair, nudgeInternalStair, rotateInternalStair, type StairMove } from '@/lib/pool/internal-stair-position';
+import { currentInternalStairOption, cornerStairMoves, internalStairDragOrigin, moveInternalStairFromPlan, nudgeInternalStair, rotateInternalStair, type StairMove } from '@/lib/pool/internal-stair-position';
 import type { InternalStairPosition, PoolConfig } from '@/lib/pool/types';
 
 export function InternalStairPlanControl({ config, onPositionChange, onSideChange }: {
@@ -13,7 +13,8 @@ export function InternalStairPlanControl({ config, onPositionChange, onSideChang
 }) {
   const { t }=useI18n(), helpId=useId();
   const option=useMemo(()=>currentInternalStairOption(config),[config]);
-  const rotations=useMemo(()=>[-1,1].map(direction=>rotateInternalStair(config,direction as -1|1)),[config]);
+  const corners=useMemo(()=>cornerStairMoves(config),[config]);
+  const rotations=useMemo(()=>[-1,1].map(direction=>rotateInternalStair(config,direction as -1|1,corners)),[config,corners]);
   const [preview,setPreview]=useState<typeof option|null>(null), [notice,setNotice]=useState('');
   const drag=useRef<{pointer:number; x:number; y:number; offset:InternalStairPosition; moved:boolean}|null>(null);
   const frame=useRef<number|undefined>(undefined);
@@ -46,9 +47,8 @@ export function InternalStairPlanControl({ config, onPositionChange, onSideChang
       onPointerDown:event=>{
         if(event.button!==0)return;
         const p=point(event);if(!p)return;
-        const anchor=option.layout.access.corner ? option.layout.access.footprint[0] : option.layout.access.placement ? [option.layout.access.placement.x,option.layout.access.placement.z] : null;
-        const centre=anchor ?? [option.footprint.reduce((s,p)=>s+p[0]/option.footprint.length,0),option.footprint.reduce((s,p)=>s+p[1]/option.footprint.length,0)];
-        drag.current={pointer:event.pointerId,x:event.clientX,y:event.clientY,offset:{x:p.x-centre[0]!,z:p.z-centre[1]!},moved:false};
+        const origin=internalStairDragOrigin(option);
+        drag.current={pointer:event.pointerId,x:event.clientX,y:event.clientY,offset:{x:p.x-origin.x,z:p.z-origin.z},moved:false};
         event.currentTarget.setPointerCapture(event.pointerId);event.preventDefault();setNotice('');
       },
       onPointerMove:event=>{
@@ -56,12 +56,12 @@ export function InternalStairPlanControl({ config, onPositionChange, onSideChang
         if(Math.hypot(event.clientX-drag.current.x,event.clientY-drag.current.y)<4&&!drag.current.moved)return;
         drag.current.moved=true;const p=target(event);if(!p)return;
         if(frame.current!==undefined)cancelAnimationFrame(frame.current);
-        frame.current=requestAnimationFrame(()=>{frame.current=undefined;const result=moveInternalStair(config,p);if(result.move)setPreview(result.move.option);setNotice(result.reason);});
+        frame.current=requestAnimationFrame(()=>{frame.current=undefined;const result=moveInternalStairFromPlan(config,p,corners);if(result.move)setPreview(result.move.option);setNotice(result.reason);});
       },
       onPointerUp:event=>{
         if(!drag.current||drag.current.pointer!==event.pointerId)return;
         const p=target(event), moved=drag.current.moved;
-        cancel();if(moved&&p){const result=moveInternalStair(config,p);apply(result.move,result.reason);}
+        cancel();if(moved&&p){const result=moveInternalStairFromPlan(config,p,corners);apply(result.move,result.reason);}
         if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
       },
       onPointerCancel:cancel,onLostPointerCapture:cancel,

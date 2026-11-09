@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {configuratorTesting} from '@/lib/pool/store';
 import {configuredPoolLayout} from '@/lib/pool/resolved-layout';
 import {configuredOutline} from '@/lib/pool/configured-outline';
-import {currentInternalStairOption,moveInternalStair,nudgeInternalStair,rotateInternalStair} from '@/lib/pool/internal-stair-position';
+import {currentInternalStairOption,cornerStairMoves,internalStairDragOrigin,moveInternalStairFromPlan,moveInternalStair,nudgeInternalStair,rotateInternalStair} from '@/lib/pool/internal-stair-position';
 import {nearestStairWall,isInternalStairPosition} from '@/lib/pool/stair-position';
 import {parseProjectConfiguration,serializeProjectConfiguration,toProjectConfiguration} from '@/lib/pool/project';
 import {shareableProject} from '@/lib/project-delivery/service';
@@ -80,4 +80,32 @@ check(html.includes('role="group"'),'interactive plan exposes a group instead of
 check((html.match(/aria-label="Trascina la scala lungo il perimetro"/g)??[]).length===1,'exactly one named draggable focus target');
 check(html.includes('tabindex="0"')&&html.includes('Da tastiera:'),'keyboard control discoverable in real rendered UI');
 check(html.includes('Ruota verso la parete successiva')&&html.includes('Posizione automatica'),'rotation and reset controls rendered');
-console.log(JSON.stringify({checks,fixtures:fixtures.length,valid,rejected,status:'PASS'}));
+// Regression: two flights on a2.7m L arm have overlapping footprints.
+// Dragging between their visible centres must work in BOTH directions;
+// the old wall-pivot offset stuck on the same corner. Both rotation buttons
+// must also be reversible when the bounding-box90deg target is unusable.
+let returnChecks=0;
+const sameFootprint=(a:readonly (readonly [number,number])[],b:readonly (readonly [number,number])[])=>a.length===b.length&&a.every((p,i)=>Math.hypot(p[0]-b[i]![0],p[1]-b[i]![1])<1e-7);
+const centreOf=(points:readonly (readonly [number,number])[])=>({x:points.reduce((sum,p)=>sum+p[0]/points.length,0),z:points.reduce((sum,p)=>sum+p[1]/points.length,0)});
+for(const orientation of ['sw','se','ne','nw'] as const)for(const system of ['skimmer','overflow','infinity0','infinity1','infinity2','infinity3']){
+ const c:PoolConfig={...base,shape:'l-shape',internalStairType:'corner',system:system.startsWith('infinity')?'infinity':system as 'skimmer'|'overflow',
+  ...(system.startsWith('infinity')?{infinityEdge:clampInfinityEdgeParams({...defaultInfinityEdgeParams(),enabled:true,side:Number(system.slice(-1))})}:{}),
+  dimensions:{...base.dimensions,length:9.7,width:4.5,lShapeRecessLength:4,lShapeRecessWidth:1.8,lShapeOrientation:orientation}};
+ const moves=cornerStairMoves(c);
+ for(const from of moves){
+  const selected={...c,internalStairPosition:from.position},origin=internalStairDragOrigin(from.option),grab=centreOf(from.option.footprint);
+  check(Math.hypot(origin.x-grab.x,origin.z-grab.z)<1e-7,'corner pointer follows visible centre');returnChecks++;
+  for(const to of moves){
+   const end=centreOf(to.option.footprint),request={x:end.x-(grab.x-origin.x),z:end.z-(grab.z-origin.z)};
+   const dragged=moveInternalStairFromPlan(selected,request,moves).move;
+   check(!!dragged&&sameFootprint(dragged.option.footprint,to.option.footprint),'visual handle reaches requested valid L corner');returnChecks++;
+  }
+  if(moves.length>1)for(const direction of [-1,1] as const){
+   const turned=rotateInternalStair(selected,direction,moves).move;
+   check(!!turned&&!sameFootprint(turned.option.footprint,from.option.footprint),'both SX/DX rotation controls leave current corner');returnChecks++;
+   const restored=rotateInternalStair({...c,internalStairPosition:turned!.position},direction===1?-1:1,moves).move;
+   check(!!restored&&sameFootprint(restored.option.footprint,from.option.footprint),'opposite rotation returns to original corner');returnChecks++;
+  }
+ }
+}
+console.log(JSON.stringify({checks,returnChecks,fixtures:fixtures.length,valid,rejected,status:'PASS'}));

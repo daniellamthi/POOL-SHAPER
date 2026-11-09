@@ -1,0 +1,66 @@
+{
+  "status": "targeted QA PASS; public refresh pending",
+  "scope": "Mini-plan corner stair drag and reversible rotation on L-shaped Infinity",
+  "sourceFiles": [
+    "src/components/pool/InternalStairPlanControl.tsx",
+    "src/lib/pool/internal-stair-position.ts"
+  ],
+  "audit": {
+    "checks": 2627,
+    "returnChecks": 966,
+    "fixtures": 11,
+    "valid": 191,
+    "rejected": 673,
+    "status": "PASS"
+  },
+  "typecheck": "4 roots plus dependency closure; explicit existing Node and R3F ambient declarations; PASS",
+  "semanticLint": "2 runtime sources; 0 errors, 0 warnings; existing formatting preserved",
+  "productionBuild": "isolated matching QA app npm run build PASS; local log /private/tmp/stair-drag-return-20261109/build.log",
+  "parity": {
+    "runtimeFiles": 506,
+    "mismatches": 0
+  },
+  "native": {
+    "fixture": "L9.7x4.5/recess4x1.8/nw/Infinity-side1/corner/no-comfort",
+    "desktop": {
+      "forwardChanged": true,
+      "reverseRestored": true,
+      "rotationActions": [
+        {
+          "direction": "Ruota verso la parete precedente",
+          "atOriginal": false,
+          "bothEnabled": true
+        },
+        {
+          "direction": "Ruota verso la parete successiva",
+          "atOriginal": true,
+          "bothEnabled": true
+        },
+        {
+          "direction": "Ruota verso la parete successiva",
+          "atOriginal": false,
+          "bothEnabled": true
+        },
+        {
+          "direction": "Ruota verso la parete precedente",
+          "atOriginal": true,
+          "bothEnabled": true
+        }
+      ],
+      "rightLegDrag": true,
+      "leftReturn": true
+    },
+    "mobile": {
+      "viewport": "390x844 emulation",
+      "forwardChanged": true,
+      "reverseRestored": true
+    },
+    "consoleErrors": [],
+    "limitations": [
+      "Emulated mobile layout with native pointer; not physical touch hardware",
+      "No cloud, PDF or long render repeated"
+    ]
+  },
+  "previousPublicDeployment": "dpl_43K6bzDcvA1NvLb5s8ohNaMFqXH7",
+  "limitations": "Scoped fix acceptance only; wider release gates unchanged. Historical raw untracked evidence preserved."
+}
