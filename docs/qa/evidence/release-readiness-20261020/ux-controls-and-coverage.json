@@ -1,0 +1,430 @@
+{
+  "browser": "Chrome CUA extension; integrated preview remained parent-only",
+  "desktop": "1440×900",
+  "mobile": "Viewport emulation only:390×844,430×932; no real mobile device",
+  "cycles": [
+    {
+      "cycle": 1,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 2,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 3,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 4,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 5,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 6,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 7,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 8,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 9,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 10,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 11,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 12,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 13,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 14,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 15,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 16,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 17,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 18,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 19,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    },
+    {
+      "cycle": 20,
+      "next": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "back": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "unchanged": true,
+      "expandedNext": "true",
+      "expandedBack": "true"
+    }
+  ],
+  "localeReviewEqual": true,
+  "renovationLocaleReviewEqual": true,
+  "stairsRemoved": "false",
+  "inoxOn": "true",
+  "inoxOff": "false",
+  "hydroA": "true",
+  "hydroB": "true",
+  "loungersOff": "false",
+  "mosaicsBeforeLabelFix": [
+    {
+      "name": "Mosaic 23DD3311",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic 3470EA07",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic 3A6FF20D",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic 5ABDEF81",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic 8ED505EE",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic 8F6945D0",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic C36940E8",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic DC6E8362",
+      "pressed": "true"
+    },
+    {
+      "name": "Mosaic DD99152F",
+      "pressed": "true"
+    }
+  ],
+  "outdoor": [
+    {
+      "name": "Copertura automatica",
+      "selected": "true",
+      "deselected": "false"
+    },
+    {
+      "name": "Chaise longue",
+      "selected": "true",
+      "deselected": "false"
+    },
+    {
+      "name": "Doccia solare",
+      "selected": "true",
+      "deselected": "false"
+    }
+  ],
+  "water": [
+    {
+      "name": "Elettrolisi al sale",
+      "selected": "true",
+      "deselected": "false"
+    },
+    {
+      "name": "Dosaggio automatico cloro / pH",
+      "selected": "true",
+      "deselected": "false"
+    }
+  ],
+  "heatOn": "true",
+  "heatOff": "false",
+  "infinitySides": [
+    {
+      "side": "Lato 1",
+      "pressed": "true"
+    },
+    {
+      "side": "Lato 2",
+      "pressed": "true"
+    },
+    {
+      "side": "Lato 3",
+      "pressed": "true"
+    },
+    {
+      "side": "Lato 4",
+      "pressed": "true"
+    }
+  ],
+  "externalOff": "false",
+  "panels": [
+    {
+      "name": "Acciaio satinato",
+      "pressed": "true"
+    },
+    {
+      "name": "Composito chiaro",
+      "pressed": "true"
+    },
+    {
+      "name": "Gres porcellanato",
+      "pressed": "true"
+    },
+    {
+      "name": "WPC",
+      "pressed": "true"
+    }
+  ],
+  "pellicanoOn": "true",
+  "pellicanoOff": "false",
+  "mobileNextExpanded": "true",
+  "mobileBackExpanded": "true",
+  "collapsedRetained": "false",
+  "renovationScopes": [
+    {
+      "scope": "Rivestimento interno",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "scope": "Impianto di filtrazione",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "scope": "Bordo piscina",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "scope": "Ripristini della struttura",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "scope": "Optional impianto",
+      "on": "true",
+      "off": "false"
+    }
+  ],
+  "lOrientations": [
+    {
+      "name": "Rientro in basso a sinistra",
+      "pressed": "true"
+    },
+    {
+      "name": "Rientro in basso a destra",
+      "pressed": "true"
+    },
+    {
+      "name": "Rientro in alto a destra",
+      "pressed": "true"
+    },
+    {
+      "name": "Rientro in alto a sinistra",
+      "pressed": "true"
+    }
+  ],
+  "minDepth": "0.8",
+  "outsideDepth": "1.5",
+  "renovationVisible": "true",
+  "renovationHidden": "true",
+  "filtration": [
+    {
+      "name": "Sostituzione pompa",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Sostituzione filtro",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Sostituzione skimmer",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Conversione a sfioro",
+      "on": "true",
+      "off": "false"
+    }
+  ],
+  "conserveEnabled": true,
+  "repairs": [
+    {
+      "name": "Perdite d’acqua",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Fessurazioni",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Impermeabilizzazione",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Ripristino generale",
+      "on": "true",
+      "off": "false"
+    }
+  ],
+  "renovationEquipment": [
+    {
+      "name": "Clorazione a sale",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Dosaggio automatico",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Pompa di calore",
+      "on": "true",
+      "off": "false"
+    },
+    {
+      "name": "Automazione e controllo",
+      "on": "true",
+      "off": "false"
+    }
+  ],
+  "shelfBounds": [
+    {
+      "typed": "9.6",
+      "displayed": "9.6"
+    },
+    {
+      "typed": "9.7",
+      "displayed": "9.6"
+    },
+    {
+      "typed": "3.0",
+      "displayed": "9.6"
+    },
+    {
+      "typed": "3.035",
+      "displayed": "3.035"
+    }
+  ],
+  "heatRetainedAfterConflict": "true",
+  "notVerified": [
+    "Canonical browser snapshot:localStorage unavailable in CUA read-only DOM scope",
+    "Every material variant visual correctness",
+    "Plan upload: no files uploaded",
+    "Real mobile hardware",
+    "Backend Save/Share/PDF/quote:assigned separately, no calls by this specialist",
+    "Every combinatorial product/shape/dimension configuration",
+    "Unsaved dirty flag under language changes:unsaved project no saved baseline"
+  ]
+}

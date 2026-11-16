@@ -126,7 +126,7 @@ const model = readFileSync("src/components/pool/three/PoolModel.tsx", "utf8");
 ok(model.includes('structureFamily === "VISIBLE_STAINLESS_STEEL"'), "Visible inox remains the final interior material");
 ok(model.includes("interiorShellKind"), "Shell, floor, stairs and comfort share one structure material resolver");
 ok(model.includes('if (!showWater) return;'), "Dry final finish cannot receive submerged optics");
-ok(model.includes('key={showWater ? "wet" : "dry"}'), "Changing water state recompiles dry/wet materials");
+ok(model.includes('const finishedProgramKey = `${showWater || interiorShellKind ? "wet" : "dry"}${mosaicSamplingKey}`'), "Raw construction preserves the finished shader identity; genuine dry finish remains distinct");
 equal((model.match(/depth-aware-underwater-optics-v8-\$\{LED_TRANSPORT_CACHE_KEY\}-\$\{showWater\}/g) ?? []).length, 4, "All finished surfaces keep separate dry/wet shader programs");
 const infinity = readFileSync("src/components/pool/three/InfinityEdge.tsx", "utf8");
 ok(infinity.includes('{showWater ? <>'), "Infinity sheet, crest and receiver dry-stage gate");

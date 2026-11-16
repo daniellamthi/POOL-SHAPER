@@ -1,0 +1,722 @@
+[
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":43.7,\"frameTimeMs\":22.87,\"medianFrameTimeMs\":23,\"p95FrameTimeMs\":24.9,\"frameCount\":88,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:37.343Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":43.9,\"frameTimeMs\":22.77,\"medianFrameTimeMs\":22.9,\"p95FrameTimeMs\":24.4,\"frameCount\":88,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:39.367Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":44.1,\"frameTimeMs\":22.68,\"medianFrameTimeMs\":22.7,\"p95FrameTimeMs\":24.5,\"frameCount\":89,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:41.406Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":40.7,\"frameTimeMs\":24.55,\"medianFrameTimeMs\":24.1,\"p95FrameTimeMs\":29.2,\"frameCount\":82,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:43.442Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":39.2,\"frameTimeMs\":25.54,\"medianFrameTimeMs\":25.7,\"p95FrameTimeMs\":27.8,\"frameCount\":79,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:45.479Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":38.5,\"frameTimeMs\":25.95,\"medianFrameTimeMs\":26.1,\"p95FrameTimeMs\":28.3,\"frameCount\":78,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:47.524Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":38,\"frameTimeMs\":26.32,\"medianFrameTimeMs\":26.2,\"p95FrameTimeMs\":28.4,\"frameCount\":76,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:49.544Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":38.6,\"frameTimeMs\":25.93,\"medianFrameTimeMs\":26,\"p95FrameTimeMs\":28.2,\"frameCount\":78,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:51.586Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":38.6,\"frameTimeMs\":25.88,\"medianFrameTimeMs\":26,\"p95FrameTimeMs\":27.4,\"frameCount\":78,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:53.623Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":39.5,\"frameTimeMs\":25.33,\"medianFrameTimeMs\":24.9,\"p95FrameTimeMs\":29.1,\"frameCount\":80,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:55.678Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":44.4,\"frameTimeMs\":22.54,\"medianFrameTimeMs\":23,\"p95FrameTimeMs\":29.2,\"frameCount\":89,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:57.706Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":39.8,\"frameTimeMs\":25.13,\"medianFrameTimeMs\":25.4,\"p95FrameTimeMs\":27.6,\"frameCount\":80,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:35:59.737Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":39.5,\"frameTimeMs\":25.3,\"medianFrameTimeMs\":25.3,\"p95FrameTimeMs\":27.1,\"frameCount\":80,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.6666666666666667,\"viewport\":[1280,720],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[0.6426913961600338,0,0,0,0,1.1425624820622822,0,0,0.13846435546875,-0.41735026041666673,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2133,1200],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:01.784Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":25.7,\"frameTimeMs\":38.91,\"medianFrameTimeMs\":26.7,\"p95FrameTimeMs\":51.6,\"frameCount\":52,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":221,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:04.024Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":38.5,\"frameTimeMs\":25.98,\"medianFrameTimeMs\":25.9,\"p95FrameTimeMs\":28.3,\"frameCount\":77,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:06.038Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":40.6,\"frameTimeMs\":24.64,\"medianFrameTimeMs\":24.9,\"p95FrameTimeMs\":27.2,\"frameCount\":82,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:08.079Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":46.5,\"frameTimeMs\":21.52,\"medianFrameTimeMs\":22.1,\"p95FrameTimeMs\":24.6,\"frameCount\":93,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:10.099Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":79.7,\"frameTimeMs\":12.55,\"medianFrameTimeMs\":12.4,\"p95FrameTimeMs\":15.4,\"frameCount\":160,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:12.131Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":80.2,\"frameTimeMs\":12.47,\"medianFrameTimeMs\":12.4,\"p95FrameTimeMs\":14.7,\"frameCount\":161,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:14.161Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":81.3,\"frameTimeMs\":12.3,\"medianFrameTimeMs\":12.4,\"p95FrameTimeMs\":16.6,\"frameCount\":163,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:16.191Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":80.1,\"frameTimeMs\":12.48,\"medianFrameTimeMs\":12.9,\"p95FrameTimeMs\":18.4,\"frameCount\":161,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:18.223Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":77.7,\"frameTimeMs\":12.87,\"medianFrameTimeMs\":12.9,\"p95FrameTimeMs\":14.8,\"frameCount\":156,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:20.252Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":73.3,\"frameTimeMs\":13.64,\"medianFrameTimeMs\":13.5,\"p95FrameTimeMs\":15.8,\"frameCount\":147,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.519490110571404,10.052524176184859,-7.2139076925882275],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:22.281Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":78.4,\"frameTimeMs\":12.76,\"medianFrameTimeMs\":12.9,\"p95FrameTimeMs\":16.6,\"frameCount\":157,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":222,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":false,\"camera\":[-17.518361972541392,10.048877245253635,-7.221331537577763],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1099,931],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:24.412Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":2,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0.1,\"maxMs\":0.1},\"drawArrays\":{\"count\":176,\"totalMs\":0.1,\"maxMs\":0.1},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:24.430Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":3,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0.1,\"maxMs\":0.1},\"drawArrays\":{\"count\":176,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:25.635Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":4,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0.2,\"maxMs\":0.1},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:26.268Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":116.8,\"frameTimeMs\":8.56,\"medianFrameTimeMs\":7.7,\"p95FrameTimeMs\":13.7,\"frameCount\":234,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":315,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[4.078914706956123,12.152727589101977,-17.29062530708234],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:26.726Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":5,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0.1,\"maxMs\":0.1},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:27.568Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":6,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:28.169Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":7,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0.1,\"maxMs\":0.1}}}",
+    "timestamp": "2026-10-21T19:36:28.868Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":127.3,\"frameTimeMs\":7.86,\"medianFrameTimeMs\":7.7,\"p95FrameTimeMs\":11.1,\"frameCount\":255,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":314,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":95968,\"geometries\":119,\"textures\":38,\"dpr\":1,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":false,\"camera\":[12.003539105506183,11.976775571750974,-13.247276965889004],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1099,931],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:29.031Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":8,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:29.535Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":9,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0.1,\"maxMs\":0.1},\"drawArrays\":{\"count\":176,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:30.701Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":124.5,\"frameTimeMs\":8.03,\"medianFrameTimeMs\":7.7,\"p95FrameTimeMs\":11.8,\"frameCount\":249,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":315,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-17.535114878605476,5.443014366158344,-10.758800736777603],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:31.315Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":10,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":408,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":135,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:32.693Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":107.7,\"frameTimeMs\":9.29,\"medianFrameTimeMs\":8.1,\"p95FrameTimeMs\":15.3,\"frameCount\":216,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":272,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":84716,\"geometries\":119,\"textures\":38,\"dpr\":1,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":false,\"camera\":[5.2417478105612085,2.3322915423898727,-5.055817509592963],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1099,931],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:33.539Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":11,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":350,\"totalMs\":0.1,\"maxMs\":0.1},\"drawArrays\":{\"count\":140,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:34.326Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":12,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":424,\"totalMs\":0.1,\"maxMs\":0.1},\"drawArrays\":{\"count\":140,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:35.035Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":119.4,\"frameTimeMs\":8.37,\"medianFrameTimeMs\":7.8,\"p95FrameTimeMs\":13.8,\"frameCount\":240,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":256,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-6.998468953665362,3.3756273616919263,-9.788808608295088],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:35.753Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":13,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0.2,\"maxMs\":0.1},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:36.435Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D ground build] {\"module\":[1.2,0.6],\"boards\":false,\"visible\":true,\"durationMs\":1}",
+    "timestamp": "2026-10-21T19:36:36.803Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/StudioPaving.tsx?t=1792609997359"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D ground build] {\"module\":[1.2,0.6],\"boards\":false,\"visible\":true,\"durationMs\":0}",
+    "timestamp": "2026-10-21T19:36:36.803Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/StudioPaving.tsx?t=1792609997359"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D GL diagnostic] {\"sample\":14,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":452,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":176,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+    "timestamp": "2026-10-21T19:36:37.426Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/lib/pool/development-gl-diagnostic.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":102.4,\"frameTimeMs\":9.76,\"medianFrameTimeMs\":7.8,\"p95FrameTimeMs\":14.9,\"frameCount\":206,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":316,\"peakCalls\":484,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194059610070028,8.520812721022843,-2.6570629356015902],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:38.047Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":62.5,\"frameTimeMs\":16.01,\"medianFrameTimeMs\":15.9,\"p95FrameTimeMs\":18.6,\"frameCount\":126,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":319,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587669728557,8.52110280396673,-2.6543889411496555],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:40.167Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.8,\"frameTimeMs\":16.44,\"medianFrameTimeMs\":15.9,\"p95FrameTimeMs\":18.8,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":319,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886708199,8.521102923249165,-2.654387841569098],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:42.280Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.6,\"frameTimeMs\":16.49,\"medianFrameTimeMs\":16,\"p95FrameTimeMs\":19.6,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":319,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":101612,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822474,8.521102923312048,-2.654387840989902],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:44.412Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":58.4,\"frameTimeMs\":17.14,\"medianFrameTimeMs\":17,\"p95FrameTimeMs\":19.4,\"frameCount\":117,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":259,\"peakCalls\":319,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:46.477Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":57.8,\"frameTimeMs\":17.3,\"medianFrameTimeMs\":17,\"p95FrameTimeMs\":19.6,\"frameCount\":116,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:48.495Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.6,\"frameTimeMs\":16.51,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:50.529Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.6,\"frameTimeMs\":16.51,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":17.8,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:52.561Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60,\"frameTimeMs\":16.66,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18.6,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:54.595Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.6,\"frameTimeMs\":16.51,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":17.8,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:56.628Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60,\"frameTimeMs\":16.67,\"medianFrameTimeMs\":16.6,\"p95FrameTimeMs\":18.5,\"frameCount\":120,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:36:58.645Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":62.9,\"frameTimeMs\":15.89,\"medianFrameTimeMs\":16.1,\"p95FrameTimeMs\":18,\"frameCount\":126,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:00.664Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.83,\"medianFrameTimeMs\":14.7,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:02.687Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.83,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:04.708Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67,\"frameTimeMs\":14.92,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:06.741Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.9,\"frameTimeMs\":14.94,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.9,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:08.762Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.85,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.8,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:10.785Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":63.7,\"frameTimeMs\":15.7,\"medianFrameTimeMs\":15.9,\"p95FrameTimeMs\":17.4,\"frameCount\":128,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:12.812Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.5,\"frameTimeMs\":16.53,\"medianFrameTimeMs\":16.4,\"p95FrameTimeMs\":18.2,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:14.828Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.7,\"frameTimeMs\":16.47,\"medianFrameTimeMs\":16.4,\"p95FrameTimeMs\":18.3,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:16.853Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":65.6,\"frameTimeMs\":15.23,\"medianFrameTimeMs\":15.1,\"p95FrameTimeMs\":17.2,\"frameCount\":132,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:18.882Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.5,\"frameTimeMs\":14.82,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.8,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:20.902Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.84,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:22.926Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.87,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:24.951Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.86,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.4,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:26.975Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.5,\"frameTimeMs\":14.82,\"medianFrameTimeMs\":14.7,\"p95FrameTimeMs\":16.4,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:28.994Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.91,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:31.024Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.5,\"frameTimeMs\":14.81,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":136,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:33.058Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.9,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:35.087Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.84,\"medianFrameTimeMs\":14.7,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:37.108Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.85,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:39.130Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.83,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:41.151Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.9,\"frameTimeMs\":14.94,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.8,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:43.187Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:45.215Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.91,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.3,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:47.248Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.91,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:49.279Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.84,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:51.300Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.6,\"frameTimeMs\":14.8,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.1,\"frameCount\":136,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:53.332Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.8,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:55.362Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.83,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:57.384Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.8,\"frameTimeMs\":14.96,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.6,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:37:59.407Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.86,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.4,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:01.431Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.86,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:03.456Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.83,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.4,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:05.476Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.8,\"frameTimeMs\":14.96,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.2,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:07.499Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:09.526Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.88,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:11.553Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.88,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:13.580Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.5,\"frameTimeMs\":14.81,\"medianFrameTimeMs\":14.7,\"p95FrameTimeMs\":16.6,\"frameCount\":136,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:15.611Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.87,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.4,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:17.636Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.85,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.4,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:19.659Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.7,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:21.687Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66,\"frameTimeMs\":15.15,\"medianFrameTimeMs\":15.1,\"p95FrameTimeMs\":17,\"frameCount\":133,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:23.719Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":59.7,\"frameTimeMs\":16.74,\"medianFrameTimeMs\":16.6,\"p95FrameTimeMs\":18.9,\"frameCount\":120,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:25.747Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.1,\"frameTimeMs\":16.64,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18.8,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:27.778Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.2,\"frameTimeMs\":16.62,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18.6,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:29.803Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.5,\"frameTimeMs\":16.54,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18.2,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:31.820Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":61.6,\"frameTimeMs\":16.24,\"medianFrameTimeMs\":16.3,\"p95FrameTimeMs\":18.4,\"frameCount\":124,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:33.851Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:35.879Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.9,\"frameTimeMs\":14.95,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.7,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:37.902Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.4,\"frameTimeMs\":16.56,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:39.920Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":60.4,\"frameTimeMs\":16.56,\"medianFrameTimeMs\":16.5,\"p95FrameTimeMs\":18.3,\"frameCount\":121,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:41.937Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":64,\"frameTimeMs\":15.62,\"medianFrameTimeMs\":15.5,\"p95FrameTimeMs\":17.4,\"frameCount\":129,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:43.970Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.85,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:45.990Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:48.020Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.8,\"frameTimeMs\":14.96,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.9,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:50.043Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.83,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:52.066Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67,\"frameTimeMs\":14.92,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":70676,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:54.099Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67,\"frameTimeMs\":14.93,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.6,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:56.118Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.1,\"frameTimeMs\":14.9,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:38:58.147Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.89,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.5,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:39:00.175Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.88,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:39:02.201Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.2,\"frameTimeMs\":14.88,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:39:04.230Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":66.8,\"frameTimeMs\":14.97,\"medianFrameTimeMs\":14.9,\"p95FrameTimeMs\":16.7,\"frameCount\":134,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:39:06.255Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.3,\"frameTimeMs\":14.86,\"medianFrameTimeMs\":14.8,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:39:08.279Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":67.4,\"frameTimeMs\":14.85,\"medianFrameTimeMs\":14.7,\"p95FrameTimeMs\":16.6,\"frameCount\":135,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":65032,\"geometries\":119,\"textures\":38,\"dpr\":1.5817807864418736,\"viewport\":[1099,931],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[-9.194587886822523,8.521102923312089,-2.6543878409896062],\"projection\":[1.376519462770698,0,0,0,0,1.6249139522932299,0,0,0.16126876706096455,-0.32276282223415687,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[1738,1472],\"gpuTimeMs\":null}",
+    "timestamp": "2026-10-21T19:39:10.302Z",
+    "url": "http://cold-night-depth-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792611276904"
+  }
+]

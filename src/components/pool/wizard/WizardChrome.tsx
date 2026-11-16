@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronUp, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MacroStep } from "./wizard-model";
+import { captureWizardChoice, nextWizardOptions, revealWizardOptions, wizardGuidanceVersion } from "./wizard-guidance";
+import "./fullscreen.css";
 
 /** Phase icons of the frozen icon family: 24px grid, 1.5px round stroke. */
 const PHASE_ICON_PATHS: Record<string, ReactNode> = {
@@ -69,8 +72,8 @@ function PhaseIcon({ id }: { id: string }) {
  * Primary navigation: the seven phases of the frozen wizard in one line.
  * Each phase shows its icon (a check once done), its name, the chosen value
  * underneath and a thin progress bar -- ink when done, violet while
- * current. On phones it collapses to "03 / 07 · Accesso & comfort" with a
- * segmented bar.
+ * current. All seven buttons remain available on phones in a compact,
+ * horizontally scrolling row.
  */
 export function WizardNav({
   macros,
@@ -84,26 +87,37 @@ export function WizardNav({
   /** 0..1 progress inside the current phase (its internal steps). */
   progress?: number;
 }) {
-  const active = macros[current];
+  const { t } = useI18n();
+  const phasesRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const list = phasesRef.current;
+    const active = list?.children[current];
+    if (!list || !(active instanceof HTMLElement)) return;
+    const bounds = list.getBoundingClientRect();
+    const phase = active.getBoundingClientRect();
+    if (phase.left < bounds.left || phase.right > bounds.right) {
+      list.scrollBy({ left: phase.left - bounds.left - (bounds.width - phase.width) / 2 });
+    }
+  }, [current]);
   return (
-    <nav aria-label="Fasi della configurazione" className="min-w-0">
-      <ol className="hidden items-stretch gap-1.5 xl:flex 2xl:gap-3">
+    <nav aria-label={t("Fasi della configurazione")} className="pool-phase-nav">
+      <ol ref={phasesRef} className="pool-phase-list">
         {macros.map((macro, index) => {
           const isCurrent = index === current;
           const done = macro.complete && !isCurrent;
           return (
-            <li key={macro.id} className="min-w-0">
+            <li key={macro.id}>
               <button
                 type="button"
                 onClick={() => onSelect(index)}
                 disabled={!macro.reachable}
                 aria-current={isCurrent ? "step" : undefined}
-                title={macro.value ? `${macro.label} · ${macro.value}` : macro.label}
-                className="flex w-auto min-w-[92px] max-w-[160px] flex-col gap-1.5 rounded-lg px-1.5 pt-1.5 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-foreground/40 disabled:cursor-not-allowed"
+                title={macro.value ? `${t(macro.label)} · ${t(macro.value)}` : t(macro.label)}
+                className="pool-phase-button outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 disabled:cursor-not-allowed"
               >
                 <span
                   className={cn(
-                    "flex items-center gap-2 text-[12.5px] leading-4 tracking-tight whitespace-nowrap",
+                    "pool-phase-label",
                     isCurrent
                       ? "font-normal text-foreground"
                       : done
@@ -118,15 +132,15 @@ export function WizardNav({
                       <PhaseIcon id={macro.id} />
                     )}
                   </span>
-                  <span>{macro.label}</span>
+                  <span className="pool-phase-name">{t(macro.label)}</span>
                 </span>
                 <span
                   className={cn(
-                    "block h-3.5 truncate text-[11px] leading-[14px]",
+                    "pool-phase-value",
                     isCurrent ? "text-brand" : "text-muted-foreground",
                   )}
                 >
-                  {macro.value ?? ""}
+                  {t(macro.value ?? "")}
                 </span>
                 <span aria-hidden className="block h-0.5 overflow-hidden rounded-full bg-hairline">
                   <span
@@ -148,35 +162,13 @@ export function WizardNav({
           );
         })}
       </ol>
-      <div className="flex min-w-0 flex-col gap-1.5 xl:hidden">
-        <p className="truncate text-[12px] tracking-tight text-foreground">
-          <span className="tabular-nums text-brand">
-            {String(current + 1).padStart(2, "0")}/{String(macros.length).padStart(2, "0")}
-          </span>{" "}
-          {active?.label}
-        </p>
-        <div className="flex gap-1" aria-hidden>
-          {macros.map((macro, index) => (
-            <span
-              key={macro.id}
-              className={cn(
-                "h-0.5 flex-1 rounded-full",
-                index < current ? "bg-foreground" : index === current ? "bg-brand" : "bg-hairline",
-              )}
-            />
-          ))}
-        </div>
-      </div>
     </nav>
   );
 }
 
 /**
- * The contextual configuration drawer under the 3D viewport. Desktop: a
- * wide tray with the step's title and current choice on the left and only
- * that step's cards on the right. Phones: a bottom sheet with two states --
- * collapsed (title, current choice, Continue) and expanded (the cards) --
- * toggled by tap or a vertical drag on the handle.
+ * A compact dock over the viewport, with persistent navigation and a
+ * bounded, collapsible options pane. Options stay mounted when hidden.
  */
 export function ConfiguratorTray({
   number,
@@ -195,6 +187,8 @@ export function ConfiguratorTray({
   onContinue,
   expanded,
   onExpandedChange,
+  onViewPool,
+  nextChoice,
 }: {
   number: number;
   /** Phase count: shows "Fase 03 di 07" when set. */
@@ -214,170 +208,93 @@ export function ConfiguratorTray({
   onContinue: () => void;
   expanded: boolean;
   onExpandedChange: (value: boolean) => void;
+  onViewPool: () => void;
+  nextChoice?: string | undefined;
 }) {
-  const drag = useRef<{ y: number; id: number } | null>(null);
-  const [dragOffset, setDragOffset] = useState(0);
-  // Phones snap between three heights: collapsed, half (cards beside a
-  // still-visible pool) and full (long lists). `expanded` covers both open
-  // heights so the shell only needs to know whether options are showing.
-  const [full, setFull] = useState(false);
-  const open = (value: boolean) => {
-    if (!value) setFull(false);
-    onExpandedChange(value);
-  };
-  const endDrag = () => {
-    if (!drag.current) return;
-    if (dragOffset < -40) {
-      if (expanded) setFull(true);
-      else open(true);
-    } else if (dragOffset > 40) {
-      if (full) setFull(false);
-      else open(false);
-    }
-    drag.current = null;
-    setDragOffset(0);
-  };
+  const { t } = useI18n();
+  const optionsId = useId();
+  const hintId = useId();
   return (
     <section
-      aria-label={`Passo ${number}: ${title}`}
-      className={cn(
-        "relative z-20 flex min-h-0 flex-col border-hairline bg-background",
-        // phones: bottom sheet over the viewport
-        "fixed inset-x-0 bottom-0 rounded-t-[24px] border-t shadow-[0_-24px_60px_-36px_rgba(0,0,0,0.55)] transition-[max-height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:static lg:rounded-[24px] lg:border lg:shadow-none",
-        expanded
-          ? full
-            ? "max-h-[82dvh] lg:max-h-[40dvh]"
-            : "max-h-[54dvh] lg:max-h-[40dvh]"
-          : "max-h-[23dvh] lg:max-h-[40dvh]",
-      )}
-      style={
-        dragOffset
-          ? { transform: `translateY(${Math.max(-60, Math.min(60, dragOffset))}px)` }
-          : undefined
-      }
+      aria-label={t("Passo {number}: {title}", { number, title: t(title) })}
+      data-camera-occluder="dock"
+      className="pool-config-dock"
     >
-      <button
-        type="button"
-        aria-label={expanded ? "Riduci opzioni" : "Mostra opzioni"}
-        aria-expanded={expanded}
-        onClick={() => open(!expanded)}
-        onPointerDown={(event) => {
-          drag.current = { y: event.clientY, id: event.pointerId };
-          event.currentTarget.setPointerCapture(event.pointerId);
-        }}
-        onPointerMove={(event) => {
-          if (drag.current?.id === event.pointerId) setDragOffset(event.clientY - drag.current.y);
-        }}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        className="flex w-full shrink-0 touch-none justify-center pb-1 pt-2.5 lg:hidden"
-      >
-        <span className="h-1 w-10 rounded-full bg-foreground/25" />
-      </button>
-
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <header className="flex shrink-0 items-start justify-between gap-4 px-5 pb-3 lg:w-[290px] lg:flex-col lg:justify-start lg:border-r lg:border-hairline lg:px-7 lg:py-6 xl:w-[320px]">
-          <div className="flex min-w-0 flex-col gap-1.5 lg:gap-3">
+      <div id={optionsId} hidden={!expanded} className="pool-dock-options">
+        <ScrollCueArea decisionKey={`${number}-${substep ?? ""}`} className="flex">
+          <p className="pool-dock-description">{t(subtitle)}</p>
+          {children}
+          {nextChoice && canContinue ? <button type="button" onClick={onContinue}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-3 py-2 text-xs text-brand">
+            {t("Prossima scelta")}: {t(nextChoice)} <ArrowRight className="size-3.5" aria-hidden />
+          </button> : null}
+        </ScrollCueArea>
+      </div>
+      <div className="pool-dock-bar">
+        <header className="pool-dock-heading">
+          <div className="min-w-0">
             <p className="label-xs tabular-nums">
               {total
-                ? `Fase ${String(number).padStart(2, "0")} di ${String(total).padStart(2, "0")}`
+                ? t("Fase {current} di {total}", { current: String(number).padStart(2, "0"), total: String(total).padStart(2, "0") })
                 : String(number).padStart(2, "0")}
               {substep ? (
-                <span className="ml-2 normal-case tracking-normal">· {substep}</span>
+                <span className="ml-2 normal-case tracking-normal">· {t(substep)}</span>
               ) : null}
             </p>
-            <h2 className="truncate text-[21px] leading-tight font-extralight tracking-[-0.03em] text-foreground lg:whitespace-normal lg:text-[30px]">
-              {title}
-            </h2>
-            <p className="hidden text-[12.5px] leading-[1.6] font-light text-muted-foreground lg:block">
-              {subtitle}
-            </p>
-            <p className="truncate text-[12px] text-muted-foreground lg:mt-2 lg:whitespace-normal lg:rounded-xl lg:border lg:border-hairline lg:px-3 lg:py-2.5 lg:text-foreground">
-              <span className="hidden label-xs lg:mb-1 lg:block">La tua scelta</span>
-              {selection}
+            <h2 className="pool-dock-title">{t(title)}</h2>
+            <p className="pool-dock-selection" title={t(selection)}>
+              {t(selection)}
             </p>
           </div>
-          <Button
-            type="button"
-            onClick={onContinue}
-            disabled={!canContinue}
-            title={canContinue ? undefined : continueHint}
-            className="h-auto min-h-10 shrink-0 rounded-full px-4 py-2 lg:hidden"
-          >
-            <span className="flex max-w-[110px] flex-col gap-0.5 whitespace-normal">
-              <span>{continueLabel}</span>
-              {nextLabel && canContinue ? <span className="text-[10px] font-normal normal-case tracking-normal opacity-80">{nextLabel}</span> : null}
-            </span>
-            <ArrowRight className="size-3.5" strokeWidth={1.5} />
-          </Button>
         </header>
-
-        <ScrollCueArea key={`${number}-${substep ?? ""}`} className={expanded ? "flex" : "hidden lg:flex"}>{children}</ScrollCueArea>
-      </div>
-
-      <footer className="hidden shrink-0 items-center justify-between gap-6 border-t border-hairline px-7 py-3.5 lg:flex">
+        <div className="flex flex-col items-end gap-0.5 sm:flex-row sm:items-center">
+        <Button type="button" variant="ghost" onClick={onViewPool}
+          className="pool-dock-toggle rounded-full">
+          <Scan aria-hidden />{t("Vedi la piscina")}
+        </Button>
         <Button
           type="button"
           variant="ghost"
-          onClick={onBack}
-          disabled={!canBack}
-          className="rounded-full px-3"
+          aria-expanded={expanded}
+          aria-controls={optionsId}
+          onClick={() => onExpandedChange(!expanded)}
+          className="pool-dock-toggle rounded-full"
         >
-          <ArrowLeft />
-          Indietro
+          {expanded ? <ChevronDown aria-hidden /> : <ChevronUp aria-hidden />}
+          {t(expanded ? "Riduci" : "Scegli le opzioni")}
         </Button>
-        <div className="flex items-center gap-4">
-          {!canContinue && continueHint ? (
-            <span className="text-[12px] text-muted-foreground">{continueHint}</span>
-          ) : null}
+        </div>
+        <footer className="pool-dock-actions">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onBack}
+            disabled={!canBack}
+            className="rounded-full px-3"
+          >
+            <ArrowLeft />
+            {t("Indietro")}{" "}</Button>
           <Button
             type="button"
             onClick={onContinue}
             disabled={!canContinue}
-            className="min-w-40 rounded-full px-6"
+            title={canContinue || !continueHint ? undefined : t(continueHint)}
+            aria-describedby={!canContinue && continueHint ? hintId : undefined}
+            className="pool-dock-continue rounded-full px-5"
           >
-            {continueLabel}
+            {t(continueLabel)}
             {nextLabel && canContinue ? (
-              <span className="text-[11.5px] font-light opacity-80">· {nextLabel}</span>
+              <span className="pool-dock-next">· {t(nextLabel)}</span>
             ) : null}
             <ArrowRight className="size-3.5" strokeWidth={1.5} />
           </Button>
-        </div>
-      </footer>
-      {expanded ? (
-        <div className="flex shrink-0 items-center justify-between border-t border-hairline px-5 py-2.5 lg:hidden">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            disabled={!canBack}
-            className="px-1"
-          >
-            <ArrowLeft />
-            Indietro
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => open(false)}
-            className="px-1"
-          >
-            <ChevronDown />
-            Vedi la piscina
-          </Button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => open(true)}
-          className="flex shrink-0 items-center justify-center gap-1.5 pb-[max(10px,env(safe-area-inset-bottom))] pt-0.5 text-[12px] text-muted-foreground lg:hidden"
-        >
-          <ChevronUp className="size-3.5" />
-          Scegli le opzioni
-        </button>
-      )}
+        </footer>
+      </div>
+      {!canContinue && continueHint ? (
+        <p id={hintId} className="pool-dock-hint">
+          {t(continueHint)}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -389,10 +306,17 @@ export function ConfiguratorTray({
  * appears after a choice (e.g. the stair shape, the inox ladder) is never
  * silently hidden under the edge.
  */
-function ScrollCueArea({ className, children }: { className: string; children: ReactNode }) {
+function ScrollCueArea({ className, children, decisionKey }: { className: string; children: ReactNode; decisionKey: string }) {
+  const { t } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [moreBelow, setMoreBelow] = useState(false);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    // Decision identity only: changing a finish never repeatedly scrolls.
+  }, [decisionKey]);
   useEffect(() => {
     const scroller = scrollRef.current;
     const content = contentRef.current;
@@ -409,6 +333,33 @@ function ScrollCueArea({ className, children }: { className: string; children: R
       observer.disconnect();
     };
   }, []);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const content = contentRef.current;
+    if (!scroller || !content) return;
+    let frame = 0;
+    const guide = (event: MouseEvent) => {
+      cancelAnimationFrame(frame);
+      if (!(event.target instanceof Element)) return;
+      const request = captureWizardChoice(content, scroller, event.target);
+      if (!request) return;
+      // Let React commit disclosed controls and run their explicit guides.
+      // Two frames also settle layout before measuring the new options.
+      frame = requestAnimationFrame(() => {
+        frame = requestAnimationFrame(() => {
+          if (request.version !== wizardGuidanceVersion(scroller)) return;
+          const target = nextWizardOptions(content, request);
+          if (target) revealWizardOptions(scroller, target,
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+        });
+      });
+    };
+    scroller.addEventListener("click", guide, true);
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("click", guide, true);
+    };
+  }, [decisionKey]);
   const reveal = () => {
     const scroller = scrollRef.current;
     if (!scroller) return;
@@ -417,10 +368,7 @@ function ScrollCueArea({ className, children }: { className: string; children: R
   };
   return (
     <div className={cn("relative min-h-0 flex-1 flex-col", className)}>
-      <div
-        ref={scrollRef}
-        className="scroll-slim min-h-0 flex-1 overflow-y-auto px-5 pb-5 lg:px-7 lg:py-6"
-      >
+      <div ref={scrollRef} className="pool-dock-scroll scroll-slim">
         <div ref={contentRef}>{children}</div>
       </div>
       <div
@@ -436,8 +384,7 @@ function ScrollCueArea({ className, children }: { className: string; children: R
           onClick={reveal}
           className="absolute right-4 bottom-2.5 inline-flex animate-[cue_1.6s_cubic-bezier(0.2,0,0,1)_2] items-center gap-1 rounded-full border border-hairline bg-card px-3 py-1 text-[11px] text-foreground/75 shadow-[0_6px_18px_-10px_rgb(16_16_24/0.35)] transition-colors hover:text-foreground"
         >
-          Altre opzioni
-          <ChevronDown className="size-3.5 text-brand" strokeWidth={1.6} aria-hidden />
+          {t("Altre opzioni")}{" "}<ChevronDown className="size-3.5 text-brand" strokeWidth={1.6} aria-hidden />
         </button>
       ) : null}
     </div>

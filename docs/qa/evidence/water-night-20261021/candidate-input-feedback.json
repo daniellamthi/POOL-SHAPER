@@ -1,0 +1,116 @@
+[
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":35.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:39:08.788Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":418.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:39:09.482Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":35.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:39:09.701Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":10154.8,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:39:46.372Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":60.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:41:32.111Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":388.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:41:32.782Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":29.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:41:32.954Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":11784.5,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:41:45.884Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":553.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:43:25.504Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":6,\"event\":\"click\",\"inputToSecondRafMs\":39.8,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:44:03.041Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":7,\"event\":\"click\",\"inputToSecondRafMs\":2068.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:44:41.902Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":8,\"event\":\"click\",\"inputToSecondRafMs\":434,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:45:10.824Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":9,\"event\":\"click\",\"inputToSecondRafMs\":547.5,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:45:54.156Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":10,\"event\":\"click\",\"inputToSecondRafMs\":47.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:46:20.185Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":47.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:48:29.421Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":115.7,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:48:30.327Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":184.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:49:43.536Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":23.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:51:02.563Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":203.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T17:52:22.996Z",
+    "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+  }
+]

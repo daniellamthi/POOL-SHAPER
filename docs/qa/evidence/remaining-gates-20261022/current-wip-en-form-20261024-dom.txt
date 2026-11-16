@@ -1,0 +1,52 @@
+Browser tab: 2, Title: "Pool Studio — 3D Pool Configurator", URL: "http://esse-qa.localhost:3003/".
+0 AXWebArea Pool Studio — 3D Pool Configurator, URL: esse-qa.localhost:3003/
+	1 container
+		2 container Notifications alt+T
+		3 container Review your project with a consultant, ID: radix-_r_2_
+			4 heading Review your project with a consultant, Value: 2, ID: radix-_r_3_
+				5 text Review your project with a consultant
+			6 text A few details so a Piscine Wellness consultant can contact you.
+			7 container
+				8 text NAME *
+			9 text field (settable) NAME *
+			10 container
+				11 text EMAIL *
+			12 text field (settable) EMAIL *
+			13 container
+				14 text PHONE *
+			15 text field (settable) PHONE *
+			16 container
+				17 text PROJECT LOCATION *
+			18 text field (settable) PROJECT LOCATION *
+			19 text WHEN WOULD YOU LIKE TO BUILD IT?
+			20 text *
+			21 When would you like to build it?
+				22 container
+					23 radio button Description: As soon as possible, Value: 0, ID: timing-asap
+					24 text As soon as possible
+				25 container
+					26 radio button Description: Within 3 months, Value: 0, ID: timing-within3Months
+					27 text Within 3 months
+				28 container
+					29 radio button Description: 3–6 months, Value: 0, ID: timing-threeToSixMonths
+					30 text 3–6 months
+				31 container
+					32 radio button Description: 6–12 months, Value: 0, ID: timing-sixToTwelveMonths
+					33 text 6–12 months
+				34 container
+					35 radio button Description: Still considering, Value: 0, ID: timing-evaluating
+					36 text Still considering
+			37 text NOTES (OPTIONAL)
+			38 text entry area (settable) NOTES (OPTIONAL), ID: lead-notes
+			39 container
+				40 checkbox Description: I have read and accept the privacy notice . *, Value: 0
+				41 text I have read and accept the
+				42 link Description: privacy notice, Value: esse-qa.localhost:3003/privacy
+				43 text . *
+			44 container
+				45 checkbox Description: I would like to receive marketing communications (optional)., Value: 0
+				46 text I would like to receive marketing communications (optional).
+			47 button SUBMIT REQUEST
+			48 button Close
+
+The focused UI element is 9 text field (settable) NAME *

@@ -1,0 +1,104 @@
+- heading [level=1]: Configuratore piscine 3D
+- banner:
+  - navigation:
+    - list:
+      - button:
+        - generic: Piscina
+        - generic: Cemento armato · 10,0 × 4,5 m
+      - button:
+        - generic: Sistema acqua
+        - generic: Skimmer · Slim Moderno
+      - button:
+        - generic: Accesso & comfort
+        - generic: Scala interna
+      - button:
+        - generic: Finiture
+        - generic: Liner PVC · Blue Sky [602]
+      - button:
+        - generic: Esterno
+        - generic: Travertino · Gres porcellanato · 60 × 120 cm
+      - button:
+        - generic: Optional
+        - generic: Nessun optional
+      - button:
+        - generic: Presentazione
+        - generic: In corso
+  - button [pressed]: IT
+  - button: EN
+  - button [pressed]:
+    - generic: Giorno
+  - button:
+    - generic: Notte
+  - button:
+    - generic: Ricomincia
+- main:
+  - button:
+    - text: Vista piscina
+  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+  - toolbar:
+    - button:
+      - text: Guide
+    - button:
+      - text: Vista tecnica
+    - button:
+      - text: Riquadra
+- region:
+  - paragraph: "La tua piscina finita: scena, riepilogo e richiesta di proposta."
+  - tablist:
+    - tab: Scena
+    - tab: Riepilogo
+    - tab [selected]: Richiedi proposta
+  - heading [level=3]: Vuoi trasformare questo progetto in una proposta reale?
+  - paragraph: Un consulente verifica configurazione, fattibilità e investimento.
+  - button: Valuta il progetto con un consulente
+  - paragraph:
+    - text: Fase 07 di 07
+    - generic: · 3/3 · Richiedi proposta
+  - heading [level=2]: Presentazione
+  - paragraph: 10,0 × 4,5 m · pronta per la proposta
+  - button:
+    - text: Vedi la piscina
+  - button [expanded]:
+    - text: Riduci
+  - button:
+    - text: Indietro
+  - button:
+    - text: Richiedi proposta
+- region "Notifications alt+T"
+- dialog "Valuta il progetto con un consulente":
+  - heading "Valuta il progetto con un consulente" [level=2]
+  - paragraph: Pochi dati per farti ricontattare da un consulente Piscine Wellness.
+  - generic: Nome *
+  - textbox "Nome *": QA Isolata
+  - generic: Email *
+  - textbox "Email *": <redacted>
+  - generic: Telefono *
+  - textbox "Telefono *": <redacted>
+  - generic: Località del progetto *
+  - textbox "Località del progetto *": Località QA
+  - generic: Quando vuoi realizzarla? *
+  - radiogroup "Quando vuoi realizzarla?":
+    - radio "Appena possibile"
+    - text: Appena possibile
+    - radio "Entro 3 mesi"
+    - text: Entro 3 mesi
+    - radio "3–6 mesi"
+    - text: 3–6 mesi
+    - radio "6–12 mesi"
+    - text: 6–12 mesi
+    - radio "Sto valutando" [checked]:
+    - text: Sto valutando
+  - generic: Note (opzionale)
+  - textbox "Note (opzionale)"
+  - checkbox "Ho letto e accetto l’ informativa sulla privacy . *" [checked]:
+  - text: Ho letto e accetto l’
+  - link "informativa sulla privacy":
+    - /url: /privacy
+  - text: .
+  - generic: "*"
+  - checkbox "Desidero ricevere comunicazioni commerciali (opzionale)."
+  - text: Desidero ricevere comunicazioni commerciali (opzionale).
+  - alert: "Salvataggio del progetto non riuscito. Riprova prima di inviare la richiesta. La tua configurazione resta salvata: puoi riprovare senza perdere nulla."
+  - button "Riprova"
+  - button "Chiudi":
+    - generic: Chiudi

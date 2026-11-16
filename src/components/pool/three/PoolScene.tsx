@@ -1,6 +1,10 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows, Line, useProgress } from "@react-three/drei";
+import { ShaderPreparation } from "./ShaderPreparation";
+import { installDevelopmentInteractionTiming, readDevelopmentRenderPause, writeDevelopmentRenderPause } from "@/lib/pool/development-interaction-timing";
+import { installDevelopmentGlDiagnostic } from "@/lib/pool/development-gl-diagnostic";
+import { OrbitControls, Line, useProgress } from "@react-three/drei";
+import { OwnedContactShadows as ContactShadows } from "./OwnedContactShadows";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   Vector3,
@@ -12,28 +16,32 @@ import {
   NoToneMapping,
   PCFShadowMap,
   OrthographicCamera,
+  PerspectiveCamera,
   SRGBColorSpace,
 } from "three";
 import type { DirectionalLight, HemisphereLight, SpotLight, Texture } from "three";
 import { PoolModel } from "./PoolModel";
+import { SunShelfLoungers } from "./SunShelfLoungers";
+import { resolveSunShelfLoungers, SUN_SHELF_LOUNGER_MODEL } from "@/lib/pool/sun-shelf-loungers";
 import { ArchitecturalOutline, ARCHITECTURAL_OUTLINE_NAME } from "./ArchitecturalOutline";
-import { architecturalFrustum } from "./architecturalPlan";
+import { architecturalFrustum, centeredArchitecturalFrame } from "./architecturalPlan";
 import { AutomaticCover } from "./AutomaticCover";
 import type { CoverPlan } from "@/lib/pool/cover-plan";
 import { StudioPaving, PavingMaterial } from "./StudioPaving";
 import { createPavingOnSurface } from "./pavingGeometry";
 import { pavingLayout, type PavingFormatId } from "@/lib/pool/presentation";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
 import { studioDeckBand, studioDeckInnerOffset } from "./studioDeck";
-import { DeckLoungers } from "./DeckLoungers";
+import { DeckLoungers, planDeckFurniture, deckFurnitureCameraPoints } from "./DeckLoungers";
 import { PoolLights } from "./PoolLights";
 import { resolvePoolLayout } from "@/lib/pool/resolved-layout";
 import { InfinityEdgePicker } from "./InfinityEdgePicker";
-import { createInfinityLandscape, createInfinityDeck, infinityGroundHeight } from "./infinityLandscape";
+import { createInfinityDeck } from "./infinityLandscape";
 import { excludeSubmergedDirectLights } from "./exteriorLightMask";
-import { COAST_PHOTO_CAPTURE, coastalCamera, coastalGrade, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
-import { CoastalGroundMaterial } from "./CoastalGroundMaterial";
+import { createCoastalTerrace, coastalPhotoRotation, coastalPhotoSun } from "./coastalLayout";
 import { DaylightEnvironment, COASTAL_DAYLIGHT } from "./DaylightEnvironment";
 import { copingOuterOffset, buildDeckCutoutOutline } from "./poolConstruction";
+import { integratedCoping } from "@/lib/pool/coping-style";
 import { createLimestoneMaps, createTravertineMaps } from "./stoneTextures";
 import { PoolMeasurements } from "./PoolMeasurements";
 import { Skimmers } from "./Skimmers";
@@ -63,7 +71,7 @@ import {
 } from "@/configurator/3d/scene/visual-preset";
 import { POOL_BORDER_PRESET } from "@/configurator/materials/visual-presets";
 import { outlineBounds } from "@/lib/pool/geometry";
-import { getCameraPose, contextualAccessCamera, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
+import { getCameraPose, contextualAccessCamera, sunShelfCameraSubject, accessCameraSubject, accessFlightCameraSubject, comfortCameraSubject, microLightCameraSubject, lightingCameraSubject, externalStairCameraSubject, pavingCameraSubject, coverCameraSubject, overviewCameraSubject, fitInfinityOverviewCamera, pellicanoCameraSubject, waterlineCameraSubject, infinityWaterlineCameraSubject, infinityDetailCameraSubject, infinityCopingCameraSubject, overflowCameraSubject, interiorFinishCameraSubject, componentCameraAspect, visibleCameraFrame, infinityNavigationLimits, cameraFrameFit, offsetCameraToFrame } from "@/lib/pool/camera";
 import type { ResolvedPoolLayout } from "@/lib/pool/resolved-layout";
 import type { SceneLightingPlan } from "@/lib/pool/lighting-plan";
 import type { CameraIntent } from "@/lib/pool/camera";
@@ -72,6 +80,7 @@ import type { HydromassageVariant, InternalStairType } from "@/lib/pool/types";
 import {
   infinityExclusion,
   clampInfinityEdgeParams,
+  clampInfinityEdgeDimensions,
   infinityZonesForOutline,
 } from "@/lib/pool/infinity-edge";
 import type { InfinityEdgeParams, RectangleInfinityZone } from "@/lib/pool/infinity-edge";
@@ -80,6 +89,7 @@ import type { PoolVerticalLayout } from "@/lib/pool/vertical-layout";
 import type { PhotoModeQuality } from "./PhotoModeRenderer";
 import { renderQualityState, RENDER_QUALITY_IDLE_DELAY } from "@/lib/pool/renderQualityState";
 import { heroCaptureState } from "@/lib/project-delivery/heroCapture";
+import { projectBookHeroFrame } from "@/lib/project-delivery/hero-frame";
 
 export type { PhotoModeQuality };
 
@@ -149,6 +159,14 @@ export interface SceneProps {
   paving?: import("@/lib/pool/presentation").PavingId;
   pavingFormat?: PavingFormatId | undefined;
   photoMode: boolean;
+  /** Export framing ignores DOM panels without changing the configured pool. */
+  cleanCapture?: boolean;
+  sunShelfLoungerCount?: number;
+  integratedBenchStations?: number;
+  copingStyle?: import("@/lib/pool/coping-style").CopingStyle;
+  copingEdge?: import("@/lib/pool/coping-style").CopingEdge;
+  sunShelfLoungerColor?: import("@/lib/pool/sun-shelf-lounger-colors").SunShelfLoungerColorId;
+  sunShelfRun?: number;
   photoModeQuality: PhotoModeQuality;
   onPhotoModeUnsupported: () => void;
 }
@@ -283,49 +301,121 @@ function HeroCaptureListener() {
 
 const HERO_CAPTURE_HEIGHT = 1100;
 const HERO_SETTLE_MS = 1500;
-/** Project Book cover box (297 x 150 mm). */
-const HERO_ASPECT = 297 / 150;
-
 /** Centre crop to the cover aspect, so the PDF never letterboxes. */
 function cropHero(source: HTMLCanvasElement): string {
   const { width, height } = source;
-  const cropW = Math.min(width, Math.round(height * HERO_ASPECT));
-  const cropH = Math.min(height, Math.round(cropW / HERO_ASPECT));
+  const frame = projectBookHeroFrame(width, height);
   const canvas = document.createElement("canvas");
-  canvas.width = cropW;
-  canvas.height = cropH;
+  canvas.width = Math.round(frame.width);
+  canvas.height = Math.round(frame.height);
   canvas
     .getContext("2d")
     ?.drawImage(
       source,
-      (width - cropW) / 2,
-      (height - cropH) / 2,
-      cropW,
-      cropH,
+      frame.left,
+      frame.top,
+      frame.width,
+      frame.height,
       0,
       0,
-      cropW,
-      cropH,
+      canvas.width,
+      canvas.height,
     );
   return canvas.toDataURL("image/jpeg", 0.9);
 }
 
-function DevelopmentRendererMetrics() {
+function DevelopmentRendererMetrics({ qaPaused }: { qaPaused: boolean }) {
+  useEffect(installDevelopmentInteractionTiming, []);
   const gl = useThree((state) => state.gl);
+  const getRoot = useThree((state) => state.get);
+  // DEV-only pause for matched single-scene measurements in embedded tabs,
+  // whose webviews can all report "visible" even behind another tab.
+  const size = useThree(state => state.size);
+  useLayoutEffect(() => {
+    const state = getRoot();
+    if (qaPaused) { state.setFrameloop("never"); state.internal.frames = 0; }
+    console.debug("[Pool3D QA render pause]", qaPaused ? "paused" : "resumed");
+  }, [qaPaused, size.width, size.height, getRoot]);
+  // Include all passes (mirror, transmission, shadows and main draw), rather
+  // than reporting whichever offscreen render happened to run last. DEV only.
+  useEffect(() => {
+    const previous = gl.info.autoReset;
+    gl.info.autoReset = false;
+    gl.info.reset();
+    return () => { gl.info.autoReset = previous; gl.info.reset(); };
+  }, [gl]);
+  useEffect(() => installDevelopmentGlDiagnostic(gl.getContext()), [gl]);
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("qaGlDiagnostic") === "1") console.debug("[Pool3D GL capability]", JSON.stringify({ KHR_parallel_shader_compile: gl.extensions.has("KHR_parallel_shader_compile") })); }, [gl]);
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has("qaRenderDiagnostics")) return;
+    const original = gl.render;
+    let budget = 12;
+    gl.render = function (...args) {
+      const start = performance.now();
+      try { return original.apply(this, args); }
+      finally {
+        const durationMs = performance.now() - start;
+        if (durationMs > 40 && budget-- > 0) console.debug("[Pool3D render diagnostic]", JSON.stringify({
+          durationMs: Number(durationMs.toFixed(2)), programs: gl.info.programs?.length,
+        }));
+      }
+    };
+    return () => { gl.render = original; };
+  }, [gl]);
   const elapsed = useRef(0);
   const frames = useRef(0);
+  const frameTimes = useRef<number[]>([]);
+  const drawCalls = useRef<number[]>([]);
+  const gpuTimes = useRef<number[]>([]);
+  const gpuProbe = useMemo(() => {
+    if (!new URLSearchParams(window.location.search).has("qaGpuTiming")) return null;
+    const context = gl.getContext() as WebGL2RenderingContext;
+    const extension = context.getExtension("EXT_disjoint_timer_query_webgl2");
+    if (!extension) { console.debug("[Pool3D GPU timing] unavailable"); return null; }
+    return { context, extension, pending: [] as WebGLQuery[], spare: [] as WebGLQuery[] };
+  }, [gl]);
+  useEffect(() => () => {
+    if (gpuProbe) for (const query of [...gpuProbe.pending, ...gpuProbe.spare]) gpuProbe.context.deleteQuery(query);
+  }, [gpuProbe]);
+  useFrame((state) => {
+    if (!gpuProbe) return;
+    const {context, extension, pending, spare} = gpuProbe;
+    while (pending.length && context.getQueryParameter(pending[0]!, context.QUERY_RESULT_AVAILABLE)) {
+      const query = pending.shift()!;
+      if (!context.getParameter(extension.GPU_DISJOINT_EXT)) gpuTimes.current.push(context.getQueryParameter(query, context.QUERY_RESULT) / 1e6);
+      spare.push(query);
+    }
+    const query = spare.pop() ?? (pending.length < 4 ? context.createQuery() : null);
+    if (query) context.beginQuery(extension.TIME_ELAPSED_EXT, query);
+    try { gl.render(state.scene, state.camera); }
+    finally { if (query) { context.endQuery(extension.TIME_ELAPSED_EXT); pending.push(query); } }
+  }, gpuProbe ? 1 : 0);
   const inspectedPrograms = useRef(new Set<number>());
   const peakSamplers = useRef(0);
+  const renderer = useMemo(() => {
+    const context = gl.getContext();
+    const debug = context.getExtension("WEBGL_debug_renderer_info");
+    return debug ? String(context.getParameter(debug.UNMASKED_RENDERER_WEBGL)) : "unavailable";
+  }, [gl]);
 
   useFrame((_, delta) => {
+    drawCalls.current.push(gl.info.render.calls);
+    const lastFrameTriangles = gl.info.render.triangles;
+    gl.info.reset();
     elapsed.current += delta;
     frames.current += 1;
+    frameTimes.current.push(delta * 1000);
     if (elapsed.current < 2) return;
     const frameTime = (elapsed.current / frames.current) * 1000;
+    const sorted = frameTimes.current.sort((a, b) => a - b);
+    const percentile = (p: number) => Number(sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))]!.toFixed(2));
     const context = gl.getContext() as WebGL2RenderingContext;
+    const inspectionStarted = performance.now();
+    let newlyInspected = 0;
     for (const program of gl.info.programs ?? []) {
       if (inspectedPrograms.current.has(program.id)) continue;
       inspectedPrograms.current.add(program.id);
+      newlyInspected++;
       const samplers: string[] = [];
       const handle = program.program as WebGLProgram;
       const count = context.getProgramParameter(handle, context.ACTIVE_UNIFORMS) as number;
@@ -339,13 +429,26 @@ function DevelopmentRendererMetrics() {
         console.debug("[Pool3D sampler budget]", JSON.stringify({ count: samplers.length, limit: gl.capabilities.maxTextures, samplers }));
       }
     }
+    if (new URLSearchParams(window.location.search).has("qaRenderDiagnostics") && newlyInspected) console.debug("[Pool3D sampler diagnostic]", JSON.stringify({
+      durationMs: Number((performance.now() - inspectionStarted).toFixed(2)), newlyInspected,
+    }));
     console.debug(
       "[Pool3D performance]",
       JSON.stringify({
         fps: Number((1000 / frameTime).toFixed(1)),
         frameTimeMs: Number(frameTime.toFixed(2)),
-        calls: gl.info.render.calls,
-        triangles: gl.info.render.triangles,
+        medianFrameTimeMs: percentile(0.5),
+        p95FrameTimeMs: percentile(0.95),
+        frameCount: sorted.length,
+        renderer,
+        qaPaused,
+        frameloop: getRoot().frameloop,
+        queuedFrames: getRoot().internal.frames,
+        visibility: document.visibilityState,
+        calls: Math.round(drawCalls.current.reduce((sum, count) => sum + count, 0) / drawCalls.current.length),
+        peakCalls: Math.max(...drawCalls.current),
+        callScope: "full frame, all passes",
+        triangles: lastFrameTriangles,
         geometries: gl.info.memory.geometries,
         textures: gl.info.memory.textures,
         dpr: gl.getPixelRatio(),
@@ -354,11 +457,24 @@ function DevelopmentRendererMetrics() {
         peakProgramSamplers: peakSamplers.current,
         shadowMapSize: ACTIVE_RENDERING_QUALITY.shadowMapSize,
         qualityPreset: ACTIVE_RENDERING_QUALITY.id,
+        planarReflection: ACTIVE_RENDERING_QUALITY.planarReflection.enabled,
+        parallelShaderCompile: gl.extensions.has("KHR_parallel_shader_compile"),
+        idle: renderQualityState.idle,
+        camera: _.camera.position.toArray(),
+        projection: _.camera.projectionMatrix.elements.slice(),
+        buffer: [context.drawingBufferWidth, context.drawingBufferHeight],
+        gpuTimeMs: gpuTimes.current.length ? (() => {
+          const values = gpuTimes.current.sort((a,b)=>a-b);
+          return {median: Number(values[Math.floor(values.length*.5)]!.toFixed(3)), p95:Number(values[Math.min(values.length-1,Math.floor(values.length*.95))]!.toFixed(3)), samples:values.length, scope:"main, transmission and shadows; mirror excluded"};
+        })() : null,
       }),
     );
     elapsed.current = 0;
     frames.current = 0;
-  });
+    frameTimes.current = [];
+    drawCalls.current = [];
+    gpuTimes.current = [];
+  }, -100);
   return null;
 }
 
@@ -371,16 +487,30 @@ function DevelopmentRendererMetrics() {
  * the instant movement resumes. `setDpr` is react-three-fiber's own API for
  * this (the same one its `dpr` array prop uses internally), so this never
  * fights the initial dpr clamp; it only ever runs on the moving/idle
- * transition edge, not every frame, so it costs nothing while settled.
+ * transition or viewport resize, never reallocating unchanged settled frames.
  */
 function AdaptiveQuality() {
   const setDpr = useThree((state) => state.setDpr);
-  const wasIdle = useRef(false);
+  const size = useThree((state) => state.size);
+  const gl = useThree((state) => state.gl);
+  const canvas = gl.domElement;
+  // Fullscreen adds pixels, not geometry. Bound interactive supersampling;
+  // Photo Mode and locked export cameras retain the original quality tier.
+  const fullscreenCeiling = canvas.closest(".pool-fullscreen")
+    ? Math.sqrt(2_560_000 / Math.max(1, size.width * size.height))
+    : Infinity;
+  const appliedDpr = useRef<number | null>(null);
+  useEffect(() => () => setDpr(ACTIVE_RENDERING_QUALITY.dpr[1]), [setDpr]);
 
   useFrame(() => {
-    if (renderQualityState.idle === wasIdle.current) return;
-    wasIdle.current = renderQualityState.idle;
-    setDpr(wasIdle.current ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr[0]);
+    const tier = renderQualityState.idle ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr[0];
+    const dpr = Math.min(tier, Math.max(0.85, fullscreenCeiling));
+    // Canvas configuration can restore its device-DPR clamp on a parent
+    // commit. Check the renderer as well as our last request, so switching
+    // Day/Night cannot strand it at a stale resolution until the next orbit.
+    if (dpr === appliedDpr.current && gl.getPixelRatio() === dpr) return;
+    appliedDpr.current = dpr;
+    setDpr(dpr);
   });
 
   return null;
@@ -405,6 +535,7 @@ function PlanCamera({ enabled }: { enabled: boolean }) {
 function CameraRig({
   accessPlan,
   resolvedLayout,
+  floorProfile,
   cameraLocked,
   radius,
   controls,
@@ -418,13 +549,20 @@ function CameraRig({
   ledRow,
   includeExternalStaircase,
   planBounds,
+  compactPlan,
+  premiumPlan,
   photoMode,
+  cleanCapture,
   infinityZone,
   externalStairPlan,
+  coverSubject,
   pellicanoPlacement,
+  shelfLoungerEnvelope,
+  deckFurnitureEnvelope,
 }: {
   accessPlan: SceneLightingPlan["accessPlan"];
   resolvedLayout: ResolvedPoolLayout;
+  floorProfile: FloorProfileModel;
   cameraLocked: boolean;
   radius: number;
   controls: React.RefObject<OrbitControlsImpl | null>;
@@ -438,12 +576,18 @@ function CameraRig({
   ledRow: readonly PoolLightPosition[];
   includeExternalStaircase: boolean;
   planBounds: Outline;
+  compactPlan: boolean;
+  premiumPlan: boolean;
   photoMode: boolean;
+  cleanCapture: boolean;
   /** Geometry Pass D (Infinity): forwarded to `getCameraPose` for the
    * `"infinity"` intent. `null` on every pre-Infinity call is a no-op. */
   infinityZone: RectangleInfinityZone | null;
   externalStairPlan: ReturnType<typeof planExternalStaircase>;
+  coverSubject: ReturnType<typeof coverCameraSubject>;
   pellicanoPlacement: ReturnType<typeof planPellicano>;
+  shelfLoungerEnvelope: readonly import("@/lib/pool/camera").CameraPoint[];
+  deckFurnitureEnvelope: readonly import("@/lib/pool/camera").CameraPoint[];
 }) {
   const camera = useThree((state) => state.camera);
   const viewportSize = useThree((state) => state.size);
@@ -455,6 +599,7 @@ function CameraRig({
   const elapsed = useRef(0);
   const duration = useRef(1.15);
   const flying = useRef(false);
+  const navigationLimits = useRef<ReturnType<typeof infinityNavigationLimits> | null>(null);
   // Tracks live OrbitControls dragging (pan/rotate/zoom), separately from
   // `flying` above which tracks this component's own scripted camera
   // transitions -- the stationary-quality mode (see AdaptiveQuality and
@@ -464,20 +609,28 @@ function CameraRig({
   const editingPose = useRef<{ key: string; pose: import("@/lib/pool/camera").CameraPose } | null>(null);
   const planFit = useRef<{ key: string; width: number; height: number; centre: readonly [number,number] } | null>(null);
   const [, refreshVisibleFrame] = useState(0);
+  const occluderRoot = canvas.closest(".pool-fullscreen") ?? document;
+  // Layout identities must not depend on translated accessible labels.
+  const occluderSelector = '[data-camera-occluder], [data-testid="construction-stage"], [data-technical-panel]';
   useLayoutEffect(() => {
-    if (!infinityZone && focus !== "top" && !["access","inox","shelf","hydromassage","bench","coping","paving","exterior-panel","external-stairs","pellicano","stair-lighting","liner","mosaic","skimmer-detail","overflow-hidden","overflow-visible","features"].includes(focus)) return;
-    const tray = document.querySelector('[aria-label^="Passo "]');
-    if (!tray) return;
     const observer = new ResizeObserver(() => refreshVisibleFrame(n => n + 1));
-    observer.observe(tray);
+    occluderRoot.querySelectorAll(occluderSelector).forEach(element => observer.observe(element));
     return () => observer.disconnect();
-  }, [canvas, Boolean(infinityZone), focus, frameToken]);
+  }, [occluderRoot, occluderSelector, focus, frameToken]);
 
   useEffect(() => {
     const control = controls.current;
     if (!control) return;
     const handleStart = () => {
       interacting.current = true;
+      if (flying.current && navigationLimits.current) {
+        // A manual interruption owns its current viewpoint; do not clamp it
+        // to the unfinished destination's small Infinity orbit window.
+        Object.assign(control, infinityZone ? infinityNavigationLimits({
+          position: camera.position.toArray() as [number, number, number],
+          target: control.target.toArray() as [number, number, number],
+        }, true, layout.waterY) : navigationLimits.current);
+      }
       flying.current = false;
     };
     const handleEnd = () => {
@@ -489,7 +642,7 @@ function CameraRig({
       control.removeEventListener("start", handleStart);
       control.removeEventListener("end", handleEnd);
     };
-  }, [controls, camera]);
+  }, [controls, camera, Boolean(infinityZone), layout.waterY]);
 
   // Stationary-quality bookkeeping, independent of the flight-animation
   // useFrame below: runs every frame (not just mid-flight) so it can notice
@@ -514,18 +667,69 @@ function CameraRig({
     }
   });
 
-  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping",
-    ...(!infinityZone ? ["paving","exterior-panel","external-stairs","pellicano","stair-lighting","skimmer-detail","overflow-hidden","overflow-visible","features"] : [])].includes(focus);
-  const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[aria-label="Riepilogo configurazione"]')?.getBoundingClientRect() : null;
-  const reservedRight = summaryRect?.width ? summaryRect.width + 48 : 0;
-  const visibleFrame = detail || focus === "top"
-    ? visibleCameraFrame(canvas.getBoundingClientRect(), Array.from(document.querySelectorAll('[aria-label^="Passo "], [data-testid="construction-stage"], main [aria-label="Strumenti vista"], main button[aria-label="Vista della piscina"], main button[aria-label="Riquadra"], main button[aria-label="Altri strumenti"], main button[aria-label="Espandi piscina"], [data-technical-panel]')).map(element => element.getBoundingClientRect()))
-    : { left: 0, top: 0, width: viewportSize.width - reservedRight, height: viewportSize.height };
-  const fitFov = detail
-    ? cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov
-    : SCENE_VISUAL_PRESET.camera.fov;
-  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone) ?? (["infinity", "review", "overview"].includes(focus) && infinityZone
-    ? coastalCamera(outline, infinityZone, layout.waterY, viewportSize.width / Math.max(1, viewportSize.height), SCENE_VISUAL_PRESET.camera.fov, {outset:copingOuterOffset("infinity", "hidden"), y:layout.copingY})
+  const detail = ["access", "liner", "mosaic", "inox", "shelf", "hydromassage", "bench", "coping", "infinity",
+    "paving", "exterior-panel", "external-stairs", "pellicano", "stair-lighting", "bench-lighting", "skimmer-detail", "overflow-hidden", "overflow-visible", "overflow-continuous", "features", "cover"].includes(focus);
+  const coastalHero = !!infinityZone && ["review", "overview"].includes(focus);
+  const opticalDetail = detail;
+  const interiorSubject = useMemo(() => focus === "liner" || focus === "mosaic"
+    ? interiorFinishCameraSubject(outline, layout, resolvedLayout, floorProfile, infinityZone) : null,
+  [focus, outline, layout, resolvedLayout, floorProfile, infinityZone]);
+  const wholeSubject = useMemo(() => overviewCameraSubject(outline, layout, {
+    infinityZone,
+    // The exterior stair is a substantial part of an above-ground product.
+    // Look from its exposed side instead of hiding its flight behind the shell.
+    exteriorDirection: externalStairPlan ? externalStairCameraSubject(externalStairPlan,layout).direction : undefined,
+    outset: copingOuterOffset(infinityZone ? "infinity" : "skimmer", "hidden") + 0.15,
+    // No invisible below-ground outside corners in the general fit. The rim
+    // encloses all visible interior surfaces; above-ground walls reach grade.
+    baseY: layout.groundY,
+    entrance: resolvedLayout.access.placement,
+    accessories: [
+      ...(accessCameraSubject(resolvedLayout.access,layout,outline)?.points ?? []),
+      ...(resolvedLayout.ladder ? accessCameraSubject(resolvedLayout.ladder.plan,layout,outline)?.points ?? [] : []),
+      ...shelfLoungerEnvelope,
+      ...deckFurnitureEnvelope,
+      ...(externalStairPlan ? externalStairCameraSubject(externalStairPlan,layout).points : []),
+      ...(coverSubject?.points ?? []),
+      ...(pellicanoPlacement ? pellicanoCameraSubject(pellicanoPlacement,layout).points : []),
+    ],
+  }), [outline,layout,resolvedLayout,shelfLoungerEnvelope,deckFurnitureEnvelope,externalStairPlan,coverSubject,pellicanoPlacement,infinityZone]);
+  const localFraming = (focus === "external-stairs" && !!externalStairPlan) || (focus === "cover" && !!coverSubject)
+    || (focus === "bench-lighting" && resolvedLayout.comfort.elements.some(element => element.kind === "hydromassage"))
+    || !!interiorSubject || focus === "waterline" || (focus === "infinity" && !!infinityZone)
+    || coastalHero || (!infinityZone && ["paving", "review", "overview", "shelf", "access", "inox", "hydromassage", "bench"].includes(focus));
+  const subjectAspect = useMemo(() => {
+    if (focus === "top") {
+      const b = outlineBounds(planBounds);
+      return b.spanX / Math.max(0.01, b.spanZ);
+    }
+    const subject = interiorSubject ?? (focus === "shelf" ? sunShelfCameraSubject(resolvedLayout, layout, outline, shelfLoungerEnvelope)
+      : focus === "access" ? accessFlightCameraSubject(resolvedLayout, layout, outline, shelfLoungerEnvelope)
+      : focus === "inox" ? accessCameraSubject(resolvedLayout.ladder?.plan ?? resolvedLayout.access, layout, outline)
+      : focus === "hydromassage" || focus === "bench" ? comfortCameraSubject(focus, resolvedLayout, layout, outline)
+      : focus === "stair-lighting" || focus === "bench-lighting" ? microLightCameraSubject(focus, resolvedLayout, layout, outline)
+      : focus === "features" ? lightingCameraSubject(outline, layout, ledRow)
+      : focus === "external-stairs" && externalStairPlan ? externalStairCameraSubject(externalStairPlan, layout)
+      : focus === "cover" ? coverSubject
+      : focus === "paving" && !infinityZone ? pavingCameraSubject(outline, layout, skimmers)
+      : (focus === "review" || focus === "overview") ? wholeSubject
+      : focus === "waterline" ? (infinityZone ? infinityWaterlineCameraSubject(outline, infinityZone, layout) : waterlineCameraSubject(outline, layout, skimmers))
+      : focus === "infinity" && infinityZone ? infinityDetailCameraSubject(outline, infinityZone, layout)
+      : focus === "coping" && infinityZone ? infinityCopingCameraSubject(outline, infinityZone, layout)
+      : focus === "overflow-hidden" || focus === "overflow-visible" || focus === "overflow-continuous" ? overflowCameraSubject(focus, outline, layout, skimmers)
+      : null);
+    return subject ? componentCameraAspect(subject.points, subject.direction) : undefined;
+  }, [focus, resolvedLayout, layout, outline, shelfLoungerEnvelope, infinityZone, skimmers, ledRow, externalStairPlan, coverSubject, planBounds, compactPlan, interiorSubject, wholeSubject]);
+  const summaryRect = detail && !infinityZone ? canvas.closest("main")?.querySelector('[data-config-summary]')?.getBoundingClientRect() : null;
+  const visibleFrame = cleanCapture ? projectBookHeroFrame(viewportSize.width, viewportSize.height) : visibleCameraFrame(canvas.getBoundingClientRect(), [
+    ...Array.from(occluderRoot.querySelectorAll(occluderSelector)).map(element => element.getBoundingClientRect()),
+    ...(summaryRect ? [summaryRect] : []),
+  ], subjectAspect);
+  const visibleFrameKey = `${visibleFrame.left}:${visibleFrame.top}:${visibleFrame.width}:${visibleFrame.height}`;
+  const fitFov = localFraming ? SCENE_VISUAL_PRESET.camera.fov
+    : cameraFrameFit(SCENE_VISUAL_PRESET.camera.fov, viewportSize.height, visibleFrame).verticalFov;
+  let pose = contextualAccessCamera(focus, resolvedLayout, layout, outline, fitFov, visibleFrame.width / Math.max(1,visibleFrame.height), infinityZone, shelfLoungerEnvelope) ?? (coastalHero && infinityZone
+    ? fitInfinityOverviewCamera(wholeSubject, outline, SCENE_VISUAL_PRESET.camera.fov, visibleFrame.width / Math.max(1, visibleFrame.height))
     : getCameraPose({
       accessPlan,
       intent: focus,
@@ -539,32 +743,39 @@ function CameraRig({
       includeExternalStaircase,
       infinityZone,
       externalStairPlan,
+      coverSubject,
       pellicanoPlacement,
+      interiorSubject,
+      overviewSubject: wholeSubject,
     }));
-  const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${frameToken}`;
+  const editKey = `${focus}:${viewportSize.width}:${viewportSize.height}:${visibleFrameKey}:${frameToken}`;
   if (focus === "depth") {
     if (editingPose.current?.key !== editKey) editingPose.current = { key: editKey, pose };
     pose = editingPose.current.pose;
   } else editingPose.current = null;
   if (focus === "top") {
-    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, visibleFrame) };
+    // Centre within a symmetric subset of the free rectangle, without
+    // putting the plan under floating controls or a technical panel.
+    const planFrame = centeredArchitecturalFrame(visibleFrame, viewportSize.width);
+    planFit.current = { key: editKey, ...architecturalFrustum(planBounds, viewportSize.width, viewportSize.height, planFrame, compactPlan, premiumPlan) };
     const [x,z] = planFit.current.centre;
     pose = { position: [x, layout.copingY + 30, z], target: [x, layout.copingY, z] };
   } else planFit.current = null;
-  if (reservedRight) {
-    const eye = new Vector3(...pose.position), target = new Vector3(...pose.target);
-    const right = target.clone().sub(eye).cross(new Vector3(0, 1, 0)).normalize();
-    const offset = eye.distanceTo(target) * Math.tan(SCENE_VISUAL_PRESET.camera.fov * Math.PI / 360) * reservedRight / viewportSize.height;
-    right.multiplyScalar(offset);
-    pose.position = eye.add(right).toArray() as [number, number, number];
-    pose.target = target.add(right).toArray() as [number, number, number];
-  }
-  if (detail) {
+  if (focus !== "top" && !coastalHero && !opticalDetail && !localFraming) {
     pose = offsetCameraToFrame(pose, SCENE_VISUAL_PRESET.camera.fov, viewportSize.width, viewportSize.height, visibleFrame);
   }
   // Material changes can recreate plans without moving their geometry.
   // Only a different pose/intent or explicit reframe starts a new flight.
   const poseKey = JSON.stringify(pose);
+  useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera) || !localFraming) return;
+    // This inset projection owns its aspect; R3F's DPR resize otherwise
+    // replaces it with the full canvas aspect after the camera has settled.
+    const owned = camera as PerspectiveCamera & { manual?: boolean };
+    const previous = owned.manual;
+    owned.manual = true;
+    return () => { if (previous === undefined) delete owned.manual; else owned.manual = previous; };
+  }, [camera, localFraming]);
   useLayoutEffect(() => {
     canvas.dataset["cameraProjection"] = camera instanceof OrthographicCamera ? "orthographic" : "perspective";
     canvas.dataset["cameraFocus"] = focus;
@@ -579,25 +790,56 @@ function CameraRig({
       camera.fov = "fov" in pose ? Number(pose.fov) : SCENE_VISUAL_PRESET.camera.fov;
       camera.updateProjectionMatrix();
     }
+    if (camera instanceof PerspectiveCamera) {
+      // clearViewOffset does not undo the inset's aspect. Restore the current
+      // canvas ratio on handoff, even if no R3F resize/DPR event follows.
+      if (!localFraming) camera.aspect = viewportSize.width / Math.max(1, viewportSize.height);
+      if (localFraming) {
+        // Keep the component's physical 34° lens close to the installation.
+        // A full-canvas lens fitted into a tiny UI strip pushed it into fog.
+        camera.setViewOffset(visibleFrame.width, visibleFrame.height,
+          -visibleFrame.left, -visibleFrame.top, viewportSize.width, viewportSize.height);
+      } else if (opticalDetail) {
+        // Shift the lens inside the available UI frame, not the installation
+        // viewpoint. Translating the eye/target moved it away from the real
+        // selected surface and could lower the physical architectural eye line.
+        camera.setViewOffset(viewportSize.width, viewportSize.height,
+          viewportSize.width / 2 - (visibleFrame.left + visibleFrame.width / 2),
+          viewportSize.height / 2 - (visibleFrame.top + visibleFrame.height / 2),
+          viewportSize.width, viewportSize.height);
+      } else camera.clearViewOffset();
+    }
     goal.current.set(...pose.position);
     lookAt.current.set(...pose.target);
     startPosition.current.copy(camera.position);
     startTarget.current.copy(controls.current?.target ?? lookAt.current);
-    // Drain any orbit inertia without changing the visible starting pose.
     const control = controls.current;
+    const goalDistance = goal.current.distanceTo(lookAt.current);
+    navigationLimits.current = infinityZone && focus !== "top" && focus !== "depth"
+      ? infinityNavigationLimits(pose, detail, layout.waterY)
+      : { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: Math.min(2, goalDistance * 0.6), maxDistance: 160,
+          minPolarAngle: focus === "top" ? Math.PI / 2 : 0,
+          maxPolarAngle: focus === "top" ? Math.PI / 2 : Math.PI / 2.05 };
+    // Drain old orbit inertia with open limits, retaining the actual start.
+    // Applying the destination's restricted azimuth during a flight made
+    // OrbitControls snap/clamp the interpolated path on every frame.
     if (control) {
-      Object.assign(control, infinityZone && focus !== "top" && focus !== "depth"
-        ? infinityNavigationLimits(pose, detail, layout.waterY)
-        : { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: 2, maxDistance: 160,
-            minPolarAngle: focus === "top" ? Math.PI / 2 : 0,
-            maxPolarAngle: focus === "top" ? Math.PI / 2 : Math.PI / 2.05 });
+      Object.assign(control, { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minDistance: 0.05, maxDistance: Infinity,
+        minPolarAngle: 0, maxPolarAngle: Math.PI });
+      const damping = control.enableDamping;
+      control.enableDamping = false;
+      control.update();
+      camera.position.copy(startPosition.current);
+      control.target.copy(startTarget.current);
+      control.update();
+      control.enableDamping = damping;
     }
     renderQualityState.locked = cameraLocked;
-    if (cameraLocked || infinityZone || focus === "top" || focus === "depth") {
+    if (cameraLocked || focus === "top" || focus === "depth") {
       if (control) {
         const damping = control.enableDamping;
         control.enableDamping = false;
-        control.update();
+        Object.assign(control, navigationLimits.current);
         camera.position.copy(goal.current);
         control.target.copy(lookAt.current);
         control.update();
@@ -610,15 +852,6 @@ function CameraRig({
       renderQualityState.idle = true;
       return;
     }
-    if (control && cameraLocked) {
-      const damping = control.enableDamping;
-      control.enableDamping = false;
-      control.update();
-      camera.position.copy(startPosition.current);
-      control.target.copy(startTarget.current);
-      control.update();
-      control.enableDamping = damping;
-    }
     elapsed.current = 0;
     // AUTO-012 / directive §53: honour prefers-reduced-motion by snapping to
     // the goal pose on the next frame instead of flying the camera there.
@@ -626,10 +859,11 @@ function CameraRig({
     // animations/transitions -- it doesn't reach this Three.js-driven lerp.)
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     const largeMove = startPosition.current.distanceTo(goal.current) > Math.max(2, radius * 0.65);
-    duration.current = reducedMotion || (largeMove && (!detail || infinityZone)) ? 0 : 0.24;
+    duration.current = reducedMotion || (largeMove && !detail) ? 0 : 0.24;
     flying.current =
       startPosition.current.distanceToSquared(goal.current) > 1e-10 ||
       startTarget.current.distanceToSquared(lookAt.current) > 1e-10;
+    if (!flying.current && control) Object.assign(control, navigationLimits.current);
   }, [
     cameraLocked,
     Boolean(infinityZone),
@@ -638,6 +872,15 @@ function CameraRig({
     frameToken,
     focus,
     poseKey,
+    coastalHero,
+    localFraming,
+    opticalDetail,
+    viewportSize.width,
+    viewportSize.height,
+    visibleFrame.left,
+    visibleFrame.top,
+    visibleFrame.width,
+    visibleFrame.height,
     planFit.current?.width,
     planFit.current?.height,
   ]);
@@ -664,6 +907,7 @@ function CameraRig({
     if (progress >= 1) {
       camera.position.copy(goal.current);
       if (control) {
+        if (navigationLimits.current) Object.assign(control, navigationLimits.current);
         control.target.copy(lookAt.current);
         control.update();
       }
@@ -689,6 +933,7 @@ function StudioFloor({
   sceneTime,
   paving,
   pavingFormat,
+  integratedEdge = false,
 }: {
   outline: Outline;
   size: number;
@@ -701,6 +946,7 @@ function StudioFloor({
   sceneTime: SceneTimeOfDay;
   paving: import("@/lib/pool/presentation").PavingId;
   pavingFormat?: PavingFormatId | undefined;
+  integratedEdge?: boolean | undefined;
   /** Geometry Pass D (Infinity): the selected Rectangle side's zone, so the
    * deck's own cutout can widen on that one side to clear the catch basin.
    * `null` (every pre-Infinity call, and Infinity with no side chosen yet)
@@ -713,69 +959,26 @@ function StudioFloor({
   const pavingGeometry = useMemo(
     () =>
       premiumInfinity && infinityZone
-        ? createInfinityDeck(outline, infinityZone, copingOuterOffset(system, overflowType))
+        ? createInfinityDeck(outline, infinityZone, integratedEdge ? 0 : copingOuterOffset(system, overflowType))
         : null,
-    [premiumInfinity, infinityZone, outline, system, overflowType],
+    [premiumInfinity, infinityZone, outline, system, overflowType, integratedEdge],
   );
   useEffect(() => () => pavingGeometry?.dispose(), [pavingGeometry]);
+  const terraceLayout = useMemo(() => pavingLayout(paving, pavingFormat), [paving, pavingFormat]);
+  const { module: terraceModule, gap: terraceGap, thickness: terraceThickness, boards: terraceBoards } = terraceLayout;
   const terrace = useMemo(() => {
     if (!pavingGeometry) return null;
-    const layout = pavingLayout(paving, pavingFormat);
-    const slabs = createPavingOnSurface(pavingGeometry, layout.module, layout);
+    const slabs = createPavingOnSurface(pavingGeometry, terraceModule, { gap: terraceGap, thickness: terraceThickness, boards: terraceBoards });
     const bed = pavingGeometry.clone();
     const p = bed.getAttribute("position");
-    for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) < 1e-6) p.setY(i, -layout.thickness);
+    for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) < 1e-6) p.setY(i, -terraceThickness);
     bed.computeVertexNormals();
     return { slabs, bed };
-  }, [pavingGeometry, paving, pavingFormat]);
+  }, [pavingGeometry, terraceModule, terraceGap, terraceThickness, terraceBoards]);
   useEffect(() => () => { terrace?.slabs.dispose(); terrace?.bed.dispose(); }, [terrace]);
   const geometry = useMemo(() => {
     if (premiumInfinity && infinityZone) {
-      const landscape = createInfinityLandscape(
-        outline,
-        infinityZone,
-        size,
-        copingOuterOffset(system, overflowType),
-      );
-      // Extend only the distant landscape: retain near-pool tessellation and
-      // topology, without a dense 400 m terrain or a visible showroom edge.
-      const bounds = outlineBounds(outline);
-      const p = landscape.getAttribute("position");
-      const uv = landscape.getAttribute("uv");
-      const near = Math.max(bounds.spanX, bounds.spanZ) / 2 + 12;
-      for (let i = 0; i < p.count; i++) {
-        const extend = (v: number) => {
-          const beyond = Math.max(0, Math.abs(v) - near);
-          // Continuous first derivative avoids a hard normal crease where
-          // the near terrain starts stretching toward the distant horizon.
-          return Math.sign(v) * (Math.abs(v) + 80 * beyond * beyond / (beyond + 4));
-        };
-        p.setX(i, extend(p.getX(i)));
-        p.setZ(i, extend(p.getZ(i)));
-        // Broad distant relief only: the surveyed near-pool grade and deck
-        // junctions remain byte-identical. No extra terrain meshes/textures.
-        const distance = Math.hypot(p.getX(i), p.getZ(i));
-        const relief = MathUtils.smoothstep(distance, near + 8, near + 55);
-        // Evaluate the grade at its final position, not the pre-stretch
-        // coordinates (which dragged near slopes across hundreds of metres).
-        // A gentle distant fall avoids undersampled sinusoidal ridge teeth.
-        p.setY(i, infinityGroundHeight(outline, infinityZone, p.getX(i), p.getZ(i)) - relief * distance * 0.006);
-        uv.setXY(i, p.getX(i), p.getZ(i));
-      }
-      coastalGrade(landscape, infinityZone, outline);
-      // Only the immediate site stays geometric; the photographic coast owns
-      // the far field. Retain a full triangle apron around the fade boundary.
-      const index=landscape.getIndex(), kept:number[]=[];
-      if(index && photographicCoast) {
-        for(let i=0;i<index.count;i+=3) {
-          const ids=[index.getX(i),index.getX(i+1),index.getX(i+2)];
-          if(ids.some(id=>p.getX(id)>bounds.minX-7 && p.getX(id)<bounds.maxX+7 && p.getZ(id)>bounds.minZ-7 && p.getZ(id)<bounds.maxZ+7)) kept.push(...ids);
-        }
-        landscape.setIndex(kept);
-      }
-      landscape.computeVertexNormals();
-      landscape.computeBoundingSphere();
-      return landscape;
+      return createCoastalTerrace(outline, infinityZone, copingOuterOffset(system, overflowType), waterY);
     }
     const half = size / 2;
     const outer: Outline = [
@@ -794,19 +997,19 @@ function StudioFloor({
           )
         : undefined;
     return createSurfaceGeometry(outer, inner);
-  }, [outline, size, poolType, system, overflowType, infinityZone, premiumInfinity, photographicCoast]);
+  }, [outline, size, poolType, system, overflowType, infinityZone, premiumInfinity, photographicCoast, waterY]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
   const stone = useMemo(() => premiumInfinity ? createLimestoneMaps() : createTravertineMaps(), [premiumInfinity]);
   useEffect(() => {
     const textures = Object.values(stone).filter((texture) => texture !== null);
     for (const texture of textures) {
-      texture.repeat.set(2.5, 2.5);
+      texture.repeat.set(premiumInfinity ? 0.5 : 2.5, premiumInfinity ? 0.5 : 2.5);
       texture.anisotropy = Math.min(8, maxAnisotropy);
       texture.needsUpdate = true;
     }
     return () => textures.forEach((texture) => texture.dispose());
-  }, [stone, maxAnisotropy]);
+  }, [stone, maxAnisotropy, premiumInfinity]);
 
   return (
     <group>
@@ -821,14 +1024,17 @@ function StudioFloor({
           <PavingMaterial key={paving} id={paving} waterY={waterY} joint />
         </mesh>
         <mesh name="infinity-paving-modules" geometry={terrace.slabs} receiveShadow castShadow>
-          <PavingMaterial key={paving} id={paving} waterY={waterY} />
+          <PavingMaterial key={isReferenceFinish(paving) ? "reference" : paving} id={paving} waterY={waterY} />
         </mesh>
         </>
       ) : null}
       <mesh name="pool-studio-deck" geometry={geometry} position={[0, -0.002, 0]} receiveShadow>
-        {premiumInfinity && infinityZone && coastalMap ? <CoastalGroundMaterial map={coastalMap}
-          rotation={coastalPhotoRotation(infinityZone)} outline={outline} projectionHeight={COAST_PHOTO_CAPTURE.height}
-          timeOfDay={sceneTime} /> : <meshStandardMaterial
+        {premiumInfinity && infinityZone && coastalMap ? <meshStandardMaterial
+          side={DoubleSide}
+          color={sceneTime === "night" ? "#68655e" : "#c1b8a7"}
+          map={stone.colorMap} normalMap={stone.normalMap} normalScale={[0.18,0.18]}
+          roughnessMap={stone.roughnessMap} roughness={0.88} metalness={0}
+        /> : <meshStandardMaterial
           key={
             premiumInfinity
               ? `coastal-photo-near-${theme}`
@@ -970,10 +1176,33 @@ export default function PoolScene({
   paving,
   pavingFormat,
   photoMode,
+  cleanCapture = false,
+  sunShelfLoungerCount,
+  integratedBenchStations,
+  copingStyle,
+  copingEdge,
+  sunShelfLoungerColor = "white",
+  sunShelfRun,
   photoModeQuality,
   onPhotoModeUnsupported,
 }: SceneProps) {
   const controls = useRef<OrbitControlsImpl | null>(null);
+  const renderer = useRef<import("three").WebGLRenderer | null>(null);
+  const [preparingShaders, setPreparingShaders] = useState(false);
+  const [qaRenderPaused, setQaRenderPaused] = useState(() => import.meta.env.DEV && readDevelopmentRenderPause());
+  useEffect(() => {
+    if (import.meta.env.DEV) writeDevelopmentRenderPause(qaRenderPaused);
+  }, [qaRenderPaused]);
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const toggle = (event: KeyboardEvent) => {
+      if (!event.isTrusted || !event.altKey || !event.shiftKey || event.code !== "KeyP") return;
+      event.preventDefault();
+      setQaRenderPaused(paused => !paused);
+    };
+    window.addEventListener("keydown", toggle);
+    return () => window.removeEventListener("keydown", toggle);
+  }, []);
   const [coastalStatus, setCoastalStatus] = useState<"loading" | "ready" | "error">("loading");
   const [coastalMap, setCoastalMap] = useState<Texture | null>(null);
   const radius = Math.hypot(length, width) / 2;
@@ -987,18 +1216,29 @@ export default function PoolScene({
   const sunLight = useRef<DirectionalLight | null>(null);
   const auxiliaryLight = useRef<SpotLight | null>(null);
 
-  // Pool geometry and the sun are static between configuration commits.
-  // Orbit/ripples do not change their shadow silhouette. Invalidate after
-  // each React commit (including dimensions/access/system changes), rather
-  // than rebuilding the same 4K shadow map every animation frame.
+  // Depth silhouettes change with geometry, not with RGB, language or time
+  // of day. Rebuilding a4K map on those uniform-only commits stalls toggles.
+  // Asset readiness also invalidates so async-mounted casters are included.
+  const assetsLoading=useProgress(state=>state.active);
+  const shadowRevision=JSON.stringify([
+    outline,shape,system,overflowType,poolType,length,width,depth,floorProfileSetting,
+    shallowDepth,slopeReversed,features,poolAccess,internalStairType,internalStairMirrored,
+    hydromassageVariant,sunShelfRun,sunShelfLoungerCount,integratedBenchStations,infinityEdge,construction,
+    solarShower,loungers,exteriorPanelFinish,externalStairSide,externalStairPlatformExtended,
+    pellicano,coverPlan.geometry,coverPlan.extension,materials.skimmer.type,skimmers.positions,
+    paving,pavingFormat,copingStyle,copingEdge,
+  ]);
   useLayoutEffect(() => {
     if (sunLight.current) sunLight.current.shadow.needsUpdate = true;
-  });
+  },[shadowRevision,assetsLoading]);
 
   const verticalLayout = useMemo(
-    () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness }),
-    [poolType, system, overflowType, depth, copingThickness],
+    () => getPoolVerticalLayout({ poolType, system, overflowType, depth, copingThickness, copingStyle }),
+    [poolType, system, overflowType, depth, copingThickness, copingStyle],
   );
+  const integratedEdge = integratedCoping({ poolType, system, overflowType, copingStyle });
+  const pavingTopY = integratedEdge ? verticalLayout.copingY : 0;
+  const rimOffset = copingOuterOffset(system, overflowType, copingStyle);
 
   // Single source of truth for every floor elevation -- rendering, stairs,
   // lighting and measurements all read the same model (see floor-profile.ts).
@@ -1016,9 +1256,11 @@ export default function PoolScene({
           floorProfile: floorProfileSetting,
           ...(shallowDepth !== undefined ? { shallowDepth } : {}),
           ...(slopeReversed !== undefined ? { slopeReversed } : {}),
+          ...(sunShelfRun !== undefined ? { sunShelfRun } : {}),
         },
         verticalLayout,
         sunShelf: features.includes("sunShelf") || features.includes("hydromassage"),
+        twoLoungerShelf: features.includes("sunShelf"),
         infinityEdge: system === "infinity" ? infinityEdge : null,
       }),
     [
@@ -1031,6 +1273,7 @@ export default function PoolScene({
       floorProfileSetting,
       shallowDepth,
       slopeReversed,
+      sunShelfRun,
       verticalLayout,
       features,
       system,
@@ -1067,7 +1310,13 @@ export default function PoolScene({
   // that the pool sits in the same studio context as every other system,
   // never a vast empty tiled plane with a stray panorama.
   const infinityStage = system === "infinity" && !!infinityZone;
-  const background = infinityStage
+  const showSkimmers = construction?.showSystemComponents ?? true;
+  const [skimmersPrepared, setSkimmersPrepared] = useState(system === "skimmer" && showSkimmers);
+  useEffect(() => {
+    if (system !== "skimmer") setSkimmersPrepared(false);
+    else if (showSkimmers) setSkimmersPrepared(true);
+  }, [system, showSkimmers]);
+  const background = infinityStage && (focus !== "top" || photoMode)
     ? sceneTime === "night"
       ? "#101b28"
       : "#cee0ec"
@@ -1082,6 +1331,10 @@ export default function PoolScene({
         poolType,
         features,
         hydromassageVariant,
+        nominalWidth: width,
+        sunShelfRun,
+        integratedBenchStations,
+        infinityWallType: normalisedInfinityEdge?.wallType,
         system,
         overflowType,
         outline,
@@ -1101,6 +1354,10 @@ export default function PoolScene({
       poolType,
       features,
       hydromassageVariant,
+      integratedBenchStations,
+      width,
+      sunShelfRun,
+      normalisedInfinityEdge?.wallType,
       system,
       poolAccess,
       internalStairType,
@@ -1112,33 +1369,59 @@ export default function PoolScene({
   );
 
   const deckSize = useMemo(() => Math.max(40, radius * 14), [radius]);
+  const shelfLoungerPlan = useMemo(() => resolveSunShelfLoungers({
+    comfort: resolvedLayout.comfort, outline, waterY: verticalLayout.waterY,
+    enabled: features.includes("sunShelfLoungers"), quantity: sunShelfLoungerCount, infinityExcluded,
+    accessFootprints: [
+      ...(resolvedLayout.access.placement ? [resolvedLayout.access.footprint] : []),
+      ...(resolvedLayout.ladder?.plan.placement ? [resolvedLayout.ladder.plan.footprint] : []),
+    ],
+  }), [resolvedLayout, outline, verticalLayout.waterY, features, sunShelfLoungerCount, infinityExcluded]);
+  const shelfLoungerEnvelope = useMemo(() => shelfLoungerPlan.placements.flatMap(placement =>
+    placement.footprint.flatMap(([x, z]) => [placement.y, placement.y + SUN_SHELF_LOUNGER_MODEL.height]
+      .map(y => [x, y, z] as const))), [shelfLoungerPlan]);
   const lighting = resolvedLayout.lighting;
   // Deck positions the furniture must keep clear of: the inox ladder (deck
   // anchored), the access placement itself and, above ground, both ends of
   // the external staircase.
   const externalStairs = poolType === "above-ground" && features.includes("externalStaircase");
+  const coverSubject = useMemo(() => coverCameraSubject(coverPlan, verticalLayout, outline, rimOffset),
+    [coverPlan, verticalLayout, outline, rimOffset]);
   const planBounds = useMemo(() => {
     const b = outlineBounds(outline);
     // Include the actual shell/coping envelope; Infinity's receiver projects
     // beyond it. No furniture/scenery can inflate this architectural fit.
-    const margin = copingOuterOffset(system, overflowType) + (infinityZone ? 0.5 : 0.05);
+    const margin = rimOffset + (poolType === "above-ground" && showMeasurements ? infinityZone ? 0.5 : 0.05 : 0);
     const points: [number, number][] = [
       [b.minX-margin,b.minZ-margin], [b.maxX+margin,b.maxZ+margin],
     ];
+    // Dimension lines sit 0.60 m from the basin, with 0.12 m ticks.
+    // Include their true envelope once; labels receive pixel clearance in fit.
+    if (poolType === "in-ground" && showMeasurements)
+      points.push([b.minX-0.72,b.minZ-0.72], [b.maxX+0.72,b.maxZ+0.72]);
+    if (!showMeasurements && infinityZone) {
+      const d = clampInfinityEdgeDimensions(undefined), receiverOut = d.lipWidth + d.catchBasinWidth + d.wallThickness;
+      infinityZone.points.forEach(([x, z], i) => {
+        const normal = infinityZone.pointNormals[i]!;
+        points.push([x + normal[0] * receiverOut, z + normal[1] * receiverOut]);
+      });
+    }
+    if (!showMeasurements && coverPlan.geometry && coverSubject)
+      points.push(...coverSubject.points.map(([x, , z]) => [x, z] as [number, number]));
     if (externalStairs) {
       const stairs = planExternalStaircase({ outline, side: externalStairSide,
         platformExtended: externalStairPlatformExtended, accessAnchor: lighting.accessPlan.placement,
-        copingOffset: copingOuterOffset(system, overflowType), infinityExcluded,
+        copingOffset: rimOffset, infinityExcluded,
         groundY: verticalLayout.groundY,
         topY: system === "overflow" ? verticalLayout.waterY-0.001 : verticalLayout.copingY });
       if (stairs) points.push(...stairs.footprint.map(p => [p[0], p[1]] as [number,number]));
     }
     return points;
-  }, [outline, system, overflowType, infinityZone, externalStairs, externalStairSide,
-    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout]);
+  }, [outline, system, overflowType, infinityZone, poolType, externalStairs, externalStairSide,
+    externalStairPlatformExtended, lighting.accessPlan.placement, infinityExcluded, verticalLayout, showMeasurements, coverPlan.geometry, coverSubject, rimOffset]);
   const planView = focus === "top" && !photoMode;
   const planRevision = JSON.stringify([outline, depth, features, resolvedLayout, system, overflowType,
-    poolType, copingThickness, materials.coping.id, externalStairSide, externalStairPlatformExtended, construction]);
+    poolType, copingThickness, materials.coping.id, copingStyle, externalStairSide, externalStairPlatformExtended, construction]);
   const deckObstacles = useMemo(() => {
     const points: { x: number; z: number }[] = [
       resolvedLayout.ladder?.plan.placement,
@@ -1198,6 +1481,12 @@ export default function PoolScene({
     [coverPlan.geometry],
   );
   const sceneBounds = useMemo(() => outlineBounds(outline), [outline]);
+  const visibleDeckLoungers = loungers && (construction?.showLoungers ?? true);
+  const deckFurniturePlan = useMemo(() => system !== "infinity" && (construction?.showEnvironment ?? true)
+    ? planDeckFurniture(outline, studioDeckInnerOffset(poolType,system,overflowType,copingStyle),
+      studioDeckBand(outline,true,visibleDeckLoungers),deckObstacles,{loungers:visibleDeckLoungers,shower:solarShower,coverHousing}) : null,
+  [system,construction?.showEnvironment,outline,poolType,overflowType,copingStyle,deckObstacles,visibleDeckLoungers,solarShower,coverHousing]);
+  const deckFurnitureEnvelope = useMemo(() => deckFurniturePlan ? deckFurnitureCameraPoints(deckFurniturePlan) : [], [deckFurniturePlan]);
   const shadowExtent =
     Math.max(sceneBounds.spanX, sceneBounds.spanZ) / 2 +
     SCENE_VISUAL_PRESET.lighting.sun.frustumMargin;
@@ -1231,6 +1520,8 @@ export default function PoolScene({
     materials.surface.textureUrl,
     materials.coping.color,
     materials.coping.id,
+    copingStyle,
+    copingEdge,
     paving,
     pavingFormat,
     exteriorPanelFinish,
@@ -1242,6 +1533,7 @@ export default function PoolScene({
     sceneTime,
     features.join(","),
     hydromassageVariant,
+    integratedBenchStations,
     ledColor,
     ledIntensity,
     poolAccess,
@@ -1251,13 +1543,16 @@ export default function PoolScene({
   return (
     <div className="relative h-full w-full">
     <Canvas
+      frameloop={preparingShaders || (import.meta.env.DEV && qaRenderPaused) ? "never" : "always"}
       // PCFSoftShadowMap is deprecated in three.js: WebGLShadowMap silently
       // reassigns it to PCFShadowMap on the very first render anyway (same
       // algorithm, only the enum name changed), so setting it explicitly
       // here is a zero-behaviour-change fix for the console warning, not a
       // visual change.
       shadows={{ type: PCFShadowMap }}
-      dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : ACTIVE_RENDERING_QUALITY.dpr}
+      // AdaptiveQuality owns the live ratio. Feeding the original device
+      // clamp back on every React commit resized it twice on Day/Night.
+      dpr={cameraLocked ? ACTIVE_RENDERING_QUALITY.dpr[1] : renderer.current?.getPixelRatio() ?? ACTIVE_RENDERING_QUALITY.dpr}
       gl={{
         antialias: ACTIVE_RENDERING_QUALITY.antialias,
         // Retaining every WebGL back buffer causes sustained GPU-memory growth
@@ -1272,6 +1567,7 @@ export default function PoolScene({
         toneMappingExposure: SCENE_VISUAL_PRESET.exposure[visualTheme],
       }}
       onCreated={({ gl }) => {
+        renderer.current = gl;
         gl.outputColorSpace = SRGBColorSpace;
       }}
       camera={{
@@ -1297,7 +1593,7 @@ export default function PoolScene({
           Photo Mode: it's a custom ShaderMaterial, which the path tracer
           cannot read anyway, and PhotoModeRenderer supplies its own
           equirectangular gradient environment instead. */}
-      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
+      {!photoMode ? <DaylightEnvironment theme={visualTheme} timeOfDay={sceneTime} sunDirection={sunPosition} outdoor={infinityStage} showBackdrop={!planView} coastalRotation={infinityZone ? coastalPhotoRotation(infinityZone) : 0} onCoastalStatus={setCoastalStatus} onCoastalMap={setCoastalMap} /> : null}
 
       <SceneMood
         dusk={dusk}
@@ -1366,6 +1662,7 @@ export default function PoolScene({
           sceneTime={sceneTime}
           paving={paving ?? "gres"}
           pavingFormat={pavingFormat}
+          integratedEdge={integratedEdge}
         />
       ) : (
           <StudioPaving
@@ -1375,7 +1672,13 @@ export default function PoolScene({
             overflowType={overflowType}
             paving={paving ?? "gres"}
             pavingFormat={pavingFormat}
+            integratedEdge={integratedEdge}
+            topY={pavingTopY}
+            copingStyle={copingStyle}
+            copingEdge={copingEdge}
             environment={construction?.showEnvironment ?? true}
+            loungers={visibleDeckLoungers}
+            furnitureRows={deckFurniturePlan?.rows}
             decking={construction?.showDecking ?? true}
             waterY={verticalLayout.waterY}
           />
@@ -1393,16 +1696,16 @@ export default function PoolScene({
       {/* Presentation furniture on the studio deck: hidden in the raw
           construction stages and never part of the configuration. */}
       {system !== "infinity" && (construction?.showEnvironment ?? true) ? (
-        <DeckLoungers
+        <group position={[0, pavingTopY, 0]}><DeckLoungers
           outline={outline}
-          innerOffset={studioDeckInnerOffset(poolType, system, overflowType)}
-          band={studioDeckBand(outline, true)}
+          innerOffset={studioDeckInnerOffset(poolType, system, overflowType, copingStyle)}
+          band={studioDeckBand(outline, true, visibleDeckLoungers)}
           waterY={verticalLayout.waterY}
           avoid={deckObstacles}
           shower={solarShower}
-          loungers={loungers}
+          loungers={visibleDeckLoungers}
           coverHousing={coverHousing}
-        />
+        /></group>
       ) : null}
 
       <PoolModel
@@ -1421,15 +1724,22 @@ export default function PoolScene({
         overflowType={overflowType}
         poolType={poolType}
         copingThickness={copingThickness}
+        pavingThickness={pavingLayout(paving, pavingFormat).thickness}
+        copingStyle={copingStyle}
+        copingEdge={copingEdge}
         showWater={showWater}
+        waterGeometryRevision={`${shadowRevision}|${assetsLoading}`}
         planView={planView}
         rawStructure={construction?.raw ? construction.structure ?? "REINFORCED_CONCRETE" : null}
         structureFamily={construction?.structure ?? null}
         showAccessories={construction?.showAccessories ?? true}
         night={dusk}
+        ledColor={ledColor}
+        ledIntensity={ledIntensity}
         {...(normalisedInfinityEdge ? { infinityEdge: normalisedInfinityEdge } : {})}
         infinityExcluded={infinityExcluded}
       />
+      {features.includes("sunShelfLoungers") && (construction?.showAccessories ?? true) ? <SunShelfLoungers plan={shelfLoungerPlan} color={sunShelfLoungerColor} /> : null}
       {coverPlan.geometry && !photoMode && (construction?.showWater ?? true) ? <AutomaticCover plan={coverPlan} /> : null}
       {technicalView && !photoMode && system === "skimmer" ? skimmers.positions.map((point, index) => (
         <mesh key={`technical-skimmer-${index}`} name="technical-skimmer-marker" position={[point.x, verticalLayout.waterY + 0.075, point.z]}>
@@ -1498,9 +1808,10 @@ export default function PoolScene({
         />
       ) : null}
 
-      {planView ? <ArchitecturalOutline revision={planRevision} /> : null}
+      {planView ? <ArchitecturalOutline revision={planRevision} premium={poolType === "in-ground"} /> : null}
 
-      {system === "skimmer" && (construction?.showSystemComponents ?? true) ? (
+      {system === "skimmer" && (showSkimmers || skimmersPrepared) ? (
+        <group visible={showSkimmers}>
         <Skimmers
           showWater={showWater}
           plan={skimmers}
@@ -1512,6 +1823,7 @@ export default function PoolScene({
           variant={materials.skimmer.type}
           poolType={poolType}
         />
+        </group>
       ) : null}
 
       {/* Dimension guide lines: drei's <Line> is built on LineSegmentsGeometry,
@@ -1520,6 +1832,7 @@ export default function PoolScene({
           They are an editing overlay anyway, not part of a "photo". */}
       {showMeasurements && !photoMode ? (
         <PoolMeasurements
+          architecturalPlan={planView && poolType === "in-ground"}
           outline={outline}
           length={length}
           width={width}
@@ -1557,7 +1870,7 @@ export default function PoolScene({
         />
       ) : null}
 
-      {import.meta.env.DEV ? <DevelopmentRendererMetrics /> : null}
+      {import.meta.env.DEV ? <DevelopmentRendererMetrics qaPaused={qaRenderPaused} /> : null}
       {!photoMode ? <HeroCaptureListener /> : null}
       {!photoMode && !cameraLocked ? <AdaptiveQuality /> : null}
 
@@ -1588,11 +1901,15 @@ export default function PoolScene({
       <CameraRig
         accessPlan={lighting.accessPlan}
         resolvedLayout={resolvedLayout}
+        floorProfile={floorProfile}
         cameraLocked={cameraLocked}
         radius={radius}
         controls={controls}
         frameToken={frameToken}
-        focus={infinityZone && (focus === "overview" || focus === "review") ? "infinity" : construction?.raw && (focus === "overview" || focus === "review") ? "structure" : focus}
+        // Vedi piscina owns its whole-installation projection even while the
+        // current construction stage shows the raw shell. Do not reroute it
+        // to the structure editor's different optical fit.
+        focus={focus}
         shape={shape}
         depth={depth}
         outline={outline}
@@ -1600,17 +1917,23 @@ export default function PoolScene({
         skimmers={skimmers}
         ledRow={lighting.plan.positions}
         photoMode={photoMode}
+        cleanCapture={cleanCapture}
         infinityZone={infinityZone}
         // The exterior/staircase framing must never hijack the Step 05
         // Pool System camera -- that step's premium front view (both
         // skimmers, centred, from inside looking out) always wins.
         includeExternalStaircase={false}
         planBounds={planBounds}
+        compactPlan={!showMeasurements}
+        premiumPlan={poolType === "in-ground"}
         externalStairPlan={externalStairs ? planExternalStaircase({outline, side:externalStairSide,
           platformExtended:externalStairPlatformExtended, accessAnchor:lighting.accessPlan.placement,
           copingOffset:copingOuterOffset(system,overflowType), infinityExcluded,
           groundY:verticalLayout.groundY, topY:system==="overflow"?verticalLayout.waterY-.001:verticalLayout.copingY}) : null}
+        coverSubject={coverSubject}
         pellicanoPlacement={pellicanoPlacement}
+        shelfLoungerEnvelope={shelfLoungerEnvelope}
+        deckFurnitureEnvelope={deckFurnitureEnvelope}
       />
 
       {/* Premium post pass -- only ever mounts (and only ever fetches its
@@ -1624,6 +1947,14 @@ export default function PoolScene({
           <PremiumPostFX />
         </Suspense>
       ) : null}
+
+      <ShaderPreparation enabled={showWater && !photoMode && !qaRenderPaused} onPreparing={setPreparingShaders} signature={[
+        sceneTime, features.join(","), lighting.plan.count,
+        resolvedLayout.stairMicroSpots.length,
+        resolvedLayout.comfort.elements.reduce((sum,element)=>sum+(element.spots?.length??0),0),
+        construction?.showLighting, construction?.showAccessories, infinityStage,
+        materials.surface.kind, materials.surface.textureUrl, materials.coping.id, paving,
+      ].join("|")} />
 
       {/* Normal configuration is raster-only. Tracing is loaded and mounted
           exclusively in response to the user's explicit Photo Mode toggle. */}

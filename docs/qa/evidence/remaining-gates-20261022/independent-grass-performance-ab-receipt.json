@@ -1,0 +1,2178 @@
+{
+  "reviewer": "E independent reviewer",
+  "date": "2026-10-22T11:27:43.269Z",
+  "source": {
+    "candidate": "f594b6d as provided by root; independently identified compiled candidate bundle PoolScene-Xo76ZBVd.js",
+    "control": "same source as provided by root, grass material-only control; independently identified bundle PoolScene-CsKo-owI.js",
+    "workspace": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/grass-current-ab-20261022-5u2evH",
+    "candidateUrl": "http://127.0.0.1:3091/?qaGrass=1&qaInteractionTiming=1",
+    "controlUrl": "http://127.0.0.1:3092/?qaGrass=1&qaInteractionTiming=1"
+  },
+  "method": {
+    "oneTemporaryChromeTab": "651928435",
+    "viewportBeforeImport": {
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "visibility": "visible"
+    },
+    "ui": "Only trusted click on already-selected Italiano arms180passiveframe samples; no fixture state injection.",
+    "warmup": "Two completed windows excluded on each of four fresh page loads.",
+    "sequence": "C1/B1/B2/C2/C3/B3",
+    "noProfiling": true,
+    "noScreenshotDuringWindow": true,
+    "metric": "rAF/completed frame interval, NOT GPU execution timer",
+    "drawCalls": "Completed-frame all-pass counter snapshot of ONE frame at end, not window average; alternating118/171 affected by pass cadence. No material-cost inference from this snapshot.",
+    "foreground": "Browser task tab was document.visible during inspected points and trusted UI-operated; OS focus was not separately established by available read-only DOM. document.hasFocus not exposed by sandbox, not an app defect.",
+    "memory": "Resource counts only; GPU memory bytes not measured.",
+    "isolation": "Root reported IAB49 paused11:16:29.155Z with lastframe11:16:28.961Z and no CPU/build/GPU work during campaign. Reviewer owned exactly one temporary local3D tab; no other tabs operated."
+  },
+  "identity": {
+    "candidate": {
+      "beforeImport": {
+        "viewport": [
+          1440,
+          900,
+          1
+        ],
+        "visibility": "visible"
+      },
+      "renderer": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA renderer] {\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"version\":\"WebGL 2.0 (OpenGL ES 3.0 Chromium)\",\"canvas\":[1440,900],\"dpr\":1,\"qualityPreset\":\"experience\",\"shadowMapSize\":4096,\"planarReflection\":{\"enabled\":true,\"resolution\":512},\"mountedViewport\":[1440,900,1],\"coarsePointer\":false,\"hardwareConcurrency\":10,\"method\":\"single renderer identification before warmup; no GL wrappers\"}",
+          "timestamp": "2026-10-22T11:18:37.651Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "fixture": [
+        {
+          "level": "debug",
+          "message": "[Grass A/B fixture] {\"schemaVersion\":1,\"projectId\":\"00000000-0000-4000-8000-000000000099\",\"config\":{\"projectType\":\"new\",\"poolType\":\"in-ground\",\"structure\":\"reinforced-concrete\",\"shape\":\"rectangle\",\"shapeSelected\":true,\"customMode\":\"draw\",\"controlPoints\":[[-0.5,-0.36],[-0.16,-0.5],[0.22,-0.5],[0.5,-0.3],[0.5,0.32],[0.18,0.5],[-0.2,0.5],[-0.5,0.34]],\"dimensions\":{\"length\":12,\"width\":5,\"depth\":1.5,\"cornerRadius\":0.25,\"floorProfile\":\"flat\"},\"system\":\"skimmer\",\"overflowType\":\"hidden\",\"skimmerType\":\"highWaterline\",\"skimmerFinish\":\"steel\",\"finish\":\"liner\",\"linerColor\":\"motionBlueSky602\",\"mosaicFinish\":\"mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32\",\"copingMaterial\":\"prun\",\"paving\":\"reference-greige\",\"pavingFormat\":\"60x120\",\"poolAccess\":\"internalSteps\",\"internalStairType\":\"linear\",\"features\":[],\"equipment\":[],\"ledColor\":\"#ffffff\",\"ledIntensity\":0.6,\"sceneTime\":\"day\",\"customer\":{\"name\":\"\",\"surname\":\"\",\"company\":\"\",\"email\":\"\",\"phone\":\"\",\"city\":\"\",\"country\":\"\",\"notes\":\"\"},\"uploads\":[]},\"renovation\":{\"areas\":[],\"currentFinish\":\"liner\",\"filtrationWorks\":[],\"replaceCoping\":null,\"copingMaterial\":\"\",\"structureIssues\":[],\"equipmentUpgrades\":[]}}",
+          "timestamp": "2026-10-22T11:18:36.370Z",
+          "url": "http://127.0.0.1:3091/assets/routes-DmuVP6uW.js"
+        }
+      ]
+    },
+    "control": {
+      "renderer": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA renderer] {\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"version\":\"WebGL 2.0 (OpenGL ES 3.0 Chromium)\",\"canvas\":[1440,900],\"dpr\":1,\"qualityPreset\":\"experience\",\"shadowMapSize\":4096,\"planarReflection\":{\"enabled\":true,\"resolution\":512},\"mountedViewport\":[1440,900,1],\"coarsePointer\":false,\"hardwareConcurrency\":10,\"method\":\"single renderer identification before warmup; no GL wrappers\"}",
+          "timestamp": "2026-10-22T11:21:35.706Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "fixture": [
+        {
+          "level": "debug",
+          "message": "[Grass A/B fixture] {\"schemaVersion\":1,\"projectId\":\"00000000-0000-4000-8000-000000000099\",\"config\":{\"projectType\":\"new\",\"poolType\":\"in-ground\",\"structure\":\"reinforced-concrete\",\"shape\":\"rectangle\",\"shapeSelected\":true,\"customMode\":\"draw\",\"controlPoints\":[[-0.5,-0.36],[-0.16,-0.5],[0.22,-0.5],[0.5,-0.3],[0.5,0.32],[0.18,0.5],[-0.2,0.5],[-0.5,0.34]],\"dimensions\":{\"length\":12,\"width\":5,\"depth\":1.5,\"cornerRadius\":0.25,\"floorProfile\":\"flat\"},\"system\":\"skimmer\",\"overflowType\":\"hidden\",\"skimmerType\":\"highWaterline\",\"skimmerFinish\":\"steel\",\"finish\":\"liner\",\"linerColor\":\"motionBlueSky602\",\"mosaicFinish\":\"mosaic-23dd3311-e2c5-4ba3-87bb-d056d3b75f32\",\"copingMaterial\":\"prun\",\"paving\":\"reference-greige\",\"pavingFormat\":\"60x120\",\"poolAccess\":\"internalSteps\",\"internalStairType\":\"linear\",\"features\":[],\"equipment\":[],\"ledColor\":\"#ffffff\",\"ledIntensity\":0.6,\"sceneTime\":\"day\",\"customer\":{\"name\":\"\",\"surname\":\"\",\"company\":\"\",\"email\":\"\",\"phone\":\"\",\"city\":\"\",\"country\":\"\",\"notes\":\"\"},\"uploads\":[]},\"renovation\":{\"areas\":[],\"currentFinish\":\"liner\",\"filtrationWorks\":[],\"replaceCoping\":null,\"copingMaterial\":\"\",\"structureIssues\":[],\"equipmentUpgrades\":[]}}",
+          "timestamp": "2026-10-22T11:21:32.610Z",
+          "url": "http://127.0.0.1:3092/assets/routes-DjgPBtrF.js"
+        }
+      ]
+    },
+    "end": {
+      "canvas": [
+        {
+          "data": {
+            "cameraFocus": "review",
+            "cameraProjection": "perspective",
+            "engine": "three.js r185"
+          },
+          "height": 1264,
+          "width": 2023
+        }
+      ],
+      "panel": [
+        "Riduci"
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "visibility": "visible"
+    },
+    "checks": {
+      "all180": true,
+      "cameraStartEndIdentical": true,
+      "allCameraFrustumIdentical": true,
+      "allViewportIdentical": true,
+      "allBufferIdentical": true,
+      "allEffectiveDprIdentical": true,
+      "fixtureIdentical": true,
+      "domSnapshotIdentical": true
+    }
+  },
+  "runs": [
+    {
+      "variant": "candidate",
+      "sample": "warm1",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":1,\"frames\":180,\"medianMs\":8.099999994039536,\"p95Ms\":16.30000001192093,\"maxMs\":34.5,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:19:35.473Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:19:35.473Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 1,
+          "frames": 180,
+          "medianMs": 8.099999994039536,
+          "p95Ms": 16.30000001192093,
+          "maxMs": 34.5,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "candidate",
+      "sample": "warm2",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":2,\"frames\":180,\"medianMs\":7.800000011920929,\"p95Ms\":18.299999982118607,\"maxMs\":35.39999997615814,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:20:05.339Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:20:05.339Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 2,
+          "frames": 180,
+          "medianMs": 7.800000011920929,
+          "p95Ms": 18.299999982118607,
+          "maxMs": 35.39999997615814,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "candidate",
+      "sample": "C1",
+      "excluded": false,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":3,\"frames\":180,\"medianMs\":7.800000011920929,\"p95Ms\":13.299999982118607,\"maxMs\":90.30000001192093,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:20:48.904Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:20:48.904Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 3,
+          "frames": 180,
+          "medianMs": 7.800000011920929,
+          "p95Ms": 13.299999982118607,
+          "maxMs": 90.30000001192093,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "warm1-load1",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":1,\"frames\":180,\"medianMs\":28.599999994039536,\"p95Ms\":86.7999999821186,\"maxMs\":185.09999999403954,\"calls\":171,\"triangles\":80124,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:22:11.776Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:22:11.776Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 1,
+          "frames": 180,
+          "medianMs": 28.599999994039536,
+          "p95Ms": 86.7999999821186,
+          "maxMs": 185.09999999403954,
+          "calls": 171,
+          "triangles": 80124,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "warm2-load1",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":2,\"frames\":180,\"medianMs\":26.600000023841858,\"p95Ms\":71.2999999821186,\"maxMs\":138.80000001192093,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:22:27.004Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:22:27.004Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 2,
+          "frames": 180,
+          "medianMs": 26.600000023841858,
+          "p95Ms": 71.2999999821186,
+          "maxMs": 138.80000001192093,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "B1",
+      "excluded": false,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":3,\"frames\":180,\"medianMs\":33.400000005960464,\"p95Ms\":66.19999998807907,\"maxMs\":99.10000002384186,\"calls\":171,\"triangles\":80124,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:22:42.691Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:22:42.691Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 3,
+          "frames": 180,
+          "medianMs": 33.400000005960464,
+          "p95Ms": 66.19999998807907,
+          "maxMs": 99.10000002384186,
+          "calls": 171,
+          "triangles": 80124,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "B2",
+      "excluded": false,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":4,\"frames\":180,\"medianMs\":32,\"p95Ms\":101.30000001192093,\"maxMs\":182.59999999403954,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:22:56.516Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:22:56.516Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 4,
+          "frames": 180,
+          "medianMs": 32,
+          "p95Ms": 101.30000001192093,
+          "maxMs": 182.59999999403954,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "candidate",
+      "sample": "warm1-load2",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":1,\"frames\":180,\"medianMs\":48.5,\"p95Ms\":74.5,\"maxMs\":105.09999999403954,\"calls\":171,\"triangles\":80124,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:23:45.072Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:23:45.072Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 1,
+          "frames": 180,
+          "medianMs": 48.5,
+          "p95Ms": 74.5,
+          "maxMs": 105.09999999403954,
+          "calls": 171,
+          "triangles": 80124,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "candidate",
+      "sample": "warm2-load2",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":2,\"frames\":180,\"medianMs\":46.70000001788139,\"p95Ms\":72.90000000596046,\"maxMs\":103.90000000596046,\"calls\":171,\"triangles\":80124,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:23:58.650Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:23:58.650Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 2,
+          "frames": 180,
+          "medianMs": 46.70000001788139,
+          "p95Ms": 72.90000000596046,
+          "maxMs": 103.90000000596046,
+          "calls": 171,
+          "triangles": 80124,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "candidate",
+      "sample": "C2",
+      "excluded": false,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":3,\"frames\":180,\"medianMs\":53.80000001192093,\"p95Ms\":78.30000001192093,\"maxMs\":164.30000001192093,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:24:17.311Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:24:17.311Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 3,
+          "frames": 180,
+          "medianMs": 53.80000001192093,
+          "p95Ms": 78.30000001192093,
+          "maxMs": 164.30000001192093,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "candidate",
+      "sample": "C3",
+      "excluded": false,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":4,\"frames\":180,\"medianMs\":49.89999997615814,\"p95Ms\":291.5,\"maxMs\":559.2000000178814,\"calls\":171,\"triangles\":80124,\"geometries\":73,\"textures\":30,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:24:37.942Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:24:37.942Z",
+          "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+          "window": 4,
+          "frames": 180,
+          "medianMs": 49.89999997615814,
+          "p95Ms": 291.5,
+          "maxMs": 559.2000000178814,
+          "calls": 171,
+          "triangles": 80124,
+          "geometries": 73,
+          "textures": 30,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "warm1-load2",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":1,\"frames\":180,\"medianMs\":32.69999998807907,\"p95Ms\":66.69999998807907,\"maxMs\":102.59999999403954,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:25:42.151Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:25:42.151Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 1,
+          "frames": 180,
+          "medianMs": 32.69999998807907,
+          "p95Ms": 66.69999998807907,
+          "maxMs": 102.59999999403954,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "warm2-load2",
+      "excluded": true,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":2,\"frames\":180,\"medianMs\":40,\"p95Ms\":57.20000001788139,\"maxMs\":71.2999999821186,\"calls\":171,\"triangles\":80124,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:25:57.283Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:25:57.283Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 2,
+          "frames": 180,
+          "medianMs": 40,
+          "p95Ms": 57.20000001788139,
+          "maxMs": 71.2999999821186,
+          "calls": 171,
+          "triangles": 80124,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    },
+    {
+      "variant": "control",
+      "sample": "B3",
+      "excluded": false,
+      "logs": [
+        {
+          "level": "debug",
+          "message": "[Pool3D QA frame window] {\"window\":3,\"frames\":180,\"medianMs\":44,\"p95Ms\":62,\"maxMs\":138.40000000596046,\"calls\":118,\"triangles\":52812,\"geometries\":73,\"textures\":28,\"programs\":41,\"dpr\":1.405456737852613,\"buffer\":[2023,1264],\"viewport\":[1440,900,1],\"cameraStart\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"cameraEnd\":{\"position\":[-13.710437120791205,6.535966711007107,-5.6454741085610864],\"quaternion\":[-0.12556619395603702,-0.809456187817788,-0.18749822033993147,0.5420869195140641],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0]},\"method\":\"passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing\"}",
+          "timestamp": "2026-10-22T11:26:11.790Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js"
+        }
+      ],
+      "frames": [
+        {
+          "timestamp": "2026-10-22T11:26:11.790Z",
+          "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+          "window": 3,
+          "frames": 180,
+          "medianMs": 44,
+          "p95Ms": 62,
+          "maxMs": 138.40000000596046,
+          "calls": 118,
+          "triangles": 52812,
+          "geometries": 73,
+          "textures": 28,
+          "programs": 41,
+          "dpr": 1.405456737852613,
+          "buffer": [
+            2023,
+            1264
+          ],
+          "viewport": [
+            1440,
+            900,
+            1
+          ],
+          "cameraStart": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "cameraEnd": {
+            "position": [
+              -13.710437120791205,
+              6.535966711007107,
+              -5.6454741085610864
+            ],
+            "quaternion": [
+              -0.12556619395603702,
+              -0.809456187817788,
+              -0.18749822033993147,
+              0.5420869195140641
+            ],
+            "projection": [
+              0.9801378183416588,
+              0,
+              0,
+              0,
+              0,
+              1.568220509346654,
+              0,
+              0,
+              0.12307942708333328,
+              -0.3338802083333334,
+              -1.0004000800160033,
+              -1,
+              0,
+              0,
+              -0.20004000800160032,
+              0
+            ]
+          },
+          "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+        }
+      ]
+    }
+  ],
+  "measured": [
+    {
+      "sample": "C1",
+      "variant": "candidate",
+      "timestamp": "2026-10-22T11:20:48.904Z",
+      "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+      "window": 3,
+      "frames": 180,
+      "medianMs": 7.800000011920929,
+      "p95Ms": 13.299999982118607,
+      "maxMs": 90.30000001192093,
+      "calls": 118,
+      "triangles": 52812,
+      "geometries": 73,
+      "textures": 30,
+      "programs": 41,
+      "dpr": 1.405456737852613,
+      "buffer": [
+        2023,
+        1264
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "cameraStart": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "cameraEnd": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+    },
+    {
+      "sample": "B1",
+      "variant": "control",
+      "timestamp": "2026-10-22T11:22:42.691Z",
+      "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+      "window": 3,
+      "frames": 180,
+      "medianMs": 33.400000005960464,
+      "p95Ms": 66.19999998807907,
+      "maxMs": 99.10000002384186,
+      "calls": 171,
+      "triangles": 80124,
+      "geometries": 73,
+      "textures": 28,
+      "programs": 41,
+      "dpr": 1.405456737852613,
+      "buffer": [
+        2023,
+        1264
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "cameraStart": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "cameraEnd": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+    },
+    {
+      "sample": "B2",
+      "variant": "control",
+      "timestamp": "2026-10-22T11:22:56.516Z",
+      "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+      "window": 4,
+      "frames": 180,
+      "medianMs": 32,
+      "p95Ms": 101.30000001192093,
+      "maxMs": 182.59999999403954,
+      "calls": 118,
+      "triangles": 52812,
+      "geometries": 73,
+      "textures": 28,
+      "programs": 41,
+      "dpr": 1.405456737852613,
+      "buffer": [
+        2023,
+        1264
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "cameraStart": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "cameraEnd": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+    },
+    {
+      "sample": "C2",
+      "variant": "candidate",
+      "timestamp": "2026-10-22T11:24:17.311Z",
+      "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+      "window": 3,
+      "frames": 180,
+      "medianMs": 53.80000001192093,
+      "p95Ms": 78.30000001192093,
+      "maxMs": 164.30000001192093,
+      "calls": 118,
+      "triangles": 52812,
+      "geometries": 73,
+      "textures": 30,
+      "programs": 41,
+      "dpr": 1.405456737852613,
+      "buffer": [
+        2023,
+        1264
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "cameraStart": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "cameraEnd": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+    },
+    {
+      "sample": "C3",
+      "variant": "candidate",
+      "timestamp": "2026-10-22T11:24:37.942Z",
+      "url": "http://127.0.0.1:3091/assets/PoolScene-Xo76ZBVd.js",
+      "window": 4,
+      "frames": 180,
+      "medianMs": 49.89999997615814,
+      "p95Ms": 291.5,
+      "maxMs": 559.2000000178814,
+      "calls": 171,
+      "triangles": 80124,
+      "geometries": 73,
+      "textures": 30,
+      "programs": 41,
+      "dpr": 1.405456737852613,
+      "buffer": [
+        2023,
+        1264
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "cameraStart": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "cameraEnd": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+    },
+    {
+      "sample": "B3",
+      "variant": "control",
+      "timestamp": "2026-10-22T11:26:11.790Z",
+      "url": "http://127.0.0.1:3092/assets/PoolScene-CsKo-owI.js",
+      "window": 3,
+      "frames": 180,
+      "medianMs": 44,
+      "p95Ms": 62,
+      "maxMs": 138.40000000596046,
+      "calls": 118,
+      "triangles": 52812,
+      "geometries": 73,
+      "textures": 28,
+      "programs": 41,
+      "dpr": 1.405456737852613,
+      "buffer": [
+        2023,
+        1264
+      ],
+      "viewport": [
+        1440,
+        900,
+        1
+      ],
+      "cameraStart": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "cameraEnd": {
+        "position": [
+          -13.710437120791205,
+          6.535966711007107,
+          -5.6454741085610864
+        ],
+        "quaternion": [
+          -0.12556619395603702,
+          -0.809456187817788,
+          -0.18749822033993147,
+          0.5420869195140641
+        ],
+        "projection": [
+          0.9801378183416588,
+          0,
+          0,
+          0,
+          0,
+          1.568220509346654,
+          0,
+          0,
+          0.12307942708333328,
+          -0.3338802083333334,
+          -1.0004000800160033,
+          -1,
+          0,
+          0,
+          -0.20004000800160032,
+          0
+        ]
+      },
+      "method": "passive frame interval; completed-frame all-pass counters reset before rendering; not GPU bytes or GPU timing"
+    }
+  ],
+  "pairs": [
+    {
+      "pair": 1,
+      "candidate": "C1",
+      "control": "B1"
+    },
+    {
+      "pair": 2,
+      "candidate": "C2",
+      "control": "B2"
+    },
+    {
+      "pair": 3,
+      "candidate": "C3",
+      "control": "B3"
+    }
+  ],
+  "verdict": {
+    "status": "PERFORMANCE_NOT_VERIFIED",
+    "reason": "Identity is matched but within-candidate medians drift7.8→53.8→49.9ms at identical camera/frustum/buffer/DPR/config. Candidate p95 reaches291.5ms; control32–44ms. Sign/magnitude is not stable across alternating pairs. Cannot causally attribute regression or improvement to photographic grass, and cannot declare non-regression PASS.",
+    "candidateMedianMs": [
+      7.8,
+      53.8,
+      49.9
+    ],
+    "candidateP95Ms": [
+      13.3,
+      78.3,
+      291.5
+    ],
+    "controlMedianMs": [
+      33.4,
+      32,
+      44
+    ],
+    "controlP95Ms": [
+      66.2,
+      101.3,
+      62
+    ],
+    "noFurtherLoops": true,
+    "requiredRemainingProof": "One controlled run on stable real hardware/browser foreground with matched configuration/quality and repeatable baseline; this run cannot substitute for that external stability condition."
+  },
+  "screenshots": {
+    "candidate": {
+      "file": "independent-grass-candidate-1440.jpg",
+      "sha256": "e05b1fe9672529480793319d17dcb94e4c5682eb8f176b05f8dc4d27f3bd1f63",
+      "raster": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured": "After C1, before navigation"
+    },
+    "control": {
+      "file": "independent-grass-control-1440.jpg",
+      "sha256": "eaa6f330b39beaeabd7e23526e6dddfeb9208301c5516a20c91e9979be60e372",
+      "raster": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured": "After B2, before navigation"
+    },
+    "candidateDom": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 12,0 × 5,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 12,0 × 5,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort Scala interna\":\n        - generic: Accesso & comfort\n        - generic: Scala interna\n      - button \"Finiture Liner PVC · Blue Sky [602]\":\n        - generic: Finiture\n        - generic: Liner PVC · Blue Sky [602]\n      - button \"Esterno Pietra di Prun · Gres porcellanato · Greige · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Pietra di Prun · Gres porcellanato · Greige · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [active] [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\":\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 12,0 × 5,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+    "controlDom": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 12,0 × 5,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 12,0 × 5,0 m\n      - button \"Sistema acqua Skimmer · Livello Acqua Alto\":\n        - generic: Sistema acqua\n        - generic: Skimmer · Livello Acqua Alto\n      - button \"Accesso & comfort Scala interna\":\n        - generic: Accesso & comfort\n        - generic: Scala interna\n      - button \"Finiture Liner PVC · Blue Sky [602]\":\n        - generic: Finiture\n        - generic: Liner PVC · Blue Sky [602]\n      - button \"Esterno Pietra di Prun · Gres porcellanato · Greige · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Pietra di Prun · Gres porcellanato · Greige · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\":\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [active] [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n    - button \"Notte\":\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\" [pressed]:\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\":\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 12,0 × 5,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\""
+  },
+  "logs": [
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-22T11:18:36.779Z",
+      "url": "http://127.0.0.1:3091/assets/events-156d8d12.esm-CLxXcyVP.js"
+    },
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-22T11:21:33.376Z",
+      "url": "http://127.0.0.1:3092/assets/events-156d8d12.esm-yRo_YycF.js"
+    },
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-22T11:23:21.965Z",
+      "url": "http://127.0.0.1:3091/assets/events-156d8d12.esm-CLxXcyVP.js"
+    },
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-22T11:25:20.528Z",
+      "url": "http://127.0.0.1:3092/assets/events-156d8d12.esm-yRo_YycF.js"
+    }
+  ],
+  "safety": {
+    "cloudWrites": 0,
+    "sourceEdits": 0,
+    "benchCampaigns": 1,
+    "excludedWarmups": 8,
+    "tabClosed": true,
+    "viewportReset": true,
+    "uiReleased": true,
+    "measurementWindows": 6,
+    "qualifiedStablePairedComparisons": 0
+  }
+}

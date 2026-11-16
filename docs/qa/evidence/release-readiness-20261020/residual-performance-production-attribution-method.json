@@ -1,0 +1,155 @@
+{
+  "createdAt": "2026-10-20T17:17:02.076Z",
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "source": "Exact task-only HEAD runtime before isolated probe; 39WIP excluded. See residual-performance-production-source.json",
+  "isolatedCopy": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-BjDT7l",
+  "onlyExpectedIsolatedInstrumentation": true,
+  "isolatedPoolSceneSHA256": "d0d42113ff79812630367e04b4c2f2b650be4326969e28a30e2b480366f531b0",
+  "nativeHelperSHA256": "8fe916930157ac2f1d06722dbf835edcf99185ccaab634f6fe5c245bd22399cc",
+  "metadataComponentSource": "// Isolated production attribution only; not part of the candidate source.\nfunction IsolatedProductionGlAttribution() {\n  const gl = useThree(state => state.gl);\n  useEffect(() => {\n    if (new URLSearchParams(window.location.search).get(\"qaGlDiagnostic\") !== \"1\") return;\n    const context = gl.getContext();\n    const debugRenderer = context.getExtension(\"WEBGL_debug_renderer_info\");\n    console.info(\"[Pool3D production renderer]\", JSON.stringify({\n      renderer: debugRenderer ? context.getParameter(debugRenderer.UNMASKED_RENDERER_WEBGL) : context.getParameter(context.RENDERER),\n      vendor: debugRenderer ? context.getParameter(debugRenderer.UNMASKED_VENDOR_WEBGL) : context.getParameter(context.VENDOR),\n      version: context.getParameter(context.VERSION),\n      shadingLanguageVersion: context.getParameter(context.SHADING_LANGUAGE_VERSION),\n      KHR_parallel_shader_compile: gl.extensions.has(\"KHR_parallel_shader_compile\"),\n      dpr: gl.getPixelRatio(), cssWidth: gl.domElement.clientWidth, cssHeight: gl.domElement.clientHeight,\n      geometries: gl.info.memory.geometries, textures: gl.info.memory.textures, programs: gl.info.programs?.length,\n    }));\n    return installDevelopmentGlDiagnostic(context);\n  }, [gl]);\n  return null;\n}\n\n",
+  "serverSession": 95740,
+  "port": 3019,
+  "renderer": [
+    {
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+      "vendor": "Google Inc. (Apple)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "shadingLanguageVersion": "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)",
+      "KHR_parallel_shader_compile": true,
+      "dpr": 1,
+      "cssWidth": 1623,
+      "cssHeight": 873,
+      "geometries": 52,
+      "textures": 20,
+      "programs": 27
+    }
+  ],
+  "targetCanvas": {
+    "data": {
+      "cameraFocus": "review",
+      "cameraProjection": "perspective",
+      "engine": "three.js r185"
+    },
+    "height": 900,
+    "rect": {
+      "bottom": 900,
+      "height": 900,
+      "left": 0,
+      "right": 1440,
+      "top": 0,
+      "width": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "visibility": "visible",
+    "width": 1440
+  },
+  "targetTiming": {
+    "sample": 8,
+    "event": "click",
+    "inputToSecondRafMs": 734.3,
+    "visibility": "visible",
+    "method": "trusted input to second rAF; not GPU or final 3D paint"
+  },
+  "native": {
+    "sample": 8,
+    "event": "click",
+    "methods": {
+      "drawElements": {
+        "count": 122,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "texImage2D": {
+        "count": 3,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "bufferData": {
+        "count": 64,
+        "totalMs": 0.1,
+        "maxMs": 0.1
+      },
+      "renderbufferStorageMultisample": {
+        "count": 2,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "generateMipmap": {
+        "count": 11,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "drawArrays": {
+        "count": 98,
+        "totalMs": 0.1,
+        "maxMs": 0.1
+      },
+      "texStorage2D": {
+        "count": 5,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "compileShader": {
+        "count": 56,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "linkProgram": {
+        "count": 28,
+        "totalMs": 0.3,
+        "maxMs": 0.1
+      },
+      "getProgramInfoLog": {
+        "count": 28,
+        "totalMs": 274.8,
+        "maxMs": 14.5
+      },
+      "getShaderInfoLog": {
+        "count": 56,
+        "totalMs": 5.2,
+        "maxMs": 0.3
+      },
+      "getProgramParameter": {
+        "count": 84,
+        "totalMs": 4.9,
+        "maxMs": 0.3
+      },
+      "getActiveUniform": {
+        "count": 1863,
+        "totalMs": 1,
+        "maxMs": 0.1
+      },
+      "getUniformLocation": {
+        "count": 1863,
+        "totalMs": 1.1,
+        "maxMs": 0.1
+      }
+    }
+  },
+  "totals": {
+    "queryMs": 284.9,
+    "queryPercent": 38.79885605338417,
+    "allWrappedMethodMs": 287.5,
+    "notAttributedBySelectedWrappersMs": 446.79999999999995
+  },
+  "findings": [
+    "28 linkProgram and56 compileShader submissions recur on the single warmed target (same counts in preparation warm-up), demonstrating repeated program creation.",
+    "Native program/shader queries account for284.9ms,38.8% of734.3ms; they do not explain the whole interval. getProgramInfoLog is the largest selected native cost.",
+    "Selected texture/buffer allocation/upload calls total0.1ms rounded; no large selected upload cost observed.",
+    "No deleteProgram/deleteTexture/scene-unmount callbacks were instrumented; resource disposal or the remaining446.8ms CPU/driver work is not directly attributed.",
+    "This does not establish a DEV-only difference: historic DEV evidence had pre-goal PoolModel/RawShell WIP, cache/DPR regimes differ."
+  ],
+  "nextFixHypothesis": "Retaining approved water/reflection material resources while dry may prevent re-creation; validate only as an isolated causal experiment. Visibility must still suppress water and reflection work in dry stages, with no appearance, liner, light or quality change. Do not ship checkShaderErrors suppression.",
+  "limits": [
+    "One measured warm target, preparation clicks/warm-up retained separately in raw, no new matrix.",
+    "Public WebGL context metadata only; no private R3F fields/raw CDP/Chrome-internal access.",
+    "Renderer metadata logged on initial mount at1623x873 before explicit override; measured target DOM1440x900 visible and adaptive DPR unchanged.",
+    "14 selected GL wrappers, rounded performance.now walltime, no argument/return/program identities or GPU time;2RAF not final3Dpaint.",
+    "Production renderer/client served via local Node adapter of generated Cloudflare worker, no backend/edge-runtime claim."
+  ],
+  "errors": [],
+  "original39WipChanged": [],
+  "browserReleased": true,
+  "primaryAppNotEditedByThisAgent": true
+}

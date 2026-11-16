@@ -1,0 +1,38 @@
+{
+  "scope": "Native PostgreSQL backup prerequisite; no data restore performed",
+  "sourceProjectRef": "waetxxqdlsuanqescuye",
+  "privateFile": {
+    "exists": true,
+    "ownerOnlyPermissions": true,
+    "targetProjectHostUserMatch": true,
+    "valuePresent": true,
+    "usablePostgresqlPassword": false,
+    "classification": "Entire connection URI containing the unfilled YOUR-PASSWORD placeholder, not the actual database password",
+    "valueNeverPrinted": true,
+    "userFileUnmodified": true
+  },
+  "connectionChecks": {
+    "sandboxAttempt": "DNS unavailable inside restricted sandbox",
+    "reviewedNetworkAttempt": "System CA trust did not validate the Supabase certificate; verification not disabled",
+    "officialCaDownload": "Dashboard Download certificate on the same authorised project",
+    "officialCaUrl": "https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt",
+    "caSha256Fingerprint": "807025ad50d4ed219d2c9c7d299c004f824eb00cf7f65afef607d07b72e6cafa",
+    "caNotBefore": "2021-04-28T10:56:53Z",
+    "caNotAfter": "2031-04-26T10:56:53Z",
+    "sourceTlsMode": "verify-full",
+    "systemTrustStoreModified": false,
+    "sourceSettingChanged": false,
+    "tlsVerifiedBeforeAuthFailure": true,
+    "authOutcome": "AUTH_FAILED; subsequent local-only classification identified the unfilled URI placeholder",
+    "readOnlyRequested": true,
+    "authenticatedSessionEstablished": false,
+    "sqlQueriesExecuted": 0,
+    "cloudMutations": 0,
+    "rowsExported": 0,
+    "storageObjectsCopied": 0
+  },
+  "recoveryTarget": "Previously verified native private-socket target retained, stopped; no new startup required for source probe",
+  "guardCorrection": "Reject a whole URI or YOUR-PASSWORD anywhere in the password field before any further network connection",
+  "remainingAction": "Owner must enter only the existing raw PostgreSQL password privately; do not reset credentials or paste them in chat",
+  "result": "BLOCKED_MISSING_REAL_DB_PASSWORD"
+}

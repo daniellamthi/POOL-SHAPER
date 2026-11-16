@@ -1,0 +1,116 @@
+[
+  {
+    "mode": "night",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":49,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T18:41:06.510Z",
+        "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "cache": [
+      {
+        "level": "debug",
+        "message": "[Pool3D environment cache] {\"night\":true,\"prepared\":true,\"ready\":true,\"nightTexture\":\"1c067ebe-5365-4413-add0-6147d4ccb059\",\"dayTexture\":\"793dcf6e-23ca-4a26-a357-e675bb15d739\"}",
+        "timestamp": "2026-10-21T18:41:06.505Z",
+        "url": "http://127.0.0.1:3040/src/components/pool/three/DaylightEnvironment.tsx?t=1792606802744"
+      }
+    ]
+  },
+  {
+    "mode": "day",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":6,\"event\":\"click\",\"inputToSecondRafMs\":48.8,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T18:41:06.976Z",
+        "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "cache": [
+      {
+        "level": "debug",
+        "message": "[Pool3D environment cache] {\"night\":false,\"prepared\":true,\"ready\":true,\"nightTexture\":\"1c067ebe-5365-4413-add0-6147d4ccb059\",\"dayTexture\":\"793dcf6e-23ca-4a26-a357-e675bb15d739\"}",
+        "timestamp": "2026-10-21T18:41:06.972Z",
+        "url": "http://127.0.0.1:3040/src/components/pool/three/DaylightEnvironment.tsx?t=1792606802744"
+      }
+    ]
+  },
+  {
+    "mode": "night",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":7,\"event\":\"click\",\"inputToSecondRafMs\":47.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T18:41:07.888Z",
+        "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "cache": [
+      {
+        "level": "debug",
+        "message": "[Pool3D environment cache] {\"night\":true,\"prepared\":true,\"ready\":true,\"nightTexture\":\"1c067ebe-5365-4413-add0-6147d4ccb059\",\"dayTexture\":\"793dcf6e-23ca-4a26-a357-e675bb15d739\"}",
+        "timestamp": "2026-10-21T18:41:07.888Z",
+        "url": "http://127.0.0.1:3040/src/components/pool/three/DaylightEnvironment.tsx?t=1792606802744"
+      }
+    ]
+  },
+  {
+    "mode": "day",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":8,\"event\":\"click\",\"inputToSecondRafMs\":54,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T18:41:08.325Z",
+        "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "cache": [
+      {
+        "level": "debug",
+        "message": "[Pool3D environment cache] {\"night\":false,\"prepared\":true,\"ready\":true,\"nightTexture\":\"1c067ebe-5365-4413-add0-6147d4ccb059\",\"dayTexture\":\"793dcf6e-23ca-4a26-a357-e675bb15d739\"}",
+        "timestamp": "2026-10-21T18:41:08.325Z",
+        "url": "http://127.0.0.1:3040/src/components/pool/three/DaylightEnvironment.tsx?t=1792606802744"
+      }
+    ]
+  },
+  {
+    "mode": "night",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":9,\"event\":\"click\",\"inputToSecondRafMs\":44.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T18:41:08.760Z",
+        "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "cache": [
+      {
+        "level": "debug",
+        "message": "[Pool3D environment cache] {\"night\":true,\"prepared\":true,\"ready\":true,\"nightTexture\":\"1c067ebe-5365-4413-add0-6147d4ccb059\",\"dayTexture\":\"793dcf6e-23ca-4a26-a357-e675bb15d739\"}",
+        "timestamp": "2026-10-21T18:41:08.760Z",
+        "url": "http://127.0.0.1:3040/src/components/pool/three/DaylightEnvironment.tsx?t=1792606802744"
+      }
+    ]
+  },
+  {
+    "mode": "day",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":10,\"event\":\"click\",\"inputToSecondRafMs\":45.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T18:41:09.229Z",
+        "url": "http://127.0.0.1:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "cache": [
+      {
+        "level": "debug",
+        "message": "[Pool3D environment cache] {\"night\":false,\"prepared\":true,\"ready\":true,\"nightTexture\":\"1c067ebe-5365-4413-add0-6147d4ccb059\",\"dayTexture\":\"793dcf6e-23ca-4a26-a357-e675bb15d739\"}",
+        "timestamp": "2026-10-21T18:41:09.229Z",
+        "url": "http://127.0.0.1:3040/src/components/pool/three/DaylightEnvironment.tsx?t=1792606802744"
+      }
+    ]
+  }
+]

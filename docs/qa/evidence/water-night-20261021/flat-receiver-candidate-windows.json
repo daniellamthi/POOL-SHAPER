@@ -1,0 +1,107 @@
+{
+  "nightOverview": [
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":80.2,\"frameTimeMs\":12.48,\"medianFrameTimeMs\":12.4,\"p95FrameTimeMs\":14.4,\"frameCount\":161,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":226,\"peakCalls\":273,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":118,\"textures\":35,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":9.902,\"p95\":10.463,\"samples\":161,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:10:37.217Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":77.6,\"frameTimeMs\":12.89,\"medianFrameTimeMs\":12.7,\"p95FrameTimeMs\":15,\"frameCount\":156,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":226,\"peakCalls\":273,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":118,\"textures\":35,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":10,\"p95\":10.531,\"samples\":156,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:10:39.283Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":81.6,\"frameTimeMs\":12.25,\"medianFrameTimeMs\":12.2,\"p95FrameTimeMs\":14,\"frameCount\":164,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":226,\"peakCalls\":273,\"callScope\":\"full frame, all passes\",\"triangles\":141572,\"geometries\":118,\"textures\":35,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":9.638,\"p95\":10.37,\"samples\":164,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:10:41.345Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    }
+  ],
+  "dayOverview": [
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":81.1,\"frameTimeMs\":12.33,\"medianFrameTimeMs\":12.1,\"p95FrameTimeMs\":14.4,\"frameCount\":163,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":226,\"peakCalls\":274,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":9.351,\"p95\":10.182,\"samples\":163,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:10:55.926Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":86.3,\"frameTimeMs\":11.58,\"medianFrameTimeMs\":11.5,\"p95FrameTimeMs\":12.7,\"frameCount\":173,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":226,\"peakCalls\":274,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":9.134,\"p95\":9.534,\"samples\":173,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:10:57.980Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":83.2,\"frameTimeMs\":12.02,\"medianFrameTimeMs\":11.9,\"p95FrameTimeMs\":13.8,\"frameCount\":167,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":226,\"peakCalls\":274,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":9.27,\"p95\":9.717,\"samples\":167,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:00.036Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    }
+  ],
+  "dayWaterline": [
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":62.7,\"frameTimeMs\":15.96,\"medianFrameTimeMs\":15.4,\"p95FrameTimeMs\":17.6,\"frameCount\":126,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":59,\"peakCalls\":78,\"callScope\":\"full frame, all passes\",\"triangles\":44632,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.54,\"p95\":14.324,\"samples\":126,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:24.749Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":62.7,\"frameTimeMs\":15.94,\"medianFrameTimeMs\":15.8,\"p95FrameTimeMs\":19.1,\"frameCount\":126,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":59,\"peakCalls\":78,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.71,\"p95\":14.501,\"samples\":126,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:26.800Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":61,\"frameTimeMs\":16.4,\"medianFrameTimeMs\":15.9,\"p95FrameTimeMs\":20.3,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":60,\"peakCalls\":78,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":119,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.58,\"p95\":14.979,\"samples\":122,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:28.850Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    }
+  ],
+  "nightWaterline": [
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":60.7,\"frameTimeMs\":16.46,\"medianFrameTimeMs\":16.1,\"p95FrameTimeMs\":19.4,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":59,\"peakCalls\":77,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":118,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.692,\"p95\":16.448,\"samples\":122,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:47.351Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":62,\"frameTimeMs\":16.13,\"medianFrameTimeMs\":16,\"p95FrameTimeMs\":18.9,\"frameCount\":124,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":59,\"peakCalls\":77,\"callScope\":\"full frame, all passes\",\"triangles\":43672,\"geometries\":118,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.741,\"p95\":14.539,\"samples\":124,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:49.397Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":57.4,\"frameTimeMs\":17.42,\"medianFrameTimeMs\":16.8,\"p95FrameTimeMs\":22.2,\"frameCount\":115,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":59,\"peakCalls\":77,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":118,\"textures\":37,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":15,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.762,\"p95\":16.217,\"samples\":115,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T22:11:51.445Z",
+      "url": "http://flat-lens-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792620593679"
+    }
+  ],
+  "ownerIsolation": {
+    "pauseObserved": "2026-10-21T22:01:25.160Z",
+    "lastOwnerMetricObserved": "2026-10-21T22:01:25.085Z",
+    "ownerTabAbsentAtFinalInventory": true
+  },
+  "errors": [
+    {
+      "level": "error",
+      "message": "THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false\n\nMaterial Name: stainless-brushed\nMaterial Type: MeshPhysicalMaterial\n\nProgram Info Log: Vertex shader is not compiled.\nVERTEX\n\nERROR: 0:194: 'poolLensActive' : redefinition\nERROR: 0:195: 'poolLensWaterY' : redefinition\nERROR: 0:196: 'poolLensIor' : redefinition\nERROR: 0:197: 'poolLensViewToWorld' : redefinition\nERROR: 0:198: 'poolLensCameraPosition' : redefinition\nERROR: 0:199: 'poolFlatWaterClip' : function already has a body\nERROR: 0:228: 'poolLensActive' : redefinition\nERROR: 0:229: 'poolLensWaterY' : redefinition\nERROR: 0:230: 'poolLensIor' : redefinition\nERROR: 0:231: 'poolLensViewToWorld' : redefinition\nERROR: 0:232: 'poolLensCameraPosition' : redefinition\nERROR: 0:233: 'poolFlatWaterClip' : function already has a body\n\n  189:   virtualView.xyz *= (airDistance + distance(interfacePoint, point)) / max(airDistance, 0.0001);\n  190:   return projectionMatrix * virtualView;\n  191: }\n  192: \n  193: \n> 194: uniform bool poolLensActive;\n  195: uniform float poolLensWaterY;\n  196: uniform float poolLensIor;\n  197: uniform mat4 poolLensViewToWorld;\n  198: uniform vec3 poolLensCameraPosition;\n  199: vec4 poolFlatWaterClip(vec4 originalView) {\n  200:   vec3 point = (poolLensViewToWorld * originalView).xyz;\n",
+      "timestamp": "2026-10-21T22:06:20.489Z",
+      "url": "http://flat-lens-qa.localhost:3040/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false\n\nMaterial Name: \nMaterial Type: MeshStandardMaterial\n\nProgram Info Log: Vertex shader is not compiled.\nVERTEX\n\nERROR: 0:187: 'poolLensActive' : redefinition\nERROR: 0:188: 'poolLensWaterY' : redefinition\nERROR: 0:189: 'poolLensIor' : redefinition\nERROR: 0:190: 'poolLensViewToWorld' : redefinition\nERROR: 0:191: 'poolLensCameraPosition' : redefinition\nERROR: 0:192: 'poolFlatWaterClip' : function already has a body\nERROR: 0:221: 'poolLensActive' : redefinition\nERROR: 0:222: 'poolLensWaterY' : redefinition\nERROR: 0:223: 'poolLensIor' : redefinition\nERROR: 0:224: 'poolLensViewToWorld' : redefinition\nERROR: 0:225: 'poolLensCameraPosition' : redefinition\nERROR: 0:226: 'poolFlatWaterClip' : function already has a body\n\n  182:   virtualView.xyz *= (airDistance + distance(interfacePoint, point)) / max(airDistance, 0.0001);\n  183:   return projectionMatrix * virtualView;\n  184: }\n  185: \n  186: \n> 187: uniform bool poolLensActive;\n  188: uniform float poolLensWaterY;\n  189: uniform float poolLensIor;\n  190: uniform mat4 poolLensViewToWorld;\n  191: uniform vec3 poolLensCameraPosition;\n  192: vec4 poolFlatWaterClip(vec4 originalView) {\n  193:   vec3 point = (poolLensViewToWorld * originalView).xyz;\n",
+      "timestamp": "2026-10-21T22:06:20.500Z",
+      "url": "http://flat-lens-qa.localhost:3040/@vite/client"
+    },
+    {
+      "level": "error",
+      "message": "THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false\n\nMaterial Name: \nMaterial Type: MeshBasicMaterial\n\nProgram Info Log: Vertex shader is not compiled.\nVERTEX\n\nERROR: 0:181: 'poolLensActive' : redefinition\nERROR: 0:182: 'poolLensWaterY' : redefinition\nERROR: 0:183: 'poolLensIor' : redefinition\nERROR: 0:184: 'poolLensViewToWorld' : redefinition\nERROR: 0:185: 'poolLensCameraPosition' : redefinition\nERROR: 0:186: 'poolFlatWaterClip' : function already has a body\nERROR: 0:215: 'poolLensActive' : redefinition\nERROR: 0:216: 'poolLensWaterY' : redefinition\nERROR: 0:217: 'poolLensIor' : redefinition\nERROR: 0:218: 'poolLensViewToWorld' : redefinition\nERROR: 0:219: 'poolLensCameraPosition' : redefinition\nERROR: 0:220: 'poolFlatWaterClip' : function already has a body\n\n  176:   virtualView.xyz *= (airDistance + distance(interfacePoint, point)) / max(airDistance, 0.0001);\n  177:   return projectionMatrix * virtualView;\n  178: }\n  179: \n  180: \n> 181: uniform bool poolLensActive;\n  182: uniform float poolLensWaterY;\n  183: uniform float poolLensIor;\n  184: uniform mat4 poolLensViewToWorld;\n  185: uniform vec3 poolLensCameraPosition;\n  186: vec4 poolFlatWaterClip(vec4 originalView) {\n  187:   vec3 point = (poolLensViewToWorld * originalView).xyz;\n",
+      "timestamp": "2026-10-21T22:06:20.506Z",
+      "url": "http://flat-lens-qa.localhost:3040/@vite/client"
+    }
+  ]
+}

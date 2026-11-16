@@ -1,0 +1,125 @@
+- heading "3D Pool Configurator" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Configuration phases":
+    - list:
+      - button "Pool Reinforced concrete · 12.0 × 4.5 m":
+        - generic: Pool
+        - generic: Reinforced concrete · 12.0 × 4.5 m
+      - button "Water system Hidden overflow":
+        - generic: Water system
+        - generic: Hidden overflow
+      - button "Access & comfort Internal stairs · Sun shelf · Bench":
+        - generic: Access & comfort
+        - generic: Internal stairs · Sun shelf · Bench
+      - button "Finishes PVC liner · Blue Sky [602]":
+        - generic: Finishes
+        - generic: PVC liner · Blue Sky [602]
+      - button "Exterior In progress":
+        - generic: Exterior
+        - generic: In progress
+      - button "Options":
+        - generic: Options
+      - button "Presentation":
+        - generic: Presentation
+  - group "Language":
+    - button "Italian": IT
+    - button "English" [pressed]: EN
+  - group "Scene time":
+    - button "Day" [pressed]:
+      - generic: Day
+    - button "Night":
+      - generic: Night
+  - button "Start again":
+    - generic: Start again
+- main:
+  - button "Pool view":
+    - text: Pool view
+  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan
+  - toolbar "View tools":
+    - button "Guides":
+      - text: Guides
+    - button "Technical view":
+      - text: Technical view
+    - button "Reframe":
+      - text: Reframe
+- 'region "Step 5: Exterior"':
+  - paragraph: "The pool coping and surrounding paving: the exterior appears here."
+  - tablist "Coping and decking":
+    - tab "Pool coping"
+    - tab "Paving" [selected]
+  - group "Paving":
+    - button "Porcelain stoneware" [expanded] [pressed]:
+      - img "Porcelain stoneware"
+      - generic: Porcelain stoneware
+      - generic: Four finishes
+    - group "Porcelain stoneware finishes":
+      - heading "Porcelain stoneware finishes" [level=4]
+      - paragraph: Select a shade to apply it.
+      - button "Grey":
+        - img "Porcelain stoneware · Grey"
+        - generic: Grey
+      - button "Ivory" [pressed]:
+        - img "Porcelain stoneware · Ivory"
+        - generic: Ivory
+      - button "Beige":
+        - img "Porcelain stoneware · Beige"
+        - generic: Beige
+      - button "Greige":
+        - img "Porcelain stoneware · Greige"
+        - generic: Greige
+    - button "Timber decking":
+      - generic: Timber decking
+      - generic: Boards 240 × 14 cm · existing material reference
+    - button "Istrian stone":
+      - generic: Istrian stone
+      - generic: Indicative appearance, not a certified scan · 60 × 40 cm
+    - button "Limestone Ivory":
+      - generic: Limestone Ivory
+      - generic: Finish from the coping catalogue · independent selection
+    - button "Pietra di Prun":
+      - generic "Photo sample. Photograph of the supplied sample; natural variations and the supplied batch remain to be confirmed.":
+        - 'img "Photo sample: Owner-supplied photographic sample of pale Prun stone with natural veining and pores."'
+        - generic: Photo sample
+      - generic: Pietra di Prun
+      - generic: Finish from the coping catalogue · independent selection
+    - button "Travertine":
+      - img "Light travertine"
+      - generic: Travertine
+      - generic: Light or veined · two variants
+    - button "Slate":
+      - generic: Slate
+      - generic: Finish from the coping catalogue · independent selection
+    - button "WPC":
+      - generic: WPC
+      - generic: Finish from the coping catalogue · independent selection
+    - button "Ipè wood":
+      - img "Ipè wood"
+      - generic: Ipè wood
+      - generic: Photographic reference finish · independent selection
+  - group "Paving size":
+    - heading "Paving size" [level=4]
+    - paragraph: Size ·Porcelain stoneware · Ivory
+    - group "Paving size":
+      - button "60 × 120 cm":
+        - generic: 60 × 120 cm
+      - button "30 × 60 cm" [active] [pressed]:
+        - generic: 30 × 60 cm
+      - button "60 × 60 cm":
+        - generic: 60 × 60 cm
+    - paragraph: Reference laying dimensions. Supplied sizes and thicknesses to be confirmed.
+  - paragraph:
+    - text: Phase 05 of 07
+    - generic: · 2/2 · Paving
+  - heading "Exterior" [level=2]
+  - paragraph: Deck-level pool edge · Porcelain stoneware · Ivory · 30 × 60 cm
+  - button "View the pool":
+    - text: View the pool
+  - button "Minimise" [expanded]:
+    - text: Minimise
+  - button "Back":
+    - text: Back
+  - button "Continue · Options":
+    - text: Continue
+    - generic: · Options
+- region "Notifications alt+T"

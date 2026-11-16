@@ -1,3 +1,5 @@
+import { REFERENCE_FINISHES, isReferenceFinish } from "./reference-finishes";
+
 /** Metric, non-metallic coping finishes shared by skimmer and concealed overflow.
  * `moduleSize` doubles as the material's physical texture repeat (metres) fed
  * to the triplanar coping shader, and `id` selects which procedural stone
@@ -7,7 +9,7 @@
  * `title` is the exact customer-facing name -- never show `id` in the UI.
  * `subtitle` is the short line under the name in the main selector;
  * `category` and `description` back the material detail view only. */
-export const COPING_MATERIALS = [
+export const LEGACY_COPING_MATERIALS = [
   {
     id: "limestone",
     title: "Limestone Ivory",
@@ -149,4 +151,12 @@ export const COPING_MATERIALS = [
     moduleSize: 0.16,
   },
 ] as const;
+export const COPING_MATERIALS = [...LEGACY_COPING_MATERIALS, ...REFERENCE_FINISHES] as const;
 export type CopingMaterialId = (typeof COPING_MATERIALS)[number]["id"];
+/** References remain in-ground only. Retired brown timber stays in the full
+ * catalogue for old snapshots, but is no longer offered as a coping choice. */
+export const copingMaterialsForPool = (poolType: unknown) =>
+  (poolType === "in-ground" ? COPING_MATERIALS : LEGACY_COPING_MATERIALS)
+    .filter(material => material.id !== "deck-marrone");
+export const copingMaterialForPool = <T extends CopingMaterialId | undefined>(id: T, poolType: unknown): T | "travertine" =>
+  poolType === "above-ground" && isReferenceFinish(id) ? "travertine" : id;

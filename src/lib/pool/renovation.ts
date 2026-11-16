@@ -37,7 +37,7 @@ export function isRenovationConfig(value: unknown): value is RenovationConfig {
     const valid = (v: unknown, allowed: readonly unknown[]) => v === undefined || allowed.includes(v);
     if (!valid(e.poolType, ["in-ground", "above-ground"]) ||
         !valid(e.structure, ["reinforced-concrete", "modular-steel-panels"]) ||
-        !valid(e.system, ["skimmer", "overflow"]) || !valid(e.overflowType, ["visible", "hidden"]) ||
+        !valid(e.system, ["skimmer", "overflow"]) || !valid(e.overflowType, ["visible", "hidden", "continuous"]) ||
         !valid(e.finish, ["liner", "mosaic"]) || !valid(e.poolAccess, [null, "internalSteps", "stainlessSteelLadder"]) ||
         !valid(e.internalStairType, ["linear", "corner"]) ||
         !valid(e.linerColor, LINER_COLORS.map(c => c.id)) ||

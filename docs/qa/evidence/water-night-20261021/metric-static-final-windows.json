@@ -1,0 +1,48 @@
+[
+  {
+    "scene": "overview-night",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D performance] {\"fps\":77.2,\"frameTimeMs\":12.96,\"medianFrameTimeMs\":12.7,\"p95FrameTimeMs\":15.3,\"frameCount\":155,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":118,\"textures\":42,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":10.001,\"p95\":10.736,\"samples\":155,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+        "timestamp": "2026-10-21T20:51:47.251Z",
+        "url": "http://metric-water-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792614930909"
+      },
+      {
+        "level": "debug",
+        "message": "[Pool3D performance] {\"fps\":76.4,\"frameTimeMs\":13.09,\"medianFrameTimeMs\":12.7,\"p95FrameTimeMs\":15.5,\"frameCount\":153,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":118,\"textures\":42,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":10.057,\"p95\":10.82,\"samples\":153,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+        "timestamp": "2026-10-21T20:51:49.278Z",
+        "url": "http://metric-water-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792614930909"
+      },
+      {
+        "level": "debug",
+        "message": "[Pool3D performance] {\"fps\":75.2,\"frameTimeMs\":13.3,\"medianFrameTimeMs\":12.8,\"p95FrameTimeMs\":16.9,\"frameCount\":151,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":226,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":118,\"textures\":42,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":10.114,\"p95\":10.771,\"samples\":151,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+        "timestamp": "2026-10-21T20:51:51.314Z",
+        "url": "http://metric-water-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792614930909"
+      }
+    ]
+  },
+  {
+    "scene": "waterline-night",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D performance] {\"fps\":36.6,\"frameTimeMs\":27.32,\"medianFrameTimeMs\":27.5,\"p95FrameTimeMs\":32.1,\"frameCount\":74,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":56,\"peakCalls\":59,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":118,\"textures\":42,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":23.104,\"p95\":23.595,\"samples\":74,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+        "timestamp": "2026-10-21T20:52:17.852Z",
+        "url": "http://metric-water-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792614930909"
+      },
+      {
+        "level": "debug",
+        "message": "[Pool3D performance] {\"fps\":36.6,\"frameTimeMs\":27.35,\"medianFrameTimeMs\":27.4,\"p95FrameTimeMs\":31.4,\"frameCount\":74,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":56,\"peakCalls\":59,\"callScope\":\"full frame, all passes\",\"triangles\":34312,\"geometries\":118,\"textures\":42,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":23.014,\"p95\":23.422,\"samples\":74,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+        "timestamp": "2026-10-21T20:52:19.901Z",
+        "url": "http://metric-water-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792614930909"
+      },
+      {
+        "level": "debug",
+        "message": "[Pool3D performance] {\"fps\":36.6,\"frameTimeMs\":27.3,\"medianFrameTimeMs\":27.8,\"p95FrameTimeMs\":30.7,\"frameCount\":74,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":56,\"peakCalls\":59,\"callScope\":\"full frame, all passes\",\"triangles\":34312,\"geometries\":118,\"textures\":42,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":23.033,\"p95\":23.516,\"samples\":74,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+        "timestamp": "2026-10-21T20:52:21.940Z",
+        "url": "http://metric-water-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792614930909"
+      }
+    ]
+  }
+]

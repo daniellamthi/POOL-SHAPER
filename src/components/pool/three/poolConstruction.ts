@@ -4,10 +4,28 @@ import type { Outline, OverflowType, SkimmerTypeId, SystemType } from "@/lib/poo
 import { offsetOutline } from "@/lib/pool/geometry";
 import { OVERFLOW_GEOMETRY } from "@/lib/pool/config";
 import { clampInfinityEdgeDimensions } from "@/lib/pool/infinity-edge";
+import { copingProfile } from "./copingProfile";
 import type { RectangleInfinityZone } from "@/lib/pool/infinity-edge";
 
+/** A 15 mm intake with the collector concealed beneath the full stone coping.
+ * Presentation dimensions only; hydraulic sizing remains project-specific. */
+export function concealedOverflowSection(wallTopY: number, copingThickness: number) {
+  return {
+    slotWidth: 0.015,
+    // The exposed crest before the coping shares the terrace/wall-top datum.
+    intakeTopY: wallTopY,
+    copingInnerOffset: OVERFLOW_GEOMETRY.waterEdgeOffset + 0.015,
+    copingTopY: wallTopY + 0.008,
+    // Matches the eased slab's lowest face (see arris/inset below).
+    copingBottomY: wallTopY + 0.008 - copingThickness + 0.0012,
+    channelOuterOffset: OVERFLOW_GEOMETRY.hiddenChannelOffset,
+    channelFloorY: wallTopY - OVERFLOW_GEOMETRY.channelDepth,
+  };
+}
+
 /** Architectural presentation only; never changes basin dimensions or quotation logic. */
-export function copingOuterOffset(system: SystemType, overflow: OverflowType) {
+export function copingOuterOffset(system: SystemType, overflow: OverflowType, style?: import("@/lib/pool/coping-style").CopingStyle) {
+  if (system === "overflow" && overflow === "continuous") return style === "dedicated" ? .32 : 0;
   // The deck meets the grille directly: no separate masonry border.
   if (system === "overflow" && overflow === "visible")
     return OVERFLOW_GEOMETRY.visibleChannelOuterOffset;
@@ -162,6 +180,9 @@ export function createCopingSlabGeometry(
    * `null`/`undefined` (every pre-Infinity call site) is byte-identical to
    * before. */
   excludeSection: number | ReadonlySet<number> | null = null,
+  /** Continuous timber coping: one solid run between real corners. */
+  continuousSides = false,
+  noseRadius?: number,
 ) {
   if (inner.length !== outer.length || inner.length < 3)
     throw new Error("Mismatched coping outlines");
@@ -226,11 +247,13 @@ export function createCopingSlabGeometry(
       continue;
     const start = corners[section]!,
       length = corners[section + 1]! - start;
-    const count = Math.max(1, Math.round(length / 0.62));
+    const count = continuousSides ? 1 : Math.max(1, Math.round(length / 0.62));
     for (let slab = 0; slab < count; slab++) {
       const from = start + (length * slab) / count,
         to = start + (length * (slab + 1)) / count;
-      const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5), to];
+      const stations = [from, ...distances.filter((d) => d > from + 1e-5 && d < to - 1e-5),
+        ...(continuousSides ? [(from + to) / 2] : []), to].sort((a, b) => a - b)
+        .filter((d, i, values) => i === 0 || d - values[i - 1]! > 1e-8);
       // Joints are laid square to the pool edge: a joint between two slabs
       // runs straight out across the coping (the outer point is the inner
       // point projected onto the outer edge), and only a true corner keeps
@@ -247,24 +270,9 @@ export function createCopingSlabGeometry(
         ...stations.map((d) => pointAt(inner, d)),
         ...[...stations].reverse().map(outerAt),
       ];
-      // Real coping joint: ~2mm at the slab sides, opening to ~4.5mm at the
-      // honed face through a 1.8mm eased arris that catches a soft highlight.
-      // (A 9mm rounded opening over a deep bed read as a black graphic line.)
-      // Insetting before extrusion keeps the stone inside its surveyed perimeter.
-      const arris = 0.0018;
-      const inset = offsetOutline(polygon, -0.0022);
-      const shape = new THREE.Shape(inset.map(([x, z]) => new THREE.Vector2(x, -z)));
-      const raw = new THREE.ExtrudeGeometry(shape, {
-        depth: thickness - 0.003 - arris,
-        bevelEnabled: true,
-        bevelSize: arris,
-        bevelThickness: arris,
-        bevelSegments: 3,
-        steps: 1,
-        curveSegments: 1,
-      });
-      raw.rotateX(-Math.PI / 2);
-      raw.translate(0, -thickness + 0.003, 0);
+      // Rounded perimeter like the photographic reference, without enlarging
+      // slab joints or changing the coping's top, underside or outer envelope.
+      const raw = copingProfile(polygon, stations.length, thickness, noseRadius);
       const geometry = toCreasedNormals(raw, Math.PI / 3);
       if (geometry !== raw) raw.dispose();
       // Keep the honed face planar. Averaging its corner normals with the

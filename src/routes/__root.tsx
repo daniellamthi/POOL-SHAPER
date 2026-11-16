@@ -14,22 +14,24 @@ import { THEME_BOOT_SCRIPT } from "../lib/theme";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { installChunkReloadGuard } from "../lib/chunk-reload-guard";
 import { Toaster } from "../components/ui/sonner";
+import { LocaleProvider, useI18n } from "@/lib/i18n";
 
 function NotFoundComponent() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("Pagina non trovata")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          {t("La pagina cercata non esiste o è stata spostata.")}
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            {t("Torna alla home")}
           </Link>
         </div>
       </div>
@@ -61,6 +63,7 @@ function ErrorDiagnostics({
   error: unknown;
   info: { componentStack: string } | undefined;
 }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const diagnostics = formatErrorDiagnostics(error, info);
 
@@ -68,7 +71,7 @@ function ErrorDiagnostics({
     <div className="mt-6 w-full text-left">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Error details
+          {t("Dettagli errore")}
         </h2>
         <button
           type="button"
@@ -84,10 +87,10 @@ function ErrorDiagnostics({
           className="inline-flex items-center justify-center rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
           {copyState === "copied"
-            ? "Copied"
+            ? t("Copiato")
             : copyState === "failed"
-              ? "Select text to copy"
-              : "Copy"}
+              ? t("Seleziona il testo per copiarlo")
+              : t("Copia")}
         </button>
       </div>
       <pre className="max-h-64 select-text overflow-auto whitespace-pre-wrap break-words rounded-md border border-input bg-muted/40 p-3 text-left text-[11px] leading-snug text-foreground">
@@ -106,6 +109,7 @@ function ErrorComponent({
   info?: { componentStack: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -116,10 +120,10 @@ function ErrorComponent({
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-2xl text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          {t("Impossibile caricare la pagina")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {t("Si è verificato un errore. Riprova o torna alla home.")}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -129,13 +133,13 @@ function ErrorComponent({
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            {t("Riprova")}
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            {t("Torna alla home")}
           </a>
         </div>
         <ErrorDiagnostics error={error} info={info} />
@@ -174,13 +178,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="it" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
-        {children}
+        <LocaleProvider>{children}</LocaleProvider>
         <Scripts />
       </body>
     </html>

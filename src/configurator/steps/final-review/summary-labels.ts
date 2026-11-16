@@ -38,7 +38,8 @@ export function systemHeadline(
 ): string {
   if (system === "skimmer") return "Skimmer — bordo classico";
   if (system === "infinity") return "Infinity — bordo a sfioro invisibile";
-  return overflowType === "visible" ? "Sfioro con griglia" : "Sfioro nascosto — acqua a filo";
+  if (overflowType === "continuous") return "Sfioro nascosto";
+  return overflowType === "visible" ? "Sfioro con griglia" : "Sfioro a bordo continuo — acqua a filo";
 }
 
 /** A short, non-technical description of how the selected liner reads
@@ -74,7 +75,9 @@ export const POOL_FEATURE_LABEL: Record<PoolFeatureId, string> = {
   ledLighting: "Illuminazione subacquea a LED",
   stairLighting: "Micro-spot LED nelle alzate delle scale interne",
   hydromassage: "Idromassaggio integrato",
-  sunShelf: "Sun shelf sommerso",
+  hydromassageBenchLighting: "Micro-spot LED sulla panca idromassaggio",
+  sunShelf: "Spiaggetta sommersa",
+  sunShelfLoungers: "Lettini per spiaggetta",
   integratedBench: "Panca sommersa integrata",
   inoxLadder: "Scaletta inox opzionale",
   externalStaircase: "Scala esterna",

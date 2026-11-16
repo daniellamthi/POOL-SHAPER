@@ -1,0 +1,162 @@
+Browser tab: 2, Title: "Pool Studio — Configuratore piscine 3D", URL: "http://esse-qa.localhost:3003/?p=PW-4QFG-QQ485X".
+1 AXWebArea Pool Studio — Configuratore piscine 3D, URL: esse-qa.localhost:3003/?p=PW-4QFG-QQ485X
+	2 heading Configuratore piscine 3D, Value: 1
+		3 text Configuratore piscine 3D
+	4 container
+		5 image Piscine Wellness
+		6 container Fasi della configurazione
+			7 content list
+				8 button Piscina, Help: Piscina · Cemento armato · 10,0 × 4,5 m
+				9 button Sistema acqua, Help: Sistema acqua · Sfioro nascosto
+				10 button Accesso & comfort, Help: Accesso & comfort · Scala interna · Spiaggetta · Panca
+				11 button Finiture, Help: Finiture · Liner PVC · Arctic White [180]
+				12 button Esterno, Help: Esterno · Travertino · Gres porcellanato · 60 × 120 cm
+				13 button Optional, Help: Optional · Chaise longue
+				14 button Presentazione, Help: Presentazione · In corso
+		15 container Lingua
+			16 checkbox Description: Italiano, Value: 1
+			17 checkbox Description: Inglese, Value: 0
+		18 container Ora della scena
+			19 checkbox Giorno, Value: 1
+			20 checkbox Notte, Value: 0
+		21 button Ricomincia
+		22 container
+			23 pop up button (collapsed) Description: Vista della piscina, ID: radix-_R_rpaq_, Secondary Actions: Expand
+			24 text Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare
+			25 toolbar Strumenti vista
+				26 checkbox Guide, Value: 0
+				27 checkbox Vista tecnica, Value: 0
+				28 checkbox Riquadra, Value: 0
+		29 container Passo 7: Presentazione
+			30 container
+				31 text La tua piscina finita: scena, riepilogo e richiesta di proposta.
+				32 tab group Presentazione
+					33 tab (selectable, settable, boolean) Scena, Value: 0
+					34 tab (selected, settable, boolean) Riepilogo, Value: 1
+					35 tab (selectable, settable, boolean) Richiedi proposta, Value: 0
+				36 container Salva e condividi
+					37 text IL TUO PROGETTO
+					38 text Salvato  · PW-4QFG-QQ485X
+					39 text Riprendilo quando vuoi, anche da un altro dispositivo, con il link.
+					40 image QR del progetto PW-4QFG-QQ485X
+					41 button SALVATO
+					42 button CONDIVIDI
+					43 button PROJECT BOOK PDF
+					44 text http://esse-qa.localhost:3003/?p=PW-4QFG-QQ485X
+				45 container
+					46 text IL TUO PROGETTO
+					47 heading Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m, Value: 2
+						48 text Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m
+					49 text Piscina interrata · Sfioro nascosto · circa 45 m³ d'acqua
+					50 container
+						51 text Project ID PW-4QFG-QQ485X
+					52 link Description: ↑ Espandi piscina, Value: esse-qa.localhost:3003/?p=PW-4QFG-QQ485X#pool-viewport
+					53 heading LA TUA PISCINA, Value: 3
+						54 text LA TUA PISCINA
+					55 button MODIFICA
+					56 definition list
+						57 container Tipologia
+							58 text Tipologia
+						59 text Piscina interrata
+						60 container Struttura
+							61 text Struttura
+						62 text Cemento armato
+						63 container Dimensioni
+							64 text Dimensioni
+						65 text Piscina rettangolare 10,00 × 4,50 m, profondità 1,50 m
+					66 heading LINEA D'ACQUA, Value: 3
+						67 text LINEA D'ACQUA
+					68 button MODIFICA
+					69 definition list
+						70 container Sistema idraulico
+							71 text Sistema idraulico
+						72 text Sfioro nascosto
+					73 heading MATERIALI, Value: 3
+						74 text MATERIALI
+					75 button MODIFICA
+					76 definition list
+						77 container Rivestimento
+							78 text Rivestimento
+						79 container
+							80 text Motion Arctic White [180] Acqua dai riflessi turchese
+						81 container Bordo
+							82 text Bordo
+						83 container
+							84 text Travertino Bordo dedicato
+						85 container Pavimentazione
+							86 text Pavimentazione
+						87 text Gres porcellanato
+						88 container Formato pavimentazione
+							89 text Formato pavimentazione
+						90 container
+							91 text 60 × 120 cm Dimensioni di riferimento della visualizzazione; fornitura da confermare.
+					92 heading ACCESSO E COMFORT, Value: 3
+						93 text ACCESSO E COMFORT
+					94 button MODIFICA
+					95 definition list
+						96 container Incluso
+							97 text Incluso
+						98 text Scala interna integrata — Scala interna rettilinea
+						99 container Incluso
+							100 text Incluso
+						101 text Sun Shelf · lunghezza complessiva 3,400 m · acqua 10 cm
+						102 container Incluso
+							103 text Incluso
+						104 text Panca integrata · 3 postazioni · 12 bocchette
+					105 heading ILLUMINAZIONE, Value: 3
+						106 text ILLUMINAZIONE
+					107 button MODIFICA
+					108 definition list
+						109 container Optional scale
+							110 text Optional scale
+						111 text Micro-spot LED nelle alzate delle scale interne
+						112 container Impianto
+							113 text Impianto
+						114 text Illuminazione subacquea a LED
+						115 container Punti luce
+							116 text Punti luce
+						117 text 3 · automatici, dimensionamento indicativo
+						118 container Colore selezionato
+							119 text Colore selezionato
+						120 text #FFFFFF
+						121 container Intensità luce
+							122 text Intensità luce
+						123 text 26%
+					124 heading OPTIONAL, Value: 3
+						125 text OPTIONAL
+					126 button MODIFICA
+					127 definition list
+						128 container Incluso
+							129 text Incluso
+						130 text Chaise longue · 4 lettini
+					131 heading PRESENTAZIONE, Value: 3
+						132 text PRESENTAZIONE
+					133 button MODIFICA
+					134 definition list
+						135 container Momento
+							136 text Momento
+						137 text Giorno
+					138 heading DA DEFINIRE CON IL CONSULENTE, Value: 3
+						139 text DA DEFINIRE CON IL CONSULENTE
+					140 content list
+						141 text Dimensionamento definitivo dell'impianto tecnico
+					142 button (collapsed) SCOPRI I DETTAGLI TECNICI, Secondary Actions: Expand
+						143 text SCOPRI I DETTAGLI TECNICI
+				144 button Prossima scelta: Richiedi proposta
+					145 text Prossima scelta
+					146 text : 
+					147 text Richiedi proposta
+				148 button Altre opzioni
+			149 container
+				150 text FASE 07 DI 07 ·  2/3 · Riepilogo
+				151 heading Presentazione, Value: 2
+					152 text Presentazione
+				153 text 10,0 × 4,5 m · pronta per la proposta
+			154 button VEDI LA PISCINA
+			155 button (expanded) RIDUCI, Secondary Actions: Collapse
+			156 container
+				157 button INDIETRO
+				158 button CONTINUA
+	159 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Pool Studio — Configuratore piscine 3D, URL: esse-qa.localhost:3003/?p=PW-4QFG-QQ485X

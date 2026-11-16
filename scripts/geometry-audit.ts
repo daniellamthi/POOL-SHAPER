@@ -711,9 +711,8 @@ for (const testCase of verticalGeometryCases) {
     });
     assert(
       Math.abs(
-        hiddenOverflowLayout.wallTopY -
-          hiddenOverflowLayout.waterY -
-          OVERFLOW_GEOMETRY.hiddenWaterTopClearance,
+        hiddenOverflowLayout.waterY - hiddenOverflowLayout.wallTopY -
+          (poolType === "above-ground" ? -OVERFLOW_GEOMETRY.hiddenWaterTopClearance : OVERFLOW_GEOMETRY.visibleWaterAboveLip),
       ) < 1e-9,
       `${testCase.name}: invalid Hidden Overflow water clearance`,
     );
@@ -1183,7 +1182,7 @@ assert(
 );
 assert(
   POOL_FEATURES.map(({ id }) => id).join(",") ===
-    "ledLighting,stairLighting,hydromassage,sunShelf,integratedBench",
+    "ledLighting,stairLighting,hydromassage,hydromassageBenchLighting,sunShelf,integratedBench,sunShelfLoungers",
   "invalid pool features",
 );
 assert(

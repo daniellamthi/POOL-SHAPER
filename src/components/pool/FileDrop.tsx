@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useCallback, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertCircle, Loader2, RotateCw, Upload, X } from "lucide-react";
@@ -24,6 +25,7 @@ interface Props {
  * `UploadedFile` record are the durable, honest signal of whether it
  * actually made it to storage. */
 export function FileDrop({ category, label, hint }: Props) {
+  const { t } = useI18n();
   const { config, projectId, addUploads, removeUpload, setUploadStatus } = useConfigurator();
   const input = useRef<HTMLInputElement>(null);
   // Runtime-only: the actual File objects, kept just long enough to retry a
@@ -86,8 +88,8 @@ export function FileDrop({ category, label, hint }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <span className="label-xs">{label}</span>
-        <span className="text-[11.5px] font-light text-muted-foreground">{hint}</span>
+        <span className="label-xs">{t(label)}</span>
+        <span className="text-[11.5px] font-light text-muted-foreground">{t(hint)}</span>
       </div>
 
       <button
@@ -102,7 +104,7 @@ export function FileDrop({ category, label, hint }: Props) {
       >
         <Upload className="size-4 text-muted-foreground" strokeWidth={1.25} />
         <span className="text-[12px] font-light text-muted-foreground">
-          {config.projectType === "renovation" ? "Trascina qui o scegli un file — JPG, PNG, WebP, PDF" : "Drop files here or click to browse — JPG, PNG, WEBP, PDF"}
+          {t("Trascina qui o scegli un file — JPG, PNG, WebP, PDF")}
         </span>
       </button>
       <input
@@ -136,14 +138,13 @@ export function FileDrop({ category, label, hint }: Props) {
                 {file.uploadStatus === "uploading" ? (
                   <span className="flex items-center gap-1.5 text-[10.5px] font-light text-muted-foreground">
                     <Loader2 className="size-3 animate-spin" strokeWidth={1.5} />
-                    Caricamento…
-                  </span>
+                    {t("Caricamento…")}{" "}</span>
                 ) : file.uploadStatus === "uploaded" ? (
-                  <span className="text-[10.5px] font-light text-muted-foreground">Caricato</span>
+                  <span className="text-[10.5px] font-light text-muted-foreground">{t("Caricato")}</span>
                 ) : file.uploadStatus === "failed" ? (
                   <span className="flex items-center gap-1.5 text-[10.5px] font-light text-destructive">
                     <AlertCircle className="size-3" strokeWidth={1.5} />
-                    {file.uploadError ?? "Caricamento non riuscito"}
+                    {t(file.uploadError ?? "Caricamento non riuscito")}
                   </span>
                 ) : null}
               </span>
@@ -152,7 +153,7 @@ export function FileDrop({ category, label, hint }: Props) {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  aria-label={`Riprova a caricare ${file.name}`}
+                  aria-label={t("Riprova a caricare {name}", { name: file.name })}
                   onClick={() => {
                     const original = fileRefs.current.get(file.id);
                     if (original) void attemptUpload(file.id, original);
@@ -165,7 +166,7 @@ export function FileDrop({ category, label, hint }: Props) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                aria-label={`Rimuovi ${file.name}`}
+                aria-label={t("Rimuovi {name}", { name: file.name })}
                 onClick={() => {
                   fileRefs.current.delete(file.id);
                   removeUpload(file.id);

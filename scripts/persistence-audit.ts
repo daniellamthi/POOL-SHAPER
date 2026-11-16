@@ -148,6 +148,27 @@ console.log("PASS — D) overflow variant survives");
 assert(restored!.config.copingMaterial === "prun", "coping must survive");
 console.log("PASS — E) coping survives");
 
+// The rapid-reload regression concerns these real catalogue variants, not
+// merely the family label. Exercise the actual local-draft parser as well.
+for (const paving of [
+  "reference-grigio",
+  "reference-avorio",
+  "reference-beige",
+  "reference-greige",
+] as const) {
+  const variantProject: ProjectConfiguration = {
+    ...project,
+    config: { ...fullConfig, paving, pavingFormat: "60x120" },
+  };
+  saveProjectDraft(variantProject);
+  const variantRestored = loadProjectDraft();
+  assert(variantRestored?.config.paving === paving, `${paving} must survive local-draft restore`);
+  assert(variantRestored.config.pavingFormat === "60x120", "selected paving format must survive");
+  assert(variantRestored.projectId === projectId, "paving choice must not change project identity");
+  assert(variantRestored.config.copingMaterial === "prun", "paving must remain independent of coping");
+}
+console.log("PASS — E2) four reference Gres variants preserve finish, format, identity and coping");
+
 // --- F. Liner/mosaic survives. ---
 assert(
   restored!.config.finish === "mosaic" &&

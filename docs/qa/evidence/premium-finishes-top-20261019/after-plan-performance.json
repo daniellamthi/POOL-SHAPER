@@ -1,0 +1,20 @@
+[
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":121.2,\"frameTimeMs\":8.25,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":9.5,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":139,\"triangles\":66814,\"geometries\":83,\"textures\":31,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":11,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+    "timestamp": "2026-10-19T08:14:47.500Z",
+    "url": "http://camera-qa.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792397665952"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":121.2,\"frameTimeMs\":8.25,\"medianFrameTimeMs\":8.3,\"p95FrameTimeMs\":9.4,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":139,\"triangles\":66814,\"geometries\":83,\"textures\":31,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":11,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+    "timestamp": "2026-10-19T08:14:49.525Z",
+    "url": "http://camera-qa.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792397665952"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":121.3,\"frameTimeMs\":8.25,\"medianFrameTimeMs\":8.2,\"p95FrameTimeMs\":9.3,\"frameCount\":243,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":139,\"triangles\":66814,\"geometries\":83,\"textures\":31,\"dpr\":1,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":11,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\"}",
+    "timestamp": "2026-10-19T08:14:51.551Z",
+    "url": "http://camera-qa.localhost:3003/src/components/pool/three/PoolScene.tsx?t=1792397665952"
+  }
+]

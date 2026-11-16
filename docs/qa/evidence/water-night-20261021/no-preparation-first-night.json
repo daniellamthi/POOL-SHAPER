@@ -1,0 +1,14 @@
+[
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":756.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T19:46:03.985Z",
+    "url": "http://no-preparation-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+  },
+  {
+    "level": "debug",
+    "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":10019.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+    "timestamp": "2026-10-21T19:46:55.182Z",
+    "url": "http://no-preparation-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+  }
+]

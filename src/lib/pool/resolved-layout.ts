@@ -3,7 +3,8 @@ import { resolveAccessPlan } from "@/components/pool/three/PoolAccessModel";
 import { accessMounting } from "./access-plan";
 import { planSceneLighting, type SceneLightingPlan } from "./lighting-plan";
 import { buildFloorProfile } from "./floor-profile";
-import { buildOutline, computeMetrics, outlineBounds } from "./geometry";
+import { computeMetrics, outlineBounds } from "./geometry";
+import { configuredOutline } from "./configured-outline";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { planSkimmers } from "./engineering";
 import { infinityExclusion } from "./infinity-edge";
@@ -39,6 +40,10 @@ type LayoutInput = Parameters<typeof planSceneLighting>[0] & {
   poolType: PoolType;
   features: ReadonlyArray<PoolFeatureId>;
   hydromassageVariant?: HydromassageVariant | undefined;
+  infinityWallType?: "traditional" | "glass" | undefined;
+  nominalWidth?: number;
+  sunShelfRun?: number | undefined;
+  integratedBenchStations?: number | undefined;
 };
 
 export function comfortFootprints(plan: ComfortPlan) {
@@ -59,6 +64,7 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
     wantsFlightZone && input.floorProfile.sloped && !input.floorProfile.shelfZone;
   const comfort = resolveComfortPlan({
     ...input,
+    separateHydroAccess: input.poolType === "in-ground" && input.access === "internalSteps" && input.stairType === "corner",
     waterY: input.layout.waterY,
     enabled: missingShelfLanding
       ? features.filter((feature) => feature !== "sunShelf" && feature !== "hydromassage")
@@ -72,7 +78,7 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
       comfort.availability.hydromassage = { available: false, reason };
   }
   const integrated = comfort.elements.some(
-    (element) => element.kind === "sunShelf" || element.kind === "hydromassage",
+    (element) => element.kind === "sunShelf" || (element.kind === "hydromassage" && !!element.steps?.length),
   );
   const ladderAsAddon = input.poolType !== "above-ground" && input.access === "internalSteps" && features.includes("inoxLadder");
   const effectiveAccess = (input.poolType === "above-ground" && input.access === "stainlessSteelLadder") ||
@@ -111,6 +117,17 @@ export function resolvePoolLayout(input: LayoutInput): ResolvedPoolLayout {
         Math.abs(plan.placement.z - free.placement.z) > 1e-6);
     ladder = { plan, status: !plan.placement ? "UNAVAILABLE" : moved ? "REPOSITION" : "VALID" };
   }
+  const activeComfort = comfort.elements.find(element => element.kind === "sunShelf" || element.kind === "hydromassage");
+  if (activeComfort && ((!!effectiveAccess && !access.placement) || ladder?.status === "UNAVAILABLE")) {
+    const reason = access.reason ?? ladder?.plan.reason ?? "Accesso incompatibile con la zona comfort selezionata.";
+    // Preserve requested data but never build a comfort zone that consumes the
+    // only selected entrance. Re-resolve the unchanged access without that zone.
+    // Removing both flight kinds guarantees this fallback cannot recurse again.
+    const fallback = resolvePoolLayout({ ...input, features: features.filter(feature =>
+      !["sunShelf", "hydromassage", "integratedBench", "sunShelfLoungers"].includes(feature)) });
+    fallback.comfort.availability[activeComfort.kind] = { available: false, reason };
+    return { ...fallback, status: "UNAVAILABLE" };
+  }
   const lighting = planSceneLighting({
     ...input,
     resolvedAccess: access,
@@ -147,7 +164,7 @@ export function configuredStairMicroSpots(config: PoolConfig): ReadonlyArray<Sta
 }
 
 export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const poolType = config.poolType ?? "in-ground";
   const layout = getPoolVerticalLayout({
     poolType,
@@ -155,6 +172,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     overflowType: config.overflowType,
     depth: config.dimensions.depth,
     copingThickness: POOL_BORDER_PRESET.thickness,
+    copingStyle: config.copingStyle,
   });
   const floorProfile = buildFloorProfile({
     outline,
@@ -163,6 +181,7 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     dimensions: config.dimensions,
     verticalLayout: layout,
     sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
+    twoLoungerShelf: config.features.includes("sunShelf"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
   return resolvePoolLayout({
@@ -175,6 +194,10 @@ export function configuredPoolLayout(config: PoolConfig): ResolvedPoolLayout {
     overflowType: config.overflowType,
     features: config.features,
     hydromassageVariant: config.hydromassageVariant,
+    nominalWidth: config.dimensions.width,
+    sunShelfRun: config.dimensions.sunShelfRun,
+    integratedBenchStations: config.integratedBenchStations,
+    infinityWallType: config.system === "infinity" ? config.infinityEdge?.wallType : undefined,
     access: config.poolAccess,
     stairType: config.internalStairType ?? "linear",
     stairMirrored: !!config.internalStairMirrored,

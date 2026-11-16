@@ -27,8 +27,10 @@ export function samplePavingGres(shader: WebGLProgramParametersWithUniforms) {
 export function samplePavingWood(shader: WebGLProgramParametersWithUniforms) {
   shader.fragmentShader = `
     vec2 pavingWoodUv(vec2 p) {
-      float u = mod(p.x, 0.70);
-      return vec2(0.25 + min(u, 0.70 - u), 0.008 + clamp(p.y, 0.0, 0.057));
+      // Pixel columns144..286 stay inside one photographed board. The old
+      //128..307 strip included end joints in colour, normal and roughness.
+      float u = mod(p.x, 0.5546875);
+      return vec2(0.28125 + min(u, 0.5546875 - u), 0.008 + clamp(p.y, 0.0, 0.057));
     }
   ` + shader.fragmentShader;
   for (const [chunk, varying] of [
@@ -39,7 +41,7 @@ export function samplePavingWood(shader: WebGLProgramParametersWithUniforms) {
     let source = ShaderChunk[chunk].replaceAll(varying, `pavingWoodUv(${varying})`);
     if (chunk === "normal_fragment_maps") source = source.replace(
       "mapN.xy *= normalScale;",
-      "mapN.x *= mod(vNormalMapUv.x, 0.70) < 0.35 ? 1.0 : -1.0; mapN.xy *= normalScale;",
+      "mapN.x *= mod(vNormalMapUv.x, 0.5546875) < 0.27734375 ? 1.0 : -1.0; mapN.xy *= normalScale;",
     );
     shader.fragmentShader = shader.fragmentShader.replace(`#include <${chunk}>`, source);
   }

@@ -1,0 +1,54 @@
+{
+  "input": [
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":157.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T21:15:47.891Z",
+      "url": "http://final-ray-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":176.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T21:15:58.455Z",
+      "url": "http://final-ray-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":13.8,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T21:16:16.748Z",
+      "url": "http://final-ray-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":24,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T21:16:51.445Z",
+      "url": "http://final-ray-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":45.9,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T21:17:20.488Z",
+      "url": "http://final-ray-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":6,\"event\":\"click\",\"inputToSecondRafMs\":23.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T21:19:11.026Z",
+      "url": "http://final-ray-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    }
+  ],
+  "preparation": [
+    {
+      "level": "debug",
+      "message": "[Pool3D shader preparation] {\"durationMs\":201.6,\"parallel\":true}",
+      "timestamp": "2026-10-21T21:15:48.064Z",
+      "url": "http://final-ray-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792612830231"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D shader preparation] {\"durationMs\":134.8,\"parallel\":true}",
+      "timestamp": "2026-10-21T21:15:58.455Z",
+      "url": "http://final-ray-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792612830231"
+    }
+  ]
+}

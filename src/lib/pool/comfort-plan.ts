@@ -8,6 +8,9 @@ import type { HydromassageVariant, Outline, PoolConfig, PoolFeatureId, PoolShape
 import type { InfinityExclusion } from "./walls";
 import { clearOfInfinityEdge, INFINITY_ACCESS_CLEARANCE } from "./infinity-access";
 import { infinityCrestY } from "./infinity-edge";
+import { SUN_SHELF_MIN_RUN, SUN_SHELF_LOUNGER_LAYOUT, SUN_SHELF_WATER_DEPTH } from "./sun-shelf-model";
+import { resolveSunShelfLoungers } from "./sun-shelf-loungers";
+import { integratedBenchStations, INTEGRATED_BENCH } from "./integrated-bench";
 
 export type ComfortKind = "sunShelf" | "integratedBench" | "hydromassage";
 
@@ -24,8 +27,9 @@ export interface ComfortElementPlan {
   landing?: { footprint: Outline; topY: number };
   /** Hydromassage only: non-overlapping levels that tile `footprint`. */
   tiers?: ReadonlyArray<{ footprint: Outline; topY: number; role: HydroTierRole }>;
-  /** Hydromassage only: nozzle faces; `dir` is the unit outward normal in plan. */
-  jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
+  /** Massage nozzle faces; `dir` is the unit outward normal in plan. */
+  jets?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number]; diameter?: number }>;
+  stations?: ReturnType<typeof integratedBenchStations>;
   /** Hydromassage only: LED micro-spots set into the seat's front vertical
    * face, under the seat edge; `dir` is the unit outward normal in plan. */
   spots?: ReadonlyArray<{ x: number; y: number; z: number; dir: readonly [number, number] }>;
@@ -134,7 +138,12 @@ export function resolveComfortPlan({
   enabled,
   accessFootprint = [],
   infinityExcluded = null,
+  infinityWallType = "traditional",
   hydromassageVariant = "closed",
+  separateHydroAccess = false,
+  nominalWidth,
+  sunShelfRun,
+  integratedBenchStations: requestedBenchStations,
 }: {
   outline: Outline;
   shape: PoolShapeId;
@@ -145,7 +154,14 @@ export function resolveComfortPlan({
   enabled: ReadonlyArray<PoolFeatureId>;
   accessFootprint?: Outline;
   infinityExcluded?: InfinityExclusion | null;
+  infinityWallType?: "traditional" | "glass" | undefined;
   hydromassageVariant?: HydromassageVariant | undefined;
+  /** A selected radial flight is resolved separately against the spa body. */
+  separateHydroAccess?: boolean;
+  /** Commercial width, independent of outline rotation/principal axis. */
+  nominalWidth?: number;
+  sunShelfRun?: number | undefined;
+  integratedBenchStations?: number | undefined;
 }): ComfortPlan {
   const unsupported =
     poolType !== "in-ground"
@@ -218,7 +234,7 @@ export function resolveComfortPlan({
         { rect: { minX: safeCrossMin, maxX: safeCrossMax, minZ: bounds.maxZ - shelfRun, maxZ: bounds.maxZ - EDGE_INSET }, axis: "z", coordinate: bounds.maxZ },
       ];
   const stairWidth = Math.min(1.2, shortSpan - 1.2);
-  const withSteps = (candidate: typeof shelfCandidates[number]) => {
+  const withSteps = (candidate: typeof shelfCandidates[number], minimumRun: number) => {
     if ((infinityAtCrossMin || infinityAtCrossMax) && safeCrossMax - safeCrossMin < stairWidth + 1.2)
       return null;
     const positive = candidate.coordinate === (longX ? bounds.minX : bounds.minZ);
@@ -229,13 +245,16 @@ export function resolveComfortPlan({
     const crossMax = longX ? candidate.rect.maxZ : candidate.rect.maxX;
     const stairAtMin = !excludedWall(infinityExcluded, longX ? "z" : "x", longX ? bounds.minZ : bounds.minX);
     const center = stairAtMin ? crossMin + stairWidth / 2 : crossMax - stairWidth / 2;
-    const topY = waterY - 0.22;
+    const topY = waterY - (minimumRun ? SUN_SHELF_WATER_DEPTH : 0.22);
     // Solve against the floor at the actual landing, including its slope.
     for (let rises = 2; rises <= 16; rises++) {
       if (zone && rises !== zone.flight.rises) continue;
       const run = (rises - 1) * 0.3;
-      const totalRun = zone?.flight.totalRun ?? Math.max(shelfRun, run + 0.45);
-      if (totalRun + 2.4 > longSpan) continue;
+      const landingRun = minimumRun ? SUN_SHELF_LOUNGER_LAYOUT.backPassage + EDGE_INSET : 0.45;
+      const requiredRun = Math.max(shelfRun, minimumRun, run + landingRun);
+      const totalRun = minimumRun && sunShelfRun !== undefined ? sunShelfRun : zone?.flight.totalRun ?? requiredRun;
+      if (!Number.isFinite(totalRun) || totalRun < requiredRun - 1e-7) continue;
+      if (totalRun + 2.4 > longSpan + 1e-7) continue;
       const end = candidate.coordinate + direction * totalRun;
       const start = end - direction * run;
       const floorY = longX ? floorProfile.floorYAt(end, center) : floorProfile.floorYAt(center, end);
@@ -271,12 +290,15 @@ export function resolveComfortPlan({
     }
     return null;
   };
-  const shelf = shelfCandidates
+  const flightCandidate = (minimumRun: number) => shelfCandidates
     .filter(candidate => valid(candidate.rect, candidate.axis, candidate.coordinate) &&
       clearOfInfinityEdge(outline, infinityExcluded, rectOutline(candidate.rect)))
-    .map(withSteps).find(candidate => candidate !== null);
-  if (!shelf) availability.sunShelf = { available: false, reason: "Nessuna testata libera da scala, accessi o bordo Infinity." };
-  else if (wantsShelf) {
+    .map(candidate => withSteps(candidate, minimumRun)).find(candidate => candidate !== null);
+  const shelf = flightCandidate(SUN_SHELF_MIN_RUN);
+  if (!shelf) availability.sunShelf = { available: false, reason: sunShelfRun !== undefined
+    ? "Lunghezza della spiaggetta non compatibile con gradini, accessi e spazio residuo. Modifica la misura o ripristina le dimensioni della piscina."
+    : "Nessuna testata libera da scala, accessi o bordo Infinity." };
+  else {
     const rect = shelf.rect;
     // Join the Infinity shelf and flight to the shell, not an inset floating block.
     // The excluded overflow edge keeps its existing safety clearance.
@@ -289,21 +311,34 @@ export function resolveComfortPlan({
     const element: ComfortElementPlan = {
       kind: "sunShelf",
       footprint: joinShell(rectOutline(rect)),
-      topY: waterY - 0.22,
-      waterDepth: 0.22,
+      topY: waterY - SUN_SHELF_WATER_DEPTH,
+      waterDepth: SUN_SHELF_WATER_DEPTH,
       width: longX ? rect.maxZ - rect.minZ : rect.maxX - rect.minX,
       run: shelf.totalRun,
       steps: shelf.steps.map(step => ({ ...step, footprint: joinShell(step.footprint) })),
       riser: shelf.riser,
       landing: { ...shelf.landing, footprint: joinShell(shelf.landing.footprint) },
     };
-    elements.push(element);
-    selectedRects.push(rect);
-    selectedRects.push(shelf.flight);
-    selectedRects.push(boundsOf(shelf.landing.footprint));
+    const loungers = resolveSunShelfLoungers({
+      comfort: { elements: [element], availability, displacedVolume: 0 },
+      outline, waterY, infinityExcluded,
+      accessFootprints: accessFootprint.length >= 3 ? [accessFootprint] : [],
+    });
+    if (!loungers.available) availability.sunShelf = { available: false, reason: loungers.reason ?? "Non disponibile per questa configurazione." };
+    else if (wantsShelf) {
+      elements.push(element);
+      selectedRects.push(rect);
+      selectedRects.push(shelf.flight);
+      selectedRects.push(boundsOf(shelf.landing.footprint));
+    }
   }
 
-  if (!shelf) availability.hydromassage = { available: false, reason: "Nessuna testata libera per scala rettilinea e vasca idromassaggio." };
+  {
+  // Independent candidate: never grow an approved hydro body for the shelf rule.
+  const shelf = flightCandidate(0);
+  if ((nominalWidth ?? shortSpan) <= 3)
+    availability.hydromassage = { available: false, reason: "L’idromassaggio integrato richiede una larghezza nominale superiore a 3,00 m e spazio utile compatibile." };
+  else if (!shelf) availability.hydromassage = { available: false, reason: "Nessuna testata libera per scala rettilinea e vasca idromassaggio." };
   else {
     const H = HYDRO_DIMENSIONS;
     const direction = shelf.coordinate === (longX ? bounds.minX : bounds.minZ) ? 1 : -1;
@@ -354,7 +389,11 @@ export function resolveComfortPlan({
       const frontWall = hydromassageVariant === "closed";
       const front = frontWall ? lip : end;
       const innerBenchEdge = inner + side * H.benchDepth;
-      const tubInner = frontWall ? inner : innerBenchEdge;
+      const clearGlassSide = outerIsInfinity && infinityWallType === "glass";
+      const outerSeat = !clearGlassSide;
+      const innerSeat = !frontWall || clearGlassSide;
+      const tubInner = innerSeat ? innerBenchEdge : inner;
+      const tubOuter = outerSeat ? benchInner : seatBack;
       // Match the actual lowered spill crest, never the surrounding coping
       // or the first tread. Seat, jet and micro-spot elevations are unchanged.
       const wallTop = system === "infinity" ? infinityCrestY(waterY) : waterY - H.wallWaterDepth;
@@ -364,12 +403,14 @@ export function resolveComfortPlan({
           ? [{ role: "frontWall" as const, footprint: rectOutline(box(lip, end, inner, outerIsInfinity ? seatBack : outer)), topY: wallTop }]
           : []),
         { role: "backSeat", footprint: rectOutline(box(back, H.benchDepth, inner, outerIsInfinity ? seatBack : outer)), topY: seatTop },
-        { role: "sideSeat", footprint: rectOutline(box(H.benchDepth, front, benchInner, outerIsInfinity ? seatBack : outer)), topY: seatTop },
-        ...(!frontWall
+        ...(outerSeat
+          ? [{ role: "sideSeat" as const, footprint: rectOutline(box(H.benchDepth, front, benchInner, outerIsInfinity ? seatBack : outer)), topY: seatTop }]
+          : []),
+        ...(innerSeat
           ? [{ role: "innerSideSeat" as const, footprint: rectOutline(box(H.benchDepth, front, inner, innerBenchEdge)), topY: seatTop }]
           : []),
         ...(raisedFloor
-          ? [{ role: "tubFloor" as const, footprint: rectOutline(box(H.benchDepth, front, tubInner, benchInner)), topY: tubFloor }]
+          ? [{ role: "tubFloor" as const, footprint: rectOutline(box(H.benchDepth, front, tubInner, tubOuter)), topY: tubFloor }]
           : []),
       ];
       // The flight shares the head and long walls: close those seams too.
@@ -389,33 +430,35 @@ export function resolveComfortPlan({
       const headDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
       const sideDir = (longX ? [0, -side] : [-side, 0]) as readonly [number, number];
       const innerSideDir = (longX ? [0, side] : [side, 0]) as readonly [number, number];
+      // A glass spill wall stays clear: the L uses the two solid faces only.
+      const headStart = clearGlassSide ? innerBenchEdge : inner;
+      const headEnd = clearGlassSide ? seatBack : benchInner;
       const jets = [
-        ...spaced(inner + side * 0.3, benchInner - side * 0.25).map((c) => ({ ...point(0, c), y: jetY, dir: headDir })),
-        ...spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, seatBack), y: jetY, dir: sideDir })),
-        ...(!frontWall
+        ...spaced(headStart + side * 0.3, headEnd - side * 0.25).map((c) => ({ ...point(0, c), y: jetY, dir: headDir })),
+        ...(outerSeat ? spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, seatBack), y: jetY, dir: sideDir })) : []),
+        ...(innerSeat
           ? spaced(H.benchDepth + 0.3, front - 0.25).map((a) => ({ ...point(a, inner), y: jetY, dir: innerSideDir }))
           : []),
       ];
       // Micro-spots light the tub from the seat's front face: below the seat
       // edge, facing the legroom, never in the backrest beside the jets.
       const spotY = seatTop - H.spotBelowSeat;
-      const spotsAlong = (from: number, to: number) => {
-        const count = Math.max(1, Math.floor(Math.abs(to - from) / H.spotSpacing));
-        return Array.from({ length: count }, (_, i) => from + ((i + 0.5) * (to - from)) / count);
-      };
+      // One miniature fitting at the centre of each actual seat face: two
+      // for the L and three for the U, never a repeated row of decorative dots.
+      const spotsAlong = (from: number, to: number) => [(from + to) / 2];
       const backFrontDir = (longX ? [direction, 0] : [0, direction]) as readonly [number, number];
       const spots = [
-        ...spotsAlong(inner + side * 0.25, benchInner - side * 0.25).map((c) => ({
+        ...spotsAlong(headStart + side * 0.25, headEnd - side * 0.25).map((c) => ({
           ...point(H.benchDepth, c),
           y: spotY,
           dir: backFrontDir,
         })),
-        ...spotsAlong(H.benchDepth + 0.25, front - 0.25).map((a) => ({
+        ...(outerSeat ? spotsAlong(H.benchDepth + 0.25, front - 0.25).map((a) => ({
           ...point(a, benchInner),
           y: spotY,
           dir: sideDir,
-        })),
-        ...(!frontWall
+        })) : []),
+        ...(innerSeat
           ? spotsAlong(H.benchDepth + 0.25, front - 0.25).map((a) => ({
               ...point(a, innerBenchEdge),
               y: spotY,
@@ -430,9 +473,11 @@ export function resolveComfortPlan({
         waterDepth: H.seatWaterDepth,
         width: interiorWidth,
         run: end,
-        steps: shelf.steps.map((step) => ({ ...step, footprint: toWalls(step.footprint) })),
-        riser: shelf.riser,
-        landing: { ...shelf.landing, footprint: toWalls(shelf.landing.footprint) },
+        ...(!separateHydroAccess ? {
+          steps: shelf.steps.map((step) => ({ ...step, footprint: toWalls(step.footprint) })),
+          riser: shelf.riser,
+          landing: { ...shelf.landing, footprint: toWalls(shelf.landing.footprint) },
+        } : {}),
         tiers,
         jets,
         spots,
@@ -441,6 +486,7 @@ export function resolveComfortPlan({
     }
   }
 
+  }
   const benchLength = Math.min(3, Math.max(1.5, longSpan * 0.36));
   const half = benchLength / 2;
   const benchProjection = 0.5;
@@ -466,17 +512,49 @@ export function resolveComfortPlan({
           : { ...candidate.rect, minZ: centre-length/2, maxZ: centre+length/2 } });
     }
   }
-  const bench = benchOptions.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
-  if (!bench) availability.integratedBench = { available: false, reason: "Nessuna parete lunga libera da scala, solarium o bordo Infinity." };
+  const previousBench = benchOptions.find((candidate) => valid(candidate.rect, candidate.axis, candidate.coordinate));
+  // Resolve against the legacy placement first, then use its opposite wall.
+  // Search all permitted lengths/positions there before declaring a conflict.
+  const bench = previousBench && benchOptions.find(candidate =>
+    candidate.coordinate !== previousBench.coordinate && valid(candidate.rect, candidate.axis, candidate.coordinate) &&
+    rectOutline(candidate.rect).every(([x, z]) => floorProfile.floorYAt(x, z) <= waterY - HYDRO_DIMENSIONS.seatWaterDepth - HYDRO_DIMENSIONS.minSeatHeight));
+  if (!bench) availability.integratedBench = { available: false, reason: "Parete opposta non disponibile: verifica scala, spiaggetta e lato Infinity." };
   else if (enabled.includes("integratedBench")) {
-    const rect = bench.rect;
+    const rect = { ...bench.rect };
+    const H = HYDRO_DIMENSIONS;
+    const direction = bench.coordinate < (bench.axis === "x" ? bounds.maxX : bounds.maxZ) ? 1 : -1;
+    // The pool wall is the backrest: close the former 35 mm gap behind the seat.
+    if (bench.axis === "z") {
+      if (direction > 0) rect.minZ = bench.coordinate - H.wallOverlap;
+      else rect.maxZ = bench.coordinate + H.wallOverlap;
+    } else {
+      if (direction > 0) rect.minX = bench.coordinate - H.wallOverlap;
+      else rect.maxX = bench.coordinate + H.wallOverlap;
+    }
+    const topY = waterY - H.seatWaterDepth;
+    const start = longX ? rect.minX : rect.minZ;
+    const end = longX ? rect.maxX : rect.maxZ;
+    const stations = integratedBenchStations(end - start, requestedBenchStations);
+    const dir = (bench.axis === "z" ? [0, direction] : [direction, 0]) as readonly [number, number];
+    const front = bench.axis === "z" ? direction > 0 ? rect.maxZ : rect.minZ : direction > 0 ? rect.maxX : rect.minX;
+    const point = (along: number, across: number) => bench.axis === "z" ? { x: along, z: across } : { x: across, z: along };
+    const jets: NonNullable<ComfortElementPlan["jets"]>[number][] = [];
+    for (let i = 0; i < stations.count; i++) for (const side of [-1, 1]) {
+      const along = start + (end - start) * (i + 0.5) / stations.count + side * INTEGRATED_BENCH.jetPairSpacing / 2;
+      jets.push({ ...point(along, bench.coordinate), y: topY + H.jetAboveSeat, dir, diameter: INTEGRATED_BENCH.jetDiameter });
+      const leg = point(along, front);
+      const y = topY - H.jetAboveSeat;
+      jets.push({ ...leg, y, dir, diameter: INTEGRATED_BENCH.jetDiameter });
+    }
     const element: ComfortElementPlan = {
       kind: "integratedBench",
       footprint: rectOutline(rect),
-      topY: waterY - 0.48,
-      waterDepth: 0.48,
-      width: benchProjection,
+      topY,
+      waterDepth: H.seatWaterDepth,
+      width: benchProjection + EDGE_INSET + H.wallOverlap,
       run: longX ? rect.maxX - rect.minX : rect.maxZ - rect.minZ,
+      jets,
+      stations,
     };
     elements.push(element);
     selectedRects.push(rect);

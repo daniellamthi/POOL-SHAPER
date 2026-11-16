@@ -1,7 +1,6 @@
 import { exteriorPanelFinish } from "@/lib/pool/above-ground";
 import { decisions } from "./wizard/decisions";
 import { normalisedLedIntensity } from "@/lib/pool/led-optics";
-import { configuredStairMicroSpots } from "@/lib/pool/resolved-layout";
 import { SCENE_VISUAL_PRESET } from "@/configurator/3d/scene/visual-preset";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -39,6 +38,9 @@ import { PoolViewport } from "./PoolViewport";
 import { useTechnicalData } from "./TechnicalDataPanel";
 import type { VisualFocus } from "@/lib/pool/contextual-camera";
 import { ConfiguratorTray, WizardNav } from "./wizard/WizardChrome";
+import { DayNightSwitch } from "./wizard/DayNightSwitch";
+import { LocaleControls, useI18n } from "@/lib/i18n";
+import "./wizard/configurator-theme.css";
 import { buildMacros, describeSelection, isStepSkipped, STEP_COPY } from "./wizard/wizard-model";
 import {
   AccessTray,
@@ -62,6 +64,7 @@ import { planSkimmers } from "@/lib/pool/engineering";
 import { projectMetrics } from "@/lib/pool/project-metrics";
 import { buildTechnicalPlan } from "@/lib/pool/technical-plan";
 import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
+import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 
 
 /**
@@ -73,6 +76,7 @@ import { configuredPoolLayout } from "@/lib/pool/resolved-layout";
  * still fire but the veil never visibly holds the screen.
  */
 function IntroVeil() {
+  const { t } = useI18n();
   const [stage, setStage] = useState<"in" | "out" | "done">("in");
 
   useEffect(() => {
@@ -96,8 +100,7 @@ function IntroVeil() {
     >
       <BrandLogo className="h-10 w-auto animate-intro-mark" />
       <p className="label-xs animate-veil [animation-delay:200ms]">
-        Configuratore Piscine Wellness
-      </p>
+        {t("Configuratore Piscine Wellness")}</p>
     </div>
   );
 }
@@ -112,6 +115,9 @@ const RENOVATION_COMPONENTS = [
 ] as const;
 
 function ConfiguratorLayout() {
+  const { t, locale } = useI18n();
+  const toastLocale = useRef(locale);
+  useEffect(() => { if (toastLocale.current !== locale) toast.dismiss(); toastLocale.current = locale; }, [locale]);
   const { technical: projectTechnical, cover } = useTechnicalData();
   const {
     config: projectConfig,
@@ -149,9 +155,9 @@ function ConfiguratorLayout() {
   // away so it can't reopen from an unrelated re-render.
   useEffect(() => {
     if (!justRestoredProject) return;
-    toast.message("Abbiamo ripristinato il tuo progetto.", {
-      description: "Puoi continuare da dove avevi lasciato oppure iniziare un nuovo progetto.",
-      action: { label: "Nuovo progetto", onClick: () => reset() },
+    toast.message(t("Abbiamo ripristinato il tuo progetto."), {
+      description: t("Puoi continuare da dove avevi lasciato oppure iniziare un nuovo progetto."),
+      action: { label: t("Nuovo progetto"), onClick: () => reset() },
       duration: 8000,
     });
     dismissRestoredProjectNotice();
@@ -166,6 +172,7 @@ function ConfiguratorLayout() {
         skimmerFinish: config.skimmerFinish,
         skimmerType: config.skimmerType,
         copingMaterial: config.copingMaterial ?? "travertine",
+        poolType: config.poolType,
       }),
     [
       config.finish,
@@ -174,6 +181,7 @@ function ConfiguratorLayout() {
       config.skimmerFinish,
       config.skimmerType,
       config.copingMaterial,
+      config.poolType,
     ],
   );
 
@@ -181,11 +189,9 @@ function ConfiguratorLayout() {
   // start uncluttered. Customers can still toggle Guides explicitly.
   const [showMeasurements, setShowMeasurements] = useState(false);
   const sceneTime: SceneTimeOfDay = config.sceneTime === "night" ? "night" : "day";
-  const hasStairLed = useMemo(() => configuredStairMicroSpots(config).length > 0, [config]);
-  // Night is contextual: the live scene shows it only while LED colours are
-  // being evaluated (lighting step) or while the Project Book captures its
-  // day/night pair. Everywhere else the journey stays in daylight.
+  // The global time choice and contextual lighting preview share one scene.
   const [dayNightCapture, setDayNightCapture] = useState(false);
+  const [cleanCapture, setCleanCapture] = useState(false);
   const [frameToken, setFrameToken] = useState(0);
   const [inspectionView, setInspectionView] = useState<SceneFocus | null>(null);
   const [technicalView, setTechnicalView] = useState(false);
@@ -208,14 +214,22 @@ function ConfiguratorLayout() {
   const reframe = useCallback(() => setFrameToken((value) => value + 1), []);
   // Build 2 · clean hero: reframe to the whole-pool hero, let the scripted
   // flight start (the camera leaves its idle state) and settle, then capture.
-  const captureHero = useCallback(async () => {
+  const captureHero = useCallback(async (keepCleanCapture = false) => {
+    setCleanCapture(true);
     setInspectionView("review");
     reframe();
     const started = Date.now();
     while (renderQualityState.idle && Date.now() - started < 3000) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    return requestHeroCapture();
+    try {
+      return await requestHeroCapture();
+    } finally {
+      if (!keepCleanCapture) {
+        setCleanCapture(false);
+        reframe();
+      }
+    }
   }, [reframe]);
   /** Project Book "Presentazione": the same configuration and view, by day
    * and by night. Only the presentation time changes, and it is restored. */
@@ -226,7 +240,7 @@ function ConfiguratorLayout() {
     let current: string | null = null;
     let alternate: string | null = null;
     try {
-      current = await captureHero();
+      current = await captureHero(true);
       setSceneTime(other);
       // Let the lighting transition finish before the settled capture.
       await new Promise((resolve) =>
@@ -236,11 +250,13 @@ function ConfiguratorLayout() {
     } finally {
       setSceneTime(original);
       setDayNightCapture(false);
+      setCleanCapture(false);
+      reframe();
     }
     return original === "day"
       ? { day: current, night: alternate }
       : { day: alternate, night: current };
-  }, [captureHero, config.sceneTime, setSceneTime]);
+  }, [captureHero, config.sceneTime, setSceneTime, reframe]);
   const premiumPresentationAvailable = step === (config.projectType === "renovation" ? RENOVATION_STEPS : STEPS).length - 1;
   const openPremiumPresentation = useCallback(() => {
     if (!premiumPresentationAvailable) return;
@@ -271,10 +287,10 @@ function ConfiguratorLayout() {
     hasReportedUnsupported.current = true;
     setPhotoModeUnsupported(true);
     setPhotoMode(false);
-    toast.error("Photo Mode isn't supported on this device", {
-      description: "The live 3D view is unaffected -- keep configuring as normal.",
+    toast.error(t("Photo Mode isn't supported on this device"), {
+      description: t("The live 3D view is unaffected -- keep configuring as normal."),
     });
-  }, []);
+  }, [t]);
 
   // "Generate Photorealistic Render" -- hands the current configuration to
   // the separate Blender/Cycles pipeline (see src/lib/render-pipeline/ and
@@ -367,7 +383,7 @@ function ConfiguratorLayout() {
   const activeSteps = renovationWorkflow ? RENOVATION_STEPS : STEPS;
   const isLast = step === activeSteps.length - 1;
   const activeStepId = activeSteps[step]?.id;
-  const construction = constructionPresentation(config, activeStepId, technicalView);
+  const construction = constructionPresentation(config, activeStepId, technicalView && !cleanCapture);
   // System details frame automatically, but remain inspectable by orbit/touch.
   const cameraLocked = false;
   const cameraFocus: SceneFocus = renovationWorkflow
@@ -387,9 +403,7 @@ function ConfiguratorLayout() {
                 config,
               )
             : activeStepId === "lighting"
-              ? config.system === "infinity"
-                ? "infinity"
-                : "features"
+              ? "features"
               : "review";
 
   // ---- New wizard navigation: nine macro steps, skipped empty steps ----
@@ -417,9 +431,30 @@ function ConfiguratorLayout() {
   const currentDecisions = renovationWorkflow ? renovationDecisions(activeStepId, renovation) : decisions(activeStepId, config);
   const decisionIndex = Math.max(0, currentDecisions.findIndex(d => decisionState.step === step && d.id === decisionState.id));
   const decision = currentDecisions[decisionIndex];
-  const setDecision = (id: string) => { setDecisionState({ step, id }); setTrayExpanded(true); };
+  const setDecision = (id: string) => { setDecisionState({ step, id }); };
   const decisionProps = { tab: decision?.id ?? "", setTab: setDecision };
   const nextDecision = currentDecisions[decisionIndex + 1];
+  const comfortIssues = useMemo(() => comfortConfigurationIssues(config), [config]);
+  useEffect(() => {
+    if (activeStepId === "system" && decision?.id === "detail") {
+      setInspectionView(config.system === "infinity" ? "infinity" : config.system === "overflow"
+        ? config.overflowType === "continuous" ? "overflow-continuous" : config.overflowType === "hidden" ? "overflow-hidden" : "overflow-visible"
+        : "skimmer-detail");
+      reframe();
+    } else if (activeStepId === "deck" &&
+      (decision?.id === "coping" || decision?.id === "paving")) {
+      setInspectionView(decision.id);
+      reframe();
+    }
+  }, [activeStepId, decision?.id, config.system, config.overflowType, reframe]);
+  useEffect(() => {
+    if (activeStepId === "lighting" && decision?.id === "color") {
+      // Entering colour also requests its night preview. A retained micro-spot
+      // focus can arrive one render later and clear the inspection override.
+      setInspectionView("features");
+      reframe();
+    }
+  }, [activeStepId, decision?.id, visualFocus, reframe]);
   useEffect(() => {
     if (sharedProject?.status === "ready") {
       const reviewStep = activeSteps.findIndex(s => s.id === "review");
@@ -455,15 +490,30 @@ function ConfiguratorLayout() {
     if (skipped(step)) goNext();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, config.structure]);
-  // Phones: a step that still needs a decision opens with its cards; a step
-  // revisited after it was completed opens collapsed, so the pool stays visible.
+  // The customer owns the panel state. Navigation never expands or reduces it.
   const [trayExpanded, setTrayExpanded] = useState(true);
-  useEffect(() => setTrayExpanded(!isStepComplete(step)), [step]); // eslint-disable-line react-hooks/exhaustive-deps
-  // A share link lands on the Summary: open the mobile sheet so the
-  // visitor sees the project, its ID and the save/share/PDF actions.
   useEffect(() => {
-    if (sharedProject?.status === "ready") setTrayExpanded(true);
-  }, [sharedProject?.status]);
+    const root = document.querySelector<HTMLElement>(".pool-fullscreen");
+    const header = root?.querySelector<HTMLElement>("[data-camera-occluder='header']");
+    const dock = root?.querySelector<HTMLElement>("[data-camera-occluder='dock']");
+    if (!root || !header || !dock) return;
+    const previousDockHeight = document.body.style.getPropertyValue("--pool-floating-dock-height");
+    const update = () => {
+      root.style.setProperty("--pool-header-height", `${header.getBoundingClientRect().height}px`);
+      const dockHeight = `${dock.getBoundingClientRect().height}px`;
+      root.style.setProperty("--pool-dock-height", dockHeight);
+      document.body.style.setProperty("--pool-floating-dock-height", dockHeight);
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    observer.observe(dock);
+    update();
+    return () => {
+      observer.disconnect();
+      if (previousDockHeight) document.body.style.setProperty("--pool-floating-dock-height", previousDockHeight);
+      else document.body.style.removeProperty("--pool-floating-dock-height");
+    };
+  }, []);
   // The final step's primary action opens the proposal request.
   const finalRequest = !renovationWorkflow && activeStepId === "review" && !nextDecision;
   const trayContext: TrayContext = {
@@ -513,9 +563,9 @@ function ConfiguratorLayout() {
   const substepPosition = macro && macro.indices.length > 1 ? macro.indices.indexOf(step) + 1 : 0;
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
+    <div className="pool-configurator pool-fullscreen flex h-[100dvh] flex-col overflow-hidden bg-background" data-scene-time={sceneTime}>
       <IntroVeil />
-      <header className="z-30 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-hairline bg-background px-4 py-3 sm:px-6 lg:gap-8">
+      <header data-camera-occluder="header" className="pool-fullscreen-header z-30 grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-hairline bg-background px-4 py-3 sm:px-6 lg:gap-8">
         <BrandLogo className="h-7 max-w-[100px]" />
         <div className="flex min-w-0 justify-center">
           <WizardNav
@@ -530,25 +580,27 @@ function ConfiguratorLayout() {
           />
         </div>
         <div className="flex items-center gap-1 sm:gap-3">
+          <LocaleControls />
+          <DayNightSwitch sceneTime={sceneTime} onChange={(value) => setSceneTime(value, true)} />
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={reset}
-            aria-label="Ricomincia"
+            aria-label={t("Ricomincia")}
             className="rounded-full px-2.5"
           >
             <RotateCcw />
-            <span className="hidden xl:inline">Ricomincia</span>
+            <span className="hidden xl:inline">{t("Ricomincia")}</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 p-2 sm:p-3 lg:p-4">
+      <div className="pool-fullscreen-content">
         <main
           id="pool-viewport"
           className={cn(
-            "relative w-full overflow-hidden bg-viewport",
+            "pool-fullscreen-viewport relative w-full overflow-hidden bg-viewport",
             mobileExpanded
               ? "fixed inset-0 z-40 h-[100dvh] rounded-none border-0"
               : "min-h-[200px] flex-1 rounded-[20px] border border-hairline lg:rounded-[24px]",
@@ -583,7 +635,14 @@ function ConfiguratorLayout() {
                   pellicano: config.equipment.includes("pellicano"),
                 }
               : {})}
-            technicalView={technicalView}
+            technicalView={technicalView && !cleanCapture}
+            cleanCapture={cleanCapture}
+            {...(config.sunShelfLoungerCount !== undefined ? {sunShelfLoungerCount: config.sunShelfLoungerCount} : {})}
+            {...(config.integratedBenchStations !== undefined ? {integratedBenchStations: config.integratedBenchStations} : {})}
+            {...(config.copingStyle !== undefined ? {copingStyle: config.copingStyle} : {})}
+            {...(config.copingEdge !== undefined ? {copingEdge: config.copingEdge} : {})}
+            {...(config.sunShelfLoungerColor !== undefined ? {sunShelfLoungerColor: config.sunShelfLoungerColor} : {})}
+            {...(config.dimensions.sunShelfRun !== undefined ? {sunShelfRun: config.dimensions.sunShelfRun} : {})}
             technicalPlan={technical}
             onToggleTechnicalView={() => { setTechnicalView((value) => !value); setInspectionView(null); reframe(); }}
             onTechnicalFocus={(focus: VisualFocus) => { setInspectionView(contextualIntent(focus, config)); reframe(); }}
@@ -600,23 +659,25 @@ function ConfiguratorLayout() {
             shallowDepth={config.dimensions.shallowDepth}
             slopeReversed={config.dimensions.slopeReversed}
             showMeasurements={
-              showMeasurements ||
+              !cleanCapture && (showMeasurements ||
               (technicalView && config.system === "infinity") ||
               visualFocus?.focus === "DIMENSIONS_TOP" ||
               visualFocus?.focus === "DEPTH" ||
-              activeStepId === "shape-dimensions"
+              activeStepId === "shape-dimensions")
             }
             onToggleMeasurements={toggleMeasurements}
             onReframe={reframe}
             frameToken={frameToken + (visualFocus?.revision ?? 0)}
             focus={
               // Renovation PDF: changing time must not replace the hero with LED focus.
-              (dayNightCapture && renovationWorkflow ? "review" : null) ??
+              (cleanCapture || (dayNightCapture && renovationWorkflow) ? "review" : null) ??
               inspectionView ??
               (technicalView
                 ? config.system === "infinity" ? "top" : "review"
                 : wholePoolIntent(
-                    visualFocus ? contextualIntent(visualFocus.focus, config) : cameraFocus,
+                    visualFocus ? contextualIntent(visualFocus.focus, config)
+                      : activeStepId === "style" && decision?.id === "interior"
+                        ? contextualIntent("INTERIOR_FINISH", config) : cameraFocus,
                     renovationWorkflow ? undefined : activeStepId,
                     config.system,
                   ))
@@ -624,16 +685,7 @@ function ConfiguratorLayout() {
             cameraLocked={cameraLocked}
             showWater={construction.showWater}
             theme={theme}
-            sceneTime={
-              construction.showWater &&
-              (activeStepId === "lighting" ||
-                dayNightCapture ||
-                // The final presentation may be shown at night, but only
-                // for a pool that actually has LEDs to show.
-                (activeStepId === "review" && (config.features.includes("ledLighting") || hasStairLed)))
-                ? sceneTime
-                : "day"
-            }
+            sceneTime={sceneTime}
             paving={config.paving ?? "gres"}
             pavingFormat={config.pavingFormat}
             photoMode={photoMode}
@@ -652,17 +704,8 @@ function ConfiguratorLayout() {
           />
         </main>
 
-        {/* Phones: reserve the sheet's height so the 3D viewport reframes the
-            pool above it, collapsed or half open, instead of hiding behind it. */}
-        <div
-          aria-hidden
-          className={cn(
-            "shrink-0 transition-[height] duration-300 lg:hidden",
-            trayExpanded ? "h-[52dvh]" : "h-[136px]",
-          )}
-        />
-
         <ConfiguratorTray
+          nextChoice={nextDecision?.label}
           number={macroIndex + 1}
           total={macros.length}
           nextLabel={
@@ -672,7 +715,7 @@ function ConfiguratorLayout() {
               ? macros[macroIndex + 1]?.label
               : renovationWorkflow ? activeSteps[step + 1]?.title : STEP_COPY[activeSteps[step + 1]?.id ?? ""]?.title
           }
-          title={renovationWorkflow ? copy.title : (macro?.label ?? copy.title)}
+          title={t(renovationWorkflow ? copy.title : (macro?.label ?? copy.title))}
           subtitle={copy.subtitle}
           {...(decision ? { substep: `${decisionIndex + 1}/${currentDecisions.length} · ${decision.label}` } : substepPosition
             ? { substep: `${substepPosition}/${macro!.indices.length} · ${copy.title}` }
@@ -683,9 +726,9 @@ function ConfiguratorLayout() {
               : describeSelection(activeStepId, config)
           }
           canBack={step > 0}
-          canContinue={finalRequest || ((Boolean(nextDecision) || !isLast) && (renovationWorkflow && decision
+          canContinue={(finalRequest && !comfortIssues.length) || ((Boolean(nextDecision) || !isLast) && (renovationWorkflow && decision
             ? renovationDecisionComplete(activeStepId, decision.id, projectConfig, renovation) && (Boolean(nextDecision) || canContinue)
-            : canContinue))}
+            : (activeStepId === "access" && Boolean(nextDecision)) || canContinue))}
           continueLabel={
             finalRequest ? "Richiedi proposta" : isLast && !nextDecision ? "Configurazione completa" : "Continua"
           }
@@ -695,13 +738,21 @@ function ConfiguratorLayout() {
             finalRequest
               ? () => {
                   setDecision("request");
-                  setTrayExpanded(true);
                 }
               : goNext
           }
           expanded={trayExpanded}
           onExpandedChange={setTrayExpanded}
+          onViewPool={() => { setInspectionView("review"); reframe(); }}
         >
+          {comfortIssues.length ? <div role="alert" className="mb-3 flex flex-col gap-2 rounded-xl border border-brand/20 p-3 text-xs">
+            <p>{t("Le scelte comfort sono conservate, ma richiedono una verifica con le dimensioni attuali.")}</p>
+            {comfortIssues.map(issue => <p key={issue.feature}>{t(issue.reason)}</p>)}
+            <button type="button" className="w-fit text-brand underline underline-offset-4" onClick={() => {
+              const accessStep = activeSteps.findIndex(item => item.id === "access");
+              if (accessStep >= 0) { goToStep(accessStep); setDecisionState({step:accessStep,id:"comfort"}); }
+            }}>{t("Rivedi comfort")}</button>
+          </div> : null}
           <div key={`${step}-${decision?.id ?? ""}`} className="animate-rise">
             {trayContent}
           </div>

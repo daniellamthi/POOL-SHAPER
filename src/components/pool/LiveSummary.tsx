@@ -10,12 +10,14 @@ import {
 } from "@/lib/pool/config";
 import { normalizeComfortFeatures } from "@/lib/pool/comfort-selection";
 import { useConfigurator } from "@/lib/pool/context";
-import { formatNumber } from "@/lib/pool/format";
+import { useI18n } from "@/lib/i18n";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
 import { finishDescription } from "@/lib/pool/structure-finish";
 
 export function LiveSummary() {
+  const { t, number } = useI18n();
+  const formatNumber = (value: number, digits = 2) => number(value, { minimumFractionDigits: digits, maximumFractionDigits: digits });
   const { config, metrics } = useConfigurator();
   const project =
     PROJECT_TYPES.find((item) => item.id === config.projectType)?.title ?? "Non selezionato";
@@ -81,9 +83,10 @@ export function LiveSummary() {
   return (
     <details
       className="absolute right-6 top-6 z-10 hidden w-56 border border-hairline/80 bg-card/92 px-4 py-2.5 text-foreground shadow-sm backdrop-blur-sm xl:block"
-      aria-label="Riepilogo configurazione"
+      aria-label={t("Riepilogo configurazione")}
+      data-config-summary
     >
-      <summary className="label-xs cursor-pointer select-none">Specifica live</summary>
+      <summary className="label-xs cursor-pointer select-none">{t("Specifica live")}</summary>
       <dl>
         {rows.map(([label, value]) => (
           <div
@@ -91,9 +94,9 @@ export function LiveSummary() {
             className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2 border-b border-hairline/45 py-1.5 last:border-0 last:pb-0"
           >
             <dt className="text-[8px] font-medium uppercase leading-4 tracking-[0.12em] text-muted-foreground">
-              {label}
+              {t(label)}
             </dt>
-            <dd className="text-[10px] font-normal leading-4 text-foreground/88">{value}</dd>
+            <dd className="text-[10px] font-normal leading-4 text-foreground/88">{t(value)}</dd>
           </div>
         ))}
       </dl>

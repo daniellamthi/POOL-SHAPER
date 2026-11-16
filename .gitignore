@@ -39,3 +39,5 @@ test-baselines/visual/*.diff.png
 # Impeccable engine binary and local settings
 .claude/skills/impeccable/scripts/bin/
 .claude/settings.local.json
+# Local browser/PDF evidence; requirements report remains tracked separately.
+docs/fullscreen-qa-evidence/

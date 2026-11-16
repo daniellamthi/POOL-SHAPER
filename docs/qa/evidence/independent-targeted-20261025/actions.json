@@ -1,0 +1,168 @@
+{
+  "date": "2026-10-25T14:28:02.769Z",
+  "origin": "http://release-review.localhost:3003/",
+  "scope": [
+    "U08 visible colour/dimension actions",
+    "U09 UI-rendered before-after complete fixture",
+    "U10 shelf/bench/coping current ITEN surfaces"
+  ],
+  "records": [
+    {
+      "action": "IT shelf+3white loungers+bench2 baseline",
+      "state": {
+        "panel": [
+          303
+        ],
+        "scrollY": 0,
+        "selected": [
+          {
+            "label": "Italiano",
+            "role": null,
+            "text": "IT",
+            "value": ""
+          },
+          {
+            "label": null,
+            "role": null,
+            "text": "Giorno",
+            "value": ""
+          },
+          {
+            "label": null,
+            "role": "tab",
+            "text": "Optional per la spiaggetta",
+            "value": ""
+          },
+          {
+            "label": "Lettini per spiaggetta",
+            "role": null,
+            "text": "Lettini per spiaggettaEsse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.Aggiunto",
+            "value": ""
+          },
+          {
+            "label": "Bianco",
+            "role": null,
+            "text": "",
+            "value": ""
+          },
+          {
+            "label": "Quantità lettini",
+            "role": null,
+            "text": "123",
+            "value": "3"
+          },
+          {
+            "label": "Panca integrata",
+            "role": null,
+            "text": "Panca integrataSeduta sommersa lungo parete.Aggiunto",
+            "value": ""
+          },
+          {
+            "label": "Postazioni panca",
+            "role": null,
+            "text": "1234",
+            "value": "2"
+          }
+        ]
+      }
+    },
+    {
+      "action": "Change only lounger colour to aqua",
+      "state": {
+        "panel": [
+          99.5
+        ],
+        "scrollY": 0,
+        "selected": [
+          {
+            "label": "Italiano",
+            "role": null,
+            "text": "IT",
+            "value": ""
+          },
+          {
+            "label": null,
+            "role": null,
+            "text": "Giorno",
+            "value": ""
+          },
+          {
+            "label": null,
+            "role": "tab",
+            "text": "Optional per la spiaggetta",
+            "value": ""
+          },
+          {
+            "label": "Lettini per spiaggetta",
+            "role": null,
+            "text": "Lettini per spiaggettaEsse · Lyxo, senza telaio. Per acqua fino a 20 cm, con zavorramento.Aggiunto",
+            "value": ""
+          },
+          {
+            "label": "Acquamarina",
+            "role": null,
+            "text": "",
+            "value": ""
+          },
+          {
+            "label": "Quantità lettini",
+            "role": null,
+            "text": "123",
+            "value": "3"
+          },
+          {
+            "label": "Panca integrata",
+            "role": null,
+            "text": "Panca integrataSeduta sommersa lungo parete.Aggiunto",
+            "value": ""
+          },
+          {
+            "label": "Postazioni panca",
+            "role": null,
+            "text": "1234",
+            "value": "2"
+          }
+        ]
+      }
+    },
+    {
+      "action": "Before visible EN White swatch click",
+      "panel": 99.5
+    },
+    {
+      "action": "After visible EN White swatch click",
+      "panel": 99.5
+    },
+    {
+      "action": "Complete fixture length12to11",
+      "state": {
+        "inputs": [
+          {
+            "type": "number",
+            "value": "11"
+          },
+          {
+            "type": "number",
+            "value": "4.5"
+          }
+        ],
+        "panel": [
+          0
+        ]
+      }
+    },
+    {
+      "action": "390 before visible Aqua swatch",
+      "panel": 0
+    },
+    {
+      "action": "390 after visible Aqua swatch",
+      "panel": 245.5
+    },
+    {
+      "action": "430 change bench2to3;3aqua loungers retained",
+      "dom": "- heading \"3D Pool Configurator\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Configuration phases\":\n    - list:\n      - button \"Pool\":\n        - generic: Pool\n      - button \"Water system\":\n        - generic: Water system\n      - button \"Access & comfort\":\n        - generic: Access & comfort\n      - button \"Finishes\":\n        - generic: Finishes\n      - button \"Exterior\":\n        - generic: Exterior\n      - button \"Options\":\n        - generic: Options\n      - button \"Presentation\":\n        - generic: Presentation\n  - group \"Language\":\n    - button \"Italian\": IT\n    - button \"English\" [active] [pressed]: EN\n  - group \"Scene time\":\n    - button \"Day\" [pressed]:\n      - generic: Day\n    - button \"Night\":\n      - generic: Night\n  - button \"Start again\":\n- main:\n  - button \"Pool view\":\n    - text: Pool view\n  - status: Structure · Reinforced concrete\n  - button \"Reframe\":\n    - text: Reframe\n  - button \"Expand pool\":\n  - button \"More tools\":\n- 'region \"Step 3: Access & comfort\"':\n  - paragraph: How you enter the water and the integrated relaxation areas.\n  - tablist \"Access and comfort\":\n    - tab \"Internal stairs\"\n    - tab \"Stainless steel ladder\"\n    - tab \"In-water comfort\"\n    - tab \"Sun shelf options\" [selected]\n  - group \"Sun shelf options\":\n    - button \"Sun shelf loungers\" [pressed]:\n      - generic: Sun shelf loungers\n      - generic: Esse · Lyxo, without frame. For water up to 20 cm deep, with ballast.\n      - text: Added\n  - group \"Lounger colour · Aquamarine\":\n    - text: Lounger colour\n    - generic: · Aquamarine\n    - button \"White\"\n    - button \"Lime green\"\n    - button \"Taupe grey\"\n    - button \"Aquamarine\" [pressed]:\n    - button \"Blue grey\"\n    - button \"Light green\"\n  - paragraph: \"Allowed quantity: from 1 to 3.\"\n  - text: Lounger quantity\n  - combobox \"Lounger quantity\":\n    - option \"1\"\n    - option \"2\"\n    - option \"3\" [selected]\n  - paragraph: Dimensional 3D preview; model and supply to be confirmed. 1.85 ×0.73 m.\n  - paragraph:\n    - generic: For your sun shelf · available only with this choice\n  - group \"Integrated bench\":\n    - button \"Integrated bench\" [pressed]:\n      - generic: Integrated bench\n      - generic: A submerged seat along the pool wall.\n      - text: Added\n  - text: Bench seats\n  - combobox \"Bench seats\":\n    - option \"1\"\n    - option \"2\"\n    - option \"3\" [selected]\n    - option \"4\"\n  - paragraph: \"Per seat: 2 back jets and 2 leg jets.\"\n  - paragraph:\n    - text: Phase 03 of 07\n    - generic: · 4/4 · Sun shelf options\n  - heading \"Access & comfort\" [level=2]\n  - paragraph: Internal stairs · Sun shelf · Bench\n  - button \"View the pool\":\n    - text: View the pool\n  - button \"Minimise\" [expanded]:\n    - text: Minimise\n  - button \"Back\":\n    - text: Back\n  - button \"Continue\":\n    - text: Continue\n- region \"Notifications alt+T\"",
+      "panel": 222
+    }
+  ]
+}

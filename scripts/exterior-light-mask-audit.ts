@@ -5,7 +5,8 @@ import { excludeSubmergedDirectLights } from "../src/components/pool/three/exter
 const shader = { uniforms: {}, fragmentShader: "#include <lights_fragment_begin>" } as WebGLProgramParametersWithUniforms;
 excludeSubmergedDirectLights(shader, -0.04);
 assert.equal(shader.uniforms.exteriorWaterY?.value, -0.04);
-assert(shader.fragmentShader.includes("directLight.color *= step(exteriorWaterY"));
+assert(shader.fragmentShader.includes(".y >= exteriorWaterY) {"));
+assert(shader.fragmentShader.indexOf(".y >= exteriorWaterY) {") < shader.fragmentShader.indexOf("getSpotLightInfo( spotLight, geometryPosition, directLight );"), "Reject submerged exterior illumination before sampling shadows or evaluating BRDF");
 assert(!shader.fragmentShader.includes("vec3 exteriorLightWorld"), "Unrolled light loops must not redeclare a shared local");
 assert(shader.fragmentShader.includes("getDirectionalLightInfo"), "Daylight must remain in the original lighting chunk");
 assert(shader.fragmentShader.includes("getSpotLightInfo"), "Above-ground spotlights retain the standard BRDF");

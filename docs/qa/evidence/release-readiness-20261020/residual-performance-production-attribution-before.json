@@ -1,0 +1,122 @@
+{
+  "at": "2026-10-20T17:13:59.033Z",
+  "logs": [
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-20T17:12:34.003Z",
+      "url": "http://127.0.0.1:3019/assets/events-156d8d12.esm-BXcLJBJ5.js"
+    },
+    {
+      "level": "info",
+      "message": "[Pool3D production renderer] {\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"vendor\":\"Google Inc. (Apple)\",\"version\":\"WebGL 2.0 (OpenGL ES 3.0 Chromium)\",\"shadingLanguageVersion\":\"WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)\",\"KHR_parallel_shader_compile\":true,\"dpr\":1,\"cssWidth\":1623,\"cssHeight\":873,\"geometries\":52,\"textures\":20,\"programs\":27}",
+      "timestamp": "2026-10-20T17:12:35.885Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":970.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:20.698Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":1,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":122,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":64,\"totalMs\":0,\"maxMs\":0},\"renderbufferStorageMultisample\":{\"count\":2,\"totalMs\":0,\"maxMs\":0},\"texImage2D\":{\"count\":1,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":5,\"totalMs\":0,\"maxMs\":0},\"compileShader\":{\"count\":56,\"totalMs\":0,\"maxMs\":0},\"linkProgram\":{\"count\":28,\"totalMs\":0.4,\"maxMs\":0.1},\"getProgramInfoLog\":{\"count\":28,\"totalMs\":790.8,\"maxMs\":251.4},\"getShaderInfoLog\":{\"count\":56,\"totalMs\":27.3,\"maxMs\":23.3},\"getProgramParameter\":{\"count\":84,\"totalMs\":2.9,\"maxMs\":0.2},\"getActiveUniform\":{\"count\":1124,\"totalMs\":0.4,\"maxMs\":0.1},\"getUniformLocation\":{\"count\":1124,\"totalMs\":1,\"maxMs\":0.1}}}",
+      "timestamp": "2026-10-20T17:13:20.698Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":710.7,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:25.047Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":2,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":156,\"totalMs\":0.2,\"maxMs\":0.1},\"texImage2D\":{\"count\":4,\"totalMs\":0,\"maxMs\":0},\"bufferData\":{\"count\":60,\"totalMs\":0.2,\"maxMs\":0.1},\"renderbufferStorageMultisample\":{\"count\":4,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":12,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":98,\"totalMs\":0.3,\"maxMs\":0.1},\"texStorage2D\":{\"count\":5,\"totalMs\":0,\"maxMs\":0},\"compileShader\":{\"count\":38,\"totalMs\":0.1,\"maxMs\":0.1},\"linkProgram\":{\"count\":19,\"totalMs\":0.1,\"maxMs\":0.1},\"getProgramInfoLog\":{\"count\":19,\"totalMs\":193.3,\"maxMs\":14.3},\"getShaderInfoLog\":{\"count\":38,\"totalMs\":3.6,\"maxMs\":0.3},\"getProgramParameter\":{\"count\":57,\"totalMs\":4.1,\"maxMs\":0.3},\"getActiveUniform\":{\"count\":1857,\"totalMs\":0.8,\"maxMs\":0.1},\"getUniformLocation\":{\"count\":1857,\"totalMs\":1.8,\"maxMs\":0.1}}}",
+      "timestamp": "2026-10-20T17:13:25.047Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":426.5,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:35.954Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":3,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":118,\"totalMs\":0.2,\"maxMs\":0.1},\"texImage2D\":{\"count\":3,\"totalMs\":0,\"maxMs\":0},\"renderbufferStorageMultisample\":{\"count\":4,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":10,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":92,\"totalMs\":0,\"maxMs\":0},\"bufferData\":{\"count\":10,\"totalMs\":0.2,\"maxMs\":0.1},\"compileShader\":{\"count\":64,\"totalMs\":0.1,\"maxMs\":0.1},\"linkProgram\":{\"count\":32,\"totalMs\":0.4,\"maxMs\":0.1},\"getProgramInfoLog\":{\"count\":32,\"totalMs\":302.5,\"maxMs\":12.8},\"getShaderInfoLog\":{\"count\":64,\"totalMs\":6.3,\"maxMs\":0.3},\"getProgramParameter\":{\"count\":96,\"totalMs\":4.2,\"maxMs\":0.4},\"getActiveUniform\":{\"count\":2063,\"totalMs\":1.1,\"maxMs\":0.1},\"getUniformLocation\":{\"count\":2063,\"totalMs\":1.1,\"maxMs\":0.1}}}",
+      "timestamp": "2026-10-20T17:13:35.954Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":19.8,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:36.025Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":4,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":106,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":84,\"totalMs\":0.1,\"maxMs\":0.1},\"generateMipmap\":{\"count\":6,\"totalMs\":0,\"maxMs\":0}}}",
+      "timestamp": "2026-10-20T17:13:36.028Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":280.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:44.262Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":5,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":26,\"totalMs\":0.1,\"maxMs\":0.1},\"bufferData\":{\"count\":28,\"totalMs\":0.3,\"maxMs\":0.1},\"drawArrays\":{\"count\":67,\"totalMs\":0,\"maxMs\":0},\"renderbufferStorageMultisample\":{\"count\":2,\"totalMs\":0,\"maxMs\":0},\"texImage2D\":{\"count\":1,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":8,\"totalMs\":0,\"maxMs\":0},\"compileShader\":{\"count\":10,\"totalMs\":0,\"maxMs\":0},\"linkProgram\":{\"count\":5,\"totalMs\":0.1,\"maxMs\":0.1},\"getProgramInfoLog\":{\"count\":5,\"totalMs\":40.7,\"maxMs\":10.3},\"getShaderInfoLog\":{\"count\":10,\"totalMs\":0.9,\"maxMs\":0.2},\"getProgramParameter\":{\"count\":15,\"totalMs\":0.6,\"maxMs\":0.2},\"getActiveUniform\":{\"count\":192,\"totalMs\":0.2,\"maxMs\":0.1},\"getUniformLocation\":{\"count\":192,\"totalMs\":0,\"maxMs\":0},\"texStorage2D\":{\"count\":3,\"totalMs\":0,\"maxMs\":0}}}",
+      "timestamp": "2026-10-20T17:13:44.262Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":6,\"event\":\"click\",\"inputToSecondRafMs\":760.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:48.411Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":6,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":122,\"totalMs\":0.1,\"maxMs\":0.1},\"texImage2D\":{\"count\":3,\"totalMs\":0,\"maxMs\":0},\"bufferData\":{\"count\":64,\"totalMs\":0,\"maxMs\":0},\"renderbufferStorageMultisample\":{\"count\":2,\"totalMs\":0,\"maxMs\":0},\"generateMipmap\":{\"count\":11,\"totalMs\":0,\"maxMs\":0},\"drawArrays\":{\"count\":98,\"totalMs\":0,\"maxMs\":0},\"texStorage2D\":{\"count\":5,\"totalMs\":0,\"maxMs\":0},\"compileShader\":{\"count\":56,\"totalMs\":0.1,\"maxMs\":0.1},\"linkProgram\":{\"count\":28,\"totalMs\":0.3,\"maxMs\":0.1},\"getProgramInfoLog\":{\"count\":28,\"totalMs\":281.8,\"maxMs\":14.8},\"getShaderInfoLog\":{\"count\":56,\"totalMs\":5.5,\"maxMs\":0.2},\"getProgramParameter\":{\"count\":84,\"totalMs\":4.8,\"maxMs\":0.3},\"getActiveUniform\":{\"count\":1863,\"totalMs\":0.7,\"maxMs\":0.1},\"getUniformLocation\":{\"count\":1863,\"totalMs\":1.8,\"maxMs\":0.1}}}",
+      "timestamp": "2026-10-20T17:13:48.411Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":7,\"event\":\"click\",\"inputToSecondRafMs\":120.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:13:58.993Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D GL diagnostic] {\"sample\":7,\"event\":\"click\",\"methods\":{\"drawElements\":{\"count\":26,\"totalMs\":0.1,\"maxMs\":0.1},\"bufferData\":{\"count\":28,\"totalMs\":0.2,\"maxMs\":0.1},\"drawArrays\":{\"count\":67,\"totalMs\":0.2,\"maxMs\":0.1},\"compileShader\":{\"count\":10,\"totalMs\":0,\"maxMs\":0},\"linkProgram\":{\"count\":5,\"totalMs\":0,\"maxMs\":0},\"getProgramInfoLog\":{\"count\":5,\"totalMs\":44.9,\"maxMs\":11.7},\"getShaderInfoLog\":{\"count\":10,\"totalMs\":0.8,\"maxMs\":0.2},\"getProgramParameter\":{\"count\":15,\"totalMs\":0.6,\"maxMs\":0.2},\"getActiveUniform\":{\"count\":192,\"totalMs\":0.1,\"maxMs\":0.1},\"getUniformLocation\":{\"count\":192,\"totalMs\":0.1,\"maxMs\":0.1},\"generateMipmap\":{\"count\":4,\"totalMs\":0,\"maxMs\":0}}}",
+      "timestamp": "2026-10-20T17:13:58.993Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-n7uerDUr.js"
+    }
+  ],
+  "dom": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua In corso\" [active]:\n        - generic: Sistema acqua\n        - generic: In corso\n      - button \"Accesso & comfort\":\n        - generic: Accesso & comfort\n      - button \"Finiture\":\n        - generic: Finiture\n      - button \"Esterno\":\n        - generic: Esterno\n      - button \"Optional\":\n        - generic: Optional\n      - button \"Presentazione\":\n        - generic: Presentazione\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - status: Struttura · Cemento armato\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 2: Sistema acqua\"':\n  - paragraph: \"Come l’acqua viene filtrata: decide il livello dell’acqua rispetto al bordo.\"\n  - tablist \"Sistema piscina\":\n    - tab \"Sistema\" [selected]\n    - tab \"Lato Infinity\"\n  - group \"Sistema idraulico\":\n    - button \"Skimmer\":\n      - generic: Skimmer\n      - generic: Acqua 12 cm sotto il bordo, aspirata da bocchette a parete.\n    - button \"Sfioro\":\n      - generic: Sfioro\n      - generic: \"Acqua a filo bordo: tracima in un canale perimetrale.\"\n    - button \"Infinity\" [pressed]:\n      - generic: \"Infinity\"\n      - generic: \"Un lato senza bordo: l’acqua scompare verso il panorama.\"\n  - 'button \"Prossima scelta: Lato Infinity\"':\n    - text: \"Prossima scelta: Lato Infinity\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 02 di 07\n    - generic: · 1/2 · Sistema acqua\n  - heading \"Sistema acqua\" [level=2]\n  - paragraph: Infinity · lato scelto\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Lato Infinity\":\n    - text: Continua\n    - generic: · Lato Infinity\n- region \"Notifications alt+T\"",
+  "canvas": {
+    "data": {
+      "cameraFocus": "review",
+      "cameraProjection": "perspective",
+      "engine": "three.js r185"
+    },
+    "height": 900,
+    "rect": {
+      "bottom": 900,
+      "height": 900,
+      "left": 0,
+      "right": 1440,
+      "top": 0,
+      "width": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "visibility": "visible",
+    "width": 1440
+  }
+}

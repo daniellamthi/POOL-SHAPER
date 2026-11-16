@@ -9,7 +9,11 @@ import {
   type ReactNode,
 } from "react";
 import { ConfiguratorContext, type ConfiguratorContextValue } from "./context";
+import { normalizeSunShelfLoungers, configuredSunShelfLoungers } from "./sun-shelf-loungers";
+import { isSunShelfLoungerColor, sunShelfLoungerColor, type SunShelfLoungerColorId } from "./sun-shelf-lounger-colors";
 import { focusForAction, nextFocusRequest, type FocusRequest } from "./contextual-camera";
+import { copingMaterialForPool } from "./coping-materials";
+import { isReferenceFinish } from "./reference-finishes";
 import {
   DEFAULT_CONTROL_POINTS,
   DEFAULT_CUSTOMER,
@@ -43,6 +47,7 @@ import {
 import { loadSharedProjectFn } from "@/lib/project-delivery/projectDelivery.server";
 import {
   getProjectLink,
+  projectLinkIsDirty,
   projectSnapshotFingerprint,
   setProjectLink,
   sharedRefFromLocation,
@@ -78,6 +83,9 @@ import type {
   RenovationConfig,
 } from "./types";
 import { clampLShapeDimensions, type LShapeOrientation } from "./l-shape";
+import { integratedCoping, supportsCopingStyle, supportsCopingEdge, isCopingEdge } from "./coping-style";
+import { configuredOutline } from "./configured-outline";
+import { configuredSunShelfRange, sunShelfRunWithinRange } from "./sun-shelf-range";
 import { clampOrganicShapeParams } from "./organic-shape";
 import { pavingId, pavingFormatId, premiumEnvironment, type PavingId, type PavingFormatId, type PremiumEnvironment } from "./presentation";
 import { clampInfinityEdgeParams, compatibleInfinityZones, compatiblePoolSystem, infinityZonesForOutline, resolveInfinitySelection } from "./infinity-edge";
@@ -94,6 +102,8 @@ type Action =
   | { type: "setCustomerField"; key: keyof CustomerInfo; value: string }
   | { type: "setShape"; value: PoolShapeId }
   | { type: "setCopingMaterial"; value: NonNullable<PoolConfig["copingMaterial"]> }
+  | { type: "setCopingStyle"; value: NonNullable<PoolConfig["copingStyle"]> }
+  | { type: "setCopingEdge"; value: NonNullable<PoolConfig["copingEdge"]> }
   | { type: "setCustomMode"; value: CustomMode }
   | { type: "setControlPoint"; index: number; value: ControlPoint }
   | { type: "resetControlPoints" }
@@ -105,15 +115,20 @@ type Action =
   | { type: "setSystem"; value: SystemType }
   | { type: "setOverflowType"; value: OverflowType }
   | { type: "setInfinitySide"; value: number }
+  | { type: "setInfinityWall"; value: "traditional" | "glass" }
   | { type: "setSkimmerFinish"; value: SkimmerFinishId }
   | { type: "setSkimmerType"; value: SkimmerTypeId }
   | { type: "setFinish"; value: FinishMaterial }
   | { type: "setLinerColor"; value: LinerColor }
   | { type: "setMosaicFinish"; value: MosaicFinishId }
   | { type: "togglePoolFeature"; value: PoolFeatureId }
+  | { type: "setSunShelfLoungerCount"; value: number }
+  | { type: "setIntegratedBenchStations"; value: number }
+  | { type: "setSunShelfLoungerColor"; value: SunShelfLoungerColorId }
+  | { type: "setSunShelfRun"; value: number }
   | { type: "setLedColor"; value: string }
   | { type: "setLedIntensity"; value: number }
-  | { type: "setSceneTime"; value: "day" | "night" }
+  | { type: "setSceneTime"; value: "day" | "night"; preserveCamera?: boolean }
   | { type: "setPaving"; value: PavingId }
   | { type: "setPavingFormat"; value: PavingFormatId }
   | { type: "setExteriorPanelFinish"; value: ExteriorPanelFinishId }
@@ -146,6 +161,7 @@ type Action =
   | { type: "restoreProject"; value: ProjectConfiguration };
 
 interface State {
+  sunShelfNotice?: string | null;
   visualFocus?: FocusRequest | null;
   /** Session preference; inactive Infinity never leaks into saved configuration. */
   lastInfinitySide?: number | undefined;
@@ -214,13 +230,48 @@ function validateInfinity(config: PoolConfig, invalidate = false): PoolConfig {
   const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
   const edge = resolveInfinitySelection(
     outline, config.shape, config.poolType, invalidate ? undefined : config.infinityEdge?.side,
+    config.infinityEdge?.wallType,
   );
   return edge ? { ...config, infinityEdge: edge } : withoutInfinityEdge({ ...config, system: "skimmer" });
 }
 
 function configurationReducer(state: State, action: Action): State {
+  const next = reduceConfiguration(state, action);
+  if (next.config === state.config) return next;
+  const config = normalizeSunShelfLoungers(next.config);
+  const removed = state.config.features.includes("sunShelfLoungers") && !config.features.includes("sunShelfLoungers")
+    && !(action.type === "togglePoolFeature" && action.value === "sunShelfLoungers");
+  const reduced = config.sunShelfLoungerCount !== next.config.sunShelfLoungerCount && config.features.includes("sunShelfLoungers");
+  const explicitLoungerToggle = action.type === "togglePoolFeature" && action.value === "sunShelfLoungers";
+  return { ...next, config, sunShelfNotice: removed
+    ? "Lettini per spiaggetta rimossi: la spiaggetta non è più disponibile o compatibile."
+    : reduced ? "Quantità lettini aggiornata allo spazio disponibile."
+    : explicitLoungerToggle ? null : next.sunShelfNotice ?? null };
+}
+
+function reduceConfiguration(state: State, action: Action): State {
   const config = state.config;
   switch (action.type) {
+    case "setSunShelfRun": {
+      if (!config.features.includes("sunShelf") || !sunShelfRunWithinRange(configuredSunShelfRange(config), action.value)) return state;
+      const candidate = { ...config, dimensions: { ...config.dimensions, sunShelfRun: action.value } };
+      if (!configuredComfortPlan(candidate).availability.sunShelf.available) return state;
+      return { ...state, config: candidate };
+    }
+    case "setIntegratedBenchStations": {
+      const bench = configuredComfortPlan(config).elements.find(element => element.kind === "integratedBench");
+      return bench?.stations && Number.isSafeInteger(action.value) && action.value >= 1 && action.value <= bench.stations.capacity
+        ? { ...state, config: { ...config, integratedBenchStations: action.value } } : state;
+    }
+    case "setSunShelfLoungerCount":
+      return config.features.includes("sunShelfLoungers") && Number.isFinite(action.value)
+        ? { ...state, sunShelfNotice: null, config: { ...config, sunShelfLoungerCount: Math.max(1, Math.trunc(action.value)) } }
+        : state;
+    case "setSunShelfLoungerColor":
+      return config.features.includes("sunShelfLoungers") && isSunShelfLoungerColor(action.value)
+        && sunShelfLoungerColor(config.sunShelfLoungerColor).id !== action.value
+        ? { ...state, config: { ...config, sunShelfLoungerColor: action.value } }
+        : state;
     case "setLedColor":
       return isLedColor(action.value)
         ? { ...state, config: { ...config, ledColor: action.value.toLowerCase() } }
@@ -242,6 +293,7 @@ function configurationReducer(state: State, action: Action): State {
     case "setSceneTime":
       return { ...state, config: { ...config, sceneTime: action.value } };
     case "setPaving":
+      if (config.poolType !== "in-ground" && isReferenceFinish(action.value)) return state;
       return { ...state, config: { ...config, paving: pavingId(action.value), pavingFormat: pavingFormatId(action.value, config.pavingFormat) } };
     case "setPavingFormat":
       return { ...state, config: { ...config, pavingFormat: pavingFormatId(config.paving, action.value) } };
@@ -293,6 +345,11 @@ function configurationReducer(state: State, action: Action): State {
         finish: normaliseFinishForStructure(structure, config.finish),
         features,
         system,
+        ...(aboveGround && config.overflowType === "continuous" ? { overflowType: "hidden" as const } : {}),
+        ...(aboveGround && isReferenceFinish(config.copingMaterial)
+          ? { copingMaterial: copingMaterialForPool(config.copingMaterial, action.value) } : {}),
+        ...(aboveGround && isReferenceFinish(config.paving)
+          ? { paving: "gres" as const, pavingFormat: pavingFormatId("gres", config.pavingFormat) } : {}),
         // Above ground the internal entry steps are included by default; the
         // customer can still remove them in Accesso & comfort.
         ...(aboveGround && (config.poolAccess === null || config.poolAccess === "stainlessSteelLadder")
@@ -362,16 +419,24 @@ function configurationReducer(state: State, action: Action): State {
             shapeSelected: true,
             dimensions,
             system,
-            features:
-              action.value === "rectangle"
-                ? config.features
-                : config.features.filter((id) => id !== "sunShelf" && id !== "hydromassage" && id !== "integratedBench"),
+            // Keep requested comfort on shape changes. The derived layout hides
+            // impossible geometry and requires explicit resolution, never data loss.
+            features: config.features,
           },
           action.value !== config.shape,
         ),
       };
     }
+    case "setCopingStyle":
+      if (!supportsCopingStyle(config)) return state;
+      if ((integratedCoping(config) ? "flush" : "dedicated") === action.value) return state;
+      return action.value === "dedicated" || action.value === "flush"
+        ? { ...state, config: { ...config, copingStyle: action.value } } : state;
+    case "setCopingEdge":
+      if (!supportsCopingEdge(config) || !isCopingEdge(action.value) || (config.copingEdge ?? "square") === action.value) return state;
+      return { ...state, config: { ...config, copingEdge: action.value } };
     case "setCopingMaterial":
+      if (config.poolType !== "in-ground" && isReferenceFinish(action.value)) return state;
       return { ...state, config: { ...config, copingMaterial: action.value } };
     case "setCustomMode":
       return { ...state, config: { ...config, customMode: action.value } };
@@ -471,13 +536,18 @@ function configurationReducer(state: State, action: Action): State {
       return { ...state, lastInfinitySide,
         config: system === "infinity"
           ? validateInfinity({ ...nextConfig, ...(typeof lastInfinitySide === "number" ? {
-              infinityEdge: clampInfinityEdgeParams({ enabled: true, side: lastInfinitySide }),
+              infinityEdge: clampInfinityEdgeParams({ ...config.infinityEdge, enabled: true, side: lastInfinitySide }),
             } : {}) })
           : withoutInfinityEdge(nextConfig),
       };
     }
     case "setOverflowType":
-      return { ...state, config: { ...config, overflowType: action.value } };
+      return action.value === "continuous" && config.poolType === "above-ground" ? state
+        : { ...state, config: { ...config, overflowType: action.value } };
+    case "setInfinityWall":
+      return config.system === "infinity" ? { ...state, config: { ...config,
+        infinityEdge: clampInfinityEdgeParams({ ...config.infinityEdge, wallType: action.value }),
+      } } : state;
     case "setInfinitySide":
       if (!compatibleInfinityZones(buildOutline(config.shape, config.dimensions, config.controlPoints), config.shape, config.poolType).some((zone) => zone.side === action.value)) return state;
       // Rectangle and L-shape, this pass -- the Acqua step never dispatches
@@ -511,6 +581,13 @@ function configurationReducer(state: State, action: Action): State {
     case "togglePoolFeature": {
       if (action.value === "inoxLadder" && config.poolType === "above-ground") return state;
       if (action.value === "externalStaircase" && config.poolType !== "above-ground") return state;
+      if (!config.features.includes(action.value)) {
+        if (action.value === "sunShelf" || action.value === "hydromassage") {
+          const proposal = { ...config, features: normalizeComfortFeatures([...config.features, action.value], action.value) };
+          if (!configuredComfortPlan(proposal).availability[action.value].available) return state;
+        }
+        if (action.value === "sunShelfLoungers" && !configuredSunShelfLoungers(config).available) return state;
+      }
       const features = config.features.includes(action.value)
         ? normalizeComfortFeatures(config.features.filter((id) => id !== action.value))
         : normalizeComfortFeatures([...config.features, action.value], action.value);
@@ -646,6 +723,7 @@ function configurationReducer(state: State, action: Action): State {
  * instead of the provider's own closed-over state, since it needs to run
  * against the just-loaded draft before that state is committed. */
 function firstIncompleteStepIndex(config: PoolConfig, renovation: RenovationConfig): number {
+  if (config.projectType === null) return 0;
   if (config.projectType === "renovation") {
     for (let i = 1; i < RENOVATION_STEPS.length - 1; i++)
       if (!renovationStepComplete(i, config, renovation)) return i;
@@ -673,7 +751,7 @@ export function reducer(state: State, action: Action): State {
     const renovation = cleanRenovation(next.renovation);
     next = { ...next, renovation, config: renovationPreviewConfig(next.config, renovation) };
   }
-  return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config)) };
+  return { ...next, visualFocus: nextFocusRequest(state.visualFocus ?? null, focusForAction(action, next.config, state.visualFocus?.focus)) };
 }
 
 export function ConfiguratorProvider({ children }: { children: ReactNode }) {
@@ -690,15 +768,29 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
   // server/client hydration mismatch to worry about; this effect only ever
   // runs in the browser, after hydration.
   const [justRestoredProject, setJustRestoredProject] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const sharedLoadRevision = useRef(0);
   const [sharedProject, setSharedProject] = useState<ConfiguratorContextValue["sharedProject"]>(null);
   useEffect(() => {
+    const revision = ++sharedLoadRevision.current;
     // Build 2: a share link restores that exact saved snapshot and lands on
     // the presentation; it takes precedence over this browser's local draft.
     const sharedRef = sharedRefFromLocation();
+    const draft = loadProjectDraft();
+    const draftLink = draft ? getProjectLink(draft.projectId) : null;
+    // A saved URL must not discard this owner's newer autosaved edits.
+    if (sharedRef && draft && draftLink?.editToken && draftLink.publicRef === sharedRef && projectLinkIsDirty(draftLink, draft)) {
+      dispatch({ type: "restoreProject", value: draft });
+      dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
+      setJustRestoredProject(true);
+      setDraftReady(true);
+      return undefined;
+    }
     if (sharedRef) {
       setSharedProject({ publicRef: sharedRef, status: "loading" });
       void loadSharedProjectFn({ data: { publicRef: sharedRef } })
         .then((result) => {
+          if (revision !== sharedLoadRevision.current) return;
           if (!result.ok) {
             setSharedProject({ publicRef: sharedRef, status: "error", message: result.message });
             return;
@@ -710,7 +802,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
             ...shared,
             config: {
               ...shared.config,
-              customer: loadProjectDraft()?.config.customer ?? shared.config.customer,
+              customer: draft?.config.customer ?? shared.config.customer,
             },
           };
           const known = getProjectLink(project.projectId);
@@ -729,38 +821,62 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
                 : STEPS.length - 1,
           });
           setSharedProject({ publicRef: sharedRef, status: "ready" });
+          setDraftReady(true);
         })
-        .catch(() =>
+        .catch(() => {
+          if (revision !== sharedLoadRevision.current) return;
           setSharedProject({
             publicRef: sharedRef,
             status: "error",
             message: "Progetto non disponibile in questo momento.",
-          }),
-        );
-      return;
+          });
+        });
+      return () => {
+        if (revision === sharedLoadRevision.current) sharedLoadRevision.current += 1;
+      };
     }
-    const draft = loadProjectDraft();
-    if (!draft) return;
-    dispatch({ type: "restoreProject", value: draft });
-    dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
-    setJustRestoredProject(true);
+    if (draft) {
+      dispatch({ type: "restoreProject", value: draft });
+      dispatch({ type: "goToStep", value: firstIncompleteStepIndex(draft.config, draft.renovation) });
+      setJustRestoredProject(true);
+    }
+    setDraftReady(true);
     // Runs once per mount by design -- a later `reset()` starts a fresh
     // project and clears the draft rather than re-triggering this restore.
+    return undefined;
   }, []);
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
-    // Debounced so a drag/typing burst writes once, not on every change.
-    saveTimeoutRef.current = setTimeout(() => saveProjectDraft(projectConfiguration), 800);
-    return () => {
-      if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
+    // Never overwrite a local draft with defaults while a share is loading
+    // or has failed. Explicitly starting a new project releases this gate.
+    if (!draftReady) return;
+    const flush = () => {
+      if (saveTimeoutRef.current === null) return;
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+      saveProjectDraft(projectConfiguration);
     };
-  }, [projectConfiguration]);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    // Debounced so a drag/typing burst writes once, not on every change.
+    // Exit/suspension must not discard the last selection inside that window.
+    saveTimeoutRef.current = setTimeout(flush, 800);
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (saveTimeoutRef.current !== null) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    };
+  }, [projectConfiguration, draftReady]);
 
   const outline = useMemo(
-    () => buildOutline(config.shape, config.dimensions, config.controlPoints),
-    [config.shape, config.dimensions, config.controlPoints],
+    () => configuredOutline(config),
+    [config.shape, config.dimensions, config.controlPoints, config.poolType, config.system, config.overflowType, config.copingStyle, config.copingEdge],
   );
 
   const metrics = useMemo(
@@ -832,6 +948,8 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setCustomerField: (key, v) => dispatch({ type: "setCustomerField", key, value: v }),
       setShape: (v) => dispatch({ type: "setShape", value: v }),
       setCopingMaterial: (v) => dispatch({ type: "setCopingMaterial", value: v }),
+      setCopingStyle: (v) => dispatch({ type: "setCopingStyle", value: v }),
+      setCopingEdge: (v) => dispatch({ type: "setCopingEdge", value: v }),
       setCustomMode: (v) => dispatch({ type: "setCustomMode", value: v }),
       setControlPoint: (index, v) => dispatch({ type: "setControlPoint", index, value: v }),
       resetControlPoints: () => dispatch({ type: "resetControlPoints" }),
@@ -843,15 +961,21 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       setSystem: (v) => dispatch({ type: "setSystem", value: v }),
       setOverflowType: (v) => dispatch({ type: "setOverflowType", value: v }),
       setInfinitySide: (v) => dispatch({ type: "setInfinitySide", value: v }),
+      setInfinityWall: (v) => dispatch({ type: "setInfinityWall", value: v }),
       setSkimmerFinish: (v) => dispatch({ type: "setSkimmerFinish", value: v }),
       setSkimmerType: (v) => dispatch({ type: "setSkimmerType", value: v }),
       setFinish: (v) => dispatch({ type: "setFinish", value: v }),
       setLinerColor: (v) => dispatch({ type: "setLinerColor", value: v }),
       setMosaicFinish: (v) => dispatch({ type: "setMosaicFinish", value: v }),
       togglePoolFeature: (v) => dispatch({ type: "togglePoolFeature", value: v }),
+      setSunShelfLoungerCount: (v) => dispatch({ type: "setSunShelfLoungerCount", value: v }),
+      setIntegratedBenchStations: (v) => dispatch({ type: "setIntegratedBenchStations", value: v }),
+      setSunShelfLoungerColor: (v) => dispatch({ type: "setSunShelfLoungerColor", value: v }),
+      setSunShelfRun: (v) => dispatch({ type: "setSunShelfRun", value: v }),
+      sunShelfNotice: state.sunShelfNotice ?? null,
       setLedColor: (v) => dispatch({ type: "setLedColor", value: v }),
       setLedIntensity: (v) => dispatch({ type: "setLedIntensity", value: v }),
-      setSceneTime: (v) => dispatch({ type: "setSceneTime", value: v }),
+      setSceneTime: (v, preserveCamera = false) => dispatch({ type: "setSceneTime", value: v, preserveCamera }),
       setPaving: (v) => dispatch({ type: "setPaving", value: v }),
       setPavingFormat: (v) => dispatch({ type: "setPavingFormat", value: v }),
       setExteriorPanelFinish: (v) => dispatch({ type: "setExteriorPanelFinish", value: v }),
@@ -886,6 +1010,7 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
       next: () => dispatch({ type: "next" }),
       previous: () => dispatch({ type: "previous" }),
       reset: () => {
+        sharedLoadRevision.current += 1;
         for (const upload of config.uploads) {
           if (upload.url) URL.revokeObjectURL(upload.url);
         }
@@ -893,6 +1018,11 @@ export function ConfiguratorProvider({ children }: { children: ReactNode }) {
         // next visit -- clear it immediately rather than waiting for the
         // debounced autosave to overwrite it with the fresh (blank) state.
         clearProjectDraft();
+        const location = new URL(window.location.href);
+        location.searchParams.delete("p");
+        window.history.replaceState(window.history.state, "", location.href);
+        setSharedProject(null);
+        setDraftReady(true);
         setJustRestoredProject(false);
         dispatch({ type: "reset" });
       },

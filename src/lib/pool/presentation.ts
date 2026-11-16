@@ -1,5 +1,6 @@
 /** Presentation choices never change the pool or its compatibility rules. */
 import { COPING_MATERIALS, type CopingMaterialId } from "./coping-materials";
+import { isReferenceFinish } from "./reference-finishes";
 export type PavingId = "gres" | "wood" | "istria" | Exclude<CopingMaterialId, "anthracite-gres" | "deck-marrone">;
 export const PAVING_FORMATS = {
   "30x60": { label: "30 × 60 cm", module: [0.6, 0.3] },
@@ -13,6 +14,7 @@ export const PAVING_FORMATS = {
   "90x90": { label: "90 × 90 cm", module: [0.9, 0.9] },
 } as const;
 export type PavingFormatId = keyof typeof PAVING_FORMATS;
+const REFERENCE_STONE_FORMATS = ["60x120", "30x60", "60x60"] as const;
 const FORMATS: Record<PavingId, readonly PavingFormatId[]> = {
   gres: ["60x120", "30x60", "60x60"],
   travertine: ["60x120", "30x60", "60x60"],
@@ -20,6 +22,14 @@ const FORMATS: Record<PavingId, readonly PavingFormatId[]> = {
   prun: ["50x100", "50x50"],
   wpc: ["wpc-140x2200"], wood: ["wood-140x2400"],
   istria: ["40x60"], ardesia: ["90x90"],
+  "reference-light": REFERENCE_STONE_FORMATS,
+  "reference-grigio": REFERENCE_STONE_FORMATS,
+  "reference-avorio": REFERENCE_STONE_FORMATS,
+  "reference-beige": REFERENCE_STONE_FORMATS,
+  "reference-greige": REFERENCE_STONE_FORMATS,
+  "reference-ipe": ["wood-140x2400"],
+  "reference-travertine-light": REFERENCE_STONE_FORMATS,
+  "reference-travertine-veined": REFERENCE_STONE_FORMATS,
 };
 export const pavingFormats = (material: unknown) => FORMATS[pavingId(material)];
 export function pavingFormatId(material: unknown, value?: unknown): PavingFormatId {
@@ -29,7 +39,7 @@ export function pavingFormatId(material: unknown, value?: unknown): PavingFormat
 /** Dimensions describe the visualization, not a certified supplier specification. */
 export function pavingLayout(material: unknown, format?: unknown) {
   const id = pavingId(material), formatId = pavingFormatId(id, format);
-  const boards = id === "wood" || id === "wpc";
+  const boards = id === "wood" || id === "wpc" || id === "reference-ipe";
   return { ...PAVING.find(p => p.id === id)!, formatId,
     formatLabel: PAVING_FORMATS[formatId].label, module: PAVING_FORMATS[formatId].module,
     gap: boards ? 0.005 : 0.003, thickness: boards ? 0.025 : 0.02,
@@ -44,7 +54,7 @@ export const PAVING: ReadonlyArray<{ id: PavingId; label: string; module: readon
     id: m.id as PavingId, label: m.title, module: PAVING_FORMATS[FORMATS[m.id as PavingId][0]!].module,
     color: m.id === "prun" ? "#ffffff" : m.color,
     maps: m.id === "prun" ? "prun" : "asset" in m ? m.asset.dir.split("/").at(-1)! : null,
-    note: "Finitura del catalogo bordo · selezione indipendente",
+    note: isReferenceFinish(m.id) ? "Finitura fotografica di riferimento · selezione indipendente" : "Finitura del catalogo bordo · selezione indipendente",
   })),
 ];
 export const PREMIUM_ENVIRONMENTS = [
@@ -53,4 +63,6 @@ export const PREMIUM_ENVIRONMENTS = [
   { id: "panorama-infinity", label: "Panorama Infinity", description: "Identità costiera Simons Town, senza modificare il sistema piscina." },
 ] as const;
 export const pavingId = (value: unknown): PavingId => PAVING.some(p => p.id === value) ? value as PavingId : "gres";
+export const pavingMaterialsForPool = (poolType: unknown) => PAVING.filter(p => poolType === "in-ground" || !isReferenceFinish(p.id));
+export const pavingForPool = (value: unknown, poolType: unknown): PavingId => poolType === "above-ground" && isReferenceFinish(value) ? "gres" : pavingId(value);
 export const premiumEnvironment = (value: unknown): PremiumEnvironment => PREMIUM_ENVIRONMENTS.some(p => p.id === value) ? value as PremiumEnvironment : "outdoor-villa";

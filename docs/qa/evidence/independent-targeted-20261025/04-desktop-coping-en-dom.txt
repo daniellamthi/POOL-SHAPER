@@ -1,0 +1,79 @@
+- heading "3D Pool Configurator" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Configuration phases":
+    - list:
+      - button "Pool Reinforced concrete · 12.0 × 4.5 m":
+        - generic: Pool
+        - generic: Reinforced concrete · 12.0 × 4.5 m
+      - button "Water system Hidden overflow":
+        - generic: Water system
+        - generic: Hidden overflow
+      - button "Access & comfort Internal stairs · Sun shelf · Bench":
+        - generic: Access & comfort
+        - generic: Internal stairs · Sun shelf · Bench
+      - button "Finishes PVC liner · Blue Sky [602]":
+        - generic: Finishes
+        - generic: PVC liner · Blue Sky [602]
+      - button "Exterior In progress":
+        - generic: Exterior
+        - generic: In progress
+      - button "Options":
+        - generic: Options
+      - button "Presentation":
+        - generic: Presentation
+  - group "Language":
+    - button "Italian": IT
+    - button "English" [active] [pressed]: EN
+  - group "Scene time":
+    - button "Day" [pressed]:
+      - generic: Day
+    - button "Night":
+      - generic: Night
+  - button "Start again":
+    - generic: Start again
+- main:
+  - button "Pool view":
+    - text: Pool view
+  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan
+  - toolbar "View tools":
+    - button "Guides":
+      - text: Guides
+    - button "Technical view":
+      - text: Technical view
+    - button "Reframe":
+      - text: Reframe
+- 'region "Step 5: Exterior"':
+  - paragraph: "The pool coping and surrounding paving: the exterior appears here."
+  - tablist "Coping and decking":
+    - tab "Pool coping" [selected]
+    - tab "Paving"
+  - group "Coping style":
+    - button "Separate coping":
+      - generic: Separate coping
+      - generic: Rounded pool corners R20 cm, with an independent coping finish.
+    - button "Coping flush with paving" [pressed]:
+      - generic: Coping flush with paving
+      - generic: One continuous level with the same paving finish.
+  - paragraph: The coping follows the paving material, size and layout.
+  - button "Choose paving":
+    - text: Choose paving
+  - 'button "Next option: Paving"':
+    - text: "Next option: Paving"
+  - button "More options":
+    - text: More options
+  - paragraph:
+    - text: Phase 05 of 07
+    - generic: · 1/2 · Pool coping
+  - heading "Exterior" [level=2]
+  - paragraph: Deck-level pool edge · Porcelain stoneware · 60 × 120 cm
+  - button "View the pool":
+    - text: View the pool
+  - button "Minimise" [expanded]:
+    - text: Minimise
+  - button "Back":
+    - text: Back
+  - button "Continue · Paving":
+    - text: Continue
+    - generic: · Paving
+- region "Notifications alt+T"

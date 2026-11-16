@@ -15,6 +15,8 @@
  */
 import { exteriorPanelFinish, externalStairSide } from "./above-ground";
 import { normalizeComfortFeatures } from "./comfort-selection";
+import { normalizeSunShelfLoungers } from "./sun-shelf-loungers";
+import { isSunShelfLoungerColor } from "./sun-shelf-lounger-colors";
 import type { PoolConfig, RenovationConfig } from "./types";
 import { normalisedLedIntensity } from "./led-optics";
 import { clampShallowDepth } from "./floor-profile";
@@ -22,7 +24,9 @@ import { clampLShapeDimensions } from "./l-shape";
 import { compatiblePoolSystem, resolveInfinitySelection } from "./infinity-edge";
 import { buildOutline } from "./geometry";
 import { isRenovationConfig } from "./renovation";
-import { pavingId, pavingFormatId, premiumEnvironment } from "./presentation";
+import { pavingId, pavingForPool, pavingFormatId, premiumEnvironment } from "./presentation";
+import { copingMaterialForPool } from "./coping-materials";
+import { isCopingStyle, isCopingEdge } from "./coping-style";
 import {
   normaliseFinishForStructure,
   normalisePoolStructure,
@@ -69,12 +73,13 @@ export function toProjectConfiguration(
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
-    config: {
+    config: normalizeSunShelfLoungers({
       ...config,
+      ...(config.poolType === "above-ground" && config.overflowType === "continuous" ? { overflowType: "hidden" as const } : {}),
       ...(config.poolType === "above-ground" ? { externalStairPlatformExtended: true } : {}),
       structure,
       finish: normaliseFinishForStructure(structure, config.finish),
-    },
+    }),
     renovation,
   };
 }
@@ -117,6 +122,20 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // commercial email, quotation -- sees a real number instead of each having
   // to guess a fallback of its own.
   const restored = config as PoolConfig;
+  if (restored.copingStyle !== undefined && !isCopingStyle(restored.copingStyle)) throw new Error("ProjectConfiguration: invalid copingStyle");
+  if (restored.copingEdge !== undefined && !isCopingEdge(restored.copingEdge)) throw new Error("ProjectConfiguration: invalid copingEdge");
+  if (restored.integratedBenchStations !== undefined && (!Number.isSafeInteger(restored.integratedBenchStations) || restored.integratedBenchStations < 1 || restored.integratedBenchStations > 4))
+    throw new Error("ProjectConfiguration: invalid integratedBenchStations");
+  if (restored.sunShelfLoungerColor !== undefined && !isSunShelfLoungerColor(restored.sunShelfLoungerColor)) {
+    throw new Error("ProjectConfiguration: invalid sunShelfLoungerColor");
+  }
+  // Preserve a positive requested run even when a later resize makes it
+  // incompatible; malformed persisted values must never reach numeric UI.
+  const shelfRun = restored.dimensions?.sunShelfRun;
+  if (shelfRun !== undefined &&
+      (typeof shelfRun !== "number" || !Number.isFinite(shelfRun) || shelfRun <= 0)) {
+    throw new Error("ProjectConfiguration: invalid sunShelfRun");
+  }
   // Do not silently redesign a retired product on restore.
   if (restored.shape === "organic") throw new Error("Progetto con forma organica non più supportato. Il file originale resta invariato.");
   const slopeNormalisedDimensions =
@@ -182,7 +201,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   // "infinity") -- a project that never touched Infinity must round-trip
   // byte-for-byte identical, never gain a new field it didn't have before.
   const infinityEdge = system === "infinity"
-    ? resolveInfinitySelection(outline, restored.shape, restored.poolType, restored.infinityEdge?.side)
+    ? resolveInfinitySelection(outline, restored.shape, restored.poolType, restored.infinityEdge?.side, restored.infinityEdge?.wallType)
     : undefined;
   const {
     infinityEdge: _savedInfinityEdge,
@@ -196,21 +215,20 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
   return {
     schemaVersion: PROJECT_SCHEMA_VERSION,
     projectId,
-    config: {
+    config: normalizeSunShelfLoungers({
       ...restoredWithoutEdge,
-      ...(restored.paving !== undefined ? { paving: pavingId(restored.paving) } : {}),
+      ...(restored.poolType === "above-ground" && restored.overflowType === "continuous" ? { overflowType: "hidden" as const } : {}),
+      ...(restored.copingMaterial !== undefined ? { copingMaterial: copingMaterialForPool(restored.copingMaterial, restored.poolType) } : {}),
+      ...(restored.paving !== undefined ? { paving: pavingForPool(restored.paving, restored.poolType) } : {}),
       ...(restored.pavingFormat !== undefined ? { pavingFormat: pavingFormatId(restored.paving, restored.pavingFormat) } : {}),
       ...(restored.premiumEnvironment !== undefined ? { premiumEnvironment: premiumEnvironment(restored.premiumEnvironment) } : {}),
       // External access is only built above ground. Restore the same valid
       // selection in the scene, summary and render export.
       features: normalizeComfortFeatures(restored.poolType === "above-ground"
         ? restored.features.filter((id) => id !== "sunShelf" && id !== "integratedBench" && id !== "inoxLadder")
-        : restored.features.filter(
-            (id) =>
-              id !== "externalStaircase" &&
-              (restored.shape === "rectangle" ||
-                (id !== "sunShelf" && id !== "integratedBench")),
-          )),
+        // A draft may contain an unresolved comfort request after a shape
+        // change. Preserve it through Save/Reload so it can be resolved/restored.
+        : restored.features.filter((id) => id !== "externalStaircase")),
       // Above-ground-only selections never survive on an in-ground project.
       equipment: restored.poolType === "above-ground"
         ? restored.equipment
@@ -251,7 +269,7 @@ export function parseProjectConfiguration(json: string): ProjectConfiguration {
       finish,
       system,
       ...(infinityEdge !== undefined ? { infinityEdge } : {}),
-    },
+    }),
     renovation: renovation as RenovationConfig,
   };
 }

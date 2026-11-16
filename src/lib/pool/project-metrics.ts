@@ -3,7 +3,8 @@
  * computation the live configurator, the Premium Summary and the Project
  * Book PDF all use, so their numbers can never disagree.
  */
-import { buildOutline, computeMetrics } from "./geometry";
+import { computeMetrics } from "./geometry";
+import { configuredOutline } from "./configured-outline";
 import { buildFloorProfile, computeSlopeMetrics } from "./floor-profile";
 import { getPoolVerticalLayout } from "./vertical-layout";
 import { configuredComfortPlan } from "./comfort-plan";
@@ -20,6 +21,7 @@ export function projectMetrics(config: PoolConfig, outline: Outline) {
     overflowType: config.overflowType,
     depth: config.dimensions.depth,
     copingThickness: 0,
+    copingStyle: config.copingStyle,
   });
   const floorProfile = buildFloorProfile({
     outline,
@@ -28,9 +30,11 @@ export function projectMetrics(config: PoolConfig, outline: Outline) {
     dimensions: config.dimensions,
     verticalLayout,
     sunShelf: config.features.includes("sunShelf") || config.features.includes("hydromassage"),
+    twoLoungerShelf: config.features.includes("sunShelf"),
     infinityEdge: config.system === "infinity" ? config.infinityEdge : null,
   });
-  const baseMetrics = floorProfile.sloped
+  const recessedOverflow = config.poolType !== "above-ground" && config.system === "overflow" && config.overflowType === "continuous";
+  const baseMetrics = floorProfile.sloped || recessedOverflow
     ? computeSlopeMetrics(outline, floorProfile, verticalLayout.waterY, verticalLayout.wallTopY)
     : computeMetrics(outline, config.dimensions.depth);
   const comfort = configuredComfortPlan(config);
@@ -44,7 +48,7 @@ export type ProjectMetrics = ReturnType<typeof projectMetrics>;
 
 /** Outline, metrics and skimmer plan of a configuration, as the scene uses them. */
 export function projectGeometry(config: PoolConfig) {
-  const outline = buildOutline(config.shape, config.dimensions, config.controlPoints);
+  const outline = configuredOutline(config);
   const metrics = projectMetrics(config, outline);
   const skimmers = planSkimmers(outline, metrics.waterSurface, config.system === "skimmer");
   return { outline, metrics, skimmers };

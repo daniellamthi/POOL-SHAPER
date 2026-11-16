@@ -1,0 +1,2281 @@
+{
+  "createdAt": "2026-10-20T18:50:43.286Z",
+  "status": "PASS: independent build/tests; UNPROBED production checkpoint, not performance PASS",
+  "root": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/residual-final-checkpoint-20261020-VqcJDl",
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "archive": "git archive exact commit streamed to fresh persistent directory; excludes .env*; overlays applied after archive completed",
+  "runtimeFileCount": 385,
+  "newRuntimeFiles": [
+    {
+      "name": "src/components/pool/three/RetainedStageMaterial.tsx",
+      "sha256": "db0bf71c22666c1048ff9d82a9dfe4086da4652b24ea524e8c08ffd87c4e7cda"
+    }
+  ],
+  "runtimeDifferencesFromHead": [
+    {
+      "name": "src/components/pool/three/PoolModel.tsx",
+      "sha256": "5740f81e841a4e8568cbe0be95ee1f800b4937b26c5fe87d7980f4585a121902",
+      "matchesHead": false
+    },
+    {
+      "name": "src/components/pool/three/WaterSurfaceMaterial.tsx",
+      "sha256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa",
+      "matchesHead": false
+    }
+  ],
+  "runtimeFiles": [
+    {
+      "name": "components.json",
+      "sha256": "37c484818824d2521eee3367e7aa2c2abbd19635d8103d19734b6e24603d0292",
+      "matchesHead": true
+    },
+    {
+      "name": "package-lock.json",
+      "sha256": "144d0f864f80ad94af246632792dabb897cd3f3f8b3a899cfb68b6a0eeb0b9a3",
+      "matchesHead": true
+    },
+    {
+      "name": "package.json",
+      "sha256": "1d317ca281c9eb7c7b451a1861c820c89d294533206617be2a0602233859ab34",
+      "matchesHead": true
+    },
+    {
+      "name": "public/favicon.png",
+      "sha256": "510c8fb29375ae53a76a637d039078d7075cd9b227ab57af06bf5f3580d9fd37",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/CREDITS.md",
+      "sha256": "c07f53cf4458cb903427f8709e1c9c8f0b1be9272d37270d3bd438f062647dec",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/infinity-white-cliff-1k.hdr",
+      "sha256": "ae772bc2823313e7134bedff860a6992eb93a88ca3c4be09ab8420bf45c4ad2c",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/infinity-white-cliff-LICENSE.md",
+      "sha256": "73020554c87cca5193ed593c04daeaba562c38fcb567478758a0954da018b2ea",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/infinity-white-cliff.jpg",
+      "sha256": "241958d58ec440c85ef2c896d83e7a161c5eb92c5c8163f3fed7b1d5a62ed871",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/pool-daylight-1k.hdr",
+      "sha256": "fe449864812f4bdfde39a2b024147774ccd34a7a0af7c999b74af49672c33cb0",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/qwantani-dusk-puresky-2k.hdr",
+      "sha256": "d28f81e36723852cb5dc15c82611e5be094c2a9bcbf0b279f265647b1cc11e17",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/qwantani-noon-puresky-2k.hdr",
+      "sha256": "d070d48c8e802c92027b0f7b1965b5bd820b0d25afca225503abfec67e00ad07",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/simons-town-rocks-1k.hdr",
+      "sha256": "b25e331ebbe3b52b87f6786aceb43bb20d7c3f1524344befd29b82ca72596e41",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/simons-town-rocks-LICENSE.md",
+      "sha256": "df19cd20454907cd9abddba6d2bbcd27f7bbbe3562bdfaaf4079cffee1466055",
+      "matchesHead": true
+    },
+    {
+      "name": "public/hdri/simons-town-rocks-background.jpg",
+      "sha256": "910fcfcc05bfb18b7d1b24ae0ee6cb903f2efea0a03f50ecbff4b8ca60dff856",
+      "matchesHead": true
+    },
+    {
+      "name": "public/premium-finishes/README.md",
+      "sha256": "70d15fdad1fee33d6a6d9ccbb4c70e60be9053e2bd30595ee8b27e60b1d998e5",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/PROVENANCE.md",
+      "sha256": "4250934074ac0bee9e1043bdcef7f81c3ee0174e7068589c6d4762e92f30617f",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/access-external.jpg",
+      "sha256": "ce4021a74b3db3602b525a0c8d09767fb699bdfec5baad7b82a8aad3c78ecb0f",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/access-ladder.jpg",
+      "sha256": "34e2369ce9c3ea9f1e9dcce96239fe362ac820b14799d317bee0527c89bcd8a8",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/capture-audit.json",
+      "sha256": "4642ffe40c4efd4509a4e34452ede4ce6d06be8b2888a8bde551fbe35125fe5b",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/comfort-sunShelf.jpg",
+      "sha256": "767ec781d6d46486da782a11b995a400580263402802e08104d9563c6f8e14fa",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/equipment-loungers.jpg",
+      "sha256": "a1b012e0ecaf1862018c750f1eeeb03baa9cee3efc5d7e3875c4559b69740f40",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/equipment-pellicano.jpg",
+      "sha256": "88ee9696bf515e36266c019ed4f50409dc919e227c70c0142e937f979fcb1202",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/equipment-sunShelfLoungers.jpg",
+      "sha256": "4d6e39deadb32e05bd4549bef25a5e123aa3eabfa5e0da99c6744a6bc7167ad5",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/lympha-deck.jpg",
+      "sha256": "f9b94396421cee4c922795a71c7b0cd9623852e54ee8f501da9a121b4bc05ef1",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/lympha-immersed.jpg",
+      "sha256": "4cd71dbe8408bcc35896669865321370d5c71930b7a248daaff65f3eefca1943",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/overflow-hidden.jpg",
+      "sha256": "a9fce737163b9e1463b6b50163076ed0f2a412e0349a52318d55c43b471ef852",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/overflow-visible.jpg",
+      "sha256": "f5170f73e09a740037af98672d5c8dec5929255a8402f214e364e89da9d70079",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/skimmer-high.jpg",
+      "sha256": "30b3b1baf214d059900f0f66e59867c6544d08ba70e8f912acbbd092a7666798",
+      "matchesHead": true
+    },
+    {
+      "name": "public/product-previews/skimmer-slim.jpg",
+      "sha256": "35f4766974be7994566399bcd36d111d43648500b0c408f96f6a48b886d3047d",
+      "matchesHead": true
+    },
+    {
+      "name": "public/robots.txt",
+      "sha256": "a3d27b3ca5ce32341fa9f96f01169b521b1657c05d1860c45d1e53a6258e9e8b",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/CREDITS.md",
+      "sha256": "423d0c1948fe75d0a97fbaef5df5315c91087324a1f0b8436f65695e4764427a",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/ardesia/ao.png",
+      "sha256": "51dc5ee71b9c68de99b270d4e2a22c0d831fdff14b9562a8775ba12b8d5798f5",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/ardesia/basecolor.png",
+      "sha256": "02dfd8c68dd4c8e90942599c8df7a7137ee7490d3a8ddea487ca9bb3a49c6255",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/ardesia/normal.png",
+      "sha256": "80ee8b7c5d74f1d81036b9652e8bb8eef7faad2b0be3e61c2434768e6d465b36",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/deck/ao.png",
+      "sha256": "94aaaa5647a429f7bc812c7ffde3e6ffd235d8d2e50380131b4b5f49131a7461",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/deck/basecolor.png",
+      "sha256": "89bfc126b7b8baa45a307f63801089f6514464c970d00eac478d5a38296efed1",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/deck/normal.png",
+      "sha256": "39f42a94c85ce0ec002df37f2500f06dac8e00c2cc045969cc2bdb7ed4de1241",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/deck/roughness.png",
+      "sha256": "e75004f80fdb45e73e5d27ee91e457696d2ac83d999fd1e828841b7c9bd42089",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/derived-mineral-v3/README.md",
+      "sha256": "f2eac7d041aebba8d286ccf5fb33a2e434bef12d2561c9af69449dce17960022",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/derived-mineral-v3/ardesia-basecolor.png",
+      "sha256": "868fe11ffd4fb2b619aa478568e00c206711efd5859602f8c33f087625a43fc0",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/derived-mineral-v3/ardesia-normal.png",
+      "sha256": "4e4c703a6f7cb855282c93283ce052b8c52baf584dddcda85dfaae90f84715af",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/derived-mineral-v3/provenance.json",
+      "sha256": "fbd8716829813b950de7346b32567944e60650f971fed19538fecd775fabee83",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/derived-mineral-v3/prun-basecolor.png",
+      "sha256": "97d4958a441664d6347c6860c0ed9b8c18d828e7cdc6a6ea575ef7db48028948",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/gres/ao.png",
+      "sha256": "1994e05950b6f980d0762704b43b7f07f7448014126aa7b2e01bd7bd3929ba1e",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/gres/basecolor.png",
+      "sha256": "f3580cdad95e1b11dafffea6e5f1e5cf791b0a3cd4cdf8c2eb57289c9316db2f",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/gres/normal.png",
+      "sha256": "0d5e6bc431092a3ff116b09708376f348400ce2f8cf3418e529f90bd235e97f6",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/gres/roughness.png",
+      "sha256": "e6cefa0fefb92aeb1f4c1f98440f1095b86deb2bafe011d0fbcab345458b8070",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/prun/README.md",
+      "sha256": "07a6730d695ef3e86b0c9ee27208ff82217f182bb2982944c5e53731f370d853",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/prun/basecolor.png",
+      "sha256": "2de4ca932f1d015e09e764849a5d4533278b4eb265f83ab3bdffce23a0e8367f",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/travertino/ao.png",
+      "sha256": "d6c5dc860ddcc298c1d5236877014bc11cfc350e7ccb458a469ff71e9791fa19",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/travertino/basecolor.png",
+      "sha256": "ba77d628eb4bdd3c6d9f7f9f454493e9d8dc3673c0da2fc88008ea62758c8196",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/travertino/normal.png",
+      "sha256": "75710775ad54ff13e1e1fcbf50c3dced885256250ee01981aad3ce2f4806bed2",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/coping/travertino/roughness.png",
+      "sha256": "817f6b8bb8124a4e580b6dc00f8dd0378538aca538b1ccdd889df791c958242b",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/23DD3311-E2C5-4BA3-87BB-D056D3B75F32.PNG",
+      "sha256": "7b82990a5431dc68f49338843a7ebc1c6f2b6b98ec9a3408ecd7976dd3f188e3",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/3470EA07-2B30-4CCE-89F7-664A6460C7DF.PNG",
+      "sha256": "8f23b964bc5d12949f898f462c67e999b807e86838e90b133d75cdff5aa4dc14",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/3A6FF20D-DA5E-422E-9296-242AF2E6C604.PNG",
+      "sha256": "39a5aa84b304d48039d2e0287f68b931f3569de1b7c632f0fe8f769bcbaa6e4b",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/5ABDEF81-B8C7-4387-AF15-21882CC2401D.PNG",
+      "sha256": "658ea32f66def8f14812914dbbb2b15b8c7a10f31aed50e45cd7df4a2c9dd9b6",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/8ED505EE-F994-46D5-8E0B-3CC8EC770A96.PNG",
+      "sha256": "406487c281994b1aa82db0a1f292d9dd3fe817881cbfd49c3ac0d164d50190e5",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/8F6945D0-2E20-41D5-B499-B90527E428FE.PNG",
+      "sha256": "5262a9d0a33ece3c7ad987d7beb4fc5213af886d0fb17c34eff783e9b65d9527",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/C36940E8-5BF5-4568-ABE7-5903EF3D5311.PNG",
+      "sha256": "3fde2ed57060c15f0dc893b540e3b2d762da06156eb749f744c5976a176ed596",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/DC6E8362-3310-4453-A436-00D14A36EC66.PNG",
+      "sha256": "01cea411066f1439b5ff080549e544f40bbf17a1f936dff767dc6aae0fbcbb5e",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/mosaico/DD99152F-96C9-46F5-B07B-EE7E4E076C04.PNG",
+      "sha256": "e81d3cd9a7f7f4d718593343f045f7888cb6169864152e3e661aba66c015100e",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pool/mosaic-base.png",
+      "sha256": "68e3fb74e86b917bb13e3fc799a237139fad60fc7e2f5fe0eeefccfc062c99aa",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pool/pvc-liner-base.png",
+      "sha256": "5c821b622f6975ad43fc4905568761241d31888d6cb1fe3f84e5da027208e337",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pvc-liner/motion-arctic-white-180.png",
+      "sha256": "134b14880dd363f5f87505a789303689e392874792d7c2230429e64fb9748a25",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pvc-liner/motion-black-stone-799.png",
+      "sha256": "64ec467cb709b40d09d26e2bca3dbe1056d41c8ab72d42af6af6953a0faf0ce8",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pvc-liner/motion-blue-sky-602.png",
+      "sha256": "9a83343b5c0588190afca4ba0d731a0ea71b691f7374b43c7d125c27c5f1fe18",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pvc-liner/motion-deep-sea-603.png",
+      "sha256": "8da364679c018350dd177c5cdf8021e28e1e38bdac4f4b247d16240fc127d2e3",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pvc-liner/motion-grey-rock-798.png",
+      "sha256": "cfa3fff22c3146d98e6e3ada743832001a77464a810e4082c5656ee6ceaca2d0",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/pvc-liner/motion-sand-beach-179.png",
+      "sha256": "71a62f6677e659abf6ed79c35dfc84abbb0ca2c04a2ee63084f1b009f9254daa",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-1.jpeg",
+      "sha256": "07b3f0e6f6d1c4770a8bb6259c3f94ff16a22a10ab7b5a2742f3c7a488d4646c",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-2.jpeg",
+      "sha256": "b684fde52afd73ce0a167ae78c922a62f5445aa2f2fd0c6454d140ae1707bfc6",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-3.jpeg",
+      "sha256": "7c1c7bac392d1f3f163dc8236f4cd9b2bf787443052a307c0971210b7d139f04",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-4.jpeg",
+      "sha256": "9fb59fe38c1566b7f2fd12fe797ec976f8bbec884c9eb69813a13621f9e53abc",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-5.jpeg",
+      "sha256": "98ff29743a86128f86155aab35497aa8b952157e66c94f5ea90d6dfaaac2eb1f",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-6.jpeg",
+      "sha256": "07480c518f7b38b13cb77c86064046d8898e39ad93b88ae7d723dac38407b4fb",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-7.jpeg",
+      "sha256": "7868561bddd723fecc3a6edbc79a32bcc1f26bb9bda73b6b699c9495b142950e",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/image-8.jpeg",
+      "sha256": "512c93eebed653ae160adf2df613992b139c0b78ffd1aa5ef5313e8804d95987",
+      "matchesHead": true
+    },
+    {
+      "name": "public/textures/references/20261018/provenance.json",
+      "sha256": "f6fceb510936fb17f21e8604c7df985c5bad698034156ef099f50be8ae5d6656",
+      "matchesHead": true
+    },
+    {
+      "name": "src/app/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/assets/logo.png.asset.json",
+      "sha256": "e131f4d94306418f62207045cbf012ba6d6b0944fe525101ec920466129c60b4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/animations/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/layout/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/BrandLogo.tsx",
+      "sha256": "34b6d549ccb0da19e04305c8d12bbd41fd14f8f86dcc332524aa22e9b2877238",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/DimensionControl.tsx",
+      "sha256": "42ff1189273872df41aafbf0fe6f71880ab0d88f5ac9dd80fe8f19052ec87b08",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/FileDrop.tsx",
+      "sha256": "4c58599388bb36d099e3823b8557bbbdd57a00def3f4210e47ee4af325ea21e6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/LiveSummary.tsx",
+      "sha256": "d1c0610dbd9190d3c15f5d702358252e8fbd146a39567af3f96bc3444cdd4dba",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/MetricsPanel.tsx",
+      "sha256": "e2aca6500c287f8850feba27e3e27fdc97f8dd087598082db60be41119d6d6d9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/PoolConfigurator.tsx",
+      "sha256": "eba97ffaa983cba56f97528e5102ddb4a0252330c80e7cfa45e299de22aac34b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/PoolViewport.tsx",
+      "sha256": "bcefe619ef46fd9a3cfb533f129ed33f6637c11ea243d51ff82860a98e944999",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/PorcelainFinishChoice.tsx",
+      "sha256": "063950721566212fdaa2f861d782705a3e4e1395c452d3a1dd335eb1a04ff150",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/PresentationOptions.tsx",
+      "sha256": "014f5abc502b791c52eba5f550fda059b25850468ea20dfee49829edb49191bf",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/ProjectSummary.tsx",
+      "sha256": "d0451523ae19b0272ff6588f4d4b363f1901ea6e812a9f0d1b461ebfbd4ef54c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/ReferenceFinishSwatch.tsx",
+      "sha256": "dd4bcd6fd937abdaedce7bf0a5c42a95c84cc2b3b2ad93c5abd6c6c225bcb6d4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/ShapeEditor.tsx",
+      "sha256": "5ae7bf13c51ff5646fbd949c15bdc7aab16b4836815d020f35153e98ede9d980",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/StepIndicator.tsx",
+      "sha256": "e513fa1ce4736df1377c974d3134ba4a586e38588155a891448b5f659fd44da7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/StepSection.tsx",
+      "sha256": "2a912fef437e074ca7129e0d3238ad595f0b96e23630c53f561f0ef8fac41710",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/TechnicalDataPanel.tsx",
+      "sha256": "0b944273f679dc9d6699f140476108bccc47816f34905c74710099aedbee86ba",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/TextField.tsx",
+      "sha256": "428407483616eef80b62b7868a63c24fc693c81e885655d61d1e4eda07beb074",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/ThemeToggle.tsx",
+      "sha256": "d55924c1f3a04731f42dee7840e452848354213aa2bf3001d5068ab2aab19b22",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/copingSwatchPreview.ts",
+      "sha256": "4791a81e6a2781e48728793a8c72b38c19491e6e552565ddc1a9fba7d3dc6f6d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/delivery/ProjectDelivery.tsx",
+      "sha256": "5e22eb9f9e96d235bc16c62cd412856001dc5b760597f69649f9a6f1fb35b978",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/delivery/useProjectDelivery.ts",
+      "sha256": "2d931b75bc17c44b75ccfff511f77b6c2cd8f09fc243ec3247aed99a3048611f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/steps/ProjectTypeStep.tsx",
+      "sha256": "9419669a8f1a28a7d663f49dad6702a093c562d4295e477a8f2b6a760f3bd69a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/steps/ShapeStep.tsx",
+      "sha256": "ec8047daba70d114a145f8593d7de63c44fe5719349689b34281d46dbc43efdf",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/steps/SystemStep.tsx",
+      "sha256": "77e4c0f8592cea7adde57fae555afc69c4842cc20e53ddb026cd914a74ba3587",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/AboveGroundCladding.tsx",
+      "sha256": "37f22c0c58a73e124f7696ac7911f53eff6b8762ae15c87b23ac35b3892f701c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/ArchitecturalOutline.tsx",
+      "sha256": "c8eefb9dacb5ecdab8d554e857f5541231dd4da7db0ee42cf974b0381454a4dd",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/AutomaticCover.tsx",
+      "sha256": "d46ffc86318c036e17c4b074e2717d92e1464e308a6869f36e3b3fb969bc02e7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/CoastalGroundMaterial.tsx",
+      "sha256": "2b14703f8b6188ddf6180a054a39d7150cf4a9adf7bfd890fcf9cc09849b0bd7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/CoastalPhotoBackdrop.tsx",
+      "sha256": "b15492acd7fd30e802e62f19b624214aa812debc7515253a4ba14cfb356fc51d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/CoastalVista.tsx",
+      "sha256": "ac10e9a2cf0c4a2bef63cd024a3365a38a0dae39bc7a1fd914f46132343707b6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/DaylightEnvironment.tsx",
+      "sha256": "ab4d0a30993b207632bc9c82939e888183481754aae9c398ea0213128ba64889",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/DeckLoungers.tsx",
+      "sha256": "46c08c170d9f1d66bfdb8170534dd9ea46ed3c821f62e86a6db32efe632a838d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/ExternalStaircase.tsx",
+      "sha256": "d96760965d35d19c2061ce3da9c039995cf4e55c148f6b4e27883d8a71deac9c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/InfinityEdge.tsx",
+      "sha256": "656c5814a4b196a27755d36429018e52f1474401f52d5e1941c1f9895530fea4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/InfinityEdgePicker.tsx",
+      "sha256": "b8500acacc5d1ec7d98a1614481e3b5fb022fc226dc0f2f15840d1449c8d45f0",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/LymphaChaiseGeometry.ts",
+      "sha256": "75c90fd82f13c91cd6520074ef67d87cc72d91d4f03ab38a9a7b66e6db12213b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/Pellicano.tsx",
+      "sha256": "e027e24535654732c3edde04a2984d7170e6feedb443657d82db1d42facd0d94",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PhotoModeRenderer.tsx",
+      "sha256": "a1947231d76ca8093fe578ac5b3b5e06b753d9442aa4e70230ad713322afea97",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PoolAccessModel.tsx",
+      "sha256": "37c30df2f28dfdeb94fc200b1f5b587bb07137d38351b8eb1d090352a70be73d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PoolComfortModel.tsx",
+      "sha256": "5536314921d586d487bec6f6e5cffea836c1e7ef2c1a719d701e4123213d920c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PoolLights.tsx",
+      "sha256": "ad71a4b9a234847a9790127358701cfab061385b813c7ffa121a5c163da22861",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PoolMeasurements.tsx",
+      "sha256": "edc8b5132641a7a306ad50a5b05ff4a68b72dfd6b36dc579b400feaa6cacabde",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PoolModel.tsx",
+      "sha256": "5740f81e841a4e8568cbe0be95ee1f800b4937b26c5fe87d7980f4585a121902",
+      "matchesHead": false
+    },
+    {
+      "name": "src/components/pool/three/PoolScene.tsx",
+      "sha256": "fd7fc88f0bf619ff44e6a690a5d7841b31e45b7f7083dd801d23d3f9fb10debd",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/PremiumPostFX.tsx",
+      "sha256": "1ac8673ca76f9ee718322643c0283c1039ff19a92e2442c71611f880a51df18c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/RawShellMaterial.tsx",
+      "sha256": "c7643f1022e34bbcf2906f9f95c0bd6a31a78141d3ec7337d12f125a2772d426",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/ReferencePavingMaterial.tsx",
+      "sha256": "bf67735974d68a39ff8e2ab2773b55264c623216e8983a542d284a44c660b738",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/Skimmers.tsx",
+      "sha256": "0b0fa7ed0619bb0b73cd2617b0bb919d3cc29b4381dc3f7bbcd3065e369aea18",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/SkyDome.tsx",
+      "sha256": "267a40e1427ba63fef275e69268d55449666ca6d06e548c12785d7681c7dd344",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/SolarShower.tsx",
+      "sha256": "fe4f8414edeb8ec0c6d858da5cef8c4391057650623b45f6184c6c4cfc0f09b9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/StainlessSteelMaterial.tsx",
+      "sha256": "fb9080b9ae774628149c97ce28f6ecad795542d7d1ba326eb0ba797f3e41db35",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/StudioPaving.tsx",
+      "sha256": "6633b0493f37af45ca210c7dda3718db624539478f28b80d28766acfd83dfeec",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/SunShelfLoungers.tsx",
+      "sha256": "8dfa440c4a1e7cfb7bcc036cc9a13707b41f4f9d70a4fe977ad7dfbe8dd73d38",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/WaterSurfaceMaterial.tsx",
+      "sha256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa",
+      "matchesHead": false
+    },
+    {
+      "name": "src/components/pool/three/architecturalPlan.ts",
+      "sha256": "fa3a7d0737716011e73b2587663c313a14a220a9de43feb03369725057f97b21",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/coastalLayout.ts",
+      "sha256": "e6a8b6c9bdfd71356ea76e390ea943b5f50cc7ed8413cb3faf1462057f574326",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/deckCopingGrain.ts",
+      "sha256": "c345e1e3ef7aae26b550c92e4984f617114eb4f6b6fd3726c73b47828930491c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/exteriorLightMask.ts",
+      "sha256": "6aad752f914e40fba7322979d1032b2e277e11ca8774ef1fc1784aace5edf4fd",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/externalStaircasePlan.ts",
+      "sha256": "06507658047daed1132e9b617b98a412429c8bf3183af989ecb68221f4b91cc4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/infinityContainment.ts",
+      "sha256": "3e3ba4ecfbded6781b9405543eba27c6dd6808348e147b18b44e7d15b7ab15d5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/infinityEdgeGeometry.ts",
+      "sha256": "b0ff39e7d34d9c1ad7d2f26126da32d44b10b8171ce40b6f46c4f35ef27ae6fd",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/infinityLandscape.ts",
+      "sha256": "8b2f65abe5e0503a54df8fd415bef66ea86b7bc1492727bb83512f1d76d144a7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/ledTransmission.ts",
+      "sha256": "737ae20189c2784a2a9967e6ec01a2e5ea4b9cd0db44679355d2f24e46c2a4a6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/metalEnvironment.ts",
+      "sha256": "abe6a6430e0bb7914715abf71511efadbda3347e86c8b1b7d43ec39559f14941",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/mosaicSampling.ts",
+      "sha256": "8cb2ec3930e42067a3fcf8ccaa8a407e5797a1c36fe623344ecb5e6359ab68ac",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/mosaicTexture.ts",
+      "sha256": "e403d00b2810a5b8e67175d5008757840d4764f4d59e58c89e7fce051f9f8c1d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/pavingGeometry.ts",
+      "sha256": "99c5acf8fc60cd647340be3afdbcc52399cd87e97079e4c6f7a121d28b649395",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/pavingTexture.ts",
+      "sha256": "bed448280aa74f08e9dbd42b7103ffa5723808579b2d0525f86bdaafd141f4d2",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/poolConstruction.ts",
+      "sha256": "798c94b95b867642f7474d9fe4cbf5abd678e5809b0c4537ccb5535473fd0bef",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/poolGeometry.ts",
+      "sha256": "d66dbd198834513962290da0c599b41eb1029b768001ebe70a47d68d42d3915c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/referenceFinishTexture.ts",
+      "sha256": "85cd24fbdcfe291279a3be4f9c1777cdeed39e8bc40fbb4eaf2c109f5201b919",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/stoneTextures.ts",
+      "sha256": "26d99de52ff671e9767c7b4c364f9d7443236dba93da0456428bd388a0e350e0",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/studioDeck.ts",
+      "sha256": "83e04453cde7756fd3fd48ad8f2fcb7261536cbab5d98a5b0bd6bbdad4e5ece4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/textures.ts",
+      "sha256": "8ddd9693fd2300c35d8faf7a9aff66d92f927dbbf29c16e4c3511be1d5261ec4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/three/waterDepth.ts",
+      "sha256": "e965fddbf8095464341d3529941a6a1835c27c0749c4a3401c0f947cbfe926bf",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/ChoiceCard.tsx",
+      "sha256": "830120be70dc882a5ba7356b41f39850639ec8173d67a8acb79003c72f3d4fe9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/DayNightSwitch.tsx",
+      "sha256": "ad04bcc8e3abf86d3db2ccb3050f4c4674a3f04ae62c29f116e34547599d5ed9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/GuidedFinishSection.tsx",
+      "sha256": "840a814a82d11812cc8249aeac7bee68297a2c64b1fd79b4fade3b02cfd0a885",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/StepTrays.tsx",
+      "sha256": "7adbf12c7168ea07923fa64b0dc39e0606233ab612fb228c442862993fda9eb4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/WizardChrome.tsx",
+      "sha256": "aae94d86ead08c85e6fdfab175e8e9e971a445e5dfbf850084fddfbf69056807",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/configurator-theme.css",
+      "sha256": "f39d00fe9f33f51d86f82db3775d0c4b3752deeae4f09d917fc8692ceb34a0a5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/decisions.ts",
+      "sha256": "68ca32bb8fe6e3f78d8faac6bcd06df46d2fa3098a8bc2d372fb2b165c395dbb",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/finish-guide.ts",
+      "sha256": "9f746aa110f9effa9b685363f9b9d172a327353c1904aaefcb04c263f6be05f8",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/fullscreen.css",
+      "sha256": "b68b2e996be9b059b6da6e9be8a156d5780547d8662b0122f4e6daed398f31c4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/illustrations.tsx",
+      "sha256": "6c24c62374e78f69071013b31c32c3fa4c181164b8b70333fc53cc2024c4b7e1",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/product-media.tsx",
+      "sha256": "912458f38621ae7e6806dbaa2c876487d641614d0777cea6cf4e8a771322a5d4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/pool/wizard/wizard-model.ts",
+      "sha256": "f0ecee87ade3482c7bedf3b285c1077d7aa517778d204a97264c64b5d8ce4493",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/sections/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/accordion.tsx",
+      "sha256": "0903efcd7b746eef0a10c954a541b0dfa7aa1172f3c380a1a88f4e19a317fda3",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/alert-dialog.tsx",
+      "sha256": "ee4d7f3341a1e5592787b7dac8e924bd226189492819f6704d8a7faf8fe64d20",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/alert.tsx",
+      "sha256": "e7f4c2e6f78c59270905b4152b7d3ef4d5c6b9e3b2d370daa7b301aa7cbd27b3",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/aspect-ratio.tsx",
+      "sha256": "d72c73d629e37995a0a71647d851d68d6fdcd7ec120797f36ab83a8ee89f2cab",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/avatar.tsx",
+      "sha256": "0326c9041c5a0b1ba31ff29822c51950b6aeac485cd0985e7df714741a54e7f4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/badge.tsx",
+      "sha256": "6519775252fe729f21c60b92c7c9feefd1fe7d0a8c2cf16d6f1c2fa7e153fe75",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/breadcrumb.tsx",
+      "sha256": "d5224e87344b3ac0f8b002e5dda6a71ff8fee296db8a5fbe6b034d06bd5c2ae1",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/button.tsx",
+      "sha256": "58ce1d75821d1de712ae2e59b975d0c1afe17a64965119f23fea2144a696dd4e",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/calendar.tsx",
+      "sha256": "e883f2245873fdf360764f77fc8f391426bef5776c6397537012c46970ebd6ee",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/card.tsx",
+      "sha256": "f13878a0078a5ef9f3e92af29259fc1e93ea56ea80cb992e0c4dea4e35396459",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/carousel.tsx",
+      "sha256": "568e00e8edbfab8af67ee902ca9ef5ceb6d5ed6f3045e7f9b3c15b4f7ef9e974",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/chart.tsx",
+      "sha256": "81b1f692f9334ba3030213ff37eeaf2dd762b644e5d96e51ada7072109f07430",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/checkbox.tsx",
+      "sha256": "c44d02535d5c9c92807576804407dd63d01e7189dbde526e925b53885e645fd4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/collapsible.tsx",
+      "sha256": "5f0a45d8f6ca72d37ed10bf0a85306158b67d7cbc386319186ce013ead9bc0a6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/command.tsx",
+      "sha256": "ba8c0f8b23044ce9a5066e66d7ab7be3a3c79bfc4a0ab7dfae6ffafe439145a3",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/context-menu.tsx",
+      "sha256": "b299f50a0a7840b136db5670f2b2e7eec6fc62b3c06bc2ad0015800959cc381b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/dialog.tsx",
+      "sha256": "000bb13bc818999d9d8803d91dfa0922bac530f073863ad8da8ce754185b03a5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/drawer.tsx",
+      "sha256": "478c487f66245641d5fa0f0d1c53a07d68bd60c4b3c497ec4c41ce08b482e14b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/dropdown-menu.tsx",
+      "sha256": "a6b87c89f5a806225b7f3a81f13a6577289c67e5787c2a56b5a22bd1edea02ce",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/form.tsx",
+      "sha256": "1ed53d4ab564a64708938643de590f2bef3718b0b2a309c1019c57e9c1fde23f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/hover-card.tsx",
+      "sha256": "69dc172ece56ac77bf3a044a1cd60ed601b0041945d16b5da4c6cc4f42116988",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/input-otp.tsx",
+      "sha256": "45b7c4fd518616f76dd611b9da13bc60bece1352e050878bf943e1cc6a4ed678",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/input.tsx",
+      "sha256": "92debb7d6d2d96d9e607a42d5ce8f37b2d63384ae5dd9ffbbf5f047b680ffb85",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/label.tsx",
+      "sha256": "9f72e2ecf16206593aa9e3c4fbc14cd8e81aa8488d57d92d4a950b30935a9fa9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/menubar.tsx",
+      "sha256": "5bd157c3a446ea1e451867e63724b2e87ad6bba6251c8b5f1b267d1df7bd4e0e",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/navigation-menu.tsx",
+      "sha256": "755aecc77b7911ab61159c9fbb9b25254009eb4c32c95b1430b6b5b7d37ed8f0",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/pagination.tsx",
+      "sha256": "cbe8559c578ee2d34c7daef5ee75dc3afeb795851e294b111dec375ba44a9a2d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/popover.tsx",
+      "sha256": "861c18577ea5988c6f5ca00d1c677200319fd427cf8b424e59a5cca6ff24f830",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/progress.tsx",
+      "sha256": "418f612946a520d1380b7a0d058185bb6a6d09846846dd6d6904a0016152dd4a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/radio-group.tsx",
+      "sha256": "8c55aa0496b00a27fc4f609ca8b43a7e82c6802f6bf613998438b7632899fa96",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/resizable.tsx",
+      "sha256": "f0399fec7bc334f06433b41b6ebf34255942ce4916b99173898893fa7fcc8281",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/scroll-area.tsx",
+      "sha256": "b607f562455152a079d70a22538c95072b0267e0d59a1a1cf16a905a2e373a6f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/select.tsx",
+      "sha256": "6d4deee18cf7ced0354eb719300833a83caf46400de6ee9c3d1942fa4c579ad4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/separator.tsx",
+      "sha256": "bf5838b692e5f74fde7083280b99492dd402bce6966e912e79f5e23f14bc98eb",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/sheet.tsx",
+      "sha256": "a82f9341962e766ee925a2fe883b0a9ab5d5dd8475c402ac8e491ee37dc95fde",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/sidebar.tsx",
+      "sha256": "9f44f4523271f965adec608ae1c3b8a2f350f2f45ba1401a2c7ee33bc5eda238",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/skeleton.tsx",
+      "sha256": "f4c42257d73925b0b856a3500e2cbdd918fe6744fcd6be87ef28bb88e7eb7366",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/slider.tsx",
+      "sha256": "23923071a308ee847ab17ce088738dbe3df1787c1668da77e17aeb12a8358586",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/sonner.tsx",
+      "sha256": "3ad40f66c339e799b1a57c00e10b4627294c7d580d99d8a48ae0d8d4c13cf931",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/switch.tsx",
+      "sha256": "c3c298df4ffb56695e4a8f0ff3e37eee08437dec542a677153ec16bed0820107",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/table.tsx",
+      "sha256": "1e945e564c2cc5ca3ef33019ba7da7a8b94cbc73feb3cbc2b7b33c36ea648d92",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/tabs.tsx",
+      "sha256": "e9b454d2f987c83b36cc8870bba47d9355db4e8f5c733b310dbc1119a7d27654",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/textarea.tsx",
+      "sha256": "35617a2cf053e52c9e56983bde82d556861d38e462f9e578876c8e99a0432687",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/toggle-group.tsx",
+      "sha256": "d59cd3937c967a3e221fdfcfe4ea5cd57eb97cbe37e1ac98126664c9c7db49c1",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/toggle.tsx",
+      "sha256": "62e6e21993f1ab633b9f830cbbf0c181f3d161bae3a7792dbf2d842d42a2f09c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/components/ui/tooltip.tsx",
+      "sha256": "9682690fc3755d0f4b8684f2d7b1f77945876d41a45b723d0761b26804ad5010",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/assets/README.md",
+      "sha256": "9dafdc76e5543d4688d6918a17ca0cab41ca4fdf7b13008e6460378d973d6de2",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/assets/preload.ts",
+      "sha256": "417508fbe8da6def73ef9c014371b90646e9ad79a87df3c8c3566490d63349f0",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/assets/registry.ts",
+      "sha256": "6495381352d9819d8e3c8728345828f359d22af4bf38694a7064f0bc9cf9608d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/assets/types.ts",
+      "sha256": "2c1f53a4ba9f6b5acc3525d6778642ff197a00faa5fb489d191b4f7215b293c6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/components/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/components/PremiumAsset.tsx",
+      "sha256": "aa538c261b2cbad673dfe1b8c4d03108df355c6e9de17811bf4e269e161ac2cb",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/geometry/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/scene/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/3d/scene/visual-preset.ts",
+      "sha256": "1dc22d9ebfa4974642c2af1952ae9159bba24f4b39e50f57f78e07a3c23c0d0a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/assets/icons/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/assets/icons/piscine-wellness-logo.png",
+      "sha256": "95d2cc8f8a4c884f6bb1a5f9e15a835c01d7d1fa02add8b2c4ed0df260ed4652",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/assets/models/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/assets/textures/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/calculations/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/config/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/config/design-tokens.ts",
+      "sha256": "bb384d393ace2dfb2bf94f0d55793d38fbd370354a6aff0052221b2eed805fff",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/config/product.ts",
+      "sha256": "dc2ffb73664d5b2386a5d2b03685f3cfd63c4833a4377f1d4a15f95e306c3b3f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/constants/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/data/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/forms/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/hooks/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/materials/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/materials/interior-textures.ts",
+      "sha256": "8a4aa38af14e1b1fbff4152b1815c60b61ac66d61713ab78c2fee7aa623df513",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/materials/mosaic-assets.generated.ts",
+      "sha256": "7fdf1c0b061d26832100781c4120f0f95bec2c86c8d282047b2a1b5ffd1bdc07",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/materials/visual-presets.ts",
+      "sha256": "93649cb5a4334b0499af751a9dcab15e88839e63d96e73628f5d6edc54348708",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/premium-finish/PremiumFinishView.tsx",
+      "sha256": "9d11e16fcb6cdcbc218d0f435f1a39481d81e44100ee41cb041b0b37a3224418",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/premium-finish/premium-finish-assets.ts",
+      "sha256": "4c33a02b98e2e37ff11a4cd177beef0773a16872fe56fa1164867744231d0630",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/services/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/access/AccessStep.tsx",
+      "sha256": "9fe27a9010c944ed5e626bae48ad80a1a7275ab46a85a272ca3fb3e4f23ab210",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/access/index.ts",
+      "sha256": "00893c50fc730e975df0609a93f57bf5583ebc5b5ca00b6bce0c28a1e496e841",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/equipment/EquipmentStep.tsx",
+      "sha256": "e7e6bf39cf3cdc365e62de7643c7580f51290f1e58c37302bf644ec5200bb216",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/equipment/index.ts",
+      "sha256": "a12cd3ae29a6b088f6e01c1591e866b4e3d0049cd46103ba42b98d7ba6ce4a2a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/final-review/FinalReviewStep.tsx",
+      "sha256": "4ff1a52f918296448aef0271b13d4e37c299f2b8f6cab73830d125ec3567f8be",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/final-review/LeadRequestDialog.tsx",
+      "sha256": "11c1122f95e0fe8a0d13ffc22d5797063393a01fe43cd6c1d9bc7682bed69442",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/final-review/index.ts",
+      "sha256": "9676837f6279ec9d8b023584b1fe6effdbed3e4a925fc3416b45a893092399c4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/final-review/summary-labels.ts",
+      "sha256": "dd8702edd45f8aa7ce7322c71102f9843e136b41b67961d534633e49ded9f40e",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/interior-finish/InteriorFinishStep.tsx",
+      "sha256": "e253f9c2f62db76b03cd65aaae70982879e6c052441ac493b3731fcd103d2bd4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/interior-finish/index.ts",
+      "sha256": "a93b843f903d689bfc7cea410bf31e3db8d28cf38a9038799d1f928c6c75ebf5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/lighting/LightingStep.tsx",
+      "sha256": "6b38e1c0ecdc300ea170a4ed4a8af54d2cc68e78aedccfc7f712ad488479e9ef",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/lighting/index.ts",
+      "sha256": "c16bb7c7a8cbb8273ee2b4a3d2b046aad71641f726e148fededcc128722bf2cb",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-features/LedColorWheel.tsx",
+      "sha256": "1b2d40a296d69f7fc23be372dbfd78f924926ef3da4b6be289de0dc81da2d4f9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-features/LedIntensityControl.tsx",
+      "sha256": "f89a0949365d2dd14a5e1dd48a8afbd2801e16bb05cb883d1ff05b3f2326f0ce",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-features/index.ts",
+      "sha256": "3489547293dc0abe78ceb505d7b8ba2c9fa4e9bed2d78b085a7d6a05e79725d5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-shape/PoolShapeStep.tsx",
+      "sha256": "5e6fee17681a6597013757967a2a114bd372fd76d901d652312d1756956ff0c7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-shape/index.ts",
+      "sha256": "0c608fe1f4eac4f59a398bf84f424eae28ef5a37cf5c03015f64a1033482d009",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-structure/PoolStructureStep.tsx",
+      "sha256": "a72ba4881cbc18238d206bda1d61f43a8d5f60d5bc7fb6620e6c6100a9935ca0",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-structure/index.ts",
+      "sha256": "9c81618670a6d83e8426326c1f71e1da4662eb13b565ca9d783d26189a48f226",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-system/InfinitySideSelector.tsx",
+      "sha256": "ec2e21b5464696958ed0a91a013f47a27a57aac8c4b5d1482f5366df60c58fd6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-system/PoolSystemStep.tsx",
+      "sha256": "2c3cea3943cdcc5a220a7e153cf8b59b6f7232e7c699e4eca656eff31ef15fe6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-system/index.ts",
+      "sha256": "773eca8406001937300e1e00c8d4d371aeeddeb7f7778f81782981c29c319052",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-type/PoolTypeStep.tsx",
+      "sha256": "47ddc0509a9ef09eba750ab97e50de162ec514e8341caad451b5c6e0baaed919",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/pool-type/index.ts",
+      "sha256": "02232d168c2cecd29f60750019b12e749988f678400c5780f76f928f229b1067",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/project-type/ProjectTypeStep.tsx",
+      "sha256": "acb21a80375f48837e2069b807eb41d61a31e8d966e8197c9bc0c28dd9525461",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/project-type/index.ts",
+      "sha256": "4a7cc4b7cca3126146443a0b4ebe799909920a8a9d63509b88d85cdd91d21d4e",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/renovation/RenovationSteps.tsx",
+      "sha256": "da0c32f1450422e9c53db4e92168b2e88100fdddc78b7310d0fa2f5685895b94",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/steps/renovation/index.ts",
+      "sha256": "8aeed9ccffffc9b014a5b9862eea21e45a087445efd4a665cad8efb756f9344d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/store/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/types/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/configurator/utils/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/hooks/use-mobile.tsx",
+      "sha256": "21eff740f9e5c965c7f0782925a7e8f67ddfcdf0f58b6613550f99c3e1c454e9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/backend-db.server.ts",
+      "sha256": "09daebeb63aa7d1d0cb0fd2a11406b2211cacc6ac08cbf47ebd3fceba1823c49",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/chunk-reload-guard.ts",
+      "sha256": "ed809c1963a9bad7ca2ec6ffeff1ed2aff779e02550927d2a2289d640bdb90c6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/error-capture.ts",
+      "sha256": "d6fa7756cbc4c399f4e891b174c2dce8160e2354972c2ae68413dfd1db843088",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/error-page.ts",
+      "sha256": "635915886f5d44a18b6add2a53959dbe2e8ba1bb3f7e597fc714650e74157bb6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/i18n/index.tsx",
+      "sha256": "9e8273e1400993c68027ec2656c67923f16294d7f5aef4a71495500240e576f7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/i18n/messages.ts",
+      "sha256": "f70300309edc411466fe17d05aee1edbacb89b3d0410b7cdd0af6fd40b3c2c94",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/attachmentOwner.server.ts",
+      "sha256": "bc6351e752f197c7570f5ff87cf17a8f3ab4f58b811fb910dc8f5da60b911867",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/attachmentPolicy.ts",
+      "sha256": "72aee25c9c366bbaeccdca39a26e63dc924183d859f4bf927f44a01e3d63886d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/attachmentStorage.ts",
+      "sha256": "9e1ec1139311acde7dd02885bb2071c172ccc6bf02992231d063adb9ae7f344f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/deriveAttachments.ts",
+      "sha256": "c36fd92cc137b638412f261dc4cb3df41139d481d94c4646a061891a6ed18493",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/formatLeadEmail.ts",
+      "sha256": "5f8298d29ec2f2c5cb0521a2dfa9adc345a00fceae232a20d95e4125fdc13dbe",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/leadNotification.server.ts",
+      "sha256": "f3c6770f16b63295330184ab130434d5171daedbefa0eca02c794b5d77e530ed",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/notificationQueue.server.ts",
+      "sha256": "90bce38b7bdccb08653eccf20213dc38b761ce6d832f410ff0f590a8abf83740",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/renovationLabels.ts",
+      "sha256": "adb233391c0e1294b43ab8cf27721fece2ea1067fe212faf482789e258e8d76c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/resendWebhook.server.ts",
+      "sha256": "bd2dc19cef5c221e1d41604daafc7b7b0acf5e74be3187c564547798f25e0a77",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/schema.ts",
+      "sha256": "b18478cfae198b97ec7a05e8214ca9c9eefaf1f0152fbf94e64865e65427814f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/storage.ts",
+      "sha256": "48acb8b5c0b077be301238e5b5be4653e41c235a98a435c58ebc1dc9dae71fa5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/submitLead.server.ts",
+      "sha256": "a9ec94b3f95583159e2fdb1166cf2bf4ac7bd3079e93158289ecc37b7496acc4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/types.ts",
+      "sha256": "99aac889e8e44420d9ca9f0063f5e313dd0518d239429694f0d10493eedfdc7f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/uploadAttachment.server.ts",
+      "sha256": "d4f704ea341b9db64dcf8e77d3715ffb06c211eca34d2b0e0c823d99774a12b4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lead/verifyAttachments.server.ts",
+      "sha256": "8408917f6e07d7563543dac2bc4628525e4753b2a6e1402efa730dd360976a6a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/lovable-error-reporting.ts",
+      "sha256": "0d6a91dab0a099507a379b28eaa7d2825e76bcc0ce5a8444e07e3e28427e9b57",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/above-ground.ts",
+      "sha256": "4bc2b436a19ce7987b5f4e71b61c6a080fd7c7567e4d0f409f17a5f7930e83d7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/access-plan.ts",
+      "sha256": "2b591b85ec5653b7046815ed7387f306447a44dd988acf9cfd4771d2f10659ac",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/boundary-placement.ts",
+      "sha256": "b2fb38f091ec13eeb0e801a8649e10ac7ee718e2b805c32a7f5e093de476aa72",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/camera.ts",
+      "sha256": "2e0bcb84332f335891992eb111816c8a7649b9ada568702c584e8e926843a746",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/comfort-compatibility.ts",
+      "sha256": "09c1b021ee34f63e87cbfed24162239e54a5b8a0942d81da2bbe4afb91b545e0",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/comfort-plan.ts",
+      "sha256": "634567d8b437bb0145e4dbe50858231ecb7d31759ed3c2b8168a5ad697f45695",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/comfort-selection.ts",
+      "sha256": "8835ae2997342dac36c4becdd1ae129fe7540da458bbb05e475e6f94bef4f746",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/config.ts",
+      "sha256": "c61476cd20c583f26760a7b5f9682ccce1f0efebf802ecf093b2f49d807b5749",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/construction-presentation.ts",
+      "sha256": "5d5f0de2fa93433ef45dc7db154439c26b5c496aa737516ee8b4b1d02447c87c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/context.ts",
+      "sha256": "e3eb2fd8b94a30cc36f86d2fae56d370b2c4e7b13e815ade6210a65be48c47cc",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/contextual-camera.ts",
+      "sha256": "b0f672b0529778044e35643e1e7910417ccb4a813a32e209e086aa95367ce338",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/coping-materials.ts",
+      "sha256": "62218714a7fbec75fc3c44c8c8452a2923a038f6e975620198039c8b1a440f55",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/cover-plan.ts",
+      "sha256": "809770391110234ea13b47415f089161ef98eaf8380f9effec120e673653ebbd",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/development-gl-diagnostic.ts",
+      "sha256": "8fe916930157ac2f1d06722dbf835edcf99185ccaab634f6fe5c245bd22399cc",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/development-interaction-timing.ts",
+      "sha256": "fdd791e12fd933bb12025e257b8ab442b7a146c965e022616eeb0bd868fc04d9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/engineering.ts",
+      "sha256": "1e9d190a96e571d3888f73591b9b688aadb3a3d3f59a82da01a0e712d548ab88",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/floor-profile.ts",
+      "sha256": "1b0ab4d945b6ab006bb238750b4c8a567703c168b3a3b58cc4e582bdbdfe45b2",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/format.ts",
+      "sha256": "0d5672fffa91fbc9982029caf14573470b514e5eb1e5cc7b9d58e192747e0079",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/geometry.ts",
+      "sha256": "f5b9d22f6703e03a01d9efc2461dbdc93083264e16c26cb91c6269d6beb2af95",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/infinity-access.ts",
+      "sha256": "c3f893118cb1be914b976033aa027aaee227341919050ad90befe30359a47594",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/infinity-edge.ts",
+      "sha256": "6f6315f75f480a9ed4d9e37b81477dc817a1a90a4c1f59498f72c0c82384ece9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/l-shape.ts",
+      "sha256": "a735b1e73f10c8ab1f2cfed4c805342f87f6e7d5bd6ecfb69a950bbfc4b5b546",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/led-optics.ts",
+      "sha256": "1a2df7e31a1b699378a8dbe1fd8b056522050a4c481eac088b757ba8f878bf71",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/lighting-plan.ts",
+      "sha256": "5a2f9b83d2bb61f1cfc4abd38d29359596acf25b35d4244398a0f618cbe40131",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/lighting.ts",
+      "sha256": "e229a490f928aceec1956679e51098d9d1232cb3da7a81df0f9564e96cf2c8dc",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/materials.ts",
+      "sha256": "6020837c4c6140b3f1ceb170b88d82262b2ae17f30f3b015fc3df1b2be8c7d9b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/micro-spot-optics.ts",
+      "sha256": "995bfef95bad3bf11d85a4219485a2501125305928ea0b199019d2e69366ccab",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/organic-shape.ts",
+      "sha256": "32fd83d16b274b06d5e010d374b747423dac71d583bd2c4bcde704f12f8b096c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/persistence.ts",
+      "sha256": "0e1b788f3a93dc59ddcaf04f356955bfd4ad698267b009350514bf15c3c02acc",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/photo-scene-spec.ts",
+      "sha256": "052fac1567eff8d99eb330aed830f2ef5ab1893aa32d73583b0200beea61548a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/photoModeState.ts",
+      "sha256": "b1347fcc2040d74485e7861acc1ba72e5db0fdc080ebb3e7c5e0b93e86834645",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/presentation.ts",
+      "sha256": "2074fea4e8d8dde0dbac72a4f73c80bcf48df7e1d7df245645fb9874168bd99c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/project-metrics.ts",
+      "sha256": "6a33965d33466e5c8bd421c59560fed393ca73b7fdc163cd5561f4896d8d92ef",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/project.ts",
+      "sha256": "de57c9ad233dc4d931a78dfec9bd1264d0978060f925bb870b13402225710bd5",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/reference-finishes.ts",
+      "sha256": "a410aa2a29bd5c912e0747e3ac5cc1eb5143ba05d21d3900bc4b75c76c3ef053",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/renderQualityState.ts",
+      "sha256": "dd44d15fc02a6060b304fbb5058792370d6cd508ca4660d604cfb4eb547b443a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/renovation.ts",
+      "sha256": "47b4d542d57ce549e25ee50e9e26ec4b0d513fd02a8dab260b87d3d198609ef6",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/resolved-layout.ts",
+      "sha256": "b54c578879347e68a89469126a86fd26e0ac482382655dacf2b8699c34af9d0c",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/skimmer-service.ts",
+      "sha256": "362f9d7399e174c067e45dc61daa35e94b4846eff7f0680110a7ceeefa39160b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/stair-lighting.ts",
+      "sha256": "6db2d4ab8d96910a135f9e6b3d74c78fa23d899268561bb5996c6259780d4781",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/store.tsx",
+      "sha256": "384bccf6651336b5cfcaa9df81c48f0c57aa3a769e49a6aab5c9c2b247f1012b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/structure-finish.ts",
+      "sha256": "adba351b62ca68a1b735875820f143dd94f2a104b3a2bea32e5e8f0247b9cd06",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/sun-shelf-loungers.ts",
+      "sha256": "adf906cc959e2e6e81e2d566810ba720f5872f1430ad47f3004bc81a839109a9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/sun-shelf-model.ts",
+      "sha256": "778915085d2920d6a580e33bad6f0074fc025c97a151f8f2a0137066f19635f7",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/sun-shelf-range.ts",
+      "sha256": "5321d67574d6c948f2d04509fd9abb1fec764d6fc6c8ec1a001ec38bbfb90dd9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/technical-plan.ts",
+      "sha256": "0b92554e9fc1fbde46d5ac829c743912da2972ff0b4027847f6f679743f7f12b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/types.ts",
+      "sha256": "834d796f3041b67a2d416e38e73d3c8ce76f1518725fd11b1e6151e096594cb1",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/validation.ts",
+      "sha256": "27e95bff6f6c171b0d4488e3edd58e4851dc27238db94481a7fbc9ccc3033a84",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/vertical-layout.ts",
+      "sha256": "d7e1bd0bf7bc0de00a21424cc5911a384dce5986b44d15d99a3814cfa5418fb3",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/pool/walls.ts",
+      "sha256": "2eb600706cc8dd7119f84ef2a16b15ab333f36fc9d1b4e513eb2f25917230b22",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/client.ts",
+      "sha256": "25deeb9e4eb771af997bedac326ded09a45ca03aebd67f373e0331a0860753e9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/hero-frame.ts",
+      "sha256": "44b68887d8d2bbc8236903c5fb7e45380b7401c4414af25e18e5fe05cde7e1cb",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/heroCapture.ts",
+      "sha256": "558fbde85586725a7daefd0adf03258fe0ae8fb33ad8bee018efe836be22337f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/projectBook.ts",
+      "sha256": "0ee14dbd08a43dbec4098ac3f97c09ce0471ebfe2163c2d91f7805cae562bd1b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/projectDelivery.server.ts",
+      "sha256": "5ec383923640e64817f9ec67827534a40b5dfe5b3e3cbc29dc4de8e1dfbd114f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/reference.ts",
+      "sha256": "c245a5d85091d3f35ffbb6943b555ed9c2e3e5b4f747de60b3a971b704b2c739",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/service.ts",
+      "sha256": "3982821478c2b3e07676af1e7bdc22b4c050839108b87cd7f79d83fad090d77f",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/store.ts",
+      "sha256": "e5cf61f547e19849ba8383a271e556f86f61826c43186c90413afcda9f6ed83a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/project-delivery/summary-model.ts",
+      "sha256": "5b7e432a5117d0405d7c6e877dbcb7992b516c11f0ac86abf1c859274f31c6e9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/index.ts",
+      "sha256": "9aa3466f8812e483eeb703b007876e961c01a4f768e8489b57247451e92b54c2",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/outputPresets.ts",
+      "sha256": "c574f9f09e6de1341a16dbdb24eb1a85824e3cc9284955310df1bc6519b1d320",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/renderBackend.ts",
+      "sha256": "40c066eedfcb1ba78333421989c8d762f42929adedaa3a02168fec4e7e88ffb4",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/renderJob.ts",
+      "sha256": "decffed9cbae30566a265ce51277024a1b2951949898eaade091669a99d745d1",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/schema.ts",
+      "sha256": "3e874c6d493b8b4d5200d18d01798f92a08c37b3b0d4f1a9d9204b9ba2eb3e67",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/serialize.ts",
+      "sha256": "6527fd7d35c330d1fdbc3378bdf70cb170f0832e5f0a472dc60c64d590bbb223",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/render-pipeline/types.ts",
+      "sha256": "f60f5a95ea74c143bc7bbc038762d1355d4ff6f3c4e65df8966f1d51bbd3425e",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/supabase-target.server.ts",
+      "sha256": "9896f6ec13eb9ec2a06666bca9f8a6757cdaa1310fceb8acc1174539811e3a26",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/theme.tsx",
+      "sha256": "d96471e0a01af187d046a75b31dba612a772a3db26a99f961bcf47a13872504e",
+      "matchesHead": true
+    },
+    {
+      "name": "src/lib/utils.ts",
+      "sha256": "d1f1e0d62cb8d8d1e04c26e14de842d8a151f75812d81b046c65b5d1fe8e4b27",
+      "matchesHead": true
+    },
+    {
+      "name": "src/routeTree.gen.ts",
+      "sha256": "3164f62377d7be842b5519337e8606fab3a02cc13351d0920d0b971cd1dfb016",
+      "matchesHead": true
+    },
+    {
+      "name": "src/router.tsx",
+      "sha256": "72b68964d3f55ba4f7dcf2a04aad9d97d7c61fabad13aec1d298f1e39ee59fcc",
+      "matchesHead": true
+    },
+    {
+      "name": "src/routes/README.md",
+      "sha256": "edbd5d3cd5a427882c60b7b7dcdd12c7031f2f8ac0c085d20d2f6abec719e95d",
+      "matchesHead": true
+    },
+    {
+      "name": "src/routes/__root.tsx",
+      "sha256": "5d827859c8fc5a2e12e62b7cf37553af096e2e3cf9872af08aa6ed3716318614",
+      "matchesHead": true
+    },
+    {
+      "name": "src/routes/index.tsx",
+      "sha256": "25cc451a2a4ff273ed4c011719e7edb6bdc640de0d70496843d3fb8fbe278f30",
+      "matchesHead": true
+    },
+    {
+      "name": "src/routes/privacy.tsx",
+      "sha256": "bd6abff3a3ed4fff3e5eedfcf480cd46bd24332efb20d2a37a736c596c2d3e28",
+      "matchesHead": true
+    },
+    {
+      "name": "src/server.ts",
+      "sha256": "2545727d60325740861b1801af3c7e910d5d42f33899b7bf5c1ac02bc761080a",
+      "matchesHead": true
+    },
+    {
+      "name": "src/services/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/start.ts",
+      "sha256": "d79d142c6c5d057acc7a140197f464ef29a2c55bb422aafe700f82b418894e74",
+      "matchesHead": true
+    },
+    {
+      "name": "src/store/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/styles.css",
+      "sha256": "5e97456161079db0be9c18816353f3733bee914c91898c8f988ee2a509f184d9",
+      "matchesHead": true
+    },
+    {
+      "name": "src/styles/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "src/types/three-fiber.d.ts",
+      "sha256": "726d2e798ae591769c60d13b164b7f580d6a2eec6c7d47b322f16818c8477afe",
+      "matchesHead": true
+    },
+    {
+      "name": "src/utils/.gitkeep",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matchesHead": true
+    },
+    {
+      "name": "tsconfig.json",
+      "sha256": "0ff5b0536ac765fe8beabcfe2202c3069c4cc43136e20e4c2f04c55f6f4ebc84",
+      "matchesHead": true
+    },
+    {
+      "name": "vite.config.ts",
+      "sha256": "07f34bee66359ad0fb103e50ec387b102307eeff8a3b0a0b53da015f812cfc15",
+      "matchesHead": true
+    }
+  ],
+  "overlays": [
+    {
+      "name": "src/components/pool/three/PoolModel.tsx",
+      "sha256": "5740f81e841a4e8568cbe0be95ee1f800b4937b26c5fe87d7980f4585a121902"
+    },
+    {
+      "name": "src/components/pool/three/WaterSurfaceMaterial.tsx",
+      "sha256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa"
+    },
+    {
+      "name": "src/components/pool/three/RetainedStageMaterial.tsx",
+      "sha256": "db0bf71c22666c1048ff9d82a9dfe4086da4652b24ea524e8c08ffd87c4e7cda"
+    },
+    {
+      "name": "scripts/water-lifecycle-audit.mjs",
+      "sha256": "12f7ae117996b63de6597fa10cded166c338f238889e630c0f744972f972a245"
+    },
+    {
+      "name": "scripts/retained-pbr-source-audit.mjs",
+      "sha256": "d61df1b99e134001aba0358735592c9abed537d29aec216e847e7d10c8f8eee4"
+    },
+    {
+      "name": "scripts/structure-progression-audit.ts",
+      "sha256": "2ebc042e325548f2e3028e6ccf9fcc899e328f0a854b1de1fe698bba3709cb89"
+    }
+  ],
+  "headPoolScene": {
+    "sha256": "fd7fc88f0bf619ff44e6a690a5d7841b31e45b7f7083dd801d23d3f9fb10debd",
+    "matchesHead": true,
+    "qaProductionInstrumentation": false
+  },
+  "original39WipExclusion": {
+    "total": 39,
+    "identicalWipCopies": 0,
+    "absent": 33,
+    "trackedBaselineOrAuthorizedTaskVersion": 6,
+    "files": [
+      {
+        "name": "docs/qa/CUSTOMER_QA_20261015.md",
+        "existsInCleanCheckpoint": true,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "docs/qa/PREMIUM_CAMERA_QA.md",
+        "existsInCleanCheckpoint": true,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/product-media-audit.mjs",
+        "existsInCleanCheckpoint": true,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "src/components/pool/three/PoolModel.tsx",
+        "existsInCleanCheckpoint": true,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "src/components/pool/three/RawShellMaterial.tsx",
+        "existsInCleanCheckpoint": true,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "src/components/pool/wizard/product-media.tsx",
+        "existsInCleanCheckpoint": true,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/README.md",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/inox-ladder-480.jpg",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/inox-ladder-960.jpg",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/manifest.json",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/outdoor-chaise-480.jpg",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/outdoor-chaise-960.jpg",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/prepared-files.json",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/prun-256.jpg",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/prun-365.jpg",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "public/product-photos/sources.json",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/bench-lighting-regression.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-access-h.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-bench-ab.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-bench-s.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-bench-u.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-infinity-waterline-r.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-infinity-y.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-interior-v.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-overview-o.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-paving-m.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-top-l.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/fixtures/premium-camera-waterline-q.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/hydro-glass-corner-audit.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/independent-photo-access-label-recheck.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/independent-product-photo-qa.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/infinity-waterline-regression.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/premium-camera-regression.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/prepare-product-photos.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/product-photo-mobile-diagnosis.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/product-photo-performance.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/run-hydro-glass-corner-audit.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "scripts/run-premium-camera-regression.mjs",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      },
+      {
+        "name": "src/lib/pool/product-photography.ts",
+        "existsInCleanCheckpoint": false,
+        "equalsOriginalWip": false
+      }
+    ]
+  },
+  "envFileCount": 0,
+  "moduleIsolation": {
+    "individualPackageSymlinks": 484,
+    "ownScopeDirectories": 29,
+    "privateCacheDirectories": [
+      ".cache",
+      ".nitro",
+      ".vite",
+      ".vite-temp"
+    ],
+    "privateBin": true,
+    "noInstalls": true
+  },
+  "clientScan": {
+    "filesScanned": 20,
+    "counts": {
+      "privateKeyPem": 0,
+      "serverSecretNames": 0,
+      "secretTokenShapes": 0,
+      "interactionPrefix": 0,
+      "glPrefix": 0,
+      "rendererPrefix": 0,
+      "renderPrefix": 0,
+      "samplerPrefix": 0,
+      "qaInteractionQuery": 0,
+      "qaGlQuery": 0,
+      "qaRenderQuery": 0
+    },
+    "serviceRoleJwtCount": 0,
+    "scope": "Only built client text artifacts. Counts only, no content/secret values logged. Pattern scan is not a complete secret-security audit."
+  },
+  "outputFileCount": 166,
+  "outputTreeSHA256": "07cf9aee1e587d510d5a6d421ae96d9e83ae595c799cce45db6f8ccc719e5d8e",
+  "outputTreeMethod": "sha256 + two spaces + sorted relative path + newline",
+  "clientPoolSceneAsset": [
+    {
+      "name": "public/assets/PoolScene-DLigDZqN.js",
+      "sha256": "c1c5f54e5612231d20556321f728ce77ef417e41d4c71596fa009f50c68a816b"
+    }
+  ],
+  "server": {
+    "port": 3021,
+    "session": 71280,
+    "url": "http://127.0.0.1:3021/",
+    "adapter": "GET/HEAD-only generated worker; no backend bindings or secret files"
+  },
+  "browserOrBenchUsed": false,
+  "sourcePrimaryWritesByC": false,
+  "gitWritesByC": false,
+  "testOnlyResync": {"name":"scripts/retained-pbr-source-audit.mjs","sha256":"d61df1b99e134001aba0358735592c9abed537d29aec216e847e7d10c8f8eee4","reason":"Coordinator pinned default baseline to6ad89bd for reproducibility after commits; only test script resynced, no runtime/output change; explicit BjDT7l comparison rerun PASS."},
+  "verification": [
+    {
+      "name": "typecheck",
+      "cmd": "./node_modules/.bin/tsc --noEmit",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "production-build",
+      "cmd": "npm run build",
+      "exitCode": 0,
+      "output": "\n> prebuild\n> node scripts/generate-mosaic-manifest.mjs\n\n\n> build\n> vite build\n\nThe plugin \"vite-tsconfig-paths\" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.\nvite v8.2.1 building client environment for production...\n\u001b[2K\rtransforming...✓ 3024 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.output/public/assets/piscine-wellness-logo-DeEFrFKW.png   53.02 kB\n.output/public/assets/routes-C6SATnXE.css                  10.02 kB │ gzip:   2.32 kB\n.output/public/assets/styles-DIus6m-5.css                 117.14 kB │ gzip:  19.00 kB\n.output/public/assets/PhotoModeRenderer-BBIG4jFt.js         0.07 kB │ gzip:   0.08 kB\n.output/public/assets/rolldown-runtime-hePW80VL.js          0.71 kB │ gzip:   0.42 kB\n.output/public/assets/privacy-BP1vuBlg.js                   5.17 kB │ gzip:   2.04 kB\n.output/public/assets/jsx-runtime-DE3RlOCf.js               7.89 kB │ gzip:   2.99 kB\n.output/public/assets/textures-CCm13xRx.js                 15.12 kB │ gzip:   5.48 kB\n.output/public/assets/purify.es-DHPJxOTj.js                29.07 kB │ gzip:  11.45 kB\n.output/public/assets/PremiumPostFX-BTxI-mQE.js           110.36 kB │ gzip:  28.52 kB\n.output/public/assets/camera-KXC_aO6c.js                  137.52 kB │ gzip:  48.81 kB\n.output/public/assets/index.es-DntZbLOe.js                151.44 kB │ gzip:  48.92 kB\n.output/public/assets/html2canvas-DCcDvdvP.js             199.50 kB │ gzip:  46.77 kB\n.output/public/assets/PoolScene-DLigDZqN.js               289.49 kB │ gzip:  93.45 kB\n.output/public/assets/projectBook-A1iAoOH4.js             404.93 kB │ gzip: 132.14 kB\n.output/public/assets/index-DYExNVjH.js                   439.67 kB │ gzip: 140.65 kB\n.output/public/assets/routes-BD3JBQRc.js                  673.18 kB │ gzip: 201.43 kB\n.output/public/assets/events-156d8d12.esm-DYpqq3iM.js     877.87 kB │ gzip: 233.19 kB\n\n[plugin builtin:vite-reporter] \n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n✓ built in 959ms\nvite v8.2.1 building ssr environment for production...\n\u001b[2K\rtransforming...✓ 209 modules transformed.\nrendering chunks...\ncomputing gzip size...\nnode_modules/.nitro/vite/services/ssr/assets/piscine-wellness-logo-DeEFrFKW.png       53.02 kB\nnode_modules/.nitro/vite/services/ssr/assets/routes-C6SATnXE.css                      10.02 kB │ gzip:   2.32 kB\nnode_modules/.nitro/vite/services/ssr/assets/styles-DIus6m-5.css                     117.14 kB │ gzip:  19.00 kB\nnode_modules/.nitro/vite/services/ssr/assets/empty-plugin-adapters-CvCznwb8.js         0.31 kB │ gzip:   0.22 kB\nnode_modules/.nitro/vite/services/ssr/assets/rolldown-runtime-D7D4PA-g.js              0.36 kB │ gzip:   0.25 kB\nnode_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-JZhVDYMq.js    1.14 kB │ gzip:   0.52 kB\nnode_modules/.nitro/vite/services/ssr/assets/start-CVAOCTwe.js                         1.66 kB │ gzip:   0.78 kB\nnode_modules/.nitro/vite/services/ssr/assets/backend-db.server-Ca59FzpB.js             1.76 kB │ gzip:   0.92 kB\nnode_modules/.nitro/vite/services/ssr/assets/attachmentOwner.server-B6utNwBb.js        1.96 kB │ gzip:   0.98 kB\nnode_modules/.nitro/vite/services/ssr/assets/uploadAttachment.server-BBxZLB8K.js       2.49 kB │ gzip:   1.13 kB\nnode_modules/.nitro/vite/services/ssr/assets/attachmentPolicy-DEUG3rEo.js              2.69 kB │ gzip:   1.17 kB\nnode_modules/.nitro/vite/services/ssr/assets/resendWebhook.server-BXZK-nhZ.js          2.86 kB │ gzip:   1.28 kB\nnode_modules/.nitro/vite/services/ssr/assets/createCsrfMiddleware-DQt4NwRf.js          3.38 kB │ gzip:   1.08 kB\nnode_modules/.nitro/vite/services/ssr/index.js                                         4.91 kB │ gzip:   2.05 kB\nnode_modules/.nitro/vite/services/ssr/assets/schema-CecxGaWv.js                        5.54 kB │ gzip:   2.08 kB\nnode_modules/.nitro/vite/services/ssr/assets/attachmentStorage-Cp26tGCH.js             6.11 kB │ gzip:   2.28 kB\nnode_modules/.nitro/vite/services/ssr/assets/projectDelivery.server-ByFT2QR6.js        6.31 kB │ gzip:   2.34 kB\nnode_modules/.nitro/vite/services/ssr/assets/reference-finishes-OJypCr3N.js            6.81 kB │ gzip:   2.09 kB\nnode_modules/.nitro/vite/services/ssr/assets/privacy-ezuFgmUJ.js                       7.14 kB │ gzip:   2.48 kB\nnode_modules/.nitro/vite/services/ssr/assets/projectBook-CEnvVtYD.js                   9.46 kB │ gzip:   3.50 kB\nnode_modules/.nitro/vite/services/ssr/assets/submitLead.server-BJ15Csia.js            12.16 kB │ gzip:   4.38 kB\nnode_modules/.nitro/vite/services/ssr/assets/router-CzbDrHb1.js                       13.79 kB │ gzip:   4.73 kB\nnode_modules/.nitro/vite/services/ssr/assets/leadNotification.server-CMiYJnAh.js      14.45 kB │ gzip:   5.37 kB\nnode_modules/.nitro/vite/services/ssr/assets/service-C0BYhDU2.js                      15.26 kB │ gzip:   4.91 kB\nnode_modules/.nitro/vite/services/ssr/assets/types-30A4fSYI.js                        34.63 kB │ gzip:  10.71 kB\nnode_modules/.nitro/vite/services/ssr/assets/i18n-DJfn4XPy.js                         72.30 kB │ gzip:  24.00 kB\nnode_modules/.nitro/vite/services/ssr/assets/server-D2BfV17D.js                       76.92 kB │ gzip:  19.42 kB\nnode_modules/.nitro/vite/services/ssr/assets/renovation-EtvFS5pc.js                  216.14 kB │ gzip:  64.24 kB\nnode_modules/.nitro/vite/services/ssr/assets/routes-QR8_bDvF.js                      409.21 kB │ gzip: 104.41 kB\n\n✓ built in 276ms\n\n[nitro] ◐ Building [Nitro] (preset: cloudflare-module, compatibility: 2026-10-20)\n[nitro] ✔ Generated public .output/public\nvite v8.2.1 building nitro environment for production...\n\n WARN  inlineDynamicImports option is ignored because the codeSplitting option is specified.\n\n\u001b[2K\rtransforming...✓ 2318 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.output/server/_ssr/empty-plugin-adapters-CvCznwb8.mjs          0.23 kB │ gzip:   0.16 kB\n.output/server/_ssr/rolldown-runtime-D7D4PA-g.mjs               0.41 kB │ gzip:   0.29 kB\n.output/server/_libs/radix-ui__number.mjs                       0.42 kB │ gzip:   0.30 kB\n.output/server/_chunks/ssr-renderer.mjs                         0.78 kB │ gzip:   0.43 kB\n.output/server/_libs/radix-ui__react-direction.mjs              0.85 kB │ gzip:   0.47 kB\n.output/server/_libs/tanstack__react-query.mjs                  0.87 kB │ gzip:   0.45 kB\n.output/server/_libs/radix-ui__react-label.mjs                  1.09 kB │ gzip:   0.58 kB\n.output/server/_tanstack-start-manifest_v-JZhVDYMq.mjs          1.20 kB │ gzip:   0.55 kB\n.output/server/_libs/hookable.mjs                               1.25 kB │ gzip:   0.58 kB\n.output/server/_ssr/start-CVAOCTwe.mjs                          1.53 kB │ gzip:   0.70 kB\n.output/server/_runtime.mjs                                     1.76 kB │ gzip:   0.83 kB\n.output/server/_ssr/attachmentOwner.server-B6utNwBb.mjs         1.82 kB │ gzip:   0.91 kB\n.output/server/_ssr/backend-db.server-Ca59FzpB.mjs              1.85 kB │ gzip:   0.97 kB\n.output/server/_libs/radix-ui__primitive.mjs                    1.92 kB │ gzip:   0.79 kB\n.output/server/_ssr/uploadAttachment.server-BBxZLB8K.mjs        2.52 kB │ gzip:   1.15 kB\n.output/server/_ssr/attachmentPolicy-DEUG3rEo.mjs               2.73 kB │ gzip:   1.20 kB\n.output/server/_ssr/resendWebhook.server-BXZK-nhZ.mjs           2.95 kB │ gzip:   1.33 kB\n.output/server/_ssr/createCsrfMiddleware-DQt4NwRf.mjs           3.11 kB │ gzip:   1.01 kB\n.output/server/_libs/class-variance-authority+clsx.mjs          3.35 kB │ gzip:   1.32 kB\n.output/server/_libs/dijkstrajs.mjs                             3.79 kB │ gzip:   1.61 kB\n.output/server/_ssr/ssr.mjs                                     4.84 kB │ gzip:   2.04 kB\n.output/server/_libs/babel__runtime.mjs                         5.01 kB │ gzip:   1.46 kB\n.output/server/_ssr/schema-CecxGaWv.mjs                         5.72 kB │ gzip:   2.16 kB\n.output/server/_ssr/attachmentStorage-Cp26tGCH.mjs              6.21 kB │ gzip:   2.32 kB\n.output/server/_ssr/projectDelivery.server-ByFT2QR6.mjs         6.37 kB │ gzip:   2.39 kB\n.output/server/_ssr/reference-finishes-OJypCr3N.mjs             6.86 kB │ gzip:   2.12 kB\n.output/server/_ssr/privacy-ezuFgmUJ.mjs                        8.16 kB │ gzip:   2.56 kB\n.output/server/_ssr/projectBook-CEnvVtYD.mjs                    9.64 kB │ gzip:   3.58 kB\n.output/server/_libs/fflate.mjs                                11.99 kB │ gzip:   4.46 kB\n.output/server/_ssr/submitLead.server-BJ15Csia.mjs             12.09 kB │ gzip:   4.39 kB\n.output/server/_libs/tanstack__history.mjs                     12.59 kB │ gzip:   3.78 kB\n.output/server/_libs/radix-ui__react-radio-group.mjs           12.91 kB │ gzip:   3.20 kB\n.output/server/_ssr/leadNotification.server-CMiYJnAh.mjs       14.49 kB │ gzip:   5.40 kB\n.output/server/_ssr/router-CzbDrHb1.mjs                        14.66 kB │ gzip:   4.82 kB\n.output/server/_ssr/service-C0BYhDU2.mjs                       15.22 kB │ gzip:   4.94 kB\n.output/server/_libs/radix-ui__react-collection.mjs            16.67 kB │ gzip:   3.77 kB\n.output/server/_libs/h3+rou3+srvx.mjs                          16.90 kB │ gzip:   4.88 kB\n.output/server/_libs/h3-v2+rou3+srvx.mjs                       20.10 kB │ gzip:   5.86 kB\n.output/server/_libs/lucide-react.mjs                          20.62 kB │ gzip:   4.24 kB\n.output/server/_libs/@radix-ui/react-slider+[...].mjs          22.99 kB │ gzip:   5.57 kB\n.output/server/_libs/@floating-ui/dom+[...].mjs                25.57 kB │ gzip:   6.65 kB\n.output/server/_libs/@floating-ui/core+[...].mjs               25.75 kB │ gzip:   6.40 kB\n.output/server/_libs/@tanstack/router-core+[...].mjs           30.97 kB │ gzip:   8.08 kB\n.output/server/_libs/@floating-ui/react-dom+[...].mjs          31.76 kB │ gzip:   8.06 kB\n.output/server/index.mjs                                       32.34 kB │ gzip:   8.25 kB\n.output/server/_libs/@radix-ui/react-checkbox+[...].mjs        34.06 kB │ gzip:   7.90 kB\n.output/server/_ssr/types-30A4fSYI.mjs                         34.21 kB │ gzip:  10.65 kB\n.output/server/_libs/tanstack__query-core.mjs                  49.65 kB │ gzip:  10.80 kB\n.output/server/_libs/sonner.mjs                                52.05 kB │ gzip:  11.84 kB\n.output/server/_libs/@radix-ui/react-dropdown-menu+[...].mjs   58.51 kB │ gzip:  11.55 kB\n.output/server/_libs/pngjs.mjs                                 58.90 kB │ gzip:  11.84 kB\n.output/server/_libs/@radix-ui/react-dialog+[...].mjs          66.81 kB │ gzip:  15.44 kB\n.output/server/_ssr/i18n-DJfn4XPy.mjs                          72.68 kB │ gzip:  24.11 kB\n.output/server/_ssr/server-D2BfV17D.mjs                        73.27 kB │ gzip:  19.17 kB\n.output/server/_libs/qrcode.mjs                                80.13 kB │ gzip:  18.80 kB\n.output/server/_libs/dompurify.mjs                             85.95 kB │ gzip:  23.37 kB\n.output/server/_libs/tailwind-merge.mjs                        88.22 kB │ gzip:  15.74 kB\n.output/server/_libs/zod.mjs                                  101.58 kB │ gzip:  17.59 kB\n.output/server/_libs/fast-png+iobuffer+pako.mjs               144.16 kB │ gzip:  33.13 kB\n.output/server/_ssr/renovation-EtvFS5pc.mjs                   214.64 kB │ gzip:  63.96 kB\n.output/server/_libs/html2canvas.mjs                          318.45 kB │ gzip:  63.16 kB\n.output/server/_libs/canvg+[...].mjs                          346.40 kB │ gzip:  73.32 kB\n.output/server/_libs/three.mjs                                368.89 kB │ gzip:  77.35 kB\n.output/server/_ssr/routes-QR8_bDvF.mjs                       433.58 kB │ gzip: 104.92 kB\n.output/server/_libs/jspdf.mjs                                477.07 kB │ gzip: 124.17 kB\n.output/server/_libs/@tanstack/react-router+[...].mjs         752.26 kB │ gzip: 158.33 kB\n\n✓ built in 392ms\n[nitro] ℹ Using auto generated worker name: tanstack-start-ts\nℹ Generated .output/server/wrangler.json\nℹ Generated .wrangler/deploy/config.json\nℹ Generated .output/public/_headers\nℹ Generated .output/nitro.json\n\n[nitro] ✔ You can preview this build using npx vite preview\n[nitro] ✔ You can deploy this build using npx nitro deploy --prebuilt\n"
+    },
+    {
+      "name": "water-material-lifecycle",
+      "cmd": "node scripts/water-lifecycle-audit.mjs",
+      "exitCode": 0,
+      "output": "{\"status\":\"PASS\",\"checks\":21,\"scope\":\"Actual reflection/material hook ownership, pause/resume and mount guards; GPU/browser QA separate\"}\n"
+    },
+    {
+      "name": "water-transmission",
+      "cmd": "node scripts/water-transmission-audit.mjs",
+      "exitCode": 0,
+      "output": "PASS: 13 water/shadow source contracts (runtime and visual QA separately required)\n"
+    },
+    {
+      "name": "structure-progression",
+      "cmd": "node scripts/run-structure-progression-audit.mjs",
+      "exitCode": 0,
+      "output": "PASS: 82457 structural progression checks — stage, snapshot, dry/wet, shape/resize, comfort, technical, photo and downstream identity.\n"
+    },
+    {
+      "name": "mosaic-material",
+      "cmd": "node scripts/mosaic-material-audit.mjs",
+      "exitCode": 0,
+      "output": "PASS: all 9 original mosaics, 8/9-cell calibration, 81 metric resize cases, neutral albedo, uniform PBR and photo-map wiring\nPASS: 73764 deterministic source-cell/metric checks across all9; shared PBR lookup, same sampler budget, cache cancellation/reselection/retry; PVC branch retained\n"
+    },
+    {
+      "name": "material-geometry-shader-source",
+      "cmd": "node scripts/retained-pbr-source-audit.mjs /Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-BjDT7l",
+      "exitCode": 0,
+      "output": "{\"status\":\"PASS\",\"materialElements\":8,\"geometryFactories\":17,\"shaderConstants\":16,\"scope\":\"Exact parent source descriptors/constants; not a rendered image-equivalence claim\"}\n"
+    }
+  ]
+}

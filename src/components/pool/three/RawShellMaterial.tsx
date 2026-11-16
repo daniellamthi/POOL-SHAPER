@@ -3,13 +3,14 @@ import { boostMetalEnvironment } from "./metalEnvironment";
 
 export type RawShellKind = "steel" | "concrete" | "stainless";
 // Indicative construction finish, not a manufacturer's scan or structural spec.
-// The existing visual panel convention is 0.9 m. No bolts/rebar are invented.
+// The existing steel texture repeat is 0.9 m.
 export const RAW_PANEL_MODULE_METRES = 0.9;
 const SIZE = 512;
-const cache = new Map<RawShellKind, { color: THREE.DataTexture; normal: THREE.DataTexture; roughness: THREE.DataTexture }>();
+const cache = new Map<string, { color: THREE.DataTexture; normal: THREE.DataTexture; roughness: THREE.DataTexture }>();
 
-function structuralMaps(kind: RawShellKind) {
-  const existing = cache.get(kind);
+function structuralMaps(kind: RawShellKind, seamlessSteel: boolean) {
+  const key = `${kind}-${kind === "steel" && seamlessSteel ? "seamless" : "panel"}`;
+  const existing = cache.get(key);
   if (existing) return existing;
   const color = new Uint8Array(SIZE * SIZE * 4);
   const normal = new Uint8Array(color.length);
@@ -30,9 +31,9 @@ function structuralMaps(kind: RawShellKind) {
   for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
     const n = noise(x, y), u = x / SIZE, v = y / SIZE;
     const cloud = (field(u, v, 7) * 0.65 + field(u, v, 23) * 0.35 - 0.5) * 2;
-    const joint = kind === "steel" && (x < 3 || x >= SIZE - 3);
     const pore = kind === "concrete" && n > 0.987 ? 0.22 : 0;
     const brush = kind === "stainless" ? (Math.sin(y * 2.73) + Math.sin(y * 8.17)) * 0.0035 : 0;
+    const joint = kind === "steel" && !seamlessSteel && (x < 3 || x >= SIZE - 3);
     heights[y * SIZE + x] = joint ? -0.7 : n * 0.025 + cloud * 0.025 - pore + brush;
     // Stainless: a mid satin grey (AISI 316 brushed), not near-white chrome.
     const base = kind === "steel" ? 181 : kind === "stainless" ? 150 : 146;
@@ -68,9 +69,8 @@ function structuralMaps(kind: RawShellKind) {
     return t;
   };
   const maps = { color: texture(color, true), normal: texture(normal), roughness: texture(roughness) };
-  // Two bounded, shared templates for the lifetime of the renderer; never
-  // regenerated on resize, selection or per frame (~8 MiB including mipmaps).
-  cache.set(kind, maps);
+  // Bounded shared templates; never regenerated on resize or per frame.
+  cache.set(key, maps);
   return maps;
 }
 
@@ -79,14 +79,17 @@ export function RawShellMaterial({
   kind = "concrete",
   wallSize,
   underwater,
+  seamlessSteel = false,
 }: {
   kind?: RawShellKind;
   wallSize?: readonly [number, number];
+  /** Interior steel only: omit the illustrative exterior panel joints. */
+  seamlessSteel?: boolean;
   /** Wet stainless basin: the pool's own underwater shader patch (absorption,
    * scattering, caustics) plus a cache key for it. */
   underwater?: { configure: (shader: THREE.WebGLProgramParametersWithUniforms) => void; key: string } | undefined;
 }) {
-  const maps = structuralMaps(kind);
+  const maps = structuralMaps(kind, seamlessSteel);
   const module = kind === "steel" ? RAW_PANEL_MODULE_METRES : 1;
   const scale = wallSize ? [wallSize[0] / module, wallSize[1] / module] : [1 / module, 1 / module];
   const stainless = kind === "stainless";

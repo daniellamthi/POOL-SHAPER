@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-20",
+  "baseHEAD": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "source": [
+    {
+      "path": "src/components/pool/three/PoolModel.tsx",
+      "sha256": "5740f81e841a4e8568cbe0be95ee1f800b4937b26c5fe87d7980f4585a121902"
+    },
+    {
+      "path": "src/components/pool/three/WaterSurfaceMaterial.tsx",
+      "sha256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa"
+    },
+    {
+      "path": "src/components/pool/three/RetainedStageMaterial.tsx",
+      "sha256": "db0bf71c22666c1048ff9d82a9dfe4086da4652b24ea524e8c08ffd87c4e7cda"
+    },
+    {
+      "path": "scripts/structure-progression-audit.ts",
+      "sha256": "2ebc042e325548f2e3028e6ccf9fcc899e328f0a854b1de1fe698bba3709cb89"
+    },
+    {
+      "path": "scripts/water-lifecycle-audit.mjs",
+      "sha256": "12f7ae117996b63de6597fa10cded166c338f238889e630c0f744972f972a245"
+    },
+    {
+      "path": "scripts/retained-pbr-source-audit.mjs",
+      "sha256": "d61df1b99e134001aba0358735592c9abed537d29aec216e847e7d10c8f8eee4"
+    }
+  ],
+  "originalWip": {
+    "count": 39,
+    "unchangedFiles": 38,
+    "overlap": "PoolModel contains exactly the validated patch plus all4original seamlessSteel flags; index must use isolated source without those4WIP props",
+    "otherHashMismatches": [],
+    "backup": "pool-shaper-wip-backups/residual-gates-20261015-TBuaCI"
+  },
+  "evidenceBeforeThisReceipt": {
+    "files": 69,
+    "treeSHA256": "00e3641f7cf720cfcc9a6a494b69d84fb7f6ce2408d2b001cc4a9619fa40ae52"
+  },
+  "credentialFlags": [],
+  "buildReceipt": "residual-performance-final-unprobed-checkpoint.json",
+  "independentReview": "residual-final-source-review.json",
+  "rootUnprobedSmoke": "Actual IAB3021client boot; no console errors; screenshot residual-final-unprobed-boot.png",
+  "releaseGate": "FIX REQUIRED; partial improvement only, warm latency persists; hosted backend BLOCKED due missing server env; no release approval"
+}

@@ -1,0 +1,49 @@
+[
+  {
+    "scenario": "first-finished-Infinity-glass-review",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":29,\"event\":\"click\",\"inputToSecondRafMs\":8786.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-20T13:07:37.777Z",
+        "url": "http://release-perf.localhost:3003/src/lib/pool/development-interaction-timing.ts?t=1792501257753"
+      }
+    ],
+    "toolTimeout": "Vedi piscina click: CUA Runtime.evaluate 3000ms timeout; next DOM snapshot succeeded; no page error"
+  },
+  {
+    "scenario": "warm-finished-Infinity-glass-review",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":33,\"event\":\"click\",\"inputToSecondRafMs\":2438.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-20T13:08:25.960Z",
+        "url": "http://release-perf.localhost:3003/src/lib/pool/development-interaction-timing.ts?t=1792501257753"
+      }
+    ]
+  },
+  {
+    "scenario": "first-LED-subacquei-Infinity-glass",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":42,\"event\":\"click\",\"inputToSecondRafMs\":12397.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-20T13:10:32.315Z",
+        "url": "http://release-perf.localhost:3003/src/lib/pool/development-interaction-timing.ts?t=1792501257753"
+      }
+    ],
+    "toolTimeout": "CUA Runtime.evaluate3000ms; next DOM confirmed LEDs and Night committed"
+  },
+  {
+    "scenario": "micro-spot-Infinity-night",
+    "logs": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":45,\"event\":\"click\",\"inputToSecondRafMs\":6714.5,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-20T13:11:10.016Z",
+        "url": "http://release-perf.localhost:3003/src/lib/pool/development-interaction-timing.ts?t=1792501257753"
+      }
+    ],
+    "toolTimeout": "Runtime.evaluate3000ms; subsequentDOMsnapshot"
+  }
+]

@@ -1,0 +1,178 @@
+{
+  "beforeRetry": [
+    {
+      "checked": false,
+      "id": "_r_5_",
+      "name": "",
+      "type": "text",
+      "value": "QA Isolata"
+    },
+    {
+      "checked": false,
+      "id": "_r_6_",
+      "name": "",
+      "type": "email",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_7_",
+      "name": "",
+      "type": "tel",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_8_",
+      "name": "",
+      "type": "text",
+      "value": "Località QA"
+    },
+    {
+      "checked": false,
+      "id": "lead-notes",
+      "name": "",
+      "type": "textarea",
+      "value": "Verifica locale isolata: nessuna email da inviare."
+    },
+    {
+      "checked": false,
+      "id": "",
+      "name": "website",
+      "type": "text",
+      "value": ""
+    }
+  ],
+  "afterITRetry": [
+    {
+      "checked": false,
+      "id": "_r_5_",
+      "name": "",
+      "type": "text",
+      "value": "QA Isolata"
+    },
+    {
+      "checked": false,
+      "id": "_r_6_",
+      "name": "",
+      "type": "email",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_7_",
+      "name": "",
+      "type": "tel",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_8_",
+      "name": "",
+      "type": "text",
+      "value": "Località QA"
+    },
+    {
+      "checked": false,
+      "id": "lead-notes",
+      "name": "",
+      "type": "textarea",
+      "value": "Verifica locale isolata: nessuna email da inviare."
+    },
+    {
+      "checked": false,
+      "id": "",
+      "name": "website",
+      "type": "text",
+      "value": ""
+    }
+  ],
+  "afterLanguage": [
+    {
+      "checked": false,
+      "id": "_r_e_",
+      "name": "",
+      "type": "text",
+      "value": "QA Isolata"
+    },
+    {
+      "checked": false,
+      "id": "_r_f_",
+      "name": "",
+      "type": "email",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_g_",
+      "name": "",
+      "type": "tel",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_h_",
+      "name": "",
+      "type": "text",
+      "value": "Località QA"
+    },
+    {
+      "checked": false,
+      "id": "lead-notes",
+      "name": "",
+      "type": "textarea",
+      "value": "Verifica locale isolata: nessuna email da inviare."
+    },
+    {
+      "checked": false,
+      "id": "",
+      "name": "website",
+      "type": "text",
+      "value": ""
+    }
+  ],
+  "afterENRetry": [
+    {
+      "checked": false,
+      "id": "_r_e_",
+      "name": "",
+      "type": "text",
+      "value": "QA Isolata"
+    },
+    {
+      "checked": false,
+      "id": "_r_f_",
+      "name": "",
+      "type": "email",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_g_",
+      "name": "",
+      "type": "tel",
+      "value": "<redacted>"
+    },
+    {
+      "checked": false,
+      "id": "_r_h_",
+      "name": "",
+      "type": "text",
+      "value": "Località QA"
+    },
+    {
+      "checked": false,
+      "id": "lead-notes",
+      "name": "",
+      "type": "textarea",
+      "value": "Verifica locale isolata: nessuna email da inviare."
+    },
+    {
+      "checked": false,
+      "id": "",
+      "name": "website",
+      "type": "text",
+      "value": ""
+    }
+  ]
+}

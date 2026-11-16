@@ -1,0 +1,74 @@
+{
+  "createdAt": "2026-10-20T17:09:15.617Z",
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "isolatedCopy": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-BjDT7l",
+  "exactSourceBeforeProbe": "385 runtime files +30 task files matched HEAD; see residual-performance-production-source.json",
+  "onlyAppInstrumentation": {
+    "path": "src/components/pool/three/PoolScene.tsx",
+    "expectedOnlyInsertedLines": "  // Isolated production QA only: same opt-in passive input→second-rAF helper as DEV; no renderer/quality changes.\n  useEffect(installDevelopmentInteractionTiming, []);\n",
+    "originalSHA256": "fd7fc88f0bf619ff44e6a690a5d7841b31e45b7f7083dd801d23d3f9fb10debd",
+    "instrumentedSHA256": "7247a0330ecad9004e26fa520457b2dc97d775c47ddffa855090e5e62bd3be9a",
+    "helperSHA256": "fdd791e12fd933bb12025e257b8ab442b7a146c965e022616eeb0bd868fc04d9",
+    "method": "Identical passive trusted-input→second-rAF timing helper, opt-in query; not GPU/finalpaint. No GL wrappers, sampler profiler, render timers or quality changes."
+  },
+  "server": {
+    "port": 3019,
+    "processSession": 1897,
+    "command": "node residual-production-serve.mjs",
+    "adapter": "Node HTTP -> generated Nitro Cloudflare worker default.fetch + built ASSETS; GET/HEAD only, no backend bindings",
+    "stockVitePreview": "Failed: expects dist/server/server.js but Nitro produced .output/server/index.mjs",
+    "wrangler": "Not installed; no packages installed"
+  },
+  "environment": {
+    "browser": "Actual Chrome extension browser1",
+    "viewport": [
+      1440,
+      900
+    ],
+    "hardwareReference": "Apple M1 Pro / ANGLE Metal confirmed in preceding DEV evidence; unchanged workstation, not freshly re-read in this production pass",
+    "hardwareReadLimit": "chrome://gpu blocked by browser policy; no workaround attempted",
+    "engine": "three.js r185",
+    "dpr": "Approved AdaptiveQuality: sampled idle buffer2023x1264 (~1.405), moving buffer1440x900 (1); not fixed DPR1",
+    "visibility": "visible for all app-timing records",
+    "config": "8x4x1.5 in-ground RC rectangle Infinity side3 glass, Shelf3.035m, two Esse loungers, straight internal stair, SandBeach179 liner, Travertine coping, Gres60x120, Night, two Blue wall LEDs at60%, six riser micro-spots toggled"
+  },
+  "resultsMs": {
+    "wetToDry": [
+      331.3,
+      83.6,
+      131.4
+    ],
+    "dryToWet": [
+      829,
+      759,
+      778.8
+    ],
+    "microOn": [
+      689.5,
+      124.4,
+      137.9
+    ],
+    "microOff": [
+      350.2,
+      88.6
+    ],
+    "setupFirstWaterDay": 911.3,
+    "setupFirstWallLedNight": 1445.9
+  },
+  "classification": {
+    "devOnly": "NOT ESTABLISHED: older DEV measurement included pre-goal PoolModel/RawShell WIP; candidate production excludes it. Cache/DPR regimes not identical. Historic 2.7–6.4s magnitudes not reproduced here.",
+    "firstUse": "First local activation/setup costs observed; assets then warmed. Driver shader cache was not purged, so this is not guaranteed cold GPU/compiler/network.",
+    "warmRepeated": "CONFIRMED production-rendering input scheduling delay: dry→wet759.0/778.8ms repeated. Still requires causal investigation/fix; do not clear gate using steady median.",
+    "micro": "First689.5ms improves to124.4/137.9ms warm; no repeated6.4s observed."
+  },
+  "nextBoundedCausalTest": "Before a product patch, one warm dry→wet in this isolated production copy with existing opt-in native GL aggregate helper would determine whether program-query synchronization still dominates. No checkShaderErrors suppression, quality cuts or async-gate claims are validated.",
+  "primaryPreservation": {
+    "headStill": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+    "original39WipCompared": 39,
+    "changed": [],
+    "noPrimaryAppEditsByThisAgent": true,
+    "noSecretsOrEnvCopied": true
+  },
+  "errors": [],
+  "browserReleased": true
+}

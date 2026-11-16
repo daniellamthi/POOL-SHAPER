@@ -1,0 +1,55 @@
+Browser tab: 5, Title: "Informativa sulla Privacy — Piscine Wellness", URL: "http://esse-qa.localhost:3003/privacy".
+1 AXWebArea Informativa sulla Privacy — Piscine Wellness, URL: esse-qa.localhost:3003/privacy
+	2 container
+		3 link Description: ← BACK TO THE CONFIGURATOR, Value: esse-qa.localhost:3003/
+		4 heading Privacy notice, Value: 1
+			5 text Privacy notice
+		6 text This notice explains how Piscine Wellness processes personal data collected through the pool configurator, in accordance with Regulation (EU) 2016/679 (GDPR).
+		7 text Document prepared for product development. The highlighted fields must be completed and the page validated by a legal/privacy adviser before production publication.
+		8 heading 1. Data controller, Value: 2
+			9 text 1. Data controller
+		10 container
+			11 text PISCINE WELLNESS SRL , registered at Via Caduti sul Lavoro 7, 37012 Bussolengo (VR) , VAT/tax code 04764920239 , contactable at
+			12 link Description: info@piscinewellness.com, Value: mailto:info@piscinewellness.com
+			13 text .
+		14 heading 2. Data collected, Value: 2
+			15 text 2. Data collected
+		16 text When you submit an assessment request through the configurator, we collect:
+		17 content list
+			18 container
+				19 AXListMarker • 
+				20 text Contact details: name, email, phone and project location;
+			21 container
+				22 AXListMarker • 
+				23 text Your preferred timeframe and any optional notes you choose to add;
+			24 container
+				25 AXListMarker • 
+				26 text The complete configuration of your pool (shape, dimensions, hydraulic system, lining, coping, access, lighting and equipment);
+			27 container
+				28 AXListMarker • 
+				29 text Your acceptance of this notice and your marketing consent (if given).
+		30 heading 3. Purposes and legal basis, Value: 2
+			31 text 3. Purposes and legal basis
+		32 text We use this data to assess project feasibility and prepare a commercial proposal (pre-contractual steps at your request, Article 6(1)(b) GDPR). If you have given optional consent, we may send marketing communications (consent, Article 6(1)(a) GDPR). You may withdraw this consent at any time.
+		33 heading 4. Data retention, Value: 2
+			34 text 4. Data retention
+		35 text For quotation requests that do not result in a contract, the intended retention period for personal data and any attachments is 12 months from the last contact relating to the request.
+		36 text If a contract is entered into, we retain the data needed to perform it and meet legal obligations for the applicable periods. Any longer retention must be justified and documented.
+		37 heading 5. Data recipients, Value: 2
+			38 text 5. Data recipients
+		39 container
+			40 text Data is processed by our authorised staff and technical providers acting as processors, including the notification email service (Resend) and [ hosting/data storage provider ] . We do not sell or share your data with third parties for purposes other than those stated.
+		41 heading 6. Your rights, Value: 2
+			42 text 6. Your rights
+		43 container
+			44 text You may request access, rectification, erasure, restriction of processing or portability of your data, or object to processing, at any time by writing to
+			45 link Description: info@piscinewellness.com, Value: mailto:info@piscinewellness.com
+			46 text . You also have the right to lodge a complaint with the Italian Data Protection Authority.
+		47 heading 7. Updates, Value: 2
+			48 text 7. Updates
+		49 text This notice may be updated; the current version is always available at this address.
+		50 container
+			51 text Last updated: [ publication date ]
+	52 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Informativa sulla Privacy — Piscine Wellness, URL: esse-qa.localhost:3003/privacy

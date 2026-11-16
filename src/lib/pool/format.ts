@@ -1,7 +1,9 @@
-const formatter = (digits: number) =>
-  new Intl.NumberFormat("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+import type { Locale } from "@/lib/i18n";
 
-export const formatNumber = (value: number, digits = 2) => formatter(digits).format(value);
+const formatter = (digits: number, locale?: Locale) =>
+  new Intl.NumberFormat(locale === "it" ? "it-IT" : locale === "en" ? "en-GB" : "en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
-export const formatMeasure = (value: number, unit: string, digits = 2) =>
-  `${formatNumber(value, digits)} ${unit}`;
+export const formatNumber = (value: number, digits = 2, locale?: Locale) => formatter(digits, locale).format(value);
+
+export const formatMeasure = (value: number, unit: string, digits = 2, locale?: Locale) =>
+  `${formatNumber(value, digits, locale)} ${unit}`;

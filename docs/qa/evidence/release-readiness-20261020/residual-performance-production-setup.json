@@ -1,0 +1,122 @@
+{
+  "at": "2026-10-20T17:04:59.989Z",
+  "dom": "- heading \"Configuratore piscine 3D\" [level=1]\n- banner:\n  - img \"Piscine Wellness\"\n  - navigation \"Fasi della configurazione\":\n    - list:\n      - button \"Piscina Cemento armato · 8,0 × 4,0 m\":\n        - generic: Piscina\n        - generic: Cemento armato · 8,0 × 4,0 m\n      - button \"Sistema acqua Infinity · lato scelto\":\n        - generic: Sistema acqua\n        - generic: Infinity · lato scelto\n      - button \"Accesso & comfort Scala interna · Spiaggetta\":\n        - generic: Accesso & comfort\n        - generic: Scala interna · Spiaggetta\n      - button \"Finiture Liner PVC · Sand Beach [179]\":\n        - generic: Finiture\n        - generic: Liner PVC · Sand Beach [179]\n      - button \"Esterno Travertino · Gres porcellanato · 60 × 120 cm\":\n        - generic: Esterno\n        - generic: Travertino · Gres porcellanato · 60 × 120 cm\n      - button \"Optional Nessun optional\":\n        - generic: Optional\n        - generic: Nessun optional\n      - button \"Presentazione In corso\" [active]:\n        - generic: Presentazione\n        - generic: In corso\n  - group \"Lingua\":\n    - button \"Italiano\" [pressed]: IT\n    - button \"Inglese\": EN\n  - group \"Ora della scena\":\n    - button \"Giorno\":\n      - generic: Giorno\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n  - button \"Ricomincia\":\n    - generic: Ricomincia\n- main:\n  - button \"Vista della piscina\":\n    - text: Vista piscina\n  - paragraph: Trascina per ruotare · Scorri per lo zoom · Tasto destro per spostare\n  - toolbar \"Strumenti vista\":\n    - button \"Guide\":\n      - text: Guide\n    - button \"Vista tecnica\":\n      - text: Vista tecnica\n    - button \"Riquadra\":\n      - text: Riquadra\n- 'region \"Passo 7: Presentazione\"':\n  - paragraph: \"La tua piscina finita: scena, riepilogo e richiesta di proposta.\"\n  - tablist \"Presentazione\":\n    - tab \"Scena\" [selected]\n    - tab \"Riepilogo\"\n    - tab \"Richiedi proposta\"\n  - paragraph: Momento della giornata\n  - group \"Momento della giornata\":\n    - button \"Giorno\":\n      - generic: Giorno\n      - generic: Luce naturale, colori reali del rivestimento.\n    - button \"Notte\" [pressed]:\n      - generic: Notte\n      - generic: Scena notturna, con le luci selezionate.\n  - 'button \"Prossima scelta: Riepilogo\"':\n    - text: \"Prossima scelta: Riepilogo\"\n  - button \"Altre opzioni\":\n    - text: Altre opzioni\n  - paragraph:\n    - text: Fase 07 di 07\n    - generic: · 1/3 · Scena\n  - heading \"Presentazione\" [level=2]\n  - paragraph: 8,0 × 4,0 m · pronta per la proposta\n  - button \"Vedi la piscina\":\n    - text: Vedi la piscina\n  - button \"Riduci\" [expanded]:\n    - text: Riduci\n  - button \"Indietro\":\n    - text: Indietro\n  - button \"Continua · Riepilogo\":\n    - text: Continua\n    - generic: · Riepilogo\n- region \"Notifications alt+T\"",
+  "logs": [
+    {
+      "level": "warn",
+      "message": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "timestamp": "2026-10-20T17:02:35.792Z",
+      "url": "http://127.0.0.1:3019/assets/events-156d8d12.esm-CL88Jf28.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":80.7,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:06.626Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":796.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:07.696Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":269.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:23.190Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":83.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:23.361Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":91.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:23.679Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":6,\"event\":\"click\",\"inputToSecondRafMs\":150.4,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:33.356Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":7,\"event\":\"click\",\"inputToSecondRafMs\":151.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:47.006Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":8,\"event\":\"click\",\"inputToSecondRafMs\":122.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:51.151Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":9,\"event\":\"click\",\"inputToSecondRafMs\":180.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:03:56.950Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":10,\"event\":\"click\",\"inputToSecondRafMs\":343.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:04:09.461Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":11,\"event\":\"click\",\"inputToSecondRafMs\":911.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:04:14.558Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":12,\"event\":\"click\",\"inputToSecondRafMs\":1445.9,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:04:16.034Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":13,\"event\":\"click\",\"inputToSecondRafMs\":1027.9,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:04:21.351Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":14,\"event\":\"click\",\"inputToSecondRafMs\":113.2,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:04:44.413Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":15,\"event\":\"click\",\"inputToSecondRafMs\":118.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-20T17:04:44.688Z",
+      "url": "http://127.0.0.1:3019/assets/PoolScene-B62lXkzB.js"
+    }
+  ],
+  "canvas": {
+    "data": {
+      "cameraFocus": "review",
+      "cameraProjection": "perspective",
+      "engine": "three.js r185"
+    },
+    "height": 1264,
+    "rect": {
+      "bottom": 900,
+      "height": 900,
+      "left": 0,
+      "right": 1440,
+      "top": 0,
+      "width": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "visibility": "visible",
+    "width": 2023
+  }
+}

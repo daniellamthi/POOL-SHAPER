@@ -506,11 +506,16 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
 for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
   for (const side of [0,1,2,3]) for (const sloped of [false,true]) {
     const c = config({length,width,side,sloped,system:"infinity",features:["sunShelf"]});
-    const shelf = configuredPoolLayout(c).comfort.elements.find(e => e.kind === "sunShelf");
-    check(!!shelf, `Infinity shelf ${length}/${width}/${side}/${sloped} available`);
+    const resolvedShelf = configuredPoolLayout(c);
+    const shelf = resolvedShelf.comfort.elements.find(e => e.kind === "sunShelf");
+    if (!shelf) {
+      check(!resolvedShelf.comfort.availability.sunShelf.available && !!resolvedShelf.comfort.availability.sunShelf.reason,
+        `Infinity shelf ${length}/${width}/${side}/${sloped}: unavailable for two chaises/access is explicit`);
+      continue;
+    }
     const outline = buildOutline(c.shape,c.dimensions,c.controlPoints);
     const layout = getPoolVerticalLayout({poolType:"in-ground",system:"infinity",depth:c.dimensions.depth,copingThickness:POOL_BORDER_PRESET.thickness});
-    const floor = buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout:layout,sunShelf:true,infinityEdge:c.infinityEdge!});
+    const floor = buildFloorProfile({outline,shape:c.shape,poolType:"in-ground",dimensions:c.dimensions,verticalLayout:layout,sunShelf:true,twoLoungerShelf:true,infinityEdge:c.infinityEdge!});
     const mesh = shelfStairGeometry(shelf!,floor);
     check(watertight(mesh), "Infinity shelf/landing/steps form one closed floor-supported solid");
     mesh.dispose();
@@ -519,6 +524,41 @@ for (const [length, width] of [[6,3], [8,4], [12,5]] as const)
       check(Math.abs(Math.abs(z) - (width/2-0.035)) > 1e-6, "no old 35mm Z shell gap");
     }
   }
+// Integrated bench shares the spa seating datum and nozzle hardware, with
+// separate backrest and calf rows on real vertical faces (never the seat top).
+for (const [length, width] of [[6, 3], [8, 4], [12, 5], [4, 8]]) {
+  for (const system of ["skimmer", "overflow", "infinity"] as const) {
+    const c = config({ length: length!, width: width!, sloped: false, system,
+      features: ["sunShelf", "integratedBench"], side: 3 });
+    const resolved = configuredPoolLayout(c);
+    const bench = resolved.comfort.elements.find(e => e.kind === "integratedBench");
+    if (!bench) {
+      check(!resolved.comfort.availability.integratedBench.available, "missing bench is explicitly unavailable");
+      continue;
+    }
+    const vertical = getPoolVerticalLayout({ poolType: c.poolType, system, overflowType: c.overflowType,
+      depth: c.dimensions.depth, copingThickness: POOL_BORDER_PRESET.thickness });
+    check(Math.abs(bench.topY - (vertical.waterY - HYDRO_DIMENSIONS.seatWaterDepth)) < 1e-9,
+      "integrated seat matches hydromassage height");
+    const back = bench.jets!.filter(j => j.y > bench.topY), legs = bench.jets!.filter(j => j.y < bench.topY);
+    check(back.length >= 2 && back.length === legs.length, "aligned backrest and calf rows");
+    const box = rect(bench.footprint);
+    for (const jet of bench.jets!) {
+      check(Math.abs(Math.hypot(...jet.dir) - 1) < 1e-9, "jet faces into basin");
+      check(Math.abs(Math.abs(jet.y - bench.topY) - HYDRO_DIMENSIONS.jetAboveSeat) < 1e-9, "shared nozzle vertical spacing");
+      if (jet.y > bench.topY) {
+        check(Math.abs(Math.abs(jet.dir[0] ? jet.x : jet.z) - (jet.dir[0] ? length! : width!) / 2) < 1e-8,
+          "backrest nozzle sits in existing pool wall");
+      } else {
+        const face = jet.dir[0] ? jet.dir[0] > 0 ? box.maxX : box.minX : jet.dir[1] > 0 ? box.maxZ : box.minZ;
+        check(Math.abs((jet.dir[0] ? jet.x : jet.z) - face) < 1e-9, "calf nozzle sits in bench riser");
+      }
+    }
+    const restored = roundTrip(c);
+    check(!!restored && same(configuredPoolLayout(restored).comfort.elements.find(e => e.kind === "integratedBench")?.jets, bench.jets),
+      "bench jets preserved through configuration round trip");
+  }
+}
 console.log(
   `Hydromassage audit PASS: ${checks} checks; ${built} sizes x 2 variants built, ${unavailable} unavailable.`,
 );

@@ -1,0 +1,18 @@
+{
+  "createdAt": "2026-10-20T16:56:42.917Z",
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "isolated": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-BjDT7l",
+  "runtimeFilesCompared": 385,
+  "runtimeMismatches": [],
+  "taskSourceCompared": 30,
+  "taskSourceMismatches": [],
+  "sourceEquivalent": true,
+  "noEnvSourceCopied": true,
+  "privateCaches": {
+    ".vite": true,
+    ".nitro": true,
+    ".cache": true,
+    ".vite-temp": true,
+    ".bin": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-10-15",
+  "scope": "Real photographic typology references. No exact supplier/model/finish claim. No CG, generated imagery, screenshots or hotlinks.",
+  "independentReview": "Separate reviewer verified sources, identity and all 39 modified-card viewport checks. Evidence: docs/fullscreen-qa-evidence/photos-QA/MATRIX.md. Four of 55 option mappings have approved photographs; the other 51 remain MISSING, not PASS.",
+  "photos": [
+    {
+      "photoId": "inox-ladder",
+      "status": "VERIFIED_REFERENCE",
+      "productKeys": ["access-ladder"],
+      "match": "reference",
+      "exactProduct": false,
+      "photographer": "Pavel Danilyuk",
+      "sourcePage": "https://www.pexels.com/photo/stainless-swimming-pool-ladder-9119739/",
+      "sourceDownload": "https://images.pexels.com/photos/9119739/pexels-photo-9119739.jpeg?cs=srgb&dl=pexels-pavel-danilyuk-9119739.jpg&fm=jpg",
+      "sourceSHA256": "2fab65d5650c6f00e74c471fce6934a81140674ab2e4e33321116bf78309e88e",
+      "sourceDimensions": { "width": 6016, "height": 4016 },
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "licenseVerified": true,
+      "permissionEvidence": "The specific photo page identifies this as a free photograph and links the Pexels License. The official license allows use on websites/apps and modification; credit is optional. Endorsement and stock redistribution are prohibited.",
+      "credit": "Photo: Pavel Danilyuk / Pexels",
+      "crop": { "x": 0, "y": 1500, "width": 4800, "height": 2400 },
+      "processing": "Crop, resize to 480/960 pixels wide, JPEG quality 78. No retouch or generated content.",
+      "focalPoint": { "x": 0.23, "y": 0.5 },
+      "description": {
+        "it": "Scaletta tubolare inox sul bordo di una piscina reale, con i due corrimano curvi in primo piano. La fotografia mostra il tipo di accesso, non un modello o una finitura di fornitura esatti.",
+        "en": "Tubular stainless steel ladder at a real pool edge, with both curved handrails in the foreground. The photograph illustrates the access type, not an exact supplied model or finish."
+      },
+      "alt": {
+        "it": "Fotografia di una scaletta inox con due corrimano curvi sul bordo di una piscina.",
+        "en": "Photograph of a stainless steel pool ladder with two curved handrails at the pool edge."
+      },
+      "variants": [
+        { "src": "/product-photos/inox-ladder-480.jpg", "width": 480, "height": 240 },
+        { "src": "/product-photos/inox-ladder-960.jpg", "width": 960, "height": 480 }
+      ],
+      "notSuitableFor": ["access-external", "overflow-visible", "overflow-hidden", "skimmer-slim", "skimmer-high"],
+      "notSuitableReason": "An inox pool ladder is not an integrated external staircase. The grille in the wider source is incidental and is not used as an overflow product photograph."
+    },
+    {
+      "photoId": "outdoor-chaise",
+      "status": "VERIFIED_REFERENCE",
+      "productKeys": ["equipment-loungers"],
+      "match": "reference",
+      "exactProduct": false,
+      "photographer": "Alina Skazka",
+      "sourcePage": "https://www.pexels.com/photo/lounge-chairs-by-a-swimming-pool-15780455/",
+      "sourceDownload": "https://images.pexels.com/photos/15780455/pexels-photo-15780455.jpeg?cs=srgb&dl=pexels-alinaskazka-15780455.jpg&fm=jpg",
+      "sourceSHA256": "f1239163d4688bdfb93a79f6e212336ebaf5bc45f2395e89d5a3ed7028660972",
+      "sourceDimensions": { "width": 3946, "height": 5912 },
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "licenseVerified": true,
+      "permissionEvidence": "The specific photo page identifies this as a free photograph and links the Pexels License. The official license allows use on websites/apps and modification; credit is optional. Endorsement and stock redistribution are prohibited.",
+      "credit": "Photo: Alina Skazka / Pexels",
+      "crop": { "x": 0, "y": 2600, "width": 3946, "height": 1973 },
+      "processing": "Crop, resize to 480/960 pixels wide, JPEG quality 78. No retouch or generated content.",
+      "focalPoint": { "x": 0.63, "y": 0.55 },
+      "description": {
+        "it": "Quattro chaise longue con telaio e cuscini chiari su pavimentazione asciutta a bordo piscina. Sono arredi da esterno, distinti dai lettini immersi della spiaggetta; il telaio della foto non identifica il materiale fornito.",
+        "en": "Four frame loungers with pale cushions on dry poolside paving. These are outdoor furnishings, distinct from in-water sun shelf loungers; the photographed frame does not specify the supplied material."
+      },
+      "alt": {
+        "it": "Fotografia di quattro chaise longue su telaio, con cuscini chiari, sulla pavimentazione asciutta intorno alla piscina.",
+        "en": "Photograph of four frame loungers with pale cushions standing on dry paving beside a swimming pool."
+      },
+      "variants": [
+        { "src": "/product-photos/outdoor-chaise-480.jpg", "width": 480, "height": 240 },
+        { "src": "/product-photos/outdoor-chaise-960.jpg", "width": 960, "height": 480 }
+      ],
+      "notSuitableFor": ["equipment-sunShelfLoungers", "comfort-sunShelf", "access-external"],
+      "notSuitableReason": "Dry framed furniture must not be labelled as a submerged resin chaise, a shallow shelf or a staircase."
+    }
+  ],
+  "missing": [
+    { "productKeys": ["equipment-sunShelfLoungers"], "status": "MISSING", "reason": "No verified licensed photograph of the correct sculpted immersed chaise was found in the bounded search. Floating or dry chairs were rejected." },
+    { "productKeys": ["comfort-sunShelf"], "status": "MISSING", "reason": "No verified licensed photograph clearly distinguishing a flat shallow shelf from ordinary entry steps was found." },
+    { "productKeys": ["access-external"], "status": "MISSING", "reason": "No verified licensed photograph of the enclosed, integrated external staircase was found. An A-frame ladder is not a substitute." },
+    { "productKeys": ["access-steps"], "status": "MISSING", "reason": "The extra candidate showed submerged steps too indistinctly to explain the product reliably." },
+    { "productKeys": ["comfort-hydro-closed", "comfort-hydro-open"], "status": "MISSING", "reason": "No licensed photograph verified for the two actual built-in hydromassage layouts." },
+    { "productKeys": ["skimmer-slim", "skimmer-high", "system-skimmer"], "status": "MISSING", "reason": "The licensed Commons skimmer candidate was an external basket assembly, not the wall-mounted Slim or high-waterline fitting." },
+    { "productKeys": ["overflow-visible", "overflow-hidden"], "status": "MISSING", "reason": "No independently informative, correctly licensed product detail was found. Incidental grille in the ladder photograph is not substituted." },
+    { "productKeys": ["equipment-pellicano"], "status": "MISSING", "reason": "No verified free photograph of the actual curved stainless water-blade type; unrelated sculptural fountains were rejected." },
+    { "productKeys": ["equipment-solarShower"], "status": "MISSING", "reason": "No verified free photograph of the correct freestanding solar shower type." },
+    { "productKeys": ["equipment-automaticCover"], "status": "MISSING", "reason": "The licensed automatic-cover candidate was fabric, while the configured option is a slatted cover." }
+  ],
+  "rejectedInspectedCandidates": [
+    { "sourcePage": "https://commons.wikimedia.org/wiki/File:Swimming_pool_Entry_ladder.jpg", "license": "CC BY-SA 4.0", "reason": "Ladder is too distant and barely visible; not useful as product photography." },
+    { "sourcePage": "https://commons.wikimedia.org/wiki/File:Pool_skimmer,_Fry%C5%A1t%C3%A1k.jpg", "license": "CC BY-SA 3.0", "reason": "External basket assembly, wrong fitting family." },
+    { "sourcePage": "https://commons.wikimedia.org/wiki/File:PCS_pool_cover.jpg", "license": "Public-domain dedication by Slivenbg", "reason": "Fabric cover, wrong type for the slatted-cover option." },
+    { "sourcePage": "https://www.pexels.com/photo/swimming-pool-261238/", "license": "CC0 as linked by its photo page", "reason": "Generic swimming pool; submerged steps too indistinct, no clear flat sun shelf." }
+  ]
+}

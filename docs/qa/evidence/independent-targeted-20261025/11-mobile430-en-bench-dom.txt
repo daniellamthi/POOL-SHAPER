@@ -1,0 +1,92 @@
+- heading "3D Pool Configurator" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Configuration phases":
+    - list:
+      - button "Pool":
+        - generic: Pool
+      - button "Water system":
+        - generic: Water system
+      - button "Access & comfort":
+        - generic: Access & comfort
+      - button "Finishes":
+        - generic: Finishes
+      - button "Exterior":
+        - generic: Exterior
+      - button "Options":
+        - generic: Options
+      - button "Presentation":
+        - generic: Presentation
+  - group "Language":
+    - button "Italian": IT
+    - button "English" [active] [pressed]: EN
+  - group "Scene time":
+    - button "Day" [pressed]:
+      - generic: Day
+    - button "Night":
+      - generic: Night
+  - button "Start again":
+- main:
+  - button "Pool view":
+    - text: Pool view
+  - status: Structure · Reinforced concrete
+  - button "Reframe":
+    - text: Reframe
+  - button "Expand pool":
+  - button "More tools":
+- 'region "Step 3: Access & comfort"':
+  - paragraph: How you enter the water and the integrated relaxation areas.
+  - tablist "Access and comfort":
+    - tab "Internal stairs"
+    - tab "Stainless steel ladder"
+    - tab "In-water comfort"
+    - tab "Sun shelf options" [selected]
+  - group "Sun shelf options":
+    - button "Sun shelf loungers" [pressed]:
+      - generic: Sun shelf loungers
+      - generic: Esse · Lyxo, without frame. For water up to 20 cm deep, with ballast.
+      - text: Added
+  - group "Lounger colour · Aquamarine":
+    - text: Lounger colour
+    - generic: · Aquamarine
+    - button "White"
+    - button "Lime green"
+    - button "Taupe grey"
+    - button "Aquamarine" [pressed]:
+    - button "Blue grey"
+    - button "Light green"
+  - paragraph: "Allowed quantity: from 1 to 3."
+  - text: Lounger quantity
+  - combobox "Lounger quantity":
+    - option "1"
+    - option "2"
+    - option "3" [selected]
+  - paragraph: Dimensional 3D preview; model and supply to be confirmed. 1.85 ×0.73 m.
+  - paragraph:
+    - generic: For your sun shelf · available only with this choice
+  - group "Integrated bench":
+    - button "Integrated bench" [pressed]:
+      - generic: Integrated bench
+      - generic: A submerged seat along the pool wall.
+      - text: Added
+  - text: Bench seats
+  - combobox "Bench seats":
+    - option "1"
+    - option "2" [selected]
+    - option "3"
+    - option "4"
+  - paragraph: "Per seat: 2 back jets and 2 leg jets."
+  - paragraph:
+    - text: Phase 03 of 07
+    - generic: · 4/4 · Sun shelf options
+  - heading "Access & comfort" [level=2]
+  - paragraph: Internal stairs · Sun shelf · Bench
+  - button "View the pool":
+    - text: View the pool
+  - button "Minimise" [expanded]:
+    - text: Minimise
+  - button "Back":
+    - text: Back
+  - button "Continue":
+    - text: Continue
+- region "Notifications alt+T"

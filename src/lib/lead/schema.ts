@@ -14,6 +14,8 @@ import { buildOutline } from "@/lib/pool/geometry";
 import { compatibleInfinityZones } from "@/lib/pool/infinity-edge";
 import { LEAD_TIMING_OPTIONS, type LeadTimingId } from "./types";
 import { isRenovationConfig } from "@/lib/pool/renovation";
+import { isSunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
+import { comfortConfigurationIssues, COMFORT_RESOLUTION_MESSAGE } from "@/lib/pool/comfort-compatibility";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // Kept as a literal tuple (not derived via .map(), which would widen to
@@ -28,7 +30,7 @@ const TIMING_IDS = [
 ] as const satisfies readonly LeadTimingId[];
 
 const SYSTEM_IDS = new Set(["skimmer", "overflow", "infinity"]);
-const OVERFLOW_IDS = new Set(["hidden", "visible"]);
+const OVERFLOW_IDS = new Set(["hidden", "visible", "continuous"]);
 const FINISH_IDS = new Set(["liner", "mosaic"]);
 const PROJECT_TYPE_IDS = new Set([null, "new", "renovation"]);
 const POOL_TYPE_IDS = new Set([null, "in-ground", "above-ground"]);
@@ -52,11 +54,16 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (typeof configValue !== "object" || configValue === null) return false;
 
   const config = configValue as Record<string, unknown>;
+  if (config["copingStyle"] !== undefined && config["copingStyle"] !== "dedicated" && config["copingStyle"] !== "flush") return false;
+  if (config["copingEdge"] !== undefined && config["copingEdge"] !== "square" && config["copingEdge"] !== "rounded") return false;
+  if (config["integratedBenchStations"] !== undefined && (!Number.isSafeInteger(config["integratedBenchStations"]) || Number(config["integratedBenchStations"]) < 1 || Number(config["integratedBenchStations"]) > 4)) return false;
+  if (config["sunShelfLoungerColor"] !== undefined && !isSunShelfLoungerColor(config["sunShelfLoungerColor"])) return false;
   if (!PROJECT_TYPE_IDS.has(config["projectType"] as string | null)) return false;
   if (!POOL_TYPE_IDS.has(config["poolType"] as string | null)) return false;
   if (!["rectangle", "l-shape", "custom"].includes(config["shape"] as string)) return false;
   if (!SYSTEM_IDS.has(config["system"] as string)) return false;
   if (!OVERFLOW_IDS.has(config["overflowType"] as string)) return false;
+  if (config["system"] === "overflow" && config["overflowType"] === "continuous" && config["poolType"] === "above-ground") return false;
   if (!FINISH_IDS.has(config["finish"] as string)) return false;
   const features = config["features"];
   if (!Array.isArray(features) || features.length > 20) return false;
@@ -70,6 +77,8 @@ const projectConfigurationSchema = z.custom<ProjectConfiguration>((value) => {
   if (!isFiniteNumberInRange(dimensions["length"], 0, 60)) return false;
   if (!isFiniteNumberInRange(dimensions["width"], 0, 60)) return false;
   if (!isFiniteNumberInRange(dimensions["depth"], 0, 10)) return false;
+  if (dimensions["sunShelfRun"] !== undefined &&
+    (!isFiniteNumberInRange(dimensions["sunShelfRun"], 0, Math.max(dimensions["length"] as number, dimensions["width"] as number)) || dimensions["sunShelfRun"] === 0)) return false;
   const cornerRadius = dimensions["cornerRadius"];
   if (typeof cornerRadius !== "number" || cornerRadius < 0 || cornerRadius > 1) return false;
   if (config["system"] === "infinity") {
@@ -120,7 +129,10 @@ export const leadSubmissionInputSchema = z.object({
     .string()
     .regex(/^PW-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{6}$/)
     .optional(),
-  project: projectConfigurationSchema,
+  project: projectConfigurationSchema.refine(project => {
+    try { return comfortConfigurationIssues(project.config).length === 0; }
+    catch { return false; }
+  }, COMFORT_RESOLUTION_MESSAGE),
 });
 
 export type LeadSubmissionInput = z.infer<typeof leadSubmissionInputSchema>;

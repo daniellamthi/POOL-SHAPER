@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useId } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -23,11 +24,12 @@ export function TextField({
   error,
   className,
 }: Props) {
+  const { t } = useI18n();
   const id = useId();
   return (
     <div className={cn("group flex flex-col gap-2", className)}>
       <label htmlFor={id} className="label-xs transition-colors group-focus-within:text-foreground">
-        {label} {required ? <span className="text-brand">*</span> : null}
+        {t(label)} {required ? <span className="text-brand">*</span> : null}
       </label>
       <Input
         id={id}
@@ -43,7 +45,7 @@ export function TextField({
       />
       {error ? (
         <span id={`${id}-error`} className="text-[11px] font-light text-destructive">
-          {error}
+          {t(error)}
         </span>
       ) : null}
     </div>

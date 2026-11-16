@@ -1,0 +1,128 @@
+[
+  {
+    "pair": 1,
+    "checkout": "baseline",
+    "camera": [
+      15.397847595263833,
+      8.093801668080852,
+      6.340290186285108
+    ],
+    "mode": "day",
+    "timestamp": "2026-10-21T17:31:48.098Z",
+    "fps": 30.3,
+    "frameTimeMs": 32.99,
+    "medianFrameTimeMs": 33.1,
+    "p95FrameTimeMs": 34.1,
+    "frameCount": 61,
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+    "visibility": "visible",
+    "calls": 220,
+    "peakCalls": 226,
+    "callScope": "full frame, all passes",
+    "triangles": 119852,
+    "geometries": 117,
+    "textures": 32,
+    "dpr": 1,
+    "viewport": [
+      1440,
+      900
+    ],
+    "maxTextureUnits": 16,
+    "peakProgramSamplers": 13,
+    "shadowMapSize": 4096,
+    "qualityPreset": "experience",
+    "planarReflection": true,
+    "idle": true,
+    "projection": [
+      1.4889371145503025,
+      0,
+      0,
+      0,
+      0,
+      2.3822993832804844,
+      0,
+      0,
+      0.23135308159722218,
+      0.0394531250000001,
+      -1.0004000800160033,
+      -1,
+      0,
+      0,
+      -0.20004000800160032,
+      0
+    ],
+    "buffer": [
+      1440,
+      900
+    ],
+    "gpuTimeMs": {
+      "median": 9.07,
+      "p95": 10.318,
+      "samples": 61,
+      "scope": "main, transmission and shadows; mirror excluded"
+    }
+  },
+  {
+    "pair": 1,
+    "checkout": "baseline",
+    "camera": [
+      15.397847595263833,
+      8.093801668080852,
+      6.340290186285108
+    ],
+    "mode": "night",
+    "timestamp": "2026-10-21T17:34:39.396Z",
+    "fps": 25.8,
+    "frameTimeMs": 38.81,
+    "medianFrameTimeMs": 38.6,
+    "p95FrameTimeMs": 42.1,
+    "frameCount": 52,
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+    "visibility": "visible",
+    "calls": 221,
+    "peakCalls": 226,
+    "callScope": "full frame, all passes",
+    "triangles": 119852,
+    "geometries": 120,
+    "textures": 31,
+    "dpr": 1.405456737852613,
+    "viewport": [
+      1440,
+      900
+    ],
+    "maxTextureUnits": 16,
+    "peakProgramSamplers": 13,
+    "shadowMapSize": 4096,
+    "qualityPreset": "experience",
+    "planarReflection": true,
+    "idle": true,
+    "projection": [
+      0.9801378183416588,
+      0,
+      0,
+      0,
+      0,
+      1.568220509346654,
+      0,
+      0,
+      0.12307942708333328,
+      -0.3338802083333334,
+      -1.0004000800160033,
+      -1,
+      0,
+      0,
+      -0.20004000800160032,
+      0
+    ],
+    "buffer": [
+      2023,
+      1264
+    ],
+    "gpuTimeMs": {
+      "median": 28.977,
+      "p95": 30.464,
+      "samples": 52,
+      "scope": "main, transmission and shadows; mirror excluded"
+    }
+  }
+]

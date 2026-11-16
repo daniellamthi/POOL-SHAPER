@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { BoxGeometry, Matrix4, OrthographicCamera, Vector3 } from "three";
 import { architecturalEdges, architecturalFrustum } from "../src/components/pool/three/architecturalPlan";
 import { createSurfaceGeometry, createRingGeometry } from "../src/components/pool/three/poolGeometry";
+import { createCopingSlabGeometry } from "../src/components/pool/three/poolConstruction";
 import { buildOutline, offsetOutline } from "../src/lib/pool/geometry";
 import { configuredPoolLayout } from "../src/lib/pool/resolved-layout";
 import { shelfStairGeometry } from "../src/components/pool/three/PoolComfortModel";
@@ -20,6 +21,35 @@ for (const geometry of [box,box.toNonIndexed()]) {
  ok(moved.every(p=>p[0]>=7&&p[0]<=9&&p[2]>=2.5&&p[2]<=5.5),"actual world transform");
  geometry.dispose();
 }
+// Real eased stone coping, rather than an ideal ring fixture: its three
+// tiny bevel facets must not become stacked construction strokes. Keep all
+// actual slab joints and the top perimeter; do not alter the source solid.
+for (const [length,width] of [[6,3],[8,4],[12,5]]) for (const continuous of [false,true]) {
+ const outline=buildOutline("rectangle",{length:length!,width:width!,depth:1.5,cornerRadius:0},[]);
+ const geometry=createCopingSlabGeometry(outline,offsetOutline(outline,.35),.055,null,continuous);
+ const positions=geometry.getAttribute("position");
+ const before=Array.from(positions.array);
+ geometry.computeBoundingBox();
+ const top=geometry.boundingBox!.max.y;
+ const matrix=new Matrix4().makeRotationY(.37).setPosition(2,.12,-3);
+ const legacy=architecturalEdges(geometry,matrix);
+ const refined=architecturalEdges(geometry,matrix,{horizontalOnly:true});
+ ok(refined.length>0,"real coping top contour retained");
+ ok(refined.length<legacy.length*.25,"microscopic parallel arris rings removed, not thickened");
+ ok(refined.every(p=>Math.abs(p[1]-(top+.12+.006))<1e-6),"one contour at the real upper surface");
+ ok(new Set(refined.map(p=>p[1].toFixed(6))).size===1,"no stacked bevel elevations");
+ ok(refined.every(p=>p.every(Number.isFinite)),"finite transformed coping boundaries");
+ ok(refined.length===(continuous?4:2*Math.round(length!/.62)+2*Math.round(width!/.62))*8,
+  "all four edges of every real slab remain, including corner mitres and real joints");
+ assert.deepEqual(Array.from(positions.array),before,"plan annotation cannot change coping geometry");checks++;
+ geometry.dispose();
+}
+const slopedTop=createSurfaceGeometry([[-1,-1],[-1,1],[1,1],[1,-1]]);
+slopedTop.applyMatrix4(new Matrix4().makeRotationX(.15));
+ok(architecturalEdges(slopedTop).length===8,"sloped basin retains its real four boundaries");
+ok(architecturalEdges(slopedTop,new Matrix4(),{horizontalOnly:true}).length===0,
+ "horizontal-only trim extraction is opt-in, never a global slope change");
+slopedTop.dispose();
 for(const shape of ["rectangle","l-shape"] as const) for(const [length,width] of [[6,3],[8,4],[12,5]]) {
  const outline=buildOutline(shape,{length:length!,width:width!,depth:1.5,cornerRadius:.35},[]);
  for(const geometry of [createSurfaceGeometry(outline),createRingGeometry(outline,offsetOutline(outline,.35))]) {
@@ -69,4 +99,5 @@ ok(scene.includes('if (outlines) outlines.visible = outlinesVisible ?? true;'),"
 ok(!scene.includes("InfinityTechnicalOutline"),"no duplicate legacy annotation");
 const overlay=readFileSync("src/components/pool/three/ArchitecturalOutline.tsx","utf8");
 ok(!overlay.includes('["overflow-grille"'),"dense grille slats do not become a black wireframe band");
+ok(overlay.includes('horizontalOnly: object.name === "plan-coping"'),"only eased coping uses horizontal top-face filtering");
 console.log(`PASS: ${checks} architectural geometry/framing/export checks`);

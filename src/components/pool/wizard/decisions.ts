@@ -6,7 +6,12 @@ export function decisions(step: string | undefined, config: PoolConfig): { id: s
   switch (step) {
     case "shape-dimensions": return [{ id: "shape", label: "Forma" }, { id: "plan", label: "Lunghezza e larghezza" }, { id: "depth", label: "Profondità" }];
     case "system": return [{ id: "system", label: "Sistema acqua" }, { id: "detail", label: config.system === "infinity" ? "Lato Infinity" : config.system === "overflow" ? "Tipologia di sfioro" : "Modello skimmer" }];
-    case "access": return [{ id: "access", label: "Accesso" }, ...(!above ? [{ id: "comfort", label: "Comfort in acqua" }] : [])];
+    case "access": return [
+      { id: "access", label: "Scala interna" },
+      ...(above ? [{ id: "external", label: "Scala esterna di accesso" }]
+        : [{ id: "ladder", label: "Scaletta inox" }, { id: "comfort", label: "Comfort in acqua" },
+          ...(config.features.includes("sunShelf") ? [{ id: "shelf-options", label: "Optional per la spiaggetta" }] : [])]),
+    ];
     case "style": return [{ id: "interior", label: "Rivestimento interno" }, ...(above ? [{ id: "exterior", label: "Pannelli esterni" }] : [])];
     case "lighting": return [{ id: "lighting", label: "Illuminazione" }, ...(config.features.includes("ledLighting") ? [{ id: "color", label: "Colore LED" }] : [])];
     case "deck": return [...(!(config.system === "overflow" && config.overflowType === "visible") ? [{ id: "coping", label: "Bordo vasca" }] : []), { id: "paving", label: "Pavimentazione" }];

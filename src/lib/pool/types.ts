@@ -23,7 +23,7 @@ export type CustomMode = "draw" | "upload";
  * construction: nothing reads `overflowType` or renders a skimmer wall
  * while `system === "infinity"`. */
 export type SystemType = "skimmer" | "overflow" | "infinity";
-export type OverflowType = "hidden" | "visible";
+export type OverflowType = "hidden" | "visible" | "continuous";
 /** Historical alias kept so any code still importing it keeps compiling. */
 export type FutureOverflowType = OverflowType | "infinity";
 
@@ -51,7 +51,9 @@ export type PoolFeatureId =
   | "ledLighting"
   | "stairLighting"
   | "hydromassage"
+  | "hydromassageBenchLighting"
   | "sunShelf"
+  | "sunShelfLoungers"
   | "integratedBench"
   | "inoxLadder"
   | "externalStaircase";
@@ -139,6 +141,9 @@ export interface Dimensions {
    * outline's minimum-X wall. true: swapped via "Inverti pendenza" without
    * changing the two depth values themselves. */
   slopeReversed?: boolean;
+  /** Requested Sun Shelf + flight run in metres. Absent on legacy projects:
+   * keep the approved derived layout. Never silently clamp after a resize. */
+  sunShelfRun?: number;
   /** L-shape only (`shape === "l-shape"`): `length`/`width` above are read as
    * the OUTER bounding rectangle for the L, and these three fields describe
    * the corner rectangle removed from it. Absent for every other shape --
@@ -194,6 +199,8 @@ export interface PoolConfig {
   shape: PoolShapeId;
   shapeSelected?: boolean;
   copingMaterial?: import("./coping-materials").CopingMaterialId;
+  copingStyle?: import("./coping-style").CopingStyle;
+  copingEdge?: import("./coping-style").CopingEdge;
   paving?: import("./presentation").PavingId;
   pavingFormat?: import("./presentation").PavingFormatId;
   premiumEnvironment?: import("./presentation").PremiumEnvironment;
@@ -208,6 +215,10 @@ export interface PoolConfig {
   linerColor: LinerColor;
   mosaicFinish: MosaicFinishId;
   features: ReadonlyArray<PoolFeatureId>;
+  /** Optional immersed furniture; actual capacity is derived from the Sun Shelf. */
+  sunShelfLoungerCount?: number;
+  integratedBenchStations?: number;
+  sunShelfLoungerColor?: import("./sun-shelf-lounger-colors").SunShelfLoungerColorId;
   ledColor?: string;
   /** Dimmer for the underwater LEDs, 0..1. Absent on projects saved before
    * the control existed; readers substitute LED_OPTICS.defaultIntensity. */

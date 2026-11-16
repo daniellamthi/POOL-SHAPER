@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ const PAD = 26;
 
 /** Editable outline: drag the control points, the 3D basin follows live. */
 export function ShapeEditor() {
+  const { t } = useI18n();
   const { config, outline, setControlPoint, resetControlPoints } = useConfigurator();
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<number | null>(null);
@@ -87,12 +89,10 @@ export function ShapeEditor() {
       </div>
       <div className="flex items-center justify-between gap-4">
         <p className="text-[11.5px] font-light text-muted-foreground">
-          Drag the control points to shape the basin.
-        </p>
+          {t("Drag the control points to shape the basin.")}{" "}</p>
         <Button type="button" variant="ghost" size="sm" onClick={resetControlPoints}>
           <RotateCcw />
-          Reset outline
-        </Button>
+          {t("Reset outline")}{" "}</Button>
       </div>
     </div>
   );

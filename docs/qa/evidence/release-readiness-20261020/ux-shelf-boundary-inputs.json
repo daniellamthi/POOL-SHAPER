@@ -1,0 +1,21 @@
+{
+  "pool": "12×5 rectangle in-ground concrete, linear internal stairs, Skimmer",
+  "bounds": [
+    {
+      "typed": "9.6",
+      "displayed": "9.6"
+    },
+    {
+      "typed": "9.7",
+      "displayed": "9.6"
+    },
+    {
+      "typed": "3.0",
+      "displayed": "9.6"
+    },
+    {
+      "typed": "3.035",
+      "displayed": "3.035"
+    }
+  ]
+}

@@ -1,0 +1,810 @@
+{
+  "browser": "Actual Chrome via CUA",
+  "viewport": "1440×900",
+  "routes": [
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 01 DI 07· 1/4 · Tipo di progetto\n\nPiscina\n\nNuova piscina"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 01 DI 07· 2/4 · Installazione\n\nPiscina\n\nPiscina interrata"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 01 DI 07· 3/4 · Struttura\n\nPiscina\n\nCemento armato"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 01 DI 07· 1/3 · Forma\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 01 DI 07· 2/3 · Lunghezza e larghezza\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 01 DI 07· 3/3 · Profondità\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 02 DI 07· 2/2 · Tipologia di sfioro\n\nSistema acqua\n\nSfioro a griglia",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 03 DI 07· 1/4 · Scala interna\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 03 DI 07· 2/4 · Scaletta inox\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 03 DI 07· 3/4 · Comfort in acqua\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 03 DI 07· 4/4 · Optional per la spiaggetta\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 04 DI 07· 1/1 · Rivestimento interno\n\nFiniture\n\nMosaico · Mosaic DD99152F",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 04 DI 07· 1/2 · Illuminazione\n\nFiniture\n\nGiorno · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 04 DI 07· 2/2 · Colore LED\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 05 DI 07· 1/1 · Pavimentazione\n\nEsterno\n\nGres porcellanato · Greige · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-visible",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 01 DI 07· 1/4 · Tipo di progetto\n\nPiscina\n\nNuova piscina"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 01 DI 07· 2/4 · Installazione\n\nPiscina\n\nPiscina interrata"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 01 DI 07· 3/4 · Struttura\n\nPiscina\n\nCemento armato"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 01 DI 07· 1/3 · Forma\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 01 DI 07· 2/3 · Lunghezza e larghezza\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 01 DI 07· 3/3 · Profondità\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSfioro a griglia"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 02 DI 07· 2/2 · Tipologia di sfioro\n\nSistema acqua\n\nSfioro nascosto",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 03 DI 07· 1/4 · Scala interna\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 03 DI 07· 2/4 · Scaletta inox\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 03 DI 07· 3/4 · Comfort in acqua\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 03 DI 07· 4/4 · Optional per la spiaggetta\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 04 DI 07· 1/1 · Rivestimento interno\n\nFiniture\n\nMosaico · Mosaic DD99152F",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 04 DI 07· 1/2 · Illuminazione\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 04 DI 07· 2/2 · Colore LED\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 05 DI 07· 1/2 · Bordo vasca\n\nEsterno\n\nPietra di Prun · Gres porcellanato · Greige · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 05 DI 07· 2/2 · Pavimentazione\n\nEsterno\n\nPietra di Prun · Gres porcellanato · Greige · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "overflow-hidden",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 01 DI 07· 1/4 · Tipo di progetto\n\nPiscina\n\nNuova piscina"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 01 DI 07· 2/4 · Installazione\n\nPiscina\n\nPiscina interrata"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 01 DI 07· 3/4 · Struttura\n\nPiscina\n\nCemento armato"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 01 DI 07· 1/3 · Forma\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 01 DI 07· 2/3 · Lunghezza e larghezza\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 01 DI 07· 3/3 · Profondità\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSfioro nascosto"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 02 DI 07· 2/2 · Lato Infinity\n\nSistema acqua\n\nInfinity · lato scelto",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 03 DI 07· 1/4 · Scala interna\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 03 DI 07· 2/4 · Scaletta inox\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 03 DI 07· 3/4 · Comfort in acqua\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 03 DI 07· 4/4 · Optional per la spiaggetta\n\nAccesso & comfort\n\nScala interna · Spiaggetta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 04 DI 07· 1/1 · Rivestimento interno\n\nFiniture\n\nMosaico · Mosaic DD99152F",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 04 DI 07· 1/2 · Illuminazione\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 04 DI 07· 2/2 · Colore LED\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 05 DI 07· 1/2 · Bordo vasca\n\nEsterno\n\nPietra di Prun · Gres porcellanato · Greige · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 05 DI 07· 2/2 · Pavimentazione\n\nEsterno\n\nPietra di Prun · Gres porcellanato · Greige · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nNessun optional",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "infinity",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nPellicano — Cascata a lama d’acqua",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nPellicano — Cascata a lama d’acqua",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nPellicano — Cascata a lama d’acqua",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n6,0 × 3,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n6,0 × 3,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n6,0 × 3,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 01 DI 07· 1/4 · Tipo di progetto\n\nPiscina\n\nNuova piscina",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 01 DI 07· 2/4 · Installazione\n\nPiscina\n\nPiscina fuori terra",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 01 DI 07· 3/4 · Struttura\n\nPiscina\n\nAcciaio",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 01 DI 07· 1/3 · Forma\n\nPiscina\n\nRettangolare · 6,00 × 3,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 01 DI 07· 2/3 · Lunghezza e larghezza\n\nPiscina\n\nRettangolare · 6,00 × 3,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 01 DI 07· 3/3 · Profondità\n\nPiscina\n\nRettangolare · 6,00 × 3,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 02 DI 07· 2/2 · Modello skimmer\n\nSistema acqua\n\nSkimmer · Livello Acqua Alto",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 03 DI 07· 1/2 · Scala interna\n\nAccesso & comfort\n\nScala interna · Scala esterna",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 03 DI 07· 2/2 · Scala esterna di accesso\n\nAccesso & comfort\n\nScala interna · Scala esterna",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 04 DI 07· 1/2 · Rivestimento interno\n\nFiniture\n\nLiner Blue Sky [602] · pannelli wpc",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 04 DI 07· 2/2 · Pannelli esterni\n\nFiniture\n\nLiner Blue Sky [602] · pannelli wpc",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 04 DI 07· 1/2 · Illuminazione\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 04 DI 07· 2/2 · Colore LED\n\nFiniture\n\nNotte · LED subacquei + micro-spot scale",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 05 DI 07· 1/2 · Bordo vasca\n\nEsterno\n\nPietra di Prun · Gres porcellanato · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 05 DI 07· 2/2 · Pavimentazione\n\nEsterno\n\nPietra di Prun · Gres porcellanato · 60 × 60 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nPellicano — Cascata a lama d’acqua",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nPellicano — Cascata a lama d’acqua",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nPellicano — Cascata a lama d’acqua",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n6,0 × 3,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n6,0 × 3,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-skimmer-stable-full",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n6,0 × 3,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 03 DI 06· 3/7 · Installazione e struttura\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 03 DI 06· 4/7 · Profondità e fondo\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 03 DI 06· 5/7 · Sistema esistente\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 03 DI 06· 6/7 · Rivestimento esistente\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 03 DI 06· 7/7 · Accesso esistente\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 04 DI 06· 1/5 · Nuovo rivestimento\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 04 DI 06· 2/5 · Impianto\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 04 DI 06· 3/5 · Bordo\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 04 DI 06· 4/5 · Ripristini\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 04 DI 06· 5/5 · Optional\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 05 DI 06\n\nContatti e località\n\nContatti",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground",
+      "heading": "FASE 06 DI 06\n\nRiepilogo ristrutturazione\n\nRiepilogo",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 01 DI 06\n\nTipo di progetto\n\nProgetto",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 02 DI 06\n\nInterventi richiesti\n\nInterventi",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 1/7 · Forma\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 2/7 · Dimensioni\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 3/7 · Installazione e struttura\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 4/7 · Profondità e fondo\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 5/7 · Sistema esistente\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 6/7 · Rivestimento esistente\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 03 DI 06· 7/7 · Accesso esistente\n\nPiscina esistente\n\nEsistente",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 04 DI 06· 1/5 · Nuovo rivestimento\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 04 DI 06· 2/5 · Impianto\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 04 DI 06· 3/5 · Bordo\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 04 DI 06· 4/5 · Ripristini\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 04 DI 06· 5/5 · Optional\n\nLavori proposti\n\nProposta",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 05 DI 06\n\nContatti e località\n\nContatti",
+      "expanded": "true"
+    },
+    {
+      "route": "renovation-above-ground-stable-full",
+      "heading": "FASE 06 DI 06\n\nRiepilogo ristrutturazione\n\nRiepilogo",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 01 DI 07· 1/4 · Tipo di progetto\n\nPiscina\n\nNuova piscina",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 01 DI 07· 2/4 · Installazione\n\nPiscina\n\nPiscina fuori terra",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 01 DI 07· 3/4 · Struttura\n\nPiscina\n\nAcciaio",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 01 DI 07· 1/3 · Forma\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 01 DI 07· 2/3 · Lunghezza e larghezza\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 01 DI 07· 3/3 · Profondità\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSfioro a griglia",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 02 DI 07· 2/2 · Tipologia di sfioro\n\nSistema acqua\n\nSfioro a griglia",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 03 DI 07· 1/2 · Scala interna\n\nAccesso & comfort\n\nScala interna",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 03 DI 07· 2/2 · Scala esterna di accesso\n\nAccesso & comfort\n\nScala interna",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 04 DI 07· 1/2 · Rivestimento interno\n\nFiniture\n\nLiner Blue Sky [602] · pannelli acciaio satinato",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 04 DI 07· 2/2 · Pannelli esterni\n\nFiniture\n\nLiner Blue Sky [602] · pannelli acciaio satinato",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 04 DI 07· 1/1 · Illuminazione\n\nFiniture\n\nGiorno · senza luci",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 05 DI 07· 1/1 · Pavimentazione\n\nEsterno\n\nGres porcellanato · 60 × 120 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nPompa di calore",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nPompa di calore",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nPompa di calore",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-visible-stable-full",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 01 DI 07· 1/4 · Tipo di progetto\n\nPiscina\n\nNuova piscina",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 01 DI 07· 2/4 · Installazione\n\nPiscina\n\nPiscina fuori terra",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 01 DI 07· 3/4 · Struttura\n\nPiscina\n\nAcciaio",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 01 DI 07· 1/3 · Forma\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 01 DI 07· 2/3 · Lunghezza e larghezza\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 01 DI 07· 3/3 · Profondità\n\nPiscina\n\nRettangolare · 8,00 × 4,00 m · prof. 1,50 m",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 02 DI 07· 1/2 · Sistema acqua\n\nSistema acqua\n\nSfioro nascosto",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 02 DI 07· 2/2 · Tipologia di sfioro\n\nSistema acqua\n\nSfioro nascosto",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 03 DI 07· 1/2 · Scala interna\n\nAccesso & comfort\n\nScala interna",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 03 DI 07· 2/2 · Scala esterna di accesso\n\nAccesso & comfort\n\nScala interna",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 04 DI 07· 1/2 · Rivestimento interno\n\nFiniture\n\nLiner Blue Sky [602] · pannelli acciaio satinato",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 04 DI 07· 2/2 · Pannelli esterni\n\nFiniture\n\nLiner Blue Sky [602] · pannelli acciaio satinato",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 04 DI 07· 1/1 · Illuminazione\n\nFiniture\n\nGiorno · senza luci",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 05 DI 07· 1/2 · Bordo vasca\n\nEsterno\n\nTravertino · Gres porcellanato · 60 × 120 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 05 DI 07· 2/2 · Pavimentazione\n\nEsterno\n\nTravertino · Gres porcellanato · 60 × 120 cm",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 06 DI 07· 1/3 · Esterni\n\nOptional\n\nPompa di calore",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 06 DI 07· 2/3 · Trattamento acqua\n\nOptional\n\nPompa di calore",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 06 DI 07· 3/3 · Temperatura\n\nOptional\n\nPompa di calore",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 07 DI 07· 1/3 · Scena\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 07 DI 07· 2/3 · Riepilogo\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    },
+    {
+      "route": "above-ground-overflow-hidden-stable-full",
+      "heading": "FASE 07 DI 07· 3/3 · Richiedi proposta\n\nPresentazione\n\n8,0 × 4,0 m · pronta per la proposta",
+      "expanded": "true"
+    }
+  ]
+}

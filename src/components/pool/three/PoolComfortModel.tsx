@@ -3,13 +3,16 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import type { ComfortPlan } from "@/lib/pool/comfort-plan";
 import { stairSolid } from "./PoolAccessModel";
-import { AdditiveBlending, BufferGeometry, Float32BufferAttribute } from "three";
+import { BufferGeometry, Float32BufferAttribute, Object3D } from "three";
 import { HYDRO_DIMENSIONS } from "@/lib/pool/comfort-plan";
 import type { ComfortElementPlan } from "@/lib/pool/comfort-plan";
+import { INTEGRATED_BENCH } from "@/lib/pool/integrated-bench";
+import { benchMicroSpotBeam, MICRO_SPOT_OPTICS, microSpotPresentation, type MicroSpotBeam } from "@/lib/pool/micro-spot-optics";
 
 /** Union of shelf and treads: emit only exterior faces, never touching box faces.
  * The small rectilinear grid also retains metric UVs and a floor-following base. */
 export function shelfStairGeometry(element: ComfortElementPlan, floor: FloorProfileModel) {
+  const baseY = (x: number, z: number) => floor.floorYAt(x, z) - (element.kind === "integratedBench" ? INTEGRATED_BENCH.floorOverlap : 0);
   const patches = [...(element.tiers ?? [element]), ...(element.landing ? [element.landing] : []), ...(element.steps ?? [])].map(part => ({
     minX: Math.min(...part.footprint.map(p => p[0])), maxX: Math.max(...part.footprint.map(p => p[0])),
     minZ: Math.min(...part.footprint.map(p => p[1])), maxZ: Math.max(...part.footprint.map(p => p[1])),
@@ -35,15 +38,15 @@ export function shelfStairGeometry(element: ComfortElementPlan, floor: FloorProf
     const y=heights[i]?.[j]; if(y===undefined) continue;
     const x0=xs[i]!,x1=xs[i+1]!,z0=zs[j]!,z1=zs[j+1]!;
     quad([x0,y,z0],[x0,y,z1],[x1,y,z1],[x1,y,z0]);
-    quad([x0,floor.floorYAt(x0,z0),z0],[x1,floor.floorYAt(x1,z0),z0],
-      [x1,floor.floorYAt(x1,z1),z1],[x0,floor.floorYAt(x0,z1),z1]);
+    quad([x0,baseY(x0,z0),z0],[x1,baseY(x1,z0),z0],
+      [x1,baseY(x1,z1),z1],[x0,baseY(x0,z1),z1]);
     const edges: [number|undefined,[number,number],[number,number]][] = [
       [heights[i-1]?.[j],[x0,z0],[x0,z1]], [heights[i+1]?.[j],[x1,z1],[x1,z0]],
       [heights[i]?.[j-1],[x1,z0],[x0,z0]], [heights[i]?.[j+1],[x0,z1],[x1,z1]],
     ];
     for(const [neighbor,a,b] of edges) {
       if(neighbor!==undefined && neighbor>=y-1e-8) continue;
-      const lowA=neighbor ?? floor.floorYAt(...a), lowB=neighbor ?? floor.floorYAt(...b);
+      const lowA=neighbor ?? baseY(...a), lowB=neighbor ?? baseY(...b);
       const polygon:V[]=[ [a[0],y,a[1]],
         ...levels.filter(level=>level<y-1e-8 && level>lowA+1e-8).map(level=>[a[0],level,a[1]] as V),
         [a[0],lowA,a[1]],[b[0],lowB,b[1]],
@@ -74,20 +77,27 @@ export function PoolComfortModel({
   floorProfile,
   children,
   showJets = true,
+  showBenchLighting = false,
   night = false,
+  ledColor,
+  ledIntensity,
 }: {
   plan: ComfortPlan;
   floorProfile: FloorProfileModel;
   children: ReactNode;
   showJets?: boolean;
+  /** Optional LED micro-spots, independent from the hydromassage jets. */
+  showBenchLighting?: boolean;
   /** Night scene: the hydromassage micro-spots glow softly. */
   night?: boolean;
+  ledColor?: string | undefined;
+  ledIntensity?: number | undefined;
 }) {
   const geometries = useMemo(
     () =>
       plan.elements.map((element) => ({
         element,
-        geometry: element.steps || floorProfile.shelfZone ? shelfStairGeometry(element, floorProfile) : stairSolid(
+        geometry: element.kind === "integratedBench" || element.tiers?.length || element.steps || floorProfile.shelfZone ? shelfStairGeometry(element, floorProfile) : stairSolid(
           element.footprint,
           element.topY,
           { x: 0, z: 0, rotation: 0 },
@@ -117,56 +127,67 @@ export function PoolComfortModel({
             <HydroJet key={`${element.kind}-jet-${index}`} jet={jet} />
           )),
         )}
-      {showJets &&
+      {showJets && showBenchLighting &&
         plan.elements.flatMap((element) =>
           (element.spots ?? []).map((spot, index) => (
-            <HydroSpot key={`${element.kind}-spot-${index}`} spot={spot} night={night} />
+            <HydroSpot key={`${element.kind}-spot-${index}`} spot={spot} night={night} ledColor={ledColor} ledIntensity={ledIntensity}
+              beam={benchMicroSpotBeam(spot, element, floorProfile)} />
           )),
         )}
     </group>
   );
 }
 
-/** LED micro-spot flush in the seat front face: satin bezel and a warm lens.
- * By day the lens reads as a small fitting; at night it glows softly, with a
- * faint halo on the face instead of a real light (no extra shadow/light cost). */
+/** Miniature version of the main pool fitting: recessed tapered body, rolled
+ * satin trim, dark seal and a clear lens. No large decorative halo. The short
+ * shadow-free beam lights only the nearby tread/footwell at night. */
 export function HydroSpot({
   spot,
   night,
+  ledColor,
+  ledIntensity,
+  beam,
 }: {
   spot: NonNullable<ComfortElementPlan["spots"]>[number];
   night: boolean;
+  ledColor?: string | undefined;
+  ledIntensity?: number | undefined;
+  beam?: MicroSpotBeam;
 }) {
   const d = HYDRO_DIMENSIONS.spotDiameter;
   const rotY = Math.atan2(spot.dir[0], spot.dir[1]);
+  const light = useMemo(() => microSpotPresentation(night, ledColor, ledIntensity), [night, ledColor, ledIntensity]);
+  const aim = beam?.target ?? MICRO_SPOT_OPTICS.target;
+  const target = useMemo(() => {
+    const object = new Object3D();
+    object.position.set(aim[0], aim[1], aim[2]);
+    return object;
+  }, [aim[0], aim[1], aim[2]]);
   return (
     <group name="pool-hydro-spot" position={[spot.x, spot.y, spot.z]} rotation={[0, rotY, 0]}>
-      <mesh position={[0, 0, 0.002]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[d / 2, d / 2, 0.004, 20]} />
+      <mesh name="micro-spot-recessed-body" position={[0, 0, MICRO_SPOT_OPTICS.bodyCenter]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[d * 0.44, d * 0.48, MICRO_SPOT_OPTICS.bodyDepth, 24]} />
+        <StainlessSteelMaterial finish="brushed" color="#9aa3a6" />
+      </mesh>
+      <mesh name="micro-spot-trim" position={[0, 0, MICRO_SPOT_OPTICS.trimCenter]}>
+        <torusGeometry args={[d / 2 - MICRO_SPOT_OPTICS.trimTube, MICRO_SPOT_OPTICS.trimTube, 8, 32]} />
         <StainlessSteelMaterial finish="satin" />
       </mesh>
-      <mesh position={[0, 0, 0.0045]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[d * 0.34, d * 0.34, 0.002, 16]} />
-        <meshStandardMaterial
-          color="#f3ead8"
-          emissive="#ffd9a0"
-          emissiveIntensity={night ? 2.2 : 0.08}
-          roughness={0.2}
-          toneMapped
-        />
+      <mesh name="micro-spot-seal" position={[0, 0, 0.0009]}>
+        <ringGeometry args={[d * MICRO_SPOT_OPTICS.lensRadiusRatio, d * 0.43, 32]} />
+        <meshStandardMaterial color="#333f42" roughness={0.5} />
       </mesh>
-      {night ? (
-        <mesh position={[0, 0, 0.006]}>
-          <circleGeometry args={[d * 2.4, 24]} />
-          <meshBasicMaterial
-            color="#ffcf8a"
-            transparent
-            opacity={0.16}
-            depthWrite={false}
-            blending={AdditiveBlending}
-          />
-        </mesh>
-      ) : null}
+      <mesh name="micro-spot-lens" position={[0, 0, MICRO_SPOT_OPTICS.lensCenter]}>
+        <circleGeometry args={[d * MICRO_SPOT_OPTICS.lensRadiusRatio, 32]} />
+        <meshPhysicalMaterial color="#aabfc3" roughness={0.18} clearcoat={0.8} clearcoatRoughness={0.12}
+          emissive={light.colour} emissiveIntensity={light.emission} />
+      </mesh>
+      <primitive object={target} />
+      {/* Retain the light graph. Day/OFF writes zero intensity; mounting the
+          same fitting at night recompiles every lit material in the scene. */}
+        <spotLight name="micro-spot-footwell-light" position={[0, 0, MICRO_SPOT_OPTICS.lensCenter + MICRO_SPOT_OPTICS.emitterEpsilon]}
+          target={target} color={light.colour} intensity={light.output} distance={beam?.range ?? MICRO_SPOT_OPTICS.range}
+          angle={MICRO_SPOT_OPTICS.angle} penumbra={1} decay={2} castShadow={false} />
     </group>
   );
 }
@@ -174,7 +195,7 @@ export function HydroSpot({
 /** Flush stainless nozzle set into the seat riser: chrome bezel + dark orifice.
  * Protrusion is a few mm so it never z-fights with the liner face. */
 function HydroJet({ jet }: { jet: NonNullable<ComfortElementPlan["jets"]>[number] }) {
-  const d = HYDRO_DIMENSIONS.jetDiameter;
+  const d = jet.diameter ?? HYDRO_DIMENSIONS.jetDiameter;
   const rotY = Math.atan2(jet.dir[0], jet.dir[1]);
   return (
     <group name="pool-hydro-jet" position={[jet.x, jet.y, jet.z]} rotation={[0, rotY, 0]}>

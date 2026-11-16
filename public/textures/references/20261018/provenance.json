@@ -1,0 +1,64 @@
+{
+  "source": "Eight original photographs attached by the project owner on 2026-10-18",
+  "rights": "Supplied by owner for POOL-SHAPER. This records provenance, not an independently verified third-party licence or redistribution permission.",
+  "materialStatus": "Photographic colour references only. No measured albedo, normal, roughness, AO or height data supplied.",
+  "dimensionStatus": "Metric mapping and existing visualization board/slab dimensions are not certified commercial supplier formats.",
+  "images": [
+    {
+      "file": "image-1.jpeg",
+      "bytes": 66348,
+      "sha256": "07b3f0e6f6d1c4770a8bb6259c3f94ff16a22a10ab7b5a2742f3c7a488d4646c",
+      "sourceImage": 1,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-2.jpeg",
+      "bytes": 174311,
+      "sha256": "b684fde52afd73ce0a167ae78c922a62f5445aa2f2fd0c6454d140ae1707bfc6",
+      "sourceImage": 2,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-3.jpeg",
+      "bytes": 61046,
+      "sha256": "7c1c7bac392d1f3f163dc8236f4cd9b2bf787443052a307c0971210b7d139f04",
+      "sourceImage": 3,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-4.jpeg",
+      "bytes": 71038,
+      "sha256": "9fb59fe38c1566b7f2fd12fe797ec976f8bbec884c9eb69813a13621f9e53abc",
+      "sourceImage": 4,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-5.jpeg",
+      "bytes": 69999,
+      "sha256": "98ff29743a86128f86155aab35497aa8b952157e66c94f5ea90d6dfaaac2eb1f",
+      "sourceImage": 5,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-6.jpeg",
+      "bytes": 165332,
+      "sha256": "07480c518f7b38b13cb77c86064046d8898e39ad93b88ae7d723dac38407b4fb",
+      "sourceImage": 6,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-7.jpeg",
+      "bytes": 295668,
+      "sha256": "7868561bddd723fecc3a6edbc79a32bcc1f26bb9bda73b6b699c9495b142950e",
+      "sourceImage": 7,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    },
+    {
+      "file": "image-8.jpeg",
+      "bytes": 403800,
+      "sha256": "512c93eebed653ae160adf2df613992b139c0b78ffd1aa5ef5313e8804d95987",
+      "sourceImage": 8,
+      "processing": "None: original JPEG copied byte-for-byte; safe sampling coordinates live in reference-finishes.ts"
+    }
+  ]
+}

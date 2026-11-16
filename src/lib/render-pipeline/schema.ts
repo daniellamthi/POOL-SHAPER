@@ -28,7 +28,7 @@ const structureSchema = z.object({
   installation: z.enum(["in-ground", "above-ground"]),
   construction: z.enum(["reinforced-concrete", "modular-steel-panels", "visible-stainless-steel"]).nullable(),
   system: z.enum(["skimmer", "overflow"]),
-  overflowType: z.enum(["hidden", "visible"]).nullable(),
+  overflowType: z.enum(["hidden", "visible", "continuous"]).nullable(),
 });
 
 const verticalLayoutSchema = z.object({

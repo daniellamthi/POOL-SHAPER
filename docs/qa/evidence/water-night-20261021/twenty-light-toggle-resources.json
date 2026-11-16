@@ -1,0 +1,15 @@
+{
+  "toggles": 20,
+  "before": {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":93.1,\"frameTimeMs\":10.74,\"medianFrameTimeMs\":10.3,\"p95FrameTimeMs\":13.2,\"frameCount\":187,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":218,\"peakCalls\":227,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":121,\"textures\":34,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":13,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":7.577,\"p95\":7.849,\"samples\":187,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+    "timestamp": "2026-10-21T18:51:31.985Z",
+    "url": "http://127.0.0.1:3040/src/components/pool/three/PoolScene.tsx?t=1792608309725"
+  },
+  "after": {
+    "level": "debug",
+    "message": "[Pool3D performance] {\"fps\":81.9,\"frameTimeMs\":12.21,\"medianFrameTimeMs\":11.7,\"p95FrameTimeMs\":15.4,\"frameCount\":164,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":219,\"peakCalls\":280,\"callScope\":\"full frame, all passes\",\"triangles\":100316,\"geometries\":121,\"textures\":34,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":13,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[15.397847595263833,8.093801668080852,6.340290186285108],\"projection\":[0.9801378183416588,0,0,0,0,1.568220509346654,0,0,0.12307942708333328,-0.3338802083333334,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":7.716,\"p95\":9.154,\"samples\":164,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+    "timestamp": "2026-10-21T18:51:40.148Z",
+    "url": "http://127.0.0.1:3040/src/components/pool/three/PoolScene.tsx?t=1792608309725"
+  }
+}

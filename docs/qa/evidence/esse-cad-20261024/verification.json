@@ -1,0 +1,38 @@
+{
+  "scope": "Replace only the immersed Sun Shelf chaise with owner-supplied ESSE .3ds geometry",
+  "date": "2026-10-24",
+  "sourceSha256": "19aaea95ac58294254f07468ec32c2153e23909b1ee37f7f0ad0b69aa9cf9ccf",
+  "assetSha256": "ee3ed89f13a4ef203df3f80e6857cf4c738b8dff640035fe9d0e2c13bac1bcf8",
+  "geometry": {
+    "vertices": 34663,
+    "trianglesPerChaise": 55658,
+    "compressedBytes": 868156,
+    "operations": "Uniform cm-to-m scale, proper rigid axis rotation, centering, grounding. Lossless compression. No decimation or shape edits.",
+    "sourceRoundTrip": "Exact decoded positions, normals, UVs and triangle winding matched to Three.js TDSLoader import",
+    "actualSizeMetresWidthHeightLength": [0.7319631576538086, 0.5701819062232971, 1.8456166982650757],
+    "placement": "Existing plans retained; actual CAD bounds tested on 8x4, 12x5 and rotated 4x8, seven placements, no stair/landing overlap and base on shelf"
+  },
+  "tests": {
+    "esseChaiseWithOriginal": "PASS — 75 checks",
+    "esseChaiseWithoutPrivateOriginal": "PASS — 70 checks; original not required for routine verification",
+    "existingLayoutAndExteriorShell": "PASS — 1152 checks",
+    "existingStateAndSerialization": "PASS — 93 checks, quantities/dependencies/project/shared round trips",
+    "typecheck": "PASS",
+    "componentLint": "PASS after correcting two formatting findings",
+    "diffCheck": "PASS",
+    "fullBuild": "Not rerun: targeted asset/component change, per owner instruction to prefer targeted checks"
+  },
+  "browser": {
+    "url": "http://esse-qa.localhost:3003/",
+    "surface": "Codex integrated browser; local-only synthetic configuration",
+    "configuration": "10x4.5 Skimmer, reinforced concrete, internal stairs, 20 cm Sun Shelf, Blue Sky 602 liner",
+    "observed": ["Three original CAD chaises after selection", "Two after quantity change", "OFF removes them", "ON successfully reuses cached geometry", "Reload restores two and selected optional", "Finished scene shows the imported geometry in water"],
+    "screenshots": ["off.jpg", "installed-day.jpg"],
+    "errors": "None observed; existing THREE.Clock deprecation warning after reload, no loader/material error",
+    "cloudWrites": false,
+    "emails": false,
+    "mainCustomerProject": "Kept unchanged in its existing separate tab"
+  },
+  "unchanged": ["Exterior deck loungers", "Pool and Sun Shelf geometry", "Placement rules and quantity limits", "Materials", "Cameras", "Wizard design", "Backend", "Existing unrelated WIP"],
+  "limitations": "Not a release-wide performance, real-device or cloud QA claim. Existing release gates remain open. Asset is denser than the former illustrative mesh; retained in full as requested, loaded on demand and shared between instances."
+}

@@ -1,0 +1,42 @@
+{
+  "sourceCommit": "f594b6d8189ee5480e7ce0fdacc20efae0dbbffb",
+  "scope": "Root actual browser on isolated compiled UI; not independent or live backend test. Control grass differs but form sources identical.",
+  "requiredErrorsIt": [
+    "Il nome è obbligatorio",
+    "Inserisci un'email valida",
+    "Inserisci un numero di telefono valido",
+    "Indica la località del progetto",
+    "Seleziona una tempistica",
+    "È necessario accettare l'informativa privacy"
+  ],
+  "transport": "Local QA server denies every POST before worker/backend; synthetic contacts only; no real emails or leads",
+  "retryAttempts": 2,
+  "retainedQaFields": [
+    {
+      "id": "_r_e_",
+      "nonempty": true,
+      "type": "text"
+    },
+    {
+      "id": "_r_f_",
+      "nonempty": true,
+      "type": "email"
+    },
+    {
+      "id": "_r_g_",
+      "nonempty": true,
+      "type": "tel"
+    },
+    {
+      "id": "_r_h_",
+      "nonempty": true,
+      "type": "text"
+    },
+    {
+      "id": "lead-notes",
+      "nonempty": true,
+      "type": "textarea"
+    }
+  ],
+  "englishSnapshot": "- heading [level=1]: 3D Pool Configurator\n- banner:\n  - navigation:\n    - list:\n      - button:\n        - generic: Pool\n        - generic: Reinforced concrete · 12.0 × 5.0 m\n      - button:\n        - generic: Water system\n        - generic: Skimmer · High water level\n      - button:\n        - generic: Access & comfort\n        - generic: Internal stairs\n      - button:\n        - generic: Finishes\n        - generic: PVC liner · Blue Sky [602]\n      - button:\n        - generic: Exterior\n        - generic: Pietra di Prun · Porcelain stoneware · Greige · 60 × 120 cm\n      - button:\n        - generic: Options\n        - generic: No options\n      - button:\n        - generic: Presentation\n        - generic: In progress\n  - button: IT\n  - button [pressed]: EN\n  - button [pressed]:\n    - generic: Day\n  - button:\n    - generic: Night\n  - button:\n    - generic: Start again\n- main:\n  - button:\n    - text: Pool view\n  - paragraph: Drag to rotate · Scroll to zoom · Right-click to pan\n  - toolbar:\n    - button:\n      - text: Guides\n    - button:\n      - text: Technical view\n    - button:\n      - text: Reframe\n- region:\n  - paragraph: \"Your finished pool: scene, summary and proposal request.\"\n  - tablist:\n    - tab: Scene\n    - tab: Summary\n    - tab [selected]: Request a proposal\n  - heading [level=3]: Ready to turn this project into a proposal?\n  - paragraph: A consultant reviews the configuration, feasibility and investment.\n  - button: Review your project with a consultant\n  - paragraph:\n    - text: Phase 07 of 07\n    - generic: · 3/3 · Request a proposal\n  - heading [level=2]: Presentation\n  - paragraph: 12.0 × 5.0 m · ready for a proposal\n  - button:\n    - text: View the pool\n  - button [expanded]:\n    - text: Minimise\n  - button:\n    - text: Back\n  - button:\n    - text: Request a proposal\n- region \"Notifications alt+T\"\n- dialog \"Review your project with a consultant\":\n  - heading \"Review your project with a consultant\" [level=2]\n  - paragraph: A few details so a Piscine Wellness consultant can contact you.\n  - generic: Name *\n  - textbox \"Name *\" [active]: QA locale\n  - generic: Email *\n  - textbox \"Email *\": <redacted>\n  - generic: Phone *\n  - textbox \"Phone *\": <redacted>\n  - generic: Project location *\n  - textbox \"Project location *\": Collaudo locale — nessun cliente\n  - generic: When would you like to build it? *\n  - radiogroup \"When would you like to build it?\":\n    - radio \"As soon as possible\"\n    - text: As soon as possible\n    - radio \"Within 3 months\"\n    - text: Within 3 months\n    - radio \"3–6 months\"\n    - text: 3–6 months\n    - radio \"6–12 months\"\n    - text: 6–12 months\n    - radio \"Still considering\" [checked]:\n    - text: Still considering\n  - generic: Notes (optional)\n  - textbox \"Notes (optional)\": \"Prova locale: scritture ed email disabilitate.\"\n  - checkbox \"I have read and accept the privacy notice . *\" [checked]:\n  - text: I have read and accept the\n  - link \"privacy notice\":\n    - /url: /privacy\n  - text: .\n  - generic: \"*\"\n  - checkbox \"I would like to receive marketing communications (optional).\"\n  - text: I would like to receive marketing communications (optional).\n  - alert: \"Project save failed. Please try again before submitting your request. Your configuration remains saved: you can try again without losing anything.\"\n  - button \"Try again\"\n  - button \"Close\":\n    - generic: Close"
+}

@@ -1,0 +1,67 @@
+{
+  "status": "PARTIAL IMPROVEMENT; FIX REQUIRED; NOT PASS",
+  "head": "6ad89bdd5347017ea9a4ced72caf9783b771bf76",
+  "baseline": {
+    "root": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/release-task-checkpoint-20261020-BjDT7l",
+    "url": "http://127.0.0.1:3019/",
+    "serverSession": 95740,
+    "dryToWetMsEarlier": [829, 759, 778.8],
+    "dryToWetMsContemporaryReplay": [1335.1, 1437.7, 1142.7],
+    "wetToDryMsContemporaryReplay": [833, 450.8, 310.6],
+    "outputFileCountAtFinish": 166,
+    "outputTreeSHA256AtFinish": "6a9653616e9dd6be9aa34972fdea70bafad8120f336dcfaf6b9d96b0a3bda75f",
+    "outputTreeMethod": "SHA256 of sorted relative output paths represented as sha256 + two spaces + path + newline. This receipt's representation differs from the preparation receipt; do not compare their aggregate digests directly. Baseline source/output was not rebuilt or written during this experiment."
+  },
+  "prototype": {
+    "root": "/Users/danielelamthi/Documents/Codex/pool-shaper-wip-backups/residual-water-lifecycle-20261020-UJCepz",
+    "url": "http://127.0.0.1:3020/",
+    "serverSession": 86439,
+    "productionBuild": "PASS; same npm run build command and adapter as baseline",
+    "dryToWetMs": [525.2, 595.9, 367.8],
+    "wetToDryMs": [266.6, 73, 203.3],
+    "coldNewPoolClickMs": 6784.7,
+    "coldNewPoolLimit": "Separate startup sample before configuring water/Infinity; not a water-remount attribution. CUA input timeout did not cancel the committed action. RPC duration is not used as app latency."
+  },
+  "method": {
+    "measurement": "Identical opt-in trusted click to second requestAnimationFrame helper in isolated production copies; not GPU completion or final 3D paint.",
+    "configuration": "8x4x1.5 in-ground RC rectangle, Infinity side3 glass, Shelf3.035m with2Esse, straight stairs, SandBeach179 liner, Travertine coping, Gres60x120, Night,2Blue wallLED60%, microOFF, review camera, panel open.",
+    "viewport": "Actual Chrome Apple M1 Pro; CSS1440x900. Approved adaptive DPR unchanged: observed transition drawing buffer1440x900; prototype idle2023x1264. No forced quality/DPR changes.",
+    "order": "Prototype3cycles, Day/Night visual checks, baseline3cycle replay. Same hardware, same normal UI inputs, one own QA3D scene at a time, parent CPU/source frozen during samples. Not randomized; driver/thermal/background state not controlled. Baseline drift is visible and prohibits a precise causal percentage claim.",
+    "timingQuery": "qaInteractionTiming=1",
+    "glAggregationDuringTiming": false,
+    "additionalGlPass": "Not run, per coordinator's bounded-stop instruction.",
+    "backend": "GET/HEAD-only local production adapter; no secret bindings, Save, cloud write or email."
+  },
+  "visualChecks": {
+    "nightWet": "residual-performance-water-prototype-night-wet-after.png",
+    "nightRaw": "residual-performance-water-prototype-night-raw.png",
+    "dayWet": "residual-performance-water-prototype-day-wet.png",
+    "dayRaw": "residual-performance-water-prototype-day-raw.png",
+    "result": "No visible ghost water in raw phase; water and selected night lighting return in wet phase. Visual observation only, not objective quality equivalence or image-diff proof.",
+    "lifetimeAssertion": "Final disposal and hidden/resumed resource counts NOT VERIFIED: existing production metadata is mount-only. No private-state injection, forced GC or additional instrumentation was used."
+  },
+  "rendererFromPriorBaselineAttribution": {
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+    "vendor": "Google Inc. (Apple)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "KHR_parallel_shader_compile": true,
+    "mountOnlyCounts": {"geometries": 52, "textures": 20, "programs": 27},
+    "limit": "Metadata was logged at mount1623x873 before target viewport override. It is not hidden/resumed resource evidence; measured target DOM was1440x900."
+  },
+  "sourceIsolation": {
+    "runtimeFilesCompared": 385,
+    "differencesBetweenMeasuredBaselineAndPrototype": [
+      {"name": "src/components/pool/three/PoolModel.tsx", "baselineSHA256": "eae9e9d5109e001565a42434f7b5273af8ac31f312f9e160ab40e91cdef6d0e3", "prototypeSHA256": "f2b6ad0934c18a910a19b2f203d475d7c5717f90ca229ef465e6cfad403688c5"},
+      {"name": "src/components/pool/three/WaterSurfaceMaterial.tsx", "baselineSHA256": "d7f4e5c979babd1f6746fdbe9f1f5236c6fa0fb85bec1a58f2eccee4c9559f30", "prototypeSHA256": "bd7c36338b08473d11da2fa2f33dec21c0cfe23691131e28d8e22152a5027caa"}
+    ],
+    "identicalInstrumentedPoolSceneSHA256": "d0d42113ff79812630367e04b4c2f2b650be4326969e28a30e2b480366f531b0",
+    "identicalTimingHelperSHA256": "fdd791e12fd933bb12025e257b8ab442b7a146c965e022616eeb0bd868fc04d9",
+    "identicalInactiveGlHelperSHA256": "8fe916930157ac2f1d06722dbf835edcf99185ccaab634f6fe5c245bd22399cc",
+    "original39WipHashMismatchesAtFinish": [],
+    "envOrSecretFilesCopied": false,
+    "primaryAppEditedByC": false,
+    "gitWritesByC": false
+  },
+  "rawEvidence": ["residual-performance-water-prototype-source.json", "residual-performance-water-prototype-setup.json", "residual-performance-water-prototype-timing.json", "residual-performance-water-baseline-replay.json", "residual-performance-water-prototype-visual.json"],
+  "handoff": "Own QA3D tabs closed and browser viewport reset; browser and CPU freeze released to root/E. Servers remain available;3020 is an isolated uncommitted prototype, not the release candidate."
+}

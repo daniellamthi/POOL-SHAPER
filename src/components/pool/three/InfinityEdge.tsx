@@ -11,6 +11,8 @@ import type { InfinityEdgeParams } from "@/lib/pool/infinity-edge";
 import type { Outline, PoolShapeId } from "@/lib/pool/types";
 import type { ResolvedMaterials } from "@/lib/pool/materials";
 import type { StoneMaps } from "./stoneTextures";
+import { isReferenceFinish } from "@/lib/pool/reference-finishes";
+import { configureReferencePaving } from "./referenceFinishTexture";
 
 interface InfinityEdgeProps {
   rawStructure?: StructureFamily | null;
@@ -26,7 +28,7 @@ interface InfinityEdgeProps {
   configureCopingTriplanar: (shader: THREE.WebGLProgramParametersWithUniforms) => void;
 }
 
-export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingSurfaceY, copingOuterOffsetDistance, copingDetail, rawStructure = null, showWater = true }: InfinityEdgeProps) {
+export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingSurfaceY, copingOuterOffsetDistance, copingDetail, materials, rawStructure = null, showWater = true }: InfinityEdgeProps) {
   const assembly = useMemo(() => {
     const geometry = infinityEdge ? computeInfinityEdgeGeometry(outline, infinityEdge, shape) : null;
     const zone = geometry ? infinityZonesForOutline(outline, shape).find(z => z.side === geometry.side) : null;
@@ -37,18 +39,21 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
     // Millimetric stand-off prevents coplanar film/wall flicker. Receiver
     // water stops inside the end walls and below every containing rim.
     const filmOffset = dims.lipWidth + 0.003;
+    const glass = infinityEdge?.wallType === "glass";
     return {
       dims, levels,
-      structure: createInfinityContainmentGeometry(zone, dims, waterLevel, copingOuterOffsetDistance, copingSurfaceY, outline),
+      structure: createInfinityContainmentGeometry(zone, dims, waterLevel, copingOuterOffsetDistance, copingSurfaceY, outline, glass ? "receiver" : "all"),
+      glass: glass ? createInfinityContainmentGeometry(zone, dims, waterLevel, copingOuterOffsetDistance, copingSurfaceY, outline, "glass") : null,
       film: createInfinityWaterFilmGeometry(flowZone, filmOffset, waterLevel),
       cascade: createInfinityCascadeGeometry(flowZone, { ...dims, lipWidth: filmOffset }, waterLevel),
       receiver: createInfinityWaterFilmGeometry(flowZone, dims.lipWidth + dims.catchBasinWidth - 0.004, levels.receiverY, filmOffset),
     };
   }, [outline, shape, infinityEdge, waterLevel, copingSurfaceY, copingOuterOffsetDistance]);
   useEffect(() => () => {
-    if (assembly) for (const g of [assembly.structure, assembly.film, assembly.cascade, assembly.receiver]) g.dispose();
+    if (assembly) for (const g of [assembly.structure, assembly.glass, assembly.film, assembly.cascade, assembly.receiver]) g?.dispose();
   }, [assembly]);
   if (!assembly) return null;
+  const reference = isReferenceFinish(materials.coping.id) ? materials.coping.id : null;
   const rawKind = rawStructure === "REINFORCED_CONCRETE"
     ? "concrete"
     : rawStructure === "VISIBLE_STAINLESS_STEEL"
@@ -56,10 +61,10 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
       : "steel";
   return <group name="infinity-edge">
     <mesh name="infinity-closed-grey-containment" geometry={assembly.structure} receiveShadow castShadow>
-      {rawStructure ? <RawShellMaterial kind={rawKind} /> : <meshPhysicalMaterial key={showWater ? "wet" : "dry"} color="#a6a6a6" map={copingDetail.colorMap} normalMap={copingDetail.normalMap} normalScale={[0.22, 0.22]}
+      {rawStructure ? <RawShellMaterial kind={rawKind} /> : <meshPhysicalMaterial key={`${showWater ? "wet" : "dry"}${reference ?? ""}`} color="#a6a6a6" map={copingDetail.colorMap} normalMap={copingDetail.normalMap} normalScale={[0.22, 0.22]}
         roughnessMap={copingDetail.roughnessMap} roughness={0.68} metalness={0} side={THREE.DoubleSide}
         onBeforeCompile={(shader) => {
-          if (!showWater) return;
+          if (!showWater) { if (reference) configureReferencePaving(shader, reference); return; }
           excludeSubmergedDirectLights(shader, waterLevel);
           shader.uniforms["receiverY"] = { value: assembly.levels.receiverY };
           shader.vertexShader = "attribute float wetRole; varying float vWetRole; varying float vStructureY;\n" + shader.vertexShader;
@@ -73,8 +78,14 @@ export function InfinityEdge({ outline, shape, infinityEdge, waterLevel, copingS
             float wetted = vWetRole > 1.5 ? 1.0 - smoothstep(receiverY - 0.01, receiverY + 0.01, vStructureY) : vWetRole;
             diffuseColor.rgb *= mix(1.0, 0.62, wetted);
           `).replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n roughnessFactor = mix(roughnessFactor, max(0.14, roughnessFactor * 0.32), wetted);");
-        }} customProgramCacheKey={() => `infinity-grey-wet-containment-v5-${assembly.levels.receiverY}-${showWater}`} />}
+          if (reference) configureReferencePaving(shader, reference);
+        }} customProgramCacheKey={() => `infinity-grey-wet-containment-v5-${assembly.levels.receiverY}-${showWater}${reference ? reference === "reference-ipe" ? "-reference-ipe-v7-four-boards" : "-reference-stone-v6-shared-sampler" : ""}`} />}
     </mesh>
+    {assembly.glass ? <mesh name="infinity-glass-wall" geometry={assembly.glass} renderOrder={1}>
+      <meshPhysicalMaterial color="#f5fcfa" transmission={0.98} thickness={assembly.dims.lipWidth - 0.004}
+        roughness={0.035} metalness={0} ior={1.5} attenuationColor="#b9ded8" attenuationDistance={4}
+        envMapIntensity={1} side={THREE.DoubleSide} />
+    </mesh> : null}
     {showWater ? <><mesh name="infinity-crest-water" geometry={assembly.film} renderOrder={2}>
       <WaterSurfaceMaterial waterLevel={waterLevel} reflections={false} depth={0.006} flowing />
     </mesh>

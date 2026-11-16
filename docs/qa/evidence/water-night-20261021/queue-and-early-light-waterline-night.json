@@ -1,0 +1,57 @@
+{
+  "windows": [
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":59.6,\"frameTimeMs\":16.79,\"medianFrameTimeMs\":17,\"p95FrameTimeMs\":20.1,\"frameCount\":120,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":55,\"peakCalls\":59,\"callScope\":\"full frame, all passes\",\"triangles\":34312,\"geometries\":118,\"textures\":38,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.243,\"p95\":13.572,\"samples\":120,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T20:01:45.302Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792612830231"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":64.1,\"frameTimeMs\":15.6,\"medianFrameTimeMs\":15.2,\"p95FrameTimeMs\":20.3,\"frameCount\":129,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":55,\"peakCalls\":59,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":118,\"textures\":38,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.219,\"p95\":13.438,\"samples\":129,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T20:01:47.333Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792612830231"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D performance] {\"fps\":60.7,\"frameTimeMs\":16.47,\"medianFrameTimeMs\":16.2,\"p95FrameTimeMs\":19.5,\"frameCount\":122,\"renderer\":\"ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)\",\"visibility\":\"visible\",\"calls\":55,\"peakCalls\":59,\"callScope\":\"full frame, all passes\",\"triangles\":29352,\"geometries\":118,\"textures\":38,\"dpr\":1.405456737852613,\"viewport\":[1440,900],\"maxTextureUnits\":16,\"peakProgramSamplers\":14,\"shadowMapSize\":4096,\"qualityPreset\":\"experience\",\"planarReflection\":true,\"parallelShaderCompile\":true,\"idle\":true,\"camera\":[0,0.41304494514230394,-0.6465168495256539],\"projection\":[0.6803096616472791,0,0,0,0,1.0884954586356466,0,0,0,-0.35610243055555557,-1.0004000800160033,-1,0,0,-0.20004000800160032,0],\"buffer\":[2023,1264],\"gpuTimeMs\":{\"median\":13.226,\"p95\":13.509,\"samples\":122,\"scope\":\"main, transmission and shadows; mirror excluded\"}}",
+      "timestamp": "2026-10-21T20:01:49.367Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/components/pool/three/PoolScene.tsx?t=1792612830231"
+    }
+  ],
+  "input": [
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":1,\"event\":\"click\",\"inputToSecondRafMs\":150.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T20:01:00.642Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":2,\"event\":\"click\",\"inputToSecondRafMs\":81,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T20:01:12.122Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":3,\"event\":\"click\",\"inputToSecondRafMs\":18.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T20:01:27.231Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    }
+  ],
+  "preparation": [
+    {
+      "level": "debug",
+      "message": "[Pool3D shader preparation] {\"durationMs\":548.8,\"parallel\":true}",
+      "timestamp": "2026-10-21T20:01:01.162Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792612830231"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D shader preparation] {\"durationMs\":39.8,\"parallel\":true}",
+      "timestamp": "2026-10-21T20:01:12.122Z",
+      "url": "http://queue-drain-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792612830231"
+    }
+  ],
+  "errors": []
+}

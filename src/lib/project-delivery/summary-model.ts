@@ -15,7 +15,12 @@ import { EQUIPMENT, LINER_COLORS, SKIMMER_FINISHES, FINISHES } from "@/lib/pool/
 import { renovationIncludes, renovationMosaicLabel, renovationLinerLabel } from "@/lib/pool/renovation";
 import { RENOVATION_AREA_LABEL, FILTRATION_WORK_LABEL, STRUCTURE_ISSUE_LABEL, EQUIPMENT_UPGRADE_LABEL } from "@/lib/lead/renovationLabels";
 import { COPING_MATERIALS } from "@/lib/pool/coping-materials";
-import { formatNumber } from "@/lib/pool/format";
+import { localizeSummaryModel, translateText, formatNumericText, formatNumber as localeNumber, type Locale } from "@/lib/i18n";
+import { configuredSunShelfLoungers } from "@/lib/pool/sun-shelf-loungers";
+import { sunShelfLoungerColor } from "@/lib/pool/sun-shelf-lounger-colors";
+import { integratedCoping, supportsCopingEdge } from "@/lib/pool/coping-style";
+import { SUN_SHELF_WATER_DEPTH } from "@/lib/pool/sun-shelf-model";
+import { comfortConfigurationIssues } from "@/lib/pool/comfort-compatibility";
 import { getMosaicFinish } from "@/configurator/materials/interior-textures";
 import { isSlopedFloorDisplay } from "@/lib/pool/floor-profile";
 import { infinityZonesForOutline } from "@/lib/pool/infinity-edge";
@@ -58,6 +63,8 @@ export interface SummarySection {
 }
 
 export interface ProjectSummaryModel {
+  /** Unresolved requests are visible in summary and prevent final PDF/quote. */
+  compatibilityIssues?: string[];
   headline: string;
   subline: string;
   /** Configuration identity (UUID). The public project reference, when the
@@ -96,15 +103,16 @@ export function technicalRows(
   technical: TechnicalPlan,
   cover: CoverPlan,
   compact = false,
+  locale: Locale = "it",
 ): SummaryRow[] {
   const systemName =
     technical.system === "infinity"
       ? "Infinity"
       : technical.system === "skimmer"
         ? "Skimmer"
-        : technical.overflow?.kind === "VISIBLE_CHANNEL"
+        : technical.overflow?.kind === "CONTINUOUS_EDGE" ? "Sfioro nascosto" : technical.overflow?.kind === "VISIBLE_CHANNEL"
           ? "Sfioro visibile"
-          : "Sfioro nascosto";
+          : "Sfioro a bordo continuo";
   const rows: SummaryRow[] = [
     { label: "Sistema", value: systemName },
     {
@@ -167,21 +175,24 @@ export function technicalRows(
     });
   }
   rows.push({ label: "Copertura", value: coverStateLabel(cover), hint: cover.reason ?? undefined });
-  return rows;
+  return rows.map(row => ({...row, label:translateText(row.label,locale), value:formatNumericText(translateText(row.value,locale),locale), ...(row.hint?{hint:translateText(row.hint,locale)}:{})}));
 }
 
 export const TECHNICAL_NOTE =
   "Dati di configurazione, non progetto esecutivo. Portate, aspirazioni, compensazione e compatibilità di cantiere richiedono verifica tecnica.";
 
-export function buildProjectSummary(project: ProjectConfiguration): ProjectSummaryModel {
+export function buildProjectSummary(project: ProjectConfiguration, locale: Locale = "it"): ProjectSummaryModel {
+  const t = (text: string, params?: Record<string,string|number>) => translateText(text, locale, params);
+  const formatNumber = (value: number, digits = 2) => localeNumber(value, locale, {minimumFractionDigits: digits, maximumFractionDigits: digits});
   const { config } = project;
   const { outline, metrics, skimmers } = projectGeometry(config);
+  const resolvedLayout = configuredPoolLayout(config);
   const technical = buildTechnicalPlan({
     config,
     outline,
     metrics,
     skimmers,
-    layout: configuredPoolLayout(config),
+    layout: resolvedLayout,
   });
   const cover = resolveAutomaticCover(config);
 
@@ -194,7 +205,9 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
     config.shape === "l-shape"
       ? `, rientro ${formatNumber(config.dimensions.lShapeRecessLength ?? 0, 2)} × ${formatNumber(config.dimensions.lShapeRecessWidth ?? 0, 2)} m`
       : "";
-  const dimensionsSentence = `Piscina ${shapeLabel(config.shape)} ${formatNumber(config.dimensions.length, 2)} × ${formatNumber(config.dimensions.width, 2)} m${lShapeRecessSentence}, profondità ${depthLabel}`;
+  const dimensionsSentence = t("Piscina {shape} {length} × {width} m{mirror}, profondità {depth}", {
+    shape:t(shapeLabel(config.shape)), length:formatNumber(config.dimensions.length,2), width:formatNumber(config.dimensions.width,2), mirror:lShapeRecessSentence, depth:depthLabel,
+  });
   const systemLine = systemHeadline(config.system, config.overflowType);
   const infinityZone =
     config.system === "infinity" &&
@@ -227,6 +240,7 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
       : { hex: linerColor?.hex ?? "#dfe9ec", texture: linerColor?.texture };
 
   const comfortItems = [
+    ...(config.features.includes("sunShelfLoungers") ? [`${t("Lettini per spiaggetta")} · ${config.sunShelfLoungerCount ?? configuredSunShelfLoungers(config).capacity} · ${t(sunShelfLoungerColor(config.sunShelfLoungerColor).label)}`] : []),
     ...(config.poolAccess
       ? [
           config.poolAccess === "internalSteps"
@@ -250,9 +264,16 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
             : "Idromassaggio A"
           : id === "externalStaircase" && config.poolType === "above-ground"
             ? `${POOL_FEATURE_LABEL[id]} — ${config.externalStairSide === "long" ? "lato lungo" : "lato corto"} · piattaforma prolungata inclusa`
-            : POOL_FEATURE_LABEL[id],
+            : id === "sunShelf" ? t("Sun Shelf · lunghezza complessiva {run} m · acqua {depth} cm", {
+                depth: localeNumber((resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.waterDepth ?? SUN_SHELF_WATER_DEPTH) * 100, locale),
+                run: formatNumber(config.dimensions.sunShelfRun ?? resolvedLayout.comfort.elements.find(element => element.kind === "sunShelf")?.run ?? 0, 3),
+              }) : id === "integratedBench" ? t("Panca integrata · {count} postazioni · {jets} bocchette", {
+                count: localeNumber(resolvedLayout.comfort.elements.find(element => element.kind === "integratedBench")?.stations?.count ?? 0, locale),
+                jets: localeNumber(resolvedLayout.comfort.elements.find(element => element.kind === "integratedBench")?.jets?.length ?? 0, locale),
+              }) : POOL_FEATURE_LABEL[id],
       ),
   ];
+  const compatibilityIssues = comfortConfigurationIssues(config).map(issue => t(issue.reason));
 
   const hasLed = config.features.includes("ledLighting");
   const ledColor = config.ledColor ?? "#ffffff";
@@ -290,7 +311,8 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
       rows: [
         { label: "Sistema idraulico", value: systemLine },
         ...(infinityZone
-          ? [{ label: "Lato Infinity", value: `Lato ${infinityZone.side + 1}` }]
+          ? [{ label: "Lato Infinity", value: `Lato ${infinityZone.side + 1}` },
+             { label: "Parete Infinity", value: config.infinityEdge?.wallType === "glass" ? "Panoramica in vetro" : "Tradizionale" }]
           : []),
         ...(config.system === "skimmer"
           ? [
@@ -310,9 +332,11 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
         { label: "Rivestimento", value: finishTitle, hint: finishHint, swatch: finishSwatch },
         {
           label: "Bordo",
-          value: copingMaterial?.title ?? "Da selezionare",
-          swatch: copingMaterial ? { hex: copingMaterial.color } : undefined,
+          value: integratedCoping(config) ? paving.label : copingMaterial?.title ?? "Da selezionare",
+          hint: integratedCoping(config) ? "Bordo a filo pavimentazione" : "Bordo dedicato",
+          swatch: integratedCoping(config) ? { hex: paving.color } : copingMaterial ? { hex: copingMaterial.color } : undefined,
         },
+        ...(supportsCopingEdge(config) ? [{label: "Angoli della vasca", value: config.copingEdge === "rounded" ? "Arrotondato" : "Retto", hint: config.copingEdge === "rounded" ? config.shape === "l-shape" ? "Angoli esterni arrotondati: raggio 20 cm." : "Angoli vasca arrotondati: raggio 20 cm." : "Angoli della vasca a 90°."}] : []),
         ...(config.poolType === "above-ground"
           ? [{ label: "Pannelli esterni", value: exteriorPanelFinishTitle(config) }]
           : []),
@@ -330,13 +354,16 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
     });
   }
   const hasStairLed = configuredStairMicroSpots(config).length > 0;
-  if (hasLed || hasStairLed) {
+  if (hasLed || hasStairLed || (config.features.includes("hydromassage") && config.features.includes("hydromassageBenchLighting"))) {
     sections.push({
       id: "lighting",
       title: "Illuminazione",
       stepId: "lighting",
       rows: [
         ...(hasStairLed ? [{ label: "Optional scale", value: POOL_FEATURE_LABEL.stairLighting }] : []),
+        ...(config.features.includes("hydromassage") && config.features.includes("hydromassageBenchLighting")
+          ? [{ label: "Optional panca", value: POOL_FEATURE_LABEL.hydromassageBenchLighting }]
+          : []),
         ...(hasLed ? [
         { label: "Impianto", value: "Illuminazione subacquea a LED" },
         {
@@ -426,9 +453,10 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
     deferred.push("Fattibilità degli interventi e sopralluogo", "Preventivo su valutazione del consulente, senza prezzi automatici");
   }
 
-  return {
+  return localizeSummaryModel({
+    compatibilityIssues,
     headline: config.projectType === "renovation" ? `Ristrutturazione · ${dimensionsSentence}` : dimensionsSentence,
-    subline: `${poolType} · ${systemLine} · circa ${formatNumber(metrics.waterVolume, 0)} m³ d'acqua`,
+    subline: t("{poolType} · {system} · circa {volume} m³ d'acqua", {poolType:t(poolType),system:t(systemLine),volume:formatNumber(metrics.waterVolume,0)}),
     projectId: project.projectId,
     sections,
     deferred,
@@ -440,5 +468,5 @@ export function buildProjectSummary(project: ProjectConfiguration): ProjectSumma
       width: config.dimensions.width,
       depthLabel,
     },
-  };
+  }, locale);
 }

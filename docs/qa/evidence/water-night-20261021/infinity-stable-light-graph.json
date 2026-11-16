@@ -1,0 +1,52 @@
+{
+  "cold": {
+    "feedback": [
+      {
+        "level": "debug",
+        "message": "[Pool3D input feedback] {\"sample\":4,\"event\":\"click\",\"inputToSecondRafMs\":467.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+        "timestamp": "2026-10-21T19:02:46.790Z",
+        "url": "http://night-uniform-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+      }
+    ],
+    "preparation": [
+      {
+        "level": "debug",
+        "message": "[Pool3D shader preparation] {\"durationMs\":4432.7,\"parallel\":true}",
+        "timestamp": "2026-10-21T19:02:35.985Z",
+        "url": "http://night-uniform-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792608309725"
+      },
+      {
+        "level": "debug",
+        "message": "[Pool3D shader preparation] {\"durationMs\":424.2,\"parallel\":true}",
+        "timestamp": "2026-10-21T19:02:46.790Z",
+        "url": "http://night-uniform-qa.localhost:3040/src/components/pool/three/ShaderPreparation.tsx?t=1792608309725"
+      }
+    ]
+  },
+  "warm": [
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":5,\"event\":\"click\",\"inputToSecondRafMs\":52.3,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T19:04:14.582Z",
+      "url": "http://night-uniform-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":6,\"event\":\"click\",\"inputToSecondRafMs\":40.9,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T19:04:15.060Z",
+      "url": "http://night-uniform-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":7,\"event\":\"click\",\"inputToSecondRafMs\":40.1,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T19:04:15.502Z",
+      "url": "http://night-uniform-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    },
+    {
+      "level": "debug",
+      "message": "[Pool3D input feedback] {\"sample\":8,\"event\":\"click\",\"inputToSecondRafMs\":53.6,\"visibility\":\"visible\",\"method\":\"trusted input to second rAF; not GPU or final 3D paint\"}",
+      "timestamp": "2026-10-21T19:04:15.979Z",
+      "url": "http://night-uniform-qa.localhost:3040/src/lib/pool/development-interaction-timing.ts"
+    }
+  ]
+}

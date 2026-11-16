@@ -1,0 +1,128 @@
+- heading "Configuratore piscine 3D" [level=1]
+- banner:
+  - img "Piscine Wellness"
+  - navigation "Fasi della configurazione":
+    - list:
+      - button "Piscina":
+        - generic: Piscina
+      - button "Sistema acqua":
+        - generic: Sistema acqua
+      - button "Accesso & comfort":
+        - generic: Accesso & comfort
+      - button "Finiture":
+        - generic: Finiture
+      - button "Esterno":
+        - generic: Esterno
+      - button "Optional":
+        - generic: Optional
+      - button "Presentazione":
+        - generic: Presentazione
+  - group "Lingua":
+    - button "Italiano" [pressed]: IT
+    - button "Inglese": EN
+  - group "Ora della scena":
+    - button "Giorno" [pressed]:
+      - generic: Giorno
+    - button "Notte":
+      - generic: Notte
+  - button "Ricomincia":
+- main:
+  - button "Vista della piscina":
+    - text: Vista piscina
+  - button "Riquadra":
+    - text: Riquadra
+  - button "Espandi piscina":
+  - button "Altri strumenti":
+- 'region "Passo 7: Presentazione"':
+  - paragraph: "La tua piscina finita: scena, riepilogo e richiesta di proposta."
+  - tablist "Presentazione":
+    - tab "Scena"
+    - tab "Riepilogo" [selected]
+    - tab "Richiedi proposta"
+  - region "Salva e condividi":
+    - paragraph: Il tuo progetto
+    - paragraph: Non ancora salvato
+    - paragraph: Salva per ricevere un Project ID, riprenderlo e condividerlo.
+    - button "Salva progetto":
+      - text: Salva progetto
+    - button "Condividi":
+      - text: Condividi
+    - button "Project Book PDF":
+      - text: Project Book PDF
+  - paragraph: Il tuo progetto
+  - heading "Piscina rettangolare 11,00 × 4,50 m, profondità 1,50 m" [level=2]
+  - paragraph: Piscina interrata · Sfioro nascosto · circa 53 m³ d'acqua
+  - paragraph: Project ID assegnato al salvataggio
+  - link "↑ Espandi piscina":
+    - /url: "#pool-viewport"
+  - heading "La tua piscina" [level=3]
+  - button "Modifica"
+  - term: Tipologia
+  - definition:
+    - generic: Piscina interrata
+  - term: Struttura
+  - definition:
+    - generic: Cemento armato
+  - term: Dimensioni
+  - definition:
+    - generic: Piscina rettangolare 11,00 × 4,50 m, profondità 1,50 m
+  - heading "Linea d'acqua" [level=3]
+  - button "Modifica"
+  - term: Sistema idraulico
+  - definition:
+    - generic: Sfioro nascosto
+  - heading "Materiali" [level=3]
+  - button "Modifica"
+  - term: Rivestimento
+  - definition:
+    - generic: Motion Blue Sky [602]
+    - generic: Acqua dalle tonalità azzurro cristallino
+  - term: Bordo
+  - definition:
+    - generic: Gres porcellanato · Avorio
+    - generic: Bordo a filo pavimentazione
+  - term: Pavimentazione
+  - definition:
+    - generic: Gres porcellanato · Avorio
+  - term: Formato pavimentazione
+  - definition:
+    - generic: 30 × 60 cm
+    - generic: Dimensioni di riferimento della visualizzazione; fornitura da confermare.
+  - heading "Accesso e comfort" [level=3]
+  - button "Modifica"
+  - term: Incluso
+  - definition:
+    - generic: Lettini per spiaggetta · 3 · Acquamarina
+  - term: Incluso
+  - definition:
+    - generic: Scala interna integrata — Scala interna rettilinea
+  - term: Incluso
+  - definition:
+    - generic: Sun Shelf · lunghezza complessiva 3,035 m · acqua 10 cm
+  - term: Incluso
+  - definition:
+    - generic: Panca integrata · 3 postazioni · 12 bocchette
+  - heading "Presentazione" [level=3]
+  - button "Modifica"
+  - term: Momento
+  - definition:
+    - generic: Giorno
+  - generic "Scopri i dettagli tecnici"
+  - 'button "Prossima scelta: Richiedi proposta"':
+    - text: "Prossima scelta: Richiedi proposta"
+  - button "Altre opzioni":
+    - text: Altre opzioni
+  - paragraph:
+    - text: Fase 07 di 07
+    - generic: · 2/3 · Riepilogo
+  - heading "Presentazione" [level=2]
+  - paragraph: 11,0 × 4,5 m · pronta per la proposta
+  - button "Vedi la piscina":
+    - text: Vedi la piscina
+  - button "Riduci" [expanded]:
+    - text: Riduci
+  - button "Indietro":
+    - text: Indietro
+  - button "Continua":
+    - text: Continua
+- region "Notifications alt+T"
