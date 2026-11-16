@@ -15,6 +15,8 @@ import {
   createSlopedFloorGeometry,
   createSurfaceGeometry,
   createWallGeometry,
+  densifyOutline,
+  UNDERWATER_LENS_SEGMENT,
 } from "./poolGeometry";
 import type { FloorProfileModel } from "@/lib/pool/floor-profile";
 import {
@@ -988,9 +990,10 @@ export function PoolModel({
 
   const floor = useDisposable(
     () =>
+      // Lens-tessellated: see UNDERWATER_LENS_SEGMENT.
       floorProfile.sloped
-        ? createSlopedFloorGeometry(outline, floorProfile.floorYAt, floorProfile)
-        : createSurfaceGeometry(outline),
+        ? createSlopedFloorGeometry(outline, floorProfile.floorYAt, floorProfile, UNDERWATER_LENS_SEGMENT)
+        : createSurfaceGeometry(outline, undefined, UNDERWATER_LENS_SEGMENT),
     [outline, floorProfile],
   );
   const water = useDisposable(() => createSurfaceGeometry(waterOutline), [waterOutline]);
@@ -1003,8 +1006,10 @@ export function PoolModel({
         INTERIOR_FLOOR_COVE_RADIUS,
         2,
         openings,
+        // Wall, LED luminaires and skimmer frames must refract as one surface.
+        { waterY: waterLevel, maxSegment: UNDERWATER_LENS_SEGMENT },
       ),
-    [outline, verticalLayout.wallTopY, verticalLayout.floorY, floorProfile, openings],
+    [outline, verticalLayout.wallTopY, verticalLayout.floorY, floorProfile, openings, waterLevel],
   );
   const exteriorWalls = useDisposable(
     () => createWallGeometry(structuralOutline, verticalLayout.wallTopY, verticalLayout.floorY),
@@ -1101,7 +1106,7 @@ export function PoolModel({
   const overflowKerbInnerFace = useDisposable(
     () =>
       isVisibleOverflow
-        ? createWallGeometry(outline, overflowKerbTopY, verticalLayout.wallTopY - 0.05)
+        ? createWallGeometry(densifyOutline(outline, UNDERWATER_LENS_SEGMENT), overflowKerbTopY, verticalLayout.wallTopY - 0.05)
         : new THREE.BufferGeometry(),
     [outline, overflowKerbTopY, verticalLayout.wallTopY, isVisibleOverflow],
   );

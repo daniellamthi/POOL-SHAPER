@@ -5,8 +5,122 @@ import type { WallOpening } from "./poolConstruction";
 import { offsetOutline } from "../../../lib/pool/geometry";
 import type { Outline } from "../../../lib/pool/types";
 
-/** Flat, horizontal (XZ) surface filling the outline. */
-export function createSurfaceGeometry(outline: Outline, hole?: Outline): THREE.BufferGeometry {
+/**
+ * Maximum edge length, metres, of every submerged basin receiver.
+ *
+ * The flat-water lens (`flatWaterProjection.ts`) refracts each VERTEX of a
+ * submerged mesh; the rasteriser then interpolates linearly between them.
+ * The refraction is strongly non-linear, so a wall drawn as one quad per
+ * side (coping to floor, corner to corner) is shown far from where its own
+ * points actually refract, while small, densely-vertexed fittings mounted on
+ * it (LED luminaires, skimmer frames) refract correctly -- they appear to
+ * float off the wall. Tessellating the receivers keeps the wall, floor and
+ * fittings in one consistent optical position. World geometry is unchanged.
+ */
+export const UNDERWATER_LENS_SEGMENT = 0.25;
+
+/** Same polygon, with collinear points inserted so no edge exceeds `maxSegment`. */
+export function densifyOutline(outline: Outline, maxSegment: number): Outline {
+  if (!(maxSegment > 0) || outline.length < 2) return outline;
+  const result: Array<readonly [number, number]> = [];
+  for (let index = 0; index < outline.length; index++) {
+    const a = outline[index]!;
+    const b = outline[(index + 1) % outline.length]!;
+    result.push(a);
+    const steps = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / maxSegment);
+    for (let step = 1; step < steps; step++) {
+      const t = step / steps;
+      result.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+  }
+  return result;
+}
+
+/** Sutherland-Hodgman clip of a (possibly concave) polygon to an axis-aligned cell. */
+function clipToCell(
+  polygon: ReadonlyArray<readonly [number, number]>,
+  minX: number,
+  maxX: number,
+  minY: number,
+  maxY: number,
+): Array<readonly [number, number]> {
+  const edges: Array<[0 | 1, number, 1 | -1]> = [
+    [0, minX, 1],
+    [0, maxX, -1],
+    [1, minY, 1],
+    [1, maxY, -1],
+  ];
+  let current: Array<readonly [number, number]> = [...polygon];
+  for (const [axis, limit, sign] of edges) {
+    if (current.length === 0) break;
+    const input = current;
+    current = [];
+    const inside = (p: readonly [number, number]) => (p[axis] - limit) * sign >= 0;
+    for (let index = 0; index < input.length; index++) {
+      const a = input[index]!;
+      const b = input[(index + 1) % input.length]!;
+      const aIn = inside(a);
+      const bIn = inside(b);
+      if (aIn) current.push(a);
+      if (aIn !== bIn) {
+        const t = (limit - a[axis]) / (b[axis] - a[axis]);
+        const point: [number, number] = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+        point[axis] = limit;
+        current.push(point);
+      }
+    }
+  }
+  return current;
+}
+
+/** The outline's flat surface triangulated cell by cell, so no triangle is
+ * wider than `cell` (see `UNDERWATER_LENS_SEGMENT`). Same orientation, UVs
+ * and footprint as the single-shape triangulation. */
+function createTessellatedSurfaceGeometry(outline: Outline, cell: number): THREE.BufferGeometry {
+  const polygon = outline.map(([x, z]) => [x, -z] as const);
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const [x, y] of polygon) {
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  }
+  const columns = Math.max(1, Math.ceil((maxX - minX) / cell));
+  const rows = Math.max(1, Math.ceil((maxY - minY) / cell));
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  for (let column = 0; column < columns; column++) {
+    const x0 = minX + ((maxX - minX) * column) / columns;
+    const x1 = column === columns - 1 ? maxX : minX + ((maxX - minX) * (column + 1)) / columns;
+    for (let row = 0; row < rows; row++) {
+      const y0 = minY + ((maxY - minY) * row) / rows;
+      const y1 = row === rows - 1 ? maxY : minY + ((maxY - minY) * (row + 1)) / rows;
+      const piece = clipToCell(polygon, x0, x1, y0, y1);
+      if (piece.length < 3) continue;
+      const contour = piece.map(([x, y]) => new THREE.Vector2(x, y));
+      for (const triangle of THREE.ShapeUtils.triangulateShape(contour, [])) {
+        let [a, b, c] = triangle.map((i) => contour[i]!) as [THREE.Vector2, THREE.Vector2, THREE.Vector2];
+        const area = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+        if (Math.abs(area) < 1e-12) continue;
+        if (area < 0) [b, c] = [c, b];
+        for (const vertex of [a, b, c]) {
+          positions.push(vertex.x, vertex.y, 0);
+          uvs.push(vertex.x, vertex.y);
+        }
+      }
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.rotateX(-Math.PI / 2);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/** Flat, horizontal (XZ) surface filling the outline. `cell`, when given
+ * (holes are not supported with it), bounds every triangle's extent for the
+ * underwater lens; omitted, the single-shape triangulation is unchanged. */
+export function createSurfaceGeometry(outline: Outline, hole?: Outline, cell?: number): THREE.BufferGeometry {
+  if (cell && cell > 0 && !hole) return createTessellatedSurfaceGeometry(outline, cell);
   const shape = new THREE.Shape(outline.map(([x, z]) => new THREE.Vector2(x, -z)));
   if (hole) {
     shape.holes.push(new THREE.Path(hole.map(([x, z]) => new THREE.Vector2(x, -z))));
@@ -33,15 +147,16 @@ export function createSlopedFloorGeometry(
   outline: Outline,
   floorYAt: (x: number, z: number) => number,
   profile?: FloorProfileModel,
+  cell?: number,
 ): THREE.BufferGeometry {
   if(profile?.shelfZone) {
     const parts=splitFloorOutline(outline,profile.axis,profile.shelfZone.slopeStart)
-      .map(piece=>createSlopedFloorGeometry(piece,floorYAt));
+      .map(piece=>createSlopedFloorGeometry(piece,floorYAt,undefined,cell));
     const result=mergeGeometries(parts);
     parts.forEach(part=>part.dispose());
     return result;
   }
-  const geometry = createSurfaceGeometry(outline);
+  const geometry = createSurfaceGeometry(outline, undefined, cell);
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
   for (let i = 0; i < position.count; i++) {
     position.setY(i, floorYAt(position.getX(i), position.getZ(i)));
@@ -244,13 +359,18 @@ export function createWallGeometry(outline: Outline, top: number, bottom: number
  * shows a shorter slice of the same tile instead of a squashed one.
  */
 export function createInteriorWallGeometry(
-  outline: Outline,
+  sourceOutline: Outline,
   top: number,
   bottom: number | ((x: number, z: number) => number),
   radius = 0.005,
   segments = 2,
   openings: readonly WallOpening[] = [],
+  /** Underwater lens tessellation (see `UNDERWATER_LENS_SEGMENT`): densify
+   * the runs and split the straight band exactly at the waterline and into
+   * rows no taller than `maxSegment`. Omitted, the geometry is unchanged. */
+  lens: { waterY: number; maxSegment: number } | null = null,
 ): THREE.BufferGeometry {
+  const outline = lens ? densifyOutline(sourceOutline, lens.maxSegment) : sourceOutline;
   const bottomAt = typeof bottom === "function" ? bottom : () => bottom;
   const bottomSamples = outline.map(([x, z]) => bottomAt(x, z));
   // Deepest point: the fixed reference `height`/UV scale is measured against.
@@ -282,8 +402,38 @@ export function createInteriorWallGeometry(
   // Each layer is a fixed vertical offset from the LOCAL floor at whatever
   // (x, z) a given vertex sits at (the top layer is the one exception: it is
   // always the constant wall-top elevation, never floor-relative).
-  const layers: Array<{ outline: Outline; offsetFromBottom: number | null }> = [
+  type Layer = {
+    outline: Outline;
+    offsetFromBottom: number | null;
+    /** Explicit elevation of an intermediate straight (lens) row. */
+    yAt?: (x: number, z: number) => number;
+  };
+  const straightRows: Layer[] = [];
+  if (lens) {
+    const lowerAt = (x: number, z: number) => bottomAt(x, z) + safeRadius;
+    const hasWaterRow = lens.waterY < top - 1e-4;
+    // Exactly at the waterline wherever it crosses the straight band, so the
+    // dry (unrefracted) and submerged (refracted) parts meet on a vertex row.
+    const startAt = (x: number, z: number) => {
+      if (!hasWaterRow) return top;
+      const lower = lowerAt(x, z);
+      return lens.waterY > lower + 1e-3 ? lens.waterY : (top + lower) / 2;
+    };
+    if (hasWaterRow) straightRows.push({ outline, offsetFromBottom: null, yAt: startAt });
+    const submergedHeight = Math.min(top, lens.waterY) - (referenceBottom + safeRadius);
+    const rows = Math.max(1, Math.ceil(submergedHeight / lens.maxSegment));
+    for (let row = 1; row < rows; row++) {
+      straightRows.push({
+        outline,
+        offsetFromBottom: null,
+        yAt: (x, z) => THREE.MathUtils.lerp(startAt(x, z), lowerAt(x, z), row / rows),
+      });
+    }
+  }
+  const straightBands = 1 + straightRows.length;
+  const layers: Layer[] = [
     { outline, offsetFromBottom: null },
+    ...straightRows,
     { outline, offsetFromBottom: safeRadius },
   ];
   for (let step = 1; step <= safeSegments; step++) {
@@ -298,8 +448,10 @@ export function createInteriorWallGeometry(
     }
     layers.push({ outline: insetOutline, offsetFromBottom: safeRadius * (1 - Math.sin(angle)) });
   }
-  const layerY = (layer: { offsetFromBottom: number | null }, x: number, z: number): number =>
-    layer.offsetFromBottom === null ? top : bottomAt(x, z) + layer.offsetFromBottom;
+  const layerY = (layer: Layer, x: number, z: number): number =>
+    layer.yAt
+      ? layer.yAt(x, z)
+      : layer.offsetFromBottom === null ? top : bottomAt(x, z) + layer.offsetFromBottom;
 
   const positions: number[] = [];
   const uvs: number[] = [];
@@ -324,7 +476,7 @@ export function createInteriorWallGeometry(
       const lowerBV = (lowerBY - referenceBottom) / height;
       // Only the straight vertical band intersects the skimmers. Split it
       // at the aperture boundaries; retain physical holes in raster and shadows.
-      if (layer === 0 && openings.length) {
+      if (layer < straightBands && openings.length) {
         const dx = upperB[0] - upperA[0];
         const dz = upperB[1] - upperA[1];
         const holes = openings.flatMap((opening) => {
@@ -378,8 +530,10 @@ export function createInteriorWallGeometry(
           const lowerAt = (t:number) => THREE.MathUtils.lerp(lowerAY, lowerBY, t);
           const hole = holes.find((h) => mid >= h.a && mid <= h.b);
           if (hole) {
-            append(a, b, upperAt, t=>Math.min(upperAt(t), hole.top));
-            append(a, b, t=>Math.max(lowerAt(t), hole.bottom), lowerAt);
+            // Clamped to this band, which with lens rows may lie wholly
+            // above, below or inside the aperture.
+            append(a, b, upperAt, t=>Math.max(lowerAt(t), Math.min(upperAt(t), hole.top)));
+            append(a, b, t=>Math.min(upperAt(t), Math.max(lowerAt(t), hole.bottom)), lowerAt);
           } else append(a, b, upperAt, lowerAt);
         }
         continue;
