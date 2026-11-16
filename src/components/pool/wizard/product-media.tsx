@@ -18,11 +18,15 @@ const retiredPreviews = new Set([
   "equipment-sunShelfLoungers",
 ]);
 const lineIllustrations = new Set([
+  "skimmer-slim",
+  "skimmer-high",
   "overflow-visible",
   "overflow-hidden",
+  "access-ladder",
   "access-external",
   "comfort-sunShelf",
   "equipment-pellicano",
+  "equipment-loungers",
 ]);
 
 export function hasProductMedia(name: string): boolean {
@@ -43,9 +47,13 @@ export function ProductMedia({ name }: { name: string }) {
       : locale === "en"
         ? "Reference photo"
         : "Foto indicativa"
-    : locale === "en"
-      ? "Photo unavailable"
-      : "Foto non disponibile";
+    : lineIllustrations.has(name)
+      ? locale === "en"
+        ? "Diagram"
+        : "Schema"
+      : locale === "en"
+        ? "Photo unavailable"
+        : "Foto non disponibile";
   const note = available
     ? media.note[locale]
     : locale === "en"

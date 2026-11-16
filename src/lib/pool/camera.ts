@@ -989,49 +989,21 @@ function getInfinityDetailCamera({
 }
 
 /** Oblique wall/floor material view, stable while comparing finishes. */
-export function interiorFinishCameraSubject(outline: Outline, layout: PoolVerticalLayout, resolved: ResolvedPoolLayout, floorProfile: FloorProfileModel, infinityZone: RectangleInfinityZone | null = null): { points: CameraPoint[]; direction: CameraPoint } | null {
-  const winding = Math.sign(outlineArea(outline)) || 1;
-  const occupied = resolved.comfort.elements.flatMap(element => [element.footprint,
-    ...(element.steps ?? []).map(step => step.footprint), ...(element.landing ? [element.landing.footprint] : [])]);
-  if (resolved.access.placement) occupied.push(resolved.access.footprint);
-  if (resolved.ladder?.plan.placement) occupied.push(resolved.ladder.plan.footprint);
-  const excluded = new Set(infinityZone ? infinityZone.points.slice(1).map((_, i) => (infinityZone.side + i) % outline.length) : []);
-  let best: { points: CameraPoint[]; direction: CameraPoint; span: number } | null = null;
-  for (let i = 0; i < outline.length; i++) {
-    if (excluded.has(i)) continue;
-    const a = outline[i]!, b = outline[(i + 1) % outline.length]!;
-    const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
-    if (length <= .3) continue;
-    const tx = (b[0] - a[0]) / length, tz = (b[1] - a[1]) / length, nx = -tz * winding, nz = tx * winding;
-    let free: [number, number][] = [[.15, length - .15]];
-    for (const polygon of occupied) {
-      const normal = polygon.map(([x, z]) => (x - a[0]) * nx + (z - a[1]) * nz);
-      if (Math.max(...normal) < -.05) continue;
-      const along = polygon.map(([x, z]) => (x - a[0]) * tx + (z - a[1]) * tz);
-      const low = Math.min(...along) - .15, high = Math.max(...along) + .15;
-      free = free.flatMap(([start, end]) => [
-        ...(low > start ? [[start, Math.min(end, low)] as [number, number]] : []),
-        ...(high < end ? [[Math.max(start, high), end] as [number, number]] : []),
-      ]).filter(([start, end]) => end - start > .3);
-    }
-    for (const [start, end] of free) {
-      const span = Math.min(1.25, end - start), mid = (start + end) / 2;
-      const points: CameraPoint[] = [];
-      let valid = true;
-      for (const along of [mid - span / 2, mid, mid + span / 2]) {
-        const x = a[0] + tx * along, z = a[1] + tz * along;
-        const fx = x + nx * .75, fz = z + nz * .75;
-        if (!pointInBasin(fx, fz, outline)) { valid = false; break; }
-        const wallFloor = floorProfile.floorYAt(x, z);
-        points.push([x, wallFloor, z], [x, Math.min(layout.wallTopY, wallFloor + .8), z],
-          [fx, floorProfile.floorYAt(fx, fz), fz]);
-      }
-      if (valid && (!best || end - start > best.span)) best = {
-        points, direction: [nx + tx * .2, 1, nz + tz * .2], span: end - start,
-      };
-    }
-  }
-  return best ? { points: best.points, direction: best.direction } : null;
+/** Interior finish (liner / mosaic) framing: the whole lined basin -- floor
+ * and every wall -- seen from an elevated three-quarter view, so the chosen
+ * colour reads across the entire pool instead of a 1.25 m wall patch that
+ * filled the viewport with a flat block of colour (owner feedback). The
+ * signature is unchanged; the comfort/access arguments stay accepted. */
+export function interiorFinishCameraSubject(outline: Outline, layout: PoolVerticalLayout, _resolved: ResolvedPoolLayout, floorProfile: FloorProfileModel, infinityZone: RectangleInfinityZone | null = null): { points: CameraPoint[]; direction: CameraPoint } | null {
+  if (outline.length < 3) return null;
+  const points: CameraPoint[] = [];
+  for (const [x, z] of outline) points.push([x, floorProfile.floorYAt(x, z), z], [x, layout.wallTopY, z]);
+  const overview = overviewCameraSubject(outline, layout, { infinityZone });
+  const [dx, , dz] = overview.direction;
+  const horizontal = Math.hypot(dx, dz) || 1;
+  // Steeper than the overview so the floor -- most of the visible lining --
+  // is in view over the near coping.
+  return { points, direction: [dx / horizontal, 1.35, dz / horizontal] };
 }
 
 function getInteriorFinishCamera({

@@ -229,6 +229,30 @@ const sections: Record<string, ReactNode> = {
       <path d="M122 38 h16" strokeWidth={4} stroke={STONE} />
     </Frame>
   ),
+  // Front elevation of the pool wall: low, wide "slim" mouth just under the
+  // coping, water 12 cm below the border.
+  "skimmer-slim": (
+    <Frame>
+      <path d="M14 24 h132" strokeWidth={4} stroke={STONE} />
+      <path d="M18 27 v58 M142 27 v58" opacity={0.5} />
+      <rect x="18" y="40" width="124" height="45" fill={WATER} fillOpacity={0.4} stroke="none" />
+      <line x1="18" y1="40" x2="142" y2="40" stroke={WATER} strokeWidth={1.2} />
+      <rect x="52" y="31" width="56" height="13" rx="1.5" fill="currentColor" fillOpacity={0.08} />
+      <rect x="57" y="34" width="46" height="7" rx="1" fill="currentColor" fillOpacity={0.55} stroke="none" />
+    </Frame>
+  ),
+  // High-waterline skimmer: compact, taller mouth that lets the water sit a
+  // few centimetres from the coping.
+  "skimmer-high": (
+    <Frame>
+      <path d="M14 24 h132" strokeWidth={4} stroke={STONE} />
+      <path d="M18 27 v58 M142 27 v58" opacity={0.5} />
+      <rect x="18" y="33" width="124" height="52" fill={WATER} fillOpacity={0.4} stroke="none" />
+      <line x1="18" y1="33" x2="142" y2="33" stroke={WATER} strokeWidth={1.2} />
+      <rect x="62" y="28" width="36" height="22" rx="1.5" fill="currentColor" fillOpacity={0.08} />
+      <rect x="66" y="31" width="28" height="15" rx="1" fill="currentColor" fillOpacity={0.55} stroke="none" />
+    </Frame>
+  ),
   "access-steps": (
     <Frame>
       <path d="M30 26 h10 v10 h12 v10 h12 v10 h12 v10 h50" strokeWidth={1.6} />
