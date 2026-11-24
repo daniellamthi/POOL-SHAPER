@@ -17,12 +17,16 @@ export function formatDate(value: Date, locale: Locale, options: Intl.DateTimeFo
 
 /** Only measurements with an explicit unit: catalogue codes and project references are excluded. */
 export function formatNumericText(text: string, locale: Locale): string {
-  return text.replace(/(?<![\w.,-])(\d+(?:[.,]\d+)+)(?=\s*(?:×|m²|m³|cm|mm|m|%)(?=$|[\s·×→,;/)]))/g, value => {
-    const separator = Math.max(value.lastIndexOf("."), value.lastIndexOf(","));
-    const digits = value.length - separator - 1;
-    const numeric = Number(`${value.slice(0, separator).replace(/[.,]/g, "")}.${value.slice(separator + 1)}`);
-    return formatNumber(numeric, locale, { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
-  });
+  // No lookbehind: regex lookbehind is a parse-time SyntaxError on Safari < 16.4,
+  // which would blank the whole app on older iPads.
+  return text.replace(/(^|[^\w.,-])(\d+(?:[.,]\d+)+)(?=\s*(?:×|m²|m³|cm|mm|m|%)(?=$|[\s·×→,;/)]))/g, (_match, prefix: string, value: string) => prefix + formatMeasure(value, locale));
+}
+
+function formatMeasure(value: string, locale: Locale): string {
+  const separator = Math.max(value.lastIndexOf("."), value.lastIndexOf(","));
+  const digits = value.length - separator - 1;
+  const numeric = Number(`${value.slice(0, separator).replace(/[.,]/g, "")}.${value.slice(separator + 1)}`);
+  return formatNumber(numeric, locale, { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
 }
 
 const lookups = { it: new Map<string, string>(), en: new Map<string, string>() };
@@ -66,7 +70,7 @@ export function translateText(text: string, locale: Locale, params?: Parameters)
     ).join("");
   }
   if (result === text && !exact && /[.!?]\s+/.test(text)) {
-    result = text.split(/(?<=[.!?])\s+/).map(part => lookups[locale].get(part) ?? part).join(" ");
+    result = text.replace(/([.!?])\s+/g, "$1\u0001").split("\u0001").map(part => lookups[locale].get(part) ?? part).join(" ");
   }
   return formatNumericText(params ? result.replace(/\{(\w+)\}/g, (placeholder, name: string) => String(params[name] ?? placeholder)) : result, locale);
 }
