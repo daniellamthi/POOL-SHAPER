@@ -123,8 +123,8 @@ class SceneBoundary extends Component<{ children: ReactNode; fallback: ReactNode
 function SceneUnavailable() {
   const { t } = useI18n();
   return (
-    <div className="flex h-full w-full items-center justify-center bg-viewport px-6 text-center">
-      <p className="max-w-xs text-sm text-foreground/70">{t("Anteprima 3D non disponibile su questo dispositivo. Puoi proseguire con la configurazione.")}</p>
+    <div className="flex h-full w-full items-start justify-center bg-viewport px-6 pt-32 text-center">
+      <p role="status" className="max-w-xs rounded-xl bg-card/95 px-4 py-3 text-sm text-foreground/80 shadow-sm">{t("Anteprima 3D non disponibile su questo dispositivo. Puoi proseguire con la configurazione.")}</p>
     </div>
   );
 }

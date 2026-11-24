@@ -3,6 +3,8 @@
   position: relative;
   isolation: isolate;
   width: 100%;
+  /* Fallback for Safari < 15.4 (older iPads), which ignores dvh. */
+  height: 100vh;
   height: 100dvh;
   overflow: hidden;
 }
