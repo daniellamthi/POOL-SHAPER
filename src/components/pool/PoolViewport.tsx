@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n";
-import { lazy, memo, Suspense, useEffect, useState } from "react";
+import { Component, lazy, memo, Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import {
   Aperture,
@@ -103,6 +103,50 @@ function ToolButton({
       {icon}
       {t(label)}
     </button>
+  );
+}
+
+/** Keeps the wizard usable when WebGL cannot start (some iPad/Safari states). */
+class SceneBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  override componentDidCatch(error: unknown) {
+    console.error("3D scene unavailable", error);
+  }
+  override render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+function SceneUnavailable() {
+  const { t } = useI18n();
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-viewport px-6 text-center">
+      <p className="max-w-xs text-sm text-foreground/70">{t("Anteprima 3D non disponibile su questo dispositivo. Puoi proseguire con la configurazione.")}</p>
+    </div>
+  );
+}
+
+function SceneGuard({ children }: { children: ReactNode }) {
+  const [lost, setLost] = useState(false);
+  const observe = useCallback((host: HTMLDivElement | null) => {
+    if (!host) return;
+    const fail = () => setLost(true);
+    // WebGL context events fire on the canvas and do not bubble.
+    host.addEventListener("webglcontextcreationerror", fail, true);
+    host.addEventListener("webglcontextlost", fail, true);
+    return () => {
+      host.removeEventListener("webglcontextcreationerror", fail, true);
+      host.removeEventListener("webglcontextlost", fail, true);
+    };
+  }, []);
+  if (lost) return <SceneUnavailable />;
+  return (
+    <div ref={observe} className="h-full w-full">
+      <SceneBoundary fallback={<SceneUnavailable />}>{children}</SceneBoundary>
+    </div>
   );
 }
 
@@ -217,9 +261,9 @@ export const PoolViewport = memo(function PoolViewport({
     <div data-architectural-plan={scene.focus === "top" && scene.poolType === "in-ground" && !scene.photoMode ? scene.technicalView ? "technical" : "true" : undefined}
       className="relative h-full w-full overflow-hidden bg-viewport">
       <ClientOnly fallback={<ViewportFallback />}>
-        <Suspense fallback={<ViewportFallback />}>
+        <SceneGuard><Suspense fallback={<ViewportFallback />}>
           <PoolScene {...scene} />
-        </Suspense>
+        </Suspense></SceneGuard>
       </ClientOnly>
       {scene.construction && <div key={`${scene.construction.stage}-${scene.construction.structure}`}
         aria-hidden className="pointer-events-none absolute inset-0 z-[1] bg-viewport animate-[construction-reveal_240ms_ease-out_both] motion-reduce:hidden" />}
